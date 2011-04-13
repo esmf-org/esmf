@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.1 2011/04/13 23:12:16 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.2 2011/04/13 23:44:47 theurich Exp $
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -236,7 +236,7 @@ module NUOPC_Connector
       file=__FILE__)) &
       return  ! bail out
     
-    do i=3, cplListSize ! todo: starting at 3 because of Attribute workaround
+    do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
 
       iMatch = 0  ! reset

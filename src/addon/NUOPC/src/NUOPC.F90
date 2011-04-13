@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.1 2011/04/13 23:12:16 theurich Exp $
+! $Id: NUOPC.F90,v 1.2 2011/04/13 23:44:47 theurich Exp $
 module NUOPC
 
   !-----------------------------------------------------------------------------
@@ -308,19 +308,6 @@ module NUOPC
 
     maxCount = size(cplList)
     count = 0 ! initialize
-    
-    if (maxCount < 2) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Not enough space in cplList",&
-        line=__LINE__, &
-        file=__FILE__, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! fill in the dummy elements as a current work-around for Attr. code issues
-    cplList(1) = "dummyEntryWorkaround1" !needed b/c of Attr code issue
-    cplList(2) = "dummyEntryWorkaround2" !needed b/c of Attr code issue
-    count = 2
     
     ! build list of standard names of all Fields inside of importState
     call NUOPC_StateBuildStdList(importState, importStandardNameList, rc=rc)
