@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock_F.C,v 1.7 2011/02/24 04:46:25 eschwab Exp $
+// $Id: ESMCI_Clock_F.C,v 1.8 2011/04/13 19:03:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -275,6 +275,22 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
+       void FTN(c_esmc_clockgetalarmlist3)(Clock **ptr,
+                                           ESMC_AlarmListType *type,
+                                           int *sizeofAlarmList,
+                                           int *alarmCount,
+                                           TimeInterval *timeStep,
+                                           int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          int rc = (*ptr)->Clock::getAlarmList(*type,
+                                                  ESMC_NULL_POINTER,
+                                                  ESMC_NULL_POINTER,
+                                                 *sizeofAlarmList,
+                          ESMC_NOT_PRESENT_FILTER(alarmCount),
+                          ESMC_NOT_PRESENT_FILTER(timeStep) );
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
        // for alarmList() size > 1
        void FTN(c_esmc_clockgetalarmlist2)(Clock **ptr,
                                            ESMC_AlarmListType *type,
@@ -291,7 +307,7 @@ extern "C" {
                                                   AlarmList1stElementPtr,
                                                   AlarmList2ndElementPtr,
                                                  *sizeofAlarmList,
-                                                  alarmCount,
+                          ESMC_NOT_PRESENT_FILTER(alarmCount),
                           ESMC_NOT_PRESENT_FILTER(timeStep) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -310,7 +326,7 @@ extern "C" {
                                                   AlarmList1stElementPtr,
                                                   ESMC_NULL_POINTER,
                                                  *sizeofAlarmList,
-                                                  alarmCount,
+                          ESMC_NOT_PRESENT_FILTER(alarmCount),
                           ESMC_NOT_PRESENT_FILTER(timeStep) );
           if (ESMC_PRESENT(status)) *status = rc;
        }

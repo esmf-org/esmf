@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.112 2011/04/01 16:42:25 theurich Exp $
+! $Id: ESMF_Clock.F90,v 1.113 2011/04/13 19:03:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.112 2011/04/01 16:42:25 theurich Exp $'
+      '$Id: ESMF_Clock.F90,v 1.113 2011/04/13 19:03:35 eschwab Exp $'
 
 !==============================================================================
 !
@@ -284,12 +284,12 @@
         timeStep, ringingAlarmList, ringingAlarmCount, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(inout)           :: clock
+      type(ESMF_Clock),        intent(inout)         :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TimeInterval), intent(inout), optional :: timeStep
-      type(ESMF_Alarm),        intent(out),   optional :: ringingAlarmList(:)
-      integer,                 intent(out),   optional :: ringingAlarmCount
-      integer,                 intent(out),   optional :: rc
+      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
+      type(ESMF_Alarm),        intent(out), optional :: ringingAlarmList(:)
+      integer,                 intent(out), optional :: ringingAlarmCount
+      integer,                 intent(out), optional :: rc
 !   
 !
 ! !STATUS:
@@ -343,6 +343,7 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeStep,rc)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
 
       sizeofRingingAlarmList = 0
@@ -390,8 +391,6 @@
 
       ! post-process ringing alarm list
       if (present(ringingAlarmList)) then
-
-         ! post-process ringing ringingAlarm list
          do i=1,sizeofRingingAlarmList
             call ESMF_AlarmSetThis(ringingAlarmList(i),ringingAlarmPtrList(i))
             call ESMF_AlarmSetInitCreated(ringingAlarmList(i))
@@ -488,8 +487,14 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check variables
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeStep,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,startTime,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,stopTime,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,runDuration,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,refTime,rc)
 
       nameLen = 0
 
@@ -761,16 +766,15 @@
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,prevTime)
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timestep)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,currSimTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,prevSimTime)
-
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -810,7 +814,7 @@
         keywordEnforcer, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(inout)         :: clock
+      type(ESMF_Clock),  intent(in)            :: clock
       character (len=*), intent(in)            :: alarmname
       type(ESMF_Alarm),  intent(out)           :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -847,9 +851,12 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check variables
+      !ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       alarmnameLen = len_trim(alarmname)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_ClockGetAlarm(clock, alarmnameLen, alarmname, alarm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -868,14 +875,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
-        alarmList, alarmCount, keywordEnforcer, timeStep, rc)
+        keywordEnforcer, alarmList, alarmCount, timeStep, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),         intent(in)            :: clock
       type(ESMF_AlarmListType), intent(in)            :: alarmListType
-      type(ESMF_Alarm),         intent(out)           :: alarmList(:)
-      integer,                  intent(out)           :: alarmCount
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_Alarm),         intent(out), optional :: alarmList(:)
+      integer,                  intent(out), optional :: alarmCount
       type(ESMF_TimeInterval),  intent(in),  optional :: timeStep
       integer,                  intent(out), optional :: rc
 !   
@@ -884,21 +891,23 @@
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Gets the {\tt clock}'s list of alarms.
+!     Gets the {\tt clock}'s list of alarms and/or number of alarms.
 !  
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance from which to get an {\tt ESMF\_Alarm} list.
+!          The object instance from which to get an {\tt ESMF\_Alarm} list 
+!          and/or count of {\tt ESMF\_Alarm}s.
 !     \item[alarmListType]
 !          The type of list to get:
+!
 !            {\tt ESMF\_ALARMLIST\_ALL} :
 !                Returns the {\tt ESMF\_Clock}'s entire list of alarms.
 !
 !            {\tt ESMF\_ALARMLIST\_NEXTRINGING} :
 !                Return only those alarms that will ring upon the next
 !                {\tt clock} time step.  Can optionally specify argument
-!                timeStep (see below) to use instead of the {\tt clock}'s.
+!                {\tt timeStep} (see below) to use instead of the {\tt clock}'s.
 !                See also method {\tt ESMF\_AlarmWillRingNext()} for checking a
 !                single alarm.
 !
@@ -915,10 +924,16 @@
 !                getting the list of ringing alarms subsequent to a time step.
 !                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
 !                single alarm.
-!     \item[alarmList]
-!          The array of returned alarms. 
-!     \item[alarmCount]
-!          The number of {\tt ESMF\_Alarm}s in the returned list.
+!     \item[{[alarmList]}]
+!          The array of returned alarms.  If given, the array must be large
+!          enough to hold the number of alarms of the specified 
+!          {\tt alarmListType} in the specified {\tt clock}.  At least one of
+!          {\tt alarmList} or {\tt alarmCount} must be specified.
+!     \item[{[alarmCount]}]
+!          If specified, returns the number of {\tt ESMF\_Alarm}s of the 
+!          specified {\tt alarmListType} in the specified {\tt clock}.  
+!          At least one of {\tt alarmCount} or {\tt alarmList} must be 
+!          specified.
 !     \item[{[timeStep]}]
 !          Optional time step to be used instead of the {\tt clock}'s.
 !          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmListType}
@@ -942,44 +957,57 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeStep,rc)
 
-      sizeofAlarmList = size(alarmList)
-      
-      ! for Init Macros
-      allocate(alarmPtrList(sizeofAlarmList))
-
-      ! invoke C to C++ entry point
-      if (sizeofAlarmList > 1) then
-        ! pass address of 2nd element for C++ to calculate array step size
-        call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
-                           alarmPtrList(1), alarmPtrList(2), &
+      if (.not.present(alarmList)) then
+        ! only get alarmCount if specified
+        sizeofAlarmList = 0
+        ! invoke C to C++ entry point
+        call c_ESMC_ClockGetAlarmList3(clock, alarmListType, &
                            sizeofAlarmList, alarmCount, timeStep, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) then
-          ! Not bail out until deallocation
-          write(*,*)"c_ESMC_ClockGetAlarmList2 fails"
-        endif
+          ESMF_CONTEXT, rcToReturn=rc)) return
       else
-        ! array has only one element
-        call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
-                           alarmPtrList(1), &
-                           sizeofAlarmList, alarmCount, timeStep, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) then
-          ! Not bail out until deallocation
-          write(*,*)"c_ESMC_ClockGetAlarmList1 fails"
+        ! get alarmList and alarmCount if specified
+
+        sizeofAlarmList = size(alarmList)
+      
+        ! for init macros
+        allocate(alarmPtrList(sizeofAlarmList))
+
+        ! invoke C to C++ entry point
+        if (sizeofAlarmList > 1) then
+          ! pass address of 2nd element for C++ to calculate array step size
+          call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
+                             alarmPtrList(1), alarmPtrList(2), &
+                             sizeofAlarmList, alarmCount, timeStep, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) then
+            ! do not bail out until deallocation
+            write(*,*)"c_ESMC_ClockGetAlarmList2 fails"
+          endif
+        else
+          ! array has only one element
+          call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
+                             alarmPtrList(1), &
+                             sizeofAlarmList, alarmCount, timeStep, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) then
+            ! do not bail out until deallocation
+            write(*,*)"c_ESMC_ClockGetAlarmList1 fails"
+          endif
         endif
-      endif
-
     
-      ! post-process ringing alarm list
-      do i=1,sizeofAlarmList
-         call ESMF_AlarmSetThis(alarmList(i),alarmPtrList(i))
-         call ESMF_AlarmSetInitCreated(alarmList(i))
-      enddo
+        ! post-process alarm list
+        do i=1,sizeofAlarmList
+           call ESMF_AlarmSetThis(alarmList(i),alarmPtrList(i))
+           call ESMF_AlarmSetInitCreated(alarmList(i))
+        enddo
 
-      ! Get rid of list
-      deallocate(alarmPtrList)
+        ! Get rid of temporary list
+        deallocate(alarmPtrList)
+
+      endif
 
       ! Return success
       if (present(rc)) rc = localrc
@@ -996,11 +1024,11 @@
         timeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(in)              :: clock
-      type(ESMF_Time),         intent(out)             :: nextTime
+      type(ESMF_Clock),        intent(in)            :: clock
+      type(ESMF_Time),         intent(out)           :: nextTime
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TimeInterval), intent(inout), optional :: timeStep
-      integer,                 intent(out), optional   :: rc
+      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
+      integer,                 intent(out), optional :: rc
     
 !
 ! !STATUS:
@@ -1035,6 +1063,7 @@
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,nextTime)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeStep,rc)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
 
 !     invoke C to C++ entry point
@@ -1400,19 +1429,19 @@
         direction, name, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(inout)           :: clock
+      type(ESMF_Clock),        intent(inout)         :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TimeInterval), intent(inout), optional :: timeStep
-      type(ESMF_Time),         intent(inout), optional :: startTime
-      type(ESMF_Time),         intent(inout), optional :: stopTime
-      type(ESMF_TimeInterval), intent(inout), optional :: runDuration
-      integer,                 intent(in),    optional :: runTimeStepCount
-      type(ESMF_Time),         intent(inout), optional :: refTime
-      type(ESMF_Time),         intent(inout), optional :: currTime
-      integer(ESMF_KIND_I8),   intent(in),    optional :: advanceCount
-      type(ESMF_Direction),    intent(in),    optional :: direction
-      character (len=*),       intent(in),    optional :: name
-      integer,                 intent(out),   optional :: rc
+      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
+      type(ESMF_Time),         intent(in),  optional :: startTime
+      type(ESMF_Time),         intent(in),  optional :: stopTime
+      type(ESMF_TimeInterval), intent(in),  optional :: runDuration
+      integer,                 intent(in),  optional :: runTimeStepCount
+      type(ESMF_Time),         intent(in),  optional :: refTime
+      type(ESMF_Time),         intent(in),  optional :: currTime
+      integer(ESMF_KIND_I8),   intent(in),  optional :: advanceCount
+      type(ESMF_Direction),    intent(in),  optional :: direction
+      character (len=*),       intent(in),  optional :: name
+      integer,                 intent(out), optional :: rc
     
 !
 ! !STATUS:
@@ -1506,12 +1535,19 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,timeStep)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,refTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,currTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,startTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,stopTime)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,runDuration)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeStep,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,startTime,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,stopTime,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,runDuration,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,refTime,rc)
+      !ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,currTime,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1622,6 +1658,7 @@
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,stopTime,rc)
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockStopTimeEnable(clock, stopTime, localrc)
@@ -1693,7 +1730,7 @@
       subroutine ESMF_ClockValidate(clock, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(inout)         :: clock
+      type(ESMF_Clock),  intent(in)            :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
@@ -1747,7 +1784,7 @@
       subroutine ESMF_ClockWriteRestart(clock, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),  intent(inout)         :: clock
+      type(ESMF_Clock),  intent(in)            :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 

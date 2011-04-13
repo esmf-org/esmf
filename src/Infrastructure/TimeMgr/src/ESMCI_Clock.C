@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.20 2011/02/24 04:46:26 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.21 2011/04/13 19:03:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.20 2011/02/24 04:46:26 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.21 2011/04/13 19:03:36 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1082,10 +1082,18 @@ int Clock::count=0;
       return(rc);
     }
 
-    *alarmCount = 0;
+    if (alarmList1stElementPtr == ESMC_NULL_POINTER && 
+        alarmList2ndElementPtr == ESMC_NULL_POINTER &&
+        alarmCount == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD,
+         "; must specify at least one of AlarmList and/or alarmCount", &rc);
+      return(rc);
+    }
+
+    if (alarmCount != ESMC_NULL_POINTER) *alarmCount = 0;
 
     // Calculate element size of F90 array of Alarm pointers since we
-    // cannont depend on C++ element size to be the same as F90's across all
+    // cannot depend on C++ element size to be the same as F90's across all
     // platforms.  It is assumed that all F90 platforms allocate arrays
     // contiguously and uniformly in memory, in either ascending or descending
     // address order.
@@ -1094,7 +1102,8 @@ int Clock::count=0;
     // see also Clock::advance().
 
     int f90ArrayElementSize = 0; 
-    if (alarmList2ndElementPtr != ESMC_NULL_POINTER) {
+    if (alarmList1stElementPtr != ESMC_NULL_POINTER &&
+        alarmList2ndElementPtr != ESMC_NULL_POINTER) {
         f90ArrayElementSize = (int)(alarmList2ndElementPtr -
                                     alarmList1stElementPtr);
     }
@@ -1102,7 +1111,6 @@ int Clock::count=0;
     // traverse clock's alarm list (i) for alarms to return in
     //   requested list (j)
     for(int i=0, j=0; i < this->alarmCount; i++) {
-      int rc;
       bool returnAlarm;
 
       // based on requested list type, check if this (i'th) alarm is
@@ -1116,17 +1124,17 @@ int Clock::count=0;
 
         case ESMF_ALARMLIST_RINGING:
           // return alarm if it's ringing
-          returnAlarm = alarmList[i]->Alarm::isRinging(&rc);
+          returnAlarm = (this->alarmList[i])->Alarm::isRinging(&rc);
           break;
 
         case ESMF_ALARMLIST_NEXTRINGING:
           // return alarm if it will ring upon the next clock time step
-          returnAlarm = alarmList[i]->Alarm::willRingNext(timeStep, &rc);
+          returnAlarm = (this->alarmList[i])->Alarm::willRingNext(timeStep,&rc);
           break;
 
         case ESMF_ALARMLIST_PREVRINGING:
           // return alarm if it was ringing on the previous clock time step
-          returnAlarm = alarmList[i]->Alarm::wasPrevRinging(&rc);
+          returnAlarm = (this->alarmList[i])->Alarm::wasPrevRinging(&rc);
           break;
 
         default :
@@ -1141,27 +1149,29 @@ int Clock::count=0;
       // copy alarm pointers to be returned into given F90 array
       if (returnAlarm) {
         // count and report number of returned alarms
-        (*alarmCount)++;
+        if (alarmCount != ESMC_NULL_POINTER) (*alarmCount)++;
 
-        // copy if there's space in the given F90 array
-        if (j < sizeofAlarmList) {
-          // F90/C++ equivalent: AlarmList(j) = this->alarmList[i]
-          //                 j = j + 1
-          // calculate F90 array address for the j'th element ...
-          char *f90ArrayElementJ;
-          f90ArrayElementJ = alarmList1stElementPtr +
+        if (alarmList1stElementPtr != ESMC_NULL_POINTER) {
+          // copy if there's space in the given F90 array
+          if (j < sizeofAlarmList) {
+            // F90/C++ equivalent: AlarmList(j) = this->alarmList[i]
+            //                 j = j + 1
+            // calculate F90 array address for the j'th element ...
+            char *f90ArrayElementJ;
+            f90ArrayElementJ = alarmList1stElementPtr +
                                                 (j++ * f90ArrayElementSize);
-          // ... then copy it in!
-          *((Alarm**)f90ArrayElementJ) = alarmList[i];
-        } else {
-          // list overflow!
-          char logMsg[ESMF_MAXSTR];
-          sprintf(logMsg, "For clock %s, "
-                  "trying to return %dth requested alarm, but given "
-                  "alarmList array can only hold %d.",
-                  this->name, j+1, sizeofAlarmList);
-          ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
-          rc = ESMF_FAILURE;
+            // ... then copy it in!
+            *((Alarm**)f90ArrayElementJ) = this->alarmList[i];
+          } else {
+            // list overflow!
+            char logMsg[ESMF_MAXSTR];
+            sprintf(logMsg, "For clock %s, "
+                    "trying to return %dth requested alarm, but given "
+                    "alarmList array can only hold %d.",
+                    this->name, j+1, sizeofAlarmList);
+            ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+            rc = ESMF_FAILURE;
+          }
         }
       }
     }

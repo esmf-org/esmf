@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.59 2011/02/24 04:46:26 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.60 2011/04/13 19:03:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.59 2011/02/24 04:46:26 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.60 2011/04/13 19:03:38 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -74,7 +74,8 @@
       logical :: willRingNext, testPass, alarmsNotEqual, alarmsEqual
       type(ESMF_Direction) :: reverseDirection, forwardDirection
       type(ESMF_Alarm) :: alarm, alarm2, afterAlarm, beforeAlarm
-      type(ESMF_Alarm) :: alarmList(201), alarm6, alarm7, alarm8
+      type(ESMF_Alarm) :: alarmList(201), alarmListOne(1)
+      type(ESMF_Alarm) :: alarm6, alarm7, alarm8
       type(ESMF_Alarm) :: alarm5(200), alarm3, alarm4
       type(ESMF_Alarm) :: ALARM_HISTORY
 
@@ -493,7 +494,7 @@
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Create Alarm Test"
-      alarm1 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
+      alarm1 = ESMF_AlarmCreate(name="WAKEUP1", clock=clock1, ringTime=alarmTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -502,7 +503,7 @@
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Create Alarm Test"
-      alarm3 = ESMF_AlarmCreate(name="WAKEUP", clock=clock1, ringTime=alarmTime, rc=rc)
+      alarm3 = ESMF_AlarmCreate(name="WAKEUP3", clock=clock1, ringTime=alarmTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -518,10 +519,55 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
+      write(failMsg, *) " Did not return ESMC_RC_OPTARG_BAD"
+      write(name, *) "Clock Get Alarm List Test 1 - optional args missing"
+      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, rc=rc)
+      call ESMF_Test((rc.eq.ESMC_RC_OPTARG_BAD), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Clock Get Alarm List Test 2 - only alarmList specified"
+      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, &
+                                  alarmList=alarmList, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount=3"
+      write(name, *) "Clock Get Alarm List Test 3 - only alarmCount specified"
+      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, &
+                                  alarmCount=alarmCount, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.3), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount=1"
+      write(name, *) "Clock Get Alarm List Test 5 - single-element length alarmList specified"
+      call ESMF_AlarmRingerOn(alarm1, rc=rc)
+      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_RINGING, &
+                                  alarmList=alarmListOne, &
+                                  alarmCount=alarmCount, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_AlarmRingerOff(alarm1, rc=rc)
+      !call ESMF_AlarmPrint(alarmListOne(1), options="name", rc=rc)
+      !print *, "alarmCount = ", alarmCount
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount = 3"
-      write(name, *) "Clock Get Alarm List Test"
-      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, alarmList, &
-                                  alarmCount, rc=rc)
+      write(name, *) "Clock Get Alarm List Test 6"
+      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, &
+                                  alarmList=alarmList, alarmCount=alarmCount, &
+                                  rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.3), &
                       name, failMsg, result, ESMF_SRCLINE)
       !call ESMF_AlarmPrint(alarmList(1), options="name", rc=rc)
@@ -538,7 +584,7 @@
       alarm8 = alarm1  ! exercise default F90 Alarm = assignment
       call ESMF_AlarmGet(alarm8, name=aName, clock=clock3, &
                          ringTime=time1, rc=rc)
-      call ESMF_Test((alarm8==alarm1 .and. aName=="WAKEUP" .and. &
+      call ESMF_Test((alarm8==alarm1 .and. aName=="WAKEUP1" .and. &
                       clock3==clock1 .and. time1==alarmTime), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -725,7 +771,7 @@
       write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
       write(name, *) "Get Alarm name Test"
       call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aName.eq."WAKEUP"), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aName.eq."WAKEUP1"), &
                       name, failMsg, result, ESMF_SRCLINE)
       !print *, "Alarm name is ", aName
 
@@ -1246,7 +1292,8 @@
       do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
         i = i + 1
         call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_RINGING, &
-                                    alarmList, alarmCount, rc=rc)
+                                    alarmList=alarmList, &
+                                    alarmCount=alarmCount, rc=rc)
         if (alarmCount .gt. 0) then
           if (sstep .eq. 0) sstep = i
           nstep = nstep + 1
@@ -2611,8 +2658,9 @@
       !Test Alarm list re-allocation within clock, part 2
       write(failMsg, *) " Did not return 201 alarms and name '201st Alarm'"
       write(name, *) "Alarm list reallocation Test 2"
-      call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_ALL, alarmList, &
-                                  alarmCount, rc=rc)
+      call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_ALL, &
+                                  alarmList=alarmList, &
+                                  alarmCount=alarmCount, rc=rc)
       write(*,*) "rc=",rc
       call ESMF_AlarmGet(alarmList(alarmCount), name=aName, rc=rc)
 
@@ -2632,8 +2680,9 @@
       write(failMsg, *) " Did not return 201st alarm ringing"
       write(name, *) "Alarm list reallocation Test 3"
       call ESMF_ClockAdvance(clock2, rc=rc)
-      call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_RINGING, alarmList, &
-                                  alarmCount, rc=rc)
+      call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_RINGING, &
+                                  alarmList=alarmList, &
+                                  alarmCount=alarmCount, rc=rc)
       ! double check ringing with Alarm API call
       isringing = ESMF_AlarmIsRinging(alarm4, rc=rc)
 
