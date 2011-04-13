@@ -1,7 +1,7 @@
-! $Id: ESMF_WebServicesSTest.F90,v 1.1 2011/04/12 15:20:05 ksaint Exp $
+! $Id: ESMF_WebServicesSTest.F90,v 1.2 2011/04/13 15:04:47 ksaint Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_disable_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
