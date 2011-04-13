@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2011/03/09 14:16:39 ksaint Exp $ 
+# $Id: makefile,v 1.2 2011/04/13 01:28:55 ksaint Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -28,9 +28,6 @@ DIRS        =
 #
 # Web Services
 #
-
-ESMF_WebServUTest.o: ESMF_WebServUserModel.o 
-ESMF_UTEST_WebServ_OBJS = ESMF_WebServUserModel.o
 
 RUN_ESMF_WebServUTest:
 	$(MAKE) TNAME=WebServ NP=4 ftest & \
