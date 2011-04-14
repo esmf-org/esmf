@@ -2,6 +2,7 @@
 #include "dtypes.h"
 subroutine pio_callback_handler(iosystem, msg)
   use ESMFPIOMod
+  use pio_types, only: file_desc_t, iosystem_desc_t
   use pio_msg_mod
   use pio_support, only : debugAsync, piodie
   implicit none
@@ -106,6 +107,7 @@ subroutine open_file_handler(iosystem)
   use pio_kinds
   use pio_msg_mod
   use pio_support, only : debugAsync
+  use pio_types, only: file_desc_t, iosystem_desc_t
   implicit none
   include 'mpif.h' !_EXTERNAL
 
@@ -138,6 +140,7 @@ subroutine initdecomp_dof_handler(iosystem)
   use pio_kinds
   use pio_msg_mod
   use pio_support, only : debugAsync
+  use pio_types, only: io_desc_t, iosystem_desc_t
   implicit none
   include 'mpif.h' !_EXTERNAL
 
