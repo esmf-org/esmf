@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.1 2011/04/13 23:12:16 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.2 2011/04/14 15:12:53 theurich Exp $
 module NUOPC_DriverExplicit
 
   !-----------------------------------------------------------------------------
@@ -12,7 +12,7 @@ module NUOPC_DriverExplicit
   
   private
   
-  public SetServices, InternalState
+  public SetServices, InternalState, InternalStateStruct
   public ConnectorPlacing, connectorPlacingPreModel, connectorPlacingPostModel
   public ConnectorGrouping, connectorGroupingNone, &
     connectorGroupingPreModel, connectorGroupingPostModel

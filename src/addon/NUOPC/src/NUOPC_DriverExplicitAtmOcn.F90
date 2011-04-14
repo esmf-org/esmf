@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.1 2011/04/13 23:12:16 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.2 2011/04/14 15:12:54 theurich Exp $
 module NUOPC_DriverExplicitAtmOcn
 
   !-----------------------------------------------------------------------------
@@ -15,7 +15,7 @@ module NUOPC_DriverExplicitAtmOcn
   
   private
   
-  public SetServices, InternalState
+  public SetServices, InternalState, InternalStateStruct
   
   type InternalStateStruct
     type(ESMF_GridComp) :: atm
