@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.21 2011/04/13 19:03:36 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.22 2011/04/14 05:33:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.21 2011/04/13 19:03:36 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.22 2011/04/14 05:33:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1079,14 +1079,6 @@ int Clock::count=0;
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
-      return(rc);
-    }
-
-    if (alarmList1stElementPtr == ESMC_NULL_POINTER && 
-        alarmList2ndElementPtr == ESMC_NULL_POINTER &&
-        alarmCount == ESMC_NULL_POINTER) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD,
-         "; must specify at least one of AlarmList and/or alarmCount", &rc);
       return(rc);
     }
 

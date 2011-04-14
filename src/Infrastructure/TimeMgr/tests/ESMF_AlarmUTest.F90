@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.60 2011/04/13 19:03:38 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.61 2011/04/14 05:33:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.60 2011/04/13 19:03:38 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.61 2011/04/14 05:33:44 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -519,10 +519,10 @@
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      write(failMsg, *) " Did not return ESMC_RC_OPTARG_BAD"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Clock Get Alarm List Test 1 - optional args missing"
       call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, rc=rc)
-      call ESMF_Test((rc.eq.ESMC_RC_OPTARG_BAD), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -549,7 +549,7 @@
 
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount=1"
-      write(name, *) "Clock Get Alarm List Test 5 - single-element length alarmList specified"
+      write(name, *) "Clock Get Alarm List Test 4 - single-element length alarmList specified"
       call ESMF_AlarmRingerOn(alarm1, rc=rc)
       call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_RINGING, &
                                   alarmList=alarmListOne, &
@@ -564,7 +564,7 @@
 
       !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount = 3"
-      write(name, *) "Clock Get Alarm List Test 6"
+      write(name, *) "Clock Get Alarm List Test 5"
       call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, &
                                   alarmList=alarmList, alarmCount=alarmCount, &
                                   rc=rc)

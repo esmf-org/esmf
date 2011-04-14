@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.113 2011/04/13 19:03:35 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.114 2011/04/14 05:33:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.113 2011/04/13 19:03:35 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.114 2011/04/14 05:33:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -875,15 +875,15 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
-        keywordEnforcer, alarmList, alarmCount, timeStep, rc)
+        keywordEnforcer, timeStep, alarmList, alarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),         intent(in)            :: clock
       type(ESMF_AlarmListType), intent(in)            :: alarmListType
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_TimeInterval),  intent(in),  optional :: timeStep
       type(ESMF_Alarm),         intent(out), optional :: alarmList(:)
       integer,                  intent(out), optional :: alarmCount
-      type(ESMF_TimeInterval),  intent(in),  optional :: timeStep
       integer,                  intent(out), optional :: rc
 !   
 !
@@ -924,20 +924,17 @@
 !                getting the list of ringing alarms subsequent to a time step.
 !                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
 !                single alarm.
-!     \item[{[alarmList]}]
-!          The array of returned alarms.  If given, the array must be large
-!          enough to hold the number of alarms of the specified 
-!          {\tt alarmListType} in the specified {\tt clock}.  At least one of
-!          {\tt alarmList} or {\tt alarmCount} must be specified.
-!     \item[{[alarmCount]}]
-!          If specified, returns the number of {\tt ESMF\_Alarm}s of the 
-!          specified {\tt alarmListType} in the specified {\tt clock}.  
-!          At least one of {\tt alarmCount} or {\tt alarmList} must be 
-!          specified.
 !     \item[{[timeStep]}]
 !          Optional time step to be used instead of the {\tt clock}'s.
 !          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmListType}
 !          (see above); ignored if specified with other {\tt alarmListTypes}.
+!     \item[{[alarmList]}]
+!          The array of returned alarms.  If given, the array must be large
+!          enough to hold the number of alarms of the specified 
+!          {\tt alarmListType} in the specified {\tt clock}.
+!     \item[{[alarmCount]}]
+!          If specified, returns the number of {\tt ESMF\_Alarm}s of the 
+!          specified {\tt alarmListType} in the specified {\tt clock}.  
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
