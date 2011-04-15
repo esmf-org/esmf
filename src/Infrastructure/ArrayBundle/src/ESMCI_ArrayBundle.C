@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.35 2011/04/01 22:09:12 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.36 2011/04/15 22:06:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.35 2011/04/01 22:09:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.36 2011/04/15 22:06:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -299,10 +299,7 @@ int ArrayBundle::print()const{
   printf("--- ESMCI::ArrayBundle::print start ---\n");
   printf("ArrayBundle: %s\n", getName());
   printf("arrayCount = %d\n", getArrayCount());
-  vector<Array *> arrayVector;
-  getArrayVector(arrayVector);
-  for (int i=0; i<getArrayCount(); i++)
-    printf("array #%d: %s\n", i, arrayVector[i]->getName());
+  arrayContainer.print();
   printf("--- ESMCI::ArrayBundle::print end ---\n");
   
   // return successfully
