@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.73 2011/04/08 20:40:23 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.74 2011/04/15 16:14:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.73 2011/04/08 20:40:23 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.74 2011/04/15 16:14:11 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -591,16 +591,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldGet() @\
-! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, localDe, & @\
-!   farrayPtr, keywordEnforcer, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
+! subroutine ESMF_FieldGetDataPtr<rank><type><kind>(field, keywordEnforcer, localDe, & @\
+!   farrayPtr, exclusiveLBound, exclusiveUBound, exclusiveCount, & @\
 !   computationalLBound, computationalUBound, computationalCount, & @\
 !   totalLBound, totalUBound, totalCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field), intent(in)            :: field @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(in),  optional :: localDe @\
 !   <type> (ESMF_KIND_<kind>), pointer      :: farrayPtr(<rank>) @\
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
 !   integer,          intent(out), optional :: exclusiveCount(:) @\
