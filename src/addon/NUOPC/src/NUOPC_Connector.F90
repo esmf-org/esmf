@@ -1,4 +1,7 @@
-! $Id: NUOPC_Connector.F90,v 1.2 2011/04/13 23:44:47 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+
+#define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
+
 module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
@@ -38,28 +41,28 @@ module NUOPC_Connector
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, &
       userRoutine=InitializeP1, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   
@@ -83,19 +86,19 @@ module NUOPC_Connector
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! reconcile the States
     call ESMF_StateReconcile(importState, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! access the state types
@@ -103,13 +106,13 @@ module NUOPC_Connector
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateGet(exportState, statetype=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     if (.not.((isType==ESMF_STATE_EXPORT).and.(esType==ESMF_STATE_IMPORT))) then
@@ -120,7 +123,7 @@ module NUOPC_Connector
     call NUOPC_CplCompAttributeAdd(cplcomp, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -155,13 +158,13 @@ module NUOPC_Connector
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
     call ESMF_CplCompSetInternalState(cplcomp, isw, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! get current VM because StateReconcile needs it
@@ -169,19 +172,19 @@ module NUOPC_Connector
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! reconcile the States
     call ESMF_StateReconcile(importState, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! access the state types
@@ -189,13 +192,13 @@ module NUOPC_Connector
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateGet(exportState, statetype=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     if (.not.((isType==ESMF_STATE_EXPORT).and.(esType==ESMF_STATE_IMPORT))) then
@@ -207,33 +210,33 @@ module NUOPC_Connector
     call NUOPC_CplCompAttributeGet(cplcomp, cplList, cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
       importStdItemNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     ! get the exportState std lists
     call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
       exportStdItemNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! prepare FieldBundles to store src and dst Fields
     isw%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     isw%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     do i=1, cplListSize
@@ -267,25 +270,25 @@ module NUOPC_Connector
           itemName=importStdItemNameList(iMatch), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
         call ESMF_StateGet(exportState, field=eField, &
           itemName=exportStdItemNameList(iMatch), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
         
         ! add the import and export Fields to FieldBundles
         call ESMF_FieldBundleAdd(isw%wrap%srcFields, field=iField, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
         call ESMF_FieldBundleAdd(isw%wrap%dstFields, field=eField, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
           
         ! set the connected Attribute on import Field
@@ -295,7 +298,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
         ! set the connected Attribute on export Field
         call ESMF_AttributeSet(eField, &
@@ -304,7 +307,7 @@ module NUOPC_Connector
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
@@ -318,7 +321,7 @@ module NUOPC_Connector
       routehandle=isw%wrap%rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
@@ -347,7 +350,7 @@ module NUOPC_Connector
     call ESMF_CplCompGetInternalState(cplcomp, isw, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     !TODO: here may be the place to ensure incoming States are consistent
@@ -358,7 +361,7 @@ module NUOPC_Connector
       routehandle=isw%wrap%rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! update the timestamp on all of the dst fields to that on the src side
@@ -366,7 +369,7 @@ module NUOPC_Connector
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! get current VM because AttributeUpdate needs it
@@ -374,7 +377,7 @@ module NUOPC_Connector
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! ensure that Attributes are correctly updated across the exportState    
@@ -384,7 +387,7 @@ module NUOPC_Connector
     call ESMF_AttributeUpdate(exportState, vm=vm, rootList=(/0/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   
@@ -407,24 +410,24 @@ module NUOPC_Connector
     call ESMF_CplCompGetInternalState(cplcomp, isw, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! destroy the objects in the internal state
     call ESMF_FieldBundleRegridRelease(isw%wrap%rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_FieldBundleDestroy(isw%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_FieldBundleDestroy(isw%wrap%dstFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! deallocate internal state memory
@@ -432,7 +435,7 @@ module NUOPC_Connector
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
       

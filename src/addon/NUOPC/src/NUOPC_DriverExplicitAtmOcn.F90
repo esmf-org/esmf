@@ -1,4 +1,7 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.2 2011/04/14 15:12:54 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+
+#define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
+
 module NUOPC_DriverExplicitAtmOcn
 
   !-----------------------------------------------------------------------------
@@ -43,7 +46,7 @@ module NUOPC_DriverExplicitAtmOcn
     call DriverExplicit_SS(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! attach specializing method(s)
@@ -51,19 +54,19 @@ module NUOPC_DriverExplicitAtmOcn
       userRoutine=SetModelCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_MethodAdd(gcomp, label="DriverExplicit_SetModelServices", &
       userRoutine=SetModelServices, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_MethodAdd(gcomp, label="DriverExplicit_Finalize", &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -85,7 +88,7 @@ module NUOPC_DriverExplicitAtmOcn
       rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! set the modelCount for ATM-OCN pair coupling
@@ -112,7 +115,7 @@ module NUOPC_DriverExplicitAtmOcn
       rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! allocate memory for this internal state and set it in the Component
@@ -120,14 +123,14 @@ module NUOPC_DriverExplicitAtmOcn
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
     call ESMF_UserCompSetInternalState(gcomp, "NUOPC_DriverExplicitAtmOcn", &
       is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! map components and states for ATM-OCN pair coupling
@@ -144,22 +147,22 @@ module NUOPC_DriverExplicitAtmOcn
     call ESMF_GridCompSet(is%wrap%atm, name="ATM", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_GridCompSet(is%wrap%ocn, name="OCN", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_CplCompSet(is%wrap%atm2ocn, name="ATM2OCN", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_CplCompSet(is%wrap%ocn2atm, name="OCN2ATM", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
@@ -168,11 +171,11 @@ module NUOPC_DriverExplicitAtmOcn
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
       
@@ -196,11 +199,11 @@ module NUOPC_DriverExplicitAtmOcn
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
 
@@ -210,7 +213,7 @@ module NUOPC_DriverExplicitAtmOcn
       rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! deallocate internal state memory
@@ -218,7 +221,7 @@ module NUOPC_DriverExplicitAtmOcn
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
       

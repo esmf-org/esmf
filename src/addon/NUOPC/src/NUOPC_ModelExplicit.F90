@@ -1,4 +1,7 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.1 2011/04/13 23:12:16 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.2 2011/04/15 16:30:17 theurich Exp $
+
+#define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
+
 module NUOPC_ModelExplicit
 
   !-----------------------------------------------------------------------------
@@ -28,28 +31,28 @@ module NUOPC_ModelExplicit
       userRoutine=InitializeP2, phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
       userRoutine=InitializeP3, phase=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
 
@@ -70,7 +73,7 @@ module NUOPC_ModelExplicit
     allConnected = NUOPC_StateIsAllConnected(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! compatibility check
@@ -79,7 +82,7 @@ module NUOPC_ModelExplicit
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not all connected", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
@@ -111,11 +114,11 @@ module NUOPC_ModelExplicit
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
     
@@ -123,12 +126,12 @@ module NUOPC_ModelExplicit
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -152,28 +155,28 @@ module NUOPC_ModelExplicit
     call ESMF_GridCompGet(gcomp, name=modelName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! check and set the internal clock against the external clock
     call NUOPC_GridCompCheckSetClock(gcomp, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! get the internal clock for the time stepping loop
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
       trim(modelName)//" entered Run with current time: ", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! check that Fields in the importState show correct timestamp
@@ -181,7 +184,7 @@ module NUOPC_ModelExplicit
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     if (.not.allCurrent) then
@@ -189,7 +192,7 @@ module NUOPC_ModelExplicit
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not at current time", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
@@ -198,7 +201,7 @@ module NUOPC_ModelExplicit
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       ! SPECIALIZE by calling into attached method to advance the model t->t+dt
@@ -206,11 +209,11 @@ module NUOPC_ModelExplicit
         userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
       
@@ -218,27 +221,27 @@ module NUOPC_ModelExplicit
       call ESMF_ClockAdvance(internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     
       call NUOPC_ClockPrintCurrTime(internalClock, &
         trim(modelName)//" time stepping loop, current time: ", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
     enddo ! end of time stepping loop
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! update timestamp on export Fields
     call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -262,11 +265,11 @@ module NUOPC_ModelExplicit
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
-      file=__FILE__, &
+      file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
 

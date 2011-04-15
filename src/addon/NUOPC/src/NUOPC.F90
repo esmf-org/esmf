@@ -1,4 +1,7 @@
-! $Id: NUOPC.F90,v 1.2 2011/04/13 23:44:47 theurich Exp $
+! $Id: NUOPC.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+
+#define FILENAME "src/addon/NUOPC/NUOPC.F90"
+
 module NUOPC
 
   !-----------------------------------------------------------------------------
@@ -65,20 +68,20 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     else if (len_trim(value) == 0) then
       ! attribute present but not set
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
@@ -113,13 +116,13 @@ module NUOPC
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_AttributeAdd(field, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! set Attributes
@@ -129,7 +132,7 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_AttributeSet(field, &
       name="Units", value=Units, &
@@ -137,7 +140,7 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_AttributeSet(field, &
       name="Connected", value=Connected, &
@@ -145,7 +148,7 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_AttributeSet(field, &
       name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0/), &
@@ -153,7 +156,7 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
@@ -180,7 +183,7 @@ module NUOPC
     call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     if (vm_info == ESMF_NULL_POINTER) then
@@ -215,7 +218,7 @@ module NUOPC
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -251,7 +254,7 @@ module NUOPC
       attrList=attrList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! find cplListValues
@@ -259,7 +262,7 @@ module NUOPC
       count=count, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! set Attributes
@@ -269,7 +272,7 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (count>0) then
       call ESMF_AttributeSet(comp, &
@@ -278,7 +281,7 @@ module NUOPC
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
       
@@ -313,12 +316,12 @@ module NUOPC
     call NUOPC_StateBuildStdList(importState, importStandardNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call NUOPC_StateBuildStdList(exportState, exportStandardNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     if (associated(importStandardNameList) .and. &
@@ -333,7 +336,7 @@ module NUOPC
               call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
                 msg="Not enough space in cplList",&
                 line=__LINE__, &
-                file=__FILE__, &
+                file=FILENAME, &
                 rcToReturn=rc)
                 return  ! bail out
             endif
@@ -371,7 +374,7 @@ module NUOPC
     call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   
     if (present(string)) then
@@ -405,13 +408,13 @@ module NUOPC
     call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call NUOPC_TimePrint(currTime, string, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
 
@@ -437,13 +440,13 @@ module NUOPC
     call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call NUOPC_TimePrint(startTime, string, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
@@ -468,13 +471,13 @@ module NUOPC
     call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call NUOPC_TimePrint(stopTime, string, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
@@ -504,7 +507,7 @@ module NUOPC
     internalClock = ESMF_ClockCreate(externalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     if (present(stabilityTimeStep)) then
@@ -519,7 +522,7 @@ module NUOPC
       call ESMF_ClockGet(externalClock, timeStep=externalTimeStep, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     
       internalStepCount = ceiling(externalTimeStep / stabilityTimeStep)
@@ -528,7 +531,7 @@ module NUOPC
       call ESMF_ClockSet(internalClock, timeStep=actualTimeStep, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
       
@@ -558,7 +561,7 @@ module NUOPC
     call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     if (vm_info == ESMF_NULL_POINTER) then
@@ -598,13 +601,13 @@ module NUOPC
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     call ESMF_GridCompSet(comp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
@@ -640,20 +643,20 @@ module NUOPC
       timeStep=externalTimeStep, direction=direction, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_GridCompGet(comp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_ClockGet(internalClock, currTime=currTime, timeStep=timeStep, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! ensure the current times match between external and internal Clock
@@ -661,7 +664,7 @@ module NUOPC
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="internal and external Clocks do not match in current time!", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
@@ -672,7 +675,7 @@ module NUOPC
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="external timestep is not multiple of internal timestep!", &
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
@@ -686,7 +689,7 @@ module NUOPC
     call ESMF_ClockSet(internalClock, stopTime=stopTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
@@ -717,7 +720,7 @@ module NUOPC
     call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
           
     if (itemCount > 0) then
@@ -727,7 +730,7 @@ module NUOPC
         itemtypeList=stateitemtypeList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       fieldCount = 0  ! reset
@@ -739,14 +742,14 @@ module NUOPC
       allocate(stdAttrNameList(fieldCount), stat=stat)
       if (ESMF_LogFoundAllocError(stat, msg= "allocating stdAttrNameList", &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       if (present(stdItemNameList)) then
         allocate(stdItemNameList(fieldCount), stat=stat)
         if (ESMF_LogFoundAllocError(stat, msg= "allocating stdItemNameList", &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       endif
 
@@ -754,7 +757,7 @@ module NUOPC
         allocate(stdConnectedList(fieldCount), stat=stat)
         if (ESMF_LogFoundAllocError(stat, msg= "allocating stdConnectedList", &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       endif
 
@@ -766,13 +769,13 @@ module NUOPC
             field=field, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
             line=__LINE__, &
-            file=__FILE__)) &
+            file=FILENAME)) &
             return  ! bail out
           call NUOPC_FieldAttributeGet(field, name="StandardName", &
             value=stdAttrNameList(fieldCount), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
             line=__LINE__, &
-            file=__FILE__)) &
+            file=FILENAME)) &
             return  ! bail out
           if (present(stdItemNameList)) then
             stdItemNameList(fieldCount)=itemNameList(item)
@@ -782,7 +785,7 @@ module NUOPC
               value=stdConnectedList(fieldCount), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
           endif
           fieldCount = fieldCount + 1
@@ -820,7 +823,7 @@ module NUOPC
       stdConnectedList=stdConnectedList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     allConnected = .true.  ! initialize
@@ -864,28 +867,28 @@ module NUOPC
     call ESMF_ClockGet(clock, currTime=time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
       ns=ns, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
   
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdItemNameList=stdItemNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     do i=1, size(stdItemNameList)
       call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_AttributeSet(field, &
         name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
@@ -893,7 +896,7 @@ module NUOPC
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     enddo
     
@@ -925,18 +928,18 @@ module NUOPC
     field = ESMF_FieldCreateEmpty(name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
       Units=Units, Connected="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateAdd(state, field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -965,35 +968,35 @@ module NUOPC
     call ESMF_FieldGet(field, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateGet(state, field=potentialField, itemName=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call NUOPC_FieldAttributeGet(potentialField, name="StandardName", &
       value=StandardName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call NUOPC_FieldAttributeGet(potentialField, name="Units", &
       value=Units, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
       Units=Units, Connected="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_StateReplace(state, field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -1025,14 +1028,14 @@ module NUOPC
     call ESMF_ClockGet(clock, currTime=time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdItemNameList=stdItemNameList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     isCurrent = .true. ! initialize
@@ -1041,7 +1044,7 @@ module NUOPC
       call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_AttributeGet(field, &
         name="TimeStamp", valueList=valueList, &
@@ -1049,7 +1052,7 @@ module NUOPC
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_TimeSet(fieldTime, &
         yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
@@ -1058,7 +1061,7 @@ module NUOPC
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       if (fieldTime /= time) then
         isCurrent = .false.
@@ -1097,17 +1100,17 @@ module NUOPC
     call ESMF_FieldBundleGet(srcFields, fieldCount=srcCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_FieldBundleGet(dstFields, fieldCount=dstCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (srcCount /= dstCount) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="count mismatch",&
         line=__LINE__, &
-        file=__FILE__, &
+        file=FILENAME, &
         rcToReturn=rc)
       return  ! bail out
     endif
@@ -1116,12 +1119,12 @@ module NUOPC
       call ESMF_FieldBundleGet(srcFields, fieldIndex=i, field=srcField, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_FieldBundleGet(dstFields, fieldIndex=i, field=dstField, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_AttributeGet(srcField, &
         name="TimeStamp", valueList=valueList, &
@@ -1129,7 +1132,7 @@ module NUOPC
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_AttributeSet(dstField, &
         name="TimeStamp", valueList=valueList, &
@@ -1137,7 +1140,7 @@ module NUOPC
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     enddo
     
@@ -1175,28 +1178,28 @@ module NUOPC
       indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! add center stagger
     call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_GridGetCoord(grid, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CENTER, &
       coordDim=1, farrayPtr=coordX, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     call ESMF_GridGetCoord(grid, localDE=0, &
       staggerLoc=ESMF_STAGGERLOC_CENTER, &
       coordDim=2, farrayPtr=coordY, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compute center stagger coordinate values
