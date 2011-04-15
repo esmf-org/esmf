@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.37 2011/04/13 14:41:04 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.38 2011/04/15 00:08:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.37 2011/04/13 14:41:04 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.38 2011/04/15 00:08:50 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -923,7 +923,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Getting a logical list Attribute isPresent flag and itemCount on a Field test"
       call ESMF_Test((rc == ESMF_SUCCESS) &
                      .and.isPresent.eqv..false. &
-                     .and.itemCount==0, &
+                     .and.items==0, &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -946,7 +946,7 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting a logical list Attribute itemCount on a Field test"
       call ESMF_Test((rc == ESMF_SUCCESS) &
-                     .and.itemCount==0, &
+                     .and.items==0, &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
