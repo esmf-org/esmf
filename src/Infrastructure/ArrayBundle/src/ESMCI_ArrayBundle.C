@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.36 2011/04/15 22:06:03 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.37 2011/04/15 22:39:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.36 2011/04/15 22:06:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.37 2011/04/15 22:39:06 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -140,8 +140,8 @@ int ArrayBundle::destruct(bool followCreator){
     // garbage collection
     if (arrayCreator && followCreator){
       vector<Array *> arrayVector;
-      getArrayVector(arrayVector);
-      for (int i=0; i<getArrayCount(); i++)
+      getVector(arrayVector);
+      for (int i=0; i<getCount(); i++)
         Array::destroy(&arrayVector[i]);
     }
   }
@@ -298,7 +298,7 @@ int ArrayBundle::print()const{
   // print info about the ESMCI::ArrayBundle object
   printf("--- ESMCI::ArrayBundle::print start ---\n");
   printf("ArrayBundle: %s\n", getName());
-  printf("arrayCount = %d\n", getArrayCount());
+  printf("arrayCount = %d\n", getCount());
   arrayContainer.print();
   printf("--- ESMCI::ArrayBundle::print end ---\n");
   
@@ -360,7 +360,7 @@ int ArrayBundle::haloStore(
         "- Not a valid pointer to arraybundle", &rc);
       return rc;
     }
-    int arrayCount = arraybundle->getArrayCount();
+    int arrayCount = arraybundle->getCount();
     vector<int> arrayCountList(petCount);
     vm->allgather(&arrayCount, &(arrayCountList[0]), sizeof(int));
     arrayCount = *min_element(arrayCountList.begin(), arrayCountList.end());
@@ -379,7 +379,7 @@ int ArrayBundle::haloStore(
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> arrayVector;
-    arraybundle->getArrayVector(arrayVector);
+    arraybundle->getVector(arrayVector);
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *array = arrayVector[i];
@@ -617,8 +617,8 @@ int ArrayBundle::redistStore(
         "- Not a valid pointer to dstArraybundle", &rc);
       return rc;
     }
-    int arrayCount = srcArraybundle->getArrayCount();
-    if (arrayCount != dstArraybundle->getArrayCount()){
+    int arrayCount = srcArraybundle->getCount();
+    if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- srcArraybundle and dstArraybundle contain different number"
         " of Arrays", &rc);
@@ -643,8 +643,8 @@ int ArrayBundle::redistStore(
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getArrayVector(srcArrayVector);
-    dstArraybundle->getArrayVector(dstArrayVector);
+    srcArraybundle->getVector(srcArrayVector);
+    dstArraybundle->getVector(dstArrayVector);
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *srcArray = srcArrayVector[i];
@@ -887,8 +887,8 @@ int ArrayBundle::sparseMatMulStore(
         "- Not a valid pointer to dstArraybundle", &rc);
       return rc;
     }
-    int arrayCount = srcArraybundle->getArrayCount();
-    if (arrayCount != dstArraybundle->getArrayCount()){
+    int arrayCount = srcArraybundle->getCount();
+    if (arrayCount != dstArraybundle->getCount()){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
         "- srcArraybundle and dstArraybundle contain different number"
         " of Arrays", &rc);
@@ -913,8 +913,8 @@ int ArrayBundle::sparseMatMulStore(
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getArrayVector(srcArrayVector);
-    dstArraybundle->getArrayVector(dstArrayVector);    
+    srcArraybundle->getVector(srcArrayVector);
+    dstArraybundle->getVector(dstArrayVector);    
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *srcArray = srcArrayVector[i];
@@ -1073,18 +1073,18 @@ int ArrayBundle::sparseMatMul(
     Array *dstArray = NULL;
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getArrayVector(srcArrayVector);
-    dstArraybundle->getArrayVector(dstArrayVector);    
+    srcArraybundle->getVector(srcArrayVector);
+    dstArraybundle->getVector(dstArrayVector);    
     if (rhType == ESMC_ARRAYXXE){
       // apply same routehandle to each src/dst Array pair
       if (srcArraybundle != NULL && dstArraybundle != NULL){
-        if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
+        if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- srcArraybundle and dstArraybundle contain different number"
             " of Arrays", &rc);
           return rc;
         }
-        for (int i=0; i<srcArraybundle->getArrayCount(); i++){
+        for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
@@ -1093,7 +1093,7 @@ int ArrayBundle::sparseMatMul(
             &rc)) return rc;
         }
       }else if (srcArraybundle != NULL){
-        for (int i=0; i<srcArraybundle->getArrayCount(); i++){
+        for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
@@ -1101,7 +1101,7 @@ int ArrayBundle::sparseMatMul(
             &rc)) return rc;
         }
       }else if (dstArraybundle != NULL){
-        for (int i=0; i<dstArraybundle->getArrayCount(); i++){
+        for (int i=0; i<dstArraybundle->getCount(); i++){
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
             ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
@@ -1119,13 +1119,13 @@ int ArrayBundle::sparseMatMul(
       rraList.reserve(100); // optimize performance
       vectorLength.reserve(100); // optimize performance
       if (srcArraybundle != NULL && dstArraybundle != NULL){
-        if (srcArraybundle->getArrayCount() != dstArraybundle->getArrayCount()){
+        if (srcArraybundle->getCount() != dstArraybundle->getCount()){
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
             "- srcArraybundle and dstArraybundle contain different number"
             " of Arrays", &rc);
           return rc;
         }
-        for (int i=0; i<srcArraybundle->getArrayCount(); i++){
+        for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
           for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
@@ -1152,7 +1152,7 @@ int ArrayBundle::sparseMatMul(
           vectorLength.push_back(vectorL);
         }
       }else if (srcArraybundle != NULL){
-        for (int i=0; i<srcArraybundle->getArrayCount(); i++){
+        for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           void **larrayBaseAddrList = srcArray->getLarrayBaseAddrList();
           for (int j=0; j<srcArray->getDELayout()->getLocalDeCount(); j++){
@@ -1173,7 +1173,7 @@ int ArrayBundle::sparseMatMul(
           vectorLength.push_back(vectorL);
         }
       }else if (dstArraybundle != NULL){
-        for (int i=0; i<dstArraybundle->getArrayCount(); i++){
+        for (int i=0; i<dstArraybundle->getCount(); i++){
           dstArray = dstArrayVector[i];
           void **larrayBaseAddrList = dstArray->getLarrayBaseAddrList();
           for (int j=0; j<dstArray->getDELayout()->getLocalDeCount(); j++){
@@ -1373,15 +1373,15 @@ int ArrayBundle::serialize(
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
   if (inquireflag != ESMF_INQUIREONLY)
-    *ip++ = getArrayCount();
+    *ip++ = getCount();
   else
     ip++;
 
   cp = (char *)ip;
   *offset = (cp - buffer);
   vector<Array *> arrayVector;
-  getArrayVector(arrayVector);
-  for (int i=0; i<getArrayCount(); i++){
+  getVector(arrayVector);
+  for (int i=0; i<getCount(); i++){
     localrc =
       arrayVector[i]->serialize(buffer,length,offset,attreconflag,inquireflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))

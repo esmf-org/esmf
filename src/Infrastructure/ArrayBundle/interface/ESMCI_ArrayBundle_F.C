@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.27 2011/04/06 04:43:30 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.28 2011/04/15 22:39:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ extern "C" {
       
       for (int i=0; i<*arrayCount; i++){
         // call into C++ layer
-        (*ptr)->addArray(arrayList[i]);
+        (*ptr)->add(arrayList[i]);
       }
 
     }catch(int localrc){
@@ -126,19 +126,19 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // fill simple return values
     if (ESMC_NOT_PRESENT_FILTER(arrayCount) != ESMC_NULL_POINTER)
-      *arrayCount = (*ptr)->getArrayCount();
+      *arrayCount = (*ptr)->getCount();
     // fill arrayList
     if (*len_arrayList != 0){
       // opt_arrayList was provided
-      if (*len_arrayList < (*ptr)->getArrayCount()){
+      if (*len_arrayList < (*ptr)->getCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- opt_arrayList must provide arrayCount elements", rc);
         return;
       }
       // opt_arrayList has correct number of elements
       vector<ESMCI::Array *> arrayVector;
-      (*ptr)->getArrayVector(arrayVector);
-      for (int i=0; i<(*ptr)->getArrayCount(); i++)
+      (*ptr)->getVector(arrayVector);
+      for (int i=0; i<(*ptr)->getCount(); i++)
         opt_arrayList[i] = arrayVector[i];
     }
     // return successfully
@@ -155,7 +155,7 @@ extern "C" {
     try{
 
       // query the C++ layer
-      *array = (*ptr)->getArray(std::string(arrayName, nlen));
+      *array = (*ptr)->get(std::string(arrayName, nlen));
 
     }catch(int localrc){
       // catch standard ESMF return code
@@ -289,7 +289,7 @@ extern "C" {
       
       for (int i=0; i<*itemCount; i++){
         // call into C++ layer
-        (*ptr)->removeArray(std::string(arrayNameList+i*nlen, nlen), strict);
+        (*ptr)->remove(std::string(arrayNameList+i*nlen, nlen), strict);
       }
 
     }catch(int localrc){
@@ -330,7 +330,7 @@ extern "C" {
       
       for (int i=0; i<*itemCount; i++){
         // call into C++ layer
-        (*ptr)->replaceArray(arrayList[i], strict);
+        (*ptr)->replace(arrayList[i], strict);
       }
 
     }catch(int localrc){

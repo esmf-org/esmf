@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.25 2011/04/06 04:43:29 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.26 2011/04/15 22:39:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,25 +75,25 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     // create() and destroy()
     static ArrayBundle *create(Array **arrayList, int arrayCount, int *rc);
     static int destroy(ArrayBundle **arraybundle);
-    // add(), get(), remove(), set()
-    void addArray(Array *array){
+    // add(), get(), remove(), replace(), set()
+    void add(Array *array){
       arrayContainer.add(array->getName(), array);
     }
-    Array *getArray(std::string arrayName){
+    Array *get(std::string arrayName){
       return arrayContainer.get(arrayName);
     }
-    void getArrayVector(vector<Array *> &arrayVector)const{ 
+    void getVector(vector<Array *> &arrayVector)const{ 
       arrayContainer.getVector(arrayVector);
     }
-    void getArrayNameVector(vector<string> &arrayNameVector)const{ 
+    void getNameVector(vector<string> &arrayNameVector)const{ 
       arrayContainer.getKeyVector(arrayNameVector);
     }
-    int getArrayCount()         const {return arrayContainer.size();}
-    char const *getName()       const {return ESMC_BaseGetName();}
-    void removeArray(std::string arrayName, bool strict=false){
+    int getCount()        const {return arrayContainer.size();}
+    char const *getName() const {return ESMC_BaseGetName();}
+    void remove(std::string arrayName, bool strict=false){
       arrayContainer.remove(arrayName, strict);
     }
-    void replaceArray(Array *array, bool strict=false){
+    void replace(Array *array, bool strict=false){
       arrayContainer.replace(array->getName(), array, strict);
     }
     int setName(char *name){return ESMC_BaseSetName(name, "ArrayBundle");}
