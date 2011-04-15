@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.1 2011/04/12 00:15:39 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.2 2011/04/15 17:11:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -18,6 +18,7 @@
 
 #include <map>
 #include <vector>
+#include <iostream>
 
 // LogErr headers
 #include "ESMCI_LogErr.h"                  // for LogErr
@@ -35,6 +36,7 @@ namespace ESMCI {
     T get(Key k);
     void getVector(std::vector<T> &v)const;
     void getKeyVector(std::vector<Key> &v)const;
+    void print()const;
   };
   
 #undef  ESMC_METHOD
@@ -121,6 +123,18 @@ namespace ESMCI {
     int i = 0;
     for (pos = this->begin(); pos != this->end(); ++pos)
       v[i++] = pos->first;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::print()"
+  template <typename Key, typename T>
+  void Container<Key, T>::print()const{
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+    typename Container::const_iterator pos;
+    int i = 0;
+    for (pos = this->begin(); pos != this->end(); ++pos)
+      std::cout << "Container::print() item="<<i++<<" key="<<pos->first
+        <<" value="<<pos->second<<"\n";
   }
 
 } // namespace ESMCI
