@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.1 2011/04/12 00:15:40 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.2 2011/04/15 17:14:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@ module ESMF_ContainerMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_FieldMod         ! ESMF Fortran-C++ interface helper
+  use ESMF_FieldGetMod      ! ESMF FieldGet interfaces
   
   implicit none
 
@@ -69,8 +70,11 @@ module ESMF_ContainerMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public ESMF_ContainerAdd
   public ESMF_ContainerCreate
   public ESMF_ContainerDestroy
+  public ESMF_ContainerGet
+  public ESMF_ContainerPrint
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -78,8 +82,46 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.1 2011/04/12 00:15:40 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.2 2011/04/15 17:14:44 theurich Exp $'
 
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
+! !IROUTINE: ESMF_ContainerAdd -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ContainerAdd
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_ContainerAddFieldList
+
+! !DESCRIPTION: 
+!   Add item to Container.
+!EOPI 
+  end interface
+
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
+! !IROUTINE: ESMF_ContainerGet -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ContainerGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_ContainerGetField
+
+! !DESCRIPTION: 
+!   Query Container.
+!EOPI 
+  end interface
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -88,6 +130,69 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerAddFieldList()"
+!BOPI
+! !IROUTINE: ESMF_ContainerAdd - Add Container object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ContainerAdd()
+  subroutine ESMF_ContainerAddFieldList(container, fieldList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)           :: container
+    type(ESMF_Field),     intent(in)              :: fieldList(:)
+    integer,              intent(out),  optional  :: rc  
+!         
+! !DESCRIPTION:
+!   Add items to an {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container] 
+!     {\tt ESMF\_Container} object to be added to.
+!   \item[fieldList] 
+!     Field objects to be added.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                     :: localrc      ! local return code
+    integer                     :: i
+    character(len=ESMF_MAXSTR)  :: name
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    do i=1, size(fieldList)
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
+      
+      ! Get the name of the Field
+      call ESMF_FieldGet(fieldList(i), name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_ContainerAdd(container, trim(name), fieldList(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerAddFieldList
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-internal method -----------------------------
@@ -107,13 +212,13 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Create empty ESMF Container.
+!   Create empty ESMF Container.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -158,15 +263,15 @@ contains
     integer,              intent(out),  optional  :: rc  
 !         
 ! !DESCRIPTION:
-!     Destroy an {\tt ESMF\_Container} object.
+!   Destroy an {\tt ESMF\_Container} object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[container] 
-!          {\tt ESMF\_Container} object to be destroyed.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[container] 
+!     {\tt ESMF\_Container} object to be destroyed.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -199,6 +304,109 @@ contains
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGetField()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGet - Query Container object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ContainerGet()
+  subroutine ESMF_ContainerGetField(container, fieldName, field, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(in)              :: container
+    character(len=*),     intent(in)              :: fieldName
+    type(ESMF_Field),     intent(out)             :: field
+    integer,              intent(out),  optional  :: rc  
+!         
+! !DESCRIPTION:
+!   Get items from a {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container] 
+!     {\tt ESMF\_Container} object to be queried.
+!   \item[fieldName] 
+!     The name of the specified Field object.
+!   \item[field] 
+!     Returned Field object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                     :: localrc      ! local return code
+    integer                     :: i
+    character(len=ESMF_MAXSTR)  :: name
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_ContainerGetItem(container, fieldName, field, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGetField
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerPrint()"
+!BOPI
+! !IROUTINE: ESMF_ContainerPrint - Print Container object
+
+! !INTERFACE:
+  subroutine ESMF_ContainerPrint(container, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)           :: container
+    integer,              intent(out),  optional  :: rc  
+!         
+! !DESCRIPTION:
+!   Print an {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container] 
+!     {\tt ESMF\_Container} object to be printed.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_ContainerPrint(container, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ContainerGetInit"
 !BOPI
 ! !IROUTINE: ESMF_ContainerGetInit - Internal access routine for init code
@@ -213,16 +421,16 @@ contains
       type(ESMF_Container), intent(in), optional :: container
 !
 ! !DESCRIPTION:
-!      Access deep object init code.
+!   Access deep object init code.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [{[container]}]
-!           Container object.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [{[container]}]
+!     Container object.
+!   \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     if (present(container)) then
       ESMF_ContainerGetInit = ESMF_INIT_GET(container)
     else
