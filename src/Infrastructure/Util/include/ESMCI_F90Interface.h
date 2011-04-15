@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.h,v 1.12 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_F90Interface.h,v 1.13 2011/04/15 17:09:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,8 +34,8 @@
 //-------------------------------------------------------------------------
 
 #include <vector>
-
 #include <cstddef>
+#include <iostream>
 
 namespace ESMCI {
 
@@ -44,6 +44,11 @@ class F90ClassHolder{
   void *memoryHolder[8];  // reserve 8 times the space of a void pointer
                           // this value has been determined empirically to work
                           // on the supported platforms.
+  friend std::ostream& operator<<(std::ostream& out,
+    const F90ClassHolder& f90p){
+    out << f90p.memoryHolder[0];
+    return out;
+  }
 };
 
 
