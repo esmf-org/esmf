@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.1 2011/04/12 00:15:42 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.2 2011/04/15 17:16:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.1 2011/04/12 00:15:42 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.2 2011/04/15 17:16:08 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -51,9 +51,14 @@ program ESMF_ContainerUTest
   character(ESMF_MAXSTR) :: name
 
   !LOCAL VARIABLES:
-  type (ESMF_Container) :: container
+  type(ESMF_Container)            :: container
+  type(ESMF_Field), allocatable   :: fieldList(:)
+  type(ESMF_Field)                :: field
+  character(ESMF_MAXSTR)          :: iString
+  character(ESMF_MAXSTR)          :: fieldName
+  integer, parameter              :: fieldCount = 5
+  integer                         :: i
   
-
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
@@ -73,6 +78,56 @@ program ESMF_ContainerUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   container = ESMF_ContainerCreate(rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !- prepare fieldList
+  allocate(fieldList(fieldCount))
+  do i=1, fieldCount
+    write(iString, *) i
+    fieldList(i) = ESMF_FieldCreateEmpty(name="testField"//&
+      trim(adjustl(iString)), rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  enddo
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add Field Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, fieldList=fieldList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !- fieldList garbage collection
+  do i=1, fieldCount
+    call ESMF_FieldDestroy(fieldList(i), rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  enddo
+  deallocate(fieldList)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Print Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerPrint(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Get item Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGet(container, fieldName="testField3", field=field, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !- get name out of queried Field object in preparation of verify test
+  call ESMF_FieldGet(field, name=fieldName, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get item Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((trim(fieldName)=="testField3"), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
