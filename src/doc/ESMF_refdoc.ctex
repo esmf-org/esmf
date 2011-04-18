@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.107 2011/04/05 19:01:40 theurich Exp $
+% $Id: ESMF_refdoc.ctex,v 1.108 2011/04/18 17:58:59 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -134,6 +134,8 @@
 #include "../Superstructure/State/doc/State_refdoc.ctex"
 
 #include "../Superstructure/AttachMethods/doc/AttachMethods_refdoc.ctex"
+
+#include "../Superstructure/WebServices/doc/WebServices_refdoc.ctex"
 
 %+==============================================================================
 
