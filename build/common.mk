@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.332 2011/04/11 23:02:45 theurich Exp $
+#  $Id: common.mk,v 1.333 2011/04/18 23:31:14 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3285,12 +3285,20 @@ endif
 # keyword.  Multiple use statements on the same line are not recognized.
 define MOD_FUNC
 $(filter-out $(addsuffix .o,$(basename $(1))) ESMF_.o, \
+ $(subst ESMF_.o,ESMF.o, \
   $(sort \
-    $(shell awk  '/^ *use  *ESMF_/' $(1) \
-          | sed 's/^ *use  *ESMF_/ESMF_/' \
-          | sed 's/Mod.*$$/\.o/' \
+   $(addsuffix .o, \
+      $(shell awk  '/^ *use  *ESMF_/' $(1) \
+            | sed 's/^ *use  *ESMF_/ESMF_/' \
+            | sed 's/Mod.*$$//' \
+       ) \
+      $(shell awk  '/^ *use  *NUOPC/' $(1) \
+            | sed 's/^ *use  *NUOPC/NUOPC/' \
+            | sed 's/,.*$$//' \
+       ) \
      ) \
    ) \
+  ) \
  )
 endef
 
