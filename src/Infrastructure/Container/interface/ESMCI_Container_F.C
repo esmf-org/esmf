@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.2 2011/04/15 17:14:44 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.3 2011/04/18 21:14:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMCI_LogMacros.inc"
 #include "ESMCI_F90Interface.h"
+#include "ESMCI_Field.h"
 
 #include "ESMCI_Container.h"
 
@@ -135,12 +136,12 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_containergetitem)
+  void FTN(c_esmc_containergetfield)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
     char const *fieldName, ESMCI::F90ClassHolder *f90p, int *rc, 
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_containergetitem()"
+#define ESMC_METHOD "c_esmc_containergetfield()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -148,7 +149,12 @@ extern "C" {
     try{
 
       // query the C++ layer
-      *f90p = (*ptr)->get(std::string(fieldName, nlen));
+      ESMCI::Field field = (*ptr)->get(std::string(fieldName, nlen));
+      
+      // cast C++ Field object into Fortran
+      localrc = field.castToFortran(f90p);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
       
     }catch(int localrc){
       // catch standard ESMF return code

@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.2 2011/04/15 17:14:44 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.3 2011/04/18 21:14:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.2 2011/04/15 17:14:44 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.3 2011/04/18 21:14:53 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -347,7 +347,7 @@ contains
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_ContainerGetItem(container, fieldName, field, localrc)
+    call c_ESMC_ContainerGetField(container, fieldName, field, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
