@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.30 2011/04/18 21:00:35 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.31 2011/04/18 21:03:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !EX_UTest_Multi_Proc_Only
+        !E-X_UTest_Multi_Proc_Only
         !call test_regrid2xg(10,10,14,14,0.1,0.1,0.06,0.06,rc)
         !write(failMsg, *) ""
         !write(name, *) "Regrid then create xgrid and regrid through xgrid, overlapping cut"
