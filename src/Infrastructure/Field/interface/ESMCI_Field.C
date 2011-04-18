@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.6 2011/02/23 05:06:40 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.7 2011/04/18 21:12:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -73,11 +73,16 @@ void FTN(f_esmf_fieldcreate)(ESMCI::Field *fieldp, void *mesh_pointer, ESMC_Arra
 
 void FTN(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
 
+void FTN(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
+  int *rc);
+
+void FTN(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer,
+  int *rc);
+
 void FTN(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 
-void FTN(f_esmf_fieldget)(ESMCI::Field *fieldp, void *mesh_pointer, int *rc);
-
-void FTN(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer, int *rc);
+void FTN(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
+  ESMCI::Field *fieldIn, int *rc);
 
 }
 
@@ -239,7 +244,7 @@ namespace ESMCI {
 
     ESMC_Mesh mesh;
     mesh.ptr = NULL; // initialize
-    FTN(f_esmf_fieldget)(this, &(mesh.ptr), &localrc);
+    FTN(f_esmf_fieldgetmesh)(this, &(mesh.ptr), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return mesh;
     
@@ -318,4 +323,37 @@ namespace ESMCI {
 //-----------------------------------------------------------------------------
   
   
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::castToFortran()"
+//BOP
+// !IROUTINE:  ESMCI::Field::castToFortran - cast Field object to Fortran
+// !INTERFACE:
+  int Field::castToFortran(F90ClassHolder *fc){
+
+// !RETURN VALUE:
+//    int error return code
+  
+// !ARGUMENTS:
+//   returned Fortran cast
+
+//  !DESCRIPTION
+//    Cast Field object to Fortran.
+
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    int rc=ESMC_RC_NOT_IMPL;
+
+    // Invoque the fortran interface through the F90-C++ "glue" code
+    FTN(f_esmf_fieldcast)(fc, this, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+
 } // namespace ESMCI
