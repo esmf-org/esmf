@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.16 2011/03/17 17:38:00 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.17 2011/04/18 18:00:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -518,7 +518,7 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_WebServicesLoop()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_WebServicesLoop 
 !
 ! !INTERFACE:
@@ -552,7 +552,7 @@ contains
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
 
     integer                 :: localrc
