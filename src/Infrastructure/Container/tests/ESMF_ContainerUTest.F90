@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.2 2011/04/15 17:16:08 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.3 2011/04/18 18:25:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.2 2011/04/15 17:16:08 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.3 2011/04/18 18:25:59 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -97,14 +97,6 @@ program ESMF_ContainerUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
-  !- fieldList garbage collection
-  do i=1, fieldCount
-    call ESMF_FieldDestroy(fieldList(i), rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  enddo
-  deallocate(fieldList)
-
-  !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Print Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -136,6 +128,14 @@ program ESMF_ContainerUTest
   call ESMF_ContainerDestroy(container, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !- fieldList garbage collection
+  do i=1, fieldCount
+    call ESMF_FieldDestroy(fieldList(i), rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  enddo
+  deallocate(fieldList)
+
 10 continue
   !------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
