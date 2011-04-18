@@ -1,0 +1,89 @@
+% $Id: WebServices_refdoc.ctex,v 1.1 2011/04/18 18:05:31 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2011, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{Web Services Reference Manual}
+\newcommand{\myauthors}{Kathy Saint}
+% these are temporary tiles until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{Web Services}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{WebServices_desc}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/WebServices/doc/WebServices_desc}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{WebServices_usage}
+\input{ESMF_WebServicesEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/WebServices/doc/WebServices_usage}
+\input{../Superstructure/WebServices/doc/ESMF_WebServicesEx_fapi}
+#endif
+
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{WebServices_rest}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/WebServices/doc/WebServices_rest}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMF_WebServ_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/WebServices/doc/ESMF_WebServ_fapi}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
