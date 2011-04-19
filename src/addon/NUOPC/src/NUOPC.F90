@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+! $Id: NUOPC.F90,v 1.4 2011/04/19 18:27:53 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -717,6 +717,10 @@ module NUOPC
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    nullify(stdAttrNameList)
+    if (present(stdItemNameList)) nullify(stdItemNameList)
+    if (present(stdConnectedList)) nullify(stdConnectedList)
+    
     call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
@@ -827,12 +831,14 @@ module NUOPC
       return  ! bail out
       
     allConnected = .true.  ! initialize
-    do i=1, size(stdConnectedList)
-      if (stdConnectedList(i) /= "true") then
-        allConnected = .false.
-        exit
-      endif
-    enddo
+    if (associated(stdConnectedList)) then
+      do i=1, size(stdConnectedList)
+        if (stdConnectedList(i) /= "true") then
+          allConnected = .false.
+          exit
+        endif
+      enddo
+    endif
 
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdConnectedList)) deallocate(stdConnectedList)
@@ -884,21 +890,23 @@ module NUOPC
       file=FILENAME)) &
       return  ! bail out
     
-    do i=1, size(stdItemNameList)
-      call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_AttributeSet(field, &
-        name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    enddo
+    if (associated(stdItemNameList)) then
+      do i=1, size(stdItemNameList)
+        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        call ESMF_AttributeSet(field, &
+          name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
+          convention="NUOPC", purpose="General", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      enddo
+    endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
@@ -1040,34 +1048,37 @@ module NUOPC
       
     isCurrent = .true. ! initialize
     
-    do i=1, size(stdItemNameList)
-      call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_AttributeGet(field, &
-        name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_TimeSet(fieldTime, &
-        yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-         h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-        ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      if (fieldTime /= time) then
-        isCurrent = .false.
-        exit
-      endif
-    enddo
+    if (associated(stdItemNameList)) then
+      do i=1, size(stdItemNameList)
+        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        call ESMF_AttributeGet(field, &
+          name="TimeStamp", valueList=valueList, &
+          convention="NUOPC", purpose="General", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        call ESMF_TimeSet(fieldTime, &
+          yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
+           h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
+          ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        if (fieldTime /= time) then
+          isCurrent = .false.
+          exit
+        endif
+      enddo
+    endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
@@ -1090,8 +1101,6 @@ module NUOPC
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
     type(ESMF_Field)        :: srcField, dstField
     integer                 :: i, valueList(9), srcCount, dstCount
     
