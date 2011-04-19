@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.31 2011/04/18 21:03:56 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.32 2011/04/19 21:39:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -94,11 +94,11 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
-        !E-X_UTest_Multi_Proc_Only
-        !call test_regrid2xg(10,10,14,14,0.1,0.1,0.06,0.06,rc)
-        !write(failMsg, *) ""
-        !write(name, *) "Regrid then create xgrid and regrid through xgrid, overlapping cut"
-        !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !EX_UTest_Multi_Proc_Only
+        call test_regrid2xg(10,10,14,14,0.1,0.1,0.06,0.06,rc)
+        write(failMsg, *) ""
+        write(name, *) "Regrid then create xgrid and regrid through xgrid, overlapping cut"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
         !------------------------------------------------------------------------
         !E-disable-X_UTest_Multi_Proc_Only
@@ -1979,7 +1979,7 @@ contains
     real(ESMF_KIND_R8), pointer     :: coordX(:), coordY(:)
     type(ESMF_XGrid)                :: xgrid
     type(ESMF_XGridSpec)            :: sparseMatA2X(1)
-    integer                         :: gn(2)
+    integer                         :: gn(2), simax, dimax
     real(ESMF_KIND_R8), pointer     :: atm(:,:), ocn(:,:), exf(:)
     type(ESMF_RouteHandle)          :: rh
     type(ESMF_DistGrid)             :: distgridM
@@ -2169,13 +2169,16 @@ contains
     do j = 1, size(indicies,1)
          print *, indicies(j,1), '->', indicies(j,2)
     enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
+
+    simax = maxval(indicies(:,1))
+    dimax = maxval(indicies(:,2))
+    call ESMF_VMAllReduce(vm, (/ simax, dimax /), gn, 2, ESMF_MAX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
-    if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
+    if(gn(2) /= ocn_nx*ocn_ny) then
       call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)
       return
