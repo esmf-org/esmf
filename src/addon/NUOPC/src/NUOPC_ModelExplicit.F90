@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.2 2011/04/15 16:30:17 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.3 2011/04/19 02:03:44 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -15,13 +15,21 @@ module NUOPC_ModelExplicit
   
   private
   
-  public SetServices
+  public routine_SetServices
+  public label_DataInitialize, label_Advance, label_Finalize
   
+  character(*), parameter :: &
+    label_DataInitialize = "ModelExplicit_DataInitialize"
+  character(*), parameter :: &
+    label_Advance = "ModelExplicit_Advance"
+  character(*), parameter :: &
+    label_Finalize = "ModelExplicit_Finalize"
+
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine SetServices(gcomp, rc)
+  subroutine routine_SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
     
@@ -110,7 +118,7 @@ module NUOPC_ModelExplicit
     ! fill all export Fields with valid initial data for current time
     ! note that only connected Fields reside in exportState at this time
     ! SPECIALIZE by calling into attached method to fill initial data
-    call ESMF_MethodExecute(gcomp, label="ModelExplicit_DataInitialize", &
+    call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -205,8 +213,7 @@ module NUOPC_ModelExplicit
         return  ! bail out
         
       ! SPECIALIZE by calling into attached method to advance the model t->t+dt
-      call ESMF_MethodExecute(gcomp, label="ModelExplicit_Advance", &
-        userRc=localrc, rc=rc)
+      call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -261,7 +268,7 @@ module NUOPC_ModelExplicit
     rc = ESMF_SUCCESS
     
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(gcomp, label="ModelExplicit_Finalize", &
+    call ESMF_MethodExecute(gcomp, label=label_Finalize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &

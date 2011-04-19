@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.4 2011/04/19 02:03:44 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -15,23 +15,23 @@ module NUOPC_Connector
   
   private
   
-  public SetServices
+  public routine_SetServices
   
-  type internalState
+  type type_InternalStateStruct
     type(ESMF_FieldBundle)  :: srcFields
     type(ESMF_FieldBundle)  :: dstFields
     type(ESMF_RouteHandle)  :: rh
   end type
 
-  type internalStateWrap
-    type(internalState), pointer :: wrap
+  type type_InternalState
+    type(type_InternalStateStruct), pointer :: wrap
   end type
 
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine SetServices(cplcomp, rc)
+  subroutine routine_SetServices(cplcomp, rc)
     type(ESMF_CplComp)   :: cplcomp
     integer, intent(out) :: rc
     
@@ -149,19 +149,19 @@ module NUOPC_Connector
     type(ESMF_Field)                      :: iField, eField
     type(ESMF_VM)                         :: vm
     integer                               :: stat
-    type(internalStateWrap)               :: isw
+    type(type_InternalState)              :: is
     
     rc = ESMF_SUCCESS
     
     ! allocate memory for the internal state and set it in the Component
-    allocate(isw%wrap, stat=stat)
+    allocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_CplCompSetInternalState(cplcomp, isw, rc)
+    call ESMF_CplCompSetInternalState(cplcomp, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -228,12 +228,12 @@ module NUOPC_Connector
       return  ! bail out
     
     ! prepare FieldBundles to store src and dst Fields
-    isw%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
+    is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    isw%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
+    is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -280,12 +280,12 @@ module NUOPC_Connector
           return  ! bail out
         
         ! add the import and export Fields to FieldBundles
-        call ESMF_FieldBundleAdd(isw%wrap%srcFields, field=iField, rc=rc)
+        call ESMF_FieldBundleAdd(is%wrap%srcFields, field=iField, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        call ESMF_FieldBundleAdd(isw%wrap%dstFields, field=eField, rc=rc)
+        call ESMF_FieldBundleAdd(is%wrap%dstFields, field=eField, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -316,9 +316,9 @@ module NUOPC_Connector
     enddo
     
     ! precompute the regrid for all src to dst Fields
-    call ESMF_FieldBundleRegridStore(isw%wrap%srcFields, isw%wrap%dstFields, &
+    call ESMF_FieldBundleRegridStore(is%wrap%srcFields, is%wrap%dstFields, &
       unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
-      routehandle=isw%wrap%rh, rc=rc)
+      routehandle=is%wrap%rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -340,14 +340,14 @@ module NUOPC_Connector
     integer, intent(out) :: rc
 
     ! local variables
-    type(internalStateWrap) :: isw
-    type(ESMF_VM)           :: vm
+    type(type_InternalState)  :: is
+    type(ESMF_VM)             :: vm
 
     rc = ESMF_SUCCESS
     
     ! query Component for its internal State
-    nullify(isw%wrap)
-    call ESMF_CplCompGetInternalState(cplcomp, isw, rc)
+    nullify(is%wrap)
+    call ESMF_CplCompGetInternalState(cplcomp, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -357,15 +357,15 @@ module NUOPC_Connector
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
     ! execute the regrid operation
-    call ESMF_FieldBundleRegrid(isw%wrap%srcFields, isw%wrap%dstFields, &
-      routehandle=isw%wrap%rh, rc=rc)
+    call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
+      routehandle=is%wrap%rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
     ! update the timestamp on all of the dst fields to that on the src side
-    call NUOPC_FieldBundleUpdateTime(isw%wrap%srcFields, isw%wrap%dstFields, &
+    call NUOPC_FieldBundleUpdateTime(is%wrap%srcFields, is%wrap%dstFields, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
@@ -400,38 +400,38 @@ module NUOPC_Connector
     integer, intent(out) :: rc
 
     ! local variables
-    integer                 :: stat
-    type(internalStateWrap) :: isw
+    integer                   :: stat
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
     
     ! query Component for its internal State
-    nullify(isw%wrap)
-    call ESMF_CplCompGetInternalState(cplcomp, isw, rc)
+    nullify(is%wrap)
+    call ESMF_CplCompGetInternalState(cplcomp, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
     ! destroy the objects in the internal state
-    call ESMF_FieldBundleRegridRelease(isw%wrap%rh, rc=rc)
+    call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_FieldBundleDestroy(isw%wrap%srcFields, rc=rc)
+    call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_FieldBundleDestroy(isw%wrap%dstFields, rc=rc)
+    call ESMF_FieldBundleDestroy(is%wrap%dstFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
     ! deallocate internal state memory
-    deallocate(isw%wrap, stat=stat)
+    deallocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, &

@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.4 2011/04/19 02:03:44 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
 
@@ -11,16 +11,29 @@ module NUOPC_DriverExplicitAtmOcn
   use ESMF_Mod
   use NUOPC
   use NUOPC_DriverExplicit, only: &
-    DriverExplicit_SS => SetServices, &
-    DriverExplicit_IS => InternalState
+    DrivEx_routine_SS             => routine_SetServices, &
+    DrivEx_type_IS                => type_InternalState, &
+    DrivEx_label_IS               => label_InternalState, &
+    DrivEx_label_SetModelServices => label_SetModelServices, &
+    DrivEx_label_SetModelCount    => label_SetModelCount, &
+    DrivEx_label_Finalize         => label_Finalize
 
   implicit none
   
   private
   
-  public SetServices, InternalState, InternalStateStruct
+  public routine_SetServices
+  public type_InternalState, type_InternalStateStruct
+  public label_InternalState, label_SetModelServices, label_Finalize
   
-  type InternalStateStruct
+  character(*), parameter :: &
+    label_InternalState = "DriverExplicitAtmOcn_InternalState"
+  character(*), parameter :: &
+    label_SetModelServices = "DriverExplicitAtmOcn_SetModelServices"
+  character(*), parameter :: &
+    label_Finalize = "DriverExplicitAtmOcn_Finalize"
+  
+  type type_InternalStateStruct
     type(ESMF_GridComp) :: atm
     type(ESMF_State)    :: atmIS, atmES
     type(ESMF_GridComp) :: ocn
@@ -28,41 +41,41 @@ module NUOPC_DriverExplicitAtmOcn
     type(ESMF_CplComp)  :: atm2ocn, ocn2atm
   end type
 
-  type InternalState
-    type(InternalStateStruct), pointer :: wrap
+  type type_InternalState
+    type(type_InternalStateStruct), pointer :: wrap
   end type
 
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine SetServices(gcomp, rc)
+  subroutine routine_SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
     
     rc = ESMF_SUCCESS
     
     ! NUOPC_DriverExplicit registers the generic methods
-    call DriverExplicit_SS(gcomp, rc=rc)
+    call DrivEx_routine_SS(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
     ! attach specializing method(s)
-    call ESMF_MethodAdd(gcomp, label="DriverExplicit_SetModelCount", &
+    call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelCount, &
       userRoutine=SetModelCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_MethodAdd(gcomp, label="DriverExplicit_SetModelServices", &
+    call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelServices, &
       userRoutine=SetModelServices, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_MethodAdd(gcomp, label="DriverExplicit_Finalize", &
+    call ESMF_MethodAdd(gcomp, label=DrivEx_label_Finalize, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
@@ -78,14 +91,13 @@ module NUOPC_DriverExplicitAtmOcn
     integer, intent(out) :: rc
     
     ! local variables
-    type(DriverExplicit_IS)  :: superIS
+    type(DrivEx_type_IS)  :: superIS
 
     rc = ESMF_SUCCESS
     
     ! query Component for super internal State
     nullify(superIS%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, "NUOPC_DriverExplicit", superIS, &
-      rc)
+    call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -103,16 +115,15 @@ module NUOPC_DriverExplicitAtmOcn
     integer, intent(out) :: rc
     
     ! local variables
-    integer                 :: localrc, stat
-    type(DriverExplicit_IS) :: superIS
-    type(InternalState)     :: is
+    integer                   :: localrc, stat
+    type(DrivEx_type_IS)      :: superIS
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
     
     ! query Component for super internal State
     nullify(superIS%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, "NUOPC_DriverExplicit", superIS, &
-      rc)
+    call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -126,8 +137,7 @@ module NUOPC_DriverExplicitAtmOcn
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_UserCompSetInternalState(gcomp, "NUOPC_DriverExplicitAtmOcn", &
-      is, rc)
+    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -167,7 +177,7 @@ module NUOPC_DriverExplicitAtmOcn
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
     call ESMF_MethodExecute(gcomp, &
-      label="DriverExplicitAtmOcn_SetModelServices", &
+      label=label_SetModelServices, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -188,14 +198,14 @@ module NUOPC_DriverExplicitAtmOcn
     integer, intent(out) :: rc
     
     ! local variables
-    integer                 :: localrc, stat
-    type(InternalState)     :: is
-    logical                 :: existflag
+    integer                   :: localrc, stat
+    type(type_InternalState)  :: is
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
     
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(gcomp, label="DriverExplicitAtmOcn_Finalize", &
+    call ESMF_MethodExecute(gcomp, label=label_Finalize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -209,8 +219,7 @@ module NUOPC_DriverExplicitAtmOcn
 
     ! query Component for this internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, "NUOPC_DriverExplicitAtmOcn", is, &
-      rc)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &

@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.3 2011/04/15 16:30:17 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.4 2011/04/19 02:03:44 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -15,11 +15,24 @@ module NUOPC_DriverExplicit
   
   private
   
-  public SetServices, InternalState, InternalStateStruct
+  public routine_SetServices
+  public type_InternalState, type_InternalStateStruct
+  public label_InternalState
+  public label_SetModelServices, label_SetModelCount, label_Finalize
+  
   public ConnectorPlacing, connectorPlacingPreModel, connectorPlacingPostModel
   public ConnectorGrouping, connectorGroupingNone, &
     connectorGroupingPreModel, connectorGroupingPostModel
-  
+
+  character(*), parameter :: &
+    label_InternalState = "DriverExplicit_InternalState"
+  character(*), parameter :: &
+    label_SetModelServices = "DriverExplicit_SetModelServices"
+  character(*), parameter :: &
+    label_SetModelCount = "DriverExplicit_SetModelCount"
+  character(*), parameter :: &
+    label_Finalize = "DriverExplicit_Finalize"
+    
   type ConnectorPlacing
     integer :: value
   end type
@@ -37,7 +50,7 @@ module NUOPC_DriverExplicit
     connectorGroupingPreModel  = connectorGrouping(1), &
     connectorGroupingPostModel = connectorGrouping(2)
   
-  type InternalStateStruct
+  type type_InternalStateStruct
     integer                         :: modelCount
     type(ESMF_GridComp), pointer    :: modelComp(:)
     type(ESMF_State),    pointer    :: modelIS(:), modelES(:)
@@ -46,8 +59,8 @@ module NUOPC_DriverExplicit
     type(ESMF_CplComp),  pointer    :: connectorComp(:,:)
   end type
 
-  type InternalState
-    type(InternalStateStruct), pointer :: wrap
+  type type_InternalState
+    type(type_InternalStateStruct), pointer :: wrap
   end type
 
   interface operator (==)
@@ -73,7 +86,7 @@ module NUOPC_DriverExplicit
   
   !-----------------------------------------------------------------------------
 
-  subroutine SetServices(gcomp, rc)
+  subroutine routine_SetServices(gcomp, rc)
     type(ESMF_GridComp)  :: gcomp
     integer, intent(out) :: rc
     
@@ -110,11 +123,11 @@ module NUOPC_DriverExplicit
     integer, intent(out) :: rc
     
     ! local variables
-    integer                 :: localrc, stat
-    type(InternalState)     :: is
-    type(ESMF_Clock)        :: internalClock
-    integer                 :: i, j
-    character(ESMF_MAXSTR)  :: iString, jString, compName
+    integer                   :: localrc, stat
+    type(type_InternalState)  :: is
+    type(ESMF_Clock)          :: internalClock
+    integer                   :: i, j
+    character(ESMF_MAXSTR)    :: iString, jString, compName
 
     rc = ESMF_SUCCESS
     
@@ -126,7 +139,7 @@ module NUOPC_DriverExplicit
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_UserCompSetInternalState(gcomp, "NUOPC_DriverExplicit", is, rc)
+    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -136,7 +149,7 @@ module NUOPC_DriverExplicit
     is%wrap%connectorGrouping = connectorGroupingPreModel
       
     ! SPECIALIZE by calling into attached method to set modelCount
-    call ESMF_MethodExecute(gcomp, label="DriverExplicit_SetModelCount", &
+    call ESMF_MethodExecute(gcomp, label=label_SetModelCount, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -204,7 +217,7 @@ module NUOPC_DriverExplicit
     enddo
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
-    call ESMF_MethodExecute(gcomp, label="DriverExplicit_SetModelServices", &
+    call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -414,11 +427,11 @@ module NUOPC_DriverExplicit
     integer, intent(out) :: rc
 
     ! local variables
-    integer                 :: localrc
-    type(InternalState)     :: is
-    type(ESMF_Clock)        :: internalClock
-    integer                 :: i, j
-    character(ESMF_MAXSTR)  :: iString, jString
+    integer                   :: localrc
+    type(type_InternalState)  :: is
+    type(ESMF_Clock)          :: internalClock
+    integer                   :: i, j
+    character(ESMF_MAXSTR)    :: iString, jString
 
     rc = ESMF_SUCCESS
     
@@ -431,7 +444,7 @@ module NUOPC_DriverExplicit
     
     ! query Component for this internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, "NUOPC_DriverExplicit", is, rc)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -602,17 +615,17 @@ module NUOPC_DriverExplicit
     integer, intent(out) :: rc
 
     ! local variables
-    integer                 :: localrc, stat
-    type(InternalState)     :: is
-    type(ESMF_Clock)        :: internalClock
-    integer                 :: i, j
-    character(ESMF_MAXSTR)  :: iString, jString
-    logical                 :: existflag
+    integer                   :: localrc, stat
+    type(type_InternalState)  :: is
+    type(ESMF_Clock)          :: internalClock
+    integer                   :: i, j
+    character(ESMF_MAXSTR)    :: iString, jString
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
     
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(gcomp, label="DriverExplicit_Finalize", &
+    call ESMF_MethodExecute(gcomp, label=label_Finalize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -633,7 +646,7 @@ module NUOPC_DriverExplicit
     
     ! query Component for this internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, "NUOPC_DriverExplicit", is, rc)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
