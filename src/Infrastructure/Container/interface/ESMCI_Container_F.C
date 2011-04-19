@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.3 2011/04/18 21:14:53 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.4 2011/04/19 00:16:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,6 +75,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  //-------------------------------------------------------------------------
+
   void FTN(c_esmc_containercreate)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, int *rc){
 #undef  ESMC_METHOD
@@ -106,6 +108,8 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  //-------------------------------------------------------------------------
+
   void FTN(c_esmc_containerdestroy)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, int *rc){
 #undef  ESMC_METHOD
@@ -135,6 +139,8 @@ extern "C" {
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
+
+  //-------------------------------------------------------------------------
 
   void FTN(c_esmc_containergetfield)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
@@ -174,6 +180,42 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  //-------------------------------------------------------------------------
+
+  void FTN(c_esmc_containerremove)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    char const *itemName, int *rc, ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_containerremove()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    try{
+
+      // call the C++ layer
+      (*ptr)->remove(std::string(itemName, nlen), true);
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
   void FTN(c_esmc_containerprint)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, int *rc){
 #undef  ESMC_METHOD

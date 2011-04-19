@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.3 2011/04/18 21:14:53 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.4 2011/04/19 00:16:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,6 +74,7 @@ module ESMF_ContainerMod
   public ESMF_ContainerCreate
   public ESMF_ContainerDestroy
   public ESMF_ContainerGet
+  public ESMF_ContainerRemove
   public ESMF_ContainerPrint
 
 !EOPI
@@ -82,7 +83,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.3 2011/04/18 21:14:53 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.4 2011/04/19 00:16:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -336,8 +337,6 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
-    integer                     :: i
-    character(len=ESMF_MAXSTR)  :: name
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -355,6 +354,60 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ContainerGetField
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerRemove()"
+!BOPI
+! !IROUTINE: ESMF_ContainerRemove - Remove object from Container
+
+! !INTERFACE:
+  subroutine ESMF_ContainerRemove(container, itemNameList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(in)              :: container
+    character(len=*),     intent(in)              :: itemNameList(:)
+    integer,              intent(out),  optional  :: rc  
+!         
+! !DESCRIPTION:
+!   Remove items from a {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container] 
+!     {\tt ESMF\_Container} object to be queried.
+!   \item[itemNameList] 
+!     The names of the items to remove
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                     :: localrc      ! local return code
+    integer                     :: i
+    character(len=ESMF_MAXSTR)  :: name
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    do i=1, size(itemNameList)
+      ! Call into the C++ interface, which will sort out optional arguments.
+      call c_ESMC_ContainerRemove(container, trim(itemNameList(i)), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerRemove
 !------------------------------------------------------------------------------
 
 
