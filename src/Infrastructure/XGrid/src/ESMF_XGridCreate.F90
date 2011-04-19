@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.19 2011/04/12 15:02:07 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.20 2011/04/19 21:38:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -40,6 +40,9 @@ module ESMF_XGridCreateMod
   use ESMF_LogErrMod
   use ESMF_DistGridMod
   use ESMF_GridMod
+  use ESMF_GridUtilMod
+  use ESMF_MeshMod
+  use ESMF_StaggerLocMod
   use ESMF_XGridMod
   use ESMF_InitMacrosMod
 
@@ -63,7 +66,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.19 2011/04/12 15:02:07 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.20 2011/04/19 21:38:16 feiliu Exp $'
 
 !==============================================================================
 !
@@ -267,8 +270,10 @@ integer, intent(out), optional  :: rc
 !     \end{description}
 !
 !EOPI
-    integer :: localrc, ngrid_a, ngrid_b, i
+    integer                       :: localrc, ngrid_a, ngrid_b, i
+    real(ESMF_KIND_R8), pointer   :: area(:), centroid(:,:)
     type(ESMF_XGridType), pointer :: xgtype
+    type(ESMF_Mesh)               :: meshA, meshB, meshAt, meshBt
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -300,15 +305,70 @@ integer, intent(out), optional  :: rc
                                 msg="Constructing xgtype base object ", &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! copy the Grids
-    allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, &
-        msg="- Allocating xgtype%grids ", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    xgtype%sideA = sideA
-    xgtype%sideB = sideB
-
     !TODO: call into online regridding to compute the distgrids
+    ! how to handle masks of each every different Grid?
+    ! for now, assume none of the Grids are masked
+    meshA = ESMF_GridToMesh(sideA(1), ESMF_STAGGERLOC_CENTER, 0, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do i = 2, ngrid_a
+      meshAt = ESMF_GridToMesh(sideA(1), ESMF_STAGGERLOC_CENTER, 0, &
+      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into Rendezveus mesh
+      !meshA = ESMF_MeshMerge(meshA, meshAt, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    meshB = ESMF_GridToMesh(sideB(1), ESMF_STAGGERLOC_CENTER, 0, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do i = 2, ngrid_b
+      meshBt = ESMF_GridToMesh(sideB(1), ESMF_STAGGERLOC_CENTER, 0, &
+      rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into Rendezveus mesh
+      !meshB = ESMF_MeshMerge(meshB, meshBt, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! Call into Regrid
+    !call compute_xgridspec(meshAt, meshBt, &
+    !  !localRegridPoleType, localRegridPoleNPnts, &
+    !  xgtype%sparseMatA2X, xgtype%sparseMatX2A, &
+    !  xgtype%sparseMatB2X, xgtype%sparseMatX2B, &
+    !  area, centroid, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call into offline xgrid create with the xgrid specs
+    !call ESMF_XGridConstruct(xgtype, area, centroid, &
+    !  xgtype%sparseMatA2X, xgtype%sparseMatX2A, &
+    !  xgtype%sparseMatB2X, xgtype%sparseMatX2B, &
+    !  rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Compute regrid weights in 4 directions? (does this make sense?)
+
+    ! Should we store routehandle instead for online generation of XGrid?
+    ! Routehandle can't (shouldn't) be reconciled
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
@@ -390,12 +450,12 @@ integer, intent(out), optional             :: rc
 !
 !EOP
 
-    integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
-    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i
+    integer :: localrc, ngrid_a, ngrid_b
+    integer :: i
     type(ESMF_XGridType), pointer :: xgtype
 
     ! clearly, srcIdxList should be 1D, but what about distgridM_idxlist??
-    integer, allocatable :: srcIdxList(:), distgridM_idxlist(:)
+    !integer, allocatable :: srcIdxList(:), distgridM_idxlist(:)
 
 
     ! Initialize
@@ -425,89 +485,15 @@ integer, intent(out), optional             :: rc
     nullify(ESMF_XGridCreateRaw%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-                                msg="Constructing xgtype base object ", &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
+      msg="Constructing xgtype base object ", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! copy the Grids
-    allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
+    call ESMF_XGridConstruct(xgtype, sideA, sideB, area, centroid, &
+      sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        msg="- Allocating xgtype%grids ", &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    xgtype%sideA = sideA
-    xgtype%sideB = sideB
+      msg="Constructing xgtype object ", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! copy area and centroid
-    if(present(area)) then
-        ncells = size(area, 1)
-        allocate(xgtype%area(ncells), stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, &
-            msg="- Allocating xgtype%area ", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        xgtype%area = area
-    endif
-
-    if(present(centroid)) then
-        ncells = size(centroid, 1)
-        ndim = size(centroid, 2)
-        allocate(xgtype%centroid(ncells, ndim), stat=localrc)
-        if (ESMF_LogFoundAllocError(localrc, &
-            msg="- Allocating xgtype%centroid ", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        xgtype%centroid = centroid
-    endif
-
-    ! check and copy all the sparse matrix spec structures
-    if(present(sparseMatA2X)) then
-        call ESMF_SparseMatca(sparseMatA2X, xgtype%sparseMatA2X, ngrid_a, &
-          'sparseMatA2X', rc=localrc)
-        if (ESMF_LogFoundAllocError(localrc, &
-            msg="- Initializing xgtype%sparseMatX2A ", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    if(present(sparseMatX2A)) then
-        call ESMF_SparseMatca(sparseMatX2A, xgtype%sparseMatX2A, ngrid_a, &
-          'sparseMatX2A', rc=localrc)
-        if (ESMF_LogFoundAllocError(localrc, &
-            msg="- Initializing xgtype%sparseMatX2A ", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! TODO:
-    ! if both A2X and X2A are present, check the sequence index list of X are identical
-    ! this checking will be collective since the indices needs to be gathered
-    ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
-    ! endif
-    ! Another approach is to create 2 distgrids and use distgridMatch to compare
-    ! the result Distgrid as discussed.
-
-    if(present(sparseMatB2X)) then
-        call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, &
-          'sparseMatB2X', rc=localrc)
-        if (ESMF_LogFoundAllocError(localrc, &
-            msg="- Initializing xgtype%sparseMatB2X ", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    if(present(sparseMatX2B)) then
-        call ESMF_SparseMatca(sparseMatX2B, xgtype%sparseMatX2B, ngrid_b, &
-          'sparseMatX2B', rc=localrc)
-        if (ESMF_LogFoundAllocError(localrc, &
-            msg="- Initializing xgtype%sparseMatX2B ", &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! TODO:
-    ! if both B2X and X2B are present, check the sequence index list of X are identical
-    ! this checking will be collective since the indices needs to be gathered
-    ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
-    ! endif
-
-    ! create the distgrids
-    call ESMF_XGridDistGrids(xgtype, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
@@ -522,6 +508,156 @@ integer, intent(out), optional             :: rc
     if(present(rc)) rc = ESMF_SUCCESS
 
 end function ESMF_XGridCreateRaw
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridConstruct()"
+!BOPI
+! !IROUTINE:  ESMF_XGridConstruct - Construct XGrid from input
+
+! !INTERFACE:
+subroutine ESMF_XGridConstruct(xgtype, sideA, sideB, area, centroid, &
+    sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, rc)
+!
+! !ARGUMENTS:
+type(ESMF_XGridType), intent(inout)        :: xgtype
+type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
+real(ESMF_KIND_R8), intent(in), optional   :: area(:)
+real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
+type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
+integer, intent(out), optional             :: rc 
+
+!
+! !DESCRIPTION:
+!     Construct internals of xgtype from input
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgtype]
+!           the {ESMF\_XGridType} object.
+!     \item [sideA]
+!           2D Grids on side A.
+!     \item [sideB]
+!           2D Grids on side B.
+!     \item [{[area]}]
+!           area of the xgrid cells.
+!     \item [{[centroid]}]
+!           coordinates at the area weighted center of the xgrid cells.
+!     \item [{[sparseMatA2X]}]
+!           indexlist from a Grid index space on side A to xgrid index space;
+!           indexFactorlist from a Grid index space on side A to xgrid index space.
+!     \item [{[sparseMatX2A]}]
+!           indexlist from xgrid index space to a Grid index space on side A;
+!           indexFactorlist from xgrid index space to a Grid index space on side A.
+!     \item [{[sparseMatB2X]}]
+!           indexlist from a Grid index space on side B to xgrid index space;
+!           indexFactorlist from a Grid index space on side B to xgrid index space.
+!     \item [{[sparseMatX2B]}]
+!           indexlist from xgrid index space to a Grid index space on side B;
+!           indexFactorlist from xgrid index space to a Grid index space on side B.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
+
+  integer :: localrc, ngrid_a, ngrid_b
+  integer :: ndim, ncells, i
+
+  localrc = ESMF_SUCCESS
+
+  ! Initialize return code   
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  ngrid_a = size(sideA, 1)
+  ngrid_b = size(sideB, 1)
+  ! copy the Grids
+  allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
+  if (ESMF_LogFoundAllocError(localrc, &
+      msg="- Allocating xgtype%grids ", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  xgtype%sideA = sideA
+  xgtype%sideB = sideB
+
+  ! copy area and centroid
+  if(present(area)) then
+      ncells = size(area, 1)
+      allocate(xgtype%area(ncells), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, &
+          msg="- Allocating xgtype%area ", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%area = area
+  endif
+
+  if(present(centroid)) then
+      ncells = size(centroid, 1)
+      ndim = size(centroid, 2)
+      allocate(xgtype%centroid(ncells, ndim), stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, &
+          msg="- Allocating xgtype%centroid ", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%centroid = centroid
+  endif
+
+  ! check and copy all the sparse matrix spec structures
+  if(present(sparseMatA2X)) then
+      call ESMF_SparseMatca(sparseMatA2X, xgtype%sparseMatA2X, ngrid_a, &
+        'sparseMatA2X', rc=localrc)
+      if (ESMF_LogFoundAllocError(localrc, &
+          msg="- Initializing xgtype%sparseMatX2A ", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if(present(sparseMatX2A)) then
+      call ESMF_SparseMatca(sparseMatX2A, xgtype%sparseMatX2A, ngrid_a, &
+        'sparseMatX2A', rc=localrc)
+      if (ESMF_LogFoundAllocError(localrc, &
+          msg="- Initializing xgtype%sparseMatX2A ", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  ! TODO:
+  ! if both A2X and X2A are present, check the sequence index list of X are identical
+  ! this checking will be collective since the indices needs to be gathered
+  ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
+  ! endif
+  ! Another approach is to create 2 distgrids and use distgridMatch to compare
+  ! the result Distgrid as discussed.
+
+  if(present(sparseMatB2X)) then
+      call ESMF_SparseMatca(sparseMatB2X, xgtype%sparseMatB2X, ngrid_b, &
+        'sparseMatB2X', rc=localrc)
+      if (ESMF_LogFoundAllocError(localrc, &
+          msg="- Initializing xgtype%sparseMatB2X ", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  if(present(sparseMatX2B)) then
+      call ESMF_SparseMatca(sparseMatX2B, xgtype%sparseMatX2B, ngrid_b, &
+        'sparseMatX2B', rc=localrc)
+      if (ESMF_LogFoundAllocError(localrc, &
+          msg="- Initializing xgtype%sparseMatX2B ", &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  ! TODO:
+  ! if both B2X and X2B are present, check the sequence index list of X are identical
+  ! this checking will be collective since the indices needs to be gathered
+  ! if(present(sparseMatA2X) .and. present(sparseMatX2A)) then
+  ! endif
+
+  ! create the distgrids
+  call ESMF_XGridDistGrids(xgtype, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_XGridConstruct
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -957,6 +1093,63 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
     if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_SparseMatca
+
+!------------------------------------------------------------------------------
+! Copied from FieldRegrid.F90
+! Small subroutine to make sure that Grid doesn't
+! contain some of the properties that aren't currently
+! allowed in regridding
+subroutine checkGrid(grid,staggerloc,rc)
+    type (ESMF_Grid) :: grid
+    type(ESMF_StaggerLoc) :: staggerloc
+    integer, intent(out), optional :: rc
+    type(ESMF_GridDecompType) :: decompType
+    integer :: localDECount, lDE, ec(ESMF_MAXDIM)
+    integer :: localrc, i, dimCount
+
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Make sure Grid isn't arbitrarily distributed
+    call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+   ! Error if decompType is ARBITRARY
+   if (decompType .eq. ESMF_GRID_ARBITRARY) then
+         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+             msg="- can't currently regrid an arbitrarily distributed Grid", & 
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+   endif        
+
+   ! Make sure Grid doesn't contain width 1 DEs
+   call ESMF_GridGet(grid,localDECount=localDECount, dimCount=dimCount, &
+          rc=localrc)
+   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+   
+   ! loop through checking DEs
+   do lDE=0,localDECount-1
+       
+       ! Get bounds of DE
+       call ESMF_GridGet(grid,staggerloc=staggerloc, localDE=lDE, &
+              exclusivecount=ec,rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! loop and make sure they aren't too small in any dimension
+       do i=1,dimCount
+          if (ec(i) .lt. 2) then
+             call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+          msg="- can't currently regrid a grid that contains a DE of width less than 2", & 
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+          endif
+       enddo
+   enddo
+
+   if(present(rc)) rc = ESMF_SUCCESS
+end subroutine checkGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
