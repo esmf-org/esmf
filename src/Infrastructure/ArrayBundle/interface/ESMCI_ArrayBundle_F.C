@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.28 2011/04/15 22:39:04 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.29 2011/04/21 04:28:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,6 +156,40 @@ extern "C" {
 
       // query the C++ layer
       *array = (*ptr)->get(std::string(arrayName, nlen));
+
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+ 
+  void FTN(c_esmc_arraybundlegetispresent)(ESMCI::ArrayBundle **ptr,
+    char *arrayName, ESMC_Logical *isPresent, int *rc,
+    ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlegetispresent()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    try{
+
+      // query the C++ layer
+      if ((*ptr)->isPresent(std::string(arrayName, nlen)))
+        *isPresent = ESMF_TRUE;
+      else
+        *isPresent = ESMF_FALSE;
 
     }catch(int localrc){
       // catch standard ESMF return code

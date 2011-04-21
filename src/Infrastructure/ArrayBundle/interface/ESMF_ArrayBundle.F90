@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.56 2011/04/06 22:21:24 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.57 2011/04/21 04:28:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -107,7 +107,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.56 2011/04/06 22:21:24 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.57 2011/04/21 04:28:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -777,15 +777,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
-    subroutine ESMF_ArrayBundleGetItem(arraybundle, arrayName, array, &
-      keywordEnforcer, rc)
+    subroutine ESMF_ArrayBundleGetItem(arraybundle, arrayName, &
+      keywordEnforcer, array, isPresent, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
-    character(len=*),       intent(in)             :: arrayName
-    type(ESMF_Array),       intent(out)            :: array
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    character(len=*),       intent(in)            :: arrayName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional :: rc
+    type(ESMF_Array),       intent(out), optional :: array
+    logical,                intent(out), optional :: isPresent
+    integer,                intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -800,8 +801,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         {\tt ESMF\_ArrayBundle} to be queried.
 !   \item [arrayName]
 !         Specific item by name.
-!   \item [array]
+!   \item [{[array]}]
 !         Upon return holds the requested Array item.
+!   \item [{[isPresent]}]
+!         Upon return indicates whether Array item with {\tt arrayName} is
+!         contained in {\tt arraybundle}.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -809,6 +813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: dummyIsPresent
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -817,15 +822,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_ArrayBundleGetItem(arraybundle, arrayName, array, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set init code for deep C++ object
-    call ESMF_ArraySetInitCreated(array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(array)) then
+      ! Call into the C++ interface
+      call c_ESMC_ArrayBundleGetItem(arraybundle, arrayName, array, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code for deep C++ object
+      call ESMF_ArraySetInitCreated(array, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    if (present(isPresent)) then
+      ! Call into the C++ interface
+      call c_ESMC_ArrayBundleGetIsPresent(arraybundle, arrayName, &
+        dummyIsPresent, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      isPresent = dummyIsPresent
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

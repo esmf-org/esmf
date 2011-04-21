@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.19 2011/04/06 04:43:32 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.20 2011/04/21 04:28:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.19 2011/04/06 04:43:32 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.20 2011/04/21 04:28:33 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,7 @@ program ESMF_ArrayBundleCreateUTest
   integer:: arrayCount, i
   type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
   character (len=80)      :: arrayName
-  logical:: arraybundleBool
+  logical:: arraybundleBool, isPresent
   
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -250,6 +250,19 @@ program ESMF_ArrayBundleCreateUTest
     array=arraySingle, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleGet with arrayName not exist isPresent Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayName="MyArray3", &
+    isPresent=isPresent, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Validate isPresent flag"
+  call ESMF_Test((isPresent.eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
   allocate(arrays(1))
   arrays(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, name="MyArray3", rc=rc)
