@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.4 2011/04/19 00:16:16 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.5 2011/04/21 04:53:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.4 2011/04/19 00:16:16 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.5 2011/04/21 04:53:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -311,13 +311,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetField(container, fieldName, field, rc)
+  subroutine ESMF_ContainerGetField(container, fieldName, field, isPresent, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(in)              :: container
-    character(len=*),     intent(in)              :: fieldName
-    type(ESMF_Field),     intent(out)             :: field
-    integer,              intent(out),  optional  :: rc  
+    type(ESMF_Container), intent(in)            :: container
+    character(len=*),     intent(in)            :: fieldName
+    type(ESMF_Field),     intent(out), optional :: field
+    logical,              intent(out), optional :: isPresent
+    integer,              intent(out), optional :: rc  
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -328,15 +329,19 @@ contains
 !     {\tt ESMF\_Container} object to be queried.
 !   \item[fieldName] 
 !     The name of the specified Field object.
-!   \item[field] 
+!   \item[{[field]}] 
 !     Returned Field object.
+!   \item [{[isPresent]}]
+!     Upon return indicates whether Field item with {\tt fieldName} is
+!     contained in {\tt container}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                     :: localrc      ! local return code
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: dummyIsPresent
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -345,10 +350,21 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_ContainerGetField(container, fieldName, field, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(field)) then
+      ! Call into the C++ interface
+      call c_ESMC_ContainerGetField(container, fieldName, field, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    if (present(isPresent)) then
+      ! Call into the C++ interface
+      call c_ESMC_ContainerGetIsPresent(container, fieldName, &
+        dummyIsPresent, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      isPresent = dummyIsPresent
+    endif
  
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS

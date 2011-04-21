@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.2 2011/04/15 17:11:09 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.3 2011/04/21 04:53:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,6 +36,11 @@ namespace ESMCI {
     T get(Key k);
     void getVector(std::vector<T> &v)const;
     void getKeyVector(std::vector<Key> &v)const;
+    bool isPresent(Key k)const{
+      if (this->find(k)!=this->end())
+        return true;  // key found
+      return false;   // key not found
+    }
     void print()const;
   };
   

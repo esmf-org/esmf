@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.4 2011/04/19 00:16:17 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.5 2011/04/21 04:53:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.4 2011/04/19 00:16:17 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.5 2011/04/21 04:53:34 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,6 +58,7 @@ program ESMF_ContainerUTest
   character(ESMF_MAXSTR)          :: fieldName
   integer, parameter              :: fieldCount = 5
   integer                         :: i
+  logical                         :: isPresent
   
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -123,6 +124,20 @@ program ESMF_ContainerUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Get isPresent Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGet(container, fieldName="testField3", &
+    isPresent=isPresent, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get isPresent Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((isPresent.eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Remove item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerRemove(container, itemNameList=(/"testField3"/), rc=rc)
@@ -135,6 +150,20 @@ program ESMF_ContainerUTest
   call ESMF_ContainerPrint(container, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Get isPresent Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGet(container, fieldName="testField3", &
+    isPresent=isPresent, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get isPresent Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_Test((isPresent.eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Destroy Test"

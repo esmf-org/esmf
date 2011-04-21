@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.4 2011/04/19 00:16:16 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.5 2011/04/21 04:53:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -180,6 +180,44 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  //-------------------------------------------------------------------------
+
+  void FTN(c_esmc_containergetispresent)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    char const *itemName, ESMC_Logical *isPresent, int *rc,
+    ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_containergetispresent()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    try{
+
+      // query the C++ layer
+      if ((*ptr)->isPresent(std::string(itemName, nlen)))
+        *isPresent = ESMF_TRUE;
+      else
+        *isPresent = ESMF_FALSE;
+
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+ 
   //-------------------------------------------------------------------------
 
   void FTN(c_esmc_containerremove)
