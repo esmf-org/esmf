@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.6 2011/04/01 16:42:29 theurich Exp $
+! $Id: ESMF_Fraction.F90,v 1.7 2011/04/21 05:58:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.6 2011/04/01 16:42:29 theurich Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.7 2011/04/21 05:58:14 eschwab Exp $'
 
 !==============================================================================
 
@@ -136,8 +136,9 @@
 !     \end{description}
 !
 !EOPI
-        s%shallowMemory = 0
+
         ESMF_INIT_SET_DEFINED(s)
+
     end subroutine ESMF_FractionInit
 
 !------------------------------------------------------------------------------

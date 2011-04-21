@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.22 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_TimeType.F90,v 1.23 2011/04/21 05:58:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.22 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.23 2011/04/21 05:58:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -139,7 +139,8 @@
     subroutine ESMF_TimeInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_Time) :: s
+       type(ESMF_Time), optional :: s
+!  TODO:     type(ESMF_Time), intent(inout), optional :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt time}.
@@ -147,14 +148,14 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [s]
-!           {\tt ESMF\_Time} of which being initialized.
+!           {\tt ESMF\_Time} being initialized.
 !     \end{description}
 !
 !EOPI
-    ! Note: ESMF_TimeType is private
 
-        s%shallowMemory = 0
-        ESMF_INIT_SET_DEFINED(s)
+       if (present(s)) then
+         ESMF_INIT_SET_DEFINED(s)
+       endif
 
     end subroutine ESMF_TimeInit
 

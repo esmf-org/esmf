@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.124 2011/04/01 16:42:25 theurich Exp $
+! $Id: ESMF_Time.F90,v 1.125 2011/04/21 05:58:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.124 2011/04/01 16:42:25 theurich Exp $'
+      '$Id: ESMF_Time.F90,v 1.125 2011/04/21 05:58:11 eschwab Exp $'
 
 !==============================================================================
 !
@@ -538,9 +538,9 @@
 
       contains
 
+!==============================================================================
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimeGet()"
-!==============================================================================
 !BOP
 ! !IROUTINE: ESMF_TimeGet - Get a Time value 
 
@@ -562,7 +562,7 @@
         dayOfYear_intvl, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),         intent(inout)         :: time
+      type(ESMF_Time),         intent(in)            :: time
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
@@ -782,15 +782,13 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
+
       timeStringLen = 0     
       timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
       tempTimeStringLenISOFrac = 0
-
-      ! check variables
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,midMonth)
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeIntervalGetInit,ESMF_TimeIntervalInit,dayOfYear_intvl)
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
@@ -814,9 +812,6 @@
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-                                  
-      if (present(calendar)) call ESMF_CalendarSetInitCreated(calendar)
-
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
@@ -825,6 +820,11 @@
       if (present(timeStringISOFrac)) then
         timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
+
+      ! mark outputs as successfully initialized
+      call ESMF_TimeInit(midMonth)
+      call ESMF_TimeIntervalInit(dayOfYear_intvl)
+      call ESMF_CalendarSetInitCreated(calendar)
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -843,7 +843,7 @@
       logical :: ESMF_TimeIsLeapYear
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout)         :: time
+      type(ESMF_Time), intent(in)            :: time
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 
@@ -872,8 +872,13 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ! Initialize output value in case of error
+      ESMF_TimeIsLeapYear = .false.
 
+      ! check input
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
+
+      ! invoke C to C++ entry point
       call c_ESMC_TimeIsLeapYear(time, ESMF_TimeIsLeapYear, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -895,8 +900,8 @@
       logical :: ESMF_TimeIsSameCalendar
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout)         :: time1
-      type(ESMF_Time), intent(inout)         :: time2
+      type(ESMF_Time), intent(in)            :: time1
+      type(ESMF_Time), intent(in)            :: time2
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,         intent(out), optional :: rc
 
@@ -927,9 +932,14 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time1)
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time2)
+      ! Initialize output value in case of error
+      ESMF_TimeIsSameCalendar = .false.
 
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,rc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,rc)
+
+      ! invoke C to C++ entry point
       call c_ESMC_TimeIsSameCalendar(time1, time2, ESMF_TimeIsSameCalendar, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -948,7 +958,7 @@
       subroutine ESMF_TimePrint(time, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(inout)         :: time
+      type(ESMF_Time),   intent(in)            :: time
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
@@ -1004,8 +1014,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
    
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ! check input
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
 
+      ! invoke C to C++ entry point
       call c_ESMC_TimePrint(time, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1054,14 +1066,15 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
-
       nameLen = len_trim(name)
    
-!     invoke C to C++ entry point to restore time
+      ! invoke C to C++ entry point to restore time
       call c_ESMC_TimeReadRestart(time, nameLen, name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! mark output as successfully initialized
+      call ESMF_TimeInit(time)
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1263,10 +1276,8 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! check variables
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
-!      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
-
+      ! check input
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! use optional args for any subset
       call c_ESMC_TimeSet(time, yy, yy_i8, mm, dd, d, d_i8, &
@@ -1276,6 +1287,9 @@
                           calendar, calendarType, timeZone, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! mark output variable as successfully initialized
+      call ESMF_TimeInit(time)
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1320,8 +1334,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ! check input
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
 
+      ! invoke C to C++ entry point
       call c_ESMC_TimeSyncToRealTime(time, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1340,7 +1356,7 @@
       subroutine ESMF_TimeValidate(time, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(inout)         :: time
+      type(ESMF_Time),   intent(in)            :: time
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
@@ -1376,8 +1392,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ! check input
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
    
+      ! invoke C to C++ entry point
       call c_ESMC_TimeValidate(time, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1396,7 +1414,7 @@
       subroutine ESMF_TimeWriteRestart(time, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),   intent(inout)         :: time
+      type(ESMF_Time),   intent(in)            :: time
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,           intent(out), optional :: rc
 
@@ -1421,9 +1439,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_TimeGetInit,ESMF_TimeInit,time)
+      ! check input
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
    
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_TimeWriteRestart(time, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1440,6 +1459,8 @@
 ! than 2 arguments for arithmetic overloaded operators
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeInc()"
 !BOPI
 ! !IROUTINE: ESMF_TimeInc - Increment a Time with a TimeInterval
 !
@@ -1458,12 +1479,22 @@
 !     See "interface operator(+)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      call ESMF_TimeInit(ESMF_TimeInc)
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+
+      ! invoke C to C++ entry point
       call c_ESMC_TimeInc(time, timeinterval, ESMF_TimeInc)
+
+      ! mark output as successfully initialized
+      call ESMF_TimeInit(ESMF_TimeInc)
 
       end function ESMF_TimeInc
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeDec()"
 !BOPI
 ! !IROUTINE: ESMF_TimeDec - Decrement a Time with a TimeInterval
 !
@@ -1482,13 +1513,23 @@
 !     See "interface operator(-)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-       call ESMF_TimeInit(ESMF_TimeDec)
-       call c_ESMC_TimeDec(time, timeinterval, ESMF_TimeDec)
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+
+      ! invoke C to C++ entry point
+      call c_ESMC_TimeDec(time, timeinterval, ESMF_TimeDec)
+
+      ! mark output as successfully initialized
+      call ESMF_TimeInit(ESMF_TimeDec)
 
       end function ESMF_TimeDec
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeDiff()"
 !BOPI
 ! !IROUTINE:  ESMF_TimeDiff - Return the difference between two Times
 !
@@ -1507,13 +1548,23 @@
 !     See "interface operator(-)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      call ESMF_TimeIntervalInit(ESMF_TimeDiff)
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
+
+      ! invoke C to C++ entry point
       call c_ESMC_TimeDiff(time1, time2, ESMF_TimeDiff)
+
+      ! mark output as successfully initialized
+      call ESMF_TimeIntervalInit(ESMF_TimeDiff)
 
       end function ESMF_TimeDiff
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeEQ()"
 !BOPI
 ! !IROUTINE: ESMF_TimeEQ - Test if Time 1 is equal to Time 2
 !
@@ -1532,6 +1583,14 @@
 !     See "interface operator(==)" above for complete description.
 !
 !EOPI
+      integer :: localrc
+
+      ! Initialize output value in case of error
+      ESMF_TimeEQ = .false.
+
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
 
       ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeEQ(time1, time2, ESMF_TimeEQ)
@@ -1539,6 +1598,8 @@
       end function ESMF_TimeEQ
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeNE()"
 !BOPI
 ! !IROUTINE: ESMF_TimeNE - Test if Time 1 is not equal to Time 2
 !
@@ -1557,13 +1618,23 @@
 !     See "interface operator(/=)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      ! call ESMC_BaseTime base class function
+      ! Initialize output value in case of error
+      ESMF_TimeNE = .true.
+
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
+
+      ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeNE(time1, time2, ESMF_TimeNE)
 
       end function ESMF_TimeNE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeLT()"
 !BOPI
 ! !IROUTINE: ESMF_TimeLT - Test if Time 1 is less than Time 2
 !
@@ -1582,13 +1653,23 @@
 !     See "interface operator(<)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      ! call ESMC_BaseTime base class function
+      ! Initialize output value in case of error
+      ESMF_TimeLT = .false.
+
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
+
+      ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLT(time1, time2, ESMF_TimeLT)
 
       end function ESMF_TimeLT
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeLE()"
 !BOPI
 ! !IROUTINE: ESMF_TimeLE - Test if Time 1 is less than or equal to Time 2
 !
@@ -1607,13 +1688,23 @@
 !     See "interface operator(<=)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      ! call ESMC_BaseTime base class function
+      ! Initialize output value in case of error
+      ESMF_TimeLE = .false.
+
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
+
+      ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLE(time1, time2, ESMF_TimeLE)
 
       end function ESMF_TimeLE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeGT()"
 !BOPI
 ! !IROUTINE: ESMF_TimeGT - Test if Time 1 is greater than Time 2
 !
@@ -1632,13 +1723,23 @@
 !     See "interface operator(>)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      ! call ESMC_BaseTime base class function
+      ! Initialize output value in case of error
+      ESMF_TimeGT = .false.
+
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
+
+      ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGT(time1, time2, ESMF_TimeGT)
 
       end function ESMF_TimeGT
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TimeGE()"
 !BOPI
 ! !IROUTINE: ESMF_TimeGE - Test if Time 1 is greater than or equal to Time 2
 !
@@ -1657,8 +1758,16 @@
 !     See "interface operator(>=)" above for complete description.
 !
 !EOPI
+      integer :: localrc
 
-      ! call ESMC_BaseTime base class function
+      ! Initialize output value in case of error
+      ESMF_TimeGE = .false.
+
+      ! check inputs
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time1,localrc)
+      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time2,localrc)
+
+      ! invoke C to C++ entry point for ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGE(time1, time2, ESMF_TimeGE)
 
       end function ESMF_TimeGE

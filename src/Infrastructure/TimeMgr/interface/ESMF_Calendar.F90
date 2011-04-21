@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.130 2011/03/08 16:23:00 w6ws Exp $
+! $Id: ESMF_Calendar.F90,v 1.131 2011/04/21 05:58:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,10 +40,10 @@
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
+      use ESMF_UtilTypesMod
       use ESMF_BaseMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
-      use ESMF_UtilTypesMod
 
       implicit none
 !
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.130 2011/03/08 16:23:00 w6ws Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.131 2011/04/21 05:58:11 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -534,7 +534,7 @@
       ESMF_INIT_TYPE :: ESMF_CalendarGetInit
 !
 ! !DESCRIPTION:
-!     Get the initialization status of the Deep class {\tt bundle}.
+!     Get the initialization status of the Deep class {\tt calendar}. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -552,7 +552,7 @@
 
       end function ESMF_CalendarGetInit
 
-! -------------------------- ESMF-public method -------------------------------
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CalendarSetInitCreated()"
 !BOPI
@@ -562,12 +562,23 @@
       subroutine ESMF_CalendarSetInitCreated(c, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(inout)           :: c
+      type(ESMF_Calendar), intent(inout), optional :: c
       integer,             intent(out),  optional  :: rc  
 !         
 !
 ! !DESCRIPTION:
 !     Set init code in Calendar object to "CREATED".
+! 
+!     Used by other classes to set the isInit value of a calendar, since it
+!     is private to the {\tt ESMF\_Calendar} class.  Within the 
+!     {\tt ESMF\_Calendar} class, the macro {\tt ESMF\_INIT\_SET\_CREATED()}
+!     is used instead, since the {\tt ESMF\_Calendar} class and its methods
+!     are encapsulated within the same module.  This gives the calendar 
+!     methods direct access to the private isInit member.  Compare to the 
+!     other TimeMgr classes which have their types defined in separate
+!     modules from their methods, due to mutual dependencies.  They must
+!     call their own {\tt ESMF\_*Init*()} method rather than use the 
+!     {\tt ESMF\_INIT\_SET\_*()} macro.
 !
 !     The arguments are:
 !     \begin{description}
@@ -583,14 +594,16 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
       ! Set init code
-      ESMF_INIT_SET_CREATED(c)
+      if (present(c)) then
+        ESMF_INIT_SET_CREATED(c)
+      endif
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
     
       end subroutine ESMF_CalendarSetInitCreated
-!------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
 
 
 !==============================================================================
@@ -666,12 +679,13 @@
         nameLen = len_trim(name)
       end if
     
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarCreateBuiltIn(ESMF_CalendarCreateBuiltIn, nameLen, &
                                         name, calendartype, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
+      ! mark output as successfully initialized
       ESMF_INIT_SET_CREATED(ESMF_CalendarCreateBuiltIn)
 
       ! Return success
@@ -718,14 +732,15 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! check inputs
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point to copy calendar
+      ! invoke C to C++ entry point to copy calendar
       call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! mark output as successfully initialized
       ESMF_INIT_SET_CREATED(ESMF_CalendarCreateCopy)
 
       ! Return success
@@ -822,8 +837,7 @@
         monthsPerYear = size(daysPerMonth)
       end if
 
-!     invoke C to C++ entry point
-
+      ! invoke C to C++ entry point
       if (present(daysPerMonth)) then
         call c_ESMC_CalendarCreateCustom1(ESMF_CalendarCreateCustom, &
                                          nameLen, name, &
@@ -844,6 +858,7 @@
           ESMF_CONTEXT, rcToReturn=rc)) return
       end if
     
+      ! mark output as successfully initialized
       ESMF_INIT_SET_CREATED(ESMF_CalendarCreateCustom)
 
       ! Return success
@@ -888,13 +903,15 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarDestroy(calendar, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! mark output as successfully deleted
       ESMF_INIT_SET_DELETED(calendar)
 
       ! Return success
@@ -930,7 +947,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-!     invoke C to C++ entry point
+     ! invoke C to C++ entry point
       call c_ESMC_CalendarFinalize(localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -952,7 +969,7 @@
         daysPerYear, daysPerYearDn, daysPerYearDd, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(inout)         :: calendar
+      type(ESMF_Calendar),     intent(in)            :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_CalendarType), intent(out), optional :: calendartype
       integer,                 intent(out), optional :: daysPerMonth(:)
@@ -1026,12 +1043,12 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! check input
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+
       nameLen = 0
       tempNameLen = 0
       sizeofDaysPerMonth = 0
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1043,7 +1060,7 @@
         sizeofDaysPerMonth = size(daysPerMonth)
       end if
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
 
       if (present(daysPerMonth)) then
         call c_ESMC_CalendarGet1(calendar, nameLen, tempNameLen, tempName, &
@@ -1108,7 +1125,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
     
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarInitialize(calendartype, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1131,7 +1148,7 @@
       logical :: ESMF_CalendarIsLeapYearI4
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),   intent(inout)         :: calendar
+      type(ESMF_Calendar),   intent(in)            :: calendar
       integer(ESMF_KIND_I4), intent(in)            :: yy
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
@@ -1164,10 +1181,13 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! check variables
+      ! Initialize output value in case of error
+      ESMF_CalendarIsLeapYearI4 = .false.
+
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI4(calendar, yy, &
                                        ESMF_CalendarIsLeapYearI4, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1191,7 +1211,7 @@
       logical :: ESMF_CalendarIsLeapYearI8
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),   intent(inout)         :: calendar
+      type(ESMF_Calendar),   intent(in)            :: calendar
       integer(ESMF_KIND_I8), intent(in)            :: yy_i8
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
@@ -1222,11 +1242,14 @@
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-    
-      ! check variables
+ 
+      ! Initialize output value in case of error
+      ESMF_CalendarIsLeapYearI8 = .false.
+
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarIsLeapYearI8(calendar, yy_i8, &
                                        ESMF_CalendarIsLeapYearI8, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1246,7 +1269,7 @@
       subroutine ESMF_CalendarPrint(calendar, keywordEnforcer, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(inout)         :: calendar
+      type(ESMF_Calendar), intent(in)            :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
@@ -1294,10 +1317,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
  
-      ! check variables
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarPrint(calendar, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1345,12 +1368,13 @@
       ! get length of given name for C++ validation
       nameLen = len_trim(name)
 
-!     invoke C to C++ entry point to allocate and restore calendar
+      ! invoke C to C++ entry point to allocate and restore calendar
       call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
                                       localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! mark output as successfully initialized
       ESMF_INIT_SET_CREATED(ESMF_CalendarReadRestart)
 
       ! Return success
@@ -1420,17 +1444,17 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      nameLen = 0
-
-      ! check variables
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+
+      nameLen = 0
 
       ! get length of given name for C++ validation
       if (present(name)) then
         nameLen = len_trim(name)
       end if
     
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarSetBuiltIn(calendar, nameLen, name, calendartype, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1514,7 +1538,11 @@
       integer :: monthsPerYear
       integer :: localrc                        ! local return code
 
-      ! check variables
+      ! Assume failure until success
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       nameLen = 0
@@ -1530,7 +1558,7 @@
         monthsPerYear = size(daysPerMonth)
       end if
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
 
       if (present(daysPerMonth)) then
         call c_ESMC_CalendarSetCustom1(calendar, &
@@ -1595,7 +1623,7 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
     
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultType(calendartype, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1643,10 +1671,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL 
 
-      ! check variables
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarSetDefaultCal(calendar, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1665,7 +1693,7 @@
       subroutine ESMF_CalendarValidate(calendar, keywordEnforcer, rc)
  
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(inout)         :: calendar
+      type(ESMF_Calendar), intent(in)            :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
@@ -1694,10 +1722,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
       
-      ! check variables
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarValidate(calendar, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1716,7 +1744,7 @@
       subroutine ESMF_CalendarWriteRestart(calendar, keywordEnforcer, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(inout)         :: calendar
+      type(ESMF_Calendar), intent(in)            :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,             intent(out), optional :: rc
 
@@ -1739,10 +1767,10 @@
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
-      ! check variables
+      ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
-!     invoke C to C++ entry point 
+      ! invoke C to C++ entry point 
       call c_ESMC_CalendarWriteRestart(calendar, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1824,7 +1852,7 @@
 !     class.  See "interface operator(==)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeEQ(calendartype1, calendartype2, &
                                  ESMF_CalendarTypeEQ)
 
@@ -1852,14 +1880,13 @@
 !             
 !EOPI
 
-      ! to satisfy macro
-      integer :: rc
+      integer :: localrc
 
-      ! if calendar uninitialized, return 'not equal'
+      ! Initialize output value in case of error
       ESMF_CalendarCalAndTypeEQ = .false.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
@@ -1889,14 +1916,13 @@
 !             
 !EOPI
 
-      ! to satisfy macro
-      integer :: rc
+      integer :: localrc
 
-      ! if calendar uninitialized, return 'not equal'
+      ! Initialize output value in case of error
       ESMF_CalendarTypeAndCalEQ = .false.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalEQ(calendartype, calendar, &
@@ -1977,7 +2003,7 @@
 !     class.  See "interface operator(/=)" above for complete description.
 !             
 !EOPI
-!     invoke C to C++ entry point
+      ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeNE(calendartype1, calendartype2, &
                                  ESMF_CalendarTypeNE)
 
@@ -2005,14 +2031,13 @@
 !             
 !EOPI
 
-      ! to satisfy macro
-      integer :: rc
+      integer :: localrc
 
-      ! if calendar uninitialized, return 'not equal'
+      ! Initialize output value in case of error
       ESMF_CalendarCalAndTypeNE = .true.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
@@ -2042,14 +2067,13 @@
 !             
 !EOPI
 
-      ! to satisfy macro
-      integer :: rc
+      integer :: localrc
 
-      ! if calendar uninitialized, return 'not equal'
+      ! Initialize output value in case of error
       ESMF_CalendarTypeAndCalNE = .true.
 
       ! check input
-      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
+      ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.126 2011/02/23 06:44:59 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.127 2011/04/21 05:58:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.126 2011/02/23 06:44:59 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.127 2011/04/21 05:58:13 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -626,7 +626,7 @@
       write(name, *) "Get Uninitialized StopTime Year Test"
       call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
       write(failMsg, *) " Returned ESMF_SUCCESS"
-      call ESMF_Test((rc.eq.ESMC_RC_OBJ_INIT), &
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_INIT), &
                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -732,10 +732,10 @@
       ! Test fix for bug 1649164.
       ! Initialize clock with uninitialized Start Time.
       write(name, *) "Clock Initialization Test with uninitialized startTime"
-      write(failMsg, *) " Did not return ESMC_RC_DIV_ZERO"
+      write(failMsg, *) " Did not return ESMF_RC_OBJ_INIT"
       clock = ESMF_ClockCreate(timeStep, startTime2, &
                                stopTime=stopTime, name="Clock 1", rc=rc)
-      call ESMF_Test((rc.eq.ESMC_RC_DIV_ZERO), &
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_INIT), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_ClockDestroy(clock, rc=rc)
 
@@ -1918,7 +1918,7 @@
       write(failMsg, *) "Should not return ESMF_SUCCESS "
       write(name, *) "Validate an uninitialzed time Test"
       call ESMF_TimeValidate(stopTime3, rc=rc)
-      call ESMF_Test((rc.eq.ESMC_RC_DIV_ZERO), &
+      call ESMF_Test((rc.eq.ESMF_RC_OBJ_INIT), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------

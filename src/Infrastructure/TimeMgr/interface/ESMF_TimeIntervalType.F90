@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalType.F90,v 1.23 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_TimeIntervalType.F90,v 1.24 2011/04/21 05:58:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeIntervalType.F90,v 1.23 2011/01/05 20:05:45 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalType.F90,v 1.24 2011/04/21 05:58:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -118,7 +118,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [s]
+!     \item [{[s]}]
 !           {\tt ESMF\_TimeInterval} from which to retrieve status.
 !     \end{description}
 !
@@ -142,20 +142,23 @@
     subroutine ESMF_TimeIntervalInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_TimeInterval) :: s
+       type(ESMF_TimeInterval), optional :: s
+!       type(ESMF_TimeInterval), intent(inout), optional :: s
 !
 ! !DESCRIPTION:
 !      Initialize the shallow class {\tt timeinterval}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [s]
-!           {\tt ESMF\_TimeInterval} of which being initialized.
+!     \item [{[s]}]
+!           {\tt ESMF\_TimeInterval} being initialized.
 !     \end{description}
 !
 !EOPI
-        s%shallowMemory  = 0
-        ESMF_INIT_SET_DEFINED(s)
+
+       if (present(s)) then
+         ESMF_INIT_SET_DEFINED(s)
+       endif
 
     end subroutine ESMF_TimeIntervalInit
 
