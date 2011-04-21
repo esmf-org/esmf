@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.250 2011/03/23 16:55:31 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.251 2011/04/21 16:08:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.250 2011/03/23 16:55:31 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.251 2011/04/21 16:08:41 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1995,6 +1995,24 @@ contains
       integer :: localcount
 
       ! check input variables
+
+      localcount = size(routehandleList)
+      if (present(count)) then
+        if (count < 0) then
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            msg="- count must be positive", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        else if (count > localcount) then
+          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            msg="- count must be smaller than or equal to the size of routehandleList", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        else
+          localcount = count
+        end if
+      end if
+
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       do i=1,count
          ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
