@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_InitMacros.inc,v 1.39 2011/04/13 19:05:42 eschwab Exp $
+$Id: ESMF_InitMacros.inc,v 1.40 2011/04/21 05:52:25 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,17 +69,17 @@ automatic initialization of types.
 #define ESMF_INIT_COPY(dvar,svar)  dvar%isInit=svar%isInit
 
 
-#define ESMF_INIT_CHECK_DEEP(fget,var, rc) \
-if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rc)) return
+#define ESMF_INIT_CHECK_DEEP(fget,var, rcvar) \
+if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rcvar)) return
 
-#define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rc) \
-if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
+#define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rcvar) \
+if (ESMF_IMErr(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rcvar)) return
 
-#define ESMF_INIT_CHECK_SHALLOW(fget,var, rc) \
-if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rc)) return
+#define ESMF_INIT_CHECK_SHALLOW(fget,var, rcvar) \
+if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rcvar)) return
 
-#define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rc) \
-if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
+#define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rcvar) \
+if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rcvar)) return
 
 
 #define ESMF_INIT_C_PAD   char isInit[8]; 
@@ -100,10 +100,10 @@ if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rc)) return
 #define ESMF_INIT_SET_CREATED(var) 
 #define ESMF_INIT_SET_DELETED(var) 
 #define ESMF_INIT_COPY(dvar,svar)
-#define ESMF_INIT_CHECK_DEEP(fget, var, rc)
-#define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rc) 
-#define ESMF_INIT_CHECK_SHALLOW(fget,var, rc) 
-#define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rc)
+#define ESMF_INIT_CHECK_DEEP(fget, var, rcvar)
+#define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rcvar) 
+#define ESMF_INIT_CHECK_SHALLOW(fget,var, rcvar) 
+#define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rcvar)
 
 #define ESMF_INIT_C_PAD 
 
