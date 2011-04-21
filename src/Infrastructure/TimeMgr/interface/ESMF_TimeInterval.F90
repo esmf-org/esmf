@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.117 2011/04/21 05:58:11 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.118 2011/04/21 13:42:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.117 2011/04/21 05:58:11 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.118 2011/04/21 13:42:16 eschwab Exp $'
 
 !==============================================================================
 !
@@ -966,7 +966,7 @@
       integer :: localrc
     
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalAbsValue(timeinterval, ESMF_TimeIntervalAbsValue)
@@ -1386,7 +1386,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,rc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,rc)
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,startTimeIn,rc)
 
       timeStringLen = 0
@@ -1624,7 +1624,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,rc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,rc)
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendarIn,rc)
 
       timeStringLen = 0     
@@ -1860,7 +1860,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,rc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,rc)
 
       timeStringLen = 0
       timeStringLenISOFrac = 0
@@ -1943,7 +1943,7 @@
       integer :: localrc
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalNegAbsValue(timeinterval, &
@@ -2771,7 +2771,7 @@
       localrc = ESMF_RC_NOT_IMPL
     
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,rc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,rc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalValidate(timeinterval, options, localrc)
@@ -2819,7 +2819,7 @@
       localrc = ESMF_RC_NOT_IMPL
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,rc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,rc)
 
       ! invoke C to C++ entry point 
       call c_ESMC_TimeIntervalWriteRestart(timeinterval, localrc)
@@ -2861,8 +2861,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
    
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalRQuot(timeinterval1, timeinterval2, &
@@ -2894,7 +2894,7 @@
       integer :: localrc
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
@@ -2929,7 +2929,7 @@
       integer :: localrc
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
@@ -2964,8 +2964,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
@@ -3001,8 +3001,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalRemainder(timeinterval1, timeinterval2, &
@@ -3037,7 +3037,7 @@
       integer :: localrc
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalProdTI(timeinterval, multiplier, &
@@ -3072,7 +3072,7 @@
       integer :: localrc
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalProdIT(multiplier, timeinterval, &
@@ -3107,8 +3107,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FractionGetInit,multiplier,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_FractionGetInit,multiplier,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalProdTF(timeinterval, multiplier, &
@@ -3143,8 +3143,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_FractionGetInit,multiplier,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_FractionGetInit,multiplier,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalProdFT(multiplier, timeinterval, &
@@ -3179,7 +3179,7 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalProdTR(timeinterval, multiplier, &
@@ -3214,7 +3214,7 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalProdRT(multiplier, timeinterval, &
@@ -3256,8 +3256,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalSum(timeinterval1, timeinterval2, &
@@ -3293,8 +3293,8 @@
       integer :: localrc
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalDiff(timeinterval1, timeinterval2, &
@@ -3329,7 +3329,7 @@
       integer :: localrc
 
       ! check input
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalNegate(timeinterval, ESMF_TimeIntervalNegate)
@@ -3366,8 +3366,8 @@
       ESMF_TimeIntervalEQ = .false.
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalEQ(timeinterval1, timeinterval2, &
@@ -3402,8 +3402,8 @@
       ESMF_TimeIntervalNE = .true.
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalNE(timeinterval1, timeinterval2, &
@@ -3438,8 +3438,8 @@
       ESMF_TimeIntervalLT = .false.
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalLT(timeinterval1, timeinterval2, &
@@ -3474,8 +3474,8 @@
       ESMF_TimeIntervalLE = .false.
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalLE(timeinterval1, timeinterval2, &
@@ -3510,8 +3510,8 @@
       ESMF_TimeIntervalGT = .false.
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalGT(timeinterval1, timeinterval2, &
@@ -3546,8 +3546,8 @@
       ESMF_TimeIntervalGE = .false.
 
       ! check inputs
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
-      ESMF_INIT_CHECK_SHALLOW(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval1,localrc)
+      ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_TimeIntervalGetInit,timeinterval2,localrc)
 
       ! invoke C to C++ entry point
       call c_ESMC_TimeIntervalGE(timeinterval1, timeinterval2, &
