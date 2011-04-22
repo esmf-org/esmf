@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.74 2011/04/01 16:42:13 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.75 2011/04/22 17:19:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.74 2011/04/01 16:42:13 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.75 2011/04/22 17:19:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -318,7 +318,7 @@ contains
       ainit2 .eq. ESMF_INIT_CREATED) then
       ESMF_ArrayEQ = array1%this .eq. array2%this
     else
-      ESMF_ArrayEQ = ESMF_FALSE
+      ESMF_ArrayEQ = .false.
     endif
 
   end function ESMF_ArrayEQ
