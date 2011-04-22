@@ -1,4 +1,4 @@
-% $Id: WebServices_desc.tex,v 1.4 2011/04/22 17:39:04 svasquez Exp $
+% $Id: WebServices_desc.tex,v 1.5 2011/04/22 18:42:41 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,3 +72,62 @@ That's all there is to turning an ESMF Component into a network-accessible
 ESMF Component Service.  For a detailed example of an ESMF Component turned into 
 an ESMF Component Service, see the Examples in the Web Services section of the 
 Developer' Guide.
+
+\subsubsection{Accessing the Service}
+Now that the Component is available as a service, it can be accessed remotely by any client 
+that can communicate via TCP sockets.  The ESMF library, in addition to providing the 
+service tools, also provides the classes to create C++ clients to access the Component 
+Service via the socket interface.
+
+However, the goal of ESMF Web Services is to make an ESMF Component accessible through 
+a standard web service, which is accomplished through the Process Controller and the 
+Tomcat/Axis2 applications
+
+\subsubsection{Client Application via C++ API}
+
+Interfacing to a Component service is fairly simple using the ESMF library.  The following 
+code is a simple example of how to interface to a Component Service in C++ and request 
+the initialize operation (the entire sample client can be found in the Web Services examples 
+section of the ESMF Distribution):
+
+\begin{verbatim}
+
+	#include "ESMCI_WebServCompSvrClient.h"
+
+	int  main(int  argc, char*  argv[])
+	{
+   	    int    portNum = 27060;
+      	    int    clientId = 101;
+   	    int    rc = ESMF_SUCCESS;
+
+   	    ESMCI::ESMCI_WebServCompSvrClient   
+                         client("localhost", portNum, clientId);
+
+   	    rc = client.init();
+   	    printf("Initialize return code: %d\n", rc);
+	}
+
+\end{verbatim}
+
+
+To see a complete description of the NetEsmfClient class, refer to the netesmf library 
+section of the Web Services Reference Manual.
+
+\subsubsection{Process Controller}
+
+The Process Controller is basically just a instance of a C++ client application. It manages 
+client access to the Component Service (only 1 client can access the service at a time), 
+and will eventually be responsible for starting up and shutting down instances of 
+Component Services (planned for a future release). The Process Controller application is 
+built with the ESMF library and is included in the apps section of the distribution.
+
+\subsubsection{Tomcat/Axis2}
+
+The Tomcat/Axis2 "application" is essentially the Apache Tomcat server using 
+the Apache Axis2 servlet to  implement web services using SOAP protocols. The web 
+interface is defined by a WSDL file, and its implementation is handled by the Component 
+Connector java code.  Tomcat and Axis2 are both open source projects that should be 
+downloaded from the Apache web site, but the WSDL file, the Component Connector java 
+code, and all required software for supporting the interface can be found next to the 
+ESMF distribution in the web\_services\_server directory. This code is not included with 
+the ESMF distribution because they can be distributed and installed independent of each other.
