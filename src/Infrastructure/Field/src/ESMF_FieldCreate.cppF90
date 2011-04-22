@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.96 2011/04/08 21:28:13 feiliu Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.97 2011/04/22 18:51:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.96 2011/04/08 21:28:13 feiliu Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.97 2011/04/22 18:51:08 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -507,7 +507,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_FieldType), pointer :: ftype 
     type(ESMF_GeomBase) :: geombase  
-    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+    type(ESMF_ArraySpec), intent(in)         :: arrayspec
     integer, intent(in), optional :: gridToFieldMap(:)
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)      
@@ -1050,7 +1050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_GeomBase) :: geombase
-    type(ESMF_ArraySpec), intent(inout) :: arrayspec     
+    type(ESMF_ArraySpec), intent(in) :: arrayspec     
     integer, intent(in), optional :: gridToFieldMap(:)    
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
@@ -2329,7 +2329,7 @@ end function ESMF_FieldCreateGridTKR
 !
 ! !ARGUMENTS:
     type(ESMF_Grid),       intent(in)            :: grid               
-    type(ESMF_ArraySpec),  intent(inout)         :: arrayspec     
+    type(ESMF_ArraySpec),  intent(in)            :: arrayspec     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
@@ -3304,7 +3304,7 @@ end function ESMF_FieldCreateLSTKR
 !
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)            :: locstream
-    type(ESMF_ArraySpec), intent(inout)         :: arrayspec     
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -3976,7 +3976,7 @@ end function ESMF_FieldCreateMeshTKR
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh),      intent(in)            :: mesh               
-    type(ESMF_ArraySpec), intent(inout)         :: arrayspec     
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_MeshLoc),   intent(in),  optional :: location
     integer,              intent(in),  optional :: gridToFieldMap(:)    
@@ -4678,7 +4678,7 @@ end function ESMF_FieldCreateXGTKR
     type(ESMF_XGrid),     intent(in)            :: xgrid
     type(ESMF_XGridSide), intent(in),  optional :: xgridSide
     integer,              intent(in),  optional :: gridIndex
-    type(ESMF_ArraySpec), intent(inout)         :: arrayspec     
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.75 2011/04/22 17:19:15 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.76 2011/04/22 18:51:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.75 2011/04/22 17:19:15 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.76 2011/04/22 18:51:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1843,7 +1843,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
+       type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
@@ -2101,7 +2101,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     undistLBound, undistUBound, name, rc)
 !
 ! !ARGUMENTS:
-       type(ESMF_ArraySpec),  intent(inout)           :: arrayspec
+       type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        integer,               intent(in)              :: haloSeqIndexList(:)
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
