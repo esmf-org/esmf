@@ -1,4 +1,4 @@
-/* $Id: ESMF_WebServController.C,v 1.2 2011/02/18 01:51:54 theurich Exp $ */
+/* $Id: ESMF_WebServController.C,v 1.3 2011/04/22 14:52:10 ksaint Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,20 +79,21 @@ int main(int    argc,
 {
   	printf("hello from ESMF_WebServController\n");
 
-	if (argc < 3)
+	if (argc < 4)
 	{
-		printf("Usage: ESMF_WebServController <portNum> <runDir>");
+		printf("Usage: ESMF_WebServController <portNum> <runDir> <svrPort>\n");
 		return 1;
 	}
 
 	int	portNum = atoi(argv[1]);
 	char	runDir[512];
+	int	svrPort = atoi(argv[3]);
 	char	host[512] = { "" };
 
 	strcpy(runDir, argv[2]);
 	gethostname(host, sizeof(host) - 1);
 
-	ESMCI::ESMCI_WebServPassThruSvr		server(portNum, runDir);
+	ESMCI::ESMCI_WebServPassThruSvr		server(portNum, runDir, svrPort);
 
    printf("\n");
    printf("ESMF_WebServController\n");
