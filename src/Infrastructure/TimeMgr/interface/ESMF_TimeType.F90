@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeType.F90,v 1.23 2011/04/21 05:58:11 eschwab Exp $
+! $Id: ESMF_TimeType.F90,v 1.24 2011/04/22 17:33:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,20 +39,15 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      ! inherit from base time class
-      use ESMF_InitMacrosMod
+      ! inherit from ESMF base class
+      use ESMF_BaseMod
       use ESMF_UtilTypesMod
 
-      ! associated derived types
-
       implicit none
-      private
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
-!     None: all types defined in this file are public and propagated up
-!     via ESMF_TimeMod in ESMF_Time.F90
-
+      private
 !------------------------------------------------------------------------------
 !     ! ESMF_Time
 !
@@ -77,22 +72,23 @@
 !     The types defined in this file are public and propagated up via 
 !     ESMF_TimeMod in ESMF_Time.F90      
 
-      public :: ESMF_Time
+      public ESMF_Time
 
 !------------------------------------------------------------------------------
 ! !PUBLIC METHODS:
 !     The methods defined in this file are public and propagated up via 
 !     ESMF_TimeMod in ESMF_Time.F90      
 
-      public :: ESMF_TimeGetInit
-      public :: ESMF_TimeInit
+      public ESMF_TimeGetInit
+      public ESMF_TimeInit
 
+!------------------------------------------------------------------------------
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeType.F90,v 1.23 2011/04/21 05:58:11 eschwab Exp $'
+      '$Id: ESMF_TimeType.F90,v 1.24 2011/04/22 17:33:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -104,30 +100,30 @@
 ! !IROUTINE:  ESMF_TimeGetInit - Get initialization status.
 
 ! !INTERFACE:
-    function ESMF_TimeGetInit(s)
+      function ESMF_TimeGetInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_Time), intent(in), optional :: s
-       ESMF_INIT_TYPE :: ESMF_TimeGetInit
+      type(ESMF_Time), intent(in), optional :: s
+      ESMF_INIT_TYPE                        :: ESMF_TimeGetInit
 !
 ! !DESCRIPTION:
-!      Get the initialization status of the shallow class {\tt time}.
+!     Get the initialization status of the shallow class {\tt time}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [s]
+!     \item [{[s]}]
 !           {\tt ESMF\_Time} from which to retrieve status.
 !     \end{description}
 !
 !EOPI
 
-       if (present(s)) then
-         ESMF_TimeGetInit = ESMF_INIT_GET(s)
-       else
-         ESMF_TimeGetInit = ESMF_INIT_DEFINED
-       endif
+      if (present(s)) then
+        ESMF_TimeGetInit = ESMF_INIT_GET(s)
+      else
+        ESMF_TimeGetInit = ESMF_INIT_DEFINED
+      endif
 
-    end function ESMF_TimeGetInit
+      end function ESMF_TimeGetInit
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -136,26 +132,25 @@
 ! !IROUTINE:  ESMF_TimeInit - Initialize Time
 
 ! !INTERFACE:
-    subroutine ESMF_TimeInit(s)
+      subroutine ESMF_TimeInit(s)
 !
 ! !ARGUMENTS:
-       type(ESMF_Time), optional :: s
-!  TODO:     type(ESMF_Time), intent(inout), optional :: s
+      type(ESMF_Time), intent(inout), optional :: s
 !
 ! !DESCRIPTION:
-!      Initialize the shallow class {\tt time}.
+!     Initialize the shallow class {\tt time}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [s]
+!     \item [{[s]}]
 !           {\tt ESMF\_Time} being initialized.
 !     \end{description}
 !
 !EOPI
 
-       if (present(s)) then
-         ESMF_INIT_SET_DEFINED(s)
-       endif
+      if (present(s)) then
+        ESMF_INIT_SET_DEFINED(s)
+      endif
 
     end subroutine ESMF_TimeInit
 

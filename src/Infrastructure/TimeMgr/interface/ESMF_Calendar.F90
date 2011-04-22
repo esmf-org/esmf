@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.131 2011/04/21 05:58:11 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.132 2011/04/22 17:33:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,8 +40,8 @@
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
-      use ESMF_UtilTypesMod
       use ESMF_BaseMod
+      use ESMF_UtilTypesMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
 
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.131 2011/04/21 05:58:11 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.132 2011/04/22 17:33:58 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -531,14 +531,14 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(in), optional :: d
-      ESMF_INIT_TYPE :: ESMF_CalendarGetInit
+      ESMF_INIT_TYPE                            :: ESMF_CalendarGetInit
 !
 ! !DESCRIPTION:
 !     Get the initialization status of the Deep class {\tt calendar}. 
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [s]
+!     \item [{[d]}]
 !           {\tt ESMF\_Calendar} from which to retrieve status.
 !     \end{description}
 !
@@ -562,8 +562,8 @@
       subroutine ESMF_CalendarSetInitCreated(c, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(inout), optional :: c
-      integer,             intent(out),  optional  :: rc  
+      type(ESMF_Calendar), intent(inout),  optional :: c
+      integer,             intent(out),    optional :: rc  
 !         
 !
 ! !DESCRIPTION:
@@ -582,7 +582,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[c] 
+!     \item[{[c]}] 
 !          Specified {\tt ESMF\_Calendar} object.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -590,6 +590,7 @@
 !
 !EOPI
 !------------------------------------------------------------------------------
+
       ! Set return code to not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
