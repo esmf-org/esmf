@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.48 2011/04/22 16:55:57 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.49 2011/04/22 17:46:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,6 +75,8 @@ module ESMF_ArraySpecMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
   public ESMF_ArraySpecGet
   public ESMF_ArraySpecPrint
   public ESMF_ArraySpecSet
@@ -89,47 +91,209 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.48 2011/04/22 16:55:57 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.49 2011/04/22 17:46:37 theurich Exp $'
 
 !==============================================================================
 
-#if 0
+
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOPI
-! !INTERFACE:
-      interface operator (==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_ArraySpecEQ
-
-! !DESCRIPTION:
+!BOP
+! !IROUTINE:  ESMF_ArraySpecAssignment(=) - Assign an ArraySpec to another ArraySpec
 !
-!EOPI
-      end interface
+! !INTERFACE:
+! interface assignment(=)
+!   arrayspec1 = arrayspec2
+!
+! !ARGUMENTS:
+!   type(ESMF_ArraySpec) :: arrayspec1
+!   type(ESMF_ArraySpec) :: arrayspec2
+! 
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Set {\tt arrayspec1} equal to {\tt arrayspec2}. This is the default 
+!   Fortran assignment, which creates a complete, independent copy of 
+!   {\tt arrayspec2} as {\tt arrayspec1}. If {\tt arrayspec2} is an 
+!   invalid {\tt ESMF\_ArraySpec} object then {\tt arrayspec1} will be 
+!   equally invalid after the assignment.
+!
+!   The arguments are:
+!   \begin{description} 
+!   \item[arrayspec1] 
+!     The {\tt ESMF\_ArraySpec} to be set.
+!   \item[arrayspec2] 
+!     The {\tt ESMF\_ArraySpec} to be copied.
+!   \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+!   None, documentation only, to describe the behavior of the default 
+!   Fortran assignment(=).
+!
+! end interface
+! 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_ArraySpecOperator(==) - Test if ArraySpec 1 is equal to ArraySpec 2
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (arrayspec1 == arrayspec2) then ... endif
+!                OR
+!   result = (arrayspec1 == arrayspec2)
+!
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_ArraySpec), intent(in) :: arrayspec1
+!   type(ESMF_ArraySpec), intent(in) :: arrayspec2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Overloads the (==) operator for the {\tt ESMF\_ArraySpec} class to return 
+!   {\tt .true.} if {\tt arrayspec1} and {\tt arrayspec2} specify the same
+!   type, kind and rank, and {\tt .false.} otherwise.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arrayspec1]
+!     First {\tt ESMF\_ArraySpec} in comparison.
+!   \item[arrayspec2]
+!     Second {\tt ESMF\_ArraySpec} in comparison.
+!   \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+    module procedure ESMF_ArraySpecEQ   ! internal implementation
+!
+  end interface
 !
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
+! !IROUTINE:  ESMF_ArraySpecOperator(/=) - Test if ArraySpec 1 is not equal to ArraySpec 2
+!
 ! !INTERFACE:
-      interface operator (/=)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_ArraySpecNE
-
+  interface operator(/=)
+!   if (arrayspec1 /= arrayspec2) then ... endif
+!                OR
+!   result = (arrayspec1 /= arrayspec2)
+!
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_ArraySpec), intent(in) :: arrayspec1
+!   type(ESMF_ArraySpec), intent(in) :: arrayspec2
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
+!   Overloads the (/=) operator for the {\tt ESMF\_ArraySpec} class to return 
+!   {\tt .true.} if {\tt arrayspec1} and {\tt arrayspec2} do not specify the
+!   same type, kind or rank, and {\tt .false.} otherwise.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arrayspec1]
+!     First {\tt ESMF\_ArraySpec} in comparison.
+!   \item[arrayspec2]
+!     Second {\tt ESMF\_ArraySpec} in comparison.
+!   \end{description}
+! 
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+    module procedure ESMF_ArraySpecNE   ! internal implementation
+!
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecEQ()"
+!BOPI
+! !IROUTINE: ESMF_ArraySpecEQ - Test if ArraySpec 1 is equal to ArraySpec 2
+!
+! !INTERFACE:
+  function ESMF_ArraySpecEQ(arrayspec1, arrayspec2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_ArraySpecEQ
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpec), intent(in) :: arrayspec1
+    type(ESMF_ArraySpec), intent(in) :: arrayspec2
+!
+! !DESCRIPTION:
+!   This method overloads the (==) operator for the {\tt ESMF\_ArraySpec} class.
+!   See "interface operator(==)" above for complete description.
 !
 !EOPI
-      end interface
+!------------------------------------------------------------------------------
+    integer :: localrc
+
+    ! Initialize output value in case of error
+    ESMF_ArraySpecEQ = .false.
+
+    ! check inputs
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec1, localrc)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec2, localrc)
+
+    if ((arrayspec1%rank == arrayspec2%rank) .and. &
+      arrayspec1%typekind == arrayspec2%typekind) &
+      ESMF_ArraySpecEQ = .true.
+
+  end function ESMF_ArraySpecEQ
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecNE()"
+!BOPI
+! !IROUTINE: ESMF_ArraySpecNE - Test if ArraySpec 1 is not equal to ArraySpec 2
 !
-!==============================================================================
-#endif
+! !INTERFACE:
+  function ESMF_ArraySpecNE(arrayspec1, arrayspec2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_ArraySpecNE
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpec), intent(in) :: arrayspec1
+    type(ESMF_ArraySpec), intent(in) :: arrayspec2
+!
+! !DESCRIPTION:
+!   This method overloads the (/=) operator for the {\tt ESMF\_ArraySpec} class.
+!   See "interface operator(/=)" above for complete description.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    ESMF_ArraySpecNE = .not.ESMF_ArraySpecEQ(arrayspec1, arrayspec2)
 
-  contains
-
-!==============================================================================
+  end function ESMF_ArraySpecNE
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------

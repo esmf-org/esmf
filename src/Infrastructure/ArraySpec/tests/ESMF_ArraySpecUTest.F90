@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecUTest.F90,v 1.11 2011/04/22 16:55:58 theurich Exp $
+! $Id: ESMF_ArraySpecUTest.F90,v 1.12 2011/04/22 17:46:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArraySpecUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySpecUTest.F90,v 1.11 2011/04/22 16:55:58 theurich Exp $'
+    '$Id: ESMF_ArraySpecUTest.F90,v 1.12 2011/04/22 17:46:39 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -49,7 +49,9 @@ program ESMF_ArraySpecUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
   
-  type(ESMF_ArraySpec)                        :: arrayspec
+  type(ESMF_ArraySpec)   :: arrayspec, arrayspec2
+  integer                :: rank
+  type(ESMF_TypeKind)    :: typekind
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -93,9 +95,29 @@ program ESMF_ArraySpecUTest
   !NEX_UTest 
   write(name, *) "Test ESMF_ArraySpecGet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArraySpecGet(arrayspec, rc=rc)
+  call ESMF_ArraySpecGet(arrayspec, rank=rank, typekind=typekind, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  !NEX_UTest 
+  write(name, *) "Validate ESMF_ArraySpecGet() results"
+  write(failMsg, *) "Returned rank and/or typekind incorrect"
+  call ESMF_Test(((rank==2).and.(typekind==ESMF_TYPEKIND_R8)), name, failMsg, &
+    result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest 
+  write(name, *) "Test ESMF_ArraySpec assignment and (==) operator"
+  write(failMsg, *) "Incorrect behavior"
+  arrayspec2 = arrayspec
+  call ESMF_Test(arrayspec2==arrayspec, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest 
+  write(name, *) "Test ESMF_ArraySpec (/=) operator"
+  write(failMsg, *) "Incorrect behavior"
+  call ESMF_Test(.not.(arrayspec2/=arrayspec), name, failMsg, result, ESMF_SRCLINE)
+
 #ifdef ESMF_TESTEXHAUSTIVE
   
   !------------------------------------------------------------------------
@@ -116,8 +138,27 @@ program ESMF_ArraySpecUTest
   !EX_UTest 
   write(name, *) "Test re-set ArraySpec with ESMF_ArraySpecGet()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArraySpecGet(arrayspec, rc=rc)
+  call ESMF_ArraySpecGet(arrayspec, rank=rank, typekind=typekind, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  write(name, *) "Validate re-set ArraySpec with ESMF_ArraySpecGet() results"
+  write(failMsg, *) "Returned rank and/or typekind incorrect"
+  call ESMF_Test(((rank==3).and.(typekind==ESMF_TYPEKIND_I4)), name, failMsg, &
+    result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  write(name, *) "Test ESMF_ArraySpec (==) operator"
+  write(failMsg, *) "Incorrect behavior"
+  call ESMF_Test(.not.(arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  write(name, *) "Test ESMF_ArraySpec (/=) operator"
+  write(failMsg, *) "Incorrect behavior"
+  call ESMF_Test(arrayspec2/=arrayspec, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !EX_UTest 
@@ -132,6 +173,18 @@ program ESMF_ArraySpecUTest
   write(failMsg, *) "Did return ESMF_SUCCESS"
   call ESMF_ArraySpecPrint(arrayspec, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  write(name, *) "Test ESMF_ArraySpec (==) operator"
+  write(failMsg, *) "Incorrect behavior"
+  call ESMF_Test(.not.(arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !EX_UTest 
+  write(name, *) "Test ESMF_ArraySpec (/=) operator"
+  write(failMsg, *) "Incorrect behavior"
+  call ESMF_Test(arrayspec2/=arrayspec, name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
