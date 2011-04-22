@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.4 2011/04/13 01:28:55 ksaint Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.5 2011/04/22 14:29:21 ksaint Exp $
 !
 ! Test code which creates a new Component.
 
@@ -10,7 +10,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! Tests, cursory and exahustive, for Component Create code.
+! Tests, cursory and exahustive, for Web Services Component Service
 !
 !
 !\begin{verbatim}
@@ -19,6 +19,7 @@ module ESMF_WebServUserModel
 
   ! ESMF Framework module
   use ESMF_Mod
+  use ESMF_TestMod
   use ESMF_IO_NetCDFMod
 
   implicit none
@@ -89,17 +90,32 @@ module ESMF_WebServUserModel
     type(ESMF_VM)         :: vm
     integer               :: petCount
 
+    ! local test variables
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer                :: result = 0
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Init starting: "
 
-    ! Determine petCount
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! Verifing that a ESMF Component Web Service can be registered
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    write(failMsg, *) "Return not equal to ESMF_SUCCESS"
+    write(name, *) "ESMF Initialize GridCompGet"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! Verifing that a ESMF Component Web Service can be registered
+    rc = ESMF_SUCCESS
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    write(failMsg, *) "Return not equal to ESMF_SUCCESS"
+    write(name, *) "ESMF Initialize VMGet"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
     print *, "User Comp1 Init returning: "
 
@@ -117,11 +133,37 @@ module ESMF_WebServUserModel
     integer, intent(out) :: rc
 
     ! Local variables
+    type(ESMF_VM)         :: vm
+    integer               :: petCount
+
+    ! local test variables
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer                :: result = 0
+
+    ! Local variables
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Run starting"
+
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! Verifing that a ESMF Component Web Service can be registered
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    write(failMsg, *) "Return not equal to ESMF_SUCCESS"
+    write(name, *) "ESMF Run GridCompGet"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! Verifing that a ESMF Component Web Service can be registered
+    rc = ESMF_SUCCESS
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    write(failMsg, *) "Return not equal to ESMF_SUCCESS"
+    write(name, *) "ESMF Run VMGet"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     print *, "User Comp1 Run returning"
 
@@ -139,13 +181,35 @@ module ESMF_WebServUserModel
     integer, intent(out) :: rc
 
     ! Local variables
+    type(ESMF_VM)         :: vm
+    integer               :: petCount
+
+    ! local test variables
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer                :: result = 0
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Final starting"
 
-    ! call ESMF_StatePrint(exportState)
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! Verifing that a ESMF Component Web Service can be registered
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+    write(failMsg, *) "Return not equal to ESMF_SUCCESS"
+    write(name, *) "ESMF Finalize GridCompGet"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! Verifing that a ESMF Component Web Service can be registered
+    rc = ESMF_SUCCESS
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    write(failMsg, *) "Return not equal to ESMF_SUCCESS"
+    write(name, *) "ESMF Finalize VMGet"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     print *, "User Comp1 Final returning"
 
@@ -166,32 +230,24 @@ program ESMF_WebServComponentUTest
     implicit none
     
     ! Local variables
-    integer :: result = 0
-    integer :: rc
-
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
-
-    ! other local variables
+    integer                :: rc
     character(ESMF_MAXSTR) :: cname
     type(ESMF_GridComp)    :: comp1
-    type(ESMF_State)       :: impState
-    type(ESMF_State)       :: expState
     integer                :: portNum
 
+    ! local test variables
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer                :: result = 0
+
 #ifdef ESMF_TESTEXHAUSTIVE
-    type(ESMF_VM)       :: vm
-    logical             :: bool
-    integer             :: localPet
-    type(ESMF_GridComp) :: comp2
 #endif
 
 
         
 !-------------------------------------------------------------------------
 !   !
-!   !  Quick Test - Register and unregister a Component Service.
+!   !  Quick Test - Setup the Web Services Loop
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
@@ -203,38 +259,19 @@ program ESMF_WebServComponentUTest
     call ESMF_GridCompSetServices(comp1, &
           userRoutine=ESMF_WebServUserModelRegister, rc=rc)
 
-    impState = ESMF_StateCreate(name="comp1 import", &
-          statetype=ESMF_STATE_IMPORT, rc=rc)
-    expState = ESMF_StateCreate(name="comp1 export", &
-          statetype=ESMF_STATE_EXPORT, rc=rc)
- 
     !------------------------------------------------------------------------
     !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
     portNum = 27060
     call ESMF_WebServicesLoop(comp1, portNum, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Web Services Loop"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
-    !------------------------------------------------------------------------
-    !EX_disable_UTest
-    ! Verifing that a Gridded Component can be created in parent VM context
-!    cname = "Atmosphere - child in parent VM context"
-!    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
-!      configFile="grid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
-!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!    write(name, *) "Creating a Gridded Component"
-!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !------------------------------------------------------------------------
-    !EX_disable_UTest
-    ! Query the run status of a Gridded Component 
-!    bool = ESMF_GridCompIsPetLocal(comp1, rc=rc)  
-!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!    write(name, *) "Query run status of a Gridded Component"
-!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 

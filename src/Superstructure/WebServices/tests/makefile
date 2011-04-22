@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2011/04/13 01:28:55 ksaint Exp $ 
+# $Id: makefile,v 1.3 2011/04/22 14:29:21 ksaint Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -30,15 +30,13 @@ DIRS        =
 #
 
 RUN_ESMF_WebServUTest:
-	$(MAKE) TNAME=WebServ NP=4 ftest & \
+	$(MAKE) TNAME=WebServ NP=3 ftest & \
    sleep 3 
 
 RUN_ESMF_WebServUTestUNI:
-	$(MAKE) TNAME=WebServ NP=1 ftest
+	$(MAKE) TNAME=WebServ NP=1 ftest & \
+   sleep 3
 
-
-#ESMC_WebServCompSvrClientUTest.o: ESMC_WebServCompSvrClientUTest.o
-#ESMC_UTEST_WebServCompSvrClient_OBJS = ESMC_WebServCompSvrClientUTest.o
 
 RUN_ESMC_WebServCompSvrClientUTest:
 	$(MAKE) TNAME=WebServCompSvrClient NP=1 ctest
