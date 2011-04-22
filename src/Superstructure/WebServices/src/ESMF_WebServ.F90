@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.17 2011/04/18 18:00:00 theurich Exp $
+! $Id: ESMF_WebServ.F90,v 1.18 2011/04/22 14:18:16 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -556,6 +556,7 @@ contains
 !------------------------------------------------------------------------------
 
     integer                 :: localrc
+    integer                 :: registrarrc
     integer                 :: localPet, petCount
     type(ESMF_VM)           :: vm
     type(ESMF_State)        :: importState
@@ -612,8 +613,8 @@ contains
              rcToReturn=rc)) return
        endif
 
-       call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
+       call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=registrarrc)
+          if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) &
@@ -633,8 +634,8 @@ contains
              importState=importState, exportState=exportState, &
              clock=clock, phase=phase, procType="E", rc=localrc)
 
-       call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
+       call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=registrarrc)
+          if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) &
