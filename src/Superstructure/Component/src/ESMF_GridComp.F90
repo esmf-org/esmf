@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.160 2011/03/24 15:28:04 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.161 2011/04/22 17:36:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@ module ESMF_GridCompMod
 ! !USES:
   use ESMF_UtilTypesMod
   use ESMF_LogErrMod
+  use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_ConfigMod
   use ESMF_ClockTypeMod
@@ -92,7 +93,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.160 2011/03/24 15:28:04 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.161 2011/04/22 17:36:50 eschwab Exp $'
 
 !==============================================================================
 !
