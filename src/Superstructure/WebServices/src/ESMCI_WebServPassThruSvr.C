@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServPassThruSvr.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $
+// $Id: ESMCI_WebServPassThruSvr.C,v 1.6 2011/04/22 14:51:26 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.6 2011/04/22 14:51:26 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -73,10 +73,12 @@ ESMCI_WebServPassThruSvr::ESMCI_WebServPassThruSvr(
 //
 // !ARGUMENTS:
 //
-  int     port,   // (in) the port number on which to setup the socket service
-                  // to listen for requests
-  string  camDir	// (in) the directory where the CAM output files can be 
-                  // found
+  int     port,    // (in) the port number on which to setup the socket service
+                   // to listen for requests
+  string  camDir,	 // (in) the directory where the CAM output files can be 
+                   // found
+  int     svrPort  // (in) the port number of the component server to which
+                   // we'll be connecting
   )
 //
 // !DESCRIPTION:
@@ -90,6 +92,7 @@ ESMCI_WebServPassThruSvr::ESMCI_WebServPassThruSvr(
 
 	theCAMDir = camDir;
 	theOutputFile = NULL;
+   theSvrPort = svrPort;
 
 	setPort(port);
 }
@@ -504,7 +507,7 @@ int  ESMCI_WebServPassThruSvr::processNew(
 	//      for each client.
 	//***
 	newClient->setServerHost("localhost");
-	newClient->setServerPort(27060);
+	newClient->setServerPort(theSvrPort);
 
 	newClient->setStatus(NET_ESMF_STAT_READY);
 

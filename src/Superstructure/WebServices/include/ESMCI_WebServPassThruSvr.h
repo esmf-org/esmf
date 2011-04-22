@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServPassThruSvr.h,v 1.5 2011/03/09 14:16:32 ksaint Exp $
+// $Id: ESMCI_WebServPassThruSvr.h,v 1.6 2011/04/22 14:51:25 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -53,7 +53,8 @@ namespace ESMCI
 
      // constructor and destructor
 	  ESMCI_WebServPassThruSvr(int     port, 
-                              string  camDir);
+                              string  camDir,
+                              int     svrPort);
 	  ~ESMCI_WebServPassThruSvr();
 
      // port number access methods
@@ -89,6 +90,7 @@ namespace ESMCI
 	  int  getNextClientId();
 
 	  int				thePort;			// the port number of the socket service
+	  int				theSvrPort;		// the port number of the component service
 
 	  ESMCI_WebServServerSocket	theSocket;		// the server socket
 
