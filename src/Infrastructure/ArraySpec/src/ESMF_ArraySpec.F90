@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.49 2011/04/22 17:46:37 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.50 2011/04/22 20:52:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.49 2011/04/22 17:46:37 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.50 2011/04/22 20:52:57 theurich Exp $'
 
 !==============================================================================
 
@@ -453,9 +453,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     arrayspec%rank = rank
     if (rank < 1 .or. rank > ESMF_MAXDIM) then
       ! not a valid rank value
-      if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         msg="bad value for rank", &
-        ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+        ESMF_CONTEXT, rcToReturn=rc)
+      return  ! bail out
     endif
 
     ! set typekind (do not need check because parameterized type)
