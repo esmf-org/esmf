@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.47 2011/04/01 16:42:14 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.48 2011/04/22 16:55:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -54,24 +54,6 @@ module ESMF_ArraySpecMod
   private
 
 !------------------------------------------------------------------------------
-  ! Status of Array Spec
-  type ESMF_ArraySpecStatus
-    sequence
-    integer  :: status
-  end type
-
-  ! Supported ESMF Array Spec Statuses:
-  !    ESMF_ARRAYSPEC_STATUS_UNKNOWN   Not Known
-  !    ESMF_ARRAYSPEC_STATUS_NOTSET    Array Spec hasn't been set yet
-  !    ESMF_ARRAYSPEC_STATUS_SET       Array Spec has been set and can be used
-
-   type (ESMF_ArraySpecStatus), parameter, private ::            &
-      ESMF_ARRAYSPEC_STATUS_UNKNOWN  =  ESMF_ArraySpecStatus(0), &
-      ESMF_ARRAYSPEC_STATUS_NOTSET   =  ESMF_ArraySpecStatus(1), &
-      ESMF_ARRAYSPEC_STATUS_SET      =  ESMF_ArraySpecStatus(2)
-
-
-!------------------------------------------------------------------------------
 ! ! ESMF_ArraySpec
 !
 ! ! Data array specification, with no associated data buffer.
@@ -80,11 +62,6 @@ module ESMF_ArraySpecMod
     private
     integer             :: rank       ! number of dimensions
     type(ESMF_TypeKind) :: typekind   ! fortran type and kind enum/integer
-#ifdef ESMF_NO_INITIALIZERS
-    type (ESMF_ArraySpecStatus) :: status
-#else
-    type (ESMF_ArraySpecStatus) :: status = ESMF_ARRAYSPEC_STATUS_NOTSET 
-#endif
     ESMF_INIT_DECLARE
   end type
 
@@ -98,25 +75,25 @@ module ESMF_ArraySpecMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
-  public ESMF_ArraySpecSet
   public ESMF_ArraySpecGet
+  public ESMF_ArraySpecPrint
+  public ESMF_ArraySpecSet
   public ESMF_ArraySpecValidate
 
 ! - ESMF-internal methods:
   public ESMF_ArraySpecInit
   public ESMF_ArraySpecGetInit
-  public ESMF_ArraySpecPrint
-  private ESMF_ArraySpecStatusPrint
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.47 2011/04/01 16:42:14 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.48 2011/04/22 16:55:57 theurich Exp $'
 
 !==============================================================================
 
+#if 0
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -127,12 +104,9 @@ module ESMF_ArraySpecMod
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_ArraySpecStatusEqual
+         module procedure ESMF_ArraySpecEQ
 
 ! !DESCRIPTION:
-!     This interface overloads the equality operator for the specific
-!     ESMF ArraySpec ids (enums).  It is provided for easy comparisons of 
-!     these types with defined values.
 !
 !EOPI
       end interface
@@ -143,17 +117,15 @@ module ESMF_ArraySpecMod
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_ArraySpecStatusNotEqual
+         module procedure ESMF_ArraySpecNE
 
 ! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF ArraySpec ids (enums).  It is provided for easy comparisons of 
-!     these types with defined values.
 !
 !EOPI
       end interface
 !
 !==============================================================================
+#endif
 
   contains
 
@@ -170,12 +142,11 @@ module ESMF_ArraySpecMod
   subroutine ESMF_ArraySpecGet(arrayspec, keywordEnforcer, rank, typekind, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rank
     type(ESMF_TypeKind),  intent(out), optional :: typekind
     integer,              intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -197,36 +168,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! Local vars
-    integer :: status ! local error status
-    logical :: rcpresent ! did user specify rc?
-
-    ! Initialize return code; assume routine is not implemented       
-    status = ESMF_RC_NOT_IMPL
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.
-      rc = ESMF_RC_NOT_IMPL
-    endif
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
-
-    ! check status
-    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
-       ! Use LogErr to handle return code (to record other info for logfile)
-       if (ESMF_LogFoundError(ESMF_RC_OBJ_INIT, msg="ArraySpec hasn't been set", &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     ! Get arrayspec contents
     if(present(rank)) rank = arrayspec%rank
     if(present(typekind)) typekind = arrayspec%typekind
 
-    ! Return successfully
-    if (rcpresent) rc = ESMF_SUCCESS
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySpecGet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecPrint"
+!BOP
+! !IROUTINE: ESMF_ArraySpecPrint - Print information of ArraySpec
+
+! !INTERFACE:
+  subroutine ESMF_ArraySpecPrint(arrayspec, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArraySpec), intent(in)              :: arrayspec
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out), optional   :: rc
+!         
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!     Print ArraySpec internals. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
+!     may be used on unit 6 to get coherent output.  \\
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[arrayspec] 
+!         Specified {\tt ESMF\_ArraySpec} object.
+!     \item[{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
+
+    write(*, *) "ArraySpec Print Begins =====>"
+    write(*, *) "   rank = ", arrayspec%rank    
+    write(*, *) "   typekind = ", arrayspec%typekind
+    write(*, *) "ArraySpec Print Ends   =====>"
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_ArraySpecPrint
 !------------------------------------------------------------------------------
 
 
@@ -240,12 +252,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySpecSet(arrayspec, rank, typekind, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)         :: arrayspec
+    type(ESMF_ArraySpec), intent(out)           :: arrayspec
     integer,              intent(in)            :: rank
     type(ESMF_TypeKind),  intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -268,43 +279,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    ! Local vars
-    integer :: status ! local error status
-    logical :: rcpresent ! did user specify rc?
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Initialize pointer
-    status = ESMF_RC_NOT_IMPL
-    rcpresent = .FALSE.
+    ! mark output as uninitialized    
+    ESMF_INIT_SET_DELETED(arrayspec)
 
-    ! Initialize return code; assume routine is not implemented 
-    if (present(rc)) then
-      rcpresent = .TRUE.
-      rc = ESMF_RC_NOT_IMPL
-    endif
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
-
-    ! Set arrayspec contents with some checking to keep Silverio at bay
-    if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
-      arrayspec%rank = rank
-    else
-      ! something to trigger on next time that this is bad
-      arrayspec%rank = 0
+    ! set rank
+    arrayspec%rank = rank
+    if (rank < 1 .or. rank > ESMF_MAXDIM) then
+      ! not a valid rank value
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                            msg="bad value for rank", &
-                             ESMF_CONTEXT, rcToReturn=rc)) return
+        msg="bad value for rank", &
+        ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
     endif
 
-    ! Since typekind is a derived type, you cannot set it to
-    ! illegal values, and no additional validity tests are needed.
+    ! set typekind (do not need check because parameterized type)
     arrayspec%typekind = typekind
+    
+    ! mark output as successfully initialized
+    ESMF_INIT_SET_DEFINED(arrayspec)
 
-    ! set status to indicate that arrayspec has now been defined
-    arrayspec%status = ESMF_ARRAYSPEC_STATUS_SET
-
-    ! set return code
-    if (rcpresent) rc = ESMF_SUCCESS
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_ArraySpecSet
 !------------------------------------------------------------------------------
@@ -320,11 +317,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySpecValidate(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)           :: arrayspec
+    type(ESMF_ArraySpec), intent(in)              :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -343,31 +338,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
-    
-    ! Call into the C++ interface, which will sort out optional arguments.
-    !todo: call c_ESMC_ArraySpecValidate(arrayspec, localrc)
-    localrc = ESMF_SUCCESS  ! remove when todo is done.
-    ! Use LogErr to handle return code
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! check status
-    if (arrayspec%status .ne. ESMF_ARRAYSPEC_STATUS_SET) then
-       ! Use LogErr to handle return code (to record other info for logfile)
-       if (ESMF_LogFoundError(ESMF_RC_OBJ_INIT, msg="ArraySpec hasn't been set", &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
-    ! Return success
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_ArraySpecValidate
 !------------------------------------------------------------------------------
 
@@ -382,7 +361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySpecInit(arrayspec)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)              :: arrayspec
+    type(ESMF_ArraySpec), intent(out)             :: arrayspec
 !         
 !
 ! !DESCRIPTION:
@@ -396,8 +375,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    arrayspec%status = ESMF_ARRAYSPEC_STATUS_NOTSET 
-
     ESMF_INIT_SET_DEFINED(arrayspec)
   end subroutine ESMF_ArraySpecInit
 !------------------------------------------------------------------------------
@@ -436,167 +413,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
   end function ESMF_ArraySpecGetInit
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySpecStatusEqual"
-!BOPI
-! !IROUTINE: ESMF_ArraySpecStatusEqual - equality of ArraySpec statuses
-!
-! !INTERFACE:
-      function ESMF_ArraySpecStatusEqual(ArraySpecStatus1, ArraySpecStatus2)
-
-! !RETURN VALUE:
-      logical :: ESMF_ArraySpecStatusEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_ArraySpecStatus), intent(in) :: &
-         ArraySpecStatus1,      &! Two igrid statuses to compare for
-         ArraySpecStatus2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF ArraySpec statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ArraySpecStatus1, ArraySpecStatus2]
-!          Two igrid statuses to compare for equality
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-      ESMF_ArraySpecStatusEqual = (ArraySpecStatus1%status == &
-                              ArraySpecStatus2%status)
-
-      end function ESMF_ArraySpecStatusEqual
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySpecStatusNotEqual"
-!BOPI
-! !IROUTINE: ESMF_ArraySpecStatusNotEqual - non-equality of ArraySpec statuses
-!
-! !INTERFACE:
-      function ESMF_ArraySpecStatusNotEqual(ArraySpecStatus1, ArraySpecStatus2)
-
-! !RETURN VALUE:
-      logical :: ESMF_ArraySpecStatusNotEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_ArraySpecStatus), intent(in) :: &
-         ArraySpecStatus1,      &! Two ArraySpec Statuses to compare for
-         ArraySpecStatus2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF ArraySpec statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[ArraySpecStatus1, ArraySpecStatus2]
-!          Two statuses of ArraySpecs to compare for inequality
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-      ESMF_ArraySpecStatusNotEqual = (ArraySpecStatus1%status /= &
-                                 ArraySpecStatus2%status)
-
-      end function ESMF_ArraySpecStatusNotEqual
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-internal method -----------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySpecStatusPrint"
-!BOPI
-! !IROUTINE: ESMF_ArraySpecStatusPrint - Print information of ArraySpecStatus
-
-! !INTERFACE:
-  subroutine ESMF_ArraySpecStatusPrint(arrayspecstatus)
-!
-! !ARGUMENTS:
-    type(ESMF_ArraySpecStatus), intent(in)              :: arrayspecstatus
-!         
-!
-! !DESCRIPTION:
-!     Print ArraySpecStatus internals. \\
-!
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[arrayspecstatus] 
-!          Specified {\tt ESMF\_ArraySpecStatus} object.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    write(*, *) "ArraySpecStatus Print Begins =====>"
-    write(*, *) "   status = ", arrayspecstatus%status
-    write(*, *) "ArraySpecStatus Print Ends   =====>"
-    
-  end subroutine ESMF_ArraySpecStatusPrint
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArraySpecPrint"
-!BOP
-! !IROUTINE: ESMF_ArraySpecPrint - Print information of ArraySpec
-
-! !INTERFACE:
-  subroutine ESMF_ArraySpecPrint(arrayspec, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(inout)           :: arrayspec
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out), optional   :: rc
-!         
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!     Print ArraySpec internals. \\
-!
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[arrayspec] 
-!          Specified {\tt ESMF\_ArraySpec} object.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    write(*, *) "ArraySpec Print Begins =====>"
-    write(*, *) "   rank = ", arrayspec%rank    
-    write(*, *) "   typekind = ", arrayspec%typekind
-    call ESMF_ArraySpecStatusPrint(arrayspec%status)
-    write(*, *) "ArraySpec Print Ends   =====>"
-
-    rc = ESMF_SUCCESS
-    
-  end subroutine ESMF_ArraySpecPrint
 !------------------------------------------------------------------------------
 
 
