@@ -1,4 +1,4 @@
-% $Id: WebServices_desc.tex,v 1.1 2011/04/18 18:05:31 theurich Exp $
+% $Id: WebServices_desc.tex,v 1.2 2011/04/22 17:06:19 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -10,5 +10,65 @@
 
 %\subsection{Description}
 
-WebServices are a cool way of making ESMF components accessible to remote clients. 
-This section describes WebServices from a high level perspective.
+The goal of the ESMF Web Services is to provide the tools to allow ESMF Users to make 
+their Components available via a web service.  The first step is to make the Component 
+a service, and then make it accessible via the Web.  
+
+The above diagram describes the ESMF Web Services software architecture. The architecture 
+defines a multi-tiered set of applications that provide a flexible approach for accessing 
+model components. 
+
+At the heart of this architecture is the Component Service; this is the 
+application that does the model work.  The ESMF Web Services part provides a way to make 
+the model accessible via a network API (Application Programming Interface). ESMF provides 
+the tools to turn a model component into a service as well as the tools to access the 
+service from the network. 
+
+The Process Controller is a stand-alone application that provides a control mechanism between 
+the end user and the Component Service.  The Process Controller is responsible for managing 
+client information as well as restricting client access to a Component Service.  
+(The role of the Process Controller is expected to expand in the future.)
+
+The tomcat/axis2 application provides the access via the Web using standard SOAP 
+protocols. Part of this application includes the SOAP interface definition 
+(using a WSDL file) as well as some java code that provides the access to the Process 
+Controller application.
+
+Finally, the Registrar maintains a list of Component Services that are currently 
+available;  Component Services register themselves with the Registrar when they 
+startup, and unregister themselves when they shutdown.  The list of available services 
+is maintained in an XML file and is accessible from the Registrar using its network API.
+
+%\subsubsection{Creating a Service around a Component}
+%\subsubsubsection{Code Modifications}
+One of the goals in providing the tools to make Components into services was to make 
+the process as simple and easy as possible.  Any model component that has been 
+implemented using the ESMF Component Framework can easily be turned into a 
+Component Services with just a minor change to the Application 
+driver code.  (For details on the ESMF Framework, see the ESMF Developers Documentation.)
+
+The primary function in ESMF Web Services is the ESMF\_WebServicesLoop routine.  This 
+function registers the Component Service with the Registrar and then sets up a 
+network socket service that listens for requests from a client.  It starts a loop 
+that waits for incoming requests and manages the routing of these requests to 
+all PETs.  It is also responsible for making sure the appropriate ESMF 
+routine (ESMF\_Initialize, ESMF\_Run or ESMF\_Finalize) is called based on the incoming 
+request. When the client has completed its interaction with the Component Service, 
+the loop will be terminated and it will unregister the Component Service from the Registrar. 
+
+To make all of this happen, the Application Driver just needs to replace its calls to 
+ESMF\_Initialize, ESMF\_Run, and ESMF\_Finalize with a single call to ESMF\_WebServicesLoop. 
+
+\begin{verbatim}
+
+	use ESMF_WebServMod
+	....
+
+	call ESMF_WebServicesLoop(gridComponent, portNumber, returnCode)
+
+\end{verbatim}
+
+That's all there is to turning an ESMF Component into a network-accessible 
+ESMF Component Service.  For a detailed example of an ESMF Component turned into 
+an ESMF Component Service, see the Examples in the Web Services section of the 
+Developer' Guide.
