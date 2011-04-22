@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.5 2011/04/21 04:53:34 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.6 2011/04/22 23:07:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.5 2011/04/21 04:53:34 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.6 2011/04/22 23:07:33 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,11 +54,12 @@ program ESMF_ContainerUTest
   type(ESMF_Container)            :: container
   type(ESMF_Field), allocatable   :: fieldList(:)
   type(ESMF_Field)                :: field
+  type(ESMF_Field), pointer       :: fieldListOut(:)
   character(ESMF_MAXSTR)          :: iString
   character(ESMF_MAXSTR)          :: fieldName
   integer, parameter              :: fieldCount = 5
-  integer                         :: i
-  logical                         :: isPresent
+  integer                         :: i, k, fieldCountOut
+  logical                         :: isPresent, loopResult
   
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -119,7 +120,7 @@ program ESMF_ContainerUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Container Get item Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "fieldName incorrect"
   call ESMF_Test((trim(fieldName)=="testField3"), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -133,7 +134,7 @@ program ESMF_ContainerUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Container Get isPresent Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "isPresent incorrect"
   call ESMF_Test((isPresent.eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -161,9 +162,59 @@ program ESMF_ContainerUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Container Get isPresent Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  write(failMsg, *) "isPresent incorrect"
   call ESMF_Test((isPresent.eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
 
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Get count Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGet(container, fieldCount=fieldCountOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+print *, fieldCountOut
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Get fieldList Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, fieldList=fieldListOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get fieldListOut (associated) Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get fieldListOut (size) Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==fieldCountOut, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get fieldListOut (item) Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    loopResult = .true. ! initialize
+    do i=1, size(fieldListOut)
+      k=i
+      if (i>=3) k=i+1
+      if (fieldListOut(i)/=fieldList(k)) loopResult = .false.
+    enddo
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  if (associated(fieldListOut)) deallocate(fieldListOut) ! garbage collection
+  
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Destroy Test"

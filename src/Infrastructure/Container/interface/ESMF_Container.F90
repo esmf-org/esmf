@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.5 2011/04/21 04:53:33 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.6 2011/04/22 23:07:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.5 2011/04/21 04:53:33 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.6 2011/04/22 23:07:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -118,6 +118,7 @@ module ESMF_ContainerMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_ContainerGetField
+    module procedure ESMF_ContainerGetFieldList
 
 ! !DESCRIPTION: 
 !   Query Container.
@@ -370,6 +371,104 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ContainerGetField
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGetFieldList()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGet - Query Container object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ContainerGet()
+  subroutine ESMF_ContainerGetFieldList(container, fieldCount, fieldList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(in)            :: container
+    integer,              intent(out), optional :: fieldCount
+    type(ESMF_Field),     pointer,     optional :: fieldList(:)
+    integer,              intent(out), optional :: rc  
+!         
+! !DESCRIPTION:
+!   Get items from a {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container] 
+!     {\tt ESMF\_Container} object to be queried.
+!   \item[{[fieldCount]}]
+!     Number of Field objects in {\tt container}.
+!   \item[{[fieldList]}]
+!     List of Field objects in {\tt container}.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: stat
+    integer                       :: i, dummyFieldCount
+    type(ESMF_Pointer)            :: vector
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface
+    call c_ESMC_ContainerGetCount(container, dummyFieldCount, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    if (present(fieldList)) then
+      if (associated(fieldList)) then
+        if (size(fieldList) < dummyFieldCount) then
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+            msg="fieldList is too small", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return  ! bail out
+        endif
+      else
+        allocate(fieldList(dummyFieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg= "allocating fieldList", &
+          ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+      endif
+      
+      ! Call into the C++ interface to set up the vector on the C++ side
+      call c_ESMC_ContainerGetVector(container, vector, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      do i=0, dummyFieldCount-1 ! C-style indexing, zero-based
+        
+        ! Call into the C++ interface to set up the vector on the C++ side
+        call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+          fieldList(i+1), localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      enddo
+      
+      ! release vector here
+      ! Call into the C++ interface to release the vector on the C++ side
+      call c_ESMC_ContainerReleaseVector(container, vector, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    endif
+    
+    if (present(fieldCount)) then
+      fieldCount = dummyFieldCount
+    endif
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGetFieldList
 !------------------------------------------------------------------------------
 
 
