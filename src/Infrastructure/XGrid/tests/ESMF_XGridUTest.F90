@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.22 2011/02/23 16:57:38 w6ws Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.23 2011/04/25 15:50:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -330,13 +330,13 @@ end subroutine test1andahalf
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         do i = 1, 2
-            sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), destroyDistGrid=.true., rc=localrc)
+            sideA(i) = ESMF_GridCreate(distgrid=sideAdg(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
         do i = 1, 1
-            sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), destroyDistGrid=.true., rc=localrc)
+            sideB(i) = ESMF_GridCreate(distgrid=sideBdg(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
