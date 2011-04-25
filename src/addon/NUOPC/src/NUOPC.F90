@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.4 2011/04/19 18:27:53 theurich Exp $
+! $Id: NUOPC.F90,v 1.5 2011/04/25 21:17:51 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -311,6 +311,9 @@ module NUOPC
 
     maxCount = size(cplList)
     count = 0 ! initialize
+    
+    nullify(importStandardNameList)
+    nullify(exportStandardNameList)
     
     ! build list of standard names of all Fields inside of importState
     call NUOPC_StateBuildStdList(importState, importStandardNameList, rc=rc)
@@ -717,10 +720,6 @@ module NUOPC
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    nullify(stdAttrNameList)
-    if (present(stdItemNameList)) nullify(stdItemNameList)
-    if (present(stdConnectedList)) nullify(stdConnectedList)
-    
     call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
@@ -743,26 +742,56 @@ module NUOPC
           fieldCount = fieldCount + 1
       enddo
       
-      allocate(stdAttrNameList(fieldCount), stat=stat)
-      if (ESMF_LogFoundAllocError(stat, msg= "allocating stdAttrNameList", &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-
-      if (present(stdItemNameList)) then
-        allocate(stdItemNameList(fieldCount), stat=stat)
-        if (ESMF_LogFoundAllocError(stat, msg= "allocating stdItemNameList", &
+      if (associated(stdAttrNameList)) then
+        if (size(stdAttrNameList)<fieldCount) then
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+            msg="stdAttrNameList too small", &
+            line=__LINE__, &
+            file=FILENAME)
+          return  ! bail out
+        endif
+      else
+        allocate(stdAttrNameList(fieldCount), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg="allocating stdAttrNameList", &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
       endif
 
+      if (present(stdItemNameList)) then
+        if (associated(stdItemNameList)) then
+          if (size(stdItemNameList)<fieldCount) then
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+              msg="stdItemNameList too small", &
+              line=__LINE__, &
+              file=FILENAME)
+            return  ! bail out
+          endif
+        else
+          allocate(stdItemNameList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating stdItemNameList", &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
+      endif
+
       if (present(stdConnectedList)) then
-        allocate(stdConnectedList(fieldCount), stat=stat)
-        if (ESMF_LogFoundAllocError(stat, msg= "allocating stdConnectedList", &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (associated(stdConnectedList)) then
+          if (size(stdConnectedList)<fieldCount) then
+            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+              msg="stdConnectedList too small", &
+              line=__LINE__, &
+              file=FILENAME)
+            return  ! bail out
+          endif
+        else
+          allocate(stdConnectedList(fieldCount), stat=stat)
+          if (ESMF_LogFoundAllocError(stat, msg="allocating stdConnectedList", &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
       endif
 
       fieldCount = 1  ! reset
@@ -805,7 +834,7 @@ module NUOPC
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateBuildStdList - Build a Field list from State according to standardName attribute
+! !IROUTINE: NUOPC_StateIsAllConnected - Test if all Fields in a State are connected
 ! !INTERFACE:
   function NUOPC_StateIsAllConnected(state, rc)
 ! !ARGUMENTS:
@@ -823,6 +852,9 @@ module NUOPC
 
     if (present(rc)) rc = ESMF_SUCCESS
     
+    nullify(stdAttrNameList)
+    nullify(stdConnectedList)
+
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdConnectedList=stdConnectedList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
@@ -882,6 +914,9 @@ module NUOPC
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+  
+    nullify(stdAttrNameList)
+    nullify(stdItemNameList)
   
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdItemNameList=stdItemNameList, rc=rc)
@@ -1038,6 +1073,9 @@ module NUOPC
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    
+    nullify(stdAttrNameList)
+    nullify(stdItemNameList)
 
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdItemNameList=stdItemNameList, rc=rc)
