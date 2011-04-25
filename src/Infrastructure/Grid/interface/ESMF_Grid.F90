@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.209 2011/04/01 23:06:45 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.210 2011/04/25 15:49:30 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -233,7 +233,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.209 2011/04/01 23:06:45 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.210 2011/04/25 15:49:30 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2382,7 +2382,7 @@ end subroutine ESMF_GridConvertIndex
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateCopyFromNewDG(grid, distgrid, keywordEnforcer, &
-        destroyDistGrid, destroyDELayout, name, rc)
+        name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateCopyFromNewDG
@@ -2391,8 +2391,6 @@ end subroutine ESMF_GridConvertIndex
        type(ESMF_Grid),       intent(in)              :: grid
        type(ESMF_DistGrid),   intent(in)              :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       logical,               intent(in),   optional  :: destroyDistGrid
-       logical,               intent(in),   optional  :: destroyDELayout
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
@@ -2407,12 +2405,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object which describes how the Grid is decomposed and
 !      distributed over DEs. 
-! \item[{[destroyDistgrid]}]
-!      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
-!      Defaults to false. 
-! \item[{[destroyDELayout]}]
-!      If true, when the Grid is destroyed the DELayout will be destroyed also. 
-!      Defaults to false. 
 ! \item[{[name]}]
 !      Name of the new Grid. If not specified, a new unique name will be created 
 !      for the Grid.
@@ -2490,8 +2482,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             gridAlign=gridAlign(1:dimCount), &
             ! gridMemLBound=gridMemLBound, &   ! TODO: NEED TO ADD THIS TO GET
             indexFlag=indexFlag, &
-            destroyDistGrid=destroyDistGrid, &
-            destroyDELayout=destroyDELayout, &
             rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2990,12 +2980,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   
     ESMF_GridCreateCopyFromReg=ESMF_GridCreate(grid, distgrid, &
-                                    destroyDistGrid=.true., &
-                                    destroyDELayout=.true., &
                                     name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ ! XMRKX
 
     ! Clean up memory
     deallocate(regDecompLocal)
@@ -3021,8 +3018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       function ESMF_GridCreateFrmDistGrid(coordTypeKind,distgrid, &
         keywordEnforcer, distgridToGridMap, coordDimCount, coordDimMap, &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-        gridMemLBound, indexflag, destroyDistGrid, &
-        destroyDELayout, name, rc)
+        gridMemLBound, indexflag, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGrid
@@ -3039,8 +3035,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional  :: gridAlign(:)
        integer,               intent(in),  optional  :: gridMemLBound(:)
        type(ESMF_IndexFlag),  intent(in),  optional  :: indexflag
-       logical,               intent(in),  optional  :: destroyDistGrid
-       logical,               intent(in),  optional  :: destroyDELayout
        character (len=*),     intent(in),  optional  :: name
        integer,               intent(out), optional  :: rc
 !
@@ -3112,12 +3106,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Indicates the indexing scheme to be used in the new Grid. Please see
 !      Section~\ref{opt:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
-! \item[{[destroyDistgrid]}]
-!      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
-!      Defaults to false. 
-! \item[{[destroyDELayout]}]
-!      If true, when the Grid is destroyed the DELayout will be destroyed also. 
-!      Defaults to false. 
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3212,31 +3200,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! Convert destroyDistGrid flag
-    if (present(destroyDistgrid)) then
-        if (destroyDistgrid) then
-           intDestroyDistgrid=1
-        else
-           intDestroyDistgrid=0
-         endif
-    else
-           intDestroyDistgrid=0
-    endif
-
-    !! Convert destroyDELayout flag
-    if (present(destroyDELayout)) then
-        if (destroyDELayout) then
-           intDestroyDELayout=1
-        else
-           intDestroyDELayout=0
-         endif
-    else
-           intDestroyDELayout=0
-    endif
-
-
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
+
+
+    !! Convert destroyDistGrid flag
+    ! default to don't destroy, subroutine used to actually set flags in other creates
+    intDestroyDistgrid=0
+    intDestroyDELayout=0
+
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreatefromdistgrid(grid%this, nameLen, name, &
@@ -3292,7 +3264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFrmDistGridArb(coordTypeKind,distgrid, &
         indexArray, keywordEnforcer, distDim, coordDimCount, coordDimMap, &
-        destroyDistGrid, destroyDELayout, name, rc)
+        name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGridArb
@@ -3305,8 +3277,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distDim(:)
        integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
-       logical,               intent(in),   optional  :: destroyDistGrid
-       logical,               intent(in),   optional  :: destroyDELayout
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
@@ -3349,12 +3319,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      {\tt coordDimMap(i,1)} is /ESMF\_GRID\_ARBDIM/ if the ith dimension of the grid is
 !      arbitrarily distributed, or {\tt i} if the ith dimension is not distributed.
 !      Note that if j is bigger than {\tt coordDimCount(i)} then it's ignored.        
-! \item[{[destroyDistgrid]}]
-!      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
-!      Defaults to false. 
-! \item[{[destroyDELayout]}]
-!      If true, when the Grid is destroyed the DELayout will be destroyed also. 
-!      Defaults to false. 
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3582,27 +3546,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 	
-    !! Convert destroyDistGrid flag
-    if (present(destroyDistgrid)) then
-        if (destroyDistgrid) then
-           intDestroyDistgrid=1
-        else
-           intDestroyDistgrid=0
-         endif
-    else
-           intDestroyDistgrid=0
-    endif
+    ! DEfault to don't destroy, subroutine used to set actual values in other creates
+    intDestroyDistgrid=0
+    intDestroyDELayout=0
 
-    !! Convert destroyDELayout flag
-    if (present(destroyDELayout)) then
-        if (destroyDELayout) then
-           intDestroyDELayout=1
-        else
-           intDestroyDELayout=0
-         endif
-    else
-           intDestroyDELayout=0
-    endif
 
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
@@ -4515,19 +4462,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (localIsSphere) then
        grid = ESMF_GridCreate(distgrid=distgrid, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
-            indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
-            destroyDELayout=.true., rc=localrc)
+            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     else
        grid = ESMF_GridCreate(distgrid=distgrid, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
-            indexflag=ESMF_INDEX_GLOBAL, destroyDistGrid=.true.,&
-            destroyDELayout=.true., rc=localrc)
+            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    
+
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set coordinate tables 
     ! Longitude
@@ -5666,7 +5619,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
    endif
 
-  
+ 
    ! Create Grid from specification -----------------------------------------------
    ESMF_GridCreateShapeTileIrreg=ESMF_GridCreateFrmDistGrid(coordTypeKind, distgrid, &
                                     distgridToGridMap=distgridToGridMap, &
@@ -5676,9 +5629,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                     gridAlign=gridAlignLocal, &
 				    gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, & 
-                                    destroyDistGrid=.true., &
-                                    destroyDELayout=.true., &
                                     name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid( ESMF_GridCreateShapeTileIrreg,destroy=.true., &
+           rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout( ESMF_GridCreateShapeTileIrreg,destroy=.true., &
+         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6574,9 +6536,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                     gridAlign=gridAlignLocal, &
                                     gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
-                                    destroyDistGrid=.true., &
-                                    destroyDELayout=.true., &
                                     name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid(ESMF_GridCreateShapeTileReg,destroy=.true., &
+           rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout(ESMF_GridCreateShapeTileReg,destroy=.true., &
+           rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7180,9 +7151,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 			       distgrid, indexArray, &
                                distDim=distDimLocal, &
 			       coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
-                               destroyDistGrid=.true., &
-                               destroyDELayout=.false., &
                                name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid(ESMF_GridCreateShapeTileArb,destroy=.true., &
+           rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout(ESMF_GridCreateShapeTileArb,destroy=.false., &
+           rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13655,27 +13635,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !! Convert destroyDistGrid flag
-    if (present(destroyDistgrid)) then
-        if (destroyDistgrid) then
-           intDestroyDistgrid=1
-        else
-           intDestroyDistgrid=0
-         endif
-    else
-           intDestroyDistgrid=0
-    endif
+    !! default to don't destroy, actual value can be set by subroutine in other creates
+    intDestroyDistgrid=0
+    intDestroyDELayout=0
 
-    !! Convert destroyDELayout flag
-    if (present(destroyDELayout)) then
-        if (destroyDELayout) then
-           intDestroyDELayout=1
-        else
-           intDestroyDELayout=0
-         endif
-    else
-           intDestroyDELayout=0
-    endif
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetfromdistgrid(grid%this, nameLen, name, &
@@ -14793,11 +14756,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                     gridAlign=gridAlignLocal, &
                                     gridMemLBound=gridMemLBound, &
                                     indexflag=indexflag, &
-                                    destroyDistGrid=.true., &
-                                    destroyDELayout=.true., &
                                     name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
 
 
     ! Commit Grid -----------------------------------------------------------------
@@ -16299,9 +16270,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 			       coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
                                minIndex=minIndexLocal, maxIndex=maxIndexLocal, &
  	    		       localArbIndexCount=arbIndexCount, localArbIndex=arbIndexList, &
-                               destroyDistGrid=.true., &
-                               destroyDELayout=.false., &
 			       name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set internal items to be destroyed with grid
+    call ESMF_GridSetDestroyDistgrid(grid,destroy=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridSetDestroyDELayout(grid,destroy=.false., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16778,6 +16756,100 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_GridLUADefault
 
 !------------------------------------------------------------------------------
+
+
+! --------------------------------------------- -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetDestroyDistgrid()"
+!BOPI
+! !IROUTINE: ESMF_GridSetDestroyDistgrid
+
+! !INTERFACE:
+  subroutine ESMF_GridSetDestroyDistgrid(grid,destroy, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)              :: grid
+    logical,         intent(in)              :: destroy
+    integer,         intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer :: destroyInt
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    
+    ! set int from logical
+    if (destroy) then
+       destroyInt=1
+    else
+       destroyInt=0
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_esmc_gridsetdestroydistgrid(grid, destroyInt);
+      
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine  ESMF_GridSetDestroyDistgrid
+!------------------------------------------------------------------------------
+
+
+! --------------------------------------------- -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetDestroyDELayout()"
+!BOPI
+! !IROUTINE: ESMF_GridSetDestroyDELayout
+
+! !INTERFACE:
+  subroutine ESMF_GridSetDestroyDELayout(grid,destroy, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)              :: grid
+    logical,         intent(in)              :: destroy
+    integer,         intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer :: destroyInt
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid, rc)
+    
+    ! set int from logical
+    if (destroy) then
+       destroyInt=1
+    else
+       destroyInt=0
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_esmc_gridsetdestroydelayout(grid, destroyInt);
+      
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine  ESMF_GridSetDestroyDELayout
+!------------------------------------------------------------------------------
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

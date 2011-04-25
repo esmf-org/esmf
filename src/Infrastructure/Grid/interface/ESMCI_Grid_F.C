@@ -2883,6 +2883,48 @@ extern "C" {
   } 
 #endif
 
+
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  void FTN(c_esmc_gridsetdestroydistgrid)(ESMCI::Grid **gridArg, 
+                                          int *destroyDistgridArg
+					  ){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridsetdestroydistgridflag()"
+
+   ESMCI::Grid *grid;
+
+   // Get grid
+   grid=*gridArg;
+
+   if (*destroyDistgridArg==1) {
+     grid->setDestroyDistgrid(true);
+   } else {
+     grid->setDestroyDistgrid(false);
+   }
+}
+
+
+  void FTN(c_esmc_gridsetdestroydelayout)(ESMCI::Grid **gridArg, 
+                                          int *destroyDelayoutArg
+					  ){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridsetdestroydelayoutflag()"
+
+   ESMCI::Grid *grid;
+
+   // Get grid
+   grid=*gridArg;
+
+   if (*destroyDelayoutArg==1) {
+     grid->setDestroyDELayout(true);
+   } else {
+     grid->setDestroyDELayout(false);
+   }
+}
+
+
+
   ///////////////////////////////////////////////////////////////////////////////////
 
 

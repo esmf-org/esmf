@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.77 2011/02/17 23:44:39 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.78 2011/04/25 15:49:29 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -306,6 +306,8 @@ template <class TYPE>
 
   static bool match(Grid *grid1, Grid *grid2, int *rc=NULL);
 
+  void setDestroyDistgrid(bool flag) {destroyDistgrid=flag;}  
+  void setDestroyDELayout(bool flag) {destroyDELayout=flag;}  
 
   // Use these when DistGrid topology stuff is in place
   // bool isLBnd(int localDE, int dim) {return (isDELBnd[localDE] & (0x1 << dim))?true:false;}

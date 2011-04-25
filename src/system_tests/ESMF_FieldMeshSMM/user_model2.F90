@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2011/01/14 17:49:01 w6ws Exp $
+! $Id: user_model2.F90,v 1.8 2011/04/25 15:50:51 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -85,7 +85,7 @@
       distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
-      grid = ESMF_GridCreate(distgrid=distgrid, destroyDistGrid=.true., rc=rc)
+      grid = ESMF_GridCreate(distgrid=distgrid, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
       if(rc/=ESMF_SUCCESS) return
@@ -160,6 +160,7 @@
       ! Local variables
       type(ESMF_Field) :: field
       type(ESMF_Grid) :: grid
+      type(ESMF_DistGrid) :: distgrid
       type(ESMF_VM) :: vm
       integer       :: de_id
 
@@ -179,9 +180,14 @@
       call ESMF_FieldGet(field, grid=grid, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
+      call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+
       call ESMF_FieldDestroy(field, rc=rc)
       if(rc/=ESMF_SUCCESS) return
       call ESMF_GridDestroy(grid, rc=rc)
+      if(rc/=ESMF_SUCCESS) return
+      call ESMF_DistGridDestroy(distgrid, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
       print *, "User Comp Final returning"
