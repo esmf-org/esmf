@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.127 2011/02/22 23:19:44 w6ws Exp $
+// $Id: ESMCI_Array.C,v 1.128 2011/04/25 19:16:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.127 2011/02/22 23:19:44 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.128 2011/04/25 19:16:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1570,7 +1570,7 @@ Array *Array::create(
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
     larrayList[i] = LocalArray::create(typekind, rank, temp_counts,
-      temp_larrayLBound, temp_larrayUBound, NULL, NULL, DATA_REF, &localrc);
+      temp_larrayLBound, temp_larrayUBound, NULL, DATA_REF, &localrc);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
   }
@@ -1693,8 +1693,9 @@ Array *Array::create(
     arrayOut->larrayList = new LocalArray*[localDeCount];
     for (int i=0; i<localDeCount; i++){
       arrayOut->larrayList[i] =
-        LocalArray::create(arrayIn->larrayList[i], NULL, NULL, NULL, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc)){
+        LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMCI_ERR_PASSTHRU,rc)){
         arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
         return ESMC_NULL_POINTER;
       }

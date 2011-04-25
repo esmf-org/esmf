@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.16 2011/02/23 19:53:02 w6ws Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.17 2011/04/25 19:16:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    *ptr = ESMCI::LocalArray::create(*tk, *rank, *oflag, NULL, &localrc);
+    *ptr = ESMCI::LocalArray::create(*tk, *rank, *oflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -76,7 +76,7 @@ extern "C" {
       return;
     }
     // call into C++
-    *larrayOut = ESMCI::LocalArray::create(*ptr, NULL, NULL, NULL, &localrc);
+    *larrayOut = ESMCI::LocalArray::create(*ptr, NULL, NULL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully

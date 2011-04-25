@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.20 2011/02/22 22:32:00 w6ws Exp $
+// $Id: ESMCI_LocalArray.C,v 1.21 2011/04/25 19:16:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.20 2011/02/22 22:32:00 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.21 2011/04/25 19:16:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -152,8 +152,7 @@ int LocalArray::construct(
   const int *ubounds,         // upper index number per dim
   const int *icounts,         // number of items in each dim
   void *ibase_addr,           // base memory address of data block
-  struct c_F90ptr *f90ptr,    // opaque type of Fortran dope vector
-  const char *name            // name, default created if NULL
+  struct c_F90ptr *f90ptr     // opaque type of Fortran dope vector
   ){
 //
 // !DESCRIPTION:
@@ -297,7 +296,6 @@ LocalArray *LocalArray::create(
   ESMC_TypeKind tk,           // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   LocalArrayOrigin oflag,     // caller is fortran or C++?
-  const char *name,           // object name
   int *rc){                   // return code
 //
 // !DESCRIPTION:
@@ -323,7 +321,7 @@ LocalArray *LocalArray::create(
   }
   
   localrc = a->construct(false, DATA_NONE, tk, rank, oflag, false,
-    NULL, NULL, NULL, NULL, NULL, NULL, name);
+    NULL, NULL, NULL, NULL, NULL, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
@@ -351,7 +349,6 @@ LocalArray *LocalArray::create(
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   const int *counts,          // number of items in each dim
   void *base_addr,            // if non-null, this is already allocated memory
-  const char *name,           // object name
   CopyFlag docopy,            // make a data copy from base_addr?
   int *rc){                   // return code
 //
@@ -382,7 +379,7 @@ LocalArray *LocalArray::create(
 
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
-    NULL, NULL, NULL, counts, base_addr, NULL, name);
+    NULL, NULL, NULL, counts, base_addr, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
@@ -412,7 +409,6 @@ LocalArray *LocalArray::create(
   const int *lbounds,         // lower index number per dim
   const int *ubounds,         // upper index number per dim
   void *base_addr,            // if non-null, this is already allocated memory
-  const char *name,           // object name
   CopyFlag docopy,            // make a data copy from base_addr?
   int *rc){                   // return code
 //
@@ -443,7 +439,7 @@ LocalArray *LocalArray::create(
 
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
-    NULL, lbounds, ubounds, counts, base_addr, NULL, name);
+    NULL, lbounds, ubounds, counts, base_addr, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
 
@@ -471,7 +467,6 @@ LocalArray *LocalArray::create(
   const LocalArray *larrayIn, // object to copy from
   const int *lbounds,         // lower index number per dim
   const int *ubounds,         // upper index number per dim
-  const char *name,           // object name
   int *rc){                   // return code
 //
 // !DESCRIPTION:
@@ -567,7 +562,7 @@ LocalArray *LocalArray::create(
   
   if (copyflag == DATA_COPY){
     // make a copy of the LocalArray object including the data allocation
-    larrayOut = LocalArray::create(larrayIn, lbounds, ubounds, NULL, &localrc);
+    larrayOut = LocalArray::create(larrayIn, lbounds, ubounds, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return NULL;
   }else{

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.17 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_LocalArray.h,v 1.18 2011/04/25 19:16:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,23 +104,20 @@ namespace ESMCI {
     int construct(bool aflag, CopyFlag docopy,
       ESMC_TypeKind tk, int irank, LocalArrayOrigin oflag, bool dflag,
       const int *offsets, const int *lbounds, const int *ubounds,
-      const int *icounts, void *ibase_addr, struct c_F90ptr *f90ptr,
-      const char *name);
+      const int *icounts, void *ibase_addr, struct c_F90ptr *f90ptr);
     int destruct();
 
    public:
     // create() and destroy()
     static LocalArray *create(ESMC_TypeKind tk, int rank,
-      LocalArrayOrigin oflag, const char *name = NULL, int *rc = NULL);
+      LocalArrayOrigin oflag, int *rc = NULL);
     static LocalArray *create(ESMC_TypeKind tk, int rank, const int *counts,
-      void *base_addr = NULL, const char *name = NULL,
-      CopyFlag docopy = DATA_REF, int *rc = NULL);
+      void *base_addr = NULL, CopyFlag docopy = DATA_REF, int *rc = NULL);
     static LocalArray *create(ESMC_TypeKind dk, int rank, const int *counts,
       const int *lbounds, const int *ubounds, void *base_addr = NULL, 
-      const char *name = NULL, CopyFlag docopy = DATA_REF, int *rc = NULL);
+      CopyFlag docopy = DATA_REF, int *rc = NULL);
     static LocalArray *create(const LocalArray *larrayIn,
-      const int *lbounds = NULL, const int *ubounds = NULL,
-      const char *name = NULL, int *rc = NULL);
+      const int *lbounds = NULL, const int *ubounds = NULL, int *rc = NULL);
     static LocalArray *create(const LocalArray *larrayIn, CopyFlag copyflag,
       const int *lbounds, const int *ubounds, int *rc);
     static int destroy(LocalArray *array);

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.25 2011/03/08 05:41:40 w6ws Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.26 2011/04/25 19:16:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.25 2011/03/08 05:41:40 w6ws Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.26 2011/04/25 19:16:49 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -270,7 +270,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
   subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
-    typekind, rank, counts, lbounds, ubounds, name, rc)
+    typekind, rank, counts, lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
@@ -280,7 +280,6 @@ contains
     integer,                    intent(out), optional :: counts(:)
     integer,                    intent(out), optional :: lbounds(:)
     integer,                    intent(out), optional :: ubounds(:)
-    character(len=*), intent(out), optional :: name
     integer,                    intent(out), optional :: rc             
 !
 !
@@ -304,8 +303,6 @@ contains
 !     Lower bound per dimension.
 !   \item[{[ubounds]}]
 !     Upper bound per dimension.
-!   \item[{[name]}]
-!     Name of the LocalArray object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -372,13 +369,6 @@ contains
         return
       endif
       call c_ESMC_LocalArrayGetUbounds(localarray, ubounds, localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    if (present(name)) then
-      call c_ESMC_GetName(localarray, name, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
