@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.76 2011/04/22 18:51:07 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.77 2011/04/25 05:23:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.76 2011/04/22 18:51:07 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.77 2011/04/25 05:23:17 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1972,7 +1972,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
 
     ! Check that indexflag does not specify mode that is not supported here

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.43 2011/04/22 18:51:10 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.44 2011/04/25 05:23:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.43 2011/04/22 18:51:10 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.44 2011/04/25 05:23:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -674,7 +674,7 @@ end function
     localrc = ESMF_RC_NOT_IMPL
 
     ! Check init status of arguments
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit,arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     call ESMF_ArraySpecGet(arrayspec, typekind=typekind, rank=rank, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

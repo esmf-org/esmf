@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.97 2011/04/22 18:51:08 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.98 2011/04/25 05:23:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.97 2011/04/22 18:51:08 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.98 2011/04/25 05:23:19 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -601,6 +601,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize return code   
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1160,7 +1163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc)
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
@@ -2447,7 +2450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
     if (ESMF_LogFoundError(localrc, &  
@@ -3382,7 +3385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_LocStreamGetInit,locstream,rc)
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
  
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
@@ -4061,7 +4064,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
  
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
@@ -4763,7 +4766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
-    ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ArraySpecGetInit, ESMF_ArraySpecInit, arrayspec)
+    ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
     ! Create GeomBase from Xgrid
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
