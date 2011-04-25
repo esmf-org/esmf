@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.62 2011/04/08 21:28:14 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.63 2011/04/25 15:22:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.62 2011/04/08 21:28:14 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.63 2011/04/25 15:22:12 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -283,7 +283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        regridMethod, &
                                        regridPoleType, regridPoleNPnts, & 
                                        regridScheme,unmappedDstAction, &
-                                       routehandle, indicies, weights, & 
+                                       routehandle, indices, weights, & 
                                        srcFracField, dstFracField, rc)
 !
 ! !RETURN VALUE:
@@ -300,7 +300,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                   intent(in),    optional :: regridScheme
       type(ESMF_UnmappedAction), intent(in),    optional :: unmappedDstAction
       type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
-      integer(ESMF_KIND_I4),     pointer,       optional :: indicies(:,:)
+      integer(ESMF_KIND_I4),     pointer,       optional :: indices(:,:)
       real(ESMF_KIND_R8),        pointer,       optional :: weights(:)
       type(ESMF_Field),          intent(inout), optional :: srcFracField
       type(ESMF_Field),          intent(inout), optional :: dstFracField
@@ -725,7 +725,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               localRegridPoleType, localRegridPoleNPnts, &
               lregridScheme, &
               unmappedDstAction, routehandle, &
-              indicies, weights, localrc)
+              indices, weights, localrc)
         if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return

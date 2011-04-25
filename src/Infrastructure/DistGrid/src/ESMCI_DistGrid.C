@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.55 2011/02/22 23:13:22 w6ws Exp $
+// $Id: ESMCI_DistGrid.C,v 1.56 2011/04/25 15:22:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.55 2011/02/22 23:13:22 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.56 2011/04/25 15:22:07 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3996,7 +3996,7 @@ int DistGrid::setArbSeqIndex(
   ){
 //
 // !DESCRIPTION:
-//    Set the array of arbitrary indicies
+//    Set the array of arbitrary indices
 //
 //EOPI
 //-----------------------------------------------------------------------------

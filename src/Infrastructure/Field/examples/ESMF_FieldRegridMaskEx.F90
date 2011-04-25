@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.16 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.17 2011/04/25 15:22:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.16 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.17 2011/04/25 15:22:11 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -72,7 +72,7 @@ program ESMF_FieldRegridEx
   real(ESMF_KIND_R8) :: ctheta, stheta
   real(ESMF_KIND_R8) :: theta, d2rad, xtmp, x, y
 
-  integer(ESMF_KIND_I4), pointer :: indicies(:,:)
+  integer(ESMF_KIND_I4), pointer :: indices(:,:)
   real(ESMF_KIND_R8), pointer    :: weights(:)
   integer :: spherical_grid
 
@@ -301,7 +301,7 @@ program ESMF_FieldRegridEx
                              dstField=dstField, dstMaskValues=(/1/),       &
                              unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
                              routeHandle=routeHandle,                      &
-                             indicies=indicies, weights=weights,           &
+                             indices=indices, weights=weights,           &
                              regridMethod=ESMF_REGRID_METHOD_BILINEAR,     &
                              rc=localrc)
 !EOC
@@ -334,10 +334,10 @@ program ESMF_FieldRegridEx
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! Uncomment print statement to print the weights
-  if (associated(indicies)) then
-    do i1 = 1, size(indicies,1)
+  if (associated(indices)) then
+    do i1 = 1, size(indices,1)
 
-    !print *, indicies(i1,1), indicies(i1,2) , ':', weights(i1)
+    !print *, indices(i1,1), indices(i1,2) , ':', weights(i1)
     
     enddo
   endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.20 2011/04/19 21:38:16 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.21 2011/04/25 15:22:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.20 2011/04/19 21:38:16 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.21 2011/04/25 15:22:20 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -836,14 +836,14 @@ function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 
 !
 ! !DESCRIPTION:
-!      Compute the overlay distgrid from offline input of indicies
+!      Compute the overlay distgrid from offline input of indices
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [sparseMat]
-!           the {ESMF\_XGridSpec} object containing indicies and weights.
+!           the {ESMF\_XGridSpec} object containing indices and weights.
 !     \item [dim]
-!           dimension of the indicies used to retrieve the seq. index list.
+!           dimension of the indices used to retrieve the seq. index list.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
 !     \end{description}
@@ -865,7 +865,7 @@ function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 
     ! generate the union of indices from all the factorIndexLists:
     ! generate the initial array that has the index positions marked '1'
-    ! Because of the distributed nature of the indicies, there may be
+    ! Because of the distributed nature of the indices, there may be
     ! duplicate entries in the index union residing on the other PETs
     ! this is currently left to to the SMM engine to detect such an error.
     !
@@ -982,9 +982,9 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 !     \item [distgrid]
 !           distgrid object spanning the same set of PETs.
 !     \item [factorIndexList]
-!           indicies used to construct the arb index list.
+!           indices used to construct the arb index list.
 !     \item [dim]
-!           dimension of the indicies used to retrieve the seq. index list.
+!           dimension of the indices used to retrieve the seq. index list.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
 !     \end{description}

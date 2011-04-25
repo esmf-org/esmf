@@ -1,4 +1,4 @@
-% $Id: Field_obj.tex,v 1.7 2008/04/02 20:42:51 cdeluca Exp $
+% $Id: Field_obj.tex,v 1.8 2011/04/25 15:22:09 rokuingh Exp $
 
 %\section{Object Model}
 
@@ -92,7 +92,7 @@ set of data values.
 
 The DataMap objects maintain mapping information between the
 Grid and the ESMF Array objects contained in a Field object.
-This includes how the indicies map, what the unit data values are,
+This includes how the indices map, what the unit data values are,
 the RelativeLocations of the data items to a single Grid element
 (this is related to but separate from the Grid "staggering" value).
 It also contains interleaving information for vectors and for
@@ -106,7 +106,7 @@ if the grid is rotated or transposed.
 
 The index order specification is 
 a simple derived type in fortran and a structure in C++.
-It contains the ordering of how the indicies in a multidimensional
+It contains the ordering of how the indices in a multidimensional
 array vary from inner to outer (fastest to slowest in iteration
 order).  Grid and Array objects use this.
 

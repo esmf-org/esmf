@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.34 2011/04/05 19:00:43 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.35 2011/04/25 15:22:23 rokuingh Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -33,7 +33,7 @@ the method, {\tt ESMF\_FieldRegridStore()}.   The method
 {\tt ESMF\_MeshCreate()}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
 source or destination grid is a cubed sphere grid or an unstructured grid. When making this call, 
 the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates.
-{\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indicies table representing the interpolation matrix. 
+{\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indices table representing the interpolation matrix. 
 
 The regridding occurs in 3D to avoid
 problems with periodicity and with the pole singularity. This application

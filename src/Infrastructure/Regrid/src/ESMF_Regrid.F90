@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.159 2011/02/23 20:08:43 w6ws Exp $
+! $Id: ESMF_Regrid.F90,v 1.160 2011/04/25 15:22:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.159 2011/02/23 20:08:43 w6ws Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.160 2011/04/25 15:22:19 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -263,7 +263,7 @@ end function my_xor
                  regridPoleType, regridPoleNPnts, &
                  regridScheme, &
                  unmappedDstAction, routehandle, &
-                 indicies, weights, &
+                 indices, weights, &
                  rc)
 !
 ! !ARGUMENTS:
@@ -277,7 +277,7 @@ end function my_xor
       integer, intent(in)                    :: regridScheme
       type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
-      integer(ESMF_KIND_I4), pointer, optional         :: indicies(:,:)
+      integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
       integer,                  intent(  out), optional :: rc
 !
@@ -324,15 +324,15 @@ end function my_xor
 
        ! Logic to determine if valid optional args are passed.  
 
-       ! First thing to check is that indicies <=> weights
-       if (my_xor(present(indicies), present(weights))) then
+       ! First thing to check is that indices <=> weights
+       if (my_xor(present(indices), present(weights))) then
          localrc = ESMF_RC_ARG_BAD
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
        ! Next, we require that the user request at least something
-       if (.not.(present(routehandle) .or. present(indicies))) then
+       if (.not.(present(routehandle) .or. present(indices))) then
          localrc = ESMF_RC_ARG_BAD
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -353,7 +353,7 @@ end function my_xor
        has_rh = 0
        has_iw = 0
        if (present(routehandle)) has_rh = 1
-       if (present(indicies)) has_iw = 1
+       if (present(indices)) has_iw = 1
 
        if (present(unmappedDstAction)) then
           localunmappedDstAction=unmappedDstAction
@@ -399,11 +399,11 @@ end function my_xor
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Now we must allocate the F90 pointers and copy weights
-       if (present(indicies)) then
-         allocate(indicies(nentries,2))
+       if (present(indices)) then
+         allocate(indices(nentries,2))
          allocate(weights(nentries))
 
-         call c_ESMC_Copy_TempWeights(tweights, indicies(1,1), weights(1))
+         call c_ESMC_Copy_TempWeights(tweights, indices(1,1), weights(1))
 
        endif
 

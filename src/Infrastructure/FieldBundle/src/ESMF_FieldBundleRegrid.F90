@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.20 2011/04/12 14:07:55 feiliu Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.21 2011/04/25 15:22:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.20 2011/04/12 14:07:55 feiliu Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.21 2011/04/25 15:22:15 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -322,8 +322,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: prevSrcStaggerLoc, prevDstStaggerLoc
         type(ESMF_Grid) :: currSrcGrid, currDstGrid
         type(ESMF_StaggerLoc) :: currSrcStaggerLoc, currDstStaggerLoc
-        integer(ESMF_KIND_I4), pointer :: tmp_indicies(:,:)
-        integer(ESMF_KIND_I4), pointer :: prev_indicies(:,:)
+        integer(ESMF_KIND_I4), pointer :: tmp_indices(:,:)
+        integer(ESMF_KIND_I4), pointer :: prev_indices(:,:)
         real(ESMF_KIND_R8), pointer :: prev_weights(:)
         type(ESMF_GeomType) :: srcGeomtype        
         type(ESMF_GeomType) :: dstGeomtype        
@@ -419,14 +419,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              if (matchesPrev) then
                 call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, & 
                         routehandle=rh, &
-                        factorList=prev_weights, factorIndexList=prev_indicies, &
+                        factorList=prev_weights, factorIndexList=prev_indices, &
                         rc=localrc)
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                      ESMF_CONTEXT, rcToReturn=rc)) return
              else ! If it doesn't match make a new previous
                 ! if we have them, get rid of old matrix
                 if (havePrev) then
-                   deallocate(prev_indicies)
+                   deallocate(prev_indices)
                    deallocate(prev_weights)
                 endif
 
@@ -438,19 +438,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                      regridScheme=regridScheme, &
                      unmappedDstAction=unmappedDstAction, &
                      routehandle=rh, &
-                     indicies=tmp_indicies, weights=prev_weights, &
+                     indices=tmp_indices, weights=prev_weights, &
                      rc=localrc)
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
                 ! Swap order
                 ! TODO: fix order in regrid
-                allocate(prev_indicies(2,size(tmp_indicies,1)))
-                do j=1,size(tmp_indicies,1)
-                   prev_indicies(1,j)=tmp_indicies(j,1)
-                   prev_indicies(2,j)=tmp_indicies(j,2)
+                allocate(prev_indices(2,size(tmp_indices,1)))
+                do j=1,size(tmp_indices,1)
+                   prev_indices(1,j)=tmp_indices(j,1)
+                   prev_indices(2,j)=tmp_indices(j,2)
                 enddo
-                deallocate(tmp_indicies)
+                deallocate(tmp_indices)
 
                 ! Mark as prev and record info about prev
                 havePrev=.true.
@@ -493,7 +493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! if we have them, get rid of old matrix
         if (havePrev) then
-           deallocate(prev_indicies)
+           deallocate(prev_indices)
            deallocate(prev_weights)
         endif
 

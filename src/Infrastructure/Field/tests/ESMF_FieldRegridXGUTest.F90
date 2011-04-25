@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.32 2011/04/19 21:39:50 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.33 2011/04/25 15:22:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1074,7 +1074,7 @@ contains
     integer             :: atm_nx, atm_ny, ocn_nx, ocn_ny
     integer             :: localrc, npet, i, j, lpet
     real(ESMF_KIND_R8), pointer :: weights(:)
-    integer(ESMF_KIND_I4), pointer :: indicies(:,:)
+    integer(ESMF_KIND_I4), pointer :: indices(:,:)
     real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
     type(ESMF_XGrid)     :: xgrid
     type(ESMF_XGridSpec) :: sparseMatA2X(1)
@@ -1253,22 +1253,22 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call RegridStore here to compute SMM weights and indicies
+    ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
-      indicies=indicies, weights=weights, rc=localrc)
+      indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights), '-', weights
-    print *, lpet, 'indicies: ', size(indicies,1),'-', size(indicies,2)
-    do j = 1, size(indicies,1)
-         print *, indicies(j,1), '->', indicies(j,2)
+    print *, lpet, 'indices: ', size(indices,1),'-', size(indices,2)
+    do j = 1, size(indices,1)
+         print *, indices(j,1), '->', indices(j,2)
     enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1281,10 +1281,10 @@ contains
     endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indicies,2), size(indicies,1)))
-    do j = 1, size(indicies,1)
-      do i = 1, size(indicies,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indicies(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
+    do j = 1, size(indices,1)
+      do i = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -1375,7 +1375,7 @@ contains
     integer             :: atm_nx, atm_ny, ocn_nx, ocn_ny
     integer             :: localrc, npet, i, j, lpet
     real(ESMF_KIND_R8), pointer :: weights(:)
-    integer(ESMF_KIND_I4), pointer :: indicies(:,:)
+    integer(ESMF_KIND_I4), pointer :: indices(:,:)
     real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
     type(ESMF_XGrid)     :: xgrid
     type(ESMF_XGridSpec) :: sparseMatA2X(1)
@@ -1552,22 +1552,22 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call RegridStore here to compute SMM weights and indicies
+    ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
-      indicies=indicies, weights=weights, rc=localrc)
+      indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights), '-', weights
-    print *, lpet, 'indicies: ', size(indicies,1),'-', size(indicies,2)
-    do j = 1, size(indicies,1)
-         print *, indicies(j,1), '->', indicies(j,2)
+    print *, lpet, 'indices: ', size(indices,1),'-', size(indices,2)
+    do j = 1, size(indices,1)
+         print *, indices(j,1), '->', indices(j,2)
     enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1580,10 +1580,10 @@ contains
     endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indicies,2), size(indicies,1)))
-    do j = 1, size(indicies,1)
-      do i = 1, size(indicies,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indicies(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
+    do j = 1, size(indices,1)
+      do i = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -1672,7 +1672,7 @@ contains
     integer             :: atm_nx, atm_ny, ocn_nx, ocn_ny
     integer             :: localrc, npet, i, j, lpet
     real(ESMF_KIND_R8), pointer :: weights(:)
-    integer(ESMF_KIND_I4), pointer :: indicies(:,:)
+    integer(ESMF_KIND_I4), pointer :: indices(:,:)
     real(ESMF_KIND_R8), pointer :: coordX(:), coordY(:)
     type(ESMF_XGrid)     :: xgrid
     type(ESMF_XGridSpec) :: sparseMatA2X(1)
@@ -1849,29 +1849,29 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call RegridStore here to compute SMM weights and indicies
+    ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
-      indicies=indicies, weights=weights, rc=localrc)
+      indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights)
-    print *, lpet, 'indicies: ', size(indicies,1)
-    !do j = 1, size(indicies,1)
-    !     print *, indicies(j,1), '->', indicies(j,2)
+    print *, lpet, 'indices: ', size(indices,1)
+    !do j = 1, size(indices,1)
+    !     print *, indices(j,1), '->', indices(j,2)
     !enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indicies,1) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,1) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
-    print *, lpet, 'src idx range: ', minval(indicies(:,1)), maxval(indicies(:,1))
-    print *, lpet, 'dst idx range: ', minval(indicies(:,2)), maxval(indicies(:,2))
+    print *, lpet, 'src idx range: ', minval(indices(:,1)), maxval(indices(:,1))
+    print *, lpet, 'dst idx range: ', minval(indices(:,2)), maxval(indices(:,2))
     !if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
     !  call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
     !    ESMF_CONTEXT, rcToReturn=rc)
@@ -1879,10 +1879,10 @@ contains
     !endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indicies,2), size(indicies,1)))
-    do j = 1, size(indicies,1)
-      do i = 1, size(indicies,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indicies(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
+    do j = 1, size(indices,1)
+      do i = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -1975,7 +1975,7 @@ contains
     real(ESMF_KIND_R8)              :: startx, starty
     integer                         :: localrc, npet, i, j, lpet
     real(ESMF_KIND_R8), pointer     :: weights(:)
-    integer(ESMF_KIND_I4), pointer  :: indicies(:,:)
+    integer(ESMF_KIND_I4), pointer  :: indices(:,:)
     real(ESMF_KIND_R8), pointer     :: coordX(:), coordY(:)
     type(ESMF_XGrid)                :: xgrid
     type(ESMF_XGridSpec)            :: sparseMatA2X(1)
@@ -2154,24 +2154,24 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call RegridStore here to compute SMM weights and indicies
+    ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
-      indicies=indicies, weights=weights, rc=localrc)
+      indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! make sure the numbers are consistent
     print *, lpet, size(weights), '-', weights
-    print *, lpet, size(indicies,1),'-', size(indicies,2)
-    do j = 1, size(indicies,1)
-         print *, indicies(j,1), '->', indicies(j,2)
+    print *, lpet, size(indices,1),'-', size(indices,2)
+    do j = 1, size(indices,1)
+         print *, indices(j,1), '->', indices(j,2)
     enddo
 
-    simax = maxval(indicies(:,1))
-    dimax = maxval(indicies(:,2))
+    simax = maxval(indices(:,1))
+    dimax = maxval(indices(:,2))
     call ESMF_VMAllReduce(vm, (/ simax, dimax /), gn, 2, ESMF_MAX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2185,10 +2185,10 @@ contains
     endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indicies,2), size(indicies,1)))
-    do j = 1, size(indicies,1)
-      do i = 1, size(indicies,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indicies(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
+    do j = 1, size(indices,1)
+      do i = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -2291,7 +2291,7 @@ contains
     integer             :: atm_nx, atm_ny, ocn_nx, ocn_ny
     integer             :: localrc, npet, i, j, lpet
     real(ESMF_KIND_R8), pointer :: weights(:)
-    integer(ESMF_KIND_I4), pointer :: indicies(:,:)
+    integer(ESMF_KIND_I4), pointer :: indices(:,:)
     real(ESMF_KIND_R8), pointer :: coordX(:,:), coordY(:,:)
 
     type(ESMF_Grid) :: sideA(1), sideB(1)
@@ -2474,12 +2474,12 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call RegridStore here to compute SMM weights and indicies
+    ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
       regridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      indicies=indicies, weights=weights, rc=localrc)
+      indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2506,11 +2506,11 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, lpet, '-', associated(weights), '-', size(weights), '-', weights
-    print *, lpet, '-', associated(indicies), '-', size(indicies),'-', indicies
+    print *, lpet, '-', associated(indices), '-', size(indices),'-', indices
 
     sideA(1) = grid_ocn
     sideB(1) = grid_atm
-    A2X(1)%factorIndexList = indicies
+    A2X(1)%factorIndexList = indices
     A2X(1)%factorList = weights
     xgrid = ESMF_XGridCreate(sideA, sideB, sparseMatA2X=A2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

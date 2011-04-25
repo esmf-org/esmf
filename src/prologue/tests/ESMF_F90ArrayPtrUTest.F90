@@ -1,4 +1,4 @@
-! $Id: ESMF_F90ArrayPtrUTest.F90,v 1.13 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_F90ArrayPtrUTest.F90,v 1.14 2011/04/25 15:22:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@
     implicit none
 
     ! This test verifies that the actual size of the Fortran 90 "dope vector"
-    ! (private pointer information which stores the rank, indicies, data type,
+    ! (private pointer information which stores the rank, indices, data type,
     ! etc for any Fortran array) will fit within space which has been set aside
     ! for it.
     !
