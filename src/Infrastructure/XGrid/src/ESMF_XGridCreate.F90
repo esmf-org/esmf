@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.22 2011/04/26 19:50:45 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.23 2011/04/26 23:48:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,6 @@ module ESMF_XGridCreateMod
   use ESMF_MeshMod
   use ESMF_StaggerLocMod
   use ESMF_XGridMod
-  use ESMF_RegridMod
   use ESMF_InitMacrosMod
   use ESMF_VMMod
   use ESMF_F90InterfaceMod
@@ -75,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.22 2011/04/26 19:50:45 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.23 2011/04/26 23:48:29 feiliu Exp $'
 
 !==============================================================================
 !
