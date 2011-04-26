@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.31 2011/01/25 18:20:25 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.32 2011/04/26 19:48:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,6 +22,9 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_ConserveInterp.h>
+#include <Mesh/include/ESMCI_Sintdnode.h>
+#include <Mesh/include/ESMCI_XGridUtil.h>
+
 
 #include <iostream>
 #include <fstream>
@@ -35,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.31 2011/01/25 18:20:25 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.32 2011/04/26 19:48:24 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -699,7 +702,7 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchRes
 }
 #endif
 
-void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
+void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
   // Get src coord field
@@ -714,6 +717,9 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchRes
   // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
+  // store all the intersections
+  std::vector<sintd_node *> sintd_nodes;
+  std::vector<sintd_cell *> sintd_cells;
 
   // Loop through search results
   SearchResult::iterator sb = sres.begin(), se = sres.end();
@@ -751,7 +757,8 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchRes
 
     // Calculate weights
     calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield,
-                                     &src_elem_area, &valid, &wgts, &areas);
+                                     &src_elem_area, &valid, &wgts, &areas, 
+                                     midmesh, &sintd_nodes, &sintd_cells);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -825,10 +832,11 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, SearchRes
 
   } // for searchresult
 
+  if(midmesh != 0)
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh);
 }
 
-
-void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
+void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
   // Get src coord field
@@ -843,6 +851,9 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
   // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
+  // store all the intersections
+  std::vector<sintd_node *> sintd_nodes;
+  std::vector<sintd_cell *> sintd_cells;
 
   // Loop through search results
   SearchResult::iterator sb = sres.begin(), se = sres.end();
@@ -880,7 +891,8 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
 
     // Calculate weights
     calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield,
-                                     &src_elem_area, &valid, &wgts, &areas);
+                                     &src_elem_area, &valid, &wgts, &areas,
+                                     midmesh, &sintd_nodes, &sintd_cells);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -951,10 +963,13 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, SearchResu
 
   } // for searchresult
 
+  if(midmesh != 0)
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
+
 }
 
 
-void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
+void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
   // both meshes have to have the same dimensions
@@ -973,9 +988,9 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, 
   // Get weights depending on dimension
   if (pdim==2) {
     if (sdim==2) {
-      calc_conserve_mat_serial_2D_2D_cart(srcmesh, dstmesh, sres, iw, src_frac);
+      calc_conserve_mat_serial_2D_2D_cart(srcmesh, dstmesh, midmesh, sres, iw, src_frac);
     } else if (sdim==3) {
-      calc_conserve_mat_serial_2D_3D_sph(srcmesh, dstmesh, sres, iw, src_frac);
+      calc_conserve_mat_serial_2D_3D_sph(srcmesh, dstmesh, midmesh, sres, iw, src_frac);
     }
   } else {
     Throw() << "Meshes with parametric dimension != 2 not supported for conservative regridding";
@@ -1128,7 +1143,7 @@ static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::
   }
 }
   
-Interp::Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
+Interp::Interp(Mesh &src, Mesh &dest, Mesh *midmesh, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
 sres(),
 grend(src, dest, get_dst_config(dest, _fpairs)),
 fpairs(_fpairs),
@@ -1139,7 +1154,8 @@ has_std(false),
 has_patch(false),
 has_cnsrv(false),
 srcmesh(src),
-dstmesh(dest)
+dstmesh(dest),
+midmesh(midmesh)
 {
 
 
@@ -1171,10 +1187,10 @@ dstmesh(dest)
       OctSearchElems(grend.GetSrcRend(), ESMC_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
     }
 
-
     /*
     Par::Out() << "SrcRend **************" << std::endl;
-    grend.GetSrcRend().Print(Par::Out());
+    //grend.GetSrcRend().Print(Par::Out());
+    grend.GetSrcRend().Print(std::cout);
     */
     
   } else {
@@ -1422,7 +1438,7 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   
   if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
   else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, srcmesh, iw);
-  else if (fpair.idata == INTERP_CONSERVE) calc_conserve_mat_serial(srcmesh, dstmesh, sres, iw, src_frac);
+  else if (fpair.idata == INTERP_CONSERVE) calc_conserve_mat_serial(srcmesh, dstmesh, midmesh, sres, iw, src_frac);
     
 }
 
@@ -1454,7 +1470,7 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     
     // Send the data back (comm has been transposed in GeomRend::Build)
     dst_node_rel.send_fields(1, &dfR, &df);
-  } else calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw, src_frac);
+  } else calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), midmesh, sres, iw, src_frac);
 
 }
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.12 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_Interp.h,v 1.13 2011/04/26 19:48:22 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -145,7 +145,7 @@ public:
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
-  Interp(Mesh &src, Mesh &dest, const std::vector<FieldPair> &Fields, int unmappedaction=ESMC_UNMAPPEDACTION_ERROR);
+  Interp(Mesh &src, Mesh &dest, Mesh *midmesh, const std::vector<FieldPair> &Fields, int unmappedaction=ESMC_UNMAPPEDACTION_ERROR);
   
   ~Interp();
   
@@ -187,6 +187,7 @@ public:
   bool has_cnsrv; // true if a conserve interp exists
   Mesh &srcmesh;
   Mesh &dstmesh;
+  Mesh *midmesh;
 };
 
 } // namespace

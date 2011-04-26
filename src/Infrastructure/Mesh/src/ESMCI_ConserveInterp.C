@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.8 2011/01/25 18:20:25 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.9 2011/04/26 19:48:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -20,6 +20,8 @@
 #include <Mesh/include/ESMCI_MathUtil.h>
 #include <Mesh/include/ESMCI_Ftn.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_Sintdnode.h>
+#include <Mesh/include/ESMCI_XGridUtil.h>
 
 #include <iostream>
 #include <iterator>
@@ -32,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.8 2011/01/25 18:20:25 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.9 2011/04/26 19:48:24 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -360,7 +362,10 @@ namespace ESMCI {
   void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas) {
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas,
+                                           Mesh * midmesh, 
+                                           std::vector<sintd_node *> * sintd_nodes, 
+                                           std::vector<sintd_cell *> * sintd_cells) {
 
 
 // Maximum size for a supported polygon
@@ -494,7 +499,11 @@ namespace ESMCI {
       // calculate intersection area
       sintd_areas[i]=area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords); 
 
-	(*valid)[i]=1;
+      (*valid)[i]=1;
+
+      if(midmesh)
+        compute_sintd_nodes_cells(num_sintd_nodes, sintd_coords, 2, 
+          sintd_nodes, sintd_cells);
     }
 
     // Loop calculating weights
@@ -853,7 +862,8 @@ void norm_poly3D(int num_p, double *p) {
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas) {
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
+                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells) {
 
 
 // Maximum size for a supported polygon
@@ -987,6 +997,10 @@ void norm_poly3D(int num_p, double *p) {
       sintd_areas[i]=great_circle_area(num_sintd_nodes, sintd_coords); 
 
 	(*valid)[i]=1;
+
+      if(midmesh)
+        compute_sintd_nodes_cells(num_sintd_nodes, sintd_coords, 3, 
+          sintd_nodes, sintd_cells);
     }
 
     // Loop calculating weights

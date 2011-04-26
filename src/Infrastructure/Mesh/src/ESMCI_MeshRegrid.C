@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.23 2011/02/23 18:53:49 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.24 2011/04/26 19:48:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.23 2011/02/23 18:53:49 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.24 2011/04/26 19:48:24 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -136,7 +136,7 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     // NON Conservative regridding
     case (ESMC_REGRID_CONSERVE_OFF): {
 
-      if (!regrid(srcmesh, dstmesh, wts, regridMethod, regridScheme, 
+      if (!regrid(srcmesh, dstmesh, 0, wts, regridMethod, regridScheme, 
                 regridPoleType, regridPoleNPnts, unmappedaction))
         Throw() << "Regridding error" << std::endl;
 
@@ -233,7 +233,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       dstmesh.Commit();
       dstmeshcpy.Commit();
 
-      if (!regrid(srcmesh, dstmesh, wts, regridMethod, &regridScheme,
+      if (!regrid(srcmesh, dstmesh, 0, wts, regridMethod, &regridScheme,
                   regridPoleType, regridPoleNPnts, &unmappedaction))
         Throw() << "Regridding error" << std::endl;
 
@@ -274,7 +274,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
 }
 
-int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
+int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
            int *regridMethod, int *regridScheme, 
            int *regridPoleType, int *regridPoleNPnts, 
            int *unmappedaction) {
@@ -339,8 +339,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
 
 
      // Build the rendezvous grids
-     Interp interp(srcmesh, dstmesh, fpairs, *unmappedaction);
-
+     Interp interp(srcmesh, dstmesh, midmesh, fpairs, *unmappedaction);
+    
      // Create the weight matrix
      interp(0, wts);
 
@@ -477,7 +477,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
       fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
 
     // Build the rendezvous grids
-    Interp interp(dstmesh, srcmesh, fpairs, *unmappedaction);
+    Interp interp(dstmesh, srcmesh, 0, fpairs, *unmappedaction);
 
     // Generate the backwards interpolation matrix
     interp(0, stw);

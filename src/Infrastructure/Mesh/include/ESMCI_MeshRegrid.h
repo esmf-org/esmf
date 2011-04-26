@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.h,v 1.10 2011/02/23 18:53:49 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.h,v 1.11 2011/04/26 19:48:22 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -52,7 +52,7 @@ enum {ESMC_REGRID_CONSERVE_OFF = 0, ESMC_REGRID_CONSERVE_ON = 1};
 enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_POLETYPE_NPNT = 2, ESMC_REGRID_POLETYPE_TEETH = 3};
 
 // offline
-int regrid(Mesh &, Mesh &, IWeights &, int *, int *, int *, int *, int *);
+int regrid(Mesh &, Mesh &, Mesh *, IWeights &, int *, int *, int *, int *, int *);
 int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *, 
          int *, int *, int *, int *, int *);
 
@@ -66,7 +66,6 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
                   int *regridConserve, int *regridMethod,
                   int *regridPoleType, int *regridPoleNPnts, 
                   int *regridScheme, int *unmappedaction);
-
 
 // get the integration weights for one mesh
 int get_iwts(Mesh &, MEField<> *, int *);

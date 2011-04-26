@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.20 2011/04/25 15:22:20 rokuingh Exp $
+! $Id: ESMF_XGrid.F90,v 1.21 2011/04/26 19:50:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@ module ESMF_XGridMod
   use ESMF_LogErrMod
   use ESMF_DistGridMod
   use ESMF_GridMod
+  use ESMF_MeshMod
   use ESMF_InitMacrosMod
 
   implicit none
@@ -73,6 +74,11 @@ module ESMF_XGridMod
     ESMF_XGRID_SIDEB=ESMF_XGridSide(1), &
     ESMF_XGRID_BALANCED=ESMF_XGridSide(2)
 
+  integer, parameter :: &
+    ESMF_XGRID_SCHEME_SPHERELATLONDEG=0, &
+    ESMF_XGRID_SCHEME_SPHERELATLONRAD=1, &
+    ESMF_XGRID_SCHEME_CARTESIAN2D    =2
+
   ! package the collapsed indices and weights matrices
   type ESMF_XGridSpec
     sequence
@@ -88,10 +94,12 @@ module ESMF_XGridMod
     type (ESMF_DistGrid), pointer          :: distgridA(:)            ! A side distgrid
     type (ESMF_DistGrid), pointer          :: distgridB(:)            ! B side distgrid
     type (ESMF_Grid), pointer              :: sideA(:), sideB(:)      ! geometric types
+    type (ESMF_Mesh)                       :: mesh                    ! overlay mesh, not always stored
     real(ESMF_KIND_R8), pointer            :: area(:), centroid(:,:)  ! area and centroids of xgrid
     type(ESMF_XGridSpec), pointer          :: sparseMatA2X(:), sparseMatX2A(:) ! descriptors of mapping sparsemat
     type(ESMF_XGridSpec), pointer          :: sparseMatB2X(:), sparseMatX2B(:)
     logical                                :: is_proxy         ! .true. for a proxy xgrid
+    logical                                :: storeOverlay    
     type (ESMF_Status)                     :: status
     ESMF_INIT_DECLARE
   end type
@@ -114,6 +122,8 @@ module ESMF_XGridMod
   public ESMF_XGridSpec
   public ESMF_XGridSide, ESMF_XGRID_SIDEA, ESMF_XGRID_SIDEB, &
     ESMF_XGRID_BALANCED
+  public ESMF_XGRID_SCHEME_SPHERELATLONDEG, &
+    ESMF_XGRID_SCHEME_CARTESIAN2D
 
 !------------------------------------------------------------------------------
 !
@@ -140,7 +150,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.20 2011/04/25 15:22:20 rokuingh Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.21 2011/04/26 19:50:45 feiliu Exp $'
 
 !==============================================================================
 !
@@ -1089,6 +1099,16 @@ contains
           deallocate(eleCountX2B)
       endif
 
+      !if(fp%storeOverlay) then
+      !  call ESMF_MeshSerialize(mesh=fp%mesh, buffer=buffer, &
+      !     length=length, offset=offset, &
+      !     attreconflag=lattreconflag, inquireflag=linquireflag, &
+      !     rc=localrc)
+      !  if (ESMF_LogFoundError(localrc, &
+      !     ESMF_ERR_PASSTHRU, &
+      !     ESMF_CONTEXT, rcToReturn=rc)) return
+      !endif
+
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_XGridSerialize
@@ -1418,6 +1438,7 @@ contains
 !EOPI
         xgtypep%status  = ESMF_STATUS_UNINIT
         xgtypep%is_proxy       = .false. 
+        xgtypep%storeOverlay   = .false. 
         nullify(xgtypep%sideA)
         nullify(xgtypep%sideB)
         nullify(xgtypep%area)
