@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.6 2011/04/26 19:50:46 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.7 2011/04/26 20:49:46 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,13 +31,13 @@ using namespace std;
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_Exception.h"
-#include "Mesh/include/ESMCI_Interp.h"
+#include "Mesh/include/ESMCI_XGridUtil.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.6 2011/04/26 19:50:46 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.7 2011/04/26 20:49:46 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
