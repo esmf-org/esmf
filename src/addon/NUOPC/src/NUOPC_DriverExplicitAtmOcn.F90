@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.4 2011/04/19 02:03:44 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.5 2011/04/26 21:24:16 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
 
@@ -176,8 +176,7 @@ module NUOPC_DriverExplicitAtmOcn
       return  ! bail out
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
-    call ESMF_MethodExecute(gcomp, &
-      label=label_SetModelServices, &
+    call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
@@ -205,8 +204,8 @@ module NUOPC_DriverExplicitAtmOcn
     rc = ESMF_SUCCESS
     
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(gcomp, label=label_Finalize, &
-      existflag=existflag, userRc=localrc, rc=rc)
+    call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
+      userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
       file=FILENAME)) &
