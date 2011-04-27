@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.110 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.111 2011/04/27 17:28:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.110 2011/02/24 21:52:21 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.111 2011/04/27 17:28:47 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -191,7 +191,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that match returns true
-  if (.not. ESMF_GridMatch(grid,grid2,rc=localrc)) correct=.false.
+  if (ESMF_GridMatch(grid,grid2,rc=localrc) /=ESMF_GRIDMATCH_EXACT) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Destroy grid2 and make one that won't match
@@ -204,7 +204,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that match returns false
-  if (ESMF_GridMatch(grid,grid2,rc=localrc)) correct=.false.   
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT) correct=.false.   
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   
   ! get rid of first grid
@@ -253,7 +253,7 @@ program ESMF_GridCreateUTest
 
   ! If the grid create copy works, then grid2 should now be 
   ! a perfect copy of grid, so check that match returns true
-  if (.not. ESMF_GridMatch(grid,grid2,rc=localrc)) correct=.false.
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get rid of first grid

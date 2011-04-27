@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.210 2011/04/25 15:49:30 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.211 2011/04/27 17:28:46 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -149,11 +149,29 @@
 	ESMF_GRID_NONARBITRARY = ESMF_GridDecompType(2), &
         ESMF_GRID_ARBITRARY = ESMF_GridDecompType(3)
 
+
 !------------------------------------------------------------------------------
 ! ! Special dimenaion for Arbitrarily distributed dimension
 !
 !------------------------------------------------------------------------------
 integer,parameter :: ESMF_GRID_ARBDIM = -1
+
+!------------------------------------------------------------------------------
+! ! ESMF_GridStatus
+!
+!------------------------------------------------------------------------------
+  type ESMF_GridMatchType
+  sequence
+!  private
+     integer :: gridmatch
+  end type
+
+  type(ESMF_GridMatchType), parameter :: &
+                      ESMF_GRIDMATCH_INVALID=ESMF_GridMatchType(-1), &
+                      ESMF_GRIDMATCH_UNINIT=ESMF_GridMatchType(0), &
+                      ESMF_GRIDMATCH_NONE=ESMF_GridMatchType(1), &
+		      ESMF_GRIDMATCH_EXACT=ESMF_GridMatchType(2)
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
@@ -163,6 +181,10 @@ public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
                         ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
 public  ESMF_GridStatus,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
                       ESMF_GRIDSTATUS_NOT_READY,  ESMF_GRIDSTATUS_SHAPE_READY
+
+public  ESMF_GridMatchType,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
+                         ESMF_GRIDMATCH_NONE,  ESMF_GRIDMATCH_EXACT
+
 public  ESMF_GridItem,  ESMF_GRIDITEM_INVALID, ESMF_GRIDITEM_UNINIT, &
                       ESMF_GRIDITEM_MASK, ESMF_GRIDITEM_AREA, &
                       ESMF_GRIDITEM_AREAM, ESMF_GRIDITEM_FRAC
@@ -233,7 +255,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.210 2011/04/25 15:49:30 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.211 2011/04/27 17:28:46 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -647,6 +669,104 @@ end interface
       end interface
 !
 !==============================================================================
+
+
+
+!GRIDMATCH
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMatchEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF GridMatch.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (/=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMatchNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridMatch.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (>)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMatchGreater
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridMatch.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.lt.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMatchLess
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridMatch.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (>=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMatchGreaterEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridMatch.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (.le.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridMatchLessEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF GridMatch.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!==============================================================================
+
 
 !===============================================================================
 ! GridOperator() interfaces
@@ -13383,7 +13503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_GridMatch(grid1, grid2, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
-    logical :: ESMF_GridMatch
+    type(ESMF_GridMatchType) :: ESMF_GridMatch
       
 ! !ARGUMENTS:
     type(ESMF_Grid),  intent(in)              :: grid1
@@ -13393,15 +13513,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 !
 ! !DESCRIPTION:
-!  Check if {\tt grid1} and {\tt grid2} match. Returns .true. if 
-!  Grid objects match, .false. otherwise. This method considers most parts of
-!  the Grids when testing for a match (coordinates, items, Distgrids, Arrays, etc). The 
-!  parts which aren't considered for a match are the {\tt destroyDistgrid} and 
-!  the {\tt destroyDELayout} flags used in the {\tt ESMF\_GridCreateFrmDistgrid()} call. 
+!  Check if {\tt grid1} and {\tt grid2} match. Returns a range of values of type
+!  ESMF\_GridMatchType indicating how closely the Grids match. For a description of
+!  the possible return values, please see~\ref{sec:opt:gridmatchtype}. 
 !  Please also note that this call returns the match for the piece of the Grids on
 !  the local PET only. It's entirely possible for this call to return a different match
-!  on different PETs for the same Grids. The user is responsible for computing the global match across
-!  the set of PETs. 
+!  on different PETs for the same Grids. The user is responsible for computing the 
+!  global match across the set of PETs. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -13423,7 +13541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! init to one setting in case of error
-    ESMF_GridMatch = .false.
+    ESMF_GridMatch = ESMF_GRIDMATCH_NONE
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid1, rc)
@@ -13436,9 +13554,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (matchResult == 1) then
-       ESMF_GridMatch = .true.
+       ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
     else
-       ESMF_GridMatch = .false.
+       ESMF_GridMatch = ESMF_GRIDMATCH_NONE
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -17058,6 +17176,219 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  GridStatus2%gridstatus)
 
       end function ESMF_GridStatusLessEqual
+
+
+!! GRIDMATCH
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatchEqual"
+!BOPI
+! !IROUTINE: ESMF_GridMatchEqual - Equality of GridMatch statuses
+!
+! !INTERFACE:
+      function ESMF_GridMatchEqual(GridMatch1, GridMatch2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMatchEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMatchType), intent(in) :: &
+         GridMatch1,      &! Two igrid statuses to compare for
+         GridMatch2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridMatch statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMatch1, GridMatch2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridMatchEqual = (GridMatch1%gridmatch == &
+                              GridMatch2%gridmatch)
+
+      end function ESMF_GridMatchEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatchNotEqual"
+!BOPI
+! !IROUTINE: ESMF_GridMatchNotEqual - Non-equality of GridMatch statuses
+!
+! !INTERFACE:
+      function ESMF_GridMatchNotEqual(GridMatch1, GridMatch2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMatchNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMatchType), intent(in) :: &
+         GridMatch1,      &! Two GridMatch Statuses to compare for
+         GridMatch2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridMatch statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMatch1, GridMatch2]
+!          Two statuses of GridMatchs to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridMatchNotEqual = (GridMatch1%gridmatch /= &
+                                 GridMatch2%gridmatch)
+
+      end function ESMF_GridMatchNotEqual
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatchGreater"
+!BOPI
+! !IROUTINE: ESMF_GridMatchGreater - Equality of GridMatch statuses
+!
+! !INTERFACE:
+      function ESMF_GridMatchGreater(GridMatch1, GridMatch2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMatchGreater
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMatchType), intent(in) :: &
+         GridMatch1,      &! Two igrid statuses to compare for
+         GridMatch2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridMatch statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMatch1, GridMatch2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridMatchGreater = (GridMatch1%gridmatch > &
+                              GridMatch2%gridmatch)
+
+      end function ESMF_GridMatchGreater
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatchLess"
+!BOPI
+! !IROUTINE: ESMF_GridMatchLess - Non-equality of GridMatch statuses
+!
+! !INTERFACE:
+      function ESMF_GridMatchLess(GridMatch1, GridMatch2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMatchLess
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMatchType), intent(in) :: &
+         GridMatch1,      &! Two GridMatch Statuses to compare for
+         GridMatch2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridMatch statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMatch1, GridMatch2]
+!          Two statuses of GridMatchs to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridMatchLess = (GridMatch1%gridmatch .lt. &
+                                 GridMatch2%gridmatch)
+
+      end function ESMF_GridMatchLess
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatchGreaterEqual"
+!BOPI
+! !IROUTINE: ESMF_GridMatchGreaterEqual - Greater than or equal of GridMatch statuses
+!
+! !INTERFACE:
+      function ESMF_GridMatchGreaterEqual(GridMatch1, GridMatch2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMatchGreaterEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMatchType), intent(in) :: &
+         GridMatch1,      &! Two igrid statuses to compare for
+         GridMatch2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridMatch statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMatch1, GridMatch2]
+!          Two igrid statuses to compare
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridMatchGreaterEqual = (GridMatch1%gridmatch >= &
+                              GridMatch2%gridmatch)
+
+      end function ESMF_GridMatchGreaterEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMatchLessEqual"
+!BOPI
+! !IROUTINE: ESMF_GridMatchLessEqual - Less than or equal of GridMatch statuses
+!
+! !INTERFACE:
+      function ESMF_GridMatchLessEqual(GridMatch1, GridMatch2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridMatchLessEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridMatchType), intent(in) :: &
+         GridMatch1,      &! Two GridMatch Statuses to compare for
+         GridMatch2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF GridMatch statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridMatch1, GridMatch2]
+!          Two statuses of GridMatchs to compare
+!     \end{description}
+!
+!EOPI
+
+      ESMF_GridMatchLessEqual = (GridMatch1%gridmatch .le. &
+                                 GridMatch2%gridmatch)
+
+      end function ESMF_GridMatchLessEqual
+
+
 
 #if 0
 ! -------------------------- ESMF-public method -------------------------------

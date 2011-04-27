@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.34 2011/01/11 18:26:13 rokuingh Exp $
+% $Id: Grid_options.tex,v 1.35 2011/04/27 17:28:44 oehmke Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -33,7 +33,7 @@ that the edge is n elements long, element i is connected to element n-i-1.
 \label{sec:opt:gridstatus}
 
 {\sf DESCRIPTION:\\}
-The ESMF Grid class can exist in three states. These states are
+The ESMF Grid class can exist in two states. These states are
 present so that the library code can detect if a Grid has been
 appropriately setup for the task at hand. The following
 are the valid values of ESMF\_GRIDSTATUS.
@@ -49,6 +49,21 @@ are the valid values of ESMF\_GRIDSTATUS.
       distribution, but incomplete coordinate arrays.  The Grid can be used
       as the basis for allocating a Field.
 \end{description}
+
+\subsubsection{ESMF\_GridMatchType}
+\label{sec:opt:gridmatchtype}
+
+{\sf DESCRIPTION:\\}
+ This type is used to indicate the level to which two grids match.
+
+\medskip
+\begin{description}
+\item [ESMF\_GRIDMATCH\_NONE:] The lowest level of grid matching. 
+      This indicates that the Grid's don't match at any of the higher levels. 
+\item [ESMF\_GRIDMATCH\_EXACT:] All the pieces of the Grid (e.g. distgrids, 
+      coordinates, etc.) except the name, match between the two Grids. 
+\end{description}
+
 
 \subsubsection{ESMF\_GridItem}
 \label{sec:opt:griditem}
