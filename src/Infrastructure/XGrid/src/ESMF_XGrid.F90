@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.21 2011/04/26 19:50:45 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.22 2011/04/27 17:30:20 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.21 2011/04/26 19:50:45 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.22 2011/04/27 17:30:20 oehmke Exp $'
 
 !==============================================================================
 !
@@ -580,7 +580,7 @@ contains
       endif
       if(.not. associated(fp1%sideA, fp2%sideA)) then
         do i = 1, ngridA1
-          if(.not. ESMF_GridMatch(fp1%sideA(i), fp2%sideA(i))) then
+          if(ESMF_GridMatch(fp1%sideA(i), fp2%sideA(i))/=ESMF_GRIDMATCH_EXACT) then
             if(present(rc)) rc = ESMF_SUCCESS
             return
           endif
@@ -595,7 +595,7 @@ contains
       endif
       if(.not. associated(fp1%sideB, fp2%sideB)) then
         do i = 1, ngridB1
-          if(.not. ESMF_GridMatch(fp1%sideB(i), fp2%sideB(i))) then
+          if(ESMF_GridMatch(fp1%sideB(i), fp2%sideB(i))/=ESMF_GRIDMATCH_EXACT) then
             if(present(rc)) rc = ESMF_SUCCESS
             return
           endif
