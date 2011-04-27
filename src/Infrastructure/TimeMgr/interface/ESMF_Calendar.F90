@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.132 2011/04/22 17:33:58 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.133 2011/04/27 19:36:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.132 2011/04/22 17:33:58 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.133 2011/04/27 19:36:08 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -196,252 +196,143 @@
 ! 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar 1 is equal to Calendar 2
+! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar argument 1 is equal to Calendar argument 2
 !
 ! !INTERFACE:
       interface operator(==)
-!     if (calendar1 == calendar2) then ... endif
-!                  OR
-!     result = (calendar1 == calendar2)
+!     if (<calendar argument 1> == <calendar argument 2>) then ... endif
+!                                 OR
+!     result = (<calendar argument 1> == <calendar argument 2>)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:
-!     type(ESMF_Calendar), intent(in) :: calendar1
-!     type(ESMF_Calendar), intent(in) :: calendar2
-!
+!     <calendar argument 1>, see below for supported values
+!     <calendar argument 2>, see below for supported values
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
-!     Compare two calendar objects for equality; return {\tt .true.} if equal,
-!     {\tt .false.} otherwise. Comparison is based on the calendar type,
-!     unless both calendars are of type {\tt ESMF\_CAL\_CUSTOM}, in which case
-!     all the calendar's properties, except name, are compared.
+!     Compare an {\tt ESMF\_Calendar} object or {\tt ESMF\_CalendarType} with
+!     another calendar object or calendar type for equality.  Return
+!     {\tt .true.} if equal, {\tt .false.} otherwise.  Comparison is based on
+!     calendar type, which is a property of a calendar object.
 !
-!     If either side of the equality test is not in the
-!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
-!     does not affect the return value, which is {\tt .true.} when both
-!     sides are in the {\em same} status, and {\tt .false.} otherwise.
+!     If both arguments are {\tt ESMF\_Calendar} objects, and both are of  
+!     type {\tt ESMF\_CAL\_CUSTOM}, then all the calendar's properties, except
+!     name, are compared.
+!
+!     If both arguments are {\tt ESMF\_Calendar} objects, and either of them
+!     is not in the {\tt ESMF\_INIT\_CREATED} status, an error will be logged.
+!     However, this does not affect the return value, which is {\tt .true.} 
+!     when both arguments are in the {\em same} status, and {\tt .false.}
+!     otherwise.
+!
+!     If one argument is an {\tt ESMF\_Calendar} object, and the other is an
+!     {\tt ESMF\_CalendarType}, and the calendar object is not in the
+!     {\tt ESMF\_INIT\_CREATED} status, an error will be logged and
+!     {\tt .false.} will be returned.
+!
+!     Supported values for <calendar argument 1> are:
+!     \begin{description}
+!     \item type(ESMF\_Calendar),     intent(in) :: calendar1
+!     \item type(ESMF\_CalendarType), intent(in) :: calendartype1
+!     \end{description}
+!     Supported values for <calendar argument 2> are:
+!     \begin{description}
+!     \item type(ESMF\_Calendar),     intent(in) :: calendar2
+!     \item type(ESMF\_CalendarType), intent(in) :: calendartype2
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}   
-!     \item[calendar1]
-!          The {\tt ESMF\_Calendar} object on the left hand side of the 
-!          equality operation.
-!     \item[calendar2]
-!          The {\tt ESMF\_Calendar} object on the right hand side of the 
-!          equality operation.
+!     \item[<calendar argument 1>]
+!          The {\tt ESMF\_Calendar} object or {\tt ESMF\_CalendarType} on the
+!          left hand side of the equality operation.
+!     \item[<calendar argument 2>]
+!          The {\tt ESMF\_Calendar} object or {\tt ESMF\_CalendarType} on the
+!          right hand side of the equality operation.
 !     \end{description}
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarEQ      ! internal implementation
+      module procedure ESMF_CalendarEQ              ! internal implementation
+      module procedure ESMF_CalendarTypeEQ          ! internal implementation
+      module procedure ESMF_CalendarCalAndTypeEQ    ! internal implementation
+      module procedure ESMF_CalendarTypeAndCalEQ    ! internal implementation
+!
+      end interface
 !
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar Type 1 is equal to Calendar Type 2
-!
-! !INTERFACE:
-!     interface operator(==)
-!     if (calendartype1 == calendartype2) then ... endif
-!                  OR
-!     result = (calendartype1 == calendartype2)
-!
-! !RETURN VALUE:
-!     logical :: result
-!
-! !ARGUMENTS:
-!     type(ESMF_CalendarType), intent(in) :: calendartype1
-!     type(ESMF_CalendarType), intent(in) :: calendartype2
-!
-!
-! !DESCRIPTION:
-!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
-!     Compare two calendar types for equality; return {\tt .true.} if equal,
-!     {\tt .false.} otherwise.
-!
-!     The arguments are:
-!     \begin{description}   
-!     \item[calendartype1]
-!          The first {\tt ESMF\_CalendarType} in comparison.
-!     \item[calendartype2]
-!          The second {\tt ESMF\_CalendarType} in comparison.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarTypeEQ      ! internal implementation
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar is equal to Calendar Type
-!
-! !INTERFACE:
-!     interface operator(==)
-!     if (calendar == calendartype) then ... endif
-!                  OR
-!     if (calendartype == calendar) then ... endif
-!                  OR
-!     result = (calendar == calendartype)
-!                  OR
-!     result = (calendartype == calendar)
-!
-! !RETURN VALUE:
-!     logical :: result
-!
-! !ARGUMENTS:
-!     type(ESMF_Calendar),     intent(in) :: calendar
-!     type(ESMF_CalendarType), intent(in) :: calendartype
-!
-!
-! !DESCRIPTION:
-!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
-!     Compare a calendar object's type with a given calendar type for equality;
-!     return {\tt .true.} if equal, {\tt .false.} otherwise.
-!
-!     If the calendar object is not in the {\tt ESMF\_INIT\_CREATED} status an 
-!     error will be logged and {\tt .false.} will be returned.
-!
-!     The arguments are:
-!     \begin{description}   
-!     \item[calendar]
-!          The {\tt ESMF\_Calendar} in comparison.
-!     \item[calendartype]
-!          The {\tt ESMF\_CalendarType} in comparison.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarCalAndTypeEQ      ! internal implementation
-       module procedure ESMF_CalendarTypeAndCalEQ      ! internal implementation
-!
-       end interface    
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar 1 is not equal to Calendar 2
+! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar argument 1 is not equal to Calendar argument 2
 !
 ! !INTERFACE:
       interface operator(/=)
-!     if (calendar1 /= calendar2) then ... endif
-!                  OR
-!     result = (calendar1 /= calendar2)
+!     if (<calendar argument 1> /= <calendar argument 2>) then ... endif
+!                                 OR
+!     result = (<calendar argument 1> /= <calendar argument 2>)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:
-!     type(ESMF_Calendar), intent(in) :: calendar1
-!     type(ESMF_Calendar), intent(in) :: calendar2
-!
+!     <calendar argument 1>, see below for supported values
+!     <calendar argument 2>, see below for supported values
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
-!     Compare two calendar objects for inequality; return {\tt .true.} if not
-!     equal, {\tt .false.} otherwise. Comparison is based on the calendar type,
-!     unless both calendars are of type {\tt ESMF\_CAL\_CUSTOM}, in which case
-!     all the calendar's properties, except name, are compared.
+!     Compare a {\tt ESMF\_Calendar} object or {\tt ESMF\_CalendarType} with
+!     another calendar object or calendar type for inequality.  Return
+!     {\tt .true.} if not equal, {\tt .false.} otherwise.  Comparison is based
+!     on calendar type, which is a property of a calendar object.
 !
-!     If either side of the equality test is not in the
-!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
-!     does not affect the return value, which is {\tt .true.} when both sides
-!     are {\em not} in the {\em same} status, and {\tt .false.} otherwise.
+!     If both arguments are {\tt ESMF\_Calendar} objects, and both are of  
+!     type {\tt ESMF\_CAL\_CUSTOM}, then all the calendar's properties, except
+!     name, are compared.
+!
+!     If both arguments are {\tt ESMF\_Calendar} objects, and either of them
+!     is not in the {\tt ESMF\_INIT\_CREATED} status, an error will be logged.
+!     However, this does not affect the return value, which is {\tt .true.} 
+!     when both arguments are {\em not} in the {\em same} status, and
+!     {\tt .false.} otherwise.
+!
+!     If one argument is an {\tt ESMF\_Calendar} object, and the other is an
+!     {\tt ESMF\_CalendarType}, and the calendar object is not in the
+!     {\tt ESMF\_INIT\_CREATED} status, an error will be logged and
+!     {\tt .true.} will be returned.
+!
+!     Supported values for <calendar argument 1> are:
+!     \begin{description}
+!     \item type(ESMF\_Calendar),     intent(in) :: calendar1
+!     \item type(ESMF\_CalendarType), intent(in) :: calendartype1
+!     \end{description}
+!     Supported values for <calendar argument 2> are:
+!     \begin{description}
+!     \item type(ESMF\_Calendar),     intent(in) :: calendar2
+!     \item type(ESMF\_CalendarType), intent(in) :: calendartype2
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}   
-!     \item[calendar1]
-!          The {\tt ESMF\_Calendar} object on the left hand side of the 
-!          non-equality operation.
-!     \item[calendar2]
-!          The {\tt ESMF\_Calendar} object on the right hand side of the 
-!          non-equality operation.
+!     \item[<calendar argument 1>]
+!          The {\tt ESMF\_Calendar} object or {\tt ESMF\_CalendarType} on the
+!          left hand side of the non-equality operation.
+!     \item[<calendar argument 2>]
+!          The {\tt ESMF\_Calendar} object or {\tt ESMF\_CalendarType} on the
+!          right hand side of the non-equality operation.
 !     \end{description}
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarNE      ! internal implementation
+      module procedure ESMF_CalendarNE              ! internal implementation
+      module procedure ESMF_CalendarTypeNE          ! internal implementation
+      module procedure ESMF_CalendarCalAndTypeNE    ! internal implementation
+      module procedure ESMF_CalendarTypeAndCalNE    ! internal implementation
 !
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
+      end interface
 !
-! !INTERFACE:
-!     interface operator(/=)
-!     if (calendartype1 /= calendartype2) then ... endif
-!                  OR
-!     result = (calendartype1 /= calendartype2)
-!
-! !RETURN VALUE:
-!     logical :: result
-!
-! !ARGUMENTS:
-!     type(ESMF_CalendarType), intent(in) :: calendartype1
-!     type(ESMF_CalendarType), intent(in) :: calendartype2
-!
-!
-! !DESCRIPTION:
-!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
-!     Compare two calendar types for inequality; return {\tt .true.} if not 
-!     equal, {\tt .false.} otherwise.
-!
-!     The arguments are:
-!     \begin{description}   
-!     \item[calendartype1]
-!          The first {\tt ESMF\_CalendarType} in comparison.
-!     \item[calendartype2]
-!          The second {\tt ESMF\_CalendarType} in comparison.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarTypeNE      ! internal implementation
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar is not equal to Calendar Type
-!
-! !INTERFACE:
-!     interface operator(/=)
-!     if (calendar /= calendartype) then ... endif
-!                  OR
-!     if (calendartype /= calendar) then ... endif
-!                  OR
-!     result = (calendar /= calendartype)
-!                  OR
-!     result = (calendartype /= calendar)
-!
-! !RETURN VALUE:
-!     logical :: result
-!
-! !ARGUMENTS:
-!     type(ESMF_Calendar),     intent(in) :: calendar
-!     type(ESMF_CalendarType), intent(in) :: calendartype
-!
-!
-! !DESCRIPTION:
-!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
-!     Compare a calendar object's type with a given calendar type for
-!     inequality; return {\tt .true.} if equal, {\tt .false.} otherwise.
-!
-!     If the calendar object is not in the {\tt ESMF\_INIT\_CREATED} status an 
-!     error will be logged and {\tt .true.} will be returned.
-!
-!     The arguments are:
-!     \begin{description}   
-!     \item[calendar]
-!          The {\tt ESMF\_Calendar} in comparison.
-!     \item[calendartype]
-!          The {\tt ESMF\_CalendarType} in comparison.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_CalendarCalAndTypeNE      ! internal implementation
-       module procedure ESMF_CalendarTypeAndCalNE      ! internal implementation
-!
-       end interface    
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -1136,9 +1027,49 @@
       end subroutine ESMF_CalendarInitialize
     
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_CalendarIsLeapYear()
+!     function ESMF_CalendarIsLeapYear<kind>(calendar, yy, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+!     logical :: ESMF_CalendarIsLeapYear<kind>
+!
+! !ARGUMENTS:
+!     type(ESMF_Calendar),       intent(in)            :: calendar
+!     integer(ESMF_KIND_<kind>), intent(in)            :: yy
+!     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,                   intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!     \begin{sloppypar}
+!     Returns {\tt .true.} if the given year is a leap year within the given
+!     calendar, and {\tt .false.} otherwise.  See also 
+!     {\tt ESMF\_TimeIsLeapYear()}.
+!     \end{sloppypar}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          {\tt ESMF\_Calendar} to determine leap year within.
+!     \item[yy]
+!          Year to check for leap year.  The type is integer and the <kind> can
+!          be either I4 or I8:  {\tt ESMF\_KIND_I4} or {\tt ESMF\_KIND_I8}.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CalendarIsLeapYearI4()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
 
 ! !INTERFACE:
@@ -1160,10 +1091,10 @@
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
-!     Returns true if the given year is a leap year within the given calendar,
-!     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
+!     Returns {\tt .true.} if the given year is a leap year within the given
+!     calendar, and {\tt .false.} otherwise.  See also
+!     {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
-!     Returns true if the given year is a leap year within the given calendar,
 !
 !     The arguments are:
 !     \begin{description}
@@ -1175,7 +1106,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !    
-!EOP
+!EOPI
       integer :: localrc                        ! local return code
 
       ! Assume failure until success
@@ -1201,19 +1132,19 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CalendarIsLeapYearI8()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CalendarIsLeapYear - Determine if given year is a leap year
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarIsLeapYear()
-      function ESMF_CalendarIsLeapYearI8(calendar, yy_i8, keywordEnforcer, rc)
+      function ESMF_CalendarIsLeapYearI8(calendar, yy, keywordEnforcer, rc)
 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarIsLeapYearI8
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(in)            :: calendar
-      integer(ESMF_KIND_I8), intent(in)            :: yy_i8
+      integer(ESMF_KIND_I8), intent(in)            :: yy
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc
 
@@ -1223,21 +1154,22 @@
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
-!     Returns true if the given year is a leap year within the given calendar,
-!     and false otherwise.  See also {\tt ESMF\_TimeIsLeapYear()}.
+!     Returns {\tt .true.} if the given year is a leap year within the given
+!     calendar, and {\tt .false.} otherwise.  See also 
+!     {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
 !          {\tt ESMF\_Calendar} to determine leap year within.
-!     \item[yy\_i8]
+!     \item[yy]
 !          Year to check for leap year.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !    
-!EOP
+!EOPI
       integer :: localrc                        ! local return code
 
       ! Assume failure until success
@@ -1251,7 +1183,7 @@
       ESMF_INIT_CHECK_DEEP(ESMF_CalendarGetInit,calendar,rc)
 
       ! invoke C to C++ entry point
-      call c_ESMC_CalendarIsLeapYearI8(calendar, yy_i8, &
+      call c_ESMC_CalendarIsLeapYearI8(calendar, yy, &
                                        ESMF_CalendarIsLeapYearI8, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

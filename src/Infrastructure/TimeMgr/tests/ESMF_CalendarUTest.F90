@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.62 2011/02/23 06:44:59 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.63 2011/04/27 19:36:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.62 2011/02/23 06:44:59 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.63 2011/04/27 19:36:10 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -336,7 +336,7 @@
       !EX_UTest
       ! Leap Year method I8 test 4
       year = 5000000100_ESMF_KIND_I8
-      bool = ESMF_CalendarIsLeapYear(gregorianCalendar1, year, rc=rc)
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar1, yy=year, rc=rc)
       write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "IsLeapYear of uncreated Calendar Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
@@ -1624,7 +1624,7 @@
       !EX_UTest
       ! Leap Year method I4 test 2
       write(failMsg, *) " Did not return true and ESMF_SUCCESS"
-      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, 2100, rc=rc)
+      bool = ESMF_CalendarIsLeapYear(gregorianCalendar, yy=2100, rc=rc)
       write(name, *) "IsLeapYear test 2"
       call ESMF_Test(.not.bool .and. (rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)

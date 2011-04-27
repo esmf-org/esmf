@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar_F.C,v 1.6 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Calendar_F.C,v 1.7 2011/04/27 19:36:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -296,11 +296,11 @@ extern "C" {
        }
 
        void FTN(c_esmc_calendarisleapyeari8)(Calendar **ptr, 
-                                   ESMC_I8 *yy_i8,
+                                   ESMC_I8 *yy,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_calendarIsLeapYear = (int) (*ptr)->Calendar::isLeapYear(
-                                             *yy_i8,
+                                             *yy,
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
@@ -363,7 +363,7 @@ extern "C" {
        void FTN(c_esmc_calendartypeandcalne)(ESMC_CalendarType *calendarType,
                                              Calendar **calendar,
                                              int *esmf_calendarTypeAndCalNE) {
-           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar, *calendarType,
+           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendarType, *calendar,
                                                esmf_calendarTypeAndCalNE)
            *esmf_calendarTypeAndCalNE = (int) (**calendar != *calendarType);
        }
