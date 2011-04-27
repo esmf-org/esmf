@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.93 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.94 2011/04/27 00:02:34 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.93 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.94 2011/04/27 00:02:34 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -142,8 +142,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_State),            intent(inout)         :: state
-      type(ESMF_VM),               intent(in)            :: vm
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
+      type(ESMF_VM),               intent(in),  optional :: vm
       type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
       integer,                     intent(out), optional :: rc               
 !
@@ -167,8 +167,8 @@
 !     \begin{description}
 !     \item[state]
 !       {\tt ESMF\_State} to reconcile.
-!     \item[vm]
-!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  Should be set to the current vm.
+!     \item[{[vm]}]
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it set to the current vm.
 !     \item[{[attreconflag]}]
 !       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
 !     \item[{[rc]}]
@@ -195,19 +195,15 @@
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ! We currently require a user-supplied vm for historical
-    ! reasons.  Ensure it is the same as the 'current' vm. 
-    call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-			   ESMF_ERR_PASSTHRU, &
-			   ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (localvm /= vm) then
-    if (ESMF_LogFoundError(localrc, &
-                     	   msg="user-supplied vm is not current vm", &
-                           ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present (vm)) then
+      localvm = vm
+    else
+      call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
     end if
-      
+
       
     ! First remove all empty nested States from State
     ! Doing this leads to much lower (factor petCount) complexity of the 
@@ -239,14 +235,14 @@
     ! This recursively descends the state objects and collects information
     ! about each one.
     nullify(stateinfo)
-    call ESMF_StateInfoBuild(state, stateinfo, vm, lattreconflag, rc=localrc)
+    call ESMF_StateInfoBuild(state, stateinfo, localvm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! This one sends missing objects from the PETs which contain them
     ! to the PETs which do not.
-    call ESMF_StateProxyCreate(state, stateinfo, vm, lattreconflag, rc=localrc)
+    call ESMF_StateProxyCreate(state, stateinfo, localvm, lattreconflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
