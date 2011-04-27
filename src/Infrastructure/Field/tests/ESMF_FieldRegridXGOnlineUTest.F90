@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.1 2011/04/26 21:08:57 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.2 2011/04/27 21:14:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -275,8 +275,8 @@ contains
 
     ! Call into online generation
     xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
-        sideAScheme=ESMF_XGRID_SCHEME_CARTESIAN2D, &
-        sideBScheme=ESMF_XGRID_SCHEME_CARTESIAN2D, &
+        sideAScheme=ESMF_XGRID_CARTESIAN2D, &
+        sideBScheme=ESMF_XGRID_CARTESIAN2D, &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

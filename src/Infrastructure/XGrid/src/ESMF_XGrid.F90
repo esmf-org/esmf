@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.22 2011/04/27 17:30:20 oehmke Exp $
+! $Id: ESMF_XGrid.F90,v 1.23 2011/04/27 21:11:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,9 +75,9 @@ module ESMF_XGridMod
     ESMF_XGRID_BALANCED=ESMF_XGridSide(2)
 
   integer, parameter :: &
-    ESMF_XGRID_SCHEME_SPHERELATLONDEG=0, &
-    ESMF_XGRID_SCHEME_SPHERELATLONRAD=1, &
-    ESMF_XGRID_SCHEME_CARTESIAN2D    =2
+    ESMF_XGRID_SPHERELATLONDEG=0, &
+    ESMF_XGRID_SPHERELATLONRAD=1, &
+    ESMF_XGRID_CARTESIAN2D    =2
 
   ! package the collapsed indices and weights matrices
   type ESMF_XGridSpec
@@ -122,8 +122,8 @@ module ESMF_XGridMod
   public ESMF_XGridSpec
   public ESMF_XGridSide, ESMF_XGRID_SIDEA, ESMF_XGRID_SIDEB, &
     ESMF_XGRID_BALANCED
-  public ESMF_XGRID_SCHEME_SPHERELATLONDEG, &
-    ESMF_XGRID_SCHEME_CARTESIAN2D
+  public ESMF_XGRID_SPHERELATLONDEG, &
+    ESMF_XGRID_CARTESIAN2D
 
 !------------------------------------------------------------------------------
 !
@@ -150,7 +150,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.22 2011/04/27 17:30:20 oehmke Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.23 2011/04/27 21:11:58 feiliu Exp $'
 
 !==============================================================================
 !

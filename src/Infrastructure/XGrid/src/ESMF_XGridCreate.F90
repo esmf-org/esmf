@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.24 2011/04/27 18:23:19 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.25 2011/04/27 21:11:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.24 2011/04/27 18:23:19 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.25 2011/04/27 21:11:58 feiliu Exp $'
 
 !==============================================================================
 !
@@ -259,12 +259,12 @@ integer, intent(out), optional         :: rc
 !           2D Grids on side B
 !     \item [sideAScheme]
 !           Specify the geometry and unit of metric of the Grids on A side. 
-!           Possible values are ESMF_XGRID_SCHEME_SPHERELATLONDEG, 
-!           ESMF_XGRID_SCHEME_CARTESIAN2D 
+!           Possible values are ESMF_XGRID_SPHERELATLONDEG, 
+!           ESMF_XGRID_CARTESIAN2D 
 !     \item [sideBScheme]
 !           Specify the geometry and unit of metric of the Grids on B side. 
-!           Possible values are ESMF_XGRID_SCHEME_SPHERELATLONDEG, 
-!           ESMF_XGRID_SCHEME_CARTESIAN2D 
+!           Possible values are ESMF_XGRID_SPHERELATLONDEG, 
+!           ESMF_XGRID_CARTESIAN2D 
 !     \item [{[sideAPriority]}]
 !           Priority array of Grids on sideA during overlay generation.
 !           The priority arrays describe the priorities of Grids at the overlapping region.
@@ -364,10 +364,10 @@ integer, intent(out), optional         :: rc
     enddo
 
     ! Set interpretation of grids based on xgridScheme
-    if (sideAScheme .eq. ESMF_XGRID_SCHEME_SPHERELATLONDEG) then
+    if (sideAScheme .eq. ESMF_XGRID_SPHERELATLONDEG) then
       AisSphere = 1
       AisLatLonDeg = .true.
-    else if (sideAScheme .eq. ESMF_XGRID_SCHEME_CARTESIAN2D) then
+    else if (sideAScheme .eq. ESMF_XGRID_CARTESIAN2D) then
       AisSphere = 0
       AisLatLonDeg = .false.
     else
@@ -377,10 +377,10 @@ integer, intent(out), optional         :: rc
       return
     endif
 
-    if (sideBScheme .eq. ESMF_XGRID_SCHEME_SPHERELATLONDEG) then
+    if (sideBScheme .eq. ESMF_XGRID_SPHERELATLONDEG) then
       BisSphere = 1
       BisLatLonDeg = .true.
-    else if (sideBScheme .eq. ESMF_XGRID_SCHEME_CARTESIAN2D) then
+    else if (sideBScheme .eq. ESMF_XGRID_CARTESIAN2D) then
       BisSphere = 0
       BisLatLonDeg = .false.
     else
@@ -1500,7 +1500,7 @@ end subroutine checkGrid
 subroutine compute_mesharea(mesh, area, rc)
 
 type(ESMF_Mesh), intent(inout)             :: mesh
-real(ESMF_KIND_R8), intent(inout), pointer :: area(:)
+real(ESMF_KIND_R8), pointer                :: area(:)
 integer, intent(out), optional          :: rc
 
 logical :: hasSplitElem
