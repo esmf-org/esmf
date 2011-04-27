@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.21 2011/04/25 15:22:15 rokuingh Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.22 2011/04/27 17:32:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.21 2011/04/25 15:22:15 rokuingh Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.22 2011/04/27 17:32:44 oehmke Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -406,8 +406,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if ((currSrcStaggerLoc==prevSrcStaggerLoc) .and.  &
                     (currDstStaggerLoc==prevDstStaggerLoc)) then 
 
-                   if (ESMF_GridMatch(currSrcGrid, prevSrcGrid) .and. &
-                       ESMF_GridMatch(currDstGrid, prevDstGrid)) then
+                   ! TODO: This only needs to consider matching the Field staggerlocs in the Grid
+                   !       and it only needs to match the coordinates and distribution
+                   !       Reimplement as a FieldMatch() with an EXACTMAT output????
+                   if ((ESMF_GridMatch(currSrcGrid, prevSrcGrid)==ESMF_GRIDMATCH_EXACT) .and. &
+                       (ESMF_GridMatch(currDstGrid, prevDstGrid)==ESMF_GRIDMATCH_EXACT)) then
                       matchesPrev=.true.
                    endif
                 endif
