@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.19 2011/03/28 20:50:54 svasquez Exp $
+! $Id: modelComp.F90,v 1.20 2011/04/27 02:27:12 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -145,9 +145,9 @@ module modelCompMod
     if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
 
     ! Reconcile module wide import and export States
-    call ESMF_StateReconcile(modelAExp, vm, rc=rc)
+    call ESMF_StateReconcile(modelAExp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateReconcile(modelBImp, vm, rc=rc)
+    call ESMF_StateReconcile(modelBImp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get access to src and dst Arrays in States

@@ -252,7 +252,7 @@ program ESMF_AttributeCIMSTest
   ! PETs 0,1,2, from PETs 3,4,5, since Coupler is setup one way,
   ! comp1 -> comp2, rather than vice versa, comp2 -> comp1. So cannot put in
   ! Coupler initialize, must put here in driver
-  call ESMF_StateReconcile(c2exp, vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+  call ESMF_StateReconcile(c2exp, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)

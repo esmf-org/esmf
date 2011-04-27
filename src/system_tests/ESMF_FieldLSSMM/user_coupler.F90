@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.6 2011/02/24 22:55:59 w6ws Exp $
+! $Id: user_coupler.F90,v 1.7 2011/04/27 02:27:19 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,10 +83,10 @@
       ! use a communications call (SMM) here, so first we must make a new
       ! call to reconcile the object lists in all the import and export states.
 
-      call ESMF_StateReconcile(importState, vm, rc=rc)
+      call ESMF_StateReconcile(importState, vm=vm, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
-      call ESMF_StateReconcile(exportState, vm, rc=rc)
+      call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)

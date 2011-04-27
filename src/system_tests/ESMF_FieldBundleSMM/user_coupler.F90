@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_coupler.F90,v 1.10 2011/04/27 02:27:15 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,9 +113,9 @@ module user_coupler
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    call ESMF_StateReconcile(importState, vm, rc=rc)
+    call ESMF_StateReconcile(importState, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-    call ESMF_StateReconcile(exportState, vm, rc=rc)
+    call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
     ! Get source FieldBundle out of import State

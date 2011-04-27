@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.15 2011/02/23 17:41:08 w6ws Exp $
+! $Id: user_coupler.F90,v 1.16 2011/04/27 02:27:09 w6ws Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -133,14 +133,14 @@
         ! Must be called on each state which is going to be accessed from
         ! this coupler.  When the call returns all objects which were not
         ! in existence on all PETs now have an object which represents them.
-        call ESMF_StateReconcile(importState, vm, rc=status)
+        call ESMF_StateReconcile(importState, vm=vm, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         !call ESMF_StatePrint(importState, rc=status)
         !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rcToReturn=rc)) return
   
-        call ESMF_StateReconcile(exportState, vm, rc=status)
+        call ESMF_StateReconcile(exportState, vm=vm, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         !call ESMF_StatePrint(exportState, rc=status)

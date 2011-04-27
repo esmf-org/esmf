@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.5 2011/04/27 02:27:14 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -89,7 +89,7 @@ module user_coupler
     do i=1,itemcount
         call ESMF_StateGet(importState, stateItemNames(i), state, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-        call ESMF_StateReconcile(state, vm, rc=rc)
+        call ESMF_StateReconcile(state, vm=vm, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         ! Get source Array out of import state

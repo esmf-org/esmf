@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2011/02/10 04:18:48 ESRL\ryan.okuinghttons Exp $
+! $Id: user_coupler.F90,v 1.5 2011/04/27 02:27:22 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -73,9 +73,9 @@
       ! Need to reconcile import and export states
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      call ESMF_StateReconcile(importState, vm, rc=rc)
+      call ESMF_StateReconcile(importState, vm=vm, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      call ESMF_StateReconcile(exportState, vm, rc=rc)
+      call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
