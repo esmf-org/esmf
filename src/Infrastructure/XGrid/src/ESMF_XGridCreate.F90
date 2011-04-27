@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.23 2011/04/26 23:48:29 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.24 2011/04/27 18:23:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.23 2011/04/26 23:48:29 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.24 2011/04/27 18:23:19 feiliu Exp $'
 
 !==============================================================================
 !
@@ -296,6 +296,7 @@ integer, intent(out), optional         :: rc
     type(ESMF_VM)                 :: vm
     integer(ESMF_KIND_I4), pointer:: indicies(:,:)
     real(ESMF_KIND_R8), pointer   :: weights(:), sidemesharea(:), mesharea(:)
+    real(ESMF_KIND_R8), pointer   :: sidemeshfrac(:)
     integer                       :: nentries
     type(ESMF_TempWeights)        :: tweights
     integer                       :: gridDimCount, AisSphere, BisSphere
@@ -412,14 +413,16 @@ integer, intent(out), optional         :: rc
 
     !TODO: Create the src/dst Mesh, take care of maskValues
     ! Also assume grids are cartesian and uses native metric
-    meshA = ESMF_GridToMesh(sideA(l_sideAPriority(1)), ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
+    meshA = ESMF_GridToMesh(sideA(l_sideAPriority(1)), &
+      ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     do i = 2, ngrid_a
-      meshAt = ESMF_GridToMesh(sideA(l_sideAPriority(i)), ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
+      meshAt = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
+        ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -436,14 +439,16 @@ integer, intent(out), optional         :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    meshB = ESMF_GridToMesh(sideB(l_sideBPriority(1)), ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
+    meshB = ESMF_GridToMesh(sideB(l_sideBPriority(1)), &
+      ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     do i = 2, ngrid_b
-      meshBt = ESMF_GridToMesh(sideB(l_sideBPriority(i)), ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
+      meshBt = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
+        ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -462,8 +467,10 @@ integer, intent(out), optional         :: rc
 
     ! TODO: compute the interpolation
 
-    allocate(xgtype%sparseMatA2X(ngrid_a), xgtype%sparseMatX2A(ngrid_a), &
-             xgtype%sparseMatB2X(ngrid_b), xgtype%sparseMatX2B(ngrid_b), stat=localrc)
+    allocate(xgtype%sparseMatA2X(ngrid_a), &
+      xgtype%sparseMatX2A(ngrid_a), &
+      xgtype%sparseMatB2X(ngrid_b), &
+      xgtype%sparseMatX2B(ngrid_b), stat=localrc)
     if(localrc /= 0) then
       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
          msg="- Failed to allocate SMM parameters", &
@@ -502,7 +509,8 @@ integer, intent(out), optional         :: rc
     allocate(indicies(2,nentries))
     allocate(weights(nentries))
 
-    call c_ESMC_Copy_TempWeights_xgrid(tweights, indicies(1,1), weights(1))
+    call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+      indicies(1,1), weights(1))
 
     !do i = 1, size(indicies,2)
     !   print *, indicies(1,i), '->', indicies(2,i), weights(i), mesharea(i)
@@ -514,7 +522,8 @@ integer, intent(out), optional         :: rc
     ! This time we don't need the middle mesh
     compute_midmesh = 0
     do i = 1, ngrid_a
-      meshAt = ESMF_GridToMesh(sideA(l_sideAPriority(i)), ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
+      meshAt = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
+        ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -530,18 +539,58 @@ integer, intent(out), optional         :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatA2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatA2X(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, xgtype%sparseMatA2X(i)%factorIndexList(1,1), xgtype%sparseMatA2X(i)%factorList(1))
-      ! We can do a bit of checking here because we know the weights must be all 1. in this case
+      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+      xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
+      xgtype%sparseMatA2X(i)%factorList(1))
+      ! We can do a bit of checking here because 
+      ! we know the weights must be all 1. in this case
       !print *, 'A2X'
       !do j = 1, size(xgtype%sparseMatA2X(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatA2X(i)%factorIndexList(1,j), '->', xgtype%sparseMatA2X(i)%factorIndexList(2,j), xgtype%sparseMatA2X(i)%factorList(j)
+      !   print *, xgtype%sparseMatA2X(i)%factorIndexList(1,j), &
+      !      '->', xgtype%sparseMatA2X(i)%factorIndexList(2,j), &
+      !      xgtype%sparseMatA2X(i)%factorList(j)
       !enddo
     
       ! Now the reverse direction
+      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       ! an immediate optimization is to use the A side area to simply invert the weight
       !call compute_mesharea(meshAt, sidemesharea, rc=localrc)
-      !call compute_mesharea(mesh, mesharea, rc=localrc)
-      !deallocate(sidemesharea, mesharea)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      !!call compute_meshfrac(meshAt, sidemeshfrac, rc=localrc)
+      !!TODO: take care of split element
+      !call ESMF_MeshGet(meshAt, numOwnedElements=sideCount, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      !if(sideCount /= size(sidemesharea)) then
+      !  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+      !     msg="- number of area elements not equal to frac elements", &
+      !     ESMF_CONTEXT, rcToReturn=rc) 
+      !  return
+      !endif
+      !allocate(sidemeshfrac(sideCount))
+      !call ESMF_MeshGetElemFrac(meshAt, sidemeshfrac, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      !do j = 1, nentries
+      !  xgtype%sparseMatX2A(i)%factorIndexList(1,j) = xgtype%sparseMatA2X(i)%factorIndexList(2,j)
+      !  xgtype%sparseMatX2A(i)%factorIndexList(2,j) = xgtype%sparseMatA2X(i)%factorIndexList(1,j)
+      !  ! frac cann't be zero if this mapping entry existed, can also take care of masking here
+      !  xgtype%sparseMatX2A(i)%factorList(j) = &
+      !    mesharea(xgtype%sparseMatX2A(i)%factorIndexList(1,j))&
+      !    /(sidemesharea(xgtype%sparseMatX2A(i)%factorIndexList(2,j)) &
+      !    * sidemeshfrac(xgtype%sparseMatX2A(i)%factorIndexList(2,j)))
+      !enddo
+      !print *, 'X2A -'
+      !do j = 1, size(xgtype%sparseMatX2A(i)%factorIndexList,2)
+      !   print *, xgtype%sparseMatX2A(i)%factorIndexList(1,j), '->', &
+      !     xgtype%sparseMatX2A(i)%factorIndexList(2,j), &
+      !     xgtype%sparseMatX2A(i)%factorList(j)
+      !enddo
       call c_esmc_xgridregrid_create(vm, mesh, meshAt, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRID_METHOD_CONSERVE, &
@@ -551,21 +600,25 @@ integer, intent(out), optional         :: rc
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
-      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, xgtype%sparseMatX2A(i)%factorIndexList(1,1), xgtype%sparseMatX2A(i)%factorList(1))
-      !print *, 'X2A'
+      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+      xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
+      xgtype%sparseMatX2A(i)%factorList(1))
+      !print *, 'X2A +'
       !do j = 1, size(xgtype%sparseMatX2A(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatX2A(i)%factorIndexList(1,j), '->', xgtype%sparseMatX2A(i)%factorIndexList(2,j), xgtype%sparseMatX2A(i)%factorList(j)
+      !   print *, xgtype%sparseMatX2A(i)%factorIndexList(1,j), '->', &
+      !     xgtype%sparseMatX2A(i)%factorIndexList(2,j), &
+      !     xgtype%sparseMatX2A(i)%factorList(j)
       !enddo
       call ESMF_MeshDestroy(meshAt, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      !deallocate(sidemesharea, sidemeshfrac)
     enddo
     ! now do the B side
     do i = 1, ngrid_b
-      meshBt = ESMF_GridToMesh(sideB(l_sideBPriority(i)), ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
+      meshBt = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
+        ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -581,12 +634,17 @@ integer, intent(out), optional         :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatB2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatB2X(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, xgtype%sparseMatB2X(i)%factorIndexList(1,1), xgtype%sparseMatB2X(i)%factorList(1))
+      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+      xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
+      xgtype%sparseMatB2X(i)%factorList(1))
       !print *, 'B2X'
       !do j = 1, size(xgtype%sparseMatB2X(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatB2X(i)%factorIndexList(1,j), '->', xgtype%sparseMatB2X(i)%factorIndexList(2,j), xgtype%sparseMatB2X(i)%factorList(j)
+      !   print *, xgtype%sparseMatB2X(i)%factorIndexList(1,j), '->', &
+      !     xgtype%sparseMatB2X(i)%factorIndexList(2,j), &
+      !     xgtype%sparseMatB2X(i)%factorList(j)
       !enddo
-      ! TODO:We can do a bit of checking here because we know the weights must be all 1. in this case
+      ! TODO:We can do a bit of checking here because we know the 
+      ! weights must be all 1. in this case
     
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(vm, mesh, meshBt, &
@@ -600,10 +658,14 @@ integer, intent(out), optional         :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatX2B(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2B(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, xgtype%sparseMatX2B(i)%factorIndexList(1,1), xgtype%sparseMatX2B(i)%factorList(1))
+      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+      xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
+      xgtype%sparseMatX2B(i)%factorList(1))
       !print *, 'X2B'
       !do j = 1, size(xgtype%sparseMatX2B(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatX2B(i)%factorIndexList(1,j), '->', xgtype%sparseMatX2B(i)%factorIndexList(2,j), xgtype%sparseMatX2B(i)%factorList(j)
+      !   print *, xgtype%sparseMatX2B(i)%factorIndexList(1,j), &
+      !     '->', xgtype%sparseMatX2B(i)%factorIndexList(2,j), &
+      !     xgtype%sparseMatX2B(i)%factorList(j)
       !enddo
       call ESMF_MeshDestroy(meshBt, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
