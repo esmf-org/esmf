@@ -1,4 +1,4 @@
-// $Id: ESMC_RendEx.C,v 1.20 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMC_RendEx.C,v 1.21 2011/04/27 02:08:07 feiliu Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
   // Ghost elements across parallel boundaries (needed by INTERP_PATCH)
   srcmesh.CreateGhost();
   
-  Interp interp(srcmesh, dstmesh, fpairs);
+  Interp interp(srcmesh, dstmesh, 0, fpairs);
   
 
   UInt nstep = 0;
