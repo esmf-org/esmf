@@ -1,4 +1,4 @@
-// $Id: ESMCI_Sintdnode.h,v 1.2 2011/04/27 12:16:32 feiliu Exp $
+// $Id: ESMCI_Sintdnode.h,v 1.3 2011/04/27 15:58:13 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -15,6 +15,7 @@
 #include <exception>
 #include <string>
 #include <vector>
+#include <cstdio>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 
