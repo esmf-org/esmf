@@ -1,4 +1,4 @@
-// $Id: ESMCI_Sintdnode.h,v 1.1 2011/04/26 19:48:22 feiliu Exp $
+// $Id: ESMCI_Sintdnode.h,v 1.2 2011/04/27 12:16:32 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -91,6 +91,7 @@ class sintd_node {
 
 class sintd_node_less{
 
+  public:
   bool operator ()(const sintd_node * const a, const sintd_node * const b) const {
     return (*a).operator<(*b);
   }
@@ -98,6 +99,7 @@ class sintd_node_less{
 
 class sintd_node_equal{
 
+  public:
   bool operator ()(const sintd_node * const a, const sintd_node * const b) const {
     return (*a).operator==(*b);
   }
