@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.37 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.38 2011/04/27 02:09:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -333,7 +333,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state1, vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -383,7 +383,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
-    call ESMF_StateReconcile(state1, vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in concurrent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -536,7 +536,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state1, vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in sequential mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -551,7 +551,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
-    call ESMF_StateReconcile(state1, vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in sequential mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -707,7 +707,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_StateReconcile(state1, vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling StateReconcile in run-in-parent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -722,7 +722,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Test redundant reconcile
-    call ESMF_StateReconcile(state1, vm, rc=rc)
+    call ESMF_StateReconcile(state1, vm=vm, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling 2nd StateReconcile in run-in-parent mode"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
