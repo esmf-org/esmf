@@ -1,4 +1,4 @@
-% $Id: WebServices_desc.tex,v 1.5 2011/04/22 18:42:41 svasquez Exp $
+% $Id: WebServices_desc.tex,v 1.6 2011/04/28 21:16:50 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -14,9 +14,15 @@ The goal of the ESMF Web Services is to provide the tools to allow ESMF Users to
 their Components available via a web service.  The first step is to make the Component 
 a service, and then make it accessible via the Web.  
 
-The above diagram describes the ESMF Web Services software architecture. The architecture 
-defines a multi-tiered set of applications that provide a flexible approach for accessing 
-model components. 
+\begin{center}
+\begin{figure}
+\caption{The diagram describes the ESMF Web Services software architecture. The architecture
+defines a multi-tiered set of applications that provide a flexible approach for accessing
+model components.}
+\label{fig:webservices_fig}
+\scalebox{0.75}{\includegraphics{webservices}}
+\end{figure}
+\end{center}
 
 At the heart of this architecture is the Component Service; this is the 
 application that does the model work.  The ESMF Web Services part provides a way to make 
