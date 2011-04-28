@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.5 2011/04/26 21:27:03 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.6 2011/04/28 15:13:35 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -612,6 +612,7 @@ module NUOPC_DriverExplicit
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         runElement => runElementNext
       enddo
+      nullify(is%wrap%runSequence)  ! ensure well defined pointer status
     endif
   end subroutine
 
