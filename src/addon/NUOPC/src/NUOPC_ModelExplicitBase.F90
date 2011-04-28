@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.2 2011/04/28 15:15:20 theurich Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.3 2011/04/28 19:37:40 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -136,10 +136,15 @@ module NUOPC_ModelExplicitBase
     ! model time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=FILENAME)) return  ! bail out
         
+      ! by default update the timestamp on Fields in exportState to the 
+      ! currTime. This timestamp can then be overridded in Advance() or 
+      ! in TimestampExport() after the timestepping loop.
+      call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
       ! SPECIALIZE by calling into attached method to advance the model t->t+dt
       call ESMF_MethodExecute(gcomp, label=label_Advance, userRc=localrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
@@ -151,7 +156,7 @@ module NUOPC_ModelExplicitBase
         file=FILENAME, &
         rcToReturn=rc)) &
         return  ! bail out
-      
+        
       ! advance the internalClock to the new current time
       call ESMF_ClockAdvance(internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
