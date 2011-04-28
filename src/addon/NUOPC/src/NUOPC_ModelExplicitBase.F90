@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.1 2011/04/25 19:32:33 theurich Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.2 2011/04/28 15:15:20 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -16,12 +16,14 @@ module NUOPC_ModelExplicitBase
   private
   
   public routine_SetServices
-  public label_CheckImport, label_Advance
+  public label_CheckImport, label_Advance, label_TimestampExport
   
   character(*), parameter :: &
     label_CheckImport = "ModelExplicitBase_CheckImport"
   character(*), parameter :: &
     label_Advance = "ModelExplicitBase_Advance"
+  character(*), parameter :: &
+    label_TimestampExport = "ModelExplicitBase_TimestampExport"
 
   !-----------------------------------------------------------------------------
   contains
@@ -170,13 +172,19 @@ module NUOPC_ModelExplicitBase
       file=FILENAME)) &
       return  ! bail out
       
-    ! update timestamp on export Fields
-    call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    ! SPECIALIZE by calling into optional attached method
+    call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
   end subroutine
   
 end module

@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.4 2011/04/25 19:32:33 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.5 2011/04/28 15:15:20 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -11,9 +11,10 @@ module NUOPC_ModelExplicit
   use ESMF_Mod
   use NUOPC
   use NUOPC_ModelExplicitBase, only: &
-    ModelExB_routine_SS           => routine_SetServices, &
-    ModelExB_label_CheckImport    => label_CheckImport, &
-    label_Advance                 => label_Advance
+    ModelExB_routine_SS             => routine_SetServices, &
+    ModelExB_label_CheckImport      => label_CheckImport, &
+    label_Advance                   => label_Advance, &
+    ModelExB_label_TimestampExport  => label_TimestampExport
 
   implicit none
   
@@ -66,6 +67,14 @@ module NUOPC_ModelExplicit
       file=FILENAME)) &
       return  ! bail out
       
+    ! Specialize Run -> timestamp export Fields
+    call ESMF_MethodAdd(gcomp, label=ModelExB_label_TimestampExport, &
+      userRoutine=TimestampExport, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -184,6 +193,34 @@ module NUOPC_ModelExplicit
         rcToReturn=rc)
       return  ! bail out
     endif
+    
+  end subroutine
+    
+  !-----------------------------------------------------------------------------
+  
+  subroutine TimestampExport(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+    
+    ! local variables
+    type(ESMF_Clock)        :: clock
+    type(ESMF_State)        :: exportState
+
+    rc = ESMF_SUCCESS
+    
+    ! query the Component for its clock and importState
+    call ESMF_GridCompGet(gcomp, clock=clock, exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    ! update timestamp on export Fields
+    call NUOPC_StateSetTimestamp(exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
   end subroutine
     
