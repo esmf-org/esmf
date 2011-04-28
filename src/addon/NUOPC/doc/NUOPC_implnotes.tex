@@ -1,4 +1,4 @@
-% $Id: NUOPC_implnotes.tex,v 1.2 2011/04/28 22:31:13 theurich Exp $
+% $Id: NUOPC_implnotes.tex,v 1.3 2011/04/28 22:47:20 theurich Exp $
 
 The NUOPC Layer is implemented in Fortran on top of the public ESMF Fortran API.
 
@@ -33,7 +33,7 @@ There are three mechanisms through which user code specializes generic component
 
 \end{enumerate}
 
-Figure \ref{fig:NUOPCGenericComp} depicts the class structure of the NUOPC Generic Components:
+Figure \ref{fig:NUOPCGenericComp} depicts the class structure of the NUOPC Generic Components. There are two trees, one is rooted in {\tt ESMF\_GridComp}, while the other is rooted in {\tt ESMF\_CplComp}.
 \begin{figure}
 \begin{center}
 \scalebox{0.6}{\includegraphics{NUOPC_GC}}
