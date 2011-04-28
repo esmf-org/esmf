@@ -1,4 +1,4 @@
-! $Id: NUOPC_MediatorExplicit.F90,v 1.1 2011/04/28 15:17:08 theurich Exp $
+! $Id: NUOPC_MediatorExplicit.F90,v 1.2 2011/04/28 22:18:52 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_MediatorExplicit.F90"
 
@@ -11,9 +11,9 @@ module NUOPC_MediatorExplicit
   use ESMF_Mod
   use NUOPC
   use NUOPC_ModelExplicitBase, only: &
-    ModelExB_routine_SS           => routine_SetServices, &
-    ModelExB_label_CheckImport    => label_CheckImport, &
-    label_Advance                 => label_Advance
+    ModelExB_routine_SS             => routine_SetServices, &
+    ModelExB_label_CheckImport      => label_CheckImport, &
+    label_Advance                   => label_Advance
 
   implicit none
   
@@ -30,8 +30,8 @@ module NUOPC_MediatorExplicit
   !-----------------------------------------------------------------------------
   
   subroutine routine_SetServices(gcomp, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
     
     rc = ESMF_SUCCESS
     
@@ -59,27 +59,32 @@ module NUOPC_MediatorExplicit
       return  ! bail out
     
     ! Specialize Run -> checking import Fields
-!    call ESMF_MethodAdd(gcomp, label=ModelExB_label_CheckImport, &
-!      userRoutine=CheckImport, rc=rc)
-!    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-!      line=__LINE__, &
-!      file=FILENAME)) &
-!      return  ! bail out
+    call ESMF_MethodAdd(gcomp, label=ModelExB_label_CheckImport, &
+      userRoutine=CheckImport, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
       
   end subroutine
 
   !-----------------------------------------------------------------------------
 
   subroutine InitializeP2(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
     
     ! local variables    
-    logical                 :: allConnected
+    logical               :: allConnected
         
     rc = ESMF_SUCCESS
+
+    ! set the internal clock to the parent clock
+    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! query if all import Fields are connected
     allConnected = NUOPC_StateIsAllConnected(importState, rc=rc)
@@ -106,16 +111,16 @@ module NUOPC_MediatorExplicit
   !-----------------------------------------------------------------------------
 
   subroutine InitializeP3(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
     
     ! local variables    
-    integer           :: localrc
-    type(ESMF_Clock)  :: internalClock
-    logical           :: allConnected
-    logical           :: existflag
+    integer               :: localrc
+    type(ESMF_Clock)      :: internalClock
+    logical               :: allConnected
+    logical               :: existflag
         
     rc = ESMF_SUCCESS
     
@@ -151,13 +156,13 @@ module NUOPC_MediatorExplicit
   !-----------------------------------------------------------------------------
   
   subroutine CheckImport(gcomp, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
     
     ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_State)        :: importState
-    logical                 :: allCurrent
+    type(ESMF_Clock)      :: clock
+    type(ESMF_State)      :: importState
+    logical               :: allCurrent
 
     rc = ESMF_SUCCESS
     
