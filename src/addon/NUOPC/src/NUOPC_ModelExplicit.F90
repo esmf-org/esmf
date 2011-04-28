@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.5 2011/04/28 15:15:20 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.6 2011/04/28 22:16:34 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -21,18 +21,20 @@ module NUOPC_ModelExplicit
   private
   
   public routine_SetServices
-  public label_DataInitialize, label_Advance
+  public label_DataInitialize, label_Advance, label_SetClock
   
   character(*), parameter :: &
     label_DataInitialize = "ModelExplicit_DataInitialize"
-
+  character(*), parameter :: &
+    label_SetClock = "ModelExplicit_SetClock"
+    
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
   
   subroutine routine_SetServices(gcomp, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
     
     rc = ESMF_SUCCESS
     
@@ -80,15 +82,30 @@ module NUOPC_ModelExplicit
   !-----------------------------------------------------------------------------
 
   subroutine InitializeP2(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
     
     ! local variables    
-    logical                 :: allConnected
-        
+    logical               :: allConnected
+    integer               :: localrc
+    logical               :: existflag
+       
     rc = ESMF_SUCCESS
+    
+    ! by default set the internal clock to the parent clock
+    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! SPECIALIZE by calling into optional attached method to set internal clock
+    call ESMF_MethodExecute(gcomp, label=label_SetClock, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! query if all import Fields are connected
     allConnected = NUOPC_StateIsAllConnected(importState, rc=rc)
@@ -115,16 +132,16 @@ module NUOPC_ModelExplicit
   !-----------------------------------------------------------------------------
 
   subroutine InitializeP3(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)  :: gcomp
-    type(ESMF_State)     :: importState, exportState
-    type(ESMF_Clock)     :: clock
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
     
     ! local variables    
-    integer           :: localrc
-    type(ESMF_Clock)  :: internalClock
-    logical           :: allConnected
-    logical           :: existflag
+    integer               :: localrc
+    type(ESMF_Clock)      :: internalClock
+    logical               :: allConnected
+    logical               :: existflag
         
     rc = ESMF_SUCCESS
     
@@ -160,13 +177,13 @@ module NUOPC_ModelExplicit
   !-----------------------------------------------------------------------------
   
   subroutine CheckImport(gcomp, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
     
     ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_State)        :: importState
-    logical                 :: allCurrent
+    type(ESMF_Clock)      :: clock
+    type(ESMF_State)      :: importState
+    logical               :: allCurrent
 
     rc = ESMF_SUCCESS
     
@@ -199,12 +216,12 @@ module NUOPC_ModelExplicit
   !-----------------------------------------------------------------------------
   
   subroutine TimestampExport(gcomp, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
     
     ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_State)        :: exportState
+    type(ESMF_Clock)      :: clock
+    type(ESMF_State)      :: exportState
 
     rc = ESMF_SUCCESS
     
