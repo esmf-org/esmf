@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.53 2011/03/24 04:59:17 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.54 2011/04/28 15:06:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.53 2011/03/24 04:59:17 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.54 2011/04/28 15:06:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2313,7 +2313,7 @@ namespace ESMCI {
         element = element->nextElement;
       }
       if (existflag){
-        existflag = false;
+        *existflag = false;
         if (userRc) *userRc = ESMF_SUCCESS;
       }else{
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
@@ -2322,7 +2322,7 @@ namespace ESMCI {
       }
     }else{
       if (existflag){
-        existflag = false;
+        *existflag = false;
         if (userRc) *userRc = ESMF_SUCCESS;
       }else{
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
