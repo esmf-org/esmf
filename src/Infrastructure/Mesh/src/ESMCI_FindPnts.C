@@ -1,4 +1,4 @@
-// $Id: ESMCI_FindPnts.C,v 1.3 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_FindPnts.C,v 1.4 2011/04/28 18:53:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,11 +34,14 @@
 #include <limits>
 #include <vector>
 
+using std::set;
+using std::vector;
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FindPnts.C,v 1.3 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_FindPnts.C,v 1.4 2011/04/28 18:53:40 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {

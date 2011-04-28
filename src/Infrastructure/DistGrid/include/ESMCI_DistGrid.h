@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.36 2011/01/07 21:09:50 rokuingh Exp $
+// $Id: ESMCI_DistGrid.h,v 1.37 2011/04/28 18:53:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -201,23 +201,23 @@ namespace ESMCI {
   class MultiDimIndexLoop{
     // Iterator type through regular multidimensional structures.
    protected:
-    vector<int> indexTupleStart;
-    vector<int> indexTupleEnd;
-    vector<int> indexTuple;
-    vector<bool> skipDim;
-    vector<int> indexTupleBlockStart; // blocked region
-    vector<int> indexTupleBlockEnd;   // blocked region
-    vector<int> indexTupleWatchStart; // watched region
-    vector<int> indexTupleWatchEnd;   // watched region
+    std::vector<int> indexTupleStart;
+    std::vector<int> indexTupleEnd;
+    std::vector<int> indexTuple;
+    std::vector<bool> skipDim;
+    std::vector<int> indexTupleBlockStart; // blocked region
+    std::vector<int> indexTupleBlockEnd;   // blocked region
+    std::vector<int> indexTupleWatchStart; // watched region
+    std::vector<int> indexTupleWatchEnd;   // watched region
    public:
     MultiDimIndexLoop();
-    MultiDimIndexLoop(vector<int> const &sizes);
-    MultiDimIndexLoop(vector<int> const &offsets, vector<int> const &sizes);
+    MultiDimIndexLoop(std::vector<int> const &sizes);
+    MultiDimIndexLoop(std::vector<int> const &offsets, std::vector<int> const &sizes);
     void setSkipDim(int dim);
-    void setBlockStart(vector<int> const &blockStart);
-    void setBlockEnd(vector<int> const &blockEnd);
-    void setWatchStart(vector<int> const &watchStart);
-    void setWatchEnd(vector<int> const &watchEnd);
+    void setBlockStart(std::vector<int> const &blockStart);
+    void setBlockEnd(std::vector<int> const &blockEnd);
+    void setWatchStart(std::vector<int> const &watchStart);
+    void setWatchEnd(std::vector<int> const &watchEnd);
     void first();
     void last();
     void adjust();

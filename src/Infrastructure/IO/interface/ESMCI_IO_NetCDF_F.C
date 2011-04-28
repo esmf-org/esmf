@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF_F.C,v 1.3 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_IO_NetCDF_F.C,v 1.4 2011/04/28 18:53:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -19,6 +19,10 @@
 //------------------------------------------------------------------------------
 #include <ESMCI_F90Interface.h>
 #include <ESMCI_IO_NetCDF.h>
+
+using std::vector;
+using std::string;
+
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

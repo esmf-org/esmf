@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.13 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_IO_XML.h,v 1.14 2011/04/28 18:53:35 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -76,26 +76,26 @@ namespace ESMCI{
 
     // maps to SAX2 startElement() & characters(), but not endElement();
     //   use to open a nested tag section
-    int writeStartElement(const string& name,
-                          const string& value,
+    int writeStartElement(const std::string& name,
+                          const std::string& value,
                           const int     indentLevel,
                           const int     nPairs, ...); // nPairs of
                  // (char *attrName, char *attrValue)
 
     // maps to SAX2 startElement, characters() & endElement();
     //   use to write an entire tag, with xml attrs, and with no nested tags
-    int writeElement(const string& name,
-                     const string& value,
+    int writeElement(const std::string& name,
+                     const std::string& value,
                      const int     indentLevel,
                      const int     nPairs, ...); // nPairs of
                  // (char *attrName, char *attrValue)
 
     // maps to SAX2 endElement(); use to close a nested tag section
-    int writeEndElement(const string& name,
+    int writeEndElement(const std::string& name,
                         const int     indentLevel);
 
     // write an XML comment
-    int writeComment(const string& comment);
+    int writeComment(const std::string& comment);
 
     int write(int fileNameLen, const char* fileName,
               const char* outChars, int flag);
@@ -115,8 +115,8 @@ namespace ESMCI{
     // used internally by public methods writeStartElement() & writeElement()
     //   to share the common logic of writing the bulk of the tag
     //   (the difference is in the handling of the end-of-line/end-of-tag)
-    int writeElementCore(const string& name,
-                         const string& value,
+    int writeElementCore(const std::string& name,
+                         const std::string& value,
                          const int     indentLevel,
                          const int     nPairs,
                          va_list       args); // nPairs of

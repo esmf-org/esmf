@@ -1,4 +1,4 @@
-// $Id: ESMCI_State.h,v 1.24 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMCI_State.h,v 1.25 2011/04/28 18:53:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,13 +75,13 @@ namespace ESMCI{
     static int destroy(State *state);
 
     int getNumItems(int* numItems);
-    vector<string>  getItemNames();
+    std::vector<std::string>  getItemNames();
 
     int getNumItems(int* numItems, ESMC_StateItemType  itemType);
-    vector<string>  getItemNames(ESMC_StateItemType  itemType);
+    std::vector<std::string>  getItemNames(ESMC_StateItemType  itemType);
 
     int getNumArrays(int* numArrays);
-    vector<string>  getArrayNames();
+    std::vector<std::string>  getArrayNames();
 
     int read(ESMC_Base* base, int fileNameLen, const char* fileName);
     int write(ESMC_Base* base, int fileNameLen, const char* fileName);

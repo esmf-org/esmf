@@ -1,4 +1,4 @@
-// $Id: ESMCI_SpaceDir.C,v 1.3 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_SpaceDir.C,v 1.4 2011/04/28 18:53:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,10 +32,13 @@
 
 #include <algorithm>
 
+using std::set;
+using std::vector;
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_SpaceDir.C,v 1.3 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_SpaceDir.C,v 1.4 2011/04/28 18:53:40 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -98,7 +101,7 @@ SpaceDir::SpaceDir(
 
    // Distribute min-max box of each proc 
    // Pack up local minmax
-   std::vector<double> local_minmax(6,0.0);
+   vector<double> local_minmax(6,0.0);
    local_minmax[0]=proc_min[0]; 
    local_minmax[1]=proc_min[1]; 
    local_minmax[2]=proc_min[2]; 
@@ -111,7 +114,7 @@ SpaceDir::SpaceDir(
    if (num_procs <1)     Throw() << "Error: number of procs is less than 1";
 
    // Allocate buffer for global minmax list
-   std::vector<double> global_minmax(6*num_procs, 0.0);
+   vector<double> global_minmax(6*num_procs, 0.0);
 
    // Do all gather to get info from all procs
    MPI_Allgather(&local_minmax[0], 6, MPI_DOUBLE, &global_minmax[0], 6, MPI_DOUBLE, Par::Comm());

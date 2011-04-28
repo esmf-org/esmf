@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.28 2011/04/21 04:54:16 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.29 2011/04/28 18:53:24 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,10 +82,10 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     Array *get(std::string arrayName){
       return arrayContainer.get(arrayName);
     }
-    void getVector(vector<Array *> &arrayVector)const{ 
+    void getVector(std::vector<Array *> &arrayVector)const{ 
       arrayContainer.getVector(arrayVector);
     }
-    void getNameVector(vector<string> &arrayNameVector)const{ 
+    void getNameVector(std::vector<std::string> &arrayNameVector)const{ 
       arrayContainer.getKeyVector(arrayNameVector);
     }
     int getCount()        const {return arrayContainer.size();}
@@ -125,7 +125,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
-        vector<SparseMatrix> &sparseMatrix);
+        std::vector<SparseMatrix> &sparseMatrix);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,

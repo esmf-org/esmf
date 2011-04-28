@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.58 2011/01/07 18:32:16 rokuingh Exp $
+// $Id: ESMCI_Array.h,v 1.59 2011/04/28 18:53:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -98,13 +98,13 @@ namespace ESMCI {
                                       // Multiply with tensorElementCount to get
                                       // total number of elements in total
                                       // Array region.
-    vector<vector<SeqIndex> > rimSeqIndex;// elements in the rim between
+    std::vector<std::vector<SeqIndex> > rimSeqIndex;// elements in the rim between
                                           // exclusive and total region
                                           // [localDeCount][rimElementCount[]]
-    vector<vector<int> > rimLinIndex;     // elements in the rim between
+    std::vector<std::vector<int> > rimLinIndex;     // elements in the rim between
                                           // exclusive and total region
                                           // [localDeCount][rimElementCount[]]
-    vector<int> rimElementCount;      // numb. of elements in rim [localDeCount]
+    std::vector<int> rimElementCount;      // numb. of elements in rim [localDeCount]
     // lower level object references
     DistGrid *distgrid;
     bool distgridCreator;
@@ -280,7 +280,7 @@ namespace ESMCI {
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, vector<SparseMatrix> const &sparseMatrix,
+      RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,
       bool haloFlag=false);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,

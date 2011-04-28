@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.33 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMCI_DELayout.h,v 1.34 2011/04/28 18:53:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -299,7 +299,7 @@ class XXE{
                                     // XXE object is responsible
     int xxeSubCount;                // number of elements in xxeSubList
     ESMC_TypeKind typekind[10];     // place the XXE can store TypeKind info
-    vector<BufferInfo *>bufferInfoList; // vector of (BufferInfo *) entries
+    std::vector<BufferInfo *>bufferInfoList; // vector of (BufferInfo *) entries
       // The bufferInfoList provides an extra level of indirection to XXE
       // managed communication buffers, and associated size information.
       // At the beginning of exec() the entries in the bufferInfoList are
@@ -384,10 +384,10 @@ class XXE{
         xxeSubCount = xxeSubCountArg; // reset
       }
       if (bufferInfoListArg>0){
-        vector<BufferInfo *>::iterator first =
+        std::vector<BufferInfo *>::iterator first =
           bufferInfoList.begin() + bufferInfoListArg;
-        vector<BufferInfo *>::iterator last = bufferInfoList.end();
-        for (vector<BufferInfo *>::iterator bi=first; bi!=last; ++bi)
+        std::vector<BufferInfo *>::iterator last = bufferInfoList.end();
+        for (std::vector<BufferInfo *>::iterator bi=first; bi!=last; ++bi)
           delete *bi;
         bufferInfoList.erase(first, last);
       }

@@ -36,6 +36,9 @@
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
 
+using std::vector;
+using std::string;
+
 //-----------------------------------------------------------------------------
 //BOP
 // !CLASS: State object
@@ -48,7 +51,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.23 2011/02/23 06:16:34 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.24 2011/04/28 18:53:46 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.29 2011/04/21 04:28:32 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.30 2011/04/28 18:53:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,6 +28,9 @@
 
 #include <vector>
 #include <string>
+
+using std::exception;
+using std::vector;
 
 //------------------------------------------------------------------------------
 //BOP
