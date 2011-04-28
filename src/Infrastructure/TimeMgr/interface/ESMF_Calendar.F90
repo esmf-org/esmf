@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.133 2011/04/27 19:36:08 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.134 2011/04/28 20:54:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.133 2011/04/27 19:36:08 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.134 2011/04/28 20:54:44 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1060,7 +1060,7 @@
 !          {\tt ESMF\_Calendar} to determine leap year within.
 !     \item[yy]
 !          Year to check for leap year.  The type is integer and the <kind> can
-!          be either I4 or I8:  {\tt ESMF\_KIND_I4} or {\tt ESMF\_KIND_I8}.
+!          be either I4 or I8:  {\tt ESMF\_KIND\_I4} or {\tt ESMF\_KIND\_I8}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
