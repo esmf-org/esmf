@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.252 2011/04/21 17:04:19 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.253 2011/04/28 02:41:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.252 2011/04/21 17:04:19 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.253 2011/04/28 02:41:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2339,11 +2339,10 @@ contains
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt ESMF\_State}. Actual
+!     Releases resources associated with this {\tt ESMF\_State}. Actual
 !     objects added to {\tt ESMF\_State}s will not be destroyed, it
 !     remains the user's responsibility to destroy these objects in the correct
-!     context. However, proxy objects automatically created during
-!     {\tt ESMF\_StateReconcile()} are destroyed when the State is destroyed.
+!     context.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2401,18 +2400,18 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetInfo(state,  &
-            keywordEnforcer, itemSearch, nestedFlag, statetype,  &
-            itemCount, itemNameList, itemtypeList, name, rc)
+            keywordEnforcer, itemSearch, nestedFlag, stateType,  &
+            itemCount, itemNameList, itemTypeList, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),         intent(in)            :: state
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),        intent(in),  optional :: itemSearch
       logical,                  intent(in),  optional :: nestedFlag
-      type(ESMF_StateType),     intent(out), optional :: statetype
+      type(ESMF_StateType),     intent(out), optional :: stateType
       integer,                  intent(out), optional :: itemCount
       character (len=*),        intent(out), optional :: itemNameList(:)
-      type(ESMF_StateItemType), intent(out), optional :: itemtypeList(:)
+      type(ESMF_StateItemType), intent(out), optional :: itemTypeList(:)
       character (len=*),        intent(out), optional :: name
       integer,                  intent(out), optional :: rc             
 
@@ -2439,7 +2438,7 @@ contains
 !       State level only (default)
 !       When set to {\tt .true.}, additionally returns information from
 !       nested States
-!     \item[{[statetype]}]
+!     \item[{[stateType]}]
 !       Returns the type, e.g., Import or Export, of this {\tt ESMF\_State}.
 !       Possible values are listed in Section~\ref{opt:statetype}.
 !     \item[{[itemCount]}]
@@ -2455,7 +2454,7 @@ contains
 !       States.  When using {\tt itemSearch}, it will return the names of
 !       items matching the specified name.  {\tt itemNameList} must be at least
 !       {\tt itemCount} long.
-!     \item[{[itemtypeList]}]  
+!     \item[{[itemTypeList]}]  
 !       Array of possible item object types in this {\tt ESMF\_State}, including
 !       placeholder names.  When the {\tt nestedFlag} option is
 !       set to {\tt .true.}, the list will include items present in nested
@@ -3247,14 +3246,14 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetItemInfo(state, itemName, itemtype, keywordEnforcer, rc)
+      subroutine ESMF_StateGetItemInfo(state, itemName, itemType, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(in) :: state
-      character (len=*), intent(in) :: itemName
-      type(ESMF_StateItemType),    intent(out) :: itemtype
+      type(ESMF_State),         intent(in)  :: state
+      character (len=*),        intent(in)  :: itemName
+      type(ESMF_StateItemType), intent(out) :: itemtype
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,           intent(out), optional :: rc             
+      integer,                  intent(out), optional :: rc             
 
 !
 ! !STATUS:
@@ -3276,7 +3275,7 @@ contains
 !        {\tt ESMF\_State} to be queried.
 !      \item[itemName]
 !        Name of the item to return information about.
-!      \item[itemtype]
+!      \item[itemType]
 !        Returned item types for the item with the given name, including 
 !        placeholder names.  Options are
 !        listed in Section~\ref{opt:stateitemtype}.  If no item with the
@@ -3340,7 +3339,7 @@ contains
 ! !ARGUMENTS:
       type(ESMF_State),      intent(in)  :: state
       character (len=*),     intent(in)  :: itemName
-      type(ESMF_NeededFlag), intent(out) :: neededflag
+      type(ESMF_NeededFlag), intent(out) :: neededFlag
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(out), optional :: rc             
 
@@ -3358,7 +3357,7 @@ contains
 !       The {\tt ESMF\_State} to query.
 !      \item[itemName]
 !       Name of the data item to query.
-!      \item[neededflag]
+!      \item[neededFlag]
 !       Whether state item is needed or not for a particular application
 !       configuration.  Possible values are listed in 
 !       Section~\ref{opt:neededflag}.
@@ -3815,11 +3814,11 @@ contains
       subroutine ESMF_StatePrint(state, keywordEnforcer, options, nestedFlag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),    intent(in) :: state
+      type(ESMF_State), intent(in) :: state
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character (len = *), intent(in),  optional :: options
-      logical,             intent(in),  optional :: nestedFlag
-      integer,             intent(out), optional :: rc 
+      character(len=*), intent(in),  optional :: options
+      logical,          intent(in),  optional :: nestedFlag
+      integer,          intent(out), optional :: rc 
 !
 ! !STATUS:
 ! \apiStatusCompatible
