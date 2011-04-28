@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.4 2011/04/19 02:03:44 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.5 2011/04/28 15:12:17 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -16,7 +16,20 @@ module NUOPC_Connector
   private
   
   public routine_SetServices
+  public type_InternalState, type_InternalStateStruct
+  public label_InternalState
+  public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
+    label_ReleaseRouteHandle
   
+  character(*), parameter :: &
+    label_InternalState = "Connector_InternalState"
+  character(*), parameter :: &
+    label_ComputeRouteHandle = "Connector_ComputeRH"
+  character(*), parameter :: &
+    label_ExecuteRouteHandle = "Connector_ExecuteRH"
+  character(*), parameter :: &
+    label_ReleaseRouteHandle = "Connector_ReleaseRH"
+
   type type_InternalStateStruct
     type(ESMF_FieldBundle)  :: srcFields
     type(ESMF_FieldBundle)  :: dstFields
@@ -150,6 +163,8 @@ module NUOPC_Connector
     type(ESMF_VM)                         :: vm
     integer                               :: stat
     type(type_InternalState)              :: is
+    integer                               :: localrc
+    logical                               :: existflag
     
     rc = ESMF_SUCCESS
     
@@ -161,7 +176,7 @@ module NUOPC_Connector
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    call ESMF_CplCompSetInternalState(cplcomp, is, rc)
+    call ESMF_UserCompSetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -273,7 +288,7 @@ module NUOPC_Connector
           file=FILENAME)) &
           return  ! bail out
         call ESMF_StateGet(exportState, field=eField, &
-          itemName=exportStdItemNameList(iMatch), rc=rc)
+          itemName=exportStdItemNameList(eMatch), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -315,14 +330,30 @@ module NUOPC_Connector
 
     enddo
     
-    ! precompute the regrid for all src to dst Fields
-    call ESMF_FieldBundleRegridStore(is%wrap%srcFields, is%wrap%dstFields, &
-      unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
-      routehandle=is%wrap%rh, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    ! SPECIALIZE by calling into attached method to precompute routehandle
+    call ESMF_MethodExecute(cplcomp, label=label_ComputeRouteHandle, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    if (.not.existflag) then
+      ! if not specialized -> use default method to:
+      ! precompute the regrid for all src to dst Fields
+      call ESMF_FieldBundleRegridStore(is%wrap%srcFields, is%wrap%dstFields, &
+        unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+        routehandle=is%wrap%rh, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
     if (associated(importStdItemNameList)) deallocate(importStdItemNameList)
@@ -342,12 +373,14 @@ module NUOPC_Connector
     ! local variables
     type(type_InternalState)  :: is
     type(ESMF_VM)             :: vm
+    integer                   :: localrc
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
     
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_CplCompGetInternalState(cplcomp, is, rc)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -356,13 +389,29 @@ module NUOPC_Connector
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
-    ! execute the regrid operation
-    call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
-      routehandle=is%wrap%rh, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    ! SPECIALIZE by calling into attached method to execute routehandle
+    call ESMF_MethodExecute(cplcomp, label=label_ExecuteRouteHandle, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    if (.not.existflag) then
+      ! if not specialized -> use default method to:
+      ! execute the regrid operation
+      call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
+        routehandle=is%wrap%rh, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
     
     ! update the timestamp on all of the dst fields to that on the src side
     call NUOPC_FieldBundleUpdateTime(is%wrap%srcFields, is%wrap%dstFields, &
@@ -402,23 +451,42 @@ module NUOPC_Connector
     ! local variables
     integer                   :: stat
     type(type_InternalState)  :: is
+    integer                   :: localrc
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
     
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_CplCompGetInternalState(cplcomp, is, rc)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
-    ! destroy the objects in the internal state
-    call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    ! SPECIALIZE by calling into attached method to release routehandle
+    call ESMF_MethodExecute(cplcomp, label=label_ReleaseRouteHandle, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    if (.not.existflag) then
+      ! if not specialized -> use default method to:
+      ! release the regrid operation
+      call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
