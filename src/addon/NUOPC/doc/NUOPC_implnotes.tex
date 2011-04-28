@@ -1,4 +1,4 @@
-% $Id: NUOPC_implnotes.tex,v 1.1 2011/04/13 23:12:15 theurich Exp $
+% $Id: NUOPC_implnotes.tex,v 1.2 2011/04/28 22:31:13 theurich Exp $
 
 The NUOPC Layer is implemented in Fortran on top of the public ESMF Fortran API.
 
@@ -9,7 +9,7 @@ The NUOPC utility routines form a very straight forward Fortran API. The interfa
   use NUOPC
 \end{verbatim}
 
-The NUOPC generic components are implemented as a collection of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix, then continues with {\tt Model}, {\tt Driver}, {\tt Connector}, or {\tt Mediator} followed optionally by a string of descriptive terms.
+The NUOPC generic components are implemented as a collection of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix, then continues with {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector} followed optionally by a string of descriptive terms.
 
 The user code accesses the desired generic component(s) by including a {\tt use} line for each one. Each generic component defines a small set of public names that are made available to the user code through the {\tt use} statement. At a minimum the {\tt SetServices} method is made public. Some generic components also define a public internal state type by the standard name {\tt InternalState}. It is recommended that the following syntax is used when accessing a generic component (here with internal state):
 

@@ -58,8 +58,8 @@ Model component that is driven by explicit time stepping. Each time the {\tt Run
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0: {\sc Required:} Add potential Fields to import and export States.
-\item phase 1: {\sc Required:} Replace potential Fields in import and export States with actual Fields. Set the model internal Clock.
+\item phase 0: {\sc Required:} Add advertised Fields to import and export States.
+\item phase 1: {\sc Required:} Replace advertised Fields in import and export States with actual Fields. Set the model internal Clock.
 \item phase 2: {\sc Provided:} Check compatibility.
 \item phase 3. {\sc Provided:} Initialize export Fields and set time stamp to current time.
 \end{itemize}
