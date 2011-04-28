@@ -1,12 +1,13 @@
-# $Id: makefile,v 1.2 2011/04/25 19:32:33 theurich Exp $ 
+# $Id: makefile,v 1.3 2011/04/28 15:17:08 theurich Exp $ 
 
 ALL: build_here 
 
 SOURCEC	  = 
 SOURCEF	  = NUOPC.F90 \
             NUOPC_ModelExplicitBase.F90 NUOPC_ModelExplicit.F90 \
+            NUOPC_MediatorExplicit.F90 \
             NUOPC_DriverExplicit.F90 NUOPC_DriverExplicitAtmOcn.F90 \
-            NUOPC_Connector.F90
+            NUOPC_DriverExplicitAtmOcnMed.F90 NUOPC_Connector.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
