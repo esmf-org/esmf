@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.h,v 1.8 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_SAX2ReadHandler.h,v 1.9 2011/04/29 16:00:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -62,10 +62,10 @@ namespace ESMCI{
  class SAX2ReadHandler : public DefaultHandler {
  private:
     ESMCI::Attribute* attr;
-    string qname;
-    string convention;
-    string purpose;
-    string object;
+    std::string qname;
+    std::string convention;
+    std::string purpose;
+    std::string object;
 
  public:
     void startElement(
