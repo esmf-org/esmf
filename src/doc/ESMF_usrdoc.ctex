@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.43 2011/01/24 23:59:02 svasquez Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.44 2011/05/02 18:47:51 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -27,7 +27,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{REF}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Samson Cheung, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Rosalinda de Fainchtein, Brian Eaton, Bob Hallberg, Tom Henderson, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Erik Kluzek, Brian Kauffman, Jay Larson, Peggy Li, Fei Liu, John Michalakes, Sylvia Murphy, David Neckels, Ryan O Kuinghttons, Bob Oehmke, Chuck Panaccione, Jim Rosinski, Will Sawyer, Earl Schwab, Shepard Smithline, Walter Spector, Don Stark, Max Suarez, Spencer Swift, Gerhard Theurich, Atanas Trayanov, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Samson Cheung, Tom Clune, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Rosalinda de Fainchtein, Brian Eaton, Bob Hallberg, Tom Henderson, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Erik Kluzek, Brian Kauffman, Jay Larson, Peggy Li, Fei Liu, John Michalakes, Sylvia Murphy, David Neckels, Ryan O Kuinghttons, Bob Oehmke, Chuck Panaccione, Jim Rosinski, Will Sawyer, Earl Schwab, Shepard Smithline, Walter Spector, Don Stark, Max Suarez, Spencer Swift, Gerhard Theurich, Atanas Trayanov, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 \setlength{\textwidth}{6.5truein}
 \setlength{\textheight}{8.5truein}
