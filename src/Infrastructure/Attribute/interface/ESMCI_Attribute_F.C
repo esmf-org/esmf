@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.48 2011/05/02 20:27:50 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.49 2011/05/02 20:39:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.48 2011/05/02 20:27:50 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.49 2011/05/02 20:39:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1477,25 +1477,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   }
 
   if (value) {
-/*    if (*count == 1) {
-      if (*tk == ESMC_TYPEKIND_I4)
-        status = attpack->AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
-      else if (*tk == ESMC_TYPEKIND_I8)
-        status = attpack->AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
-      else if (*tk == ESMC_TYPEKIND_R4)
-        status = attpack->AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
-      else if (*tk == ESMC_TYPEKIND_R8)
-        status = attpack->AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
-      else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = attpack->AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
-      else {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
-                         "typekind was inappropriate for this routine", &status);
-        if (rc) *rc = status;
-        return;
-      }
-    }
-    else if (*count > 1) {*/
+    if (*count >= 1) {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
@@ -1537,14 +1519,17 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
         if (rc) *rc = status;
         return;
       }
-/*    }
+    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }*/
+    }
   }
+
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+	&status)) {if (rc) *rc = status; return;}
 
   if (rc) *rc = status;
 
@@ -2081,8 +2066,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 
   // Set the attribute on the object.
   status = attr->AttrModifyValue(*tk, *count, &cvalue);
-/*  status = (**base).root.AttPackSet(cname, *tk, *count, &cvalue, cconv, cpurp,
-                                    cobj, capname);*/
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -2279,8 +2262,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
         for (unsigned int i=0; i<*count; i++)
           temp.push_back((static_cast<ESMC_Logical*> (value))[i]);
           status = attr->AttrModifyValue(*tk, *count, &temp);
-        /*status = (**base).root.AttPackSet(cname, *tk, *count, &temp,
-                        cconv, cpurp, cobj, capname);*/
         temp.clear();
       } else {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
@@ -2297,7 +2278,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     }
   }
 
-// TODO !!! CHECK STATUS
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
 	&status)) {if (rc) *rc = status; return;}
 
@@ -2878,25 +2858,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   }
   
   if (value) {
-/*    if (*items == 1) {
-      if (*tk == ESMC_TYPEKIND_I4)
-        status = (**base).root.AttributeGet(cname, (static_cast<ESMC_I4*> (value)));  
-      else if (*tk == ESMC_TYPEKIND_I8)
-        status = (**base).root.AttributeGet(cname, (static_cast<ESMC_I8*> (value)));
-      else if (*tk == ESMC_TYPEKIND_R4)
-        status = (**base).root.AttributeGet(cname, (static_cast<ESMC_R4*> (value)));
-      else if (*tk == ESMC_TYPEKIND_R8)
-        status = (**base).root.AttributeGet(cname, (static_cast<ESMC_R8*> (value)));
-      else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = (**base).root.AttributeGet(cname, (static_cast<ESMC_Logical*> (value)));
-      else {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
-                         "typekind was inappropriate for this routine", &status);
-        if (rc) *rc = status;
-        return;
-      }
-    }
-    else if (*items > 1) {*/
+    if (*items >= 1) {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*items);
@@ -2938,14 +2900,17 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
         if (rc) *rc = status;
         return;
       }
-/*    }
+    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }*/
+    }
   }
+
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+	&status)) {if (rc) *rc = status; return;}
 
   if (rc) *rc = status;
 
@@ -3578,25 +3543,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   }
 
   if (value) {
-/*    if (*count == 1) {
-      if (*tk == ESMC_TYPEKIND_I4)
-        status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_I4*> (value)));  
-      else if (*tk == ESMC_TYPEKIND_I8)
-        status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_I8*> (value)));
-      else if (*tk == ESMC_TYPEKIND_R4)
-        status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_R4*> (value)));
-      else if (*tk == ESMC_TYPEKIND_R8)
-        status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_R8*> (value)));
-      else if (*tk == ESMC_TYPEKIND_LOGICAL)
-        status = (**base).root.AttributeSet(cname, *(static_cast<ESMC_Logical*> (value)));
-      else {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE,
-                         "typekind was inappropriate for this routine", &status);
-        if (rc) *rc = status;
-        return;
-      }
-    }
-    else if (*count > 1) { */
+    if (*count >= 1) {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
         temp.reserve(*count);
@@ -3638,14 +3585,17 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
         if (rc) *rc = status;
         return;
       }
-/*    }
+    }
     else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF,
                        "the number of items is inappropriate", &status);
       if (rc) *rc = status;
       return;
-    }*/
+    }
   }
+
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+	&status)) {if (rc) *rc = status; return;}
     
   if (rc) *rc = status;
 
