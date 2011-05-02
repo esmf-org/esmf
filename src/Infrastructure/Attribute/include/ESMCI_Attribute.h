@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.47 2011/04/28 18:53:27 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.48 2011/05/02 14:56:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -154,10 +154,10 @@ class Attribute
     int AttPackRemoveAttribute(const std::string &name, const std::string &convention, 
       const std::string &purpose, const std::string &object, 
       const std::string &attPackInstanceName);
-    int AttPackSet(const std::string &name, const ESMC_TypeKind &tk, 
-      int count, void *value, const std::string &convention, 
-      const std::string &purpose, const std::string &object,
-      const std::string &attPackInstanceName);
+//    int AttPackSet(const std::string &name, const ESMC_TypeKind &tk, 
+//      int count, void *value, const std::string &convention, 
+//      const std::string &purpose, const std::string &object,
+//      const std::string &attPackInstanceName);
     int AttPackSet(Attribute *attr);
     
     // copy and swap an attribute hierarchy

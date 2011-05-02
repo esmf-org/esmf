@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.101 2011/04/28 18:53:30 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.102 2011/05/02 14:56:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ using std::ostringstream;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.101 2011/04/28 18:53:30 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.102 2011/05/02 14:56:29 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -286,6 +286,8 @@ int Attribute::count=0;
   vector<string> cvalue;
   cvalue.reserve(1);
   cvalue.push_back(empty);
+
+  Attribute *attr;
 
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
@@ -599,40 +601,52 @@ int Attribute::count=0;
       string attPackInstanceName;
       localrc = AttPackAddAttribute("Abbreviation", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("Abbreviation",
+      attr = AttPackGetAttribute("Abbreviation");
+      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
+/*      localrc = AttPackSet("Abbreviation",
          ESMC_TYPEKIND_CHARACTER, 1,
          &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);
+         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("EmailAddress", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("EmailAddress", ESMC_TYPEKIND_CHARACTER, 1,
+      attr = AttPackGetAttribute("EmailAddress");
+      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
+/*      localrc = AttPackSet("EmailAddress", ESMC_TYPEKIND_CHARACTER, 1,
          &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);
+         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("Name", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("Name", ESMC_TYPEKIND_CHARACTER, 1,
+      attr = AttPackGetAttribute("Name");
+      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
+/*      localrc = AttPackSet("Name", ESMC_TYPEKIND_CHARACTER, 1,
          &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);
+         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("PhysicalAddress", ESMC_TYPEKIND_CHARACTER, 1,
+      attr = AttPackGetAttribute("PhysicalAddress");
+      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
+/*      localrc = AttPackSet("PhysicalAddress", ESMC_TYPEKIND_CHARACTER, 1,
          &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);
+         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("ResponsiblePartyRole", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
+      attr = AttPackGetAttribute("ResponsiblePartyRole");
+      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
+/*      localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
          &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);
+         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                                       "Responsible Party Description", object);
-      localrc = AttPackSet("URL", ESMC_TYPEKIND_CHARACTER, 1,
+      attr = AttPackGetAttribute("URL");
+      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
+/*      localrc = AttPackSet("URL", ESMC_TYPEKIND_CHARACTER, 1,
          &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);
+         object, attPackInstanceName);*/
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -1439,7 +1453,7 @@ int Attribute::count=0;
 
 }  // end AttPackRemoveAttribute
 //-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
+/*#undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackSet"
 //BOPI
 // !IROUTINE:  AttPackSet() - set an {\tt Attribute} in an attpack
@@ -1503,7 +1517,7 @@ int Attribute::count=0;
   return ESMF_SUCCESS;
   
 }  // end AttPackSet()
-//-----------------------------------------------------------------------------
+*///-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackSet"
 //BOPI
