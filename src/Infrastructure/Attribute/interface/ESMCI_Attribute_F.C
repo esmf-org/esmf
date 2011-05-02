@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.47 2011/05/02 14:56:27 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.48 2011/05/02 20:27:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.47 2011/05/02 14:56:27 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.48 2011/05/02 20:27:50 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1070,197 +1070,6 @@ extern "C" {
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attpackremoveattribute
-/*
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_esmc_attpackgetchar - get attribute from an attpack
-//
-// !INTERFACE:
-      void FTN(c_esmc_attpackgetchar)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpackgetchar()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // out - character value
-      char *convention,         // in - convention
-      char *purpose,            // in - purpose
-      char *object,             // in - object
-      char *attPackInstanceName,// in - attpack instance name
-      int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
-// 
-// !DESCRIPTION:
-//     Retrieve a (name,value) pair from any object type in the system.
-//
-//EOP
-
-  int status;
-  ESMC_TypeKind attrTypeKind;
-  int slen;              // actual attribute string length
-  int *llens;
-  ESMCI::Attribute *attpack, *attr; 
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  string cname(name, nlen);
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  cname.resize(cname.find_last_not_of(" ")+1);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
-
-  if (cname.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  if (cconv.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  //   use the count to allocate llens
-  llens = new int[1];
-  
-  // convert optional (char *) arg attPackInstanceName to string
-// TODO: is the following line safe for all F90 compilers when passing a 
-//       not-present char* attPackInstanceName ?  what is value of alen?
-//  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
-  string capname;
-  if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
-                                                      alen > 0) {
-    capname.assign(attPackInstanceName, 0, alen);
-  }
-  capname.resize(capname.find_last_not_of(" ")+1);
-
-  // get the Attribute package
-  attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
-  if (!attpack) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  // get the attribute
-  attr = attpack->AttPackGetAttribute(cname);
-  if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
-      "This Attribute package does have the specified Attribute", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  // set attpack to parent of found attribute
-  attpack = attr->AttributeGetParent();
-
-  // get length of the attribute
-  status = attpack->AttributeGet(cname, llens, 1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc))) {
-    ESMC_LogDefault.Write("failed getting item char* lengths", ESMC_LOG_INFO);
-    delete [] llens;
-    return;
-  }
-  
-  slen = llens[0];
-
-  // make sure destination will be long enough
-  if (slen > vlen) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
-                         "Attribute is too long for buffer", &status);
-    delete [] llens;
-    if (rc) *rc = status;
-    return; 
-  }
-
-  string cvalue;
-  status = attpack->AttributeGet(cname, &cvalue);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc))) {
-    ESMC_LogDefault.Write("failed getting Attribute value", ESMC_LOG_INFO);
-    delete [] llens;
-    return;
-  }
-
-  status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc));
-
-  delete [] llens;
-  
-}  // end c_esmc_attpackgetchar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2097,130 +1906,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
         ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeMove
-*//*
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_esmc_attpacksetchar - Set attributes in the attribute package
-//
-// !INTERFACE:
-      void FTN(c_esmc_attpacksetchar)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attpacksetchar()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *name,                // in - F90, non-null terminated string
-      char *value,               // in - F90, non-null terminated string
-      ESMC_TypeKind *tk,         // in - typekind
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      char *attPackInstanceName, // in - attpack instance name
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg vlen,// hidden/in - strlen count for value
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
-// 
-// !DESCRIPTION:
-//     Set the convention, purpose, and object type on an attribute package
-//
-//EOP
-
-  int status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity checks before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  if (!value) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if (!convention) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if (!purpose) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if (!object) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cname(name, nlen);
-  string cvalue(value, vlen);
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  cname.resize(cname.find_last_not_of(" ")+1);
-  cvalue.resize(cvalue.find_last_not_of(" ")+1);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
-
-  if (cname.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion, name must not be empty", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // convert optional (char *) arg attPackInstanceName to string
-// TODO: is the following line safe for all F90 compilers when passing a 
-//       not-present char* attPackInstanceName ?  what is value of alen?
-//  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
-  string capname;
-  if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
-                                                      alen > 0) {
-    capname.assign(attPackInstanceName, 0, alen);
-  }
-  capname.resize(capname.find_last_not_of(" ")+1);
-
-  // Set the attribute on the object.
-  status = (**base).root.AttPackSet(cname, *tk, 1, &cvalue, cconv, cpurp, cobj,
-                                    capname);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-        ESMC_NOT_PRESENT_FILTER(rc));
-
-}  // end c_esmc_attpacksetchar*/
-
+*/
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_esmc_attpacksetcharlist - Set attributes in the attribute package
@@ -2967,105 +2653,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   }
 
 }  // end c_ESMC_AttributeCopy
-/*
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetchar)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributegetchar()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // out - character value
-      int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
-// 
-// !DESCRIPTION:
-//     Retrieve a (name,value) pair from any object type in the system.
-//
-//EOP
-
-  int status;
-  ESMC_TypeKind attrTypeKind;
-  int slen;
-  int *llens;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity checks before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cname(name, nlen);
-  cname.resize(cname.find_last_not_of(" ")+1);
-
-  if (cname.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  //   use the count to allocate llens
-  llens = new int[1];
-  
-  //  use llens to get the lengths of all items on this attribute
-  status = (**base).root.AttributeGet(cname, llens, 1);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc))) {
-    ESMC_LogDefault.Write("failed getting item char* lengths", ESMC_LOG_INFO);
-    delete [] llens;
-    return;
-  }
-  slen = llens[0];
-
-  // make sure destination will be long enough
-  if (slen > vlen) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_BUFFER_SHORT,
-                         "Attribute is too long for buffer", &status);
-    delete [] llens;
-    if (rc) *rc = status;
-    return; 
-  }
-
-  string cvalue;
-  status = (**base).root.AttributeGet(cname, &cvalue);
-  if (status != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "failed getting attribute value", &status);
-    delete [] llens;
-    if (rc) *rc = status;
-    return;
-  }
-
-  status = ESMC_CtoF90string(const_cast<char*> (cvalue.c_str()), value, vlen);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc));
-    
-  delete [] llens;
-  
-}  // end c_ESMC_AttributeGetChar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -3835,80 +3422,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_esmc_attributeremove
-/*
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetchar)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetchar()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // in - char string
-      int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//     Character strings have this special version since they come in
-//     with an additional hidden length argument.
-//
-//EOP
-
-  int i, status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity checks before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  if (!value) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute value", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cname(name, nlen);
-  string cvalue(value, vlen);
-  cname.resize(cname.find_last_not_of(" ")+1);
-  cvalue.resize(cvalue.find_last_not_of(" ")+1);
-
-  if (cname.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion, name must not be empty", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // Set the attribute on the object
-  status = (**base).root.AttributeSet(cname, &cvalue);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc));
-
-}  // end c_ESMC_AttributeSetChar*/
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -4140,68 +3653,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSetObjChrInTree - Set a Char Attribute on all
-//                                           objects in an Attribute hierarchy
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetobjchrintree)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributesetobjchrintree()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *object,             // in - F90, object of the Attribute
-      char *name,               // in - F90, non-null terminated string
-      char *value,              // in - value
-      int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg olen, // hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg nlen, // hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
-// 
-// !DESCRIPTION:
-//     Change the Attribute values for Attribute <name> on all <object>s.
-//
-//EOP
-
-  ESMC_TypeKind tk;
-  int count, status;
-
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute character string value", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cvalue(value, vlen);
-  cvalue.resize(cvalue.find_last_not_of(" ")+1);
-
-  if (cvalue.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute character string value conversion",
-                          &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // Re-use c_ESMC_AttributeSetObjsInTree() to set the attribute on the object.
-  tk = ESMC_TYPEKIND_CHARACTER;
-  count = 1;
-  FTN(c_esmc_attributesetobjsintree)(base, object, name, 
-      &tk, &count, (void *)&cvalue, &status, olen, nlen); 
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-    ESMC_NOT_PRESENT_FILTER(rc));
-
-}  // end c_ESMC_AttributeSetObjChrInTree
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  c_ESMC_AttributeSetObjsInTree - Set an Attribute on all objects
 //                                               in an Attribute hierarchy
 //
@@ -4282,6 +3733,69 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeSetObjsInTree
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeSetObjChrInTree - Set a Char Attribute on all
+//                                           objects in an Attribute hierarchy
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributesetobjchrintree)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributesetobjchrintree()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *object,             // in - F90, object of the Attribute
+      char *name,               // in - F90, non-null terminated string
+      char *value,              // in - value
+      int *rc,                  // in - return code
+      ESMCI_FortranStrLenArg olen, // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg nlen, // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg vlen) { // hidden/in - strlen count for value
+// 
+// !DESCRIPTION:
+//     Change the Attribute values for Attribute <name> on all <object>s.
+//
+//EOP
+
+  ESMC_TypeKind tk;
+  int count, status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute character string value", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cvalue(value, vlen);
+  cvalue.resize(cvalue.find_last_not_of(" ")+1);
+
+  if (cvalue.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute character string value conversion",
+                          &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // Re-use c_ESMC_AttributeSetObjsInTree() to set the attribute on the object.
+  tk = ESMC_TYPEKIND_CHARACTER;
+  count = 1;
+  FTN(c_esmc_attributesetobjsintree)(base, object, name, 
+      &tk, &count, (void *)&cvalue, &status, olen, nlen); 
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_AttributeSetObjChrInTree
 
 //-----------------------------------------------------------------------------
 //BOP
