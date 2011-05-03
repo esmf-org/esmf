@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.82 2011/04/01 16:42:30 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.83 2011/05/03 22:48:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -908,6 +908,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The Fortran Standard requires that a successful allocate return a stat value
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
+        call ESMF_Breakpoint()  ! no-op to assist debugging
         call c_esmc_loggeterrormsg(ESMF_RC_MEM_ALLOCATE,tempmsg,msglen)
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_ALLOCATE
@@ -1021,6 +1022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The Fortran Standard requires that a successful deallocate return a stat value
 !   of 0.  Any other value indicates a processor-defined error.
     if (statusToCheck .NE. 0) then
+        call ESMF_Breakpoint()  ! no-op to assist debugging
         call c_esmc_loggeterrormsg(ESMF_RC_MEM_DEALLOCATE,tempmsg,msglen)
         if (present(rcToReturn)) then
             rcToReturn=ESMF_RC_MEM_DEALLOCATE
@@ -1156,6 +1158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (alog%errorMask(i) == rcToCheckInternal) masked = .true.
         enddo
         if (.not.masked) then
+          call ESMF_Breakpoint()  ! no-op to assist debugging
           call c_esmc_loggeterrormsg(rcToCheckInternal,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
           if (present(msg)) then
@@ -1809,6 +1812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (alog%errorMask(i) == rcToCheck) masked = .true.
         enddo
         if (.not.masked) then
+          call ESMF_Breakpoint()  ! no-op to assist debugging
           call c_esmc_loggeterrormsg(rcToCheck,tempmsg,msglen)
           allocmsg=tempmsg(1:msglen)
           if (present(msg)) then
@@ -2060,4 +2064,16 @@ end subroutine ESMF_LogWrite
 end subroutine ESMF_LogEntryCopy
 
 end module ESMF_LogErrMod
+
+
+!-------------------------------------------------------------------------------
+
+
+subroutine ESMF_Breakpoint()
+  ! This no-op routine is called when an error condition is detected inside of
+  ! the ESMF library. By setting a breakpoint on this routine in a debugger it
+  ! is possible to inspect the complete path through user and ESMF code that
+  ! lead to the error condition.
+  continue
+end subroutine
 
