@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.12 2011/05/03 17:58:40 rokuingh Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.13 2011/05/03 20:36:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using std::vector;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.12 2011/05/03 17:58:40 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.13 2011/05/03 20:36:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -134,7 +134,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       // Set the attribute on the object, if neither convention nor purpose
       if (cname != "convention" && cname != "purpose") {
         if (!this->convention.empty() && !this->purpose.empty()) {
-          string attPackInstanceName;
+          // string attPackInstanceName;
           attPackAttr = this->attr->AttPackGetAttribute(cname);
           status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
 //          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
@@ -214,7 +214,7 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
 
       // Set the attribute on the object
       if (!this->convention.empty() && !this->purpose.empty()) {
-        string attPackInstanceName;
+        // string attPackInstanceName;
         attPackAttr = this->attr->AttPackGetAttribute(this->qname);
         status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
 //        status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
