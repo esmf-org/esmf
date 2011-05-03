@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.11 2011/05/03 16:24:05 rokuingh Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.12 2011/05/03 17:58:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using std::vector;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.11 2011/05/03 16:24:05 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.12 2011/05/03 17:58:40 rokuingh Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -135,7 +135,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       if (cname != "convention" && cname != "purpose") {
         if (!this->convention.empty() && !this->purpose.empty()) {
           string attPackInstanceName;
-          attPackAttr = this->attr->AttPackGetAttribute(this->qname);
+          attPackAttr = this->attr->AttPackGetAttribute(cname);
           status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
 //          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
 //                                          &valueVector, this->convention,
