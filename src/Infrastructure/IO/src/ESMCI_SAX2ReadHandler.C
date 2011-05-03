@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.10 2011/04/29 16:00:31 rokuingh Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.11 2011/05/03 16:24:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using std::vector;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.10 2011/04/29 16:00:31 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.11 2011/05/03 16:24:05 rokuingh Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -103,6 +103,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       //cout <<"  Attributes: " << Qname << ", " << URI << ", " << local << ", "
       //                         << type << ", " << value << endl;
 
+      Attribute *attPackAttr;
       string cname(Qname, strlen(Qname));
       string cvalue(value, strlen(value));
       cname.resize(cname.find_last_not_of(" ")+1);
@@ -134,11 +135,13 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       if (cname != "convention" && cname != "purpose") {
         if (!this->convention.empty() && !this->purpose.empty()) {
           string attPackInstanceName;
-          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
-                                          &valueVector, this->convention,
-                                                   this->purpose, 
-                                                   this->object,
-                                                   attPackInstanceName); 
+          attPackAttr = this->attr->AttPackGetAttribute(this->qname);
+          status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
+//          status = this->attr->AttPackSet(cname, ESMC_TYPEKIND_CHARACTER, 1,
+//                                          &valueVector, this->convention,
+//                                                   this->purpose, 
+//                                                   this->object,
+//                                                   attPackInstanceName); 
           //cout << "setting xml attribute into AttPack" << endl;
         } else {
           // TODO:  handle one or the other (xor) of conv, purp (error) ?
@@ -190,6 +193,7 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
       //cout << "      characters: "<< msg << endl;
       //cout << "      length: "<< length << " characters" << endl;
 
+      Attribute *attPackAttr;
       string cvalue(msg, length);
       cvalue.resize(cvalue.find_last_not_of(" ")+1);
       vector<string> valueVector;
@@ -211,11 +215,13 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
       // Set the attribute on the object
       if (!this->convention.empty() && !this->purpose.empty()) {
         string attPackInstanceName;
-        status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
-                                        &valueVector, this->convention,
-                                                 this->purpose, 
-                                                 this->object,
-                                                 attPackInstanceName); 
+        attPackAttr = this->attr->AttPackGetAttribute(this->qname);
+        status = attPackAttr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &valueVector);
+//        status = this->attr->AttPackSet(this->qname, ESMC_TYPEKIND_CHARACTER, 1,
+//                                        &valueVector, this->convention,
+//                                                 this->purpose, 
+//                                                 this->object,
+//                                                 attPackInstanceName); 
         //cout << "set xml element on AttPack" << endl;
       } else {
         // TODO:  handle one or the other (xor) of conv, purp (error) ?
