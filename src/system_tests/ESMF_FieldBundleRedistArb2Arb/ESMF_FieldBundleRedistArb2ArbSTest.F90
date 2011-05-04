@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.15 2011/03/04 19:00:41 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.16 2011/05/04 14:10:20 feiliu Exp $
 !
 ! System test FieldBundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -90,11 +90,6 @@ program Arb2ArbBunReDist
 
      miscount = 0
 
-     if (npets .eq. 1) then
-       print *, "This test must run with > 1 processor"
-       goto 20
-     endif
-
      print *, "Create section finished"
 !
 !-------------------------------------------------------------------------
@@ -121,7 +116,7 @@ program Arb2ArbBunReDist
      localCount = int((counts(1)*counts(2) + npets -1)/npets)
      allocate (myIndices1(localCount,2))
      ! calculate myIndices based on DE number
-     ! for now, start at point (1,1+localPet) and go up in the j-direction first
+     ! for now, start at point (1,1+localPet) and go up in the i-direction first
      ! to create a semi-regular distribution of points
      i1  = 1 + localPet
      add = 0

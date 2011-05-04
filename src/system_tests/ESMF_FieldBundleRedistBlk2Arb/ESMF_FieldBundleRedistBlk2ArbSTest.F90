@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.15 2011/03/04 19:00:43 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.16 2011/05/04 14:12:04 feiliu Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -89,11 +89,6 @@ program Blk2ArbBunRedist
      if (status .ne. ESMF_SUCCESS) goto 20
 
      miscount = 0
-
-     if (npets .eq. 1) then
-       print *, "This test must run with > 1 processor"
-       goto 20
-     endif
 
      print *, "Create section finished"
 !
