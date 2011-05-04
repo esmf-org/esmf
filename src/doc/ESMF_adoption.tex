@@ -1,4 +1,4 @@
-% $Id: ESMF_adoption.tex,v 1.12 2009/01/06 16:42:25 murphysj Exp $
+% $Id: ESMF_adoption.tex,v 1.13 2011/05/04 23:02:50 theurich Exp $
 
 \section{How to Adapt Applications for ESMF}
 \label{sec:Adoption}
@@ -147,15 +147,12 @@ such as DELayouts.
 
 \item Use or adapt a main program 
 
-The main program can be an unchanged copy of the file found in
-the {\tt AppDriver} directory.  The only customization needed is to
-set the name of the top level Gridded Component, and to set the
-name of the {\tt SetServices} routine.  The template file includes
-a call to {\tt ESMF\_Initialize()} which ensures the framework
-initialization code is run, and will
-provide the environment for components to be created and run.
+The main program can be a copy of a driver found in any of the
+{\tt system_tests} sub-directories.  The customization needed is to
+{\tt use} the correct Component module files, to gain access to the
+{\tt SetServices} routines. 
 
-Although ESMF provides source code for the main program, it is
+Although ESMF provides example source code for the main program, it is
 {\bf not} considered part of the framework and can be changed by
 the user as needed.
 

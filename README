@@ -454,8 +454,6 @@ lib:             Contains the ESMF library file.
 
 mod:             Contains the Fortran module files.
 
-quick_start:     Contains skeleton application files to use as a template.
-
 test:            Contains unit and system test executables and output.
 
 examples:        Contains examples executables and output.
@@ -499,4 +497,4 @@ Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.116 2011/03/01 20:16:30 theurich Exp $
+ $Id: README,v 1.117 2011/05/04 23:02:48 theurich Exp $
