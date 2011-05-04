@@ -1,4 +1,4 @@
-% $Id: WebServices_rest.tex,v 1.1 2011/04/18 18:05:31 theurich Exp $
+% $Id: WebServices_rest.tex,v 1.2 2011/05/04 13:47:51 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -11,10 +11,10 @@
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
-\item{\bf No data transfer.}
-Currently WebServices do not offer a path for data transfer between client and server.
-\item{\bf ???.}
-Something else?
+\item{\bf Manual Control of Process.}
+Currently, the Component Service must be manually started and stopped.  Future plans include having the Process Controller be responsible for controlling the Component Service processes.
+\item{\bf Data Streaming.}
+While data can be streamed from the web server to the client, it is not yet getting the data directly from the Component Service.  Instead, the Component Service exports the data to a file which the Process Controller can read and return across the network interface.  The data streaming capabilities will be a major component of future improvements to the Web Services architecture.
 \end{enumerate}
 
 
