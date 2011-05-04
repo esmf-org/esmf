@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.1 2011/04/26 19:48:24 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.2 2011/05/04 19:04:52 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
       it = itt;
     }
   }
-  sintd_nodes.erase(unique(sintd_nodes.begin(), sintd_nodes.end(), sintd_node_equal()), sintd_nodes.end());
+  sintd_nodes.erase(std::unique(sintd_nodes.begin(), sintd_nodes.end(), sintd_node_equal()), sintd_nodes.end());
 
   Mesh & meshmid = *midmesh;
   meshmid.set_parametric_dimension(pdim);
