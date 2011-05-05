@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.5 2011/05/05 16:58:26 svasquez Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.6 2011/05/05 17:02:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -181,7 +181,7 @@ program WebServicesEx
     goto 10
   endif
   !!!!!!!
-  !! KDS: I've commented out the call to ESMF_WebServicesLoop so that it won't
+  !! KDS: I've commented out the call to ESMF\_WebServicesLoop so that it won't
   !! enter the infinite loop and hold up the examples run.  I'll keep it
   !! commented out until I create an example client that will send an EXIT
   !! to the loop.
@@ -190,7 +190,7 @@ program WebServicesEx
   portNum = 27060
 
   ! Call the Web Services Loop and wait for requests to come in
-  !call ESMF_WebServicesLoop(comp1, portNum, rc=rc)
+  !call ESMF\_WebServicesLoop(comp1, portNum, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) then
     finalrc = ESMF_FAILURE
@@ -207,12 +207,12 @@ program WebServicesEx
 !  will then call the appropriate callback routine as specified in your 
 !  register routine (as specified in the ESMF\_GridCompSetServices call).
 !  In this example, when the INIT request is received, the user\_init routine
-!  found in the ESMF_WebServUserModel module is called.
+!  found in the ESMF\_WebServUserModel module is called.
 !EOE
 !BOE
 !  One other request is also processed by the Component Service, and that is
 !  the EXIT request.  When this request is received, the Web Services loop
-!  is terminated and the remainder of the code after the ESMF|_WebServicesLoop
+!  is terminated and the remainder of the code after the ESMF\_WebServicesLoop
 !  call is executed.
 !EOE
 
