@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.21 2011/03/25 22:27:44 svasquez Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.22 2011/05/05 14:19:13 feiliu Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -108,13 +108,14 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
 
+    ! Check for correct number of PETs
     if (npets .lt. 8) then
-      print *, "This system test needs to run at least 8-way, current np = ", &
-               npets
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+         msg="This system test needs to run at least 8-way", &
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     endif
+
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"

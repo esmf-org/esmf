@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.23 2011/01/24 23:04:59 rokuingh Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.24 2011/05/05 14:13:11 feiliu Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -91,11 +91,12 @@
 
     miscount = 0
 
+    ! Check for correct number of PETs
     if (2*(npets/2) .ne. npets) then
-        print *, "This test must run on an even number of processes"
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+         msg="This test must run on an even number of processes",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     endif
 
     print *, "Create section finished"
