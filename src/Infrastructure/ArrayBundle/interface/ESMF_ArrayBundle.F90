@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.57 2011/04/21 04:28:32 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.58 2011/05/05 17:23:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -76,6 +76,7 @@ module ESMF_ArrayBundleMod
   public operator(/=)
 
   public ESMF_ArrayBundleAdd
+  public ESMF_ArrayBundleAddReplace
   public ESMF_ArrayBundleCreate
   public ESMF_ArrayBundleDestroy
   public ESMF_ArrayBundleGet
@@ -107,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.57 2011/04/21 04:28:32 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.58 2011/05/05 17:23:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -399,12 +400,14 @@ contains
 ! !IROUTINE: ESMF_ArrayBundleAdd - Add Array(s) to an ArrayBundle
 !
 ! !INTERFACE:
-    subroutine ESMF_ArrayBundleAdd(arraybundle, arrayList, keywordEnforcer, rc)
+    subroutine ESMF_ArrayBundleAdd(arraybundle, arrayList, keywordEnforcer, &
+      relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     type(ESMF_Array),       intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
 !
@@ -420,6 +423,99 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} to be added to.
 !   \item [arrayList]
 !     List of {\tt ESMF\_Array} objects to be added.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "add"
+!     where it is {\em not} an error if {\tt arrayList} contains Arrays with
+!     names that are also found in {\tt arraybundle}. The {\tt arraybundle} 
+!     is left unchanged for these Arrays. For {\tt .false.} this is treated
+!     as an error condition. The default setting is {\tt .false.}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: relaxedflagArg
+    integer :: arrayCount, i
+    type(ESMF_Pointer), allocatable :: arrayPointerList(:)
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Determine the number of ArrayList elements
+    arrayCount = size(arrayList)
+
+    ! Check init status of array arguments
+    do i=1, arrayCount
+      ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
+    enddo
+    
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
+    else
+      relaxedflagArg = ESMF_FALSE
+    endif
+    
+    ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
+    ! This is necessary in order to strip off the F90 init check members
+    ! when passing into C++
+    allocate(arrayPointerList(arrayCount))
+    do i=1, arrayCount
+      call ESMF_ArrayGetThis(arrayList(i), arrayPointerList(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_ArrayBundleAdd(arraybundle, arrayPointerList, arrayCount, &
+      relaxedflagArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Garbage collection
+    deallocate(arrayPointerList)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_ArrayBundleAdd
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleAddReplace()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleAddReplace - Add/Replace Array(s) to/in an ArrayBundle
+!
+! !INTERFACE:
+    subroutine ESMF_ArrayBundleAddReplace(arraybundle, arrayList, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
+    type(ESMF_Array),       intent(in)            :: arrayList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Arrays in {\tt arrayList} that do not match any Arrays by name in 
+!   {\tt arraybundle} are added to the ArrayBundle. Arrays in {\tt arraybundle}
+!   that match by name Arrays in {\tt arrayList} are replaced by those Arrays.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} to be manipulated.
+!   \item [arrayList]
+!     List of {\tt ESMF\_Array} objects to be added or used as replacement.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -456,8 +552,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_ArrayBundleAdd(arraybundle, arrayPointerList, arrayCount, &
-      localrc)
+    call c_ESMC_ArrayBundleAddReplace(arraybundle, arrayPointerList, &
+      arrayCount, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -467,7 +563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
-  end subroutine ESMF_ArrayBundleAdd
+  end subroutine ESMF_ArrayBundleAddReplace
 !------------------------------------------------------------------------------
 
 
@@ -1903,13 +1999,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleRemove(arraybundle, arrayNameList, &
-      keywordEnforcer, strictflag, rc)
+      keywordEnforcer, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     character(len=*),       intent(in)            :: arrayNameList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                intent(in),  optional :: strictflag
+    logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
 !
@@ -1917,20 +2013,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Remove item(s) by name from ArrayBundle. In the strict setting it is an
-!   error if {\tt arrayNameList} contains names that are not found in
-!   {\tt arraybundle}.
+!   Remove item(s) by name from ArrayBundle. In the relaxed setting it is 
+!   {\em not} an error if {\tt arrayNameList} contains names that are not 
+!   found in {\tt arraybundle}.
 !
 !   \begin{description}
 !   \item [arraybundle]
 !     {\tt ESMF\_ArrayBundle} from which to remove items.
 !   \item [arrayNameList]
 !     List of items to remove.
-!   \item [{[strictflag]}]
-!     A setting of {\tt .true.} indicates a stict definition of "remove" where
-!     it is an error if {\tt arrayNameList} contains names that are not found in
-!     {\tt arraybundle}. For {\tt .false.} this is not an error condition.
-!     The default setting is {\tt .false.}.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "remove"
+!     where it is {\em not} an error if {\tt arrayNameList} contains names
+!     that are not found in {\tt arraybundle}. For {\tt .false.} this is treated
+!     as an error condition. The default setting is {\tt .false.}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1938,7 +2034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    type(ESMF_Logical)            :: strictflagArg
+    type(ESMF_Logical)            :: relaxedflagArg
     integer                       :: itemCount
 
     ! initialize return code; assume routine not implemented
@@ -1950,15 +2046,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     itemCount = size(arrayNameList)
 
-    if (present(strictflag)) then
-      strictflagArg = strictflag
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
     else
-      strictflagArg = ESMF_FALSE
+      relaxedflagArg = ESMF_FALSE
     endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundleRemove(arraybundle, arrayNameList, itemCount, &
-      strictflagArg, localrc)
+      relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1977,13 +2073,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleReplace(arraybundle, arrayList, &
-      keywordEnforcer, strictflag, rc)
+      keywordEnforcer, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     type(ESMF_Array),       intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                intent(in),  optional :: strictflag
+    logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
 !
@@ -1991,22 +2087,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Replace item(s) by name in ArrayBundle. In the strict setting it is an
-!   error if {\tt arrayList} contains Arrays that do not match by name any
-!   item in {\tt arraybundle}. In the less strict setting these Arrays
-!   are simply added to the {\tt arraybundle}.
+!   Replace item(s) by name in ArrayBundle. In the relaxed setting it is not
+!   an error if {\tt arrayList} contains Arrays that do not match by name any
+!   item in {\tt arraybundle}. These Arrays are simply ignored in this case.
 !
 !   \begin{description}
 !   \item [arraybundle]
 !     {\tt ESMF\_ArrayBundle} in which to replace items.
 !   \item [arrayList]
 !     List of items to replace.
-!   \item [{[strictflag]}]
-!     A setting of {\tt .true.} indicates a stict definition of "replace" where
-!     it is an error if {\tt arrayList} contains items that do not match by 
-!     name any item in {\tt arraybundle}. For {\tt .false.} this is not an error
-!     condition and these Arrays are added to the {\tt arraybundle}.
-!     The default setting is {\tt .false.}.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "replace"
+!     where it is {\em not} an error if {\tt arrayList} contains items that
+!     do not match by name any item in {\tt arraybundle}. For {\tt .false.}
+!     this is an error condition. The default setting is {\tt .false.}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2014,7 +2108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    type(ESMF_Logical)            :: strictflagArg
+    type(ESMF_Logical)            :: relaxedflagArg
     integer :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
 
@@ -2043,15 +2137,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    if (present(strictflag)) then
-      strictflagArg = strictflag
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
     else
-      strictflagArg = ESMF_FALSE
+      relaxedflagArg = ESMF_FALSE
     endif
     
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_ArrayBundleReplace(arraybundle, arrayPointerList, arrayCount, &
-      strictflagArg, localrc)
+      relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

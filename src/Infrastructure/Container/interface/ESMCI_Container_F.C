@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.6 2011/04/22 23:07:32 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.7 2011/05/05 17:23:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -379,7 +379,7 @@ extern "C" {
     try{
 
       // call the C++ layer
-      (*ptr)->remove(std::string(itemName, nlen), true);
+      (*ptr)->remove(std::string(itemName, nlen));
       
     }catch(int localrc){
       // catch standard ESMF return code
