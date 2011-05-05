@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.6 2011/05/05 17:02:33 svasquez Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.7 2011/05/05 17:26:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -181,7 +181,7 @@ program WebServicesEx
     goto 10
   endif
   !!!!!!!
-  !! KDS: I've commented out the call to ESMF\_WebServicesLoop so that it won't
+  !! KDS: I've commented out the call to ESMF_WebServicesLoop so that it won't
   !! enter the infinite loop and hold up the examples run.  I'll keep it
   !! commented out until I create an example client that will send an EXIT
   !! to the loop.
@@ -190,7 +190,7 @@ program WebServicesEx
   portNum = 27060
 
   ! Call the Web Services Loop and wait for requests to come in
-  !call ESMF\_WebServicesLoop(comp1, portNum, rc=rc)
+  !call ESMF_WebServicesLoop(comp1, portNum, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) then
     finalrc = ESMF_FAILURE
