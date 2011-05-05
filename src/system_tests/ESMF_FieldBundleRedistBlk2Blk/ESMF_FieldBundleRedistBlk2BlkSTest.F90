@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.14 2011/03/04 19:00:45 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.15 2011/05/05 14:11:33 feiliu Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -103,12 +103,14 @@ program Blk2BlkBunRedist
 
     miscount = 0
 
+  ! Check for correct number of PETs
     if (2*(npets/2) .ne. npets) then
-        print *, "This test must run on an even number of processes"
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+         msg="This test must run on an even number of processes",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     endif
+
 
     print *, "Create section finished"
 
