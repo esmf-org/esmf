@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.38 2011/04/25 15:22:17 rokuingh Exp $
+! $Id: ESMF_MeshEx.F90,v 1.39 2011/05/05 23:13:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -685,7 +685,7 @@ program ESMF_MeshEx
 !\label{sec:example:UnstructFromFile}
 !
 ! ESMF supports the creation of a Mesh from a 2D unstructured grid defined in a SCRIP format
-! grid file~\cite{ref:SCRIP} or a ESMF format grid file.  Both the SCRIP grid file and the
+! grid file~\cite{ref:SCRIP} or an ESMF format grid file.  Both the SCRIP grid file and the
 ! ESMF grid file are in NetCDF format. Here is a sample header from a SCRIP unstructured
 ! grid file:
 !\begin{verbatim}
@@ -725,12 +725,12 @@ program ESMF_MeshEx
 ! If the user wishes to not construct the dual mesh, the optional argument {\tt convertToDual} may be 
 ! used to control this behavior. When {\tt comvertToDual} is 
 ! set to .false. the Mesh constructed from the file will not be the dual. This is necessary when using the 
-! Mesh as part of a conservative regridding in the {\tt ESMF\_FieldRegridStore()} call, so the conservative
+! Mesh as part of a conservative regridding operation in the {\tt ESMF\_FieldRegridStore()} call, so the
 ! weights are properly generated for the cell centers in the file. 
 !
-! The following example code dipicts how to create a Mesh using a SCRIP file. Note that
+! The following example code depicts how to create a Mesh using a SCRIP file. Note that
 ! you have to set the filetype to ESMF\_FILEFORMAT\_SCRIP.  If the optional argument {\tt convert3D}
-! is set to .true., the coordinates will be converted into 3D Cartisian first.  If the grid
+! is set to .true., the coordinates will be converted into 3D Cartesian first.  If the grid
 ! is a global grid and will be used in a regrid operation, this flag should be set to .true.
 !EOE
 
@@ -750,12 +750,12 @@ program ESMF_MeshEx
 ! In addition to the SCRIP format, ESMF also supports a more general unstructured grid file format for describing meshes.
 ! In the ESMF file format, the node coordinates are defined in a separate array
 ! {\tt nodeCoords} and indices to the {\tt nodeCoords} array are used in the element
-! connectitivity array {\tt elementConn}.  While in the SCRIP format, the two are combined into 
-! {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} arrays.  The ESMF file format matches
+! connectivity array {\tt elementConn}.  While in the SCRIP format, the two are combined into 
+! {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} arrays.  The ESMF file format works
 ! better with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. 
 ! The ESMF format is also more general than the SCRIP format because it supports higher dimension coordinates and more general
-! topologies.  This format does not support conversion to a dual mesh.  The following is a sample header of a mesh described in 
-! the ESMF format.
+! topologies.  Currently, ESMF\_MeshCreate() does not support conversion to a dual mesh for this format. All regrid methods
+! are supported on Meshes in this format.  The following is a sample header of a mesh described in the ESMF format.
 !  
 !\begin{verbatim}
 ! netcdf ne4np4-esmf {
@@ -787,7 +787,7 @@ program ESMF_MeshEx
 !}
 !\end{verbatim}
 !
-! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note you have to set the filetype to
+! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note that you have to set the filetype to
 ! ESMF\_FILEFORMAT\_ESMFMESH.  As with the previous example, we set {\tt convert3D} to true because this is a
 ! global grid.
 !EOE
