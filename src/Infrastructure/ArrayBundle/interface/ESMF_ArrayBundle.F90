@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.58 2011/05/05 17:23:03 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.59 2011/05/05 17:49:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.58 2011/05/05 17:23:03 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.59 2011/05/05 17:49:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -397,7 +397,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleAdd()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleAdd - Add Array(s) to an ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleAdd - Add Arrays to an ArrayBundle
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleAdd(arraybundle, arrayList, keywordEnforcer, &
@@ -491,7 +491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleAddReplace()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleAddReplace - Add/Replace Array(s) to/in an ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleAddReplace - Conditionally add or replace Arrays in an ArrayBundle
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleAddReplace(arraybundle, arrayList, keywordEnforcer, rc)
@@ -1995,7 +1995,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleRemove()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleRemove - Remove item(s) from ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleRemove - Remove Arrays from ArrayBundle
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleRemove(arraybundle, arrayNameList, &
@@ -2013,7 +2013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Remove item(s) by name from ArrayBundle. In the relaxed setting it is 
+!   Remove Array(s) by name from ArrayBundle. In the relaxed setting it is 
 !   {\em not} an error if {\tt arrayNameList} contains names that are not 
 !   found in {\tt arraybundle}.
 !
@@ -2069,7 +2069,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleReplace()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleReplace - Replace item(s) in ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleReplace - Replace Arrays in ArrayBundle
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleReplace(arraybundle, arrayList, &
@@ -2087,7 +2087,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Replace item(s) by name in ArrayBundle. In the relaxed setting it is not
+!   Replace Array(s) by name in ArrayBundle. In the relaxed setting it is not
 !   an error if {\tt arrayList} contains Arrays that do not match by name any
 !   item in {\tt arraybundle}. These Arrays are simply ignored in this case.
 !
