@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.4 2011/05/04 16:29:12 ksaint Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.5 2011/05/05 16:58:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -206,7 +206,7 @@ program WebServicesEx
 !  The 3 main requests processed are INIT, RUN, and FINAL.  These requests 
 !  will then call the appropriate callback routine as specified in your 
 !  register routine (as specified in the ESMF\_GridCompSetServices call).
-!  In this example, when the INIT request is received, the user_init routine
+!  In this example, when the INIT request is received, the user\_init routine
 !  found in the ESMF_WebServUserModel module is called.
 !EOE
 !BOE
