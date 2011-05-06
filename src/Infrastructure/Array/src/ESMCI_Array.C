@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.128 2011/04/25 19:16:45 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.129 2011/05/06 17:19:57 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,12 +39,26 @@
 #include "ESMCI_LogErr.h"                 // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 
+
+extern "C" {
+
+// Prototypes of the Fortran interface functions.
+void FTN(f_esmf_arrayread)(ESMCI::Array *array, char *file,
+  char *variableName, int *timeslice, ESMC_IOFmtFlag *iofmt,  int *rc);
+
+void FTN(f_esmf_arraywrite)(ESMCI::Array *array, char *file,
+  char *variableName, bool *append, int *timeslice, ESMC_IOFmtFlag *iofmt,
+  int *rc);
+
+}; // extern "C"
+
+
 using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.128 2011/04/25 19:16:45 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.129 2011/05/06 17:19:57 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2463,6 +2477,93 @@ bool Array::match(
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::read()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::read
+//
+// !INTERFACE:
+int Array::read(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *array,                   // in    - Array
+  char  *file,                    // in    - name of file being read
+  char  *variableName,            // in    - start of halo region
+  int   *timeslice,               // in    - timeslice option
+  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ){
+//
+// !DESCRIPTION:
+//    Print details of Array object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // call into Fortran interface
+  FTN(f_esmf_arrayread)(array, file, variableName, timeslice, 
+      iofmt, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::write()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::write
+//
+// !INTERFACE:
+int Array::write(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *array,                   // in    - Array
+  char  *file,                    // in    - name of file being read
+  char  *variableName,            // in    - start of halo region
+  bool  *append,                  // in    - append as group
+  int   *timeslice,               // in    - timeslice option
+  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ){
+//
+// !DESCRIPTION:
+//    Print details of Array object
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // call into Fortran interface
+  FTN(f_esmf_arraywrite)(array, file, variableName, append, timeslice,
+      iofmt, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
