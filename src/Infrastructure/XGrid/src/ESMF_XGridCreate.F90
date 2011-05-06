@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.26 2011/05/06 19:00:56 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.27 2011/05/06 19:36:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.26 2011/05/06 19:00:56 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.27 2011/05/06 19:36:53 feiliu Exp $'
 
 !==============================================================================
 !
@@ -90,7 +90,7 @@ module ESMF_XGridCreateMod
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_XGridCreateDefault
-        module procedure ESMF_XGridCreateRaw
+        module procedure ESMF_XGridCreateOffline
 
 
 ! !DESCRIPTION:
@@ -232,14 +232,15 @@ contains
 ! ! Private name; call using ESMF_XGridCreate()
 
 function ESMF_XGridCreateDefault(sideA, sideB, &
-sideAMaskValues, sideBMaskValues, &
-sideAToXGridScheme, sideBToXGridScheme, &
+keywordEnforcer, sideAToXGridScheme, sideBToXGridScheme, &
 sideAPriority, sideBPriority, &
+sideAMaskValues, sideBMaskValues, &
 storeOverlay, name, rc)
 
 !
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 integer, intent(in), optional               :: sideAToXGridScheme, sideBToXGridScheme
 integer, intent(in), optional               :: sideAPriority(:), sideBPriority(:)
 integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:), sideBMaskValues(:)
@@ -261,9 +262,9 @@ integer, intent(out), optional              :: rc
 !           2D Grids on side A
 !     \item [sideB]
 !           2D Grids on side B
-!     \item [sideAToXGridScheme]
+!     \item [{[sideAToXGridScheme]}]
 !           Specify the geometry and unit of metric of the Grids on A side. 
-!     \item [sideBToXGridScheme]
+!     \item [{[sideBToXGridScheme]}]
 !           Specify the geometry and unit of metric of the Grids on B side. 
 !     \item [{[sideAPriority]}]
 !           Priority array of Grids on sideA during overlay generation.
@@ -756,15 +757,15 @@ end function ESMF_XGridCreateDefault
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridCreateRaw()"
+#define ESMF_METHOD "ESMF_XGridCreateOffline()"
 !BOP
-! !IROUTINE:  ESMF_XGridCreate - Create an XGrid from raw input parameters
+! !IROUTINE:  ESMF_XGridCreateOfflineCreate an XGrid from raw input parameters
 
 ! !INTERFACE:
 ! ! Private name; call using ESMF_XGridCreate()
 
-function ESMF_XGridCreateRaw(sideA, sideB, &
-    sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
+function ESMF_XGridCreateOffline(sideA, sideB, offline, &
+    keywordEnforcer, sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
     area, centroid, &
     name, &
     rc) 
@@ -772,6 +773,8 @@ function ESMF_XGridCreateRaw(sideA, sideB, &
 !
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
+logical, intent(in)                        :: offline
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
@@ -783,7 +786,7 @@ integer, intent(out), optional             :: rc
 
 !
 ! !RETURN VALUE:
-    type(ESMF_XGrid) :: ESMF_XGridCreateRaw
+    type(ESMF_XGrid) :: ESMF_XGridCreateOffline
 
 !
 ! !DESCRIPTION:
@@ -795,6 +798,8 @@ integer, intent(out), optional             :: rc
 !           2D Grids on side A.
 !     \item [sideB]
 !           2D Grids on side B.
+!     \item [offline]
+!           Indicate this is offline XGrid creation.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.
@@ -852,7 +857,7 @@ integer, intent(out), optional             :: rc
 
     ! initialize XGridType object and its base object
     nullify(xgtype)
-    nullify(ESMF_XGridCreateRaw%xgtypep)
+    nullify(ESMF_XGridCreateOffline%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
       msg="Constructing xgtype base object ", &
@@ -867,17 +872,17 @@ integer, intent(out), optional             :: rc
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
-    ESMF_XGridCreateRaw%xgtypep => xgtype 
-    ESMF_INIT_SET_CREATED(ESMF_XGridCreateRaw)
+    ESMF_XGridCreateOffline%xgtypep => xgtype 
+    ESMF_INIT_SET_CREATED(ESMF_XGridCreateOffline)
 
-    call ESMF_XGridValidate(ESMF_XGridCreateRaw, rc=localrc)
+    call ESMF_XGridValidate(ESMF_XGridCreateOffline, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
-end function ESMF_XGridCreateRaw
+end function ESMF_XGridCreateOffline
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
