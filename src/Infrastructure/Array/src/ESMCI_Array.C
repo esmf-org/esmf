@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.130 2011/05/06 20:01:03 samsoncheung Exp $
+// $Id: ESMCI_Array.C,v 1.131 2011/05/06 20:21:07 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.130 2011/05/06 20:01:03 samsoncheung Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.131 2011/05/06 20:21:07 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2513,7 +2513,7 @@ int Array::read(
   //    iofmt, &localrc);
   //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
   //  return rc;
-  }
+  //}
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -2559,7 +2559,7 @@ int Array::write(
   //    iofmt, &localrc);
   //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
   //  return rc;
-  }
+  //}
 
   // return successfully
   rc = ESMF_SUCCESS;
