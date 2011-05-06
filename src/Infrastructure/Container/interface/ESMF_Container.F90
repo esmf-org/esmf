@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.6 2011/04/22 23:07:32 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.7 2011/05/06 04:55:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.6 2011/04/22 23:07:32 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.7 2011/05/06 04:55:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -138,19 +138,20 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ContainerAddFieldList()"
 !BOPI
-! !IROUTINE: ESMF_ContainerAdd - Add Container object
+! !IROUTINE: ESMF_ContainerAdd - Add Fields to Container object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAdd()
-  subroutine ESMF_ContainerAddFieldList(container, fieldList, rc)
+  subroutine ESMF_ContainerAddFieldList(container, fieldList, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
     type(ESMF_Field),     intent(in)              :: fieldList(:)
-    integer,              intent(out),  optional  :: rc  
+    logical,              intent(in),   optional  :: relaxedflag
+    integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
-!   Add items to an {\tt ESMF\_Container} object.
+!   Add Fields to an {\tt ESMF\_Container} object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -158,6 +159,12 @@ contains
 !     {\tt ESMF\_Container} object to be added to.
 !   \item[fieldList] 
 !     Field objects to be added.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "add"
+!     where it is {\em not} an error if {\tt fieldList} contains Fields with
+!     names that are also found in {\tt container}. The {\tt container} 
+!     is left unchanged for these Fields. For {\tt .false.} this is treated
+!     as an error condition. The default setting is {\tt .false.}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -165,6 +172,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i
     character(len=ESMF_MAXSTR)  :: name
 
@@ -175,6 +183,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
+    else
+      relaxedflagArg = ESMF_FALSE
+    endif
+    
     do i=1, size(fieldList)
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
@@ -184,8 +198,9 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
-      ! Call into the C++ interface, which will sort out optional arguments.
-      call c_ESMC_ContainerAdd(container, trim(name), fieldList(i), localrc)
+      ! Call into the C++ interface layer
+      call c_ESMC_ContainerAdd(container, trim(name), fieldList(i), &
+        relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
@@ -286,7 +301,7 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ContainerDestroy(container, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -513,7 +528,7 @@ contains
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     do i=1, size(itemNameList)
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface layer
       call c_ESMC_ContainerRemove(container, trim(itemNameList(i)), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -561,7 +576,7 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ContainerPrint(container, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.6 2011/04/22 23:07:33 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.7 2011/05/06 04:55:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.6 2011/04/22 23:07:33 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.7 2011/05/06 04:55:15 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -96,6 +96,21 @@ program ESMF_ContainerUTest
   write(name, *) "Container Add Field Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerAdd(container, fieldList=fieldList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add Field 2nd time strict Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, fieldList=fieldList, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add Field 2nd time relaxed Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, fieldList=fieldList, relaxedflag=.true., &
+    rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

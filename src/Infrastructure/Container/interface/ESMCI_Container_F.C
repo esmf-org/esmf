@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.7 2011/05/05 17:23:08 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.8 2011/05/06 04:55:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,18 +45,24 @@ extern "C" {
         
   void FTN(c_esmc_containeradd)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
-    char const *fieldName, ESMCI::F90ClassHolder *f90p, int *rc, 
-    ESMCI_FortranStrLenArg nlen){
+    char const *itemName, ESMCI::F90ClassHolder *f90p, 
+    ESMC_Logical *relaxedflag, int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containeradd()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    bool relaxed;
+    if (*relaxedflag == ESMF_TRUE)
+      relaxed=true;
+    else
+      relaxed=false;
+
+    // call into C++
     try{
       
-      // call into C++
-      (*ptr)->add(std::string(fieldName,nlen),*f90p);
+      (*ptr)->add(std::string(itemName,nlen), *f90p, relaxed);
       
     }catch(int localrc){
       // catch standard ESMF return code
@@ -86,9 +92,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     
+    // call into C++
     try{
       
-      // call into C++
       *ptr = new ESMCI::Container<std::string, ESMCI::F90ClassHolder>;
       
     }catch(int localrc){
@@ -118,9 +124,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
       
-      // call into C++
       delete *ptr;
       
     }catch(int localrc){
@@ -152,9 +158,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
-      // query the C++ layer
       *count = (*ptr)->size();
       
     }catch(int localrc){
@@ -187,9 +193,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
-      // query the C++ layer
       ESMCI::Field field = (*ptr)->get(std::string(fieldName, nlen));
       
       // cast C++ Field object into Fortran
@@ -227,9 +233,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
-      // query the C++ layer
       if ((*ptr)->isPresent(std::string(itemName, nlen)))
         *isPresent = ESMF_TRUE;
       else
@@ -264,6 +270,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
       // construct persistent vector object
@@ -301,6 +308,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
       // query the C++ layer
@@ -340,6 +348,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
       if (*vector != NULL){
@@ -376,9 +385,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
 
-      // call the C++ layer
       (*ptr)->remove(std::string(itemName, nlen));
       
     }catch(int localrc){
@@ -408,9 +417,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
+    // call into C++
     try{
       
-      // call into C++
       (*ptr)->print();
       
     }catch(int localrc){
