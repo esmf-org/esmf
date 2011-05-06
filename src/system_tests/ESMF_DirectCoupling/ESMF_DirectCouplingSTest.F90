@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.18 2011/03/25 22:15:21 svasquez Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.19 2011/05/06 22:13:46 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -156,6 +156,13 @@ program ESMF_DirectCouplingSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+   ! Check for correct number of PETs
+  if ( petCount < 6 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 6 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+   endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

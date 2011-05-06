@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.7 2011/02/23 14:45:08 eschwab Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.8 2011/05/06 22:13:41 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -82,6 +82,14 @@ program ESMF_ComplianceCheckerSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+   ! Check for correct number of PETs
+  if ( petCount < 6 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 6 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+   endif
 
   ! Create the 2 model components and coupler
   ! use petList to define comp1 on PET 0,1,2,3

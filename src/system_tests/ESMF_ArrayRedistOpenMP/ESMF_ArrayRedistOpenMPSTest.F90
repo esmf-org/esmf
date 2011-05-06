@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.12 2011/01/25 15:34:54 rokuingh Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.13 2011/05/06 22:13:35 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -102,6 +102,14 @@ program ESMF_ArrayRedistOpenMPSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+   ! Check for correct number of PETs
+  if ( petCount < 8 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 8 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+   endif
 
   ! Create the 2 model components and coupler
   cname1 = "user model 1"

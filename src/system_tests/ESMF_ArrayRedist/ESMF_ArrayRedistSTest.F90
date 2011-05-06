@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.42 2011/03/25 21:13:47 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.43 2011/05/06 22:13:30 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -96,6 +96,14 @@ program ESMF_ArrayRedistSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+
+   ! Check for correct number of PETs
+  if ( petCount < 6 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 6 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+   endif
 
   ! Create the 2 model components and coupler
   cname1 = "user model 1"

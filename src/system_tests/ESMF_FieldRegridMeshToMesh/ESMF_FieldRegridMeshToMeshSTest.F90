@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMeshToMeshSTest.F90,v 1.14 2011/03/25 22:48:40 svasquez Exp $
+! $Id: ESMF_FieldRegridMeshToMeshSTest.F90,v 1.15 2011/05/06 22:13:57 svasquez Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -88,10 +88,12 @@
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    if (npets .ne. 4) then
-      print *, "This system test needs to run on 4 PETs, current np = ", &
-               npets
-      goto 10
+    ! Check for correct number of PETs
+    if ( npets < 4 ) then
+       call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+           msg="This system test does not run on fewer than 4 PETs.",&
+           ESMF_CONTEXT, rcToReturn=rc)
+       call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
     endif
 
     ! Create the 2 model components and coupler

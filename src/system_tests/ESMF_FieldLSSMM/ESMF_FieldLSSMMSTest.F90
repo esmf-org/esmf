@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.16 2011/03/25 22:31:26 svasquez Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.17 2011/05/06 22:13:49 svasquez Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -90,11 +90,13 @@
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-    if (npets .ne. 4) then
-      print *, "This system test needs to run 4-way, current np = ", &
-               npets
-      goto 10
-    endif
+   ! Check for correct number of PETs
+  if ( npets < 4 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 4 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+   endif
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"

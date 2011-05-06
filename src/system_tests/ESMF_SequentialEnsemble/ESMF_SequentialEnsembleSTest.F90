@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.19 2011/03/25 23:10:37 svasquez Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.20 2011/05/06 22:14:03 svasquez Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -144,6 +144,13 @@ program ESMF_SequentialEnsembleSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
+   ! Check for correct number of PETs
+  if ( petCount < 4 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 4 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+   endif
 
   ! Create the 4 ensemble model components, the composite component and the coupler on disjoint PETs
   ! components on all the 8 PETs.
