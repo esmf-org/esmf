@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.59 2011/05/05 17:49:42 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.60 2011/05/06 04:40:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.59 2011/05/05 17:49:42 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.60 2011/05/06 04:40:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -471,7 +471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleAdd(arraybundle, arrayPointerList, arrayCount, &
       relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -551,7 +551,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleAddReplace(arraybundle, arrayPointerList, &
       arrayCount, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -723,7 +723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleDestroy(arraybundle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -815,7 +815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       allocate(opt_arrayPtrList(1))
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleGetList(arraybundle, opt_arrayCount, &
       opt_arrayPtrList, len_arrayPtrList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1253,7 +1253,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundlePrint(arraybundle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2052,7 +2052,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       relaxedflagArg = ESMF_FALSE
     endif
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleRemove(arraybundle, arrayNameList, itemCount, &
       relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2143,7 +2143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       relaxedflagArg = ESMF_FALSE
     endif
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleReplace(arraybundle, arrayPointerList, arrayCount, &
       relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2839,7 +2839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface layer
     !todo: call c_ESMC_ArrayBundleValidate(arraybundle, localrc)
     localrc = ESMF_SUCCESS  ! remove when todo is done.
     
