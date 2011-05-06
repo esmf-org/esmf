@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.7 2011/05/06 04:55:15 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.8 2011/05/06 18:01:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.7 2011/05/06 04:55:15 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.8 2011/05/06 18:01:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -55,6 +55,7 @@ program ESMF_ContainerUTest
   type(ESMF_Field), allocatable   :: fieldList(:)
   type(ESMF_Field)                :: field
   type(ESMF_Field), pointer       :: fieldListOut(:)
+  type(ESMF_Field), pointer       :: fieldGarbageList(:)
   character(ESMF_MAXSTR)          :: iString
   character(ESMF_MAXSTR)          :: fieldName
   integer, parameter              :: fieldCount = 5
@@ -112,6 +113,28 @@ program ESMF_ContainerUTest
   call ESMF_ContainerAdd(container, fieldList=fieldList, relaxedflag=.true., &
     rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add Field again relaxed - with garbageList Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldGarbageList)
+  call ESMF_ContainerAdd(container, fieldList=fieldList, relaxedflag=.true., &
+    fieldGarbageList=fieldGarbageList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify garbageList Test"
+  write(failMsg, *) "garbageList incorrect"
+  call ESMF_Test((size(fieldGarbageList)==fieldCount), name, failMsg, result, ESMF_SRCLINE)
+
+  print *, "size of fieldGarbageList: ", size(fieldGarbageList)  
+  do i=1, size(fieldGarbageList)
+    call ESMF_FieldGet(fieldGarbageList(i), name=fieldName, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    print *, "fieldGarbageList(",i,")=",fieldName
+  enddo
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

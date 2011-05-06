@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.8 2011/05/06 04:55:13 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.9 2011/05/06 18:01:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,8 @@ extern "C" {
   void FTN(c_esmc_containeradd)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
     char const *itemName, ESMCI::F90ClassHolder *f90p, 
-    ESMC_Logical *relaxedflag, int *rc, ESMCI_FortranStrLenArg nlen){
+    ESMC_Logical *relaxedflag, ESMC_Logical *garbageflag, 
+    int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containeradd()"
     // Initialize return code; assume routine not implemented
@@ -62,7 +63,10 @@ extern "C" {
     // call into C++
     try{
       
-      (*ptr)->add(std::string(itemName,nlen), *f90p, relaxed);
+      if ((*ptr)->add(std::string(itemName,nlen), *f90p, relaxed))
+        *garbageflag = ESMF_FALSE; // was added
+      else
+        *garbageflag = ESMF_TRUE;  // was not added
       
     }catch(int localrc){
       // catch standard ESMF return code

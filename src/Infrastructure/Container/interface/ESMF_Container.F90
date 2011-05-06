@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.7 2011/05/06 04:55:13 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.8 2011/05/06 18:01:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.7 2011/05/06 04:55:13 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.8 2011/05/06 18:01:45 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -142,13 +142,16 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAdd()
-  subroutine ESMF_ContainerAddFieldList(container, fieldList, relaxedflag, rc)
+  subroutine ESMF_ContainerAddFieldList(container, fieldList, relaxedflag, &
+    fieldGarbageList, fieldGarbageCount, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(inout)           :: container
-    type(ESMF_Field),     intent(in)              :: fieldList(:)
-    logical,              intent(in),   optional  :: relaxedflag
-    integer,              intent(out),  optional  :: rc
+    type(ESMF_Container), intent(inout)         :: container
+    type(ESMF_Field),     intent(in)            :: fieldList(:)
+    logical,              intent(in),  optional :: relaxedflag
+    type(ESMF_Field),     pointer,     optional :: fieldGarbageList(:)
+    integer,              intent(out), optional :: fieldGarbageCount
+    integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Add Fields to an {\tt ESMF\_Container} object.
@@ -165,15 +168,30 @@ contains
 !     names that are also found in {\tt container}. The {\tt container} 
 !     is left unchanged for these Fields. For {\tt .false.} this is treated
 !     as an error condition. The default setting is {\tt .false.}.
-!   \item[{[rc]}] 
+!   \item[{[fieldGarbageList]}]
+!     List of Field objects in {\tt fieldList} that were {\em not} added to
+!     the container. This list is only valid for the relaxed mode. This
+!     argument has the pointer attribute. If the argument comes into this call
+!     associated the memory allocation is not changed. Instead the size of the
+!     memory allocation is checked against the total number of elements that
+!     need to be returned, and if sufficiently sized the container elements are
+!     returned in the provided memory allocation. If the argument comes into 
+!     this call unassociated memory will be allocated internally and filled
+!     with the container elements. In both cases it is the caller 
+!     responsibility to deallocate the memory.
+!   \item[{[fieldGarbageCount]}]
+!     Number of elements in the {\tt fieldGarbageList}. This output is only
+!     valid for the relaxed mode.
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
-    type(ESMF_Logical)          :: relaxedflagArg
-    integer                     :: i
+    type(ESMF_Logical)          :: relaxedflagArg, garbageflag
+    integer                     :: i, stat, fieldGarbageC
+    type(ESMF_Field), pointer   :: fieldGarbageL(:)
     character(len=ESMF_MAXSTR)  :: name
 
     ! Initialize return code; assume failure until success is certain
@@ -189,6 +207,16 @@ contains
       relaxedflagArg = ESMF_FALSE
     endif
     
+    if (present(fieldGarbageList)) then
+      allocate(fieldGarbageL(size(fieldList)), stat=stat) ! temporary storage
+      if (ESMF_LogFoundAllocError(stat, msg= "allocating fieldGarbageL", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+    else
+      nullify(fieldGarbageL)
+    endif
+    
+    fieldGarbageC = 0 ! reset
+
     do i=1, size(fieldList)
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
@@ -200,11 +228,43 @@ contains
       
       ! Call into the C++ interface layer
       call c_ESMC_ContainerAdd(container, trim(name), fieldList(i), &
-        relaxedflagArg, localrc)
+        relaxedflagArg, garbageflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+        
+      if (garbageflag==ESMF_TRUE) then
+        fieldGarbageC = fieldGarbageC + 1
+        if (associated(fieldGarbageL)) &
+          fieldGarbageL(fieldGarbageC)=fieldList(i)
+      endif  
+        
     enddo
- 
+    
+    ! set out variables
+
+    if (present(fieldGarbageCount)) &
+      fieldGarbageCount = fieldGarbageC
+      
+    if (present(fieldGarbageList)) then
+      if (associated(fieldGarbageList)) then
+        if (size(fieldGarbageList) < fieldGarbageC) then
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+            msg="fieldGarbageC is too small", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return  ! bail out
+        else
+          do i=1, fieldGarbageC
+            fieldGarbageList(i) = fieldGarbageL(i)
+          enddo
+        endif
+        deallocate(fieldGarbageL, stat=stat)
+        if (ESMF_LogFoundDeallocError(stat, msg= "deallocating fieldGarbageL", &
+          ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+      else
+        fieldGarbageList => fieldGarbageL ! use the internal allocation
+      endif
+    endif
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
@@ -222,7 +282,7 @@ contains
   function ESMF_ContainerCreate(rc)
 !
 ! !ARGUMENTS:
-    integer,                    intent(out),  optional  :: rc  
+    integer,                    intent(out),  optional  :: rc
 !     
 ! !RETURN VALUE:
     type(ESMF_Container) :: ESMF_ContainerCreate
@@ -277,7 +337,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
-    integer,              intent(out),  optional  :: rc  
+    integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
 !   Destroy an {\tt ESMF\_Container} object.
@@ -334,7 +394,7 @@ contains
     character(len=*),     intent(in)            :: fieldName
     type(ESMF_Field),     intent(out), optional :: field
     logical,              intent(out), optional :: isPresent
-    integer,              intent(out), optional :: rc  
+    integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -403,7 +463,7 @@ contains
     type(ESMF_Container), intent(in)            :: container
     integer,              intent(out), optional :: fieldCount
     type(ESMF_Field),     pointer,     optional :: fieldList(:)
-    integer,              intent(out), optional :: rc  
+    integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -415,7 +475,15 @@ contains
 !   \item[{[fieldCount]}]
 !     Number of Field objects in {\tt container}.
 !   \item[{[fieldList]}]
-!     List of Field objects in {\tt container}.
+!     List of Field objects in {\tt container}. This argument has the pointer
+!     attribute. If the argument comes into this call associated the memory 
+!     allocation is not changed. Instead the size of the memory allocation is
+!     checked against the total number of elements in the container, and if
+!     sufficiently sized the container elements are returned in the provided
+!     memory allocation. If the argument comes into this call unassociated
+!     memory will be allocated internally and filled with the container
+!     elements. In both cases it is the caller responsibility to deallocate
+!     the memory.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -499,7 +567,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)              :: container
     character(len=*),     intent(in)              :: itemNameList(:)
-    integer,              intent(out),  optional  :: rc  
+    integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
 !   Remove items from a {\tt ESMF\_Container} object.
@@ -552,7 +620,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
-    integer,              intent(out),  optional  :: rc  
+    integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
 !   Print an {\tt ESMF\_Container} object.
