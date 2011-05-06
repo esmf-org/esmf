@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.24 2011/05/06 19:36:54 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.25 2011/05/06 23:14:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@ subroutine test1(rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    xgrid = ESMF_XGridCreate(sideA, sideB, .true., rc=localrc)
+    xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -178,7 +178,7 @@ subroutine test1andahalf(rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    xgrid = ESMF_XGridCreate(sideA, sideB, .true., rc=localrc)
+    xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -264,7 +264,8 @@ end subroutine test1andahalf
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
 
-        xgrid = ESMF_XGridCreate(sideA, sideB, .true., area=area, centroid=centroid, rc=localrc)
+        xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., &
+          area=area, centroid=centroid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -453,7 +454,8 @@ end subroutine test1andahalf
         B_area(2,2) = 3./4
 
         ! Finally ready to do an flux exchange from A side to B side
-        xgrid = ESMF_XGridCreate(sideA, sideB, .true., area=area, centroid=centroid, &
+        xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., &
+            area=xgrid_area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
