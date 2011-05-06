@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.23 2011/04/27 21:11:58 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.24 2011/05/06 19:00:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,11 +74,6 @@ module ESMF_XGridMod
     ESMF_XGRID_SIDEB=ESMF_XGridSide(1), &
     ESMF_XGRID_BALANCED=ESMF_XGridSide(2)
 
-  integer, parameter :: &
-    ESMF_XGRID_SPHERELATLONDEG=0, &
-    ESMF_XGRID_SPHERELATLONRAD=1, &
-    ESMF_XGRID_CARTESIAN2D    =2
-
   ! package the collapsed indices and weights matrices
   type ESMF_XGridSpec
     sequence
@@ -122,8 +117,6 @@ module ESMF_XGridMod
   public ESMF_XGridSpec
   public ESMF_XGridSide, ESMF_XGRID_SIDEA, ESMF_XGRID_SIDEB, &
     ESMF_XGRID_BALANCED
-  public ESMF_XGRID_SPHERELATLONDEG, &
-    ESMF_XGRID_CARTESIAN2D
 
 !------------------------------------------------------------------------------
 !
@@ -150,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.23 2011/04/27 21:11:58 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.24 2011/05/06 19:00:56 feiliu Exp $'
 
 !==============================================================================
 !
@@ -332,12 +325,6 @@ module ESMF_XGridMod
 #define XG_S_DGB        2
 #define XG_S_GA         3
 #define XG_S_GB         4
-#define XG_S_AREA       5
-#define XG_S_CENTROID   6
-#define XG_S_SMMA2X     7
-#define XG_S_SMMX2A     8
-#define XG_S_SMMB2X     9
-#define XG_S_SMMX2B     10
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -848,13 +835,13 @@ contains
                                     attreconflag, inquireflag, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_XGrid), intent(inout) :: xgrid 
-      character, pointer, dimension(:) :: buffer
-      integer, intent(inout) :: length
-      integer, intent(inout) :: offset
+      type(ESMF_XGrid), intent(in)                      :: xgrid 
+      character, pointer, dimension(:)                  :: buffer
+      integer, intent(inout)                            :: length
+      integer, intent(inout)                            :: offset
       type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
-      type(ESMF_InquireFlag), intent(in), optional :: inquireflag
-      integer, intent(out), optional :: rc 
+      type(ESMF_InquireFlag), intent(in), optional      :: inquireflag
+      integer, intent(out), optional                    :: rc 
 !
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_XGrid} object and adds all the information needed
@@ -890,10 +877,8 @@ contains
       type(ESMF_XGridType), pointer :: fp    ! xgrid type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_InquireFlag) :: linquireflag
-      integer :: s(10)               ! association status variables
-      integer :: cellCount, dimCount ! for area and centroid
-      integer, dimension(:), allocatable :: eleCountA2X, eleCountX2A, &
-                                            eleCountB2X, eleCountX2B
+      integer :: s(4)               ! association status variables
+      integer :: flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -933,8 +918,6 @@ contains
 
       ! set up the association status array and other meta-data
       s = 0
-      cellCount = 0
-      dimCount = 0
       ngridA = 0
       ngridB = 0
       if(associated(fp%distgridA)) s(XG_S_DGA) = 1
@@ -947,53 +930,12 @@ contains
         s(XG_S_GB) = 1
         ngridB = size(fp%sideB,1)
       endif
-      if(associated(fp%area)) then
-        s(XG_S_AREA) = 1
-        cellCount = size(fp%area, 1)
-      endif
-      if(associated(fp%centroid)) then
-        s(XG_S_CENTROID) = 1
-        dimCount = size(fp%centroid, 2) ! manifold dimension count
-      endif
-      if(associated(fp%sparseMatA2X)) then
-        s(XG_S_SMMA2X) = 1
-        ngridA = size(fp%sparseMatA2X,1)
-        allocate(eleCountA2X(ngridA))
-        do i = 1, ngridA
-            eleCountA2X(i) = size(fp%sparseMatA2X(i)%factorList, 1)
-        enddo
-      endif
-      if(associated(fp%sparseMatX2A)) then
-        s(XG_S_SMMX2A) = 1
-        ngridA = size(fp%sparseMatX2A,1)
-        allocate(eleCountX2A(ngridA))
-        do i = 1, ngridA
-            eleCountX2A(i) = size(fp%sparseMatX2A(i)%factorList, 1)
-        enddo
-      endif
-      if(associated(fp%sparseMatB2X)) then
-        s(XG_S_SMMB2X) = 1
-        ngridB = size(fp%sparseMatB2X,1)
-        allocate(eleCountB2X(ngridB))
-        do i = 1, ngridB
-            eleCountB2X(i) = size(fp%sparseMatB2X(i)%factorList, 1)
-        enddo
-      endif
-      if(associated(fp%sparseMatX2B)) then
-        s(XG_S_SMMX2B) = 1
-        ngridB = size(fp%sparseMatX2B,1)
-        allocate(eleCountX2B(ngridB))
-        do i = 1, ngridB
-            eleCountX2B(i) = size(fp%sparseMatX2B(i)%factorList, 1)
-        enddo
-      endif
-
 
       ! call into the C api first to serialize this status array and other meta-data
       ! this ensures consistency when deserialization
-      call c_ESMC_XGridSerialize(s, cellCount, dimCount, ngridA, ngridB, &
-                                 eleCountA2X, eleCountX2A, eleCountB2X, eleCountX2B, &
-                                 fp%area, fp%centroid, &
+      flag = 0
+      if(fp%storeOverlay) flag = 1
+      call c_ESMC_XGridSerialize(s, ngridA, ngridB, flag, &
                                  buffer(1), length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1049,65 +991,15 @@ contains
           enddo
       endif
 
-      ! serialize the SparseMatSpec objects
-      if(associated(fp%sparseMatA2X)) then
-          do i = 1, size(fp%sparseMatA2X, 1)
-              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatA2X(i)%factorList, 1), &
-                 fp%sparseMatA2X(i)%factorIndexList, &
-                 fp%sparseMatA2X(i)%factorList, &
-                 buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountA2X)
+      if(fp%storeOverlay) then
+        call ESMF_MeshSerialize(mesh=fp%mesh, buffer=buffer, &
+           length=length, offset=offset, &
+           inquireflag=linquireflag, &
+           rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-      if(associated(fp%sparseMatX2A)) then
-          do i = 1, size(fp%sparseMatX2A, 1)
-              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatX2A(i)%factorList, 1), &
-                 fp%sparseMatX2A(i)%factorIndexList, &
-                 fp%sparseMatX2A(i)%factorList, &
-                 buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountX2A)
-      endif
-      if(associated(fp%sparseMatB2X)) then
-          do i = 1, size(fp%sparseMatB2X, 1)
-              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatB2X(i)%factorList, 1), &
-                 fp%sparseMatB2X(i)%factorIndexList, &
-                 fp%sparseMatB2X(i)%factorList, &
-                 buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountB2X)
-      endif
-      if(associated(fp%sparseMatX2B)) then
-          do i = 1, size(fp%sparseMatX2B, 1)
-              call c_ESMC_SMMSpecSerialize(size(fp%sparseMatX2B(i)%factorList, 1), &
-                 fp%sparseMatX2B(i)%factorIndexList, &
-                 fp%sparseMatX2B(i)%factorList, &
-                 buffer(1), length, offset, linquireflag, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountX2B)
-      endif
-
-      !if(fp%storeOverlay) then
-      !  call ESMF_MeshSerialize(mesh=fp%mesh, buffer=buffer, &
-      !     length=length, offset=offset, &
-      !     attreconflag=lattreconflag, inquireflag=linquireflag, &
-      !     rc=localrc)
-      !  if (ESMF_LogFoundError(localrc, &
-      !     ESMF_ERR_PASSTHRU, &
-      !     ESMF_CONTEXT, rcToReturn=rc)) return
-      !endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -1125,13 +1017,13 @@ contains
                                     attreconflag, rc) 
 !
 ! !RETURN VALUE:
-      type(ESMF_XGrid) :: ESMF_XGridDeserialize   
+      type(ESMF_XGrid)                      :: ESMF_XGridDeserialize   
 !
 ! !ARGUMENTS:
-      character, pointer, dimension(:) :: buffer
-      integer, intent(inout) :: offset
+      character, pointer, dimension(:)      :: buffer
+      integer, intent(inout)                :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
-      integer, intent(out), optional :: rc 
+      integer, intent(out), optional        :: rc 
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
@@ -1160,10 +1052,8 @@ contains
       type(ESMF_XGridType), pointer :: fp    ! xgrid type
       integer staggerloc
       type(ESMF_AttReconcileFlag) :: lattreconflag
-      integer :: s(10)               ! association status variables
-      integer :: cellCount, dimCount ! for area and centroid
-      integer, dimension(:), allocatable :: eleCountA2X, eleCountX2A, &
-                                            eleCountB2X, eleCountX2B
+      integer :: s(4)               ! association status variables
+      integer :: flag
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -1208,12 +1098,9 @@ contains
                                ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! call into the C api first to deserialize this status array and other meta-data
-      ! step 1 doesn't initialize area and centroid
-      step = 1
-      call c_ESMC_XGridDeserialize(s, cellCount, dimCount, ngridA, ngridB, &
-                                 eleCountA2X, eleCountX2A, eleCountB2X, eleCountX2B, &
-                                 fp%area, fp%centroid, step, &
+      ! call into the C api to deserialize this status array and other meta-data
+      flag = 0
+      call c_ESMC_XGridDeserialize(s, ngridA, ngridB, flag, &
                                  buffer(1), offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1224,51 +1111,6 @@ contains
       if(s(XG_S_DGB) == 1) allocate(fp%distgridB(ngridB))
       if(s(XG_S_GA) == 1) allocate(fp%sideA(ngridA))
       if(s(XG_S_GB) == 1) allocate(fp%sideB(ngridB))
-      if(s(XG_S_AREA) == 1) allocate(fp%area(cellCount))
-      if(s(XG_S_CENTROID) == 1) allocate(fp%centroid(cellCount, dimCount))
-      if(s(XG_S_SMMA2X) == 1) allocate(eleCountA2X(ngridA))
-      if(s(XG_S_SMMX2A) == 1) allocate(eleCountX2A(ngridA))
-      if(s(XG_S_SMMB2X) == 1) allocate(eleCountB2X(ngridB))
-      if(s(XG_S_SMMX2B) == 1) allocate(eleCountX2B(ngridB))
-
-      ! call into the C api again, step 2 copies eleCount, area and centroid data
-      step = 2
-      call c_ESMC_XGridDeserialize(s, cellCount, dimCount, ngridA, ngridB, &
-                                 eleCountA2X, eleCountX2A, eleCountB2X, eleCountX2B, &
-                                 fp%area, fp%centroid, step, &
-                                 buffer(1), offset, localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if(s(XG_S_SMMA2X) == 1) then
-        allocate(fp%sparseMatA2X(ngridA))
-        do i = 1, ngridA
-            allocate(fp%sparseMatA2X(i)%factorIndexList(2, eleCountA2X(i)))
-            allocate(fp%sparseMatA2X(i)%factorList(eleCountA2X(i)))
-        enddo
-      endif
-      if(s(XG_S_SMMX2A) == 1) then
-        allocate(fp%sparseMatX2A(ngridA))
-        do i = 1, ngridA
-            allocate(fp%sparseMatX2A(i)%factorIndexList(2, eleCountX2A(i)))
-            allocate(fp%sparseMatX2A(i)%factorList(eleCountX2A(i)))
-        enddo
-      endif
-      if(s(XG_S_SMMB2X) == 1) then
-        allocate(fp%sparseMatB2X(ngridB))
-        do i = 1, ngridB
-            allocate(fp%sparseMatB2X(i)%factorIndexList(2, eleCountB2X(i)))
-            allocate(fp%sparseMatB2X(i)%factorList(eleCountB2X(i)))
-        enddo
-      endif
-      if(s(XG_S_SMMX2B) == 1) then
-        allocate(fp%sparseMatX2B(ngridB))
-        do i = 1, ngridB
-            allocate(fp%sparseMatX2B(i)%factorIndexList(2, eleCountX2B(i)))
-            allocate(fp%sparseMatX2B(i)%factorList(eleCountX2B(i)))
-        enddo
-      endif
 
       ! Deserialize the rest of the XGrid members
       if(associated(fp%distgridA)) then
@@ -1312,58 +1154,15 @@ contains
           enddo
       endif
 
-      ! Deserialize the SparseMatSpec objects
-      if(associated(fp%sparseMatA2X)) then
-          do i = 1, size(fp%sparseMatA2X, 1)
-              call c_ESMC_SMMSpecDeserialize(size(fp%sparseMatA2X(i)%factorList, 1), &
-                 fp%sparseMatA2X(i)%factorIndexList, &
-                 fp%sparseMatA2X(i)%factorList, &
-                 buffer(1), offset, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountA2X)
-      endif
-      if(associated(fp%sparseMatX2A)) then
-          do i = 1, size(fp%sparseMatX2A, 1)
-              call c_ESMC_SMMSpecDeserialize(size(fp%sparseMatX2A(i)%factorList, 1), &
-                 fp%sparseMatX2A(i)%factorIndexList, &
-                 fp%sparseMatX2A(i)%factorList, &
-                 buffer(1), offset, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountX2A)
-      endif
-      if(associated(fp%sparseMatB2X)) then
-          do i = 1, size(fp%sparseMatB2X, 1)
-              call c_ESMC_SMMSpecDeserialize(size(fp%sparseMatB2X(i)%factorList, 1), &
-                 fp%sparseMatB2X(i)%factorIndexList, &
-                 fp%sparseMatB2X(i)%factorList, &
-                 buffer(1), offset, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountB2X)
-      endif
-      if(associated(fp%sparseMatX2B)) then
-          do i = 1, size(fp%sparseMatX2B, 1)
-              call c_ESMC_SMMSpecDeserialize(size(fp%sparseMatX2B(i)%factorList, 1), &
-                 fp%sparseMatX2B(i)%factorIndexList, &
-                 fp%sparseMatX2B(i)%factorList, &
-                 buffer(1), offset, localrc)
-              if (ESMF_LogFoundError(localrc, &
-                 ESMF_ERR_PASSTHRU, &
-                 ESMF_CONTEXT, rcToReturn=rc)) return
-          enddo
-          deallocate(eleCountX2B)
+      if(flag == 1) then
+        fp%storeOverlay = .true.
+        fp%mesh = ESMF_MeshDeserialize(buffer=buffer, offset=offset, &
+                                 rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-
-    
       fp%is_proxy = .true.
       ESMF_XGridDeserialize%xgtypep => fp
       

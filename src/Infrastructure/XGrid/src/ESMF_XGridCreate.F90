@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.25 2011/04/27 21:11:58 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.26 2011/05/06 19:00:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.25 2011/04/27 21:11:58 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.26 2011/05/06 19:00:56 feiliu Exp $'
 
 !==============================================================================
 !
@@ -89,8 +89,8 @@ module ESMF_XGridCreateMod
     interface ESMF_XGridCreate
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_XGridCreateRaw
         module procedure ESMF_XGridCreateDefault
+        module procedure ESMF_XGridCreateRaw
 
 
 ! !DESCRIPTION:
@@ -231,17 +231,21 @@ contains
 ! !INTERFACE:
 ! ! Private name; call using ESMF_XGridCreate()
 
-function ESMF_XGridCreateDefault(sideA, sideB, sideAScheme, sideBScheme, sideAPriority, &
-sideBPriority, storeOverlay, name, rc)
+function ESMF_XGridCreateDefault(sideA, sideB, &
+sideAMaskValues, sideBMaskValues, &
+sideAToXGridScheme, sideBToXGridScheme, &
+sideAPriority, sideBPriority, &
+storeOverlay, name, rc)
 
 !
 ! !ARGUMENTS:
-type(ESMF_Grid), intent(in)            :: sideA(:), sideB(:)
-integer, intent(in)                    :: sideAScheme, sideBScheme
-integer, intent(in), optional          :: sideAPriority(:), sideBPriority(:)
-logical, intent(in), optional          :: storeOverlay
-character(len=*), intent(in), optional :: name
-integer, intent(out), optional         :: rc
+type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
+integer, intent(in), optional               :: sideAToXGridScheme, sideBToXGridScheme
+integer, intent(in), optional               :: sideAPriority(:), sideBPriority(:)
+integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:), sideBMaskValues(:)
+logical, intent(in), optional               :: storeOverlay
+character(len=*), intent(in), optional      :: name
+integer, intent(out), optional              :: rc
 
 !
 ! !RETURN VALUE:
@@ -257,14 +261,10 @@ integer, intent(out), optional         :: rc
 !           2D Grids on side A
 !     \item [sideB]
 !           2D Grids on side B
-!     \item [sideAScheme]
+!     \item [sideAToXGridScheme]
 !           Specify the geometry and unit of metric of the Grids on A side. 
-!           Possible values are ESMF_XGRID_SPHERELATLONDEG, 
-!           ESMF_XGRID_CARTESIAN2D 
-!     \item [sideBScheme]
+!     \item [sideBToXGridScheme]
 !           Specify the geometry and unit of metric of the Grids on B side. 
-!           Possible values are ESMF_XGRID_SPHERELATLONDEG, 
-!           ESMF_XGRID_CARTESIAN2D 
 !     \item [{[sideAPriority]}]
 !           Priority array of Grids on sideA during overlay generation.
 !           The priority arrays describe the priorities of Grids at the overlapping region.
@@ -299,9 +299,12 @@ integer, intent(out), optional         :: rc
     real(ESMF_KIND_R8), pointer   :: sidemeshfrac(:)
     integer                       :: nentries
     type(ESMF_TempWeights)        :: tweights
-    integer                       :: gridDimCount, AisSphere, BisSphere
-    logical                       :: AisLatLonDeg, BisLatLonDeg
+    integer                       :: AisSphere, BisSphere, XisSphere, BXisSphere
+    logical                       :: AisLatLonDeg, BisLatLonDeg, XisLatLonDeg, BXisLatLonDeg
     integer, allocatable          :: l_sideAPriority(:), l_sideBPriority(:)
+    integer                       :: l_sideAToXGridScheme, l_sideBToXGridScheme
+    integer                       :: l_XGridToSideAScheme, l_XGridToSideBScheme
+    integer                       :: l_SideAToSideBScheme
     integer                       :: compute_midmesh
 
     ! Initialize
@@ -335,64 +338,79 @@ integer, intent(out), optional         :: rc
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Can only do conservative on 2D right now
-    ! Make sure all Grids are 2 dimensional
-    ! move all these code into checkgrid
+    ! Make sure all Grids are 2 dimensional and 
+    ! has enough data points on a PET to clip
     do i = 1, ngrid_a
-      call ESMF_GridGet(grid=sideA(i), &
-             dimCount=gridDimCount, rc=localrc)
+      call checkGrid(sideA(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      if (gridDimCount .ne. 2) then
-           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-           msg="- can currently only create xgrid on 2D grids", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-        return
-      endif
     enddo
 
     do i = 1, ngrid_b
-      call ESMF_GridGet(grid=sideB(i), &
-             dimCount=gridDimCount, rc=localrc)
+      call checkGrid(sideB(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      if (gridDimCount .ne. 2) then
-           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-           msg="- can currently only create xgrid on 2D grids", & 
-           ESMF_CONTEXT, rcToReturn=rc) 
-        return
-      endif
     enddo
 
-    ! Set interpretation of grids based on xgridScheme
-    if (sideAScheme .eq. ESMF_XGRID_SPHERELATLONDEG) then
-      AisSphere = 1
-      AisLatLonDeg = .true.
-    else if (sideAScheme .eq. ESMF_XGRID_CARTESIAN2D) then
-      AisSphere = 0
-      AisLatLonDeg = .false.
-    else
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-        msg="- invalid sideA scheme", & 
-        ESMF_CONTEXT, rcToReturn=rc) 
-      return
-    endif
+    ! Assign regrid scheme
+    if(present(sideAToXGridScheme)) then
+      if(sideAToXGridScheme == ESMF_REGRID_SCHEME_FULLTOREG3D) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+          msg="- side A to XGrid scheme cannot be ESMF_REGRID_SCHEME_FULLTOREG3D", & 
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
 
-    if (sideBScheme .eq. ESMF_XGRID_SPHERELATLONDEG) then
-      BisSphere = 1
-      BisLatLonDeg = .true.
-    else if (sideBScheme .eq. ESMF_XGRID_CARTESIAN2D) then
-      BisSphere = 0
-      BisLatLonDeg = .false.
+      l_sideAToXGridScheme = sideAToXGridScheme
+      l_XGridToSideAScheme = sideAToXGridScheme
+      if(sideAToXGridScheme == ESMF_REGRID_SCHEME_REGTOFULL3D) &
+        l_XGridToSideAScheme = ESMF_REGRID_SCHEME_FULLTOREG3D
     else
+      l_sideAToXGridScheme = ESMF_REGRID_SCHEME_NATIVE
+      l_XGridToSideAScheme = ESMF_REGRID_SCHEME_NATIVE
+    endif
+    call schemeToGridType(l_sideAToXGridScheme, AisSphere, AisLatLonDeg, &
+      XisSphere, XisLatLonDeg)
+    if(present(sideBToXGridScheme)) then
+      if(sideAToXGridScheme == ESMF_REGRID_SCHEME_FULLTOREG3D) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+          msg="- side B to XGrid scheme cannot be ESMF_REGRID_SCHEME_FULLTOREG3D", & 
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+      l_sideBToXGridScheme = sideBToXGridScheme
+      l_XGridToSideBScheme = sideBToXGridScheme
+      if(sideBToXGridScheme == ESMF_REGRID_SCHEME_REGTOFULL3D) &
+        l_XGridToSideBScheme = ESMF_REGRID_SCHEME_FULLTOREG3D
+    else
+      l_sideBToXGridScheme = ESMF_REGRID_SCHEME_NATIVE
+      l_XGridToSideBScheme = ESMF_REGRID_SCHEME_NATIVE
+    endif
+    call schemeToGridType(l_sideBToXGridScheme, BisSphere, BisLatLonDeg, &
+      BXisSphere, BXisLatLonDeg)
+    ! make sure A and B scheme means the same thing
+    if( (XisSphere /= BXisSphere) .or. (XisLatLonDeg .neqv. BXisLatLonDeg)) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-        msg="- invalid sideB scheme", & 
+        msg="- side A to XGrid scheme not compatible with side B to XGrid scheme", &
         ESMF_CONTEXT, rcToReturn=rc) 
       return
     endif
+    ! figure out the scheme from sideA to sideB for middle mesh generation
+    l_SideAToSideBScheme = SideAToSideB(l_sideAToXGridScheme, &
+      l_XGridToSideBScheme, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! compute the necessary mesh merge order accounting for the grid priorities
     allocate(l_sideAPriority(ngrid_a), l_sideBPriority(ngrid_b))
     if(present(sideAPriority)) then
+      if(size(sideAPriority) /= ngrid_a) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+         msg="- Number of sideA grids doesn't agree with size of sideAPriority", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
       do i = 1, ngrid_a
         l_sideAPriority(i) = sideAPriority(i)
       enddo
@@ -402,6 +420,12 @@ integer, intent(out), optional         :: rc
       enddo
     endif
     if(present(sideBPriority)) then
+      if(size(sideBPriority) /= ngrid_b) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+         msg="- Number of sideB grids doesn't agree with size of sideBPriority", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
       do i = 1, ngrid_b
         l_sideBPriority(i) = sideBPriority(i)
       enddo
@@ -489,6 +513,7 @@ integer, intent(out), optional         :: rc
     call c_esmc_xgridregrid_create(vm, meshA, meshB, &
       meshp, compute_midmesh, &
       ESMF_REGRID_METHOD_CONSERVE, &
+      l_SideAToSideBScheme, &
       ESMF_UNMAPPEDACTION_IGNORE, &
       nentries, tweights, &
       localrc)
@@ -531,6 +556,7 @@ integer, intent(out), optional         :: rc
       call c_esmc_xgridregrid_create(vm, meshAt, mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRID_METHOD_CONSERVE, &
+        l_sideAToXGridScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
         localrc)
@@ -552,9 +578,9 @@ integer, intent(out), optional         :: rc
       !enddo
     
       ! Now the reverse direction
-      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
-      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       ! an immediate optimization is to use the A side area to simply invert the weight
+      !allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
+      !allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       !call compute_mesharea(meshAt, sidemesharea, rc=localrc)
       !if (ESMF_LogFoundError(localrc, &
       !    ESMF_ERR_PASSTHRU, &
@@ -594,12 +620,15 @@ integer, intent(out), optional         :: rc
       call c_esmc_xgridregrid_create(vm, mesh, meshAt, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRID_METHOD_CONSERVE, &
+        l_XGridToSideAScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
         localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       call c_ESMC_Copy_TempWeights_xgrid(tweights, &
       xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
       xgtype%sparseMatX2A(i)%factorList(1))
@@ -626,6 +655,7 @@ integer, intent(out), optional         :: rc
       call c_esmc_xgridregrid_create(vm, meshBt, mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRID_METHOD_CONSERVE, &
+        l_sideBToXGridScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
         localrc)
@@ -650,6 +680,7 @@ integer, intent(out), optional         :: rc
       call c_esmc_xgridregrid_create(vm, mesh, meshBt, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRID_METHOD_CONSERVE, &
+        l_sideBToXGridScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
         localrc)
@@ -678,6 +709,7 @@ integer, intent(out), optional         :: rc
       sparseMatA2X=xgtype%sparseMatA2X, sparseMatX2A=xgtype%sparseMatX2A, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       online=.true., &
+      mesh=mesh, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -731,20 +763,21 @@ end function ESMF_XGridCreateDefault
 ! !INTERFACE:
 ! ! Private name; call using ESMF_XGridCreate()
 
-function ESMF_XGridCreateRaw(sideA, sideB, area, centroid, &
+function ESMF_XGridCreateRaw(sideA, sideB, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
+    area, centroid, &
     name, &
     rc) 
 
 !
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
-real(ESMF_KIND_R8), intent(in), optional   :: area(:)
-real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
+real(ESMF_KIND_R8), intent(in), optional   :: area(:)
+real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
 character (len=*), intent(in), optional    :: name
 integer, intent(out), optional             :: rc 
 
@@ -762,10 +795,6 @@ integer, intent(out), optional             :: rc
 !           2D Grids on side A.
 !     \item [sideB]
 !           2D Grids on side B.
-!     \item [{[area]}]
-!           area of the xgrid cells.
-!     \item [{[centroid]}]
-!           coordinates at the area weighted center of the xgrid cells.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.
@@ -778,6 +807,10 @@ integer, intent(out), optional             :: rc
 !     \item [{[sparseMatX2B]}]
 !           indexlist from xgrid index space to a Grid index space on side B;
 !           indexFactorlist from xgrid index space to a Grid index space on side B.
+!     \item [{[area]}]
+!           area of the xgrid cells.
+!     \item [{[centroid]}]
+!           coordinates at the area weighted center of the xgrid cells.
 !     \item [{[name]}]
 !           name of the xgrid object.
 !     \item [{[rc]}]
@@ -826,7 +859,7 @@ integer, intent(out), optional             :: rc
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_XGridConstruct(xgtype, sideA, sideB, area, centroid, &
-      sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, .false., localrc)
+      sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, .false., rc=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
       msg="Constructing xgtype object ", &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -854,7 +887,8 @@ end function ESMF_XGridCreateRaw
 
 ! !INTERFACE:
 subroutine ESMF_XGridConstruct(xgtype, sideA, sideB, area, centroid, &
-    sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, online, rc)
+    sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, online, &
+    mesh, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_XGridType), intent(inout)        :: xgtype
@@ -866,6 +900,7 @@ type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
 logical, intent(in), optional              :: online
+type(ESMF_Mesh), intent(inout), optional   :: mesh
 integer, intent(out), optional             :: rc 
 
 !
@@ -898,6 +933,8 @@ integer, intent(out), optional             :: rc
 !           indexFactorlist from xgrid index space to a Grid index space on side B.
 !     \item [{[online]}]
 !           online generation optimization turned on/off (default off)
+!     \item [{[mesh]}]
+!           online generation with mesh
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
 !     \end{description}
@@ -993,14 +1030,91 @@ integer, intent(out), optional             :: rc
   ! endif
 
   ! create the distgrids
-  call ESMF_XGridDistGrids(xgtype, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+  if(l_online .and. present(mesh)) then
+    call ESMF_XGridDistGridsOnline(xgtype, mesh, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_XGridDistGrids(xgtype, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
 
   if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridConstruct
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ESMF_XGridDistGridsOnline()"
+!BOPI
+! !IROUTINE:  ESMF_XGridDistGridsOnline - create the distgrids 
+!                                         online for the xgridtype object
+
+! !INTERFACE:
+subroutine ESMF_XGridDistGridsOnline(xgtype, mesh, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_XGridType), intent(inout) :: xgtype
+    type(ESMF_Mesh),      intent(inout) :: mesh
+    integer, intent(out), optional      :: rc
+
+!
+! !DESCRIPTION:
+!      Create the distgrids for the {ESMF\_XGridType} object
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgtype]
+!           the {ESMF\_XGridType} object.
+!     \item [{[mesh]}]
+!           the {ESMF\_Mesh} object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
+
+  integer                                :: localrc, i
+  type(ESMF_DistGrid)                    :: distgrid
+
+  ! Initialize
+  localrc = ESMF_RC_NOT_IMPL
+
+  ! Initialize return code   
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+  !call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
+  !if (ESMF_LogFoundError(localrc, &
+  !    ESMF_ERR_PASSTHRU, &
+  !    ESMF_CONTEXT, rcToReturn=rc)) return
+  !xgtype%distgridM = ESMF_DistGridCreate(distgrid, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  !if (ESMF_LogFoundError(localrc, &
+  !    ESMF_ERR_PASSTHRU, &
+  !    ESMF_CONTEXT, rcToReturn=rc)) return
+  call ESMF_MeshGet(mesh, elementDistgrid=xgtype%distgridM, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  do i = 1, size(xgtype%sideA)
+    call ESMF_GridGet(xgtype%sideA(i), distgrid=xgtype%distgridA(i), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  enddo
+  do i = 1, size(xgtype%sideB)
+    call ESMF_GridGet(xgtype%sideB(i), distgrid=xgtype%distgridB(i), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  enddo
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+end subroutine
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1440,14 +1554,191 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
 end subroutine ESMF_SparseMatca
 
 !------------------------------------------------------------------------------
-! Copied from FieldRegrid.F90
+#undef  ESMF_METHOD
+#define ESMF_METHOD "schemeToGridType()"
+!BOPI
+! !IROUTINE:  schemeToGridType - determine src and dst Grid types
+
+! !INTERFACE:
+subroutine schemeToGridType(scheme, srcIsSphere, srcIsLatLonDeg, &
+  dstIsSphere, dstIsLatLonDeg, rc)
+
+!
+! !ARGUMENTS:
+  integer, intent(in)              :: scheme
+  integer, intent(out)             :: srcIsSphere
+  logical, intent(out)             :: srcIsLatLonDeg
+  integer, intent(out)             :: dstIsSphere
+  logical, intent(out)             :: dstIsLatLonDeg
+  integer, intent(out), optional   :: rc
+!
+! !DESCRIPTION:
+!      Determine src and dst Grid types
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [scheme]
+!           regridding scheme
+!     \item [srcIsSphere]
+!           is src Grid a sphere.
+!     \item [srcIsLatLonDeg]
+!           is src Grid a lat lon grid with coordinates in deg.
+!     \item [dstIsSphere]
+!           is dst Grid a sphere.
+!     \item [dstIsLatLonDeg]
+!           is dst Grid a lat lon grid with coordinates in deg.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  ! Set interpretation of grid based on regridScheme
+  if (Scheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
+     srcIsSphere = 1
+     srcIsLatLonDeg=.true.
+     dstIsSphere = 1
+     dstIsLatLonDeg=.true.
+  else if (Scheme .eq. ESMF_REGRID_SCHEME_FULLTOREG3D) then
+     srcIsSphere = 1
+     srcIsLatLonDeg=.true.
+     dstIsSphere = 0
+     dstIsLatLonDeg=.true.
+  else if (Scheme .eq. ESMF_REGRID_SCHEME_REGTOFULL3D) then
+     srcIsSphere = 0
+     srcIsLatLonDeg=.true.
+     dstIsSphere = 1
+     dstIsLatLonDeg=.true.
+  else if (Scheme .eq. ESMF_REGRID_SCHEME_REGION3D) then
+     srcIsSphere = 0
+     srcIsLatLonDeg=.true.
+     dstIsSphere = 0
+     dstIsLatLonDeg=.true.
+  else if (Scheme .eq. ESMF_REGRID_SCHEME_DCON3D) then
+     srcIsSphere = 0
+     srcIsLatLonDeg=.true.
+     dstIsSphere = 0
+     dstIsLatLonDeg=.true.
+  else if (Scheme .eq. ESMF_REGRID_SCHEME_DCON3DWPOLE) then
+     srcIsSphere = 0
+     srcIsLatLonDeg=.true.
+     dstIsSphere = 0
+     dstIsLatLonDeg=.true.
+  else  
+     srcIsSphere = 0
+     srcIsLatLonDeg=.false.
+     dstIsSphere = 0
+     dstIsLatLonDeg=.false.
+  endif
+  return
+end subroutine schemeToGridType
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "SideAToSideB()"
+!BOPI
+! !IROUTINE:  SideAToSideB - compute regrid scheme from sideA to sideB
+
+! !INTERFACE:
+function SideAToSideB(AtoX, XtoB, rc)
+!
+! !ARGUMENTS:
+  integer, intent(in)           :: AtoX
+  integer, intent(in)           :: XtoB
+  integer, intent(out), optional:: rc
+!
+! !RETURN VALUE:
+  integer                       :: SideAToSideB
+!
+! !DESCRIPTION:
+!      Compute regrid scheme from sideA to sideB.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [AtoX]
+!           regrid scheme from sideA to XGrid
+!     \item [XtoB]
+!           regrid scheme from XGrid to sideB
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
+
+  logical                       :: match
+
+  match = .false.
+  if(present(rc)) rc = ESMF_SUCCESS
+  !print *, AtoX, XtoB
+
+  if(AtoX == ESMF_REGRID_SCHEME_NATIVE .and. XtoB == ESMF_REGRID_SCHEME_NATIVE) then
+    SideAToSideB = ESMF_REGRID_SCHEME_NATIVE
+    match = .true.
+  endif
+  if(AtoX == ESMF_REGRID_SCHEME_FULL3D .and. XtoB == ESMF_REGRID_SCHEME_FULL3D) then
+    SideAToSideB = ESMF_REGRID_SCHEME_FULL3D
+    match = .true.
+  endif
+  if(AtoX == ESMF_REGRID_SCHEME_REGTOFULL3D .and. XtoB == ESMF_REGRID_SCHEME_FULL3D) then
+    SideAToSideB = ESMF_REGRID_SCHEME_REGTOFULL3D
+    match = .true.
+  endif
+  if(AtoX == ESMF_REGRID_SCHEME_REGION3D .and. XtoB == ESMF_REGRID_SCHEME_REGION3D) then
+    SideAToSideB = ESMF_REGRID_SCHEME_REGION3D
+    match = .true.
+  endif
+  if(AtoX == ESMF_REGRID_SCHEME_DCON3D .and. XtoB == ESMF_REGRID_SCHEME_DCON3D) then
+    SideAToSideB = ESMF_REGRID_SCHEME_DCON3D
+    match = .true.
+  endif
+  if(AtoX == ESMF_REGRID_SCHEME_DCON3DWPOLE .and. &
+      XtoB == ESMF_REGRID_SCHEME_DCON3DWPOLE) then
+    SideAToSideB = ESMF_REGRID_SCHEME_DCON3DWPOLE
+    match = .true.
+  endif
+  if(.not. match) then
+    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+       msg="- Incorrect regrid schemes for XGrid generation", &
+       ESMF_CONTEXT, rcToReturn=rc) 
+    return
+  endif        
+  if(present(rc)) rc = ESMF_SUCCESS
+
+end function SideAToSideB
+    
+!------------------------------------------------------------------------------
 ! Small subroutine to make sure that Grid doesn't
 ! contain some of the properties that aren't currently
-! allowed in regridding
+! allowed in regridding. Slightly enhanced from the version in FieldRegrid.
+#undef  ESMF_METHOD
+#define ESMF_METHOD "checkGrid()"
+!BOPI
+! !IROUTINE:  checkGrid - check the grid to make sure it can be used to create XGrid
+
+! !INTERFACE:
 subroutine checkGrid(grid,staggerloc,rc)
+!
+! !ARGUMENTS:
     type (ESMF_Grid) :: grid
     type(ESMF_StaggerLoc) :: staggerloc
     integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Check the grid to make sure it can be used to create XGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           the {\tt ESMF\_Grid} object.
+!     \item [staggerloc]
+!           the {\tt ESMF\_STAGGERLOC} object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
     type(ESMF_GridDecompType) :: decompType
     integer :: localDECount, lDE, ec(ESMF_MAXDIM)
     integer :: localrc, i, dimCount
@@ -1472,6 +1763,13 @@ subroutine checkGrid(grid,staggerloc,rc)
           rc=localrc)
    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+   if (dimCount .ne. 2) then
+         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+         msg="- can currently only create xgrid on 2D grids", & 
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
    
    ! loop through checking DEs
    do lDE=0,localDECount-1
@@ -1497,11 +1795,34 @@ subroutine checkGrid(grid,staggerloc,rc)
 end subroutine checkGrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "compute_mesharea()"
+!BOPI
+! !IROUTINE:  compute_mesharea - Compute mesh Area
+
+! !INTERFACE:
 subroutine compute_mesharea(mesh, area, rc)
 
+!
+! !ARGUMENTS:
 type(ESMF_Mesh), intent(inout)             :: mesh
 real(ESMF_KIND_R8), pointer                :: area(:)
-integer, intent(out), optional          :: rc
+integer, intent(out), optional             :: rc
+!
+! !DESCRIPTION:
+!      Allocate internal SMM parameters and copy from src.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [mesh]
+!           the {\tt ESMF\_Mesh} object.
+!     \item [area]
+!           the area of the mesh
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
+!     \end{description}
+!
+!EOPI
 
 logical :: hasSplitElem
 integer :: localrc, localElemCount

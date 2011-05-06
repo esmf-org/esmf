@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.7 2011/04/26 20:49:46 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.8 2011/05/06 19:00:55 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -29,15 +29,15 @@ using namespace std;
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
+#include "Mesh/include/ESMCI_MeshRegrid.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.7 2011/04/26 20:49:46 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.8 2011/05/06 19:00:55 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -61,10 +61,8 @@ extern "C" {
 
 // non-method functions
 void FTN(c_esmc_xgridserialize)(
-                int * s, int * cellCount, int * dimCount, 
-                int * ngridA, int * ngridB,
-                int * eleCountA2X, int * eleCountX2A, int * eleCountB2X, int * eleCountX2B, 
-                double * area, double * centroid, 
+                int * s, 
+                int * ngridA, int * ngridB, int * flag,
                 char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buf_l){
@@ -77,7 +75,7 @@ void FTN(c_esmc_xgridserialize)(
 
     char * ptr = (char *)(buffer + *offset);
 
-#define SSIZE 10
+#define SSIZE 4
     if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)s, SSIZE*sizeof(int));
     ptr += SSIZE*sizeof(int);
@@ -89,58 +87,8 @@ void FTN(c_esmc_xgridserialize)(
       memcpy((void *)ptr, (const void *)ngridB, sizeof(int));
     ptr += sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
-      memcpy((void *)ptr, (const void *)cellCount, sizeof(int));
+      memcpy((void *)ptr, (const void *)flag, sizeof(int));
     ptr += sizeof(int);
-    if (linquireflag != ESMF_INQUIREONLY)
-      memcpy((void *)ptr, (const void *)dimCount, sizeof(int));
-    ptr += sizeof(int);
-
-    // sparseMat meta data
-    if(eleCountA2X != 0) {
-        if (linquireflag != ESMF_INQUIREONLY)
-          memcpy((void *)ptr, (const void *)eleCountA2X, *ngridA*sizeof(int));
-        ptr += *ngridA*sizeof(int);
-    }
-    if(eleCountX2A != 0) {
-        if (linquireflag != ESMF_INQUIREONLY)
-          memcpy((void *)ptr, (const void *)eleCountX2A, *ngridA*sizeof(int));
-        ptr += *ngridA*sizeof(int);
-    }
-    if(eleCountB2X != 0) {
-        if (linquireflag != ESMF_INQUIREONLY)
-          memcpy((void *)ptr, (const void *)eleCountB2X, *ngridB*sizeof(int));
-        ptr += *ngridB*sizeof(int);
-    }
-    if(eleCountX2B != 0) {
-        if (linquireflag != ESMF_INQUIREONLY)
-          memcpy((void *)ptr, (const void *)eleCountX2B, *ngridB*sizeof(int));
-        ptr += *ngridB*sizeof(int);
-    }
-
-#define AREA_IDX 4
-#define CENTROID_IDX 5
-    // realign
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-    ptr = (char *)(buffer + *offset);
-    if(s[AREA_IDX]){
-       if (linquireflag != ESMF_INQUIREONLY)
-          memcpy(reinterpret_cast<void *>(ptr), reinterpret_cast<const void *>(area), *cellCount*sizeof(double));
-       ptr += *cellCount*sizeof(double);
-    }
-
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-    ptr = (char *)(buffer + *offset);
-    if(s[CENTROID_IDX]){
-       if (linquireflag != ESMF_INQUIREONLY)
-          memcpy((void *)ptr, (const void *)centroid, *cellCount*(*dimCount)*sizeof(double));
-       ptr += *cellCount*(*dimCount)*sizeof(double);
-    }
-#undef AREA_IDX 
-#undef CENTROID_IDX
 
     // realign again
     *offset = ptr - buffer;
@@ -154,10 +102,8 @@ void FTN(c_esmc_xgridserialize)(
 
 
 void FTN(c_esmc_xgriddeserialize)(
-                int * s, int * cellCount, int * dimCount, 
-                int * ngridA, int * ngridB,
-                int * eleCountA2X, int * eleCountX2A, int * eleCountB2X, int * eleCountX2B, 
-                double * area, double * centroid, int * step, 
+                int * s, 
+                int * ngridA, int * ngridB, int * flag,
                 char *buffer, int *offset, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
@@ -166,69 +112,17 @@ void FTN(c_esmc_xgriddeserialize)(
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
 
-    if(*step != 1 && *step != 2) {
-        *localrc = ESMC_RC_ARG_BAD;
-        return;
-    }
-
     char * ptr = (char *)(buffer + *offset);
-    if(*step == 1){
-#define SSIZE 10
-        memcpy((void *)s, (const void *)ptr, SSIZE*sizeof(int));
-        ptr += SSIZE*sizeof(int);
+#define SSIZE 4
+    memcpy((void *)s, (const void *)ptr, SSIZE*sizeof(int));
+    ptr += SSIZE*sizeof(int);
 #undef SSIZE
-        memcpy((void *)ngridA, (const void *)ptr, sizeof(int));
-        ptr += sizeof(int);
-        memcpy((void *)ngridB, (const void *)ptr, sizeof(int));
-        ptr += sizeof(int);
-        memcpy((void *)cellCount, (const void *)ptr, sizeof(int));
-        ptr += sizeof(int);
-        memcpy((void *)dimCount, (const void *)ptr, sizeof(int));
-        ptr += sizeof(int);
-    }
-
-    if(*step == 2){
-        // sparseMat meta data
-        if(eleCountA2X != 0) {
-            memcpy((void *)eleCountA2X, (const void *)ptr, *ngridA*sizeof(int));
-            ptr += *ngridA*sizeof(int);
-        }
-        if(eleCountX2A != 0) {
-            memcpy((void *)eleCountX2A, (const void *)ptr, *ngridA*sizeof(int));
-            ptr += *ngridA*sizeof(int);
-        }
-        if(eleCountB2X != 0) {
-            memcpy((void *)eleCountB2X, (const void *)ptr, *ngridB*sizeof(int));
-            ptr += *ngridB*sizeof(int);
-        }
-        if(eleCountX2B != 0) {
-            memcpy((void *)eleCountX2B, (const void *)ptr, *ngridB*sizeof(int));
-            ptr += *ngridB*sizeof(int);
-        }
-
-#define AREA_IDX 4
-#define CENTROID_IDX 5
-        // realign
-        *offset = ptr - buffer;
-        padding = (*offset)%8;
-        if(padding) (*offset) += 8-padding;
-        ptr = (char *)(buffer + *offset);
-        if(s[AREA_IDX] && area != 0){
-           memcpy((void *)area, (const void *)ptr, *cellCount*sizeof(double));
-           ptr += *cellCount*sizeof(double);
-        }
-
-        *offset = ptr - buffer;
-        padding = (*offset)%8;
-        if(padding) (*offset) += 8-padding;
-        ptr = (char *)(buffer + *offset);
-        if(s[CENTROID_IDX] && centroid != 0){
-           memcpy((void *)centroid, (const void *)ptr, *cellCount*(*dimCount)*sizeof(double));
-           ptr += *cellCount*(*dimCount)*sizeof(double);
-        }
-#undef AREA_IDX 
-#undef CENTROID_IDX
-    }
+    memcpy((void *)ngridA, (const void *)ptr, sizeof(int));
+    ptr += sizeof(int);
+    memcpy((void *)ngridB, (const void *)ptr, sizeof(int));
+    ptr += sizeof(int);
+    memcpy((void *)flag, (const void *)ptr, sizeof(int));
+    ptr += sizeof(int);
 
     // realign again
     *offset = ptr - buffer;
@@ -256,32 +150,6 @@ void FTN(c_esmc_smmspecserialize)(
 
     char * ptr = (char *)(buffer + *offset);
 
-    if (linquireflag != ESMF_INQUIREONLY)
-      memcpy((void *)ptr, (const void *)cellCount, sizeof(int));
-    ptr += sizeof(int);
-
-    // realign
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-    ptr = (char *)(buffer + *offset);
-    if (linquireflag != ESMF_INQUIREONLY)
-       memcpy(reinterpret_cast<void *>(ptr), reinterpret_cast<const void *>(indices), *cellCount*2*sizeof(int));
-    ptr += *cellCount*2*sizeof(int);
-
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-    ptr = (char *)(buffer + *offset);
-    if (linquireflag != ESMF_INQUIREONLY)
-       memcpy((void *)ptr, (const void *)weights, *cellCount*sizeof(double));
-    ptr += *cellCount*sizeof(double);
-
-    // realign again
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
@@ -302,28 +170,6 @@ void FTN(c_esmc_smmspecdeserialize)(
 
     char * ptr = (char *)(buffer + *offset);
 
-    // realign
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-    ptr = (char *)(buffer + *offset);
-
-    memcpy((void  *)indices, (const void *)ptr, *cellCount*2*sizeof(int));
-    ptr += *cellCount*2*sizeof(int);
-
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-    ptr = (char *)(buffer + *offset);
-
-    memcpy((void *)weights, (const void *)ptr, *cellCount*sizeof(double));
-    ptr += *cellCount*sizeof(double);
-
-    // realign again
-    *offset = ptr - buffer;
-    padding = (*offset)%8;
-    if(padding) (*offset) += 8-padding;
-
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
@@ -335,6 +181,7 @@ void FTN(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
                    Mesh **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
+                   int *regridScheme,
                    int *unmappedaction,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
@@ -360,7 +207,7 @@ void FTN(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
     IWeights wts;
 
     if(!online_regrid_xgrid(srcmesh, dstmesh, *mesh, wts, &regridConserve, regridMethod,
-                      unmappedaction))
+                      regridScheme, unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
     // Firstly, the index list
@@ -436,8 +283,6 @@ void FTN(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, doubl
   for (int i = 0; i < tw.nentries; ++i) {
     int two_i = i << 1;
 
-    //ii[i] = tw.iientries[two_i+0];
-    //ii[tw.nentries+i] = tw.iientries[two_i+1];
     ii[two_i] = tw.iientries[two_i+0];
     ii[two_i+1] = tw.iientries[two_i+1];
     w[i] = tw.factors[i];
