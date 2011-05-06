@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.84 2011/04/26 21:08:57 feiliu Exp $ 
+# $Id: makefile,v 1.85 2011/05/06 19:02:56 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -92,7 +92,7 @@ RUN_ESMF_FieldRegridXGUTest:
 	$(MAKE) TNAME=FieldRegridXG NP=2 ftest
 
 RUN_ESMF_FieldRegridXGOnlineUTest:
-	$(MAKE) TNAME=FieldRegridXGOnline NP=1 ftest
+	$(MAKE) TNAME=FieldRegridXGOnline NP=4 ftest
 
 RUN_ESMF_FieldRegridXGOnlineUTestUNI:
 	$(MAKE) TNAME=FieldRegridXGOnline NP=1 ftest
