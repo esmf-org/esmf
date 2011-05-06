@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.117 2011/04/05 00:22:11 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.118 2011/05/06 19:00:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -656,6 +656,16 @@
            ESMF_REGRID_CONSERVE_ON      = ESMF_RegridConserve(1)
 
 
+!------------------------------------------------------------------------------
+!
+!
+      integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
+                            ESMF_REGRID_SCHEME_NATIVE = 1, &
+                            ESMF_REGRID_SCHEME_REGION3D = 2, &
+                            ESMF_REGRID_SCHEME_FULLTOREG3D=3, &
+                            ESMF_REGRID_SCHEME_REGTOFULL3D=4, &
+                            ESMF_REGRID_SCHEME_DCON3D=5, &
+                            ESMF_REGRID_SCHEME_DCON3DWPOLE=6
 
 
 !------------------------------------------------------------------------------
@@ -740,6 +750,14 @@
 
        public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
                                    ESMF_REGRID_CONSERVE_ON
+
+       public ESMF_REGRID_SCHEME_FULL3D, &
+              ESMF_REGRID_SCHEME_NATIVE, &
+              ESMF_REGRID_SCHEME_REGION3D, &
+              ESMF_REGRID_SCHEME_FULLTOREG3D, &
+              ESMF_REGRID_SCHEME_REGTOFULL3D, &
+              ESMF_REGRID_SCHEME_DCON3D, &
+              ESMF_REGRID_SCHEME_DCON3DWPOLE
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
