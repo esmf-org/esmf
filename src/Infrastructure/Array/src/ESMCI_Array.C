@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.129 2011/05/06 17:19:57 samsoncheung Exp $
+// $Id: ESMCI_Array.C,v 1.130 2011/05/06 20:01:03 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.129 2011/05/06 17:19:57 samsoncheung Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.130 2011/05/06 20:01:03 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2507,11 +2507,12 @@ int Array::read(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // To be used later
   // call into Fortran interface
-  FTN(f_esmf_arrayread)(array, file, variableName, timeslice, 
-      iofmt, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  //  FTN(f_esmf_arrayread)(array, file, variableName, timeslice, 
+  //    iofmt, &localrc);
+  //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  //  return rc;
   }
 
   // return successfully
@@ -2552,11 +2553,12 @@ int Array::write(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // to be used later
   // call into Fortran interface
-  FTN(f_esmf_arraywrite)(array, file, variableName, append, timeslice,
-      iofmt, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  //  FTN(f_esmf_arraywrite)(array, file, variableName, append, timeslice,
+  //    iofmt, &localrc);
+  //if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  //  return rc;
   }
 
   // return successfully
