@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.C,v 1.11 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_GeomRendezvous.C,v 1.12 2011/05/06 18:59:19 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.11 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.12 2011/05/06 18:59:19 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -690,7 +690,7 @@ void GeomRend::migrate_meshes() {
 
 }
 
-void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF) {
+void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, struct Zoltan_Struct **zzp, bool free_zz) {
   Trace __trace("GeomRend::Build()");
 
   ThrowRequire(built == false);
@@ -713,11 +713,12 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   float ver;
   int rc = Zoltan_Initialize(0, NULL, &ver);
 
-  struct Zoltan_Struct *zz;
   int rank = Par::Rank(); 
   int csize = Par::Size(); 
 
-  zz = Zoltan_Create(Par::Comm());
+
+  struct Zoltan_Struct * zz = Zoltan_Create(Par::Comm());
+  *zzp = zz;
 
   // Zoltan Parameters
   set_zolt_param(zz);
@@ -798,7 +799,9 @@ void GeomRend::Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF)
   Zoltan_LB_Free_Part(&exportGlobalids, &exportLocalids,
                       &exportProcs, &exportToPart);
 
-  Zoltan_Destroy(&zz);
+  if(free_zz){
+    Zoltan_Destroy(&zz);
+  }
 }
 
 } // namespace ESMCI

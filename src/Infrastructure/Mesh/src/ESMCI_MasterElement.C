@@ -1,4 +1,4 @@
-// $Id: ESMCI_MasterElement.C,v 1.5 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_MasterElement.C,v 1.6 2011/05/06 18:59:19 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MasterElement.C,v 1.5 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MasterElement.C,v 1.6 2011/05/06 18:59:19 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -321,7 +321,7 @@ MasterElement<METRAITS> *Topo2ME<METRAITS>::operator()(const std::string &name) 
   }
   if (name == "QUAD9") {
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<quad9_shape_func>::instance());
-  } else if (name == "TRI" || name == "TRI3" || name == "TRI_L") {
+  } else if (name == "TRI" || name == "TRI3" || name == "TRI_L" || name == "TRI3_3D") {
       return MasterElementV<METRAITS>::instance(SFuncAdaptor<tri_shape_func>::instance());
   }
   else if (name == "SHELL3" || name == "SHELL3_L") {

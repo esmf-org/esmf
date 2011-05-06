@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.h,v 1.9 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_GeomRendezvous.h,v 1.10 2011/05/06 18:59:17 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -56,7 +56,7 @@ public:
    * DstConfig object; if the 'conserv' type case, the full MEField will
    * be registered else only the interp _field will be registered.
    */
-  void Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF);
+  void Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, Zoltan_Struct **zzp, bool free_zz);
 
   struct ZoltanUD {
   ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst,bool _iter_is_obj) :

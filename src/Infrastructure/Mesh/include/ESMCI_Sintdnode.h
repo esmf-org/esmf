@@ -1,4 +1,4 @@
-// $Id: ESMCI_Sintdnode.h,v 1.3 2011/04/27 15:58:13 feiliu Exp $
+// $Id: ESMCI_Sintdnode.h,v 1.4 2011/05/06 18:59:17 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -12,12 +12,14 @@
 #ifndef ESMCI_Sintdnode_h
 #define ESMCI_Sintdnode_h
 
-#include <exception>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <cstdio>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
+#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/src/Zoltan/zoltan.h>
 
 
 namespace ESMCI {
@@ -28,41 +30,42 @@ class sintd_cell;
 class sintd_node {
 
   private:
-  int pdim;          // parametric dimension
+  int sdim;          // spatial dimension
   double *coords;    // coordinate of this node in space
   sintd_cell * cell; // genesis cell
   MeshObj * node;    // final MeshObj node
 
   public:
-  sintd_node(int _pdim, double *c): pdim(_pdim) {
-    coords = new double[pdim];
-    for(int i = 0; i < pdim; i ++)
+  sintd_node(int _sdim, double *c): sdim(_sdim) {
+    coords = new double[sdim];
+    for(int i = 0; i < sdim; i ++)
       coords[i] = c[i];
   }
   ~sintd_node(){
-    delete coords;
+    delete[] coords;
   }
   // copy and assignment
-  sintd_node(const sintd_node & src) : pdim(src.pdim){
-    coords = new double[pdim];
-    for(int i = 0; i < pdim; i ++)
+  sintd_node(const sintd_node & src) : sdim(src.sdim){
+    coords = new double[sdim];
+    for(int i = 0; i < sdim; i ++)
       coords[i] = src.coords[i];
   }
   sintd_node & operator = (const sintd_node & src) {
-    this->pdim = src.pdim;
-    this->coords = new double [pdim];
-    for(int i = 0; i < pdim; i ++)
+    this->sdim = src.sdim;
+    this->coords = new double [sdim];
+    for(int i = 0; i < sdim; i ++)
       this->coords[i] = src.coords[i];
     return *this;
   }
   // access operator
   double operator [](int i) const {
-    if(i < 0 || i >= pdim) throw std::string("sintd_node: access index out of range");
+    if(i < 0 || i >= sdim) Throw() << "sintd_node: access index out of range.\n";
     return coords[i];
   }
+  double * get_coord() const { return coords; }
   // operators for std::vector comparisons
   bool operator < (const sintd_node & that) const{
-    for(int i = 0; i < pdim; i ++){
+    for(int i = 0; i < sdim; i ++){
       if(coords[i] < that.coords[i]) return true;
       if(coords[i] ==that.coords[i]) continue;
       else return false;
@@ -70,7 +73,7 @@ class sintd_node {
     return false;
   }
   bool operator == (const sintd_node & that) const{
-    for(int i = 0; i < pdim; i ++)
+    for(int i = 0; i < sdim; i ++)
       if(coords[i] != that.coords[i]) return false;
     return true;
   }
@@ -84,9 +87,18 @@ class sintd_node {
   // debug purpose
   void print() const{
     printf("intersection point: (");
-    for(int i = 0; i < pdim; i ++)
+    for(int i = 0; i < sdim; i ++)
       printf("%g, ", coords[i]);
     printf(")\n");
+  }
+  
+  std::string toString(){
+    std::ostringstream os; os << "(";
+    for(int i = 0; i < sdim-1; i ++)
+      os << coords[i] << ", "; 
+    os << coords[sdim-1];
+    os << ")";
+    return os.str();
   }
 };
 
@@ -110,18 +122,30 @@ class sintd_node_equal{
 class sintd_cell {
   private:
     // nodes enclosing this cell
+    double area;
     std::vector<sintd_node *> nodes;
   public:
-    sintd_cell(const std::vector<sintd_node *> & _nodes) : nodes(_nodes) {}
+    sintd_cell(double _area, const std::vector<sintd_node *> & _nodes) : 
+      area(_area), nodes(_nodes) {}
+
     int num_edges() const { return nodes.size(); }
-    // TODO: do cell split
-    MeshObjTopo * get_topo() const {
-      if(nodes.size() == 3) return GetTopo("TRI3");
-      if(nodes.size() == 4) return GetTopo("QUAD");
-      throw std::string("Invalid cell found");
+
+    // leave hook for 3d clipping
+    MeshObjTopo * get_topo(int sdim, int pdim) const {
+      if(pdim == 2){
+        if(sdim == 2){
+          if(nodes.size() == 3) return GetTopo("TRI3");
+          if(nodes.size() == 4) return GetTopo("QUAD");
+        } 
+        if(sdim == 3){
+          if(nodes.size() == 3) return GetTopo("TRI3_3D");
+          if(nodes.size() == 4) return GetTopo("QUAD_3D");
+        }
+      }
+      Throw() << "Invalid cell found.\n";
     }
     sintd_node * operator [](int i) const{
-      if(i < 0 || i >= nodes.size()) throw std::string("sintd_cell: access index out of range");
+      if(i < 0 || i >= nodes.size()) Throw() << "sintd_cell: access index out of range.\n";
       return nodes[i];
     }
     void replace_node(sintd_node * node){
@@ -129,6 +153,37 @@ class sintd_cell {
       for(; it != nodes.end(); it++)
         if(**it == *node) { *it = node; break; }
     }
+
+    double get_area() { return area;   }
+
+    void print(int me, int gid, int lid){
+      printf("Cell (%d,%d,%d): { ", me, gid, lid+1);
+      std::vector<sintd_node *>::iterator it = nodes.begin();
+      for(; it != nodes.end(); it++)
+        printf("%s, ", (*it)->toString().c_str());
+      printf(" }\n");
+    }
+
+};
+
+struct proc_count {
+  int proc;
+  int count;
+  proc_count(int _proc, int _count): proc(_proc), count(_count) {}
+};
+
+struct proc_count_less {
+  bool operator () (const proc_count & src, const proc_count & dst){
+    return (src.count < dst.count);
+  }
+};
+
+struct proc_count_equal {
+  int me;
+  proc_count_equal(int _me) : me(_me) {}
+  bool operator () (const proc_count & src){
+    return (src.proc == me);
+  }
 };
 
 } // namespace

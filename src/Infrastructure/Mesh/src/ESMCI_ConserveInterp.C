@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.9 2011/04/26 19:48:24 feiliu Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.10 2011/05/06 18:59:19 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -29,12 +29,12 @@
 #include <cmath>
 #include <vector>
 
-
+#include <ESMCI_VM.h>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.9 2011/04/26 19:48:24 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.10 2011/05/06 18:59:19 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -365,7 +365,7 @@ namespace ESMCI {
                                            std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas,
                                            Mesh * midmesh, 
                                            std::vector<sintd_node *> * sintd_nodes, 
-                                           std::vector<sintd_cell *> * sintd_cells) {
+                                           std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
 
 
 // Maximum size for a supported polygon
@@ -502,8 +502,9 @@ namespace ESMCI {
       (*valid)[i]=1;
 
       if(midmesh)
-        compute_sintd_nodes_cells(num_sintd_nodes, sintd_coords, 2, 
-          sintd_nodes, sintd_cells);
+        compute_sintd_nodes_cells(sintd_areas[i],
+          num_sintd_nodes, sintd_coords, 2, 2,
+          sintd_nodes, sintd_cells, zz);
     }
 
     // Loop calculating weights
@@ -863,7 +864,8 @@ void norm_poly3D(int num_p, double *p) {
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
                                            std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
-                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells) {
+                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
+                                           std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
 
 
 // Maximum size for a supported polygon
@@ -999,8 +1001,9 @@ void norm_poly3D(int num_p, double *p) {
 	(*valid)[i]=1;
 
       if(midmesh)
-        compute_sintd_nodes_cells(num_sintd_nodes, sintd_coords, 3, 
-          sintd_nodes, sintd_cells);
+        compute_sintd_nodes_cells(sintd_areas[i],
+          num_sintd_nodes, sintd_coords, 2, 3, 
+          sintd_nodes, sintd_cells, zz);
     }
 
     // Loop calculating weights

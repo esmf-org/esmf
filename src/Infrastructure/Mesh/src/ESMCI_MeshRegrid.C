@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.24 2011/04/26 19:48:24 feiliu Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.25 2011/05/06 18:59:19 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.24 2011/04/26 19:48:24 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.25 2011/05/06 18:59:19 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -343,6 +343,9 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
     
      // Create the weight matrix
      interp(0, wts);
+
+     // Release the Zoltan struct if we used it for the mid mesh
+     if(midmesh) interp.release_zz();
 
      // Factor out poles if they exist
      if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||

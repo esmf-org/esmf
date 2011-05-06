@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.13 2011/04/26 19:48:22 feiliu Exp $
+// $Id: ESMCI_Interp.h,v 1.14 2011/05/06 18:59:17 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -18,6 +18,7 @@
 #include <Mesh/include/ESMCI_Migrator.h>
 #include <Mesh/include/ESMCI_SparseMsg.h>
 #include <Mesh/include/ESMCI_WMat.h>
+#include <Mesh/src/Zoltan/zoltan.h>
 
 #include <vector>
 #include <ostream>
@@ -160,6 +161,8 @@ public:
   void interpL2csrvM(const IWeights &, IWeights *, 
                      MEField<> const * const, MEField<> const * const);
   
+  void release_zz() { if(zz) Zoltan_Destroy(&zz); }
+  
   private:
 
   // interpolation parallel?
@@ -188,6 +191,7 @@ public:
   Mesh &srcmesh;
   Mesh &dstmesh;
   Mesh *midmesh;
+  Zoltan_Struct * zz;
 };
 
 } // namespace
