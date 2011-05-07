@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.3 2011/05/06 19:02:56 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.4 2011/05/07 02:06:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1985,7 +1985,7 @@ write(*,*) "LOCALRC=",localrc
 
     do i = lbound(flux_density, 1), ubound(flux_density, 1)
       !print *, i,flux_density(i), area(i) !, fraction(i)
-      write(*,'(I3,I7,2F13.10)'), lpet,i,flux_density(i), area(i)
+      write(*,'(I3,I7,2F13.10)') lpet,i,flux_density(i), area(i)
     enddo
 
   end subroutine display_flux1D
@@ -2014,7 +2014,7 @@ write(*,*) "LOCALRC=",localrc
 
     do i = lbound(flux_density, 1), ubound(flux_density, 1)
       do j = lbound(flux_density, 2), ubound(flux_density, 2)
-        write(*,'(I3,2I5,3F13.10)'), lpet, i,j,flux_density(i,j), area(i,j), fraction(i,j)
+        write(*,'(I3,2I5,3F13.10)') lpet, i,j,flux_density(i,j), area(i,j), fraction(i,j)
       enddo
     enddo
 
