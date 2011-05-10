@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.7 2011/05/10 00:42:55 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.8 2011/05/10 01:12:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -94,6 +94,11 @@ namespace ESMCI {
   // exists, or replace an existing element with the same key.
   template <typename Key, typename T>
   void Container<Key, T>::addReplace(Key k, T t){
+    if (garbageActive){
+      typename Container::iterator pos = this->find(k);
+      if (pos!=this->end())
+        garbage.push_back(pos->second); // replaced object goes into garbage
+    }
     (*this)[k]=t;
   }
 
