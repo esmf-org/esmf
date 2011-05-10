@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.44 2011/02/25 07:01:02 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.45 2011/05/10 23:27:36 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9,7 +9,25 @@
 % Licensed under the University of Illinois-NCSA License.
 
 
-The ESMF Attribute Class was created with the long-term goal of enabling models to be self-describing. Note that Attributes are individual name-value pairs, while Metadata is a term used to describe instances of Attributes that describe a particular object. While most of the discussion to follow is about specific Attributes, the overall goal is to create a Metadata system.   
+The ESMF Attribute class is a metadata utility that supports emerging standards 
+in a flexible way.  Metadata, which is data about data, is broken down into 
+name-value pairs by the Attribute class.  Attributes can be attached at any 
+level of the ESMF object hierarchy, and they can be grouped into packages to 
+help organize model metadata.  
+
+Most of the ESMF deep objects can hold metadata in the form of an Attribute 
+hierarchy.  The objects that can hold Attributes of various types are listed in 
+the following sections.  The Attribute class is useful for documenting data 
+provenance and encourages models to be more self describing.  Attributes can 
+also be used for some aspects of model execution and coupling.
+
+Standardized metadata is organized in ESMF by Attribute packages.  These 
+packages are used to aggregate, store, and output model metadata.  They can be 
+nested inside each other to make larger organized package, distributed across 
+processors and updated at runtime, and expanded to suite specific needs.  These 
+Attribute packages are designed around accepted metadata standards such as: 
+climate and forecast (CF), ISO standards, and METAFOR Common Information Model 
+(CIM).
 
 \subsubsection{The ESMF approach to Attributes}
 
@@ -53,4 +71,4 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 
 The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\tt VariableIntent} Attribute that is part of the ESMF supplied standard Attribute package for Field when that Field is added to the State.  {\tt VariableIntent} will be set to either {\tt Export} or {\tt Import}.
 
-Attribute hierarchies are linked in a "shallow" manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  
+Attribute hierarchies are linked in a ``shallow'' manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  

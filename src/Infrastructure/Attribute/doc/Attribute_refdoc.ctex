@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.28 2011/01/05 20:05:41 svasquez Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.29 2011/05/10 23:27:36 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,24 +79,24 @@
 \input{Attribute_usage} 
 \input{AttributeEx_fapi}
 \input{AttributePackageEx_fapi}
+\input{AttributeUpdateEx_fapi}
+\input{AttributeUpdateMod_fapi}
 \input{AttributeCIMEx_fapi}
 \input{AttReadGridCompEx_fapi}
 \input{AttReadFieldEx_fapi}
 \input{AttReadGridEx_fapi}
 \input{AttReadCustCplCompEx_fapi}
-\input{AttributeUpdateEx_fapi}
-\input{AttributeUpdateMod_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_usage} 
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributePackageEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateMod_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeCIMEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridCompEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadFieldEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadCustCplCompEx_fapi}
-\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateEx_fapi}
-\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateMod_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
