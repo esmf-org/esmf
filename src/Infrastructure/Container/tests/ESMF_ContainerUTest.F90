@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.8 2011/05/06 18:01:47 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.9 2011/05/10 00:24:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.8 2011/05/06 18:01:47 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.9 2011/05/10 00:24:50 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -116,11 +116,32 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Container Add Field again relaxed - with garbageList Test"
+  write(name, *) "Container turn garbage feature ON Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGarbageOn(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container clear garbage Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGarbageClear(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add Field again relaxed - with garbage ON Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, fieldList=fieldList, relaxedflag=.true., &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container garbage Get Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(fieldGarbageList)
-  call ESMF_ContainerAdd(container, fieldList=fieldList, relaxedflag=.true., &
-    fieldGarbageList=fieldGarbageList, rc=rc)
+  call ESMF_ContainerGarbageGet(container, garbageList=fieldGarbageList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -135,6 +156,20 @@ program ESMF_ContainerUTest
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
     print *, "fieldGarbageList(",i,")=",fieldName
   enddo
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container turn garbage feature OFF Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGarbageOff(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container clear garbage Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGarbageClear(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -180,6 +215,21 @@ program ESMF_ContainerUTest
   write(name, *) "Container Remove item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerRemove(container, itemNameList=(/"testField3"/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Remove item 2nd time strict Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ContainerRemove(container, itemNameList=(/"testField3"/), rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Remove item 2nd time relaxed Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerRemove(container, itemNameList=(/"testField3"/), &
+    relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

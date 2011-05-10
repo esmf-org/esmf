@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.5 2011/05/06 18:01:44 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.6 2011/05/10 00:24:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,8 +29,13 @@ namespace ESMCI {
 
   template <typename Key, typename T>
   class Container : public std::map<Key, T> {
+    bool garbageActive;
+    std::vector<T> garbage;
    public:
-    bool add(Key k, T t, bool relaxed=false);
+    Container(){
+      garbageOff();   // by default no garbage is kept
+    }
+    void add(Key k, T t, bool relaxed=false);
     void addReplace(Key k, T t);
     void remove(Key k, bool relaxed=false);
     void replace(Key k, T t, bool relaxed=false);
@@ -42,6 +47,21 @@ namespace ESMCI {
         return true;  // key found
       return false;   // key not found
     }
+    void garbageOn(){
+      garbageActive = true;
+    }
+    void garbageOff(){
+      garbageActive = false;
+    }
+    void garbageClear(){
+      garbage.clear();  // clear the garbage vector
+    }
+    void garbageGet(std::vector<T> &v){
+      v = garbage;      // copy the contents of the garbage vector
+    }
+    int garbageCount()const{
+      return garbage.size();
+    }
     void print()const;
   };
   
@@ -52,22 +72,20 @@ namespace ESMCI {
   // In relaxed mode this condition turns this method into a no-op and no
   // error is thrown.
   template <typename Key, typename T>
-  bool Container<Key, T>::add(Key k, T t, bool relaxed){
+  void Container<Key, T>::add(Key k, T t, bool relaxed){
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-    bool added;
     if (this->find(k)!=this->end()){
       // already exists
-      added = false;  // indicate not added
       if (!relaxed){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "key already exists", &rc);
         throw rc;  // bail out with exception
       }
+      if (garbageActive)
+        garbage.push_back(t); // put object not added into the garbage vector
     }else{
-      added = true;  // indicate added
       (*this)[k]=t;
     }
-    return added;
   }
   
 #undef  ESMC_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.8 2011/05/06 18:01:45 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.9 2011/05/10 00:24:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_ContainerMod
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-! - ESMF-public methods:
+! - ESMF-internal methods:
   public ESMF_ContainerAdd
   public ESMF_ContainerCreate
   public ESMF_ContainerDestroy
@@ -77,13 +77,18 @@ module ESMF_ContainerMod
   public ESMF_ContainerRemove
   public ESMF_ContainerPrint
 
+  public ESMF_ContainerGarbageOn
+  public ESMF_ContainerGarbageOff
+  public ESMF_ContainerGarbageClear
+  public ESMF_ContainerGarbageGet
+
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.8 2011/05/06 18:01:45 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.9 2011/05/10 00:24:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -142,25 +147,26 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAdd()
-  subroutine ESMF_ContainerAddFieldList(container, fieldList, relaxedflag, &
-    fieldGarbageList, fieldGarbageCount, rc)
+  subroutine ESMF_ContainerAddFieldList(container, fieldList, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
     type(ESMF_Field),     intent(in)            :: fieldList(:)
     logical,              intent(in),  optional :: relaxedflag
-    type(ESMF_Field),     pointer,     optional :: fieldGarbageList(:)
-    integer,              intent(out), optional :: fieldGarbageCount
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Add Fields to an {\tt ESMF\_Container} object.
 !
+!   This method defines garbage as those elements in {\tt fieldList} that
+!   cannot be added to the container because a Field with the same name already
+!   exists in the container. Garbage is only generated in relaxed mode.
+!
 !   The arguments are:
 !   \begin{description}
-!   \item[container] 
+!   \item[container]
 !     {\tt ESMF\_Container} object to be added to.
-!   \item[fieldList] 
+!   \item[fieldList]
 !     Field objects to be added.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
@@ -168,20 +174,6 @@ contains
 !     names that are also found in {\tt container}. The {\tt container} 
 !     is left unchanged for these Fields. For {\tt .false.} this is treated
 !     as an error condition. The default setting is {\tt .false.}.
-!   \item[{[fieldGarbageList]}]
-!     List of Field objects in {\tt fieldList} that were {\em not} added to
-!     the container. This list is only valid for the relaxed mode. This
-!     argument has the pointer attribute. If the argument comes into this call
-!     associated the memory allocation is not changed. Instead the size of the
-!     memory allocation is checked against the total number of elements that
-!     need to be returned, and if sufficiently sized the container elements are
-!     returned in the provided memory allocation. If the argument comes into 
-!     this call unassociated memory will be allocated internally and filled
-!     with the container elements. In both cases it is the caller 
-!     responsibility to deallocate the memory.
-!   \item[{[fieldGarbageCount]}]
-!     Number of elements in the {\tt fieldGarbageList}. This output is only
-!     valid for the relaxed mode.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -189,10 +181,10 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
-    type(ESMF_Logical)          :: relaxedflagArg, garbageflag
-    integer                     :: i, stat, fieldGarbageC
-    type(ESMF_Field), pointer   :: fieldGarbageL(:)
+    type(ESMF_Logical)          :: relaxedflagArg
+    integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
+    type(ESMF_Pointer)          :: vector
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -207,16 +199,6 @@ contains
       relaxedflagArg = ESMF_FALSE
     endif
     
-    if (present(fieldGarbageList)) then
-      allocate(fieldGarbageL(size(fieldList)), stat=stat) ! temporary storage
-      if (ESMF_LogFoundAllocError(stat, msg= "allocating fieldGarbageL", &
-        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
-    else
-      nullify(fieldGarbageL)
-    endif
-    
-    fieldGarbageC = 0 ! reset
-
     do i=1, size(fieldList)
       ! Check init status of arguments
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
@@ -228,42 +210,11 @@ contains
       
       ! Call into the C++ interface layer
       call c_ESMC_ContainerAdd(container, trim(name), fieldList(i), &
-        relaxedflagArg, garbageflag, localrc)
+        relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
         
-      if (garbageflag==ESMF_TRUE) then
-        fieldGarbageC = fieldGarbageC + 1
-        if (associated(fieldGarbageL)) &
-          fieldGarbageL(fieldGarbageC)=fieldList(i)
-      endif  
-        
     enddo
-    
-    ! set out variables
-
-    if (present(fieldGarbageCount)) &
-      fieldGarbageCount = fieldGarbageC
-      
-    if (present(fieldGarbageList)) then
-      if (associated(fieldGarbageList)) then
-        if (size(fieldGarbageList) < fieldGarbageC) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-            msg="fieldGarbageC is too small", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return  ! bail out
-        else
-          do i=1, fieldGarbageC
-            fieldGarbageList(i) = fieldGarbageL(i)
-          enddo
-        endif
-        deallocate(fieldGarbageL, stat=stat)
-        if (ESMF_LogFoundDeallocError(stat, msg= "deallocating fieldGarbageL", &
-          ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
-      else
-        fieldGarbageList => fieldGarbageL ! use the internal allocation
-      endif
-    endif
     
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -293,7 +244,7 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -344,9 +295,9 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[container] 
+!   \item[container]
 !     {\tt ESMF\_Container} object to be destroyed.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -401,16 +352,16 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[container] 
+!   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[fieldName] 
+!   \item[fieldName]
 !     The name of the specified Field object.
-!   \item[{[field]}] 
+!   \item[{[field]}]
 !     Returned Field object.
 !   \item [{[isPresent]}]
 !     Upon return indicates whether Field item with {\tt fieldName} is
 !     contained in {\tt container}.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -470,7 +421,7 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[container] 
+!   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
 !   \item[{[fieldCount]}]
 !     Number of Field objects in {\tt container}.
@@ -480,11 +431,11 @@ contains
 !     allocation is not changed. Instead the size of the memory allocation is
 !     checked against the total number of elements in the container, and if
 !     sufficiently sized the container elements are returned in the provided
-!     memory allocation. If the argument comes into this call unassociated
+!     memory allocation. If the argument comes into this call unassociated,
 !     memory will be allocated internally and filled with the container
 !     elements. In both cases it is the caller responsibility to deallocate
 !     the memory.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -562,29 +513,36 @@ contains
 ! !IROUTINE: ESMF_ContainerRemove - Remove object from Container
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerRemove(container, itemNameList, rc)
+  subroutine ESMF_ContainerRemove(container, itemNameList, relaxedflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(in)              :: container
-    character(len=*),     intent(in)              :: itemNameList(:)
-    integer,              intent(out),  optional  :: rc
+    type(ESMF_Container), intent(in)            :: container
+    character(len=*),     intent(in)            :: itemNameList(:)
+    logical,              intent(in),  optional :: relaxedflag
+    integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Remove items from a {\tt ESMF\_Container} object.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[container] 
+!   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[itemNameList] 
+!   \item[itemNameList]
 !     The names of the items to remove
-!   \item[{[rc]}] 
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "remove"
+!     where it is {\em not} an error if {\tt fieldNameList} contains Field
+!     names that are not found in {\tt container}. For {\tt .false.} this is 
+!     treated as an error condition. The default setting is {\tt .false.}.
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i
     character(len=ESMF_MAXSTR)  :: name
 
@@ -595,9 +553,16 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
+    else
+      relaxedflagArg = ESMF_FALSE
+    endif
+    
     do i=1, size(itemNameList)
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerRemove(container, trim(itemNameList(i)), localrc)
+      call c_ESMC_ContainerRemove(container, trim(itemNameList(i)), &
+        relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
@@ -627,9 +592,9 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[container] 
+!   \item[container]
 !     {\tt ESMF\_Container} object to be printed.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -690,5 +655,253 @@ contains
 
     end function ESMF_ContainerGetInit
 !------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGarbageOn()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGarbageOn - Turn on garbage feature in container
+
+! !INTERFACE:
+  subroutine ESMF_ContainerGarbageOn(container, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)           :: container
+    integer,              intent(out),  optional  :: rc
+!         
+! !DESCRIPTION:
+!   Turn on garbage feature in an {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to turn on garbage feature.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface layer
+    call c_ESMC_ContainerGarbageOn(container, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGarbageOn
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGarbageOff()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGarbageOff - Turn off garbage feature in container
+
+! !INTERFACE:
+  subroutine ESMF_ContainerGarbageOff(container, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)           :: container
+    integer,              intent(out),  optional  :: rc
+!         
+! !DESCRIPTION:
+!   Turn off garbage feature in an {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to turn off garbage feature.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface layer
+    call c_ESMC_ContainerGarbageOff(container, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGarbageOff
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGarbageClear()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGarbageClear - Clear garbage in container
+
+! !INTERFACE:
+  subroutine ESMF_ContainerGarbageClear(container, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)           :: container
+    integer,              intent(out),  optional  :: rc
+!         
+! !DESCRIPTION:
+!   Clear garbage in an {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to clear garbage for.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface layer
+    call c_ESMC_ContainerGarbageClear(container, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGarbageClear
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGarbageGet()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGarbageGet - Query Container object about garbage
+
+! !INTERFACE:
+  subroutine ESMF_ContainerGarbageGet(container, garbageCount, garbageList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(in)            :: container
+    integer,              intent(out), optional :: garbageCount
+    type(ESMF_Field),     pointer,     optional :: garbageList(:)
+    integer,              intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Get items from a {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to be queried.
+!   \item[{[garbageCount]}]
+!     Number of objects in {\tt container} garbage.
+!   \item[{[garbageList]}]
+!     List of objects in {\tt container} garbage. This argument has the pointer
+!     attribute. If the argument comes into this call associated the memory 
+!     allocation is not changed. Instead the size of the memory allocation is
+!     checked against the total number of elements in the container gargbage,
+!     and if sufficiently sized the container garbage elements are returned in
+!     the provided memory allocation. If the argument comes into this call
+!     unassociated, memory will be allocated internally and filled with the
+!     container garbage elements. In both cases it is the caller responsibility
+!     to deallocate the memory.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: stat
+    integer                       :: i, garbageC
+    type(ESMF_Pointer)            :: vector
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface
+    call c_ESMC_ContainerGarbageCount(container, garbageC, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    if (present(garbageList)) then
+      if (associated(garbageList)) then
+        if (size(garbageList) < garbageC) then
+          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+            msg="garbageList is too small", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return  ! bail out
+        endif
+      else
+        allocate(garbageList(garbageC), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg= "allocating garbageList", &
+          ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+      endif
+      
+
+      ! Call into the C++ interface to set up the vector on the C++ side
+      call c_ESMC_ContainerGarbageGet(container, vector, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      do i=0, garbageC-1 ! C-style indexing, zero-based
+        
+        ! Call into the C++ interface to set up the vector on the C++ side
+        call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+          garbageList(i+1), localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      enddo
+      
+      ! release vector here
+      ! Call into the C++ interface to release the vector on the C++ side
+      call c_ESMC_ContainerReleaseVector(container, vector, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    endif
+    
+    if (present(garbageCount)) then
+      garbageCount = garbageC
+    endif
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGarbageGet
+!------------------------------------------------------------------------------
+
 
 end module ESMF_ContainerMod
