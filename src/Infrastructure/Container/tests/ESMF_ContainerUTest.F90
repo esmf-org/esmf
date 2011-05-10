@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.12 2011/05/10 01:27:12 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.13 2011/05/10 18:01:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.12 2011/05/10 01:27:12 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.13 2011/05/10 18:01:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -157,6 +157,8 @@ program ESMF_ContainerUTest
     print *, "fieldGarbageList(",i,")=",fieldName
   enddo
   
+  if (associated(fieldGarbageList)) deallocate(fieldGarbageList)
+  
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container turn garbage feature OFF Test"
@@ -244,6 +246,8 @@ program ESMF_ContainerUTest
     print *, "fieldGarbageList(",i,")=",fieldName
   enddo
   
+  if (associated(fieldGarbageList)) deallocate(fieldGarbageList)
+
   !------------------------------------------------------------------------
   call ESMF_ContainerGarbageOff(container, rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
