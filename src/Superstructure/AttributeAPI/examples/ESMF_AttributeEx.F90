@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.19 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.20 2011/05/10 23:26:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@ program ESMF_AttributeEx
 ! This example illustrates the most basic usage of the Attribute class.  
 ! This demonstration of Attribute manipulation is limited to the gridded 
 ! Component, but the same principles apply to the coupler Component, State, 
-! Grid, FieldBundle, Field, and Array.  The
+! Grid, FieldBundle, Field, ArrayBundle and Array.  The
 ! functionality that is demonstrated includes setting and getting Attributes, 
 ! working with Attributes with different types and lists, removing Attributes,
 ! and getting default Attributes.  Various other uses of 
@@ -49,8 +49,9 @@ program ESMF_AttributeEx
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: name
+      type(ESMF_TypeKind)     :: tk
 
-      integer(ESMF_KIND_I4)                         :: inI4
+      integer(ESMF_KIND_I4)                       :: inI4
       integer(ESMF_KIND_I4), dimension(3)         :: inI4l
       integer(ESMF_KIND_I8)                       :: inI8
       integer(ESMF_KIND_I8), dimension(3)         :: inI8l
@@ -58,15 +59,13 @@ program ESMF_AttributeEx
       real(ESMF_KIND_I4), dimension(3)            :: inR4l
       real(ESMF_KIND_I8)                          :: inR8
       real(ESMF_KIND_I8), dimension(3)            :: inR8l
-      character(ESMF_MAXSTR)                :: inChar
-      character(ESMF_MAXSTR), dimension(3)  :: inCharl, &
-                                               defaultCharl, dfltoutCharl
-      character(ESMF_MAXSTR), dimension(8)  :: outCharl
-      logical                               :: inLog
-      logical, dimension(3)                 :: inLogl, value
+      character(ESMF_MAXSTR)                      :: inChar
+      character(ESMF_MAXSTR), dimension(3)        :: inCharl, &
+                                                     defaultCharl, dfltoutCharl
+      character(ESMF_MAXSTR), dimension(8)        :: outCharl
+      logical                                     :: inLog
+      logical, dimension(3)                       :: inLogl, value
       
-      type(ESMF_TypeKind)   :: tk
-
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeEx.Log", &
@@ -74,7 +73,6 @@ program ESMF_AttributeEx
       
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
-      if (rc/=ESMF_SUCCESS) goto 10
 !EOC         
       
       if (localPet==0) then
@@ -216,10 +214,6 @@ program ESMF_AttributeEx
       print *, "--------------------------------------- "
   endif
 
-10 continue
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  call ESMF_Finalize(rc=rc)
-  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_AttributeEx.F90"

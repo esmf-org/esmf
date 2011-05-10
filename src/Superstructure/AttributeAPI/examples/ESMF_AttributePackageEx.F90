@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.24 2011/01/21 00:11:46 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.25 2011/05/10 23:26:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,12 +24,11 @@ program ESMF_AttributePackageEx
 ! Attribute hierarchies using Attribute packages.  A gridded Component
 ! is used in conjunction with two States, a FieldBundle, and various realistic
 ! Fields to create an Attribute hierarchy and copy it from one State to another.  
-! Attributes packages are created on the Component and Fields, and the 
+! Attribute packages are created on the Component and Fields, and the 
 ! standard Attributes in each package are used in the Attribute hierarchy.
 ! The Attribute package nesting capability is demonstrated by nesting the standard
 ! ESMF supplied packages for the Fields inside a user specified Attribute package
 ! with a customized convention.
-! The first thing we must do is declare variables and initialize ESMF.
 !EOE
 
 
@@ -40,7 +39,6 @@ program ESMF_AttributePackageEx
 ! This program shows examples of Attribute usage
 
 
-!BOC
       ! Use ESMF framework module
       use ESMF_Mod
       implicit none
@@ -67,8 +65,6 @@ program ESMF_AttributePackageEx
       
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
-      if (rc/=ESMF_SUCCESS) goto 10
-!EOC
       
       if (localPet==0) then
         print *, "--------------------------------------- "
@@ -133,6 +129,8 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeAdd(DPEDT, convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,  &
         rc=rc)
+
+!EOC
 
       ! DTDT
       call ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, &
@@ -199,9 +197,10 @@ program ESMF_AttributePackageEx
       
       call ESMF_AttributeAdd(gridcomp, convention=convESMF, &
         purpose=purpGen, rc=rc)
-!EOC  
 
 !BOE
+!     ... and so on for the other 9 Fields.
+!
 !     The standard Attribute package currently supplied by ESMF for 
 !     Field contains 6 Attributes, 2 of which are set automatically.  
 !     The remaining 4 Attributes in the standard Field Attribute
@@ -235,6 +234,8 @@ program ESMF_AttributePackageEx
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
+
+!EOC
     
       ! DTDT
       value1 = 'DTDT'
@@ -415,9 +416,10 @@ program ESMF_AttributePackageEx
         purpose=purpGen, rc=rc)
       call ESMF_AttributeSet(CONVPHI, name4, value4, convention=convESMF, &
         purpose=purpGen, rc=rc)
-!EOC  
 
 !BOE
+!     ... and so on for the other 9 Fields.
+!
 !     The standard Attribute package currently supplied by ESMF for 
 !     Component contains 10 Attributes.  These Attributes conform to both
 !     the ESG and CF conventions, and must be set manually.
@@ -499,7 +501,6 @@ program ESMF_AttributePackageEx
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
       call ESMF_AttributeWrite(gridcomp,convESMF,purpGen,rc=rc)
 !EOC
-        if (rc/=ESMF_SUCCESS) goto 10
       endif
 
     ! Destroy
@@ -524,10 +525,6 @@ program ESMF_AttributePackageEx
       print *, "--------------------------------------- "
   endif
 
-    call ESMF_Finalize(rc=rc)
-
-10 continue
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

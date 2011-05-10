@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.30 2011/03/28 20:35:00 theurich Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.31 2011/05/10 23:26:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,11 +61,9 @@ implicit none
 ! coupler Component to the second Gridded component.  The third cycle will be through the
 ! finalize routines in the same order as the first cycle.
 !
-! The first thing we must do is declare variables and initialize ESMF in the application driver.
 !EOE
 
 
-!BOC
       integer                 :: rc, urc, finalrc, petCount, localPet
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
@@ -80,8 +78,6 @@ implicit none
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
       
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
-      if (rc/=ESMF_SUCCESS) print *, "ERROR!"
-!EOC         
       
       if (localPet==0) then
         print *, "--------------------------------------- "
@@ -90,7 +86,7 @@ implicit none
       endif
 
 !BOE
-! Still in the application driver, we must now construct some ESMF objects, 
+! In the application driver, we must now construct some ESMF objects, 
 ! such as the gridded Components, the coupler Component, and the States.  This
 ! is also where it is determined which subsets of the PETs of the VM the
 ! Components will be using to run their initialize, run, and finalize routines.
@@ -199,14 +195,6 @@ implicit none
       call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
       call ESMF_CplCompRun(cplcomp, importState=c1exp, &
         exportState=c2imp, userRc=urc, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        call ESMF_Finalize(terminationflag=ESMF_ABORT)  ! bail out
-      if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOG_ERRMSG, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        call ESMF_Finalize(terminationflag=ESMF_ABORT)  ! bail out
         
       call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
       

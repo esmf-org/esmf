@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.30 2011/04/27 02:37:47 w6ws Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.31 2011/05/10 23:26:05 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -203,18 +203,14 @@ module ESMF_AttributeUpdateMod
     rc = ESMF_SUCCESS
 
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
            rc=rc)
-    if (rc/=ESMF_SUCCESS) return
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
 !EOC
 
 ! This first bit is a verification that the {\tt ESMF\_StateReconcile()} call will correctly
@@ -260,7 +256,8 @@ module ESMF_AttributeUpdateMod
       purpose=purpGen, rc=status)
     call ESMF_AttributeSet(DPEDT, name4, value4, convention=convESMF, &
       purpose=purpGen, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
+
+!EOC
 
     value1 = 'DTDT'
     value2 = 'tendency_of_air_temperature'
@@ -467,9 +464,9 @@ module ESMF_AttributeUpdateMod
                           convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
-!EOC
-
 !BOE
+!     ... and so on for the other 9 Fields.
+!
 ! Now the Fields will be added to the FieldBundle, at which point the Attribute
 ! hierarchies of the Fields will also be attached to the Attribute hierarchy of
 ! the FieldBundle.  After that, the FieldBundle will be attached to the export
@@ -480,7 +477,6 @@ module ESMF_AttributeUpdateMod
 !BOC
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
     call ESMF_FieldBundleSetGrid(fieldbundle, grid=grid, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
       
     call ESMF_FieldBundleAdd(fieldbundle, DPEDT, rc=status)
     call ESMF_FieldBundleAdd(fieldbundle, DTDT, rc=status)
@@ -492,10 +488,8 @@ module ESMF_AttributeUpdateMod
     call ESMF_FieldBundleAdd(fieldbundle, CONVCPT, rc=status)
     call ESMF_FieldBundleAdd(fieldbundle, CONVKE, rc=status)
     call ESMF_FieldBundleAdd(fieldbundle, CONVPHI, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
 !EOC
 
 !BOE
@@ -560,13 +554,10 @@ module ESMF_AttributeUpdateMod
     rc = ESMF_SUCCESS
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
     call ESMF_StateReconcile(importState, vm=vm, &
                attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
     call ESMF_StateReconcile(exportState, vm=vm, &
                attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
 !EOC
    
 !BOE
@@ -620,14 +611,10 @@ module ESMF_AttributeUpdateMod
     attrList(2) = 'Mask'
     
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=status)
-    if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
     call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return
 !EOC
 
 !BOE
@@ -643,10 +630,8 @@ module ESMF_AttributeUpdateMod
 !BOC
     do k = 1, 10
         call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
-        if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
           purpose=purpGen, rc=status)
-        if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
           attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
           rc=rc)
@@ -654,10 +639,8 @@ module ESMF_AttributeUpdateMod
           convention=convESMF, purpose=purp2, rc=rc)
         call ESMF_AttributeSet(field, name='Mask', value='Yes', &
           convention=convESMF, purpose=purp2, rc=rc)
-        if (rc/=ESMF_SUCCESS) return
         call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
           purpose=purpGen, rc=status)
-        if (rc/=ESMF_SUCCESS) return
     enddo
 !EOC
 
@@ -704,40 +687,17 @@ module ESMF_AttributeUpdateMod
     rc = ESMF_SUCCESS
 
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
+
     call ESMF_VMGet(vm, localPet=myPet, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 
     call ESMF_StateGet(importState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
     call ESMF_StateGet(exportState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 
     rootList = (/0,1/)
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
    
     call ESMF_AttributeCopy(importState, exportState, &
       ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
 !EOC
 
 
