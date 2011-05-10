@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.9 2011/05/10 00:24:50 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.10 2011/05/10 00:42:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.9 2011/05/10 00:24:50 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.10 2011/05/10 00:42:58 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -211,11 +211,44 @@ program ESMF_ContainerUTest
   call ESMF_Test((isPresent.eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
+  call ESMF_ContainerGarbageOn(container, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ContainerGarbageClear(container, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Remove item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerRemove(container, itemNameList=(/"testField3"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container garbage Get Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldGarbageList)
+  call ESMF_ContainerGarbageGet(container, garbageList=fieldGarbageList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify garbageList Test"
+  write(failMsg, *) "garbageList incorrect"
+  call ESMF_Test((size(fieldGarbageList)==1), name, failMsg, result, ESMF_SRCLINE)
+
+  print *, "size of fieldGarbageList: ", size(fieldGarbageList)  
+  do i=1, size(fieldGarbageList)
+    call ESMF_FieldGet(fieldGarbageList(i), name=fieldName, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    print *, "fieldGarbageList(",i,")=",fieldName
+  enddo
+  
+  !------------------------------------------------------------------------
+  call ESMF_ContainerGarbageOff(container, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_ContainerGarbageClear(container, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

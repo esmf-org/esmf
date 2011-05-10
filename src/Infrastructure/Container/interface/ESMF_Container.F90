@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.9 2011/05/10 00:24:49 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.10 2011/05/10 00:42:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.9 2011/05/10 00:24:49 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.10 2011/05/10 00:42:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -160,7 +160,7 @@ contains
 !
 !   This method defines garbage as those elements in {\tt fieldList} that
 !   cannot be added to the container because a Field with the same name already
-!   exists in the container. Garbage is only generated in relaxed mode.
+!   exists in the container. Garbage can only be generated in relaxed mode.
 !
 !   The arguments are:
 !   \begin{description}
@@ -523,6 +523,10 @@ contains
 !         
 ! !DESCRIPTION:
 !   Remove items from a {\tt ESMF\_Container} object.
+!
+!   This method defines garbage as those elements that were removed from the
+!   container as a result of this operation. Garbage can be generated in both
+!   relaxed and strict mode.
 !
 !   The arguments are:
 !   \begin{description}

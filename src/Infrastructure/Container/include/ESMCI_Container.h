@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.6 2011/05/10 00:24:47 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.7 2011/05/10 00:42:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@ namespace ESMCI {
         throw rc;  // bail out with exception
       }
       if (garbageActive)
-        garbage.push_back(t); // put object not added into the garbage vector
+        garbage.push_back(t); // not added object goes into garbage
     }else{
       (*this)[k]=t;
     }
@@ -114,8 +114,11 @@ namespace ESMCI {
           "key does not exist", &rc);
         throw rc;  // bail out with exception
       }
-    }else
+    }else{
+      if (garbageActive)
+        garbage.push_back(pos->second); // removed object goes into garbage
       this->erase(pos);
+    }
   }
   
 #undef  ESMC_METHOD
