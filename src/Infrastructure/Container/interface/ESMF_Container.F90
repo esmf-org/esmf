@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.11 2011/05/10 01:12:19 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.12 2011/05/10 01:27:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -76,6 +76,7 @@ module ESMF_ContainerMod
   public ESMF_ContainerDestroy
   public ESMF_ContainerGet
   public ESMF_ContainerRemove
+  public ESMF_ContainerReplace
   public ESMF_ContainerPrint
 
   public ESMF_ContainerGarbageOn
@@ -89,7 +90,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.11 2011/05/10 01:12:19 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.12 2011/05/10 01:27:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -126,7 +127,7 @@ module ESMF_ContainerMod
     module procedure ESMF_ContainerAddReplaceFL
 
 ! !DESCRIPTION: 
-!   Add item to Container.
+!   AddReplace item to/in Container.
 !EOPI 
   end interface
 
@@ -144,6 +145,22 @@ module ESMF_ContainerMod
 
 ! !DESCRIPTION: 
 !   Query Container.
+!EOPI 
+  end interface
+
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
+! !IROUTINE: ESMF_ContainerReplace -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ContainerReplace
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_ContainerReplaceFieldList
+
+! !DESCRIPTION: 
+!   Replace item in Container.
 !EOPI 
   end interface
 
@@ -663,6 +680,90 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ContainerRemove
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerReplaceFieldList()"
+!BOPI
+! !IROUTINE: ESMF_ContainerReplace - Replace Fields in Container object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ContainerReplace()
+  subroutine ESMF_ContainerReplaceFieldList(container, fieldList, relaxedflag, &
+    rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)         :: container
+    type(ESMF_Field),     intent(in)            :: fieldList(:)
+    logical,              intent(in),  optional :: relaxedflag
+    integer,              intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Replace Fields in an {\tt ESMF\_Container} object.
+!
+!   This method defines garbage as those elements in {\tt container} that
+!   were replaced as a consequence of this call.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to be added to.
+!   \item[fieldList]
+!     Field objects to be added.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "replace"
+!     where it is {\em not} an error if {\tt fieldList} contains Fields with
+!     names that are not found in {\tt container}. These Fields in 
+!     {\tt fieldList} are ignored in the relaxed mode. For {\tt .false.} this
+!     is treated as an error condition. The default setting is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: relaxedflagArg
+    integer                     :: i, stat
+    character(len=ESMF_MAXSTR)  :: name
+    type(ESMF_Pointer)          :: vector
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
+    else
+      relaxedflagArg = ESMF_FALSE
+    endif
+    
+    do i=1, size(fieldList)
+      ! Check init status of arguments
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
+      
+      ! Get the name of the Field
+      call ESMF_FieldGet(fieldList(i), name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Call into the C++ interface layer
+      call c_ESMC_ContainerReplace(container, trim(name), fieldList(i), &
+        relaxedflagArg, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    enddo
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerReplaceFieldList
 !------------------------------------------------------------------------------
 
 
