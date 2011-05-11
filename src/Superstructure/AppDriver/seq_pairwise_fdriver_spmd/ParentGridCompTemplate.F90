@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.12 2011/01/13 15:06:43 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.13 2011/05/11 22:38:06 rokuingh Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -86,31 +86,40 @@
 
       ! Now call the SetServices routine for each so they can register their
       ! subroutines for Init, Run, and Finalize
-      call ESMF_GridCompSetServices(comp1Grid, UserGrid1_SetServices, rc)
-      call ESMF_GridCompSetServices(comp2Grid, UserGrid2_SetServices, rc)
-      call ESMF_CplCompSetServices(compCoupler, UserCpl_SetServices, rc)
+      call ESMF_GridCompSetServices(comp1Grid, UserGrid1_SetServices, rc=rc)
+      call ESMF_GridCompSetServices(comp2Grid, UserGrid2_SetServices, rc=rc)
+      call ESMF_CplCompSetServices(compCoupler, UserCpl_SetServices, rc=rc)
 
 
       ! Now create Import and Export State objects in order to pass data
       ! between the Coupler and the Gridded Components
-      G1imp = ESMF_StateCreate("GComp1 Import", ESMF_STATE_IMPORT)
-      G1exp = ESMF_StateCreate("GComp1 Export", ESMF_STATE_EXPORT)
+      G1imp = ESMF_StateCreate(statetype=ESMF_STATE_IMPORT, &
+        name="GComp1 Import")
+      G1exp = ESMF_StateCreate(statetype=ESMF_STATE_EXPORT, &
+        name="GComp1 Export")
 
-      G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATE_IMPORT)
-      G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATE_EXPORT)
+      G2imp = ESMF_StateCreate(statetype=ESMF_STATE_IMPORT, &
+        name="GComp2 Import")
+      G2exp = ESMF_StateCreate(statetype=ESMF_STATE_EXPORT, &
+        name="GComp2 Export")
 
-      Cplimp = ESMF_StateCreate("Coupler Import", ESMF_STATE_IMPORT)
-      Cplexp = ESMF_StateCreate("Coupler Export", ESMF_STATE_EXPORT)
+      Cplimp = ESMF_StateCreate(statetype=ESMF_STATE_IMPORT, &
+        name="Coupler Import")
+      Cplexp = ESMF_StateCreate(statetype=ESMF_STATE_EXPORT, &
+        name="Coupler Export")
       call ESMF_StateAdd(Cplimp, G1imp, rc=rc)
       call ESMF_StateAdd(Cplimp, G2imp, rc=rc)
       call ESMF_StateAdd(Cplexp, G1exp, rc=rc)
       call ESMF_StateAdd(Cplexp, G2exp, rc=rc)
 
       ! Now give each of the subcomponents a chance to initialize themselves.
-      call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
-      call ESMF_GridCompInitialize(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
+      call ESMF_GridCompInitialize(comp1Grid, importState=G1imp, &
+        exportState=G1exp, clock=parentclock, rc=rc)
+      call ESMF_GridCompInitialize(comp2Grid, importState=G2imp, &
+        exportState=G2exp, clock=parentclock, rc=rc)
 
-      call ESMF_CplCompInitialize(compCoupler, Cplimp, Cplexp, parentclock, rc=rc)
+      call ESMF_CplCompInitialize(compCoupler, importState=Cplimp, &
+        exportState=Cplexp, clock=parentclock, rc=rc)
 
       call ESMF_LogWrite("Parent Component Initialize finished", ESMF_LOG_INFO)
       rc=ESMF_SUCCESS
@@ -129,9 +138,12 @@
       call ESMF_LogWrite("Parent Gridded Component Run routine called", ESMF_LOG_INFO)
 
       ! Now run the subcomponents
-      call ESMF_GridCompRun(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
-      call ESMF_CplCompRun(compCoupler, G1exp, G2imp, parentclock, rc=rc)
-      call ESMF_GridCompRun(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
+      call ESMF_GridCompRun(comp1Grid, importState=G1imp, &
+        exportState=G1exp, clock=parentclock, rc=rc)
+      call ESMF_CplCompRun(compCoupler, importState=G1exp, &
+        exportState=G2imp, clock=parentclock, rc=rc)
+      call ESMF_GridCompRun(comp2Grid, importState=G2imp, &
+        exportState=G2exp, clock=parentclock, rc=rc)
 
 
       call ESMF_LogWrite("Parent Component Run finished", ESMF_LOG_INFO)
@@ -150,15 +162,18 @@
       call ESMF_LogWrite("Parent Gridded Component Finalize routine called", ESMF_LOG_INFO)
 
       ! Give each of the subcomponents a chance to finalize themselves.
-      call ESMF_GridCompFinalize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
-      call ESMF_GridCompFinalize(comp2Grid, G2imp, G2exp, parentclock, rc=rc)
+      call ESMF_GridCompFinalize(comp1Grid, importState=G1imp, &
+        exportState=G1exp, clock=parentclock, rc=rc)
+      call ESMF_GridCompFinalize(comp2Grid, importState=G2imp, &
+        exportState=G2exp, clock=parentclock, rc=rc)
 
-      call ESMF_CplCompFinalize(compCoupler, G1exp, G2imp, parentclock, rc=rc)
+      call ESMF_CplCompFinalize(compCoupler, importState=G1exp, &
+        exportState=G2imp, clock=parentclock, rc=rc)
 
       ! Now remove the Components to free up their resources
-      call ESMF_GridCompDestroy(comp1Grid, rc)
-      call ESMF_GridCompDestroy(comp2Grid, rc)
-      call ESMF_CplCompDestroy(compCoupler, rc)
+      call ESMF_GridCompDestroy(comp1Grid, rc=rc)
+      call ESMF_GridCompDestroy(comp2Grid, rc=rc)
+      call ESMF_CplCompDestroy(compCoupler, rc=rc)
 
       call ESMF_LogWrite( "Parent Gridded Component Finalize routine finished", ESMF_LOG_INFO)
       rc=ESMF_SUCCESS
