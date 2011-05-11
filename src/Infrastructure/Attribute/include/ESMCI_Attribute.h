@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.49 2011/05/02 20:27:49 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.50 2011/05/11 05:57:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -138,9 +138,9 @@ class Attribute
       const std::string &attPackInstanceName, ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
                       const std::string &object, 
-                      const bool &thisObjectTreeOnly,
-                      const bool &nestedAttPacks) const;
-    bool AttPackIsSet(const bool &nestedAttPacks) const;
+                      const bool &inThisCompTreeOnly,
+                      const bool &inNestedAttPacks) const;
+    bool AttPackIsSet(const bool &inNestedAttPacks) const;
     int AttPackNest(const std::string &convention, const std::string &purpose,
       const std::string &object, 
       const std::string &nestConvention, const std::string &nestPurpose);
@@ -292,7 +292,8 @@ class Attribute
     int AttributeWriteCIMmodelComp(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMsimRun(IO_XML *io_xml) const;
     int AttributeWriteCIMplatform(IO_XML *io_xml) const;
-    int AttributeWriteCIMCP(IO_XML *io_xml, int indent) const;
+    int AttributeWriteCIMCPgeneral(IO_XML *io_xml, int indent) const;
+    int AttributeWriteCIMCPfield(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMRP(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcitation(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcomposition(IO_XML *io_xml) const;

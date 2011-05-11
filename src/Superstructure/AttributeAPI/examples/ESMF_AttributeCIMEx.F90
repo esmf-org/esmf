@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.26 2011/02/25 19:31:37 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.27 2011/05/11 05:57:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -54,10 +54,12 @@ program ESMF_AttributeCIMEx
       type(ESMF_State)        :: exportState4
       type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: gridcomp1, gridcomp2, gridcomp3, gridcomp4
-      character(ESMF_MAXSTR)  :: convCIM, purpComp, purpField, purpPlatform
+      character(ESMF_MAXSTR)  :: convCIM, purpComp, purpProp
+      character(ESMF_MAXSTR)  :: purpField, purpPlatform
       character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
       character(ESMF_MAXSTR), dimension(2)  :: nestConv, nestPurp
       character(ESMF_MAXSTR), dimension(5)  :: nestAttPackName
+      character(ESMF_MAXSTR), dimension(8)  :: compPropAtt
       
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -128,14 +130,16 @@ program ESMF_AttributeCIMEx
 !BOE
 !    Now add CIM Attribute packages to all of the Components and Fields.  For 
 !    the top-level Coupler Component, add a CIM package with 2 Responsible 
-!    Party sub-packages and 1 Citation sub-package.  For the Gridded Components,
-!    add a CIM package for each, with the default of 1 Responsible Party 
-!    sub-package and 1 Citation sub-package.
+!    Party sub-packages and 1 Citation sub-package.  Also, add a CIM Component
+!    Properties package, containing custom attributes.  For the Gridded 
+!    Components, add a CIM package for each, with the default of 1 Responsible
+!    Party sub-package and 1 Citation sub-package.
 !EOE
 
 !BOC 
       convCIM = 'CIM 1.0'
       purpComp = 'Model Component Simulation Description'
+      purpProp = 'General Component Properties Description'
 
       purpField = 'Inputs Description'
       purpPlatform = 'Platform Description'
@@ -167,6 +171,19 @@ program ESMF_AttributeCIMEx
         nestAttPackInstanceNameList=nestAttPackName, &
         nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
 
+      ! Specify the top-level Coupler Component to have a Component Properties
+      ! package with some custom attributes
+      compPropAtt(1) = 'Tag'
+      compPropAtt(2) = 'CaseName'
+      compPropAtt(3) = 'SimulationURL'
+      compPropAtt(4) = 'WorkingGroup'
+      compPropAtt(5) = 'NumPEs'
+      compPropAtt(6) = 'MetadataVersion'
+      compPropAtt(7) = 'SimulationType'
+      compPropAtt(8) = 'Diagnostic'
+      call ESMF_AttributeAdd(cplcomp, convention=convCIM, purpose=purpProp, &
+        attrList=compPropAtt, rc=rc)
+      
       ! Specify the Gridded Components to have the default of 1 Responsible
       !   Party sub-package and 1 Citation sub-package
       call ESMF_AttributeAdd(gridcomp1, convention=convCIM, &
@@ -294,6 +311,32 @@ convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'MachineProcessorType', &
        'AMD X86_64', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
+
+      ! Component Properties: custom attributes
+      call ESMF_AttributeSet(cplcomp, 'Tag', &
+       'esmf_cesm1_beta16_04', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'CaseName', &
+       'SMS.f09_g16.X.bluefire', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'SimulationURL', &
+       'www.cesm.ucar.edu', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'WorkingGroup', &
+       'Atmosphere Model', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'NumPEs', &
+       '16', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'MetadataVersion', &
+       '1', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'SimulationType', &
+       'branch', &
+        convention=convCIM, purpose=purpProp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'Diagnostic', &
+       'true', &
+        convention=convCIM, purpose=purpProp, rc=rc)
 !EOC
 
 !BOE

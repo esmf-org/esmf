@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.102 2011/05/02 14:56:29 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.103 2011/05/11 05:57:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ using std::ostringstream;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.102 2011/05/02 14:56:29 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.103 2011/05/11 05:57:29 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1241,8 +1241,8 @@ int Attribute::count=0;
       const string &convention,          // in - Attribute convention
       const string &purpose,             // in - Attribute purpose
       const string &object,              // in - Attribute object type
-      const bool   &thisObjectTreeOnly,  // only search within this object tree?
-      const bool   &nestedAttPacks) const { // search within nested attpacks?
+      const bool   &inThisCompTreeOnly,  // only search within this component tree?
+      const bool   &inNestedAttPacks) const { // search within nested attpacks?
 // 
 // !DESCRIPTION:
 //     Query one or all Attribute packages of the given type, within the
@@ -1253,36 +1253,26 @@ int Attribute::count=0;
 //EOPI
 
   Attribute *attpack = NULL;
+  string attPackInstanceName;
 
-  // check all attributes in this component tree
+  // first check if given attpack is set on *this* esmf object's attribute tree
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  if (attpack != NULL) {
+    if (attpack->AttPackIsSet(inNestedAttPacks)) return true;
+  }
+
+  // if not, then check all attributes on objects in this esmf object tree
   for(int i=0; i<linkList.size(); i++) {
-    if (thisObjectTreeOnly) {
-      // only consider objects within *this* object
-      if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),
-          this->attrBase->ESMC_BaseGetClassName())==0) continue;
-             // skip if any other object of the same class
+    if (inThisCompTreeOnly) {
+      // only consider esmf objects within this component
+      if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(), "comp")==0)
+        continue; // skip if any other linked component object
     }
 
     // recurse until we reach objects of the specified type
-    char baseName[ESMF_MAXSTR];
-    strcpy(baseName, object.c_str());
-    baseName[0] = toupper(baseName[0]);
-    if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),
-        baseName)!=0) {
-      if (linkList.at(i)->AttPackIsSet(convention, purpose, object, 
-                                       thisObjectTreeOnly, nestedAttPacks))
+    if (linkList.at(i)->AttPackIsSet(convention, purpose, object, 
+                                     inThisCompTreeOnly, inNestedAttPacks))
         return true; else continue;
-    }
-    // found object of the specified type, 
-    //   now look for attPacks of the specified type
-    string attPackInstanceName;
-    attpack = linkList.at(i)->AttPackGet(convention, purpose, object,
-                                         attPackInstanceName);
-    if (attpack == NULL) continue;
-
-    // found specified attpack, now check if any of its attributes are set,
-    // optionally including those of any of its nested attpacks
-    if (attpack->AttPackIsSet(nestedAttPacks)) return true;
   }
 
   // if we get here, no set attributes found
@@ -1302,7 +1292,7 @@ int Attribute::count=0;
 //    true if attribute set, false otherwise.
 // 
 // !ARGUMENTS:
-      const bool &nestedAttPacks) const {  // search within nested attpacks?
+      const bool &inNestedAttPacks) const {  // search within nested attpacks?
 // 
 // !DESCRIPTION:
 //     Query Attribute package to see if any {\tt Attribute} has been set,
@@ -1320,9 +1310,9 @@ int Attribute::count=0;
          (ap->parent->AttributeIsSet(name))) return true;
   }
   // otherwise check for any set attributes on nested attpacks, if requested
-  if (nestedAttPacks) {
+  if (inNestedAttPacks) {
     for(int i=0; i<packList.size(); i++) { 
-      if (packList.at(i)->AttPackIsSet(nestedAttPacks)) return true; 
+      if (packList.at(i)->AttPackIsSet(inNestedAttPacks)) return true; 
     }
   }
 
@@ -5218,7 +5208,7 @@ int Attribute::count=0;
   int localrc;
   Attribute *attpack = NULL;
   static int callCount=0;
-  bool thisObjectTreeOnly, nestedAttPacks;
+  bool inThisCompTreeOnly, inNestedAttPacks;
 
   vector<string> valuevector;
   string value;
@@ -5269,13 +5259,23 @@ int Attribute::count=0;
   }
 
   // <componentProperties><componentProperty> nodes
-  if (AttPackIsSet("ESMF", "General", "field", 
-                   thisObjectTreeOnly=true, nestedAttPacks=true)) {
+  bool CPgeneral = AttPackIsSet("CIM 1.0", 
+                     "General Component Properties Description","comp",
+                     inThisCompTreeOnly=true, inNestedAttPacks=false);
+  bool CPfield   = AttPackIsSet("ESMF", "General", "field",
+                     inThisCompTreeOnly=true, inNestedAttPacks=true);
+  if (CPgeneral || CPfield) {
     localrc = io_xml->writeStartElement("componentProperties", "", indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-    localrc = AttributeWriteCIMCP(io_xml, indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    if (CPgeneral) {
+      localrc = AttributeWriteCIMCPgeneral(io_xml, indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
+    if (CPfield) {
+      localrc = AttributeWriteCIMCPfield(io_xml, indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
  
     localrc = io_xml->writeEndElement("componentProperties", indent);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -5326,7 +5326,7 @@ int Attribute::count=0;
   // <composition><coupling> (all fields, written only in top-level component)
   if (callCount == 1) {
     if (AttPackIsSet("CIM 1.0", "Inputs Description", "field", 
-                     thisObjectTreeOnly=false, nestedAttPacks=false)) {
+                     inThisCompTreeOnly=false, inNestedAttPacks=false)) {
       localrc = io_xml->writeStartElement("composition", "", 2, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
@@ -6002,12 +6002,77 @@ int Attribute::count=0;
  } // end AttributeWriteCIMRP
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteCIMCP"
+#define ESMC_METHOD "AttributeWriteCIMCPgeneral"
 //BOPI
-// !IROUTINE:  AttributeWriteCIMCP - Write contents of a CIM {\tt Attribute} Inputs package as <componentProperties><componentProperty> records within a component. (fields from all components in tree)
+// !IROUTINE:  AttributeWriteCIMCPgeneral - Write contents of a CIM {\tt Attribute} Inputs package as <componentProperties><componentProperty> records within a component. (fields from all components in tree)
 //
 // !INTERFACE:
-      int Attribute::AttributeWriteCIMCP(
+      int Attribute::AttributeWriteCIMCPgeneral(
+// // !RETURN VALUE: //    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      IO_XML *io_xml,      //  in - io pointer to write
+      int indent) const {  //  in - starting indent level
+//
+// !DESCRIPTION:
+//    Print the contents of a CIM {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  int localrc;
+  Attribute *attpack = NULL, *ap;
+
+  vector<string> valuevector;
+  string value;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  string attPackInstanceName;
+  attpack = AttPackGet("CIM 1.0", "General Component Properties Description",
+                       "comp", attPackInstanceName);
+  if(!attpack) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      "Cannot find the specified Attribute package\n", &localrc);
+    return localrc;
+  }
+
+  // output all attributes set in this package
+  for(int i=0; i<attpack->attrList.size(); i++) { 
+    string name = attpack->attrList.at(i)->attrName;
+    if (((ap = attpack->AttPackGetAttribute(name)) != NULL) &&
+         (ap->parent->AttributeIsSet(name))) {
+        localrc = ap->parent->AttributeGet(name, &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
+                                            1, "represented", "false");
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+        localrc = io_xml->writeElement("shortName", name, indent+2, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeElement("value", value, indent+2, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement("componentProperty", indent+1);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteCIMCPgeneral
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteCIMCPfield"
+//BOPI
+// !IROUTINE:  AttributeWriteCIMCPfield - Write contents of a CIM {\tt Attribute} Inputs package as <componentProperties><componentProperty> records within a component. (fields from all components in tree)
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteCIMCPfield(
 // // !RETURN VALUE: //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
@@ -6037,7 +6102,7 @@ int Attribute::count=0;
 
     // recurse until we reach field objects
     if (strcmp(linkList.at(i)->attrBase->ESMC_BaseGetClassName(),"Field")!=0) {
-      localrc = linkList.at(i)->AttributeWriteCIMCP(io_xml, indent);
+      localrc = linkList.at(i)->AttributeWriteCIMCPfield(io_xml, indent);
       continue;
     }
     // found field object, now look for CIM/Inputs package
@@ -6052,11 +6117,11 @@ int Attribute::count=0;
       if (((ap = attpack->AttPackGetAttribute("Intent")) != NULL) &&
            (ap->parent->AttributeIsSet("Intent"))) {
         localrc = ap->parent->AttributeGet("Intent", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             2, "intent", value.c_str(), 
                                             "represented", "true");
@@ -6069,33 +6134,33 @@ int Attribute::count=0;
       if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
            (ap->parent->AttributeIsSet("ShortName"))) {
         localrc = ap->parent->AttributeGet("ShortName", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
         localrc = io_xml->writeElement("shortName", value, indent+2, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
            (ap->parent->AttributeIsSet("LongName"))) {
         localrc = ap->parent->AttributeGet("LongName", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
         localrc = io_xml->writeElement("longName", value, indent+2, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
            (ap->parent->AttributeIsSet("Units"))) {
         localrc = ap->parent->AttributeGet("Units", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
         localrc = io_xml->writeElement("units", "", indent+2, 3,
                                        "cv", "true", "open", "true", 
                                        "value", value.c_str());
@@ -6104,11 +6169,11 @@ int Attribute::count=0;
       if (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
            (ap->parent->AttributeIsSet("StandardName"))) {
         localrc = ap->parent->AttributeGet("StandardName", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
         localrc = io_xml->writeElement("standardName", "", indent+2, 3,
                                        "cv", "true", "open", "true", 
                                        "value", value.c_str());
@@ -6121,7 +6186,7 @@ int Attribute::count=0;
 
   return ESMF_SUCCESS;
 
- } // end AttributeWriteCIMCP
+ } // end AttributeWriteCIMCPfield
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWritecitation"
