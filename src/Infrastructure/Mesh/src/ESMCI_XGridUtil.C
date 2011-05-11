@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.3 2011/05/06 18:59:19 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.4 2011/05/11 17:49:02 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
       std::map<int,int>::const_iterator it=proc_owned.begin(),
         ie=proc_owned.end();
       for(;it != ie; it++) proc_counts.push_back(proc_count(it->first, it->second));
-      std::vector<proc_count>::iterator it1 = find_if(proc_counts.begin(),
+      std::vector<proc_count>::iterator it1 = std::find_if(proc_counts.begin(),
         proc_counts.end(), proc_count_equal(me));
       if(it1 == proc_counts.end()) return; // this shouldn't happen
       int my_count = it1->count;
