@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.334 2011/04/18 23:33:22 theurich Exp $
+#  $Id: common.mk,v 1.335 2011/05/11 20:34:00 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1427,8 +1427,6 @@ esmflib:: chkdir_lib $(SOURCE)
 		$(MAKE) -f $(MAKEFILE) libc ; fi
 	@if [ "$(SOURCEF)" != "" ] ; then \
 		$(MAKE) -f $(MAKEFILE) libf ; fi
-	@if [ "$(QUICKSTART)" != "" ] ; then \
-		$(MAKE) -f $(MAKEFILE) tree_build_quick_start; fi
 
 # copy private include files into src/include directory.
 include: chkdir_include $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
@@ -2703,30 +2701,12 @@ results_ck_summary:
 # Quickstart targets
 #-------------------------------------------------------------------------------
 
-QUICKSTART_DIR     =  $(ESMF_BUILD)/quick_start
-
-chkdir_quick_start:
-	@if [ ! -d $(QUICKSTART_DIR) ] ; then \
-	   echo Making $(QUICKSTART_DIR); mkdir -p $(QUICKSTART_DIR) ; fi
-	@for DIR in $(QUICKSTART_SUBDIRS) foo ; do \
-	   if [ $$DIR != "foo" ] ; then \
-	      if [ ! -d $(QUICKSTART_DIR)/$$DIR ] ; then \
-	         echo Making $(QUICKSTART_DIR)/$$DIR ;\
-	         mkdir $(QUICKSTART_DIR)/$$DIR ;\
-	      fi ;\
-	   fi ;\
-	done
-
-build_quick_start: chkdir_quick_start
+build_quick_start:
 	$(MAKE) ACTION=tree_build_quick_start tree
 
-tree_build_quick_start: chkdir_quick_start
-	@for DIR in $(QUICKSTART_COPYDIRS) foo ; do \
-	   if [ $$DIR != "foo" ] ; then \
-	      echo "Copying $$DIR files to $(QUICKSTART_DIR)" ;\
-	      cp -f $$DIR/* $(QUICKSTART_DIR) ;\
-	   fi ;\
-	done
+tree_build_quick_start:
+	@if [ "$(QUICKSTARTDIR)" = "YES" ] ; then \
+		$(MAKE); fi
 
 #-------------------------------------------------------------------------------
 #  Doc targets
@@ -2835,7 +2815,7 @@ ifeq (,$(findstring k,$(MAKEFLAGS)))
 	  for dir in $(DIRS) foo ; do \
             if [ -d $$dir ]; then \
               (cd $$dir ; \
-              echo $(ACTION) in: `pwd`; \
+              echo $(ACTION) without -k in: `pwd`; \
               $(MAKE) -f makefile tree ACTION=$(ACTION));\
               if [ "$$?" != 0 ]; then \
                 exit 1; \
@@ -2848,7 +2828,7 @@ else
 	  for dir in $(DIRS) foo ; do \
             if [ -d $$dir ]; then \
               (cd $$dir ; \
-              echo $(ACTION) in: `pwd`; \
+              echo $(ACTION) with -k in: `pwd`; \
               $(MAKE) -f makefile tree ACTION=$(ACTION));\
             fi; \
 	  done; \

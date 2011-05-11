@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.15 2008/04/02 19:44:06 theurich Exp $ 
+# $Id: makefile,v 1.16 2011/05/11 20:34:03 theurich Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
 
-LOCDIR	  = src/Superstructure/AppDriver/seq_pairwise_fdriver_spmd
+QUICKSTARTDIR = YES
 
 # this includes all the ESMF definitions that we use below.
 include $(ESMF_DIR)/makefile
@@ -11,7 +11,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = 
+CLEANFILES  = Application $(APPOBJS)
 CLOBBERDIRS =
 
 # object files which need to be compiled into the executable.
@@ -34,9 +34,3 @@ run:  Application
 # run only a single copy.
 rununi: Application
 	${ESMF_MPIRUN} -np 1 ./Application
-
-
-# files to be deleted when cleaning up.
-clean:
-	${ESMF_RM} -f Application $(CLEANFILES)
-

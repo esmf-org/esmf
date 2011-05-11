@@ -1,31 +1,22 @@
-# $Id: makefile,v 1.4 2003/11/12 22:02:46 nscollins Exp $ 
+# $Id: makefile,v 1.5 2011/05/11 20:34:02 theurich Exp $ 
 
+ALL: build_here
 
-LOCDIR   = src/Superstructure/AppDriver
+# this needs to be the path of this directory relative to the
+# top level esmf directory.
+LOCDIR	  = src/Superstructure/AppDriver
 
-# this causes the makefile to build the quick_start rules
-QUICKSTART = yes
-
-# currently there are no subdirs in the quick_start dir.
-QUICKSTART_SUBDIRS = 
-
-# copy all files in this dir up to quick_start dir.
-# (you should not have build the example first)
-QUICKSTART_COPYDIRS = $(ESMF_DIR)/$(LOCDIR)/seq_pairwise_fdriver_spmd
-
+# leave this line alone.
 include $(ESMF_DIR)/makefile
 
-# at the present time do NOT list the subdirs here, because the makefiles
-# inside them are not intended to be executed as part of the esmf build.
-# (the doc dir is the exception - we do need to make the docs.)
-DIRS     =   doc
+# the DIRS line needs to contain all subdirectories which exist 
+#  directly below this directory, and have either library,
+#  example/test code, or documents which need to be generated.
+DIRS	  = doc seq_pairwise_fdriver_spmd
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
-
-
 
 
 
