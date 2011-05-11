@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $
+// $Id: ESMCI_WebServCompSvrClient.C,v 1.6 2011/05/11 15:13:44 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.5 2011/03/09 14:16:37 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.6 2011/05/11 15:13:44 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1240,21 +1240,19 @@ int  ESMCI_WebServCompSvrClient::killServer(
    }
 
    //***
-   // Send the "Exit" request... along with the client identifier
+   // Send the "Exit" request... the client id does not need to be sent.
    //***
-	unsigned int	netClientId = htonl(theClientId);
 	int				bytesSent = 0;
 
-	if ((bytesSent = sendRequest(NET_ESMF_EXIT, 4, &netClientId)) != 4)
+	if ((bytesSent = sendRequest(NET_ESMF_EXIT, 0, NULL)) != 0)
    {
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
-         "Error sending end client request to socket.",
+         "Error sending exit client request to socket.",
          &localrc);
 
       return ESMF_FAILURE;
    }
-
 
    //***
    // Disconnect from the component service
