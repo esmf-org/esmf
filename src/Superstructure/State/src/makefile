@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2011/03/24 04:55:07 theurich Exp $
+# $Id: makefile,v 1.23 2011/05/11 16:40:41 theurich Exp $
 
 ALL: build_here 
 
@@ -7,9 +7,9 @@ AUTOGEN   =
 #TODO:FIELDINTEGRATION Restore StateGet
 
 SOURCEC	  = 
-SOURCEF	  = ESMF_StateTypes.F90 ESMF_StateVa.F90 ESMF_State.F90 ESMF_StateSet.F90 ESMF_StateReconcile.F90 $(AUTOGEN)
+SOURCEF	  = ESMF_StateItem.F90 ESMF_StateContainer.F90 ESMF_StateTypes.F90 ESMF_StateVa.F90 ESMF_State.F90 ESMF_StateSet.F90 ESMF_StateReconcile.F90 $(AUTOGEN)
 SOURCEH	  = 
-STOREH    = ESMC_State.h
+STOREH    = ESMCI_StateItem.h ESMC_State.h
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

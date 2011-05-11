@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.44 2011/04/05 00:23:11 w6ws Exp $
+! $Id: ESMF_StateTypes.F90,v 1.45 2011/05/11 16:40:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,187 +44,13 @@
       use ESMF_FieldBundleMod
       use ESMF_RHandleMod
       use ESMF_InitMacrosMod
+      use ESMF_StateItemMod
+      use ESMF_StateContainerMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateType
-!     !   Enumerated value for storing Import or Export State type.
-!
-      type ESMF_StateType
-      sequence
-      !private
-         integer :: state
-      end type
-
-      type(ESMF_StateType), parameter :: &
-                ESMF_STATE_IMPORT   = ESMF_StateType(1), &
-                ESMF_STATE_EXPORT   = ESMF_StateType(2), &
-                ESMF_STATE_UNSPECIFIED = ESMF_StateType(3), &
-                ESMF_STATE_INVALID  = ESMF_StateType(4)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateItemType
-!     !   Each entry in the list of states is either simply a name placeholder
-!     !   or an actual data item - FieldBundle, Field, Array, or State. 
-!
-      type ESMF_StateItemType
-      sequence
-      !private
-         integer :: ot
-      end type
-
-      ! keep these numbers distinct from the 30 or so esmf object types.
-      type(ESMF_StateItemType), parameter :: &
-                ESMF_STATEITEM_FIELD        = ESMF_StateItemType(101), &
-                ESMF_STATEITEM_FIELDBUNDLE  = ESMF_StateItemType(102), &
-                ESMF_STATEITEM_ARRAY        = ESMF_StateItemType(103), &
-                ESMF_STATEITEM_ARRAYBUNDLE  = ESMF_StateItemType(104), &
-                ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItemType(105), &
-                ESMF_STATEITEM_STATE        = ESMF_StateItemType(106), &
-                ESMF_STATEITEM_NAME         = ESMF_StateItemType(107), &
-                ESMF_STATEITEM_INDIRECT     = ESMF_StateItemType(108), &
-                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItemType(109), &
-                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItemType(110)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_NeededFlag
-!     !   For an Export State if all data which can potentially be created is
-!     !   not needed, this flag can be used to mark data which does not need
-!     !   to be created by the Component.
-!
-      type ESMF_NeededFlag
-      sequence
-      !private
-         integer :: needed
-      end type
-
-      type(ESMF_NeededFlag), parameter :: &
-                ESMF_NEEDED = ESMF_NeededFlag(1), &
-                ESMF_NOTNEEDED = ESMF_NeededFlag(2)
-
-!------------------------------------------------------------------------------
-!     ! ESMF_ReadyFlag
-!
-      type ESMF_ReadyFlag
-      sequence
-      !private
-         integer :: ready
-      end type
-
-      type(ESMF_ReadyFlag), parameter :: &
-                ESMF_READYTOWRITE = ESMF_ReadyFlag(1), &
-                ESMF_READYTOREAD = ESMF_ReadyFlag(2), &
-                ESMF_NOTREADY = ESMF_ReadyFlag(3)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_ReqForRestartFlag
-!
-      type ESMF_ReqForRestartFlag
-      sequence
-      !private
-         integer :: required4restart
-      end type
-
-      type(ESMF_ReqForRestartFlag), parameter :: &
-                ESMF_REQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(1), &
-                ESMF_NOTREQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(2)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_ValidFlag
-!
-      type ESMF_ValidFlag
-      sequence
-      !private
-         integer :: valid
-      end type
-
-      type(ESMF_ValidFlag), parameter :: &
-                ESMF_VALID = ESMF_ValidFlag(1), &
-                ESMF_INVALID= ESMF_ValidFlag(2), &
-                ESMF_VALIDITYUNKNOWN = ESMF_ValidFlag(3)
-
-
-!------------------------------------------------------------------------------
-!     ! ESMF_DataHolder
-!
-!     ! Make a single data type for FieldBundles, Fields, and Arrays.
-!     !  The ObjectType is one level up, because this structure is not
-!     !  allocated until it is actually needed.  This is a private type.
-
-!     ! state has to be different because it's a forward reference.
-
-      type ESMF_DataHolder
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      !private
-          type(ESMF_Field)        :: fp 
-          type(ESMF_FieldBundle)  :: fbp
-          type(ESMF_Array)        :: ap
-          type(ESMF_ArrayBundle)  :: abp
-          type(ESMF_RouteHandle)  :: rp
-          type(ESMF_StateClass), pointer  :: spp
-          ESMF_INIT_DECLARE
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateItem
-!
-!     ! Description of next Data item in list, or simply a name
-!     !  which holds the place for an optional Data item.
-
-      type ESMF_StateItem
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      !private
-        type(ESMF_DataHolder) :: datap
-        type(ESMF_StateItemType) :: otype
-        type(ESMF_NeededFlag) :: needed
-        type(ESMF_ReadyFlag) :: ready
-        type(ESMF_ValidFlag) :: valid
-        type(ESMF_ReqForRestartFlag) :: reqrestart
-
-        ! VMId is currently needed for FieldBundles and their indirect Fields.
-        type(ESMF_VMId)      :: FldBundleVMId
-
-        logical :: proxyFlag
-        integer :: indirect_index
-        character(len=ESMF_MAXSTR) :: namep
-        logical :: removedflag
-         ESMF_INIT_DECLARE
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_StateClass
-!
-!     ! Internal State data type.
-
-      type ESMF_StateClass
-#ifndef ESMF_SEQUENCE_BUG
-      sequence
-#endif
-      !private
-        type(ESMF_Base) :: base
-        type(ESMF_MethodTable) :: methodTable
-        type(ESMF_StateType) :: st
-        type(ESMF_NeededFlag) :: needed_default
-        type(ESMF_ReadyFlag) :: ready_default
-        type(ESMF_ValidFlag) :: stvalid_default
-        type(ESMF_ReqForRestartFlag) :: reqrestart_default
-        integer :: alloccount
-        integer :: datacount
-        type(ESMF_MapPtr) :: nameMap
-        type(ESMF_StateItem), pointer :: datalist(:)
-        logical :: reconcileneededflag
-         ESMF_INIT_DECLARE
-      end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_State
@@ -287,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.44 2011/04/05 00:23:11 w6ws Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.45 2011/05/11 16:40:41 theurich Exp $'
 
 !==============================================================================
 ! 
