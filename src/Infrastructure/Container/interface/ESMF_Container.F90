@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.12 2011/05/10 01:27:10 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.13 2011/05/11 16:43:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,18 +79,20 @@ module ESMF_ContainerMod
   public ESMF_ContainerReplace
   public ESMF_ContainerPrint
 
+  public ESMF_ContainerGetInit
+
   public ESMF_ContainerGarbageOn
   public ESMF_ContainerGarbageOff
   public ESMF_ContainerGarbageClear
   public ESMF_ContainerGarbageGet
-
+  
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.12 2011/05/10 01:27:10 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.13 2011/05/11 16:43:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -164,6 +166,22 @@ module ESMF_ContainerMod
 !EOPI 
   end interface
 
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
+! !IROUTINE: ESMF_ContainerGarbageGet -- Generic interface
+
+! !INTERFACE:
+  interface ESMF_ContainerGarbageGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_ContainerGarbageGetFL
+
+! !DESCRIPTION: 
+!   Query Container for garbage.
+!EOPI 
+  end interface
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -181,32 +199,33 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAdd()
-  subroutine ESMF_ContainerAddFieldList(container, fieldList, relaxedflag, rc)
+  subroutine ESMF_ContainerAddFieldList(container, itemList, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
-    type(ESMF_Field),     intent(in)            :: fieldList(:)
+    type(ESMF_Field),     intent(in)            :: itemList(:)
     logical,              intent(in),  optional :: relaxedflag
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   Add Fields to an {\tt ESMF\_Container} object.
+!   Add elements to an {\tt ESMF\_Container} object.
 !
-!   This method defines garbage as those elements in {\tt fieldList} that
-!   cannot be added to the container because a Field with the same name already
-!   exists in the container. Garbage can only be generated in relaxed mode.
+!   This method defines garbage as those elements in {\tt itemList} that
+!   cannot be added to the container because an element with the same name
+!   already exists in the container. Garbage can only be generated in relaxed
+!   mode.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be added to.
-!   \item[fieldList]
-!     Field objects to be added.
+!   \item[itemList]
+!     Items to be added.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
-!     where it is {\em not} an error if {\tt fieldList} contains Fields with
-!     names that are also found in {\tt container}. The {\tt container} 
-!     is left unchanged for these Fields. For {\tt .false.} this is treated
+!     where it is {\em not} an error if {\tt itemList} contains items
+!     with names that are also found in {\tt container}. The {\tt container} 
+!     is left unchanged for these items. For {\tt .false.} this is treated
 !     as an error condition. The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -233,17 +252,17 @@ contains
       relaxedflagArg = ESMF_FALSE
     endif
     
-    do i=1, size(fieldList)
+    do i=1, size(itemList)
       ! Check init status of arguments
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, itemList(i), rc)
       
       ! Get the name of the Field
-      call ESMF_FieldGet(fieldList(i), name=name, rc=localrc)
+      call ESMF_FieldGet(itemList(i), name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerAdd(container, trim(name), fieldList(i), &
+      call c_ESMC_ContainerAdd(container, trim(name), itemList(i), &
         relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -265,17 +284,17 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAddReplace()
-  subroutine ESMF_ContainerAddReplaceFL(container, fieldList, rc)
+  subroutine ESMF_ContainerAddReplaceFL(container, itemList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
-    type(ESMF_Field),     intent(in)            :: fieldList(:)
+    type(ESMF_Field),     intent(in)            :: itemList(:)
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   Fields in {\tt fieldList} that do not match any Fields by name in 
-!   {\tt container} are added to the Container. Fields in {\tt container}
-!   that match by name Fields in {\tt container} are replaced by those Fields.
+!   Elements in {\tt itemList} that do not match any items by name in 
+!   {\tt container} are added to the Container. Elements in {\tt itemList}
+!   that match by name items in {\tt container} replaced those items.
 !
 !   This method defines garbage as those elements in {\tt container} that
 !   were replaced as a consequence of this operation.
@@ -284,8 +303,8 @@ contains
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be added to.
-!   \item[fieldList]
-!     Field objects to be added.
+!   \item[itemList]
+!     Elements to be added or used to replace items with.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -304,17 +323,17 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
-    do i=1, size(fieldList)
+    do i=1, size(itemList)
       ! Check init status of arguments
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, itemList(i), rc)
       
       ! Get the name of the Field
-      call ESMF_FieldGet(fieldList(i), name=name, rc=localrc)
+      call ESMF_FieldGet(itemList(i), name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerAddReplace(container, trim(name), fieldList(i), &
+      call c_ESMC_ContainerAddReplace(container, trim(name), itemList(i), &
         localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -443,12 +462,12 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetField(container, fieldName, field, isPresent, rc)
+  subroutine ESMF_ContainerGetField(container, itemName, item, isPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
-    character(len=*),     intent(in)            :: fieldName
-    type(ESMF_Field),     intent(out), optional :: field
+    character(len=*),     intent(in)            :: itemName
+    type(ESMF_Field),     intent(out), optional :: item
     logical,              intent(out), optional :: isPresent
     integer,              intent(out), optional :: rc
 !         
@@ -459,13 +478,13 @@ contains
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[fieldName]
-!     The name of the specified Field object.
-!   \item[{[field]}]
-!     Returned Field object.
+!   \item[itemName]
+!     The name of the specified item.
+!   \item[{[item]}]
+!     Returned item.
 !   \item [{[isPresent]}]
-!     Upon return indicates whether Field item with {\tt fieldName} is
-!     contained in {\tt container}.
+!     Upon return indicates whether item with {\tt itemName} is contained in 
+!     {\tt container}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -473,7 +492,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    type(ESMF_Logical)            :: dummyIsPresent
+    type(ESMF_Logical)            :: isPres
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -482,20 +501,20 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
-    if (present(field)) then
+    if (present(item)) then
       ! Call into the C++ interface
-      call c_ESMC_ContainerGetField(container, fieldName, field, localrc)
+      call c_ESMC_ContainerGetField(container, itemName, item, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
     if (present(isPresent)) then
       ! Call into the C++ interface
-      call c_ESMC_ContainerGetIsPresent(container, fieldName, &
-        dummyIsPresent, localrc)
+      call c_ESMC_ContainerGetIsPresent(container, itemName, &
+        isPres, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      isPresent = dummyIsPresent
+      isPresent = isPres
     endif
  
     ! Return successfully
@@ -513,12 +532,12 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetFieldList(container, fieldCount, fieldList, rc)
+  subroutine ESMF_ContainerGetFieldList(container, itemCount, itemList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
-    integer,              intent(out), optional :: fieldCount
-    type(ESMF_Field),     pointer,     optional :: fieldList(:)
+    integer,              intent(out), optional :: itemCount
+    type(ESMF_Field),     pointer,     optional :: itemList(:)
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
@@ -528,10 +547,10 @@ contains
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[{[fieldCount]}]
-!     Number of Field objects in {\tt container}.
-!   \item[{[fieldList]}]
-!     List of Field objects in {\tt container}. This argument has the pointer
+!   \item[{[itemCount]}]
+!     Number of items {\tt container}.
+!   \item[{[itemList]}]
+!     List of items in {\tt container}. This argument has the pointer
 !     attribute. If the argument comes into this call associated the memory 
 !     allocation is not changed. Instead the size of the memory allocation is
 !     checked against the total number of elements in the container, and if
@@ -548,7 +567,7 @@ contains
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
     integer                       :: stat
-    integer                       :: i, dummyFieldCount
+    integer                       :: i, itemC
     type(ESMF_Pointer)            :: vector
 
     ! Initialize return code; assume failure until success is certain
@@ -559,21 +578,21 @@ contains
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     ! Call into the C++ interface
-    call c_ESMC_ContainerGetCount(container, dummyFieldCount, localrc)
+    call c_ESMC_ContainerGetCount(container, itemC, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    if (present(fieldList)) then
-      if (associated(fieldList)) then
-        if (size(fieldList) < dummyFieldCount) then
+    if (present(itemList)) then
+      if (associated(itemList)) then
+        if (size(itemList) < itemC) then
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-            msg="fieldList is too small", &
+            msg="itemList is too small", &
             ESMF_CONTEXT, rcToReturn=rc)
           return  ! bail out
         endif
       else
-        allocate(fieldList(dummyFieldCount), stat=stat)
-        if (ESMF_LogFoundAllocError(stat, msg= "allocating fieldList", &
+        allocate(itemList(itemC), stat=stat)
+        if (ESMF_LogFoundAllocError(stat, msg= "allocating itemList", &
           ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
       endif
       
@@ -582,11 +601,11 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
-      do i=0, dummyFieldCount-1 ! C-style indexing, zero-based
+      do i=0, itemC-1 ! C-style indexing, zero-based
         
         ! Call into the C++ interface to set up the vector on the C++ side
         call c_ESMC_ContainerGetVectorItem(container, vector, i, &
-          fieldList(i+1), localrc)
+          itemList(i+1), localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -600,8 +619,8 @@ contains
       
     endif
     
-    if (present(fieldCount)) then
-      fieldCount = dummyFieldCount
+    if (present(itemCount)) then
+      itemCount = itemC
     endif
  
     ! Return successfully
@@ -641,7 +660,7 @@ contains
 !     The names of the items to remove
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "remove"
-!     where it is {\em not} an error if {\tt fieldNameList} contains Field
+!     where it is {\em not} an error if {\tt itemNameList} contains item
 !     names that are not found in {\tt container}. For {\tt .false.} this is 
 !     treated as an error condition. The default setting is {\tt .false.}.
 !   \item[{[rc]}]
@@ -691,17 +710,17 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerReplace()
-  subroutine ESMF_ContainerReplaceFieldList(container, fieldList, relaxedflag, &
+  subroutine ESMF_ContainerReplaceFieldList(container, itemList, relaxedflag, &
     rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
-    type(ESMF_Field),     intent(in)            :: fieldList(:)
+    type(ESMF_Field),     intent(in)            :: itemList(:)
     logical,              intent(in),  optional :: relaxedflag
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
-!   Replace Fields in an {\tt ESMF\_Container} object.
+!   Replace items in an {\tt ESMF\_Container} object.
 !
 !   This method defines garbage as those elements in {\tt container} that
 !   were replaced as a consequence of this call.
@@ -710,13 +729,13 @@ contains
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be added to.
-!   \item[fieldList]
-!     Field objects to be added.
+!   \item[itemList]
+!     Elements used to replace container items.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "replace"
-!     where it is {\em not} an error if {\tt fieldList} contains Fields with
-!     names that are not found in {\tt container}. These Fields in 
-!     {\tt fieldList} are ignored in the relaxed mode. For {\tt .false.} this
+!     where it is {\em not} an error if {\tt itemList} contains items with
+!     names that are not found in {\tt container}. These items in 
+!     {\tt itemList} are ignored in the relaxed mode. For {\tt .false.} this
 !     is treated as an error condition. The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -743,17 +762,17 @@ contains
       relaxedflagArg = ESMF_FALSE
     endif
     
-    do i=1, size(fieldList)
+    do i=1, size(itemList)
       ! Check init status of arguments
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldList(i), rc)
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, itemList(i), rc)
       
       ! Get the name of the Field
-      call ESMF_FieldGet(fieldList(i), name=name, rc=localrc)
+      call ESMF_FieldGet(itemList(i), name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerReplace(container, trim(name), fieldList(i), &
+      call c_ESMC_ContainerReplace(container, trim(name), itemList(i), &
         relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -993,12 +1012,14 @@ contains
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ContainerGarbageGet()"
+#define ESMF_METHOD "ESMF_ContainerGarbageGetFL()"
 !BOPI
-! !IROUTINE: ESMF_ContainerGarbageGet - Query Container object about garbage
+! !IROUTINE: ESMF_ContainerGarbageGet - Query Container object about Field garbage
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerGarbageGet(container, garbageCount, garbageList, rc)
+  ! Private name; call using ESMF_ContainerGarbageGet()
+  subroutine ESMF_ContainerGarbageGetFL(container, garbageCount, &
+    garbageList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
@@ -1093,7 +1114,7 @@ contains
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_ContainerGarbageGet
+  end subroutine ESMF_ContainerGarbageGetFL
 !------------------------------------------------------------------------------
 
 

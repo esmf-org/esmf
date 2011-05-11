@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.12 2011/05/10 01:27:10 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.13 2011/05/11 16:43:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include "ESMCI_LogMacros.inc"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Field.h"
+#include "ESMCI_StateItem.h"
 
 #include "ESMCI_Container.h"
 
@@ -368,6 +369,47 @@ extern "C" {
       
       // cast C++ Field object into Fortran
       localrc = field.castToFortran(f90p);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
+  void FTN(c_esmc_containergetsi)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    char const *stateItemName, ESMCI::F90ClassHolder *f90p, int *rc, 
+    ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_containergetsi()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+
+      ESMCI::StateItem stateItem =
+        (*ptr)->get(std::string(stateItemName, nlen));
+      
+      // cast C++ StateItem object into Fortran
+      localrc = stateItem.castToFortran(f90p);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
       
