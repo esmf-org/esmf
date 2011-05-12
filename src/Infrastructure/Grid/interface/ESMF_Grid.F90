@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.211 2011/04/27 17:28:46 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.212 2011/05/12 14:38:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.211 2011/04/27 17:28:46 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.212 2011/05/12 14:38:22 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2832,7 +2832,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateCopyFromReg"
 !BOP
-! !IROUTINE: ESMF_GridCreate - Create a copy of a Grid with a different reg decomp.
+! !IROUTINE: ESMF_GridCreate - Create a copy of a Grid with a different regular distribution
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
