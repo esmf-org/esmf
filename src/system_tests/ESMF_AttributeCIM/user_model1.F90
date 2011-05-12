@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.11 2011/03/21 23:18:03 svasquez Exp $
+! $Id: user_model1.F90,v 1.12 2011/05/12 23:54:28 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -112,7 +112,7 @@ module user_model1
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM 1.0'
+    convCIM = 'CIM 1.5'
     purpComp = 'Model Component Simulation Description'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -151,7 +151,7 @@ module user_model1
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM 1.0'
+    convCIM = 'CIM 1.5'
     purpField = 'Inputs Description'
 
     ! DMS_emi Field
@@ -238,7 +238,7 @@ module user_model1
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM 1.0'
+    convCIM = 'CIM 1.5'
     purpComp = 'Model Component Simulation Description'
 
     ! Initialize return code

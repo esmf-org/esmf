@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.27 2011/05/11 05:57:30 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.28 2011/05/12 23:54:22 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC 
-      convCIM = 'CIM 1.0'
+      convCIM = 'CIM 1.5'
       purpComp = 'Model Component Simulation Description'
       purpProp = 'General Component Properties Description'
 
@@ -155,7 +155,7 @@ program ESMF_AttributeCIMEx
 
       ! Add CIM Attribute package to Components, containing a variable number
       !   of Responsible Party and Citation sub-packages
-      !   convention = 'CIM 1.0'
+      !   convention = 'CIM 1.5'
       !   purpose    = 'Model Component Simulation Description'
       !   nestConvention(1) = 'ISO 19115'
       !   nestPurpose(1)    = 'Responsible Party Description'
@@ -196,7 +196,7 @@ program ESMF_AttributeCIMEx
         purpose=purpComp, rc=rc)
 
       ! Add CIM Attribute package to Fields
-      !   convention = 'CIM 1.0'
+      !   convention = 'CIM 1.5'
       !   purpose    = 'Inputs Description'
       call ESMF_AttributeAdd(DMS_emi, convention=convCIM, &
            purpose=purpField, rc=rc)

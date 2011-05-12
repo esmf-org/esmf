@@ -116,7 +116,7 @@ module user_coupler
     !
     ! Top-level model component attributes, set on coupler
     !
-    convCIM = 'CIM 1.0'
+    convCIM = 'CIM 1.5'
     purpComp = 'Model Component Simulation Description'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
 

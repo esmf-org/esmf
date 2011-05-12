@@ -302,7 +302,7 @@ program ESMF_AttributeCIMSTest
     ! uni-processor mode -- ESMF_AttributeUpdate() not necessary
   endif
 
-  conv = 'CIM 1.0'
+  conv = 'CIM 1.5'
   purp = 'Model Component Simulation Description'
 #if 1
   ! write the Attribute info in CIM XML format for the Coupler, both Components,

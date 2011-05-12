@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.6 2010/11/03 22:48:49 theurich Exp $
+! $Id: user_model2.F90,v 1.7 2011/05/12 23:54:30 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -125,11 +125,11 @@ module user_model2
 
     print *, localPet, "User Comp2 Init starting"
 
-    call ESMF_AttributeAdd(comp, convention="CIM 1.0", &
+    call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
       purpose="Model Component Simulation Description", rc=rc)
     
     call ESMF_AttributeSet(comp, name="ShortName", value="ABC", &
-      convention="CIM 1.0", purpose="Model Component Simulation Description", &
+      convention="CIM 1.5", purpose="Model Component Simulation Description", &
       rc=rc)
    
     field = ESMF_FieldCreateEmpty(name="myTestField", rc=rc)
