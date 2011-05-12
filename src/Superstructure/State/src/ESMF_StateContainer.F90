@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.1 2011/05/11 16:40:41 theurich Exp $
+! $Id: ESMF_StateContainer.F90,v 1.2 2011/05/12 03:45:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_StateContainerMod
   public ESMF_ContainerGet
   public ESMF_ContainerReplace
 
-  public ESMF_ContainerGarbageGet  ! TODO first need to add generic interf. 
+  public ESMF_ContainerGarbageGet
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ module ESMF_StateContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.1 2011/05/11 16:40:41 theurich Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.2 2011/05/12 03:45:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -647,7 +647,7 @@ contains
       
     do i=0, garbageC-1 ! C-style indexing, zero-based
       
-      ! Call into the C++ interface to set up the vector on the C++ side
+      ! Call into the C++ interface to obtain item in vector
       call c_ESMC_ContainerGetVectorItem(container, vector, i, &
         garbageList(i+1), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
