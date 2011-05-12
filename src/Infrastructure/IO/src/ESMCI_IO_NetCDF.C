@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.16 2011/04/25 22:25:16 theurich Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.17 2011/05/12 15:28:09 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.16 2011/04/25 22:25:16 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.17 2011/05/12 15:28:09 feiliu Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -451,7 +451,7 @@ namespace ESMCI
         int  numArrays = 0;
         theState->getNumArrays(&numArrays);
 
-        vector<string>  arrayNames = theState->getArrayNames();
+        std::vector<string>  arrayNames = theState->getArrayNames();
 
         for (int i = 0; i < arrayNames.size(); ++i)
         {
