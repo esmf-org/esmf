@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.28 2011/05/06 23:14:29 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.29 2011/05/12 14:14:38 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,32 +74,13 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.28 2011/05/06 23:14:29 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.29 2011/05/12 14:14:38 feiliu Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!!------------------------------------------------------------------------------
-!!BOPI
-!! !IROUTINE: ESMF_XGridCreate - Create an XGrid
-!!
-!! !INTERFACE:
-!    interface ESMF_XGridCreate
-!   
-!! !PRIVATE MEMBER FUNCTIONS:
-!        module procedure ESMF_XGridCreateDefault
-!        module procedure ESMF_XGridCreateOffline
-!
-!
-!! !DESCRIPTION:
-!!    Create an XGrid from raw input parameters
-! 
-!!EOPI
-!      end interface
-!!
-!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -560,7 +541,6 @@ integer, intent(out), optional              :: rc
     endif
 
     !TODO: Create the src/dst Mesh, take care of maskValues
-    ! Also assume grids are cartesian and uses native metric
     meshA = ESMF_GridToMesh(sideA(l_sideAPriority(1)), &
       ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
@@ -827,6 +807,11 @@ integer, intent(out), optional              :: rc
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
+
+    xgtype%storeOverlay = .false.
+    if(present(storeOverlay)) then
+      if(storeOverlay) xgtype%storeOverlay = .true.
+    endif
     
     ! call into offline xgrid create with the xgrid specs
     call ESMF_XGridConstruct(xgtype, sideA, sideB, area=mesharea, &
@@ -845,15 +830,8 @@ integer, intent(out), optional              :: rc
 
     ! store the middle mesh if needed
     ! and clean up temporary memory used
-    if(present(storeOverlay)) then
-      if(storeOverlay) then
-        xgtype%mesh = mesh
-      else
-        call ESMF_MeshDestroy(mesh, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
+    if(xgtype%storeOverlay) then
+      xgtype%mesh = mesh
     else
       call ESMF_MeshDestroy(mesh, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -1213,18 +1191,21 @@ subroutine ESMF_XGridDistGridsOnline(xgtype, mesh, rc)
   ! Initialize return code   
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
-  !call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
-  !if (ESMF_LogFoundError(localrc, &
-  !    ESMF_ERR_PASSTHRU, &
-  !    ESMF_CONTEXT, rcToReturn=rc)) return
-  !xgtype%distgridM = ESMF_DistGridCreate(distgrid, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-  !if (ESMF_LogFoundError(localrc, &
-  !    ESMF_ERR_PASSTHRU, &
-  !    ESMF_CONTEXT, rcToReturn=rc)) return
-  call ESMF_MeshGet(mesh, elementDistgrid=xgtype%distgridM, rc=localrc)
-  if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+  if(xgtype%storeOverlay) then
+    call ESMF_MeshGet(mesh, elementDistgrid=xgtype%distgridM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  else
+    call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    xgtype%distgridM = ESMF_DistGridCreate(distgrid, indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
   allocate(xgtype%distgridA(size(xgtype%sideA)))
   allocate(xgtype%distgridB(size(xgtype%sideB)))
   do i = 1, size(xgtype%sideA)
@@ -2098,17 +2079,24 @@ end subroutine ESMF_XGridConstructBaseObj
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
 
-    call ESMF_XGridValidate(xgrid, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (.not.associated(xgrid%xgtypep)) then 
+    if (.not. associated(xgrid%xgtypep)) then 
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         msg="Uninitialized or already destroyed XGrid: xgtypep unassociated", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif 
+
+    if(xgrid%xgtypep%storeOverlay) then
+      call ESMF_MeshDestroy(xgrid%xgtypep%mesh, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call ESMF_DistGridDestroy(xgrid%xgtypep%distgridM, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Destruct all xgrid internals and then free xgrid memory.
     call ESMF_BaseGetStatus(xgrid%xgtypep%base, xgridstatus, rc=localrc)
@@ -2119,6 +2107,23 @@ end subroutine ESMF_XGridConstructBaseObj
     if (xgridstatus .eq. ESMF_STATUS_READY) then
 
       if((xgrid%xgtypep%is_proxy)) then
+
+        if(associated(xgrid%xgtypep%sideA)) then
+          do i = 1, size(xgrid%xgtypep%sideA,1)
+            call ESMF_GridDestroy(xgrid%xgtypep%sideA(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+        if(associated(xgrid%xgtypep%sideB)) then
+          do i = 1, size(xgrid%xgtypep%sideB,1)
+            call ESMF_GridDestroy(xgrid%xgtypep%sideB(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
 
         if(associated(xgrid%xgtypep%distgridA)) then
           do i = 1, size(xgrid%xgtypep%distgridA,1)
@@ -2137,33 +2142,28 @@ end subroutine ESMF_XGridConstructBaseObj
           enddo
         endif
 
-        !call ESMF_DistGridDestroy(xgrid%xgtypep%distgridM, rc=localrc)
-        !if (ESMF_LogFoundError(localrc, &
-        !    ESMF_ERR_PASSTHRU, &
-        !    ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if(associated(xgrid%xgtypep%centroid)) then
-            deallocate(xgrid%xgtypep%centroid)
-        endif
-        if(associated(xgrid%xgtypep%area)) then
-            deallocate(xgrid%xgtypep%area)
-        endif
-
-        if(associated(xgrid%xgtypep%sparseMatA2X)) then
-            deallocate(xgrid%xgtypep%sparseMatA2X)
-        endif
-        if(associated(xgrid%xgtypep%sparseMatX2A)) then
-            deallocate(xgrid%xgtypep%sparseMatX2A)
-        endif
-        if(associated(xgrid%xgtypep%sparseMatB2X)) then
-            deallocate(xgrid%xgtypep%sparseMatB2X)
-        endif
-        if(associated(xgrid%xgtypep%sparseMatX2B)) then
-            deallocate(xgrid%xgtypep%sparseMatX2B)
-        endif
-
       endif
-      
+
+      if(associated(xgrid%xgtypep%centroid)) then
+          deallocate(xgrid%xgtypep%centroid)
+      endif
+      if(associated(xgrid%xgtypep%area)) then
+          deallocate(xgrid%xgtypep%area)
+      endif
+
+      if(associated(xgrid%xgtypep%sparseMatA2X)) then
+          deallocate(xgrid%xgtypep%sparseMatA2X)
+      endif
+      if(associated(xgrid%xgtypep%sparseMatX2A)) then
+          deallocate(xgrid%xgtypep%sparseMatX2A)
+      endif
+      if(associated(xgrid%xgtypep%sparseMatB2X)) then
+          deallocate(xgrid%xgtypep%sparseMatB2X)
+      endif
+      if(associated(xgrid%xgtypep%sparseMatX2B)) then
+          deallocate(xgrid%xgtypep%sparseMatX2B)
+      endif
+
     endif
 
     ! mark object invalid
