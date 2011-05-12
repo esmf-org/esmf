@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.5 2011/05/12 14:16:39 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.6 2011/05/12 18:53:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -205,24 +205,8 @@
     write(name, *) "Regrid then create xgrid and regrid through xgrid, full spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    !!------------------------------------------------------------------------
-    !!E-X_UTest
-    !  src flux and area:   3.725649546371366E-004   12.7021725144824     
-    !   12.7022150082729        12.5663705170155     
-    !  src flux and area sub:   3.725649546371366E-004   12.7021725144824     
-    !   12.7022150082729     
-    !  dst flux and area from direct Regrid:  -8.399031276710582E-004
-    !   12.7672149359054        12.7022150082729     
-    !  recomputed src flux and area from direct Regrid:   3.711961549896008E-004
-    !   12.7021725144824        12.7022150082729     
-    ! Setting mpi info: cb_nodes=1
-    !  xgrid flux and area:  -5.563267757924073E-011   12.5663706154704     
-    !   12.7022150082729     
-    !  dst flux and area:  -8.298862082678065E-004   12.7672149359054     
-    !   12.7022150082729     
-    !Verify:  -0.8399031277E-03 -0.8298862083E-03  0.1192627944E-01
-    !Area calculation is inaccurate
-    !Fraction sometimes > 1.0
+    !------------------------------------------------------------------------
+    !EX_UTest
     call test_regrid2xgSph(90,90,60,60,4.,2.,6.,3.,0.,-90.,-180.,-90., &
       scheme=ESMF_REGRID_SCHEME_FULL3D, &
       tag='reverse large full sphere latlonclip', rc=rc)
@@ -1393,12 +1377,12 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
-      call ESMF_FieldWrite(f_error, file='error.nc', rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    !if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
+    !  call ESMF_FieldWrite(f_error, file='error.nc', rc=localrc)
+    !  if (ESMF_LogFoundError(localrc, &
+    !      ESMF_ERR_PASSTHRU, &
+    !      ESMF_CONTEXT, rcToReturn=rc)) return
+    !endif
 
     !----------------------------------------------------
     ! compute xgrid regrid routehandle
@@ -1478,12 +1462,12 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
-      call ESMF_FieldWrite(f_ocn_dir, file='xgrid_regrid_diff.nc', rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    !if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
+    !  call ESMF_FieldWrite(f_ocn_dir, file='xgrid_regrid_diff.nc', rc=localrc)
+    !  if (ESMF_LogFoundError(localrc, &
+    !      ESMF_ERR_PASSTHRU, &
+    !      ESMF_CONTEXT, rcToReturn=rc)) return
+    !endif
     error = abs(dstFlux - dstFlux_reg)/abs(dstFlux_reg) 
     if(lpet == 0) write(*,'(A,3E18.10)') 'Verify: ', dstFlux_reg, dstFlux, error
     if(error > 1.e-4) then
@@ -1541,12 +1525,12 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
-      call ESMF_FieldWrite(f_error, file='error1.nc', rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+    !if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
+    !  call ESMF_FieldWrite(f_error, file='error1.nc', rc=localrc)
+    !  if (ESMF_LogFoundError(localrc, &
+    !      ESMF_ERR_PASSTHRU, &
+    !      ESMF_CONTEXT, rcToReturn=rc)) return
+    !endif
 
     !----------------------------------------------------
     ! clean up
