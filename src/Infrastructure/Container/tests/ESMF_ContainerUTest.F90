@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.16 2011/05/12 04:28:59 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.17 2011/05/12 15:56:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.16 2011/05/12 04:28:59 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.17 2011/05/12 15:56:09 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -51,12 +51,14 @@ program ESMF_ContainerUTest
 
   ! type definitions
   type TestTypeStruct
+    sequence
     character(len=120)            :: string
     integer                       :: index
     type(ESMF_Field)              :: field
   end type
 
   type TestType
+    sequence
     type(TestTypeStruct), pointer :: wrap
   end type
 
