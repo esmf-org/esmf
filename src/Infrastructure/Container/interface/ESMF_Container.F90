@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.14 2011/05/12 03:58:10 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.15 2011/05/12 23:30:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.14 2011/05/12 03:58:10 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.15 2011/05/12 23:30:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -553,14 +553,14 @@ contains
     
     if (present(item)) then
       ! Call into the C++ interface
-      call c_ESMC_ContainerGetField(container, itemName, item, localrc)
+      call c_ESMC_ContainerGetField(container, trim(itemName), item, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
     if (present(isPresent)) then
       ! Call into the C++ interface
-      call c_ESMC_ContainerGetIsPresent(container, itemName, &
+      call c_ESMC_ContainerGetIsPresent(container, trim(itemName), &
         isPres, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
