@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.9 2011/05/10 01:27:09 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.10 2011/05/12 03:58:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,6 +37,7 @@ namespace ESMCI {
     }
     void add(Key k, T t, bool relaxed=false);
     void addReplace(Key k, T t);
+    void clear();
     void remove(Key k, bool relaxed=false);
     void replace(Key k, T t, bool relaxed=false);
     T get(Key k);
@@ -102,6 +103,17 @@ namespace ESMCI {
     (*this)[k]=t;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::clear()"
+  // Access the entire contents of the container in form of a vector.
+  template <typename Key, typename T>
+  void Container<Key, T>::clear(){
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+    typename Container::iterator pos;
+    for (pos = this->begin(); pos != this->end(); ++pos)
+      garbage.push_back(pos->second); // object goes into garbage
+    std::map<Key, T>::clear();  // clear the container
+  }
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::remove()"
   // Remove the element with specified key. By default the method executes in

@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.C,v 1.12 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_F90Interface.C,v 1.13 2011/05/12 03:58:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -14,44 +14,83 @@
 
 //-----------------------------------------------------------------------------
 
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"                  // for LogErr
+#include "ESMCI_LogMacros.inc"
 #include "ESMCI_F90Interface.h"
 
 //-----------------------------------------------------------------------------
 
+//==============================================================================
+// prototypes for Fortran interface routines called by C++ code below
+extern "C" {
+  void FTN(f_esmf_fortranudtpointersize)(int *size);
+  void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+}
+//==============================================================================
+
 namespace ESMCI {
+  
+  F90ClassHolder::F90ClassHolder(void **udtPtr){
+    // constructor that stores a user derived type (UDT) inside F90ClassHolder
+#undef  ESMC_METHOD
+#define ESMC_METHOD "F90ClassHolder()"
+    int udtSize;
+    FTN(f_esmf_fortranudtpointersize)(&udtSize);
+    if (sizeof(ESMCI::F90ClassHolder) < udtSize){
+      int localrc = ESMC_RC_NOT_IMPL;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
+        "- hardcoded ESMCI::F90ClassHolder size smaller than UDT size"
+        " determined at runtime", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
+    FTN(f_esmf_fortranudtpointercopy)((void *)this, (void *)udtPtr); 
+  }
+  
+  int F90ClassHolder::castToFortranUDT(void **udtPtr){
+    int rc=ESMC_RC_NOT_IMPL;
+    FTN(f_esmf_fortranudtpointercopy)((void *)udtPtr, (void *)this);
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+  
+  //--------------------------------------------------------------------------
 
-InterfaceInt::InterfaceInt(void){
-  // native constructor
-  array = NULL;
-  dimCount = 0;
-}
+  InterfaceInt::InterfaceInt(void){
+    // constructor
+    array = NULL;
+    dimCount = 0;
+  }
 
-InterfaceInt::InterfaceInt(int *arrayArg, int lenArg){
-  // native constructor, special case 1d
-  array = arrayArg;
-  dimCount = 1;
-  extent[0]=lenArg;
-}
+  InterfaceInt::InterfaceInt(int *arrayArg, int lenArg){
+    // constructor, special case 1d
+    array = arrayArg;
+    dimCount = 1;
+    extent[0]=lenArg;
+  }
 
-InterfaceInt::InterfaceInt(std::vector<int> &arrayArg){
-  // native constructor, special case 1d
-  array = &(arrayArg[0]);
-  dimCount = 1;
-  extent[0]=arrayArg.size();
-}
+  InterfaceInt::InterfaceInt(std::vector<int> &arrayArg){
+    // constructor, special case 1d
+    array = &(arrayArg[0]);
+    dimCount = 1;
+    extent[0]=arrayArg.size();
+  }
 
-InterfaceInt::InterfaceInt(int *arrayArg, int dimArg, const int *lenArg){
-  // native constructor
-  array = arrayArg;
-  dimCount = dimArg;
-  for (int i=0; i<dimCount; i++)
-    extent[i]=lenArg[i];
-}
+  InterfaceInt::InterfaceInt(int *arrayArg, int dimArg, const int *lenArg){
+    // constructor
+    array = arrayArg;
+    dimCount = dimArg;
+    for (int i=0; i<dimCount; i++)
+      extent[i]=lenArg[i];
+  }
 
-InterfaceInt::~InterfaceInt(void){
-  // native destructor
-  array = NULL;
-  dimCount = 0;
-}
+  InterfaceInt::~InterfaceInt(void){
+    // destructor
+    array = NULL;
+    dimCount = 0;
+  }
+  
+  
 
 } // namespace ESMCI

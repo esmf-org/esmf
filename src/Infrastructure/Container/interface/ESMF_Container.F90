@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.13 2011/05/11 16:43:22 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.14 2011/05/12 03:58:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,6 +72,7 @@ module ESMF_ContainerMod
 ! - ESMF-internal methods:
   public ESMF_ContainerAdd
   public ESMF_ContainerAddReplace
+  public ESMF_ContainerClear
   public ESMF_ContainerCreate
   public ESMF_ContainerDestroy
   public ESMF_ContainerGet
@@ -92,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.13 2011/05/11 16:43:22 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.14 2011/05/12 03:58:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -344,6 +345,55 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_ContainerAddReplaceFL
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerClear()"
+!BOPI
+! !IROUTINE: ESMF_ContainerClear - Clear Container object
+
+! !INTERFACE:
+  subroutine ESMF_ContainerClear(container, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)           :: container
+    integer,              intent(out),  optional  :: rc
+!         
+! !DESCRIPTION:
+!   Clear an {\tt ESMF\_Container} object, i.e. remove all items.
+!
+!   This method defines garbage as all the elements in the {\tt container}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to be cleared.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface layer
+    call c_ESMC_ContainerClear(container, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerClear
 !------------------------------------------------------------------------------
 
 
@@ -1091,7 +1141,7 @@ contains
       
       do i=0, garbageC-1 ! C-style indexing, zero-based
         
-        ! Call into the C++ interface to set up the vector on the C++ side
+        ! Call into the C++ interface to obtain item in vector
         call c_ESMC_ContainerGetVectorItem(container, vector, i, &
           garbageList(i+1), localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.13 2011/05/11 16:43:22 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.14 2011/05/12 03:58:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -118,6 +118,38 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  //-------------------------------------------------------------------------
+
+  void FTN(c_esmc_containerclear)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_containerclear()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+      
+      (*ptr)->clear();
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   //-------------------------------------------------------------------------
 
   void FTN(c_esmc_containercreate)
@@ -354,7 +386,7 @@ extern "C" {
 
   void FTN(c_esmc_containergetfield)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
-    char const *fieldName, ESMCI::F90ClassHolder *f90p, int *rc, 
+    char const *itemName, ESMCI::F90ClassHolder *f90p, int *rc, 
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containergetfield()"
@@ -365,7 +397,7 @@ extern "C" {
     // call into C++
     try{
 
-      ESMCI::Field field = (*ptr)->get(std::string(fieldName, nlen));
+      ESMCI::Field field = (*ptr)->get(std::string(itemName, nlen));
       
       // cast C++ Field object into Fortran
       localrc = field.castToFortran(f90p);
@@ -394,7 +426,7 @@ extern "C" {
 
   void FTN(c_esmc_containergetsi)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
-    char const *stateItemName, ESMCI::F90ClassHolder *f90p, int *rc, 
+    char const *itemName, ESMCI::F90ClassHolder *f90p, int *rc, 
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containergetsi()"
@@ -405,8 +437,7 @@ extern "C" {
     // call into C++
     try{
 
-      ESMCI::StateItem stateItem =
-        (*ptr)->get(std::string(stateItemName, nlen));
+      ESMCI::StateItem stateItem = (*ptr)->get(std::string(itemName, nlen));
       
       // cast C++ StateItem object into Fortran
       localrc = stateItem.castToFortran(f90p);
@@ -735,4 +766,167 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  //-------------------------------------------------------------------------
+  //-------------------------------------------------------------------------
+  //--- The following interfaces are directly used from the Fortran side! ---
+  //-------------------------------------------------------------------------
+  //-------------------------------------------------------------------------
+  
+  void FTN(esmf_containeraddudt)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    char const *itemName, void **udtPtr, int *rc, ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_containeraddudt()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+      
+      ESMCI::F90ClassHolder f90CH(udtPtr);
+      (*ptr)->add(std::string(itemName,nlen), f90CH);
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
+  void FTN(esmf_containergetudt)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    char const *itemName, void **udtPtr, int *rc, ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_containergetudt()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+
+      ESMCI::F90ClassHolder f90CH = (*ptr)->get(std::string(itemName, nlen));
+      
+      // cast C++ Field object into Fortran
+      localrc = f90CH.castToFortranUDT(udtPtr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
+  void FTN(esmf_containerreplaceudt)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    char const *itemName, void **udtPtr, int *rc, ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_containerreplaceudt()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+      
+      ESMCI::F90ClassHolder f90CH(udtPtr);
+      (*ptr)->replace(std::string(itemName,nlen), f90CH);
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
+  void FTN(esmf_containergarbagegetudt)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    int const *item, void **udtPtr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "esmf_containergarbagegetudt()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+
+      // get garbage vector and return the requested element
+      std::vector<ESMCI::F90ClassHolder> garbage;
+      // query the C++ layer
+      (*ptr)->garbageGet(garbage);
+      
+      if (*item < 1 || *item > garbage.size()){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- item out of range",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+      
+      ESMCI::F90ClassHolder f90CH = garbage[*item-1];
+      
+      // cast C++ Field object into Fortran
+      localrc = f90CH.castToFortranUDT(udtPtr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }  
+  
 }
