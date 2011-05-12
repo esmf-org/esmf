@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.1 2011/05/11 16:40:41 theurich Exp $
+! $Id: ESMF_StateItem.F90,v 1.2 2011/05/12 04:56:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
       use ESMF_ArrayMod
       use ESMF_ArrayBundleMod
       use ESMF_FieldMod
+      use ESMF_FieldGetMod
       use ESMF_FieldBundleMod
       use ESMF_RHandleMod
       use ESMF_InitMacrosMod
@@ -297,10 +298,52 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    !TODO: replace this with real code!!!!!!!!!!!!
-    if (present(name)) &
-      name = ""
-
+    select case (stateItem%otype%ot)
+    case (ESMF_STATEITEM_FIELD%ot)
+      call ESMF_FieldGet(stateItem%datap%fp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+      call ESMF_FieldBundleGet(stateItem%datap%fbp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_ARRAY%ot)
+      call ESMF_ArrayGet(stateItem%datap%ap, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+      call ESMF_ArrayBundleGet(stateItem%datap%abp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+      call ESMF_RouteHandleGet(stateItem%datap%rp, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        return
+    case (ESMF_STATEITEM_STATE%ot)
+      if (present(name)) then
+        call c_ESMC_GetName(stateItem%datap%spp%base, name, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          return
+      endif
+    case default
+      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
+        msg="- unsupported StateItemType", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return  ! bail out
+    end select
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
