@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.20 2011/02/23 00:28:33 theurich Exp $
+#  $Id: protex,v 1.21 2011/05/13 17:47:35 theurich Exp $
 #
 #BOP
 #
@@ -169,6 +169,7 @@ Arg:
   $verb = 0;              # verbatim mode?
   $tpage = 0;             # title page?
   $begdoc = 0;            # has \begin{document} been written?
+  $table = 0;             # doing a latex table
 
 # Initial LaTeX stuff
 # -------------------
@@ -205,6 +206,10 @@ ARG:
         $eoc_string = '!EOC';
         $boe_string = '!BOE';
         $eoe_string = '!EOE';
+        $bot_string = '!BOT';
+        $eot_string = '!EOT';
+        $botl_string = '!BOTL';
+        $eotl_string = '!EOTL';
 #}#   end if
 
      if ( $opt_A ) {            # ADA
@@ -365,6 +370,49 @@ LINE:
            print '%/////////////////////////////////////////////////////////////';
            print "\\newpage";
            $intro = 0;
+           next LINE;
+}#      end if
+
+#       Beginning of latex table
+#       ---------------------
+        if ($Fld[1] eq $bot_string) {
+           print " ";
+           print "%/////////////////////////////////////////////////////////////";
+           shift @Fld;
+           $_ = join('|', @Fld);
+           print "\\begin{tabular}{|$_|}";
+           $table = 1;
+           $tableline = 0;
+           $tableelement = 0;
+           next LINE;
+}#      end if
+
+#       Beginning of latex table line
+#       ---------------------
+        if ($Fld[1] eq $botl_string) {
+           if (!$tableline&&$tableelement){printf "\\\\";}
+           if (!$tableline){printf " \\hline \\hline\n\n";}
+           print " ";
+           $tableelement = 0;
+           $tableline++;
+           next LINE;
+}#      end if
+
+#       End of latex table line
+#       -------------------
+        if ($Fld[1] eq $eotl_string) {
+           print "\\\\ \\hline";
+           next LINE;
+}#      end if
+
+#       End of latex table
+#       -------------------
+        if ($Fld[1] eq $eot_string) {
+           print "\\hline";
+           print "\\end{tabular}";
+           print "%/////////////////////////////////////////////////////////////";
+           print " ";
+           $table = 0;
            next LINE;
 }#      end if
 
@@ -727,6 +775,20 @@ KEY:       foreach $key ( @keys ) {
 #   --------------------------------
     if ($source) {
         print $_;
+        next LINE;
+}#  end if
+
+#   latex table: pick out the quotations
+#   ------------------------------------
+    if ($table) {
+        s/_/\\_/g;                         # Replace "_" with "\_"
+        @Fldt = split('"', $_, 9999);
+        if ($Fldt[2]) { 
+            if (!$tableline&&!$tableelement){print "\\hline \\hline";}
+            if ($tableelement) { printf " & ";} else { printf "   ";}
+            print $Fldt[2]; 
+            $tableelement++;
+        }
         next LINE;
 }#  end if
 
