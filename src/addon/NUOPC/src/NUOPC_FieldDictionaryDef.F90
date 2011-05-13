@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.1 2011/05/13 00:09:57 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.2 2011/05/13 17:50:06 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -32,8 +32,8 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_FieldDictionaryDefinition - Create the NUOPC Field dictionary
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
     standardName, unitOptions, defaultLongName, defaultShortName, rc)
@@ -45,8 +45,8 @@ module NUOPC_FieldDictionaryDef
     character(*),                     intent(in),  optional :: defaultShortName
     integer,                          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Create NUOPC Field dictionary.
-!EOP
+!   Add an entry to the NUOPC Field dictionary.
+!EOPI
   !-----------------------------------------------------------------------------
     ! local variables
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
@@ -94,7 +94,7 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryDefinition - Create the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryDefinition(fieldDictionary, rc)
@@ -103,10 +103,16 @@ module NUOPC_FieldDictionaryDef
     integer,              intent(out),  optional :: rc
 ! !DESCRIPTION:
 !   Create NUOPC Field dictionary.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
+!BOT l l l l
+! "{\bf StandardName}"
+! "{\bf Units}"
+! "{\bf LongName (default)}"
+! "{\bf ShortName (default)}"
+!BOTL
     call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
       standardName      = "air_pressure_at_sea_level", &
       unitOptions       = (/"Pa"/), &
@@ -115,7 +121,8 @@ module NUOPC_FieldDictionaryDef
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-
+!EOTL
+!BOTL
     call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
       standardName      = "isotropic_shortwave_radiance_in_air", &
       unitOptions       = (/"W m-2 sr-1"/), &
@@ -124,7 +131,8 @@ module NUOPC_FieldDictionaryDef
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-
+!EOTL
+!BOTL
     call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
       standardName      = "sea_surface_temperature", &
       unitOptions       = (/"K"/), &
@@ -133,7 +141,8 @@ module NUOPC_FieldDictionaryDef
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-
+!EOTL
+!EOT
   end subroutine
   !-----------------------------------------------------------------------------
 
