@@ -1,4 +1,4 @@
-/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.2 2011/04/22 14:29:21 ksaint Exp $ */
+/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.3 2011/05/13 18:21:46 ksaint Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,7 +119,7 @@ int main(int    argc,
 	printf("Waiting for initialize...\n");
 
    //---------------------------------------------------------------------------
-   //NEX_disable_UTest
+   //NEX_UTest
    strcpy(name, "Call Component Initialize");
    strcpy(failMsg, "Returned ESMF_FAILURE");
    rc = client.init();
@@ -139,7 +139,7 @@ int main(int    argc,
 	printf("Waiting for run...\n");
 
    //---------------------------------------------------------------------------
-   //NEX_disable_UTest
+   //NEX_UTest
    strcpy(name, "Call Component Run");
    strcpy(failMsg, "Returned ESMF_FAILURE");
    rc = client.run();
@@ -158,7 +158,7 @@ int main(int    argc,
 	printf("Done Waiting... waited for %d seconds\n", waitCount);
 
    //---------------------------------------------------------------------------
-   //NEX_disable_UTest
+   //NEX_UTest
    strcpy(name, "Call Component Finalize");
    strcpy(failMsg, "Returned ESMF_FAILURE");
    rc = client.final();
@@ -178,7 +178,7 @@ int main(int    argc,
 	printf("Done Waiting... waited for %d seconds\n", waitCount);
 
    //---------------------------------------------------------------------------
-   //NEX_disable_UTest
+   //NEX_UTest
    strcpy(name, "Call Component Files");
    strcpy(failMsg, "No files returned");
 	vector<string>	retFiles = client.files();
@@ -187,7 +187,7 @@ int main(int    argc,
    //---------------------------------------------------------------------------
 
    //---------------------------------------------------------------------------
-   //NEX_disable_UTest
+   //NEX_UTest
    strcpy(name, "Call Component End");
    strcpy(failMsg, "Returned ESMF_FAILURE");
    rc = client.end();
