@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.6 2011/05/13 18:21:46 ksaint Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.7 2011/05/13 22:59:09 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -260,7 +260,7 @@ program ESMF_WebServComponentUTest
           userRoutine=ESMF_WebServUserModelRegister, rc=rc)
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disabled__UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
     portNum = 27060
