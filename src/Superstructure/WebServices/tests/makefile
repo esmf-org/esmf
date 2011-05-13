@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2011/04/22 14:29:21 ksaint Exp $ 
+# $Id: makefile,v 1.4 2011/05/13 22:57:38 svasquez Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -9,11 +9,11 @@ LOCDIR	  = src/Superstructure/WebServices/tests
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_WebServUTest \
                   $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest
 
-TESTS_RUN     =	RUN_ESMF_WebServUTest \
-                  RUN_ESMC_WebServCompSvrClientUTest
+TESTS_RUN     =	RUN_ESMC_WebServCompSvrClientUTest
+		#RUN_ESMF_WebServUTest \
 
-TESTS_RUN_UNI =	RUN_ESMF_WebServUTestUNI \
-                  RUN_ESMC_WebServCompSvrClientUTestUNI
+TESTS_RUN_UNI =	 RUN_ESMC_WebServCompSvrClientUTestUNI
+		#RUN_ESMF_WebServUTestUNI \
 
 
 include $(ESMF_DIR)/makefile
