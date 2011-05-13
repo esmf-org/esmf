@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.2 2011/05/13 17:50:31 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.3 2011/05/13 20:36:58 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -68,11 +68,11 @@
 \input{../addon/NUOPC/doc/NUOPC_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_ModelExplicit}
+\subsection{Generic Component API: NUOPC\_Connector}
 #ifdef STANDALONE
-\input{NUOPC_ModelExplicit_manual_fapi}
+%\input{NUOPC_Connector_fapi}
 #elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_ModelExplicit_manual_fapi}
+%\input{../addon/NUOPC/doc/NUOPC_Connector_fapi}
 #endif
 
 \subsection{Generic Component API: NUOPC\_DriverExplicit}
@@ -89,11 +89,32 @@
 %\input{../addon/NUOPC/doc/NUOPC_DriverExplicitAtmOcn_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_Connector}
+\subsection{Generic Component API: NUOPC\_DriverExplicitAtmOcnMed}
 #ifdef STANDALONE
-%\input{NUOPC_Connector_fapi}
+%\input{NUOPC_DriverExplicitAtmOcnMed_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_Connector_fapi}
+%\input{../addon/NUOPC/doc/NUOPC_DriverExplicitAtmOcnMed_fapi}
+#endif
+
+\subsection{Generic Component API: NUOPC\_ModelExplicit}
+#ifdef STANDALONE
+\input{NUOPC_ModelExplicit_manual_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ModelExplicit_manual_fapi}
+#endif
+
+\subsection{Generic Component API: NUOPC\_ModelExplicitBase}
+#ifdef STANDALONE
+%\input{NUOPC_ModelExplicitBase_manual_fapi}
+#elif defined(CONSTITUENT)
+%\input{../addon/NUOPC/doc/NUOPC_ModelExplicitBase_manual_fapi}
+#endif
+
+\subsection{Generic Component API: NUOPC\_MediatorExplicit}
+#ifdef STANDALONE
+%\input{NUOPC_MediatorExplicit_manual_fapi}
+#elif defined(CONSTITUENT)
+%\input{../addon/NUOPC/doc/NUOPC_MediatorExplicit_manual_fapi}
 #endif
 
 %#ifdef STANDALONE
