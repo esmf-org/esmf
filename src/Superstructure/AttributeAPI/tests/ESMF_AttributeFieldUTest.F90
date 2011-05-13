@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.38 2011/04/15 00:08:50 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.39 2011/05/13 21:26:08 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.38 2011/04/15 00:08:50 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.39 2011/05/13 21:26:08 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1512,6 +1512,56 @@ program ESMF_AttributeFieldUTest
                                        .and.(attrTK==ESMF_TYPEKIND_CHARACTER) &
                                        .and.(items==1), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      items = 3
+      attrTK = ESMF_TYPEKIND_CHARACTER
+      isPresent = .true.
+      !NEX_UTest
+      ! Get Attribute info by name from a Field Test
+      call ESMF_AttributeGet(field, name="NOTHERE", &
+        typekind=attrTK, itemCount=items, isPresent=isPresent, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting Attribute info by name with isPresent flag, itemCount, and typekind from a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS) &
+                     .and. attrTK==ESMF_NOKIND &
+                     .and. items==0 &
+                     .and. isPresent.eqv..false.,& 
+                     name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      items = 3
+      attrTK = ESMF_TYPEKIND_CHARACTER
+      !NEX_UTest
+      ! Get Attribute info by name from a Field Test
+      call ESMF_AttributeGet(field, name="NOTHERE", &
+        typekind=attrTK, itemCount=items, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting Attribute info by name with isPresent flag and itemCount from a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS) &
+                     .and. attrTK==ESMF_NOKIND &
+                     .and. items==0, &
+                     name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      attrTK = ESMF_TYPEKIND_CHARACTER
+      !NEX_UTest
+      ! Get Attribute info by name from a Field Test
+      call ESMF_AttributeGet(field, name="NOTHERE", &
+        typekind=attrTK, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting Attribute info by name with typekind from a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS) &
+                     .and. attrTK==ESMF_NOKIND, &
+                     name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Get Attribute info by name from a Field Test
+      call ESMF_AttributeGet(field, name="NOTHERE", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting Attribute info by name with no args, will fail, from a Field Test"
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !NEX_UTest
