@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.5 2011/04/25 21:17:51 theurich Exp $
+! $Id: NUOPC.F90,v 1.6 2011/05/13 00:09:57 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -9,11 +9,21 @@ module NUOPC
   !-----------------------------------------------------------------------------
 
   use ESMF_Mod
+  use NUOPC_FieldDictionaryDef
 
   implicit none
   
   private
   
+  ! private module variables
+  logical :: NUOPC_FieldDictionaryIsSetup = .false.
+  
+  ! public module variables
+  type(ESMF_Container) :: NUOPC_FieldDictionary
+  public NUOPC_FieldDictionary
+
+  ! public module interfaces
+  public NUOPC_FieldDictionarySetup
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeAdd
   public NUOPC_CplCompAreServicesSet
@@ -36,10 +46,45 @@ module NUOPC
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_GridCreateSimpleXY
   
+  
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionaryCreate - Create the NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionarySetup(rc)
+! !ARGUMENTS:
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Create NUOPC Field dictionary.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (.not.NUOPC_FieldDictionaryIsSetup) then
+    
+      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    
+      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+
+      call NUOPC_FieldDictionaryDefinition(NUOPC_FieldDictionary, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
+      NUOPC_FieldDictionaryIsSetup = .true.
+      
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_FieldAttributeGet - Get a NUOPC Field Attribute
@@ -105,6 +150,7 @@ module NUOPC
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)  :: attrList(2)
+    logical                 :: isPresent
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -115,49 +161,54 @@ module NUOPC
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeAdd(field, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
       
+    ! Attributes don't offer controlled vocabulary checking (yet) -> do it here!
+    ! first ensure that NUOPC_FieldDictionary is set up
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    ! see if specified StandardName has an entry in the NUOPC_FieldDictionary
+    call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=StandardName, &
+      isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    if (.not.isPresent) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg=StandardName//" is not a StandardName in the NUOPC_FieldDictionary!",&
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    
     ! set Attributes
     call ESMF_AttributeSet(field, &
-      name="StandardName", value=StandardName, &
+      name="StandardName", value=trim(StandardName), &
       convention="ESG", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(field, &
-      name="Units", value=Units, &
+      name="Units", value=trim(Units), &
       convention="ESG", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(field, &
-      name="Connected", value=Connected, &
+      name="Connected", value=trim(Connected), &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(field, &
       name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0/), &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
   
@@ -338,10 +389,8 @@ module NUOPC
             if (count > maxCount) then
               call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
                 msg="Not enough space in cplList",&
-                line=__LINE__, &
-                file=FILENAME, &
-                rcToReturn=rc)
-                return  ! bail out
+                line=__LINE__, file=FILENAME, rcToReturn=rc)
+              return  ! bail out
             endif
             cplList(count) = importStandardNameList(i)
             exit
@@ -1010,37 +1059,30 @@ module NUOPC
     
     call ESMF_FieldGet(field, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_StateGet(state, field=potentialField, itemName=name, rc=rc)
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call ESMF_StateGet(state, itemName=name, field=potentialField, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
     call NUOPC_FieldAttributeGet(potentialField, name="StandardName", &
       value=StandardName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
     call NUOPC_FieldAttributeGet(potentialField, name="Units", &
       value=Units, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
       Units=Units, Connected="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
     call ESMF_StateReplace(state, field, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------

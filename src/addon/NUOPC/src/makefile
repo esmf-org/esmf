@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.3 2011/04/28 15:17:08 theurich Exp $ 
+# $Id: makefile,v 1.4 2011/05/13 00:09:57 theurich Exp $ 
 
 ALL: build_here 
 
 SOURCEC	  = 
-SOURCEF	  = NUOPC.F90 \
+SOURCEF	  = NUOPC_FieldDictionaryDef.F90 NUOPC.F90 \
             NUOPC_ModelExplicitBase.F90 NUOPC_ModelExplicit.F90 \
             NUOPC_MediatorExplicit.F90 \
             NUOPC_DriverExplicit.F90 NUOPC_DriverExplicitAtmOcn.F90 \
