@@ -1,7 +1,7 @@
-! $Id: ESMF_WebServicesSTest.F90,v 1.2 2011/04/13 15:04:47 ksaint Exp $
+! $Id: ESMF_WebServicesSTest.F90,v 1.3 2011/05/13 18:15:53 ksaint Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_disable_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
@@ -12,6 +12,131 @@
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
+
+module ESMF_WebServUserModel
+
+  ! ESMF Framework module
+  use ESMF_Mod
+  use ESMF_TestMod
+  use ESMF_IO_NetCDFMod
+
+  implicit none
+    
+  public ESMF_WebServUserModelRegister
+        
+  contains
+
+
+  !-------------------------------------------------------------------------
+  !   !  The Register routine sets the subroutines to be called
+  !   !   as the init, run, and finalize routines.  Note that these are
+  !   !   private to the module.
+
+  subroutine ESMF_WebServUserModelRegister(comp, rc)
+    type(ESMF_GridComp)  :: comp
+    integer, intent(out) :: rc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User Comp1 Register starting"
+
+    ! Register the callback routines.
+
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+                                    userRoutine=user_init, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+                                    userRoutine=user_run, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+                                    userRoutine=user_final, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    print *, "Registered Initialize, Run, and Finalize routines"
+    print *, "User Comp1 Register returning"
+    
+  end subroutine
+
+  !-------------------------------------------------------------------------
+  !   !  User Comp Component created by higher level calls, here is the
+  !   !   Initialization routine.
+    
+  subroutine user_init(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: comp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    ! Local variables
+    type(ESMF_VM)         :: vm
+    integer               :: petCount
+
+    ! local test variables
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer                :: result = 0
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User Comp1 Init starting: "
+
+    print *, "User Comp1 Init returning: "
+
+  end subroutine user_init
+
+
+  !-------------------------------------------------------------------------
+  !   !  The Run routine where data is computed.
+  !   !
+ 
+  subroutine user_run(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: comp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    ! Local variables
+    
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User Comp1 Run starting"
+
+    print *, "User Comp1 Run returning"
+
+  end subroutine user_run
+
+
+  !-------------------------------------------------------------------------
+  !   !  The Finalization routine where things are deleted and cleaned up.
+  !   !
+ 
+  subroutine user_final(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)  :: comp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+
+    ! Local variables
+    
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User Comp1 Final starting"
+
+    ! call ESMF_StatePrint(exportState)
+
+    print *, "User Comp1 Final returning"
+
+  end subroutine user_final
+
+
+end module ESMF_WebServUserModel
+
 
 program ESMF_WebServicesSTest
 #define ESMF_METHOD "program ESMF_WebServicesSTest"
@@ -27,12 +152,12 @@ program ESMF_WebServicesSTest
   implicit none
 
   ! Local variables
-  integer :: localPet, petCount, userrc, localrc, rc=ESMF_SUCCESS
-  character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-  type(ESMF_VM):: vm
-  type(ESMF_State) :: c1exp, c2imp
-  type(ESMF_GridComp) :: comp1
-  integer :: portNum
+  integer                    :: rc = ESMF_SUCCESS
+  character(len=ESMF_MAXSTR) :: cname1
+  type(ESMF_VM)              :: vm
+  type(ESMF_GridComp)        :: comp1
+  integer                    :: portNum
+  integer                    :: localrc
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -71,15 +196,13 @@ program ESMF_WebServicesSTest
 
   ! Create the model component
   cname1 = "user model 1"
-  ! use petList to define comp1 on PET 0,1,2,3
-!  comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=localrc)
   comp1 = ESMF_GridCompCreate(name=cname1, rc=localrc)
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
 
-  print *, "Comp Creates finished"
+  print *, "Comp Create finished"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -87,37 +210,12 @@ program ESMF_WebServicesSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetVM(comp1, userRoutine=userm1_setvm, rc=localrc)
-  print *, "Comp1 SetVM finished, rc= ", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
   call ESMF_GridCompSetServices(comp1, &
     userRoutine=ESMF_WebServUserModelRegister, rc=localrc)
   print *, "Comp1 SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-! Init section
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-
-  c1exp = ESMF_StateCreate(name="comp1 export",  &
-                           stateType=ESMF_STATE_EXPORT, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  c2imp = ESMF_StateCreate(name="comp2 import",  &
-                           stateType=ESMF_STATE_IMPORT, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -136,16 +234,6 @@ program ESMF_WebServicesSTest
 !-------------------------------------------------------------------------
 
   call ESMF_GridCompDestroy(comp1, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  call ESMF_StateDestroy(c1exp, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
-
-  call ESMF_StateDestroy(c2imp, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
@@ -171,7 +259,8 @@ program ESMF_WebServicesSTest
 
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
-  print *, "Test finished, localPet = ", localPet
+!  print *, "Test finished, localPet = ", localPet
+  print *, "Test finished, rc =  ", rc
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
