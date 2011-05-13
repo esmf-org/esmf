@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.104 2011/05/13 00:06:43 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.105 2011/05/13 23:25:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ using std::ostringstream;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.104 2011/05/13 00:06:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.105 2011/05/13 23:25:56 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -280,12 +280,6 @@ int Attribute::count=0;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
-
-  string empty="";  // set values initially empty to force writing out empty
-                    // containing XML tree structure(s) as per CIM standard
-  vector<string> cvalue;
-  cvalue.reserve(1);
-  cvalue.push_back(empty);
 
   Attribute *attr;
 
@@ -601,52 +595,21 @@ int Attribute::count=0;
       string attPackInstanceName;
       localrc = AttPackAddAttribute("Abbreviation", "ISO 19115",
                                       "Responsible Party Description", object);
-      attr = AttPackGetAttribute("Abbreviation");
-      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
-/*      localrc = AttPackSet("Abbreviation",
-         ESMC_TYPEKIND_CHARACTER, 1,
-         &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("EmailAddress", "ISO 19115",
                                       "Responsible Party Description", object);
-      attr = AttPackGetAttribute("EmailAddress");
-      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
-/*      localrc = AttPackSet("EmailAddress", ESMC_TYPEKIND_CHARACTER, 1,
-         &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("Name", "ISO 19115",
                                       "Responsible Party Description", object);
-      attr = AttPackGetAttribute("Name");
-      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
-/*      localrc = AttPackSet("Name", ESMC_TYPEKIND_CHARACTER, 1,
-         &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
-      attr = AttPackGetAttribute("PhysicalAddress");
-      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
-/*      localrc = AttPackSet("PhysicalAddress", ESMC_TYPEKIND_CHARACTER, 1,
-         &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("ResponsiblePartyRole", "ISO 19115",
                                       "Responsible Party Description", object);
-      attr = AttPackGetAttribute("ResponsiblePartyRole");
-      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
-/*      localrc = AttPackSet("ResponsiblePartyRole", ESMC_TYPEKIND_CHARACTER, 1,
-         &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);*/
 
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                                       "Responsible Party Description", object);
-      attr = AttPackGetAttribute("URL");
-      localrc = attr->AttrModifyValue(ESMC_TYPEKIND_CHARACTER, 1, &cvalue);
-/*      localrc = AttPackSet("URL", ESMC_TYPEKIND_CHARACTER, 1,
-         &cvalue, "ISO 19115", "Responsible Party Description",
-         object, attPackInstanceName);*/
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -692,12 +655,6 @@ int Attribute::count=0;
   int localrc;
   unsigned int i,j;
   Attribute *stdParent, *stdChild;
-
-  string empty="";  // set values initially empty to force writing out empty
-                    // containing XML tree structure(s) as per CIM standard
-  vector<string> cvalue;
-  cvalue.reserve(1);
-  cvalue.push_back(empty);
 
   if (convention.compare("CIM 1.5")!=0 ||
       purpose.compare("Model Component Simulation Description")!=0) {
@@ -846,12 +803,12 @@ int Attribute::count=0;
       //
       if (nestConvention[i].compare("ISO 19115") == 0 &&
           nestPurpose[i].compare("Responsible Party Description") == 0) {
-        localrc = stdChild->AttributeSet("Abbreviation", cvalue.size(), &cvalue);
-        localrc = stdChild->AttributeSet("EmailAddress", cvalue.size(), &cvalue);
-        localrc = stdChild->AttributeSet("Name", cvalue.size(), &cvalue);
-        localrc = stdChild->AttributeSet("PhysicalAddress", cvalue.size(), &cvalue);
-        localrc = stdChild->AttributeSet("ResponsiblePartyRole", cvalue.size(), &cvalue);
-        localrc = stdChild->AttributeSet("URL", cvalue.size(), &cvalue);
+        localrc = stdChild->AttPackAddAttribute("Abbreviation");
+        localrc = stdChild->AttPackAddAttribute("EmailAddress");
+        localrc = stdChild->AttPackAddAttribute("Name");
+        localrc = stdChild->AttPackAddAttribute("PhysicalAddress");
+        localrc = stdChild->AttPackAddAttribute("ResponsiblePartyRole");
+        localrc = stdChild->AttPackAddAttribute("URL");
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       }
@@ -5822,6 +5779,7 @@ int Attribute::count=0;
 
   int localrc;
   Attribute *attpack = NULL;
+  bool inNestedAttPacks;
 
   vector<string> valuevector;
   string value;
@@ -5836,17 +5794,22 @@ int Attribute::count=0;
           attpack->attrPurpose.compare("Responsible Party Description")==0))
       continue; // skip non-RPs
 
+    // if no attributes set in this attpack instance, skip it ...
+    if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
+
+    // otherwise, write it out ...
+
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
-      localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+        localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
       if (value == "center" || value == "funder") {
         if (attpack->AttributeIsSet("Name")) {
@@ -5881,94 +5844,92 @@ int Attribute::count=0;
       }
     }
 
-    // contactInfo header
-    localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    if (attpack->AttributeIsSet("PhysicalAddress") ||
+        attpack->AttributeIsSet("EmailAddress") ||
+        attpack->AttributeIsSet("URL")) {
 
-    // address header
-    localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeStartElement("gmd:deliveryPoint", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    if (attpack->AttributeIsSet("PhysicalAddress")) {
-      localrc = attpack->AttributeGet("PhysicalAddress", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
-      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      // contactInfo header
+      localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    } else { // output empty tag (required)
-      localrc = io_xml->writeElement("gco:CharacterString", "", ++indent, 0);
-    }
-
-    // address middle
-    localrc = io_xml->writeEndElement("gmd:deliveryPoint", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeStartElement("gmd:electronicMailAddress", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    if (attpack->AttributeIsSet("EmailAddress")) {
-      localrc = attpack->AttributeGet("EmailAddress", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
-      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    } else {  // output empty tag (required)
-      localrc = io_xml->writeElement("gco:CharacterString", "", ++indent, 0);
-    }
 
-    // address footer
-    localrc = io_xml->writeEndElement("gmd:electronicMailAddress", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeEndElement("gmd:CI_Address", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeEndElement("gmd:address", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      if (attpack->AttributeIsSet("PhysicalAddress") ||
+          attpack->AttributeIsSet("EmailAddress")) {
 
-    // url header
-    localrc = io_xml->writeStartElement("gmd:onlineResource", "", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeStartElement("gmd:CI_OnlineResource", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        // address header
+        localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        if (attpack->AttributeIsSet("PhysicalAddress")) {
+          localrc = attpack->AttributeGet("PhysicalAddress", &valuevector);
+          if (valuevector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                              "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value = valuevector.at(0);
+          localrc = io_xml->writeStartElement("gmd:deliveryPoint", "", ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-    if (attpack->AttributeIsSet("URL")) {
-      localrc = attpack->AttributeGet("URL", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
-      localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0);
+          localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeEndElement("gmd:deliveryPoint", --indent);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        }
+
+        if (attpack->AttributeIsSet("EmailAddress")) {
+          localrc = attpack->AttributeGet("EmailAddress", &valuevector);
+          if (valuevector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                              "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value = valuevector.at(0);
+          localrc = io_xml->writeStartElement("gmd:electronicMailAddress", "", indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          localrc = io_xml->writeEndElement("gmd:electronicMailAddress", --indent);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        }
+
+        // address footer
+        localrc = io_xml->writeEndElement("gmd:CI_Address", --indent);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement("gmd:address", --indent);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } // end if PhysicalAddress or EmailAddress
+
+      if (attpack->AttributeIsSet("URL")) {
+        localrc = attpack->AttributeGet("URL", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("gmd:onlineResource", "", indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeStartElement("gmd:CI_OnlineResource", "", ++indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+        localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement("gmd:linkage", --indent);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement("gmd:CI_OnlineResource", --indent);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement("gmd:onlineResource", --indent);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+
+      // contact footer
+      localrc = io_xml->writeEndElement("gmd:CI_Contact", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    } else { // output empty tag (required)
-      localrc = io_xml->writeElement("gmd:URL", "", ++indent, 0);
-    }
-
-    // url footer
-    localrc = io_xml->writeEndElement("gmd:linkage", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeEndElement("gmd:CI_OnlineResource", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeEndElement("gmd:onlineResource", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    // contact footer
-    localrc = io_xml->writeEndElement("gmd:CI_Contact", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeEndElement("gmd:contactInfo", --indent);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement("gmd:contactInfo", --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } // end if PhysicalAddress, EmailAddress or URL
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
       localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
@@ -5988,10 +5949,22 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:role", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {  // output empty tag (required in CIM 1.5)
+      localrc = io_xml->writeElement("gmd:role", "", indent, 0);
     }
 
-    // get initials from IndividualName
-    if (attpack->AttributeIsSet("Name")) {
+    // use "Abbreviation" attribute if set ...
+    if (attpack->AttributeIsSet("Abbreviation")) {
+      localrc = attpack->AttributeGet("Abbreviation", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
+      localrc = io_xml->writeElement("abbreviation", value, indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else if (attpack->AttributeIsSet("Name")) {
+      // ... otherwise get initials from "Name"
       localrc = attpack->AttributeGet("Name", &valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,

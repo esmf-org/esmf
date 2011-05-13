@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.28 2011/05/12 23:54:22 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.29 2011/05/13 23:25:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -348,6 +348,9 @@ convention=convCIM, purpose=purpPlatform, rc=rc)
       ! Responsible party attributes (for Principal Investigator)
       call ESMF_AttributeSet(cplcomp, 'Name', &
        'Gerard Devine', &
+        convention=convISO, purpose=purpRP, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'Abbreviation', &
+       'GMD', &
         convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'PhysicalAddress', &
 'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
