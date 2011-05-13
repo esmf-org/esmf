@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.77 2011/02/26 01:40:09 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.78 2011/05/13 20:22:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.77 2011/02/26 01:40:09 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.78 2011/05/13 20:22:23 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -534,13 +534,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDGP(distgrid, firstExtra, lastExtra, &
+  function ESMF_DistGridCreateDGP(distgrid, firstExtraPTile, lastExtraPTile, &
     keywordEnforcer, indexflag, connectionList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),   intent(in)            :: distgrid
-    integer, target,       intent(in)            :: firstExtra(:,:)
-    integer, target,       intent(in)            :: lastExtra(:,:)
+    integer, target,       intent(in)            :: firstExtraPTile(:,:)
+    integer, target,       intent(in)            :: lastExtraPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IndexFlag),  intent(in), optional  :: indexflag
     integer, target,       intent(in), optional  :: connectionList(:,:)
@@ -554,13 +554,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create a new DistGrid from an existing DistGrid, keeping the decomposition
-!     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
+!     unchanged. The {\tt firstExtraPTile} and {\tt lastExtraPTile} arguments allow extra
 !     elements to be added at the first/last edge DE in each dimension. The 
 !     method also allows the {\tt indexflag} to be set. Further, if the 
 !     {\tt connectionList} argument is passed in it will be used to set 
 !     connections in the newly created DistGrid, otherwise the connections of
 !     the incoming DistGrid will be used.
-!     If neither {\tt firstExtra}, {\tt lastExtra}, {\tt indexflag}, nor 
+!     If neither {\tt firstExtraPTile}, {\tt lastExtraPTile}, {\tt indexflag}, nor 
 !     {\tt connectionList} arguments are specified, the method reduces to a 
 !     deep copy of the incoming DistGrid object.
 !
@@ -568,9 +568,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[distgrid]
 !          Incoming DistGrid object.
-!     \item[firstExtra]
+!     \item[firstExtraPTile]
 !          Extra elements on the edge of the first DEs along each dimension.
-!     \item[lastExtra]
+!     \item[lastExtraPTile]
 !          Extra elements on the edge of the last DEs along each dimension.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
@@ -597,10 +597,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    firstExtraArg = ESMF_InterfaceIntCreate(farray2D=firstExtra, rc=localrc)
+    firstExtraArg = ESMF_InterfaceIntCreate(farray2D=firstExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    lastExtraArg = ESMF_InterfaceIntCreate(farray2D=lastExtra, rc=localrc)
+    lastExtraArg = ESMF_InterfaceIntCreate(farray2D=lastExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     connectionListArg = &
@@ -1383,18 +1383,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDP(minIndex, maxIndex, keywordEnforcer, regDecomp,&
-    decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
-    indexflag, connectionList, delayout, vm, rc)
+  function ESMF_DistGridCreateRDP(minIndexPTile, maxIndexPTile, keywordEnforcer, &
+    regDecompPTile, decompflagPTile, regDecompFirstExtraPTile,  &
+    regDecompLastExtraPTile, deLabelList, indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minIndex(:,:)
-    integer,                      intent(in)            :: maxIndex(:,:)
+    integer,                      intent(in)            :: minIndexPTile(:,:)
+    integer,                      intent(in)            :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                      intent(in), optional  :: regDecomp(:,:)
-    type(ESMF_DecompFlag),target, intent(in), optional  :: decompflag(:,:)
-    integer,              target, intent(in), optional  :: regDecompFirstExtra(:,:)
-    integer,              target, intent(in), optional  :: regDecompLastExtra(:,:)
+    integer,                      intent(in), optional  :: regDecompPTile(:,:)
+    type(ESMF_DecompFlag),target, intent(in), optional  :: decompflagPTile(:,:)
+    integer,              target, intent(in), optional  :: regDecompFirstExtraPTile(:,:)
+    integer,              target, intent(in), optional  :: regDecompLastExtraPTile(:,:)
     integer,                      intent(in), optional  :: deLabelList(:)
     type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
     integer,                      intent(in), optional  :: connectionList(:,:)
@@ -1415,45 +1415,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     each dimension into a fixed number of DEs. A regular decomposition of a
 !     tilework of tiles is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
-!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
+!     {\tt regDecompPTile} argument ascribes DE counts for each dimension. It is 
 !     erroneous to provide more tiles than there are DEs.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
+!     \item[minIndexPTile]
 !          The first index provides the global coordinate tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
+!     \item[maxIndexPTile]
 !          The first index provides the global coordinate tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
-!     \item[{[regDecomp]}]
+!     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second 
 !          index indicates the tile number. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
 !          {\tt deCount} for a default DELayout equals {\tt petCount}, i.e. the
 !          default decomposition will be into as many DEs as there are 
 !          PETs and the distribution will be 1 DE per PET.
-!     \item[{[decompflag]}]
+!     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tiles. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
-!     \item[{[regDecompFirstExtra]}]
+!     \item[{[regDecompFirstExtraPTile]}]
 !          Extra elements on the first DEs along each dimension in a regular
 !          decomposition. The default is a zero vector. The second index 
 !          indicates the tile number.
-!     \item[{[regDecompLastExtra]}]
+!     \item[{[regDecompLastExtraPTile]}]
 !          Extra elements on the last DEs along each dimension in a regular
 !          decomposition. The default is a zero vector. The second index 
 !          indicates the tile number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
-!          sequence is given by the column major order of the {\tt regDecomp}
+!          sequence is given by the column major order of the {\tt regDecompPTile}
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
@@ -1470,7 +1470,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
 !                index of the two connected tiles respectively,
 !          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
+!                minIndexPTile to tile B's minIndexPTile.
 !          \item {\tt orientationVector} associates each dimension of tile A
 !                with a dimension in tile B's index space. Negative index
 !                values may be used to indicate a reversal in index orientation.
@@ -1479,7 +1479,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
 !          a DELayout object is specified its number of DEs must match the 
-!          number indicated by {\tt regDecomp}.
+!          number indicated by {\tt regDecompPTile}.
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
@@ -1512,30 +1512,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Deal with (optional) array arguments
-    minIndexArg = ESMF_InterfaceIntCreate(farray2D=minIndex, rc=localrc)
+    minIndexArg = ESMF_InterfaceIntCreate(farray2D=minIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexArg = ESMF_InterfaceIntCreate(farray2D=maxIndex, rc=localrc)
+    maxIndexArg = ESMF_InterfaceIntCreate(farray2D=maxIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecomp, rc=localrc)
+    regDecompArg = ESMF_InterfaceIntCreate(farray2D=regDecompPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if (present(decompflag)) then
-      len1_decompflag = size(decompflag, 1)
-      len2_decompflag = size(decompflag, 2)
-      opt_decompflag => decompflag
+    if (present(decompflagPTile)) then
+      len1_decompflag = size(decompflagPTile, 1)
+      len2_decompflag = size(decompflagPTile, 2)
+      opt_decompflag => decompflagPTile
     else
       len1_decompflag = 0
       len2_decompflag = 0
       opt_decompflag => dummyDf
     endif
     regDecompFirstExtraArg = &
-      ESMF_InterfaceIntCreate(farray2D=regDecompFirstExtra, rc=localrc)
+      ESMF_InterfaceIntCreate(farray2D=regDecompFirstExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     regDecompLastExtraArg = &
-      ESMF_InterfaceIntCreate(farray2D=regDecompLastExtra, rc=localrc)
+      ESMF_InterfaceIntCreate(farray2D=regDecompLastExtraPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     deLabelListArg = ESMF_InterfaceIntCreate(deLabelList, rc=localrc)
@@ -2199,18 +2199,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBAI()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create (1+n)D DistGrid object from user's arbitray index list and minIndex/maxIndex
+! !IROUTINE: ESMF_DistGridCreate - Create (1+n)D DistGrid object from user's arbitray index list and minIndexPTile/maxIndexPTile
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBAI(arbSeqIndexList, arbDim, &
-    minIndex, maxIndex, keywordEnforcer, rc)
+    minIndexPTile, maxIndexPTile, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     integer,    intent(in)            :: arbSeqIndexList(:)
     integer,    intent(in)            :: arbDim
-    integer,    intent(in)            :: minIndex(:)
-    integer,    intent(in)            :: maxIndex(:)
+    integer,    intent(in)            :: minIndexPTile(:)
+    integer,    intent(in)            :: maxIndexPTile(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,    intent(out),optional  :: rc
 !         
@@ -2222,7 +2222,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} of {\tt dimCount} $1+n$, where 
-!     $n=$ {\tt size(minIndex)} = {\tt size(maxIndex)}.
+!     $n=$ {\tt size(minIndexPTile)} = {\tt size(maxIndexPTile)}.
 !
 !     The resulting DistGrid will have a 1D distribution determined by the
 !     PET-local {\tt arbSeqIndexList}. The PET-local size of the
@@ -2233,7 +2233,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     the current VM.
 !
 !     In addition to the arbitrarily distributed dimension, regular DistGrid
-!     dimensions can be specified in {\tt minIndex} and {\tt maxIndex}. The
+!     dimensions can be specified in {\tt minIndexPTile} and {\tt maxIndexPTile}. The
 !     $n$ dimensional subspace spanned by the regular dimensions is "multiplied"
 !     with the arbitrary dimension on each DE, to form a $1+n$ dimensional
 !     total index space described by the DistGrid object. The {\tt arbDim}
@@ -2246,10 +2246,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of arbitrary sequence indices that reside on the local PET.
 !     \item[arbDim]
 !          Dimension of the arbitrary distribution.
-!     \item[minIndex]
+!     \item[minIndexPTile]
 !          Global coordinate tuple of the lower corner of the tile. The 
 !          arbitrary dimension is {\em not} included in this tile
-!     \item[maxIndex]
+!     \item[maxIndexPTile]
 !          Global coordinate tuple of the upper corner of the tile. The
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[{[rc]}]
@@ -2276,10 +2276,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
     ! check input
-    dimCount = size(minIndex)
-    if (dimCount /= size(maxIndex)) then
+    dimCount = size(minIndexPTile)
+    if (dimCount /= size(maxIndexPTile)) then
       call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-          msg="- size(minIndex) must match size(maxIndex)", &
+          msg="- size(minIndexPTile) must match size(maxIndexPTile)", &
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
@@ -2319,8 +2319,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (j==arbDim) cycle
         jj=j
         if (j>arbDim) jj=jj-1
-        deblock(j,1,i) = minIndex(jj) ! min
-        deblock(j,2,i) = maxIndex(jj) ! max
+        deblock(j,1,i) = minIndexPTile(jj) ! min
+        deblock(j,2,i) = maxIndexPTile(jj) ! max
       enddo
     enddo
 
@@ -2446,9 +2446,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
   subroutine ESMF_DistGridGetDefault(distgrid, keywordEnforcer, delayout, dimCount, &
-    tileCount, minIndexPDimPTile, maxIndexPDimPTile, elementCountPTile, &
-    minIndexPDimPDe, maxIndexPDimPDe, elementCountPDe, tileListPDe, &
-    indexCountPDimPDe, collocationPDim, regDecompFlag, rc)
+    tileCount, minIndexPTile, maxIndexPTile, elementCountPTile, &
+    minIndexPDe, maxIndexPDe, elementCountPDe, deToTileMap, &
+    indexCountPDe, collocation, regDecompFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),    intent(in)            :: distgrid
@@ -2456,15 +2456,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),    intent(out), optional :: delayout
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: tileCount
-    integer,        target, intent(out), optional :: minIndexPDimPTile(:,:)
-    integer,        target, intent(out), optional :: maxIndexPDimPTile(:,:)
+    integer,        target, intent(out), optional :: minIndexPTile(:,:)
+    integer,        target, intent(out), optional :: maxIndexPTile(:,:)
     integer,        target, intent(out), optional :: elementCountPTile(:)
-    integer,        target, intent(out), optional :: minIndexPDimPDe(:,:)
-    integer,        target, intent(out), optional :: maxIndexPDimPDe(:,:)
+    integer,        target, intent(out), optional :: minIndexPDe(:,:)
+    integer,        target, intent(out), optional :: maxIndexPDe(:,:)
     integer,        target, intent(out), optional :: elementCountPDe(:)
-    integer,        target, intent(out), optional :: tileListPDe(:)
-    integer,        target, intent(out), optional :: indexCountPDimPDe(:,:)
-    integer,        target, intent(out), optional :: collocationPDim(:)
+    integer,        target, intent(out), optional :: deToTileMap(:)
+    integer,        target, intent(out), optional :: indexCountPDe(:,:)
+    integer,        target, intent(out), optional :: collocation(:)
     logical,                intent(out), optional :: regDecompFlag
     integer,                intent(out), optional :: rc
 !         
@@ -2481,42 +2481,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Number of dimensions (rank) of {\tt distgrid}.
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
-!   \item[{[minIndexPDimPTile]}]
+!   \item[{[minIndexPTile]}]
 !     Lower index space corner per {\tt dim}, per {\tt tile}, with
-!     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
-!   \item[{[maxIndexPDimPTile]}]
+!     {\tt size(minIndexPTile) == (/dimCount, tileCount/)}.
+!   \item[{[maxIndexPTile]}]
 !     Upper index space corner per {\tt dim}, per {\tt tile}, with
-!     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
+!     {\tt size(minIndexPTile) == (/dimCount, tileCount/)}.
 !   \item[{[elementCountPTile]}]
 !     Number of elements in exclusive region per tile, with
 !     {\tt size(elementCountPTile) == (/tileCount/)}
-!   \item[{[minIndexPDimPDe]}]
+!   \item[{[minIndexPDe]}]
 !     \begin{sloppypar}
 !     Lower index space corner per {\tt dim}, per {\tt De}, with
-!     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
+!     {\tt size(minIndexPDe) == (/dimCount, deCount/)}.
 !     \end{sloppypar}
-!   \item[{[maxIndexPDimPDe]}]
+!   \item[{[maxIndexPDe]}]
 !     \begin{sloppypar}
 !     Upper index space corner per {\tt dim}, per {\tt de}, with
-!     {\tt size(minIndexPDimPDe) == (/dimCount, deCount/)}.
+!     {\tt size(minIndexPDe) == (/dimCount, deCount/)}.
 !     \end{sloppypar}
 !   \item[{[elementCountPDe]}]
 !     \begin{sloppypar}
 !     Number of elements in exclusive region per DE, with
 !     {\tt size(elementCountPDe) == (/deCount/)}
 !     \end{sloppypar}
-!   \item[{[tileListPDe]}]
+!   \item[{[deToTileMap]}]
 !     List of tile id numbers, one for each DE, with
-!     {\tt size(tileListPDe) == (/deCount/)}
-!   \item[{[indexCountPDimPDe]}]
+!     {\tt size(deToTileMap) == (/deCount/)}
+!   \item[{[indexCountPDe]}]
 !     \begin{sloppypar}
 !     Array of extents per {\tt dim}, per {\tt de}, with
-!     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
+!     {\tt size(indexCountPDe) == (/dimCount, deCount/)}.
 !     \end{sloppypar}
-!   \item[{[collocationPDim]}]
+!   \item[{[collocation]}]
 !     \begin{sloppypar}
 !     List of collocation id numbers, one for each dim, with
-!     {\tt size(collocationPDim) == (/dimCount/)}
+!     {\tt size(collocation) == (/dimCount/)}
 !     \end{sloppypar}
 !   \item[{[regDecompFlag]}]
 !     Flag equal to {\tt ESMF\_TRUE} for regular decompositions
@@ -2528,15 +2528,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc                ! local return code
-    type(ESMF_InterfaceInt) :: minIndexPDimPTileArg  ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexPDimPTileArg  ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexPTileArg  ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexPTileArg  ! helper variable
     type(ESMF_InterfaceInt) :: elementCountPTileArg  ! helper variable
-    type(ESMF_InterfaceInt) :: minIndexPDimPDeArg     ! helper variable
-    type(ESMF_InterfaceInt) :: maxIndexPDimPDeArg     ! helper variable
+    type(ESMF_InterfaceInt) :: minIndexPDeArg     ! helper variable
+    type(ESMF_InterfaceInt) :: maxIndexPDeArg     ! helper variable
     type(ESMF_InterfaceInt) :: elementCountPDeArg     ! helper variable
-    type(ESMF_InterfaceInt) :: tileListPDeArg        ! helper variable
-    type(ESMF_InterfaceInt) :: indexCountPDimPDeArg   ! helper variable
-    type(ESMF_InterfaceInt) :: collocationPDimArg     ! helper variable
+    type(ESMF_InterfaceInt) :: deToTileMapArg        ! helper variable
+    type(ESMF_InterfaceInt) :: indexCountPDeArg   ! helper variable
+    type(ESMF_InterfaceInt) :: collocationArg     ! helper variable
     type(ESMF_Logical)      :: regDecompFlagArg       ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -2547,45 +2547,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Deal with (optional) array arguments
-    minIndexPDimPTileArg = &
-      ESMF_InterfaceIntCreate(farray2D=minIndexPDimPTile, rc=localrc)
+    minIndexPTileArg = &
+      ESMF_InterfaceIntCreate(farray2D=minIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexPDimPTileArg = &
-      ESMF_InterfaceIntCreate(farray2D=maxIndexPDimPTile, rc=localrc)
+    maxIndexPTileArg = &
+      ESMF_InterfaceIntCreate(farray2D=maxIndexPTile, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     elementCountPTileArg = ESMF_InterfaceIntCreate(elementCountPTile, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    minIndexPDimPDeArg = &
-      ESMF_InterfaceIntCreate(farray2D=minIndexPDimPDe, rc=localrc)
+    minIndexPDeArg = &
+      ESMF_InterfaceIntCreate(farray2D=minIndexPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    maxIndexPDimPDeArg = &
-      ESMF_InterfaceIntCreate(farray2D=maxIndexPDimPDe, rc=localrc)
+    maxIndexPDeArg = &
+      ESMF_InterfaceIntCreate(farray2D=maxIndexPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     elementCountPDeArg = ESMF_InterfaceIntCreate(elementCountPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    tileListPDeArg = ESMF_InterfaceIntCreate(tileListPDe, rc=localrc)
+    deToTileMapArg = ESMF_InterfaceIntCreate(deToTileMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    indexCountPDimPDeArg = ESMF_InterfaceIntCreate(farray2D=indexCountPDimPDe, &
+    indexCountPDeArg = ESMF_InterfaceIntCreate(farray2D=indexCountPDe, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    collocationPDimArg = ESMF_InterfaceIntCreate(collocationPDim, rc=localrc)
+    collocationArg = ESMF_InterfaceIntCreate(collocation, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridGet(distgrid, dimCount, tileCount, &
-      minIndexPDimPTileArg, maxIndexPDimPTileArg, elementCountPTileArg, &
-      minIndexPDimPDeArg, maxIndexPDimPDeArg, elementCountPDeArg, &
-      tileListPDeArg, indexCountPDimPDeArg, collocationPDimArg, &
+      minIndexPTileArg, maxIndexPTileArg, elementCountPTileArg, &
+      minIndexPDeArg, maxIndexPDeArg, elementCountPDeArg, &
+      deToTileMapArg, indexCountPDeArg, collocationArg, &
       regDecompFlagArg, delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2601,31 +2601,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! garbage collection
-    call ESMF_InterfaceIntDestroy(minIndexPDimPTileArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexPTileArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexPDimPTileArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexPTileArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(elementCountPTileArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(minIndexPDimPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(minIndexPDeArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(maxIndexPDimPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(maxIndexPDeArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_InterfaceIntDestroy(elementCountPDeArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(tileListPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(deToTileMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(indexCountPDimPDeArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(indexCountPDeArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(collocationPDimArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(collocationArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.212 2011/05/12 14:38:22 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.213 2011/05/13 20:22:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.212 2011/05/12 14:38:22 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.213 2011/05/13 20:22:26 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2957,8 +2957,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     call ESMF_DistgridGet(oldDistgrid, &
-           minIndexPDimPTile=minIndexPDimPTile, &
-           maxIndexPDimPTile=maxIndexPDimPTile, &
+           minIndexPTile=minIndexPDimPTile, &
+           maxIndexPTile=maxIndexPDimPTile, &
            rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3242,7 +3242,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt) :: coordDimCountArg  ! Language Interface Helper Var
     type(ESMF_InterfaceInt) :: coordDimMapArg ! Language Interface Helper Var
     integer :: intDestroyDistgrid,intDestroyDELayout
-    integer, allocatable :: collocationPDim(:)
+    integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
     integer :: i, deCount, distDimCount, arbDim
     type(ESMF_DELayout) :: delayout
@@ -3270,17 +3270,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if (deCount > 0) then
-      allocate(collocationPDim(distDimCount))  ! dimCount
+      allocate(collocation(distDimCount))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
-           collocationPDim=collocationPDim, rc=localrc)
+           collocation=collocation, rc=localrc)
       do i=1,distDimCount
-          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(i), &
+          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(i), &
               arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           if (arbSeqIndexFlag) arbDim = i
       enddo
-      deallocate(collocationPDim)
+      deallocate(collocation)
     endif
 
     if (arbDim /= -1) then
@@ -3463,7 +3463,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical, pointer :: isDistDim(:)
     integer :: i, j, k, arbDim, deCount
     integer, allocatable :: distDimLocal(:)
-    integer, allocatable :: collocationPDim(:)
+    integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
     type(ESMF_DELayout) :: delayout
 
@@ -3601,20 +3601,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     if (deCount > 0) then
-      allocate(collocationPDim(dimCount1))  ! dimCount
+      allocate(collocation(dimCount1))  ! dimCount
       call ESMF_DistGridGet(distgrid,   &
-           collocationPDim=collocationPDim, rc=localrc)
+           collocation=collocation, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i=1,dimCount1
-          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(i), &
+          call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(i), &
               arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           if (arbSeqIndexFlag) arbDim = i
       enddo
-      deallocate(collocationPDim)
+      deallocate(collocation)
     endif
 
     if (arbDim == -1) then
@@ -3627,8 +3627,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (undistDimCount /= 0) then
       allocate(minIndexPTile(dimCount1,1))
       allocate(maxIndexPTile(dimCount1,1))
-      call ESMF_DistGridGet(distgrid, minIndexPDimPTile=minIndexPTile, &
-	  maxIndexPDimPTile=maxIndexPTile, rc=localrc)
+      call ESMF_DistGridGet(distgrid, minIndexPTile=minIndexPTile, &
+	  maxIndexPTile=maxIndexPTile, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4023,8 +4023,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! get dimension from distgrid
-    call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPDimPTile=minInd,&
-		         maxIndexPDimPTile=maxInd, rc=localrc)
+    call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPTile=minInd,&
+		         maxIndexPTile=maxInd, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 

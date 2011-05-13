@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.19 2011/02/23 20:05:29 w6ws Exp $
+! $Id: ESMF_XGridGet.F90,v 1.20 2011/05/13 20:22:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.19 2011/02/23 20:05:29 w6ws Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.20 2011/05/13 20:22:32 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -675,8 +675,7 @@ integer, intent(out), optional               :: rc
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     allocate(minIndex(1, deCount))
-    call ESMF_DistGridGet(xgtypep%distgridM, minIndexPDimPDe=minIndex, &
-        rc=localrc)
+    call ESMF_DistGridGet(xgtypep%distgridM, minIndexPDe=minIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -685,8 +684,7 @@ integer, intent(out), optional               :: rc
     endif
 
     allocate(maxIndex(1, deCount))
-    call ESMF_DistGridGet(xgtypep%distgridM, maxIndexPDimPDe=maxIndex, &
-        rc=localrc)
+    call ESMF_DistGridGet(xgtypep%distgridM, maxIndexPDe=maxIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

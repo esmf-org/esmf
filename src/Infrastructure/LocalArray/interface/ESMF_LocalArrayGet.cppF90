@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.26 2011/04/25 19:16:49 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.27 2011/05/13 20:22:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.26 2011/04/25 19:16:49 theurich Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.27 2011/05/13 20:22:29 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -270,16 +270,16 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()
   subroutine ESMF_LocalArrayGetDefault(localarray, keywordEnforcer, &
-    typekind, rank, counts, lbounds, ubounds, rc)
+    typekind, rank, totalCount, totalLBound, totalUBound, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TypeKind),        intent(out), optional :: typekind
     integer,                    intent(out), optional :: rank
-    integer,                    intent(out), optional :: counts(:)
-    integer,                    intent(out), optional :: lbounds(:)
-    integer,                    intent(out), optional :: ubounds(:)
+    integer,                    intent(out), optional :: totalCount(:)
+    integer,                    intent(out), optional :: totalLBound(:)
+    integer,                    intent(out), optional :: totalUBound(:)
     integer,                    intent(out), optional :: rc             
 !
 !
@@ -297,11 +297,11 @@ contains
 !     TypeKind of the LocalArray object.
 !   \item[{[rank]}]
 !     Rank of the LocalArray object.
-!   \item[{[counts]}]
+!   \item[{[totalCount]}]
 !     Count per dimension.
-!   \item[{[lbounds]}]
+!   \item[{[totalLBound]}]
 !     Lower bound per dimension.
-!   \item[{[ubounds]}]
+!   \item[{[totalUBound]}]
 !     Upper bound per dimension.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -335,40 +335,40 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(counts)) then
-      if (size(counts) < lrank) then
+    if (present(totalCount)) then
+      if (size(totalCount) < lrank) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="- size of counts argument is smaller than rank", &
+          msg="- size of totalCount argument is smaller than rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      call c_esmc_localarraygetcounts(localarray, counts, localrc)
+      call c_esmc_localarraygetcounts(localarray, totalCount, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(lbounds)) then
-      if (size(lbounds) < lrank) then
+    if (present(totalLBound)) then
+      if (size(totalLBound) < lrank) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="- size of lbounds argument is smaller than rank", &
+          msg="- size of totalLBound argument is smaller than rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      call c_ESMC_LocalArrayGetLbounds(localarray, lbounds, localrc)
+      call c_ESMC_LocalArrayGetLbounds(localarray, totalLBound, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(ubounds)) then
-      if (size(ubounds) < lrank) then
+    if (present(totalUBound)) then
+      if (size(totalUBound) < lrank) then
         call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-          msg="- size of ubounds argument is smaller than rank", &
+          msg="- size of totalUBound argument is smaller than rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      call c_ESMC_LocalArrayGetUbounds(localarray, ubounds, localrc)
+      call c_ESMC_LocalArrayGetUbounds(localarray, totalUBound, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

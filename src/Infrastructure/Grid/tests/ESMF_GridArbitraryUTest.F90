@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.23 2011/02/24 22:58:13 oehmke Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.24 2011/05/13 20:22:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.23 2011/02/24 22:58:13 oehmke Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.24 2011/05/13 20:22:28 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -271,8 +271,8 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   allocate(minIndex(distDimCount,1), maxIndex(distDimCount,1))
   call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, &
-	minIndexPDimPTile=minIndex, &
-	maxIndexPDimPTile=maxIndex, &
+	minIndexPTile=minIndex, &
+	maxIndexPTile=maxIndex, &
 	elementCountPTile=localCount2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_DELayoutGet(delayout, deCount=deCount, localdeList=deList, rc=localrc)
@@ -723,8 +723,8 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   allocate(minIndex(distDimCount,1), maxIndex(distDimCount,1))
   call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, &
-	minIndexPDimPTile=minIndex, &
-	maxIndexPDimPTile=maxIndex, &
+	minIndexPTile=minIndex, &
+	maxIndexPTile=maxIndex, &
 	elementCountPTile=localCount2, rc=localrc)
 
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1200,7 +1200,7 @@ program ESMF_GridArbitraryUTest
 
   ! get the dimension of the array
   call ESMF_ArrayGet(array2D, localDE=0, localarray=larray, rc=localrc)
-  call ESMF_LocalArrayGet(larray, lbounds=lowbound, ubounds=upbound, &
+  call ESMF_LocalArrayGet(larray, totalLBound=lowbound, totalUBound=upbound, &
 	    rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1291,7 +1291,7 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
-  distgrid = ESMF_DistGridCreate(local1Dindices, 1, minIndex=(/1/), maxIndex=(/zdim/), rc=localrc)
+  distgrid = ESMF_DistGridCreate(local1Dindices, 1, minIndexPTile=(/1/), maxIndexPTile=(/zdim/), rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   ! bugs in ESMF_DistGrid.F90, need to pass localcount as work around
@@ -1324,7 +1324,7 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
-  distgrid = ESMF_DistGridCreate(local1Dindices, 1, minIndex=(/1/), maxIndex=(/zdim/), rc=localrc)
+  distgrid = ESMF_DistGridCreate(local1Dindices, 1, minIndexPTile=(/1/), maxIndexPTile=(/zdim/), rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   distDim(1)=1

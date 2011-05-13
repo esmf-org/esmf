@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.61 2011/03/08 05:36:15 w6ws Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.62 2011/05/13 20:22:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.61 2011/03/08 05:36:15 w6ws Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.62 2011/05/13 20:22:20 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -135,8 +135,8 @@ contains
     arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
     exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
     totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
-    totalUWidth, distgrid, dimCount, tileCount, minIndexPDimPTile, &
-    maxIndexPDimPTile, tileListPDe, indexCountPDimPDe, delayout, deCount, &
+    totalUWidth, distgrid, dimCount, tileCount, minIndexPTile, &
+    maxIndexPTile, deToTileMap, indexCountPDe, delayout, deCount, &
     localDeCount, localDeList, name, rc)
 !
 ! !ARGUMENTS:
@@ -165,10 +165,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid),           intent(out), optional :: distgrid
     integer,                       intent(out), optional :: dimCount
     integer,                       intent(out), optional :: tileCount
-    integer,                       intent(out), optional :: minIndexPDimPTile(:,:)
-    integer,                       intent(out), optional :: maxIndexPDimPTile(:,:)
-    integer,                       intent(out), optional :: tileListPDe(:)
-    integer,                       intent(out), optional :: indexCountPDimPDe(:,:)
+    integer,                       intent(out), optional :: minIndexPTile(:,:)
+    integer,                       intent(out), optional :: maxIndexPTile(:,:)
+    integer,                       intent(out), optional :: deToTileMap(:)
+    integer,                       intent(out), optional :: indexCountPDe(:,:)
     type(ESMF_DELayout),           intent(out), optional :: delayout
     integer,                       intent(out), optional :: deCount
     integer,                       intent(out), optional :: localDeCount
@@ -283,19 +283,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Number of dimensions (rank) of {\tt distgrid}.
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
-!   \item[{[minIndexPDimPTile]}]
+!   \item[{[minIndexPTile]}]
 !     Lower index space corner per {\tt dim}, per {\tt tile}, with
-!     {\tt size(minIndexPDimPTile) == (/dimCount, tileCount/)}.
-!   \item[{[maxIndexPDimPTile]}]
+!     {\tt size(minIndexPTile) == (/dimCount, tileCount/)}.
+!   \item[{[maxIndexPTile]}]
 !     Upper index space corner per {\tt dim}, per {\tt tile}, with
-!     {\tt size(maxIndexPDimPTile) == (/dimCount, tileCount/)}.
-!   \item[{[tileListPDe]}]
+!     {\tt size(maxIndexPTile) == (/dimCount, tileCount/)}.
+!   \item[{[deToTileMap]}]
 !     List of tile id numbers, one for each DE, with
-!     {\tt size(tileListPDe) == (/deCount/)}
-!   \item[{[indexCountPDimPDe]}]
+!     {\tt size(deToTileMap) == (/deCount/)}
+!   \item[{[indexCountPDe]}]
 !     \begin{sloppypar}
 !     Array of extents per {\tt dim}, per {\tt de}, with
-!     {\tt size(indexCountPDimPDe) == (/dimCount, deCount/)}.
+!     {\tt size(indexCountPDe) == (/dimCount, deCount/)}.
 !     \end{sloppypar}
 !   \item[{[delayout]}]
 !     Upon return this holds the associated {\tt ESMF\_DELayout} object.
@@ -506,9 +506,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Obtain DistGrid information
     call ESMF_DistGridGet(opt_distgrid, dimCount=dimCount, &
-      tileCount=tileCount, minIndexPDimPTile=minIndexPDimPTile, &
-      maxIndexPDimPTile=maxIndexPDimPTile, tileListPDe=tileListPDe, &
-      indexCountPDimPDe=indexCountPDimPDe, rc=localrc)
+      tileCount=tileCount, minIndexPTile=minIndexPTile, &
+      maxIndexPTile=maxIndexPTile, deToTileMap=deToTileMap, &
+      indexCountPDe=indexCountPDe, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -651,8 +651,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
     allocate(indexCountInternal(dimCount,0:deCount-1))
-    call ESMF_DistGridGet(distgrid, indexCountPDimPDe=indexCountInternal, &
-      rc=localrc)
+    call ESMF_DistGridGet(distgrid, indexCountPDe=indexCountInternal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     allocate(localDeList(0:localDeCount-1))

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.31 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.32 2011/05/13 20:22:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.31 2011/01/07 18:32:17 rokuingh Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.32 2011/05/13 20:22:24 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,14 +58,14 @@ program ESMF_DistGridCreateGetUTest
   integer:: dimCount, tileCount, deCount
   logical:: regDecompFlag
   integer:: elementCount, localStart
-  integer, allocatable:: elementCountPTile(:), tileListPDe(:), elementCountPDe(:)
-  integer, allocatable:: minIndexPDimPTile(:,:), maxIndexPDimPTile(:,:)
-  integer, allocatable:: minIndexPDimPDe(:,:), maxIndexPDimPDe(:,:)
-  integer, allocatable:: indexCountPDimPDe(:,:), localDeList(:)
+  integer, allocatable:: elementCountPTile(:), deToTileMap(:), elementCountPDe(:)
+  integer, allocatable:: minIndexPTile(:,:), maxIndexPTile(:,:)
+  integer, allocatable:: minIndexPDe(:,:), maxIndexPDe(:,:)
+  integer, allocatable:: indexCountPDe(:,:), localDeList(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
-  integer, allocatable:: collocationPDim(:)
+  integer, allocatable:: collocation(:)
   logical:: loopResult
   logical:: matchResult
   logical:: arbSeqIndexFlag
@@ -210,35 +210,35 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - minIndexPDimPTile(:,:)"
+  write(name, *) "DistGridGet() - minIndexPTile(:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(minIndexPDimPTile(dimCount,tileCount))
-  call ESMF_DistGridGet(distgrid, minIndexPDimPTile=minIndexPDimPTile, rc=rc)
+  allocate(minIndexPTile(dimCount,tileCount))
+  call ESMF_DistGridGet(distgrid, minIndexPTile=minIndexPTile, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify minIndexPDimPTile(:,:)"
+  write(name, *) "Verify minIndexPTile(:,:)"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((minIndexPDimPTile(1,1) == 1), &
+  call ESMF_Test((minIndexPTile(1,1) == 1), &
     name, failMsg, result, ESMF_SRCLINE)
-  deallocate(minIndexPDimPTile)
+  deallocate(minIndexPTile)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - maxIndexPDimPTile(:,:)"
+  write(name, *) "DistGridGet() - maxIndexPTile(:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(maxIndexPDimPTile(dimCount,tileCount))
-  call ESMF_DistGridGet(distgrid, maxIndexPDimPTile=maxIndexPDimPTile, rc=rc)
+  allocate(maxIndexPTile(dimCount,tileCount))
+  call ESMF_DistGridGet(distgrid, maxIndexPTile=maxIndexPTile, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify maxIndexPDimPTile(:,:)"
+  write(name, *) "Verify maxIndexPTile(:,:)"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((maxIndexPDimPTile(1,1) == 1000), &
+  call ESMF_Test((maxIndexPTile(1,1) == 1000), &
     name, failMsg, result, ESMF_SRCLINE)
-  deallocate(maxIndexPDimPTile)
+  deallocate(maxIndexPTile)
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -258,35 +258,35 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - minIndexPDimPDe(:,:)"
+  write(name, *) "DistGridGet() - minIndexPDe(:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(minIndexPDimPDe(dimCount,deCount))
-  call ESMF_DistGridGet(distgrid, minIndexPDimPDe=minIndexPDimPDe, rc=rc)
+  allocate(minIndexPDe(dimCount,deCount))
+  call ESMF_DistGridGet(distgrid, minIndexPDe=minIndexPDe, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify minIndexPDimPDe(:,:)"
+  write(name, *) "Verify minIndexPDe(:,:)"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((minIndexPDimPDe(1,1) == 1), &
+  call ESMF_Test((minIndexPDe(1,1) == 1), &
     name, failMsg, result, ESMF_SRCLINE)
-  deallocate(minIndexPDimPDe)
+  deallocate(minIndexPDe)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - maxIndexPDimPDe(:,:)"
+  write(name, *) "DistGridGet() - maxIndexPDe(:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(maxIndexPDimPDe(dimCount,deCount))
-  call ESMF_DistGridGet(distgrid, maxIndexPDimPDe=maxIndexPDimPDe, rc=rc)
+  allocate(maxIndexPDe(dimCount,deCount))
+  call ESMF_DistGridGet(distgrid, maxIndexPDe=maxIndexPDe, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify maxIndexPDimPDe(:,:)"
+  write(name, *) "Verify maxIndexPDe(:,:)"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((maxIndexPDimPDe(1,deCount) == 1000), &
+  call ESMF_Test((maxIndexPDe(1,deCount) == 1000), &
     name, failMsg, result, ESMF_SRCLINE)
-  deallocate(maxIndexPDimPDe)
+  deallocate(maxIndexPDe)
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -311,40 +311,40 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - tileListPDe(:)"
+  write(name, *) "DistGridGet() - deToTileMap(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(tileListPDe(0:deCount-1))
-  call ESMF_DistGridGet(distgrid, tileListPDe=tileListPDe, rc=rc)
+  allocate(deToTileMap(0:deCount-1))
+  call ESMF_DistGridGet(distgrid, deToTileMap=deToTileMap, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify tileListPDe(:)"
+  write(name, *) "Verify deToTileMap(:)"
   write(failMsg, *) "Wrong result"
   loopResult = .true.
   do i=0, deCount-1
-    if (tileListPDe(i) /= 1) loopResult = .false.
+    if (deToTileMap(i) /= 1) loopResult = .false.
   enddo
   call ESMF_Test(loopResult, &
     name, failMsg, result, ESMF_SRCLINE)
-  deallocate(tileListPDe)
+  deallocate(deToTileMap)
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - indexCountPDimPDe(:,:)"
+  write(name, *) "DistGridGet() - indexCountPDe(:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(indexCountPDimPDe(dimCount,0:deCount-1))
-  call ESMF_DistGridGet(distgrid, indexCountPDimPDe=indexCountPDimPDe, rc=rc)
+  allocate(indexCountPDe(dimCount,0:deCount-1))
+  call ESMF_DistGridGet(distgrid, indexCountPDe=indexCountPDe, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify indexCountPDimPDe(:,:)"
+  write(name, *) "Verify indexCountPDe(:,:)"
   write(failMsg, *) "Wrong result"
   loopResult = .true.
   do i=0, deCount-1
-    if ((indexCountPDimPDe(1,i) < 1000/deCount) .or. &
-      (indexCountPDimPDe(1,i) > 1000/deCount + 1000 - (1000/deCount)*deCount)) &
+    if ((indexCountPDe(1,i) < 1000/deCount) .or. &
+      (indexCountPDe(1,i) > 1000/deCount + 1000 - (1000/deCount)*deCount)) &
       loopResult = .false.
   enddo
   call ESMF_Test(loopResult, &
@@ -369,11 +369,11 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "DistGridGet() - indexList(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(indexList(indexCountPDimPDe(1,localDeList(0))))
+  allocate(indexList(indexCountPDe(1,localDeList(0))))
   call ESMF_DistGridGet(distgrid, localDe=0, dim=1, indexList=indexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(indexList)
-  deallocate(indexCountPDimPDe)
+  deallocate(indexCountPDe)
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -744,7 +744,7 @@ program ESMF_DistGridCreateGetUTest
     arbSeqIndexList(i)=localStart+i
   enddo
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, &
-    arbDim=2, minIndex=(/1,1/), maxIndex=(/5,7/), rc=rc)
+    arbDim=2, minIndexPTile=(/1,1/), maxIndexPTile=(/5,7/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(arbSeqIndexList)
   
@@ -757,11 +757,11 @@ program ESMF_DistGridCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DistGridGet() - dimCount, collocationPDim"
+  write(name, *) "DistGridGet() - dimCount, collocation"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(collocationPDim(3))  ! dimCount
+  allocate(collocation(3))  ! dimCount
   call ESMF_DistGridGet(distgrid, dimCount=dimCount, &
-    collocationPDim=collocationPDim, rc=rc)
+    collocation=collocation, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -774,7 +774,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "Obtain arbSeqIndexFlag for dim=1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(1), &
+  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(1), &
     arbSeqIndexFlag=arbSeqIndexFlag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -788,7 +788,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "Obtain arbSeqIndexFlag for dim=2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(2), &
+  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(2), &
     arbSeqIndexFlag=arbSeqIndexFlag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -802,7 +802,7 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "Obtain arbSeqIndexFlag for dim=3"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocationPDim(3), &
+  call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(3), &
     arbSeqIndexFlag=arbSeqIndexFlag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -812,7 +812,7 @@ program ESMF_DistGridCreateGetUTest
   write(failMsg, *) "Wrong arbSeqIndexFlag"
   call ESMF_Test((.not.arbSeqIndexFlag), name, failMsg, result, ESMF_SRCLINE)
 
-  deallocate(collocationPDim)
+  deallocate(collocation)
 
 
   !-----------------------------------------------------------------------------

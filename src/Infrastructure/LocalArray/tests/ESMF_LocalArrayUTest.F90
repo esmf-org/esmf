@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.61 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.62 2011/05/13 20:22:31 rokuingh Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -149,7 +149,7 @@
     write(failMsg, *) "Did return ESMF_SUCCESS"
     counts(1) = 10
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
-      counts=counts, rc=rc)
+      totalCount=counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -166,7 +166,7 @@
     counts(1) = 10
     lb(1) = -5
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
-      counts=counts, lbounds=lb, rc=rc)
+      totalCount=counts, totalLBound=lb, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -183,7 +183,7 @@
     counts(1) = 10
     ub(1) = 20
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
-      counts=counts, ubounds=ub, rc=rc)
+      totalCount=counts, totalUBound=ub, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -201,7 +201,7 @@
     lb(1) = -5
     ub(1) = 4
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
-      counts=counts, lbounds=lb, ubounds=ub, rc=rc)
+      totalCount=counts, totalLBound=lb, totalUBound=ub, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -219,7 +219,7 @@
     lb(1) = -5
     ub(1) = 4
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
-      counts=counts, lbounds=lb, ubounds=ub, rc=rc)
+      totalCount=counts, totalLBound=lb, totalUBound=ub, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -230,7 +230,7 @@
     lb(1) = -5
     ub(1) = 4
     array1 = ESMF_LocalArrayCreate(rank=2, typekind=ESMF_TYPEKIND_I4, &
-      counts=counts, lbounds=lb, ubounds=ub, rc=rc)
+      totalCount=counts, totalLBound=lb, totalUBound=ub, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -240,7 +240,7 @@
     lb(1) = -5
     ub(1) = 4
     array1 = ESMF_LocalArrayCreate(rank=1, typekind=ESMF_TYPEKIND_I4, &
-      lbounds=lb, ubounds=ub, rc=rc)
+      totalLBound=lb, totalUBound=ub, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
    
     !--------------------------------------------------------------------------
@@ -333,7 +333,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting lower and upper index bounds"
     call ESMF_LocalArrayGet(array1, intptr2, docopy=ESMF_DATA_REF, rc=rc)
-    call ESMF_LocalArrayGet(array1, lbounds=lb, ubounds=ub, rc=rc)  
+    call ESMF_LocalArrayGet(array1, totalLBound=lb, totalUBound=ub, rc=rc)  
     rlb = lbound(intptr2)
     rub = ubound(intptr2)
     print *, "real lb, ub = ", rlb(1), rub(1), "  lib return lb, ub = ", lb(1), ub(1)
@@ -877,7 +877,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Creating an Array Spec Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts=counts(1:2), rc=rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, totalCount=counts(1:2), rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
@@ -909,7 +909,7 @@
     !EX_UTest
     write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 10 Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts=counts, rc=rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, totalCount=counts, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !--------------------------------------------------------------------------
@@ -924,7 +924,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return the correct return code"
     write(name, *) "Creating an Array from a Spec with rank of 5 Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts=counts, rc=rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, totalCount=counts, rc=rc)
 #ifdef ESMF_NO_GREATER_THAN_4D
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -944,7 +944,7 @@
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 4 Test"
-    array2 = ESMF_LocalArrayCreate(arrayspec, counts=counts, rc=rc)
+    array2 = ESMF_LocalArrayCreate(arrayspec, totalCount=counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     call ESMF_LocalArrayDestroy(array2, rc=rc)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.44 2011/04/25 05:23:20 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.45 2011/05/13 20:22:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.44 2011/04/25 05:23:20 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.45 2011/05/13 20:22:29 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -470,8 +470,8 @@ end function
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
-  function ESMF_LocalArrayCreateByTKR(typekind, rank, keywordEnforcer, counts, &
-    lbounds, ubounds, rc)
+  function ESMF_LocalArrayCreateByTKR(typekind, rank, keywordEnforcer, totalCount, &
+    totalLBound, totalUBound, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByTKR
@@ -480,9 +480,9 @@ end function
     type(ESMF_TypeKind),  intent(in)            :: typekind
     integer,              intent(in)            :: rank
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(in),  optional :: counts(:)
-    integer,              intent(in),  optional :: lbounds(:)
-    integer,              intent(in),  optional :: ubounds(:)
+    integer,              intent(in),  optional :: totalCount(:)
+    integer,              intent(in),  optional :: totalLBound(:)
+    integer,              intent(in),  optional :: totalUBound(:)
     integer,              intent(out), optional :: rc 
 !
 !
@@ -496,13 +496,13 @@ end function
 !    Array typekind. See section \ref{opt:typekind} for valid values.
 !  \item[rank]
 !    Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 7D.
-!  \item[{[counts]}]
+!  \item[{[totalCount]}]
 !    The number of items in each dimension of the array. This is a 1D
 !    integer array the same length as the rank. The {\tt count} argument may
-!    be omitted if both {\tt lbounds} and {\tt ubounds} arguments are present.
-!  \item[{[lbounds]}]
+!    be omitted if both {\tt totalLBound} and {\tt totalUBound} arguments are present.
+!  \item[{[totalLBound]}]
 !   An integer array of length rank, with the lower index for each dimension.
-!  \item[{[ubounds]}]
+!  \item[{[totalUBound]}]
 !   An integer array of length rank, with the upper index for each dimension.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -513,7 +513,7 @@ end function
     ! Local vars
     integer                 :: localrc          ! local return code
     type (ESMF_LocalArray)  :: array            ! new C++ LocalArray
-    integer, dimension(ESMF_MAXDIM) :: cnts     ! local counts
+    integer, dimension(ESMF_MAXDIM) :: cnts     ! local totalCount
     integer, dimension(ESMF_MAXDIM) :: lb, ub   ! local bounds
     integer:: i
 
@@ -531,60 +531,60 @@ end function
       return
     endif
     
-    ! Check that enough info from counts, lbounds and ubounds is present
-    if (.not.present(counts)) then
-      if (.not.present(lbounds).or..not.present(ubounds)) then
+    ! Check that enough info from totalCount, totalLBound and totalUBound is present
+    if (.not.present(totalCount)) then
+      if (.not.present(totalLBound).or..not.present(totalUBound)) then
         call ESMF_LogSetError(ESMF_RC_ARG_OPT, &
-          msg="- lbounds and ubounds must be present when counts argument is not present", &
+          msg="- totalLBound and totalUBound must be present when totalCount argument is not present", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
     
-    ! Check size of optional counts and bounds and fill the local variables
-    if (present(lbounds)) then
-      if (size(lbounds)<rank) then
+    ! Check size of optional totalCount and bounds and fill the local variables
+    if (present(totalLBound)) then
+      if (size(totalLBound)<rank) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-          msg="- lbounds argument must be of size rank", &
+          msg="- totalLBound argument must be of size rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      lb(1:rank) = lbounds(1:rank)
+      lb(1:rank) = totalLBound(1:rank)
     endif
-    if (present(ubounds)) then
-      if (size(ubounds)<rank) then
+    if (present(totalUBound)) then
+      if (size(totalUBound)<rank) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-          msg="- ubounds argument must be of size rank", &
+          msg="- totalUBound argument must be of size rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      ub(1:rank) = ubounds(1:rank)
+      ub(1:rank) = totalUBound(1:rank)
     endif
-    if (present(counts)) then
-      if (size(counts)<rank) then
+    if (present(totalCount)) then
+      if (size(totalCount)<rank) then
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-          msg="- counts argument must be of size rank", &
+          msg="- totalCount argument must be of size rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
-      cnts(1:rank) = counts(1:rank)
+      cnts(1:rank) = totalCount(1:rank)
     else
       cnts(1:rank) = ub(1:rank) - lb(1:rank) + 1 
     endif
-    if (.not.present(lbounds).and..not.present(ubounds)) then
+    if (.not.present(totalLBound).and..not.present(totalUBound)) then
       lb(1:rank) = 1
       ub(1:rank) = cnts(1:rank)
-    else if (.not.present(lbounds)) then
+    else if (.not.present(totalLBound)) then
       lb(1:rank) = ub(1:rank) - cnts(1:rank) + 1
-    else if (.not.present(ubounds)) then
+    else if (.not.present(totalUBound)) then
       ub(1:rank) = lb(1:rank) + cnts(1:rank) - 1
     endif
     
-    ! Check that the local bounds and counts variables match
+    ! Check that the local bounds and totalCount variables match
     do i=1, rank
       if (cnts(i).ne.(ub(i)-lb(i)+1)) then
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-          msg="- counts and bounds mismatch detected", &
+          msg="- totalCount and bounds mismatch detected", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -624,8 +624,8 @@ end function
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayCreate()
-  function ESMF_LocalArrayCreateBySpec(arrayspec, keywordEnforcer, counts, &
-    lbounds, ubounds, rc)
+  function ESMF_LocalArrayCreateBySpec(arrayspec, keywordEnforcer, totalCount, &
+    totalLBound, totalUBound, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
@@ -633,9 +633,9 @@ end function
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(in)            :: arrayspec
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(in),  optional :: counts(:)
-    integer,              intent(in),  optional :: lbounds(:)
-    integer,              intent(in),  optional :: ubounds(:)
+    integer,              intent(in),  optional :: totalCount(:)
+    integer,              intent(in),  optional :: totalLBound(:)
+    integer,              intent(in),  optional :: totalUBound(:)
     integer,              intent(out), optional :: rc 
 !
 !
@@ -647,13 +647,13 @@ end function
 !  \begin{description}
 !  \item[arrayspec]
 !    ArraySpec object specifying typekind and rank.
-!  \item[{[counts]}]
+!  \item[{[totalCount]}]
 !    The number of items in each dimension of the array. This is a 1D
 !    integer array the same length as the rank. The {\tt count} argument may
-!    be omitted if both {\tt lbounds} and {\tt ubounds} arguments are present.
-!  \item[{[lbounds]}]
+!    be omitted if both {\tt totalLBound} and {\tt totalUBound} arguments are present.
+!  \item[{[totalLBound]}]
 !    An integer array of length rank, with the lower index for each dimension.
-!  \item[{[ubounds]}]
+!  \item[{[totalUBound]}]
 !    An integer array of length rank, with the upper index for each dimension.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -683,7 +683,7 @@ end function
     
     ! Call the CreateByTKR function to make the array
     ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByTKR(typekind, rank, &
-      counts=counts, lbounds=lbounds, ubounds=ubounds, rc=localrc)
+      totalCount=totalCount, totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -771,7 +771,7 @@ end function
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayCreate() @\
 ! function ESMF_LocalArrCreateByPtr<rank><type><kind>(farrayPtr, & @\
-!   keywordEnforcer, doCopy, counts, lbounds, ubounds, rc) @\
+!   keywordEnforcer, doCopy, totalCount, totalLBound, totalUBound, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_LocalArray) :: ESMF_LocalArrCreateByPtr<rank><type><kind> @\
@@ -780,9 +780,9 @@ end function
 !   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_CopyFlag), intent(in),  optional :: doCopy @\
-!   integer,             intent(in),  optional :: counts(:) @\
-!   integer,             intent(in),  optional :: lbounds(:) @\
-!   integer,             intent(in),  optional :: ubounds(:) @\
+!   integer,             intent(in),  optional :: totalCount(:) @\
+!   integer,             intent(in),  optional :: totalLBound(:) @\
+!   integer,             intent(in),  optional :: totalUBound(:) @\
 !   integer,             intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -792,14 +792,14 @@ end function
 ! First, if {\tt farrayPtr} is associated @\
 ! the optional {\tt doCopy} argument may be used to indicate whether the @\
 ! associated data is to be copied or referenced. For associated {\tt farrayPtr} @\
-! the optional {\tt counts}, {\tt lbounds} and {\tt ubounds} arguments need @\
+! the optional {\tt totalCount}, {\tt totalLBound} and {\tt totalUBound} arguments need @\
 ! not be specified. However, all present arguments will be checked against @\
 ! {\tt farrayPtr} for consistency. @\
 ! @\
 ! Second, if {\tt farrayPtr} is unassociated the optional argument {\tt doCopy} @\
-! must not be specified. However, in this case a complete set of counts and @\
-! bounds information must be provided. Any combination of present {\tt counts} @\
-! {\tt lbounds} and {\tt ubounds} arguments that provides a complete @\
+! must not be specified. However, in this case a complete set of totalCount and @\
+! bounds information must be provided. Any combination of present {\tt totalCount} @\
+! {\tt totalLBound} and {\tt totalUBound} arguments that provides a complete @\
 ! specification is valid. All input information will be checked for @\
 ! consistency. @\
 ! @\
@@ -814,13 +814,13 @@ end function
 !   reference the associated data array. If set to {\tt ESMF\_DATA\_COPY} this @\
 !   routine allocates new memory and copies the data from the pointer into @\
 !   the new LocalArray allocation. @\
-! \item[{[counts]}] @\
+! \item[{[totalCount]}] @\
 !   The number of items in each dimension of the array. This is a 1D @\
 !   integer array the same length as the rank. The {\tt count} argument may @\
-!   be omitted if both {\tt lbounds} and {\tt ubounds} arguments are present. @\
-! \item[{[lbounds]}] @\
+!   be omitted if both {\tt totalLBound} and {\tt totalUBound} arguments are present. @\
+! \item[{[totalLBound]}] @\
 !   An integer array of lower index values.  Must be the same length as the rank. @\
-! \item[{[ubounds]}] @\
+! \item[{[totalUBound]}] @\
 !   An integer array of upper index values.  Must be the same length as the rank. @\
 ! \item[{[rc]}] @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -835,23 +835,23 @@ end function
 !define ESMF_METHOD "ESMF_LocalArrCreateByPtr##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrCreateByPtr" @\
   function ESMF_LocalArrCreateByPtr##mrank##D##mtypekind(farrayPtr, & @\
-    keywordEnforcer, doCopy, counts, lbounds, ubounds, rc) @\
+    keywordEnforcer, doCopy, totalCount, totalLBound, totalUBound, rc) @\
  @\
     type(ESMF_LocalArray) :: ESMF_LocalArrCreateByPtr##mrank##D##mtypekind @\
  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
-    integer, dimension(:), intent(in), optional :: counts @\
-    integer, dimension(:), intent(in), optional :: lbounds @\
-    integer, dimension(:), intent(in), optional :: ubounds @\
+    integer, dimension(:), intent(in), optional :: totalCount @\
+    integer, dimension(:), intent(in), optional :: totalLBound @\
+    integer, dimension(:), intent(in), optional :: totalUBound @\
     integer, intent(out), optional :: rc   @\
  @\
     ! Local variables @\
     type (ESMF_LocalArray)          :: array    ! new array object @\
     integer                         :: localrc  ! local return code @\
     type (ESMF_CopyFlag)            :: copy     ! do we copy or ref? @\
-    integer, dimension(mrank)       :: cnts     ! local counts @\
+    integer, dimension(mrank)       :: cnts     ! local totalCount @\
     integer, dimension(mrank)       :: lb, ub   ! local bounds @\
     integer:: i @\
  @\
@@ -882,95 +882,95 @@ end function
       copy = ESMF_DATA_SPACE @\
     endif @\
  @\
-    ! Check that enough info from counts, lbounds and ubounds is present @\
-    if (.not.associated(farrayPtr) .and. .not.present(counts)) then @\
-      if (.not.present(lbounds) .or. .not.present(ubounds)) then @\
+    ! Check that enough info from totalCount, totalLBound and totalUBound is present @\
+    if (.not.associated(farrayPtr) .and. .not.present(totalCount)) then @\
+      if (.not.present(totalLBound) .or. .not.present(totalUBound)) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_OPT, & @\
-          msg="- lbounds and ubounds must be present when counts argument is not present", & @\
+          msg="- totalLBound and totalUBound must be present when totalCount argument is not present", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
     endif @\
  @\
-    ! Check size of optional counts and bounds and fill the local variables @\
-    if (present(lbounds)) then @\
-      if (size(lbounds)<mrank) then @\
+    ! Check size of optional totalCount and bounds and fill the local variables @\
+    if (present(totalLBound)) then @\
+      if (size(totalLBound)<mrank) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-          msg="- lbounds argument must be of size rank", & @\
+          msg="- totalLBound argument must be of size rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       if (associated(farrayPtr)) then @\
         do i=1, mrank @\
-          if (lb(i) .ne. lbounds(i)) then @\
+          if (lb(i) .ne. totalLBound(i)) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-              msg="- provided lbounds are incompatible with associated farrayPtr", & @\
+              msg="- provided totalLBound are incompatible with associated farrayPtr", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
         enddo @\
       else @\
-        lb(1:mrank) = lbounds(1:mrank) @\
+        lb(1:mrank) = totalLBound(1:mrank) @\
       endif @\
     endif @\
-    if (present(ubounds)) then @\
-      if (size(ubounds)<mrank) then @\
+    if (present(totalUBound)) then @\
+      if (size(totalUBound)<mrank) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-          msg="- ubounds argument must be of size rank", & @\
+          msg="- totalUBound argument must be of size rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       if (associated(farrayPtr)) then @\
         do i=1, mrank @\
-          if (ub(i) .ne. ubounds(i)) then @\
+          if (ub(i) .ne. totalUBound(i)) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-              msg="- provided ubounds are incompatible with associated farrayPtr", & @\
+              msg="- provided totalUBound are incompatible with associated farrayPtr", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
         enddo @\
       else @\
-        ub(1:mrank) = ubounds(1:mrank) @\
+        ub(1:mrank) = totalUBound(1:mrank) @\
       endif @\
     endif @\
-    if (present(counts)) then @\
-      if (size(counts)<mrank) then @\
+    if (present(totalCount)) then @\
+      if (size(totalCount)<mrank) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
-          msg="- counts argument must be of size rank", & @\
+          msg="- totalCount argument must be of size rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       if (associated(farrayPtr)) then @\
         do i=1, mrank @\
-          if (cnts(i) .ne. counts(i)) then @\
+          if (cnts(i) .ne. totalCount(i)) then @\
             call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
-              msg="- provided counts are incompatible with associated farrayPtr", & @\
+              msg="- provided totalCount are incompatible with associated farrayPtr", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
         enddo @\
       else @\
-        cnts(1:mrank) = counts(1:mrank) @\
+        cnts(1:mrank) = totalCount(1:mrank) @\
       endif @\
     else if (.not.associated(farrayPtr)) then @\
       cnts(1:mrank) = ub(1:mrank) - lb(1:mrank) + 1  @\
     endif @\
     if (.not.associated(farrayPtr)) then @\
-      if (.not.present(lbounds) .and. .not.present(ubounds)) then @\
+      if (.not.present(totalLBound) .and. .not.present(totalUBound)) then @\
         lb(1:mrank) = 1 @\
         ub(1:mrank) = cnts(1:mrank) @\
-      else if (.not.present(lbounds)) then @\
+      else if (.not.present(totalLBound)) then @\
         lb(1:mrank) = ub(1:mrank) - cnts(1:mrank) + 1 @\
-      else if (.not.present(ubounds)) then @\
+      else if (.not.present(totalUBound)) then @\
         ub(1:mrank) = lb(1:mrank) + cnts(1:mrank) - 1 @\
       endif @\
     endif @\
  @\
-    ! Check that the local bounds and counts variables match @\
+    ! Check that the local bounds and totalCount variables match @\
     do i=1, mrank @\
       if (cnts(i) .ne. (ub(i)-lb(i)+1)) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
-          msg="- counts and bounds mismatch detected", & @\
+          msg="- totalCount and bounds mismatch detected", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -1108,16 +1108,16 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-  subroutine ESMF_LocalArrConstrF90Ptr(array, counts, typekind, rank, lbounds, &
-    ubounds, rc)
+  subroutine ESMF_LocalArrConstrF90Ptr(array, totalCount, typekind, rank, totalLBound, &
+    totalUBound, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray), intent(inout)         :: array
-    integer, dimension(:), intent(in)            :: counts
+    integer, dimension(:), intent(in)            :: totalCount
     type(ESMF_TypeKind),   intent(in)            :: typekind
     integer,               intent(in)            :: rank
-    integer, dimension(:), intent(in)            :: lbounds
-    integer, dimension(:), intent(in)            :: ubounds
+    integer, dimension(:), intent(in)            :: totalLBound
+    integer, dimension(:), intent(in)            :: totalUBound
     integer,               intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1130,7 +1130,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !    Partially created {\tt ESMF\_LocalArray} object.  This entry point is used
 !    during both the C++ and F90 create calls if we need to create an F90
 !    pointer to be used later.
-!  \item[counts]
+!  \item[totalCount]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
 !  \item[rank]
@@ -1141,9 +1141,9 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !    Array typetypekind. 
 !    This must match what is already in the array - it is here only as
 !    a convienience.
-!   \item[lbounds]
+!   \item[totalLBound]
 !    The lower index values per rank.
-!   \item[ubounds]
+!   \item[totalUBound]
 !    The upper index values per rank.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1176,27 +1176,27 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       case (ESMF_TYPEKIND_I1%dkind)
         select case (rank)
 	  case (1)
-            call ESMF_LocalArrConstrF90Ptr1DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr1DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (2)
-            call ESMF_LocalArrConstrF90Ptr2DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr2DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (3)
-            call ESMF_LocalArrConstrF90Ptr3DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr3DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (4)
-            call ESMF_LocalArrConstrF90Ptr4DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr4DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	  case (5)
-            call ESMF_LocalArrConstrF90Ptr5DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr5DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (6)
-            call ESMF_LocalArrConstrF90Ptr6DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr6DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
           case (7)
-            call ESMF_LocalArrConstrF90Ptr7DI1(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr7DI1(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1208,27 +1208,27 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       case (ESMF_TYPEKIND_I2%dkind) 
         select case(rank)
 	  case (1) 
-            call ESMF_LocalArrConstrF90Ptr1DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr1DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (2)
-            call ESMF_LocalArrConstrF90Ptr2DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr2DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (3)
-            call ESMF_LocalArrConstrF90Ptr3DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr3DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (4)
-            call ESMF_LocalArrConstrF90Ptr4DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr4DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	  case (5)
-            call ESMF_LocalArrConstrF90Ptr5DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr5DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (6)
-            call ESMF_LocalArrConstrF90Ptr6DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr6DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
           case (7)
-            call ESMF_LocalArrConstrF90Ptr7DI2(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr7DI2(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1239,27 +1239,27 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       case (ESMF_TYPEKIND_I4%dkind) 
 	select case(rank)
 	  case (1)
-            call ESMF_LocalArrConstrF90Ptr1DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr1DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (2)
-            call ESMF_LocalArrConstrF90Ptr2DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr2DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (3)
-            call ESMF_LocalArrConstrF90Ptr3DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr3DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (4)
-            call ESMF_LocalArrConstrF90Ptr4DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr4DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	  case (5)
-            call ESMF_LocalArrConstrF90Ptr5DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr5DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (6)
-            call ESMF_LocalArrConstrF90Ptr6DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr6DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
           case (7)
-            call ESMF_LocalArrConstrF90Ptr7DI4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr7DI4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1269,27 +1269,27 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       case (ESMF_TYPEKIND_I8%dkind) 
 	select case(rank)
 	  case (1)
-            call ESMF_LocalArrConstrF90Ptr1DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr1DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (2)
-            call ESMF_LocalArrConstrF90Ptr2DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr2DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (3)
-            call ESMF_LocalArrConstrF90Ptr3DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr3DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (4)
-            call ESMF_LocalArrConstrF90Ptr4DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr4DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	  case (5)
-            call ESMF_LocalArrConstrF90Ptr5DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr5DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (6)
-            call ESMF_LocalArrConstrF90Ptr6DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr6DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
           case (7)
-            call ESMF_LocalArrConstrF90Ptr7DI8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr7DI8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1299,27 +1299,27 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       case (ESMF_TYPEKIND_R4%dkind)            
 	select case(rank)
 	  case (1)
-            call ESMF_LocalArrConstrF90Ptr1DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr1DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (2)
-            call ESMF_LocalArrConstrF90Ptr2DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr2DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (3)
-            call ESMF_LocalArrConstrF90Ptr3DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr3DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (4)
-            call ESMF_LocalArrConstrF90Ptr4DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr4DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	  case (5)
-            call ESMF_LocalArrConstrF90Ptr5DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr5DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (6)
-            call ESMF_LocalArrConstrF90Ptr6DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr6DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
           case (7)
-            call ESMF_LocalArrConstrF90Ptr7DR4(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr7DR4(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1329,27 +1329,27 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       case (ESMF_TYPEKIND_R8%dkind)            
 	select case(rank)
 	  case (1)
-            call ESMF_LocalArrConstrF90Ptr1DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr1DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (2)
-            call ESMF_LocalArrConstrF90Ptr2DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr2DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (3)
-            call ESMF_LocalArrConstrF90Ptr3DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr3DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (4)
-            call ESMF_LocalArrConstrF90Ptr4DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr4DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	  case (5)
-            call ESMF_LocalArrConstrF90Ptr5DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr5DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 	  case (6)
-            call ESMF_LocalArrConstrF90Ptr6DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr6DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
           case (7)
-            call ESMF_LocalArrConstrF90Ptr7DR8(array, counts, &
-              lbounds=lbounds, ubounds=ubounds, rc=localrc)
+            call ESMF_LocalArrConstrF90Ptr7DR8(array, totalCount, &
+              totalLBound=totalLBound, totalUBound=totalUBound, rc=localrc)
 ^endif
           case default
             if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -1375,20 +1375,20 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr<rank><type><kind> - Create a Fortran Ptr of the proper T/K/R @\
 ! @\
 ! !INTERFACE: @\
-!      subroutine ESMF_LocalArrConstrF90Ptr<rank><type><kind>(array, counts, farrayPtr, doCopy, lbounds, ubounds, rc) @\
+!      subroutine ESMF_LocalArrConstrF90Ptr<rank><type><kind>(array, totalCount, farrayPtr, doCopy, totalLBound, totalUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_LocalArray), intent(inout) :: array @\
-!      integer, dimension(:), intent(in) :: counts @\
+!      integer, dimension(:), intent(in) :: totalCount @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer, optional :: farrayPtr  @\
 !      type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
-!      integer, dimension(:), intent(in), optional :: lbounds @\
-!      integer, dimension(:), intent(in), optional :: ubounds @\
+!      integer, dimension(:), intent(in), optional :: totalLBound @\
+!      integer, dimension(:), intent(in), optional :: totalUBound @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
 !  Creates a Fortran Pointer of the requested T/K/R.  After creating the @\
-!  pointer and doing the allocation based on counts, also goes ahead and @\
+!  pointer and doing the allocation based on totalCount, also goes ahead and @\
 !  calls into the C++ interfaces to set values on the {\tt ESMF\_LocalArray} @\
 !  object. (This is to save on the total number of nested crossings of the @\
 !  F90/C++ boundary.) @\
@@ -1404,8 +1404,8 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !  \begin{description} @\
 !  \item[array] @\
 !   The {\tt ESMF\_LocalArray} to set the values into. @\
-!  \item[counts] @\
-!   An integer array of counts.  Must be the same length as the rank. @\
+!  \item[totalCount] @\
+!   An integer array of totalCount.  Must be the same length as the rank. @\
 !  \item[{[farrayPtr]}] @\
 !   An optional existing Fortran pointer.  Will be used instead of an @\
 !   internally generated Fortran pointer if given.  Must be given if the @\
@@ -1413,9 +1413,9 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !  \item[{[doCopy]}] @\
 !   An optional copy flag which can be specified if a Fortran pointer is also @\
 !   given.  Can either make a new copy of the data or ref existing data. @\
-!  \item[{[lbounds]}] @\
+!  \item[{[totalLBound]}] @\
 !  An integer array of lower index values.  Must be same length as the rank. @\
-!  \item[{[ubounds]}] @\
+!  \item[{[totalUBound]}] @\
 ! An integer array of upper index values.  Must be same length as the rank. @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -1431,15 +1431,15 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr" @\
  @\
-  subroutine ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, counts, & @\
-    farrayPtr, doCopy, lbounds, ubounds, rc) @\
+  subroutine ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, totalCount, & @\
+    farrayPtr, doCopy, totalLBound, totalUBound, rc) @\
  @\
     type(ESMF_LocalArray), intent(inout) :: array @\
-    integer, dimension(:), intent(in) :: counts @\
+    integer, dimension(:), intent(in) :: totalCount @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer, optional :: farrayPtr  @\
     type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
-    integer, dimension(:), intent(in), optional :: lbounds @\
-    integer, dimension(:), intent(in), optional :: ubounds @\
+    integer, dimension(:), intent(in), optional :: totalLBound @\
+    integer, dimension(:), intent(in), optional :: totalUBound @\
     integer, intent(out), optional :: rc   @\
  @\
     ! Local variables @\
@@ -1460,7 +1460,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     ! Assume defaults first, then alter if lb or ub specified, @\
     ! or if an existing pointer is given and can be queried. @\
     lb(:) = 1 @\
-    ub(1:size(counts)) = counts @\
+    ub(1:size(totalCount)) = totalCount @\
  @\
     ! Decide if we need to do: make a new allocation, copy existing data @\
     if (.not. present(farrayPtr)) then @\
@@ -1472,8 +1472,8 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
       if (present(doCopy)) then @\
        if (doCopy .eq. ESMF_DATA_SPACE) then @\
            newp => farrayPtr    ! ptr alias, important this be =>  @\
-           lb(1:size(counts)) = lbound(farrayPtr) @\
-           ub(1:size(counts)) = ubound(farrayPtr) @\
+           lb(1:size(totalCount)) = lbound(farrayPtr) @\
+           ub(1:size(totalCount)) = ubound(farrayPtr) @\
            willalloc = .true. @\
            willcopy = .false. @\
            do_dealloc = ESMF_TRUE @\
@@ -1484,31 +1484,31 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
            do_dealloc = ESMF_TRUE @\
        else       ! ESMF_DATA_REF @\
            newp => farrayPtr    ! ptr alias, important this be =>  @\
-           lb(1:size(counts)) = lbound(farrayPtr) @\
-           ub(1:size(counts)) = ubound(farrayPtr) @\
+           lb(1:size(totalCount)) = lbound(farrayPtr) @\
+           ub(1:size(totalCount)) = ubound(farrayPtr) @\
            willalloc = .false. @\
            willcopy = .false. @\
            do_dealloc = ESMF_FALSE @\
        endif @\
       else @\
            newp => farrayPtr    ! ptr alias, important this be =>  @\
-           lb(1:size(counts)) = lbound(farrayPtr) @\
-           ub(1:size(counts)) = ubound(farrayPtr) @\
+           lb(1:size(totalCount)) = lbound(farrayPtr) @\
+           ub(1:size(totalCount)) = ubound(farrayPtr) @\
            willalloc = .false. @\
            willcopy = .false. @\
            do_dealloc = ESMF_FALSE @\
       endif @\
     endif @\
  @\
-    ! lbounds, if given, should be used @\
-    if (present(lbounds)) then @\
-        lb(1:size(lbounds)) = lbounds @\
+    ! totalLBound, if given, should be used @\
+    if (present(totalLBound)) then @\
+        lb(1:size(totalLBound)) = totalLBound @\
     endif @\
  @\
     ! ub is only used during allocation @\
     if (willalloc) then @\
-        if (present(ubounds)) then @\
-            ub(1:size(ubounds)) = ubounds @\
+        if (present(totalUBound)) then @\
+            ub(1:size(totalUBound)) = totalUBound @\
         endif @\
         allocate(newp(mrng), stat=localrc) @\
         if (ESMF_LogFoundAllocError(localrc, & @\
@@ -1521,7 +1521,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     endif @\
  @\
     ! Now set all the new accumulated information about the array - the @\
-    ! Fortran pointer, the base addr, the counts, etc. @\
+    ! Fortran pointer, the base addr, the totalCount, etc. @\
  @\
     ! Until we need offsets, use 0. @\
     offsets = 0 @\
@@ -1529,7 +1529,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     wrap%ptr##mrank##D##mtypekind => newp @\
     if (size(newp) .ne. 0) then @\
       call c_ESMC_LocalArraySetInfo(array, wrap, & @\
-                             ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
+                             ESMF_DATA_ADDRESS(newp(mloc)), totalCount, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
@@ -1537,7 +1537,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
         ESMF_CONTEXT, rcToReturn=rc)) return @\
     else @\
       call c_ESMC_LocalArraySetInfo(array, wrap, & @\
-                             ESMF_NULL_POINTER, counts, & @\
+                             ESMF_NULL_POINTER, totalCount, & @\
                              lb, ub, offsets, & @\
                              ESMF_TRUE, do_dealloc, localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
@@ -2122,16 +2122,16 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ! !IROUTINE: ESMF_LocalArrayAdjust - Adjust bounds of Fortran array member
 !
 ! !INTERFACE:
-  subroutine ESMF_LocalArrayAdjust(array, counts, typekind, rank, lbounds, &
-    ubounds, rc)
+  subroutine ESMF_LocalArrayAdjust(array, totalCount, typekind, rank, totalLBound, &
+    totalUBound, rc)
 !
 ! !ARGUMENTS:
    type(ESMF_LocalArray), intent(inout) :: array
-   integer, dimension(:), intent(in) :: counts
+   integer, dimension(:), intent(in) :: totalCount
    type(ESMF_TypeKind), intent(in) :: typekind
    integer, intent(in) :: rank
-   integer, dimension(:), intent(in) :: lbounds
-   integer, dimension(:), intent(in) :: ubounds
+   integer, dimension(:), intent(in) :: totalLBound
+   integer, dimension(:), intent(in) :: totalUBound
    integer, intent(out), optional :: rc 
 
 !
@@ -2158,27 +2158,27 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
           case (ESMF_TYPEKIND_I1%dkind)
             select case (rank)
 	      case (1)
-                call ESMF_LocalArrayAdjust1DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust1DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (2)
-                call ESMF_LocalArrayAdjust2DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust2DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (3)
-                call ESMF_LocalArrayAdjust3DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust3DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (4)
-                call ESMF_LocalArrayAdjust4DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust4DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayAdjust5DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust5DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (6)
-                call ESMF_LocalArrayAdjust6DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust6DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
               case (7)
-                call ESMF_LocalArrayAdjust7DI1(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust7DI1(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2190,27 +2190,27 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
           case (ESMF_TYPEKIND_I2%dkind) 
 	    select case(rank)
 	      case (1) 
-                call ESMF_LocalArrayAdjust1DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust1DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (2)
-                call ESMF_LocalArrayAdjust2DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust2DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (3)
-                call ESMF_LocalArrayAdjust3DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust3DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (4)
-                call ESMF_LocalArrayAdjust4DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust4DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayAdjust5DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust5DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (6)
-                call ESMF_LocalArrayAdjust6DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust6DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
               case (7)
-                call ESMF_LocalArrayAdjust7DI2(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust7DI2(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2221,27 +2221,27 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
           case (ESMF_TYPEKIND_I4%dkind) 
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayAdjust1DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust1DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (2)
-                call ESMF_LocalArrayAdjust2DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust2DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (3)
-                call ESMF_LocalArrayAdjust3DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust3DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (4)
-                call ESMF_LocalArrayAdjust4DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust4DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayAdjust5DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust5DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (6)
-                call ESMF_LocalArrayAdjust6DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust6DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
               case (7)
-                call ESMF_LocalArrayAdjust7DI4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust7DI4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2251,27 +2251,27 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
           case (ESMF_TYPEKIND_I8%dkind) 
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayAdjust1DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust1DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (2)
-                call ESMF_LocalArrayAdjust2DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust2DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (3)
-                call ESMF_LocalArrayAdjust3DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust3DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (4)
-                call ESMF_LocalArrayAdjust4DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust4DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayAdjust5DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust5DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (6)
-                call ESMF_LocalArrayAdjust6DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust6DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
               case (7)
-                call ESMF_LocalArrayAdjust7DI8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust7DI8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2281,27 +2281,27 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
           case (ESMF_TYPEKIND_R4%dkind)            
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayAdjust1DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust1DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (2)
-                call ESMF_LocalArrayAdjust2DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust2DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (3)
-                call ESMF_LocalArrayAdjust3DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust3DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (4)
-                call ESMF_LocalArrayAdjust4DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust4DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayAdjust5DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust5DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (6)
-                call ESMF_LocalArrayAdjust6DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust6DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
               case (7)
-                call ESMF_LocalArrayAdjust7DR4(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust7DR4(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2311,27 +2311,27 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
           case (ESMF_TYPEKIND_R8%dkind)            
 	    select case(rank)
 	      case (1)
-                call ESMF_LocalArrayAdjust1DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust1DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (2)
-                call ESMF_LocalArrayAdjust2DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust2DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (3)
-                call ESMF_LocalArrayAdjust3DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust3DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (4)
-                call ESMF_LocalArrayAdjust4DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust4DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^ifndef ESMF_NO_GREATER_THAN_4D
 	      case (5)
-                call ESMF_LocalArrayAdjust5DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust5DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 	      case (6)
-                call ESMF_LocalArrayAdjust6DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust6DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
               case (7)
-                call ESMF_LocalArrayAdjust7DR8(array, counts, &
-                                    lb=lbounds, ub=ubounds, rc=localrc)
+                call ESMF_LocalArrayAdjust7DR8(array, totalCount, &
+                                    lb=totalLBound, ub=totalUBound, rc=localrc)
 ^endif
               case default
                     if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
@@ -2362,11 +2362,11 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ! @\
 ! !INTERFACE: @\
 !      recursive subroutine ESMF_LocalArrayAdjust<rank><type><kind>(array,&@\
-!  counts, lb, ub, fshape, rc) @\
+!  totalCount, lb, ub, fshape, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_LocalArray), intent(inout) :: array @\
-!      integer, dimension(:), intent(in) :: counts @\
+!      integer, dimension(:), intent(in) :: totalCount @\
 !      integer, dimension(:), intent(in), optional :: lb @\
 !      integer, dimension(:), intent(in), optional :: ub @\
 !      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional ::&@\
@@ -2395,10 +2395,10 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ^define ESMF_METHOD "ESMF_LocalArrayAdjust" @\
  @\
   recursive subroutine ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, &@\
-    counts, lb, ub, fshape, rc) @\
+    totalCount, lb, ub, fshape, rc) @\
  @\
     type(ESMF_LocalArray), intent(inout) :: array @\
-    integer, dimension(:), intent(in) :: counts @\
+    integer, dimension(:), intent(in) :: totalCount @\
     integer, dimension(:), intent(in) :: lb @\
     integer, dimension(:), intent(in) :: ub @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: &@\
@@ -2444,7 +2444,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
       farrayPtr => wrap%ptr##mrank##D##mtypekind @\
 !print *, "First recursion: ", lbound(farrayPtr), ubound(farrayPtr) @\
 !call c_esmc_vmpointerprint(farrayPtr) @\
-      call ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, counts, lb, ub, farrayPtr, rc=localrc) @\
+      call ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, totalCount, lb, ub, farrayPtr, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\

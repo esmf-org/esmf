@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.39 2011/01/16 20:26:04 svasquez Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.40 2011/05/13 20:22:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -194,7 +194,7 @@ program ESMF_DistGridEx
 !BOC
   allocate(dimExtent(2, 0:5)) ! (dimCount, deCount)
   call ESMF_DistGridGet(distgrid, delayout=delayout, &
-    indexCountPDimPDe=dimExtent, rc=rc)
+    indexCountPDe=dimExtent, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -718,8 +718,8 @@ program ESMF_DistGridEx
 ! Finally the DistGrid can be created by calling
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
-    regDecomp=regDecomp, rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, maxIndexPTile=maxIndex, &
+    regDecompPTile=regDecomp, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -748,8 +748,8 @@ program ESMF_DistGridEx
   regDecomp(:,2) = (/1,3/)    ! 3 DEs
   regDecomp(:,3) = (/2,1/)    ! 2 DEs
   
-  distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
-    regDecomp=regDecomp, rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, maxIndexPTile=maxIndex, &
+    regDecompPTile=regDecomp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -885,7 +885,7 @@ program ESMF_DistGridEx
 
 !BOC
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, &
-    arbDim=1, minIndex=(/1,1/), maxIndex=(/5,7/), rc=rc)
+    arbDim=1, minIndexPTile=(/1,1/), maxIndexPTile=(/5,7/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
