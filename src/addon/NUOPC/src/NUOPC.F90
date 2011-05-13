@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.6 2011/05/13 00:09:57 theurich Exp $
+! $Id: NUOPC.F90,v 1.7 2011/05/13 00:59:09 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -16,10 +16,10 @@ module NUOPC
   private
   
   ! private module variables
-  logical :: NUOPC_FieldDictionaryIsSetup = .false.
+  logical, save :: NUOPC_FieldDictionaryIsSetup = .false.
   
   ! public module variables
-  type(ESMF_Container) :: NUOPC_FieldDictionary
+  type(ESMF_Container), save :: NUOPC_FieldDictionary
   public NUOPC_FieldDictionary
 
   ! public module interfaces
