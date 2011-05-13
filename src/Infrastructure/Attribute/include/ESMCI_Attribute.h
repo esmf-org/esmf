@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.50 2011/05/11 05:57:27 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.51 2011/05/13 00:06:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -138,6 +138,7 @@ class Attribute
       const std::string &attPackInstanceName, ESMC_Logical *present) const;
     bool AttPackIsSet(const std::string &convention, const std::string &purpose,
                       const std::string &object, 
+                      const bool &inObjectTree,
                       const bool &inThisCompTreeOnly,
                       const bool &inNestedAttPacks) const;
     bool AttPackIsSet(const bool &inNestedAttPacks) const;
