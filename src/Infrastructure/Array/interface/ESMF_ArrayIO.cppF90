@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.42 2011/04/14 00:46:11 w6ws Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.43 2011/05/13 22:43:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.42 2011/04/14 00:46:11 w6ws Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.43 2011/05/13 22:43:46 rokuingh Exp $'
 
 !==============================================================================
 
@@ -260,7 +260,7 @@ contains
     integer, allocatable :: timestart(:), timecount(:) @\
     integer :: dimC, time_len, dimid_time @\
     integer, allocatable :: gDimsIndex(:), dimid_xyz(:) @\
-    integer, allocatable :: minIndexPDimPTile(:,:), maxIndexPDimPTile(:,:) @\
+    integer, allocatable :: minIndexPTile(:,:), maxIndexPTile(:,:) @\
     logical  ::  isfilepresent @\
 @\
     ! PIO VARIABLES: @\
@@ -316,20 +316,20 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate (dimid_xyz(dimC)) @\
     allocate (gDimsIndex(dimC)) @\
-    allocate ( minIndexPDimPTile(dimC,1) ) @\
-    allocate ( maxIndexPDimPTile(dimC,1) ) @\
+    allocate ( minIndexPTile(dimC,1) ) @\
+    allocate ( maxIndexPTile(dimC,1) ) @\
     allocate ( timecount(dimC+1) ) @\
     allocate ( timestart(dimC+1) ) @\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farraywr, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_ArrayGet(array, maxIndexPDimPTile=maxIndexPDimPTile, & @\
-      minIndexPDimPTile=minIndexPDimPTile, rc=localrc) @\
+    call ESMF_ArrayGet(array, maxIndexPTile=maxIndexPTile, & @\
+      minIndexPTile=minIndexPTile, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     do i=1,dimC @\
-      gDimsIndex(i) = maxIndexPDimPTile(i,1)-minIndexPDimPTile(i,1)+1 @\
+      gDimsIndex(i) = maxIndexPTile(i,1)-minIndexPTile(i,1)+1 @\
       timecount(i) = gDimsIndex(i) @\
     enddo @\
     timestart=1 @\
@@ -494,8 +494,8 @@ contains
     deallocate (pioDofList) @\
     deallocate (dimid_xyz) @\
     deallocate (gDimsIndex) @\
-    deallocate (minIndexPDimPTile) @\
-    deallocate (maxIndexPDimPTile) @\
+    deallocate (minIndexPTile) @\
+    deallocate (maxIndexPTile) @\
 @\
     ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
@@ -571,7 +571,7 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     mtype (ESMF_KIND_##mtypekind),pointer,dimension(mdim)  :: farrayrd @\
     integer :: dimC, time_len, dimid_time @\
     integer, allocatable :: gDimsIndex(:) @\
-    integer, allocatable :: minIndexPDimPTile(:,:), maxIndexPDimPTile(:,:) @\
+    integer, allocatable :: minIndexPTile(:,:), maxIndexPTile(:,:) @\
 @\
     ! PIO VARIABLES: @\
     type (iosystem_desc_t) :: PIOSYS @\
@@ -626,19 +626,19 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
     allocate (gDimsIndex(dimC)) @\
-    allocate ( minIndexPDimPTile(dimC,1) ) @\
-    allocate ( maxIndexPDimPTile(dimC,1) ) @\
+    allocate ( minIndexPTile(dimC,1) ) @\
+    allocate ( maxIndexPTile(dimC,1) ) @\
 @\
     call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayrd, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
-    call ESMF_ArrayGet(array, maxIndexPDimPTile=maxIndexPDimPTile, & @\
-                    minIndexPDimPTile=minIndexPDimPTile, rc=localrc) @\
+    call ESMF_ArrayGet(array, maxIndexPTile=maxIndexPTile, & @\
+                    minIndexPTile=minIndexPTile, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     do i=1,dimC @\
-      gDimsIndex(i) = maxIndexPDimPTile(i,1)-minIndexPDimPTile(i,1)+1 @\
+      gDimsIndex(i) = maxIndexPTile(i,1)-minIndexPTile(i,1)+1 @\
     enddo @\
 @\
     !-------------------------------------- @\
@@ -762,8 +762,8 @@ TypeKindRankDeclarationMacro(ArrayWriteIntl)
     !TODO: need error checking here! @\
     deallocate (pioDofList) @\
     deallocate (gDimsIndex) @\
-    deallocate (minIndexPDimPTile) @\
-    deallocate (maxIndexPDimPTile) @\
+    deallocate (minIndexPTile) @\
+    deallocate (maxIndexPTile) @\
 @\
     ! Return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
