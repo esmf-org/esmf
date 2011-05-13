@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.1 2011/04/13 23:12:15 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.2 2011/05/13 17:50:31 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -52,6 +52,13 @@
 \input{NUOPC_implnotes}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_implnotes}
+#endif
+
+\subsection{NUOPC Field Dictionary}
+#ifdef STANDALONE
+\input{NUOPC_FieldDictionaryDef_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_FieldDictionaryDef_fapi}
 #endif
 
 \subsection{Utility API}
