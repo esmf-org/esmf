@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.29 2011/05/12 14:14:38 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.30 2011/05/13 17:08:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.29 2011/05/12 14:14:38 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.30 2011/05/13 17:08:07 feiliu Exp $'
 
 !==============================================================================
 !
@@ -952,6 +952,16 @@ integer, intent(out), optional             :: rc
     do i = 1, ngrid_b
         ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideB(i),rc)
     enddo
+
+    if(.not. present(sparseMatA2X) .and. &
+      (.not. present(sparseMatX2A)).and. &
+      (.not. present(sparseMatB2X)).and. &
+      (.not. present(sparseMatX2B))) then
+        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+           msg="- One of the sparseMat must be set to generate an XGrid", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
 
     ! initialize XGridType object and its base object
     nullify(xgtype)

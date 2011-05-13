@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.24 2011/05/06 19:00:56 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.25 2011/05/13 17:08:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.24 2011/05/06 19:00:56 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.25 2011/05/13 17:08:07 feiliu Exp $'
 
 !==============================================================================
 !
@@ -909,13 +909,6 @@ contains
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! serialize the balanced distgrid
-      call C_ESMC_DistGridSerialize(fp%distgridM, buffer(1), length, offset, &
-                                   linquireflag, localrc)
-      if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-
       ! set up the association status array and other meta-data
       s = 0
       ngridA = 0
@@ -940,6 +933,13 @@ contains
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! serialize the balanced distgrid
+      call C_ESMC_DistGridSerialize(fp%distgridM, buffer(1), length, offset, &
+                                   linquireflag, localrc)
+      if (ESMF_LogFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! serialize the rest of the XGrid members
       if(associated(fp%distgridA)) then
@@ -1091,13 +1091,6 @@ contains
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! Deserialize the balanced distgrid
-      call C_ESMC_DistGridDeserialize(fp%distgridM, buffer(1), offset, &
-                                   localrc)
-      if (ESMF_LogFoundError(localrc, &
-                               ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-
       ! call into the C api to deserialize this status array and other meta-data
       flag = 0
       call c_ESMC_XGridDeserialize(s, ngridA, ngridB, flag, &
@@ -1105,6 +1098,13 @@ contains
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Deserialize the balanced distgrid
+      call C_ESMC_DistGridDeserialize(fp%distgridM, buffer(1), offset, &
+                                   localrc)
+      if (ESMF_LogFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! set up memory based on the association status array and other meta-data
       if(s(XG_S_DGA) == 1) allocate(fp%distgridA(ngridA))
