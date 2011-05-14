@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.7 2011/05/13 22:59:09 svasquez Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.8 2011/05/14 04:22:28 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -101,7 +101,7 @@ module ESMF_WebServUserModel
     print *, "User Comp1 Init starting: "
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
@@ -109,7 +109,7 @@ module ESMF_WebServUserModel
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
@@ -149,7 +149,7 @@ module ESMF_WebServUserModel
     print *, "User Comp1 Run starting"
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
@@ -157,7 +157,7 @@ module ESMF_WebServUserModel
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
@@ -195,7 +195,7 @@ module ESMF_WebServUserModel
     print *, "User Comp1 Final starting"
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
@@ -203,7 +203,7 @@ module ESMF_WebServUserModel
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
