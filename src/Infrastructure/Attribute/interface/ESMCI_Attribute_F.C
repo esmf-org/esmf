@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.49 2011/05/02 20:39:49 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.50 2011/05/16 18:59:41 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.49 2011/05/02 20:39:49 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.50 2011/05/16 18:59:41 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2915,6 +2915,178 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   if (rc) *rc = status;
 
 }  // end c_ESMC_AttributeGetValue
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttpackGetInfoName - get type and number of items in an attpackattr
+//
+// !INTERFACE:
+      void FTN(c_esmc_attpackgetinfoname)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attpackgetinfoname()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      ESMC_TypeKind *tk,        // out - typekind
+      int *count,               // out - item count
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      char *attPackInstanceName, // in - attpack instance name
+      int *rc,                   // in - return code
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
+// 
+// !DESCRIPTION:
+//   Return the typekind, count of items in the (name,value) pair from any 
+//   object type in the system.
+//
+//EOP
+
+  int status;
+  ESMCI::Attribute *attpack, *attr;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  if (!tk) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute typekind", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  if (!count) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute count", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity checks before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  if (cconv.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cpurp.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cobj.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  // convert optional (char *) arg attPackInstanceName to string
+// TODO: is the following line safe for all F90 compilers when passing a 
+//       not-present char* attPackInstanceName ?  what is value of alen?
+//  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
+  string capname;
+  if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
+                                                      alen > 0) {
+    capname.assign(attPackInstanceName, 0, alen);
+  }
+  capname.resize(capname.find_last_not_of(" ")+1);
+
+
+  // get the Attribute package
+  attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
+  if (!attpack) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "failed getting Attribute package", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  // get the attribute
+  attr = attpack->AttPackGetAttribute(cname);
+  if (!attr) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+      "This Attribute package does have the specified Attribute", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  // set attpack to parent of found attribute
+  attpack = attr->AttributeGetParent();
+
+  status = attpack->AttributeGet(cname, tk, count);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+    ESMC_NOT_PRESENT_FILTER(rc));
+
+
+
+}  // end c_ESMC_AttpackGetInfoName
 
 //-----------------------------------------------------------------------------
 //BOP

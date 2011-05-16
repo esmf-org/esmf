@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.87 2011/05/13 21:26:06 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.88 2011/05/16 18:59:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.87 2011/05/13 21:26:06 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.88 2011/05/16 18:59:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -3296,13 +3296,14 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetChar(mthis, name, value, defaultvalue, & @\
+      subroutine mclass##AttGetChar(mthis, name, value, keywordEnforcer, defaultvalue, & @\
         convention, purpose, attPackInstanceName, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(inout), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
@@ -3670,12 +3671,16 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetInfoByNam(mthis, name, typekind, itemCount, & @\
-        isPresent, rc) @\
+      subroutine mclass##AttGetInfoByNam(mthis, name, keywordEnforcer, convention, purpose, & @\
+        attPackInstanceName, typekind, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character(len=*), intent(in) :: name @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      character (len=*), intent(in), optional :: convention @\
+      character (len=*), intent(in), optional :: purpose @\
+      character (len=*), intent(in), optional :: attPackInstanceName @\
       type(ESMF_TypeKind), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
@@ -3692,6 +3697,14 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to query. @\
+!     \item [{[convention]}] @\
+!           The convention of the Attribute package. @\
+!     \item [{[purpose]}] @\
+!           The purpose of the Attribute package. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  (Not implemented yet) @\
 !     \item [{[typekind]}] @\
 !           The typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -3707,28 +3720,51 @@ contains
 !EOPI @\
  @\
       integer :: localrc              @\
+      character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_Logical) :: lisPresent, isAttpack @\
       type(ESMF_TypeKind) :: localTk @\
-      type(ESMF_Logical) :: lisPresent!, isAttpack @\
       integer :: litemCount @\
  @\
       ! Initialize  @\
       lisPresent = ESMF_FALSE @\
-!      isAttpack = ESMF_FALSE @\
+      isAttpack = ESMF_FALSE @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
-      if (lisPresent == ESMF_TRUE) then @\
-        call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
-          localTk, litemCount, localrc) @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
+          return @\
+        endif @\
+        isAttpack = ESMF_TRUE @\
+      endif @\
+ @\
+      if (isAttpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
+          fobject, attPackInstanceName, lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
+        if (lisPresent == ESMF_TRUE) then @\
+          call c_ESMC_AttPackGetInfoName(mthisfield, name, localTk, litemCount, & @\
+            convention, purpose, fobject, attPackInstanceName, localrc) @\
+        end if @\
+      else @\
+        call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        if (lisPresent == ESMF_TRUE) then @\
+          call c_ESMC_AttributeGetInfoName(mthisfield, name, & @\
+            localTk, litemCount, localrc) @\
+        endif @\
       endif @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(isPresent)) then @\
         isPresent = lisPresent @\
@@ -5145,57 +5181,6 @@ contains
       end subroutine mclass##AttWrite @\
 
 !-------------------------------------------------------------------------
-!  ARRAY
-!-------------------------------------------------------------------------
-
-AttAddPackCustomMacro(ESMF_Array, array, array)
-AttAddPackCustomNMacro(ESMF_Array, array, array)
-AttAddPackCustomN1Macro(ESMF_Array, array, array)
-AttAddPackStandardMacro(ESMF_Array, array, array)
-AttRemoveMacro(ESMF_Array, array, array)
-
-TypeKind3DeclarationMacro(AttGet, ESMF_Array, array, array)
-AttGetLogicalMacro(ESMF_Array, array, array)
-AttGetCharacterMacro(ESMF_Array, array, array)
-
-GetCountNameNumberMacro(ESMF_Array, array, array)      
-
-TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
-AttSetLogicalMacro(ESMF_Array, array, array)
-AttSetCharacterMacro(ESMF_Array, array, array)
-
-AttUpdateMacro(ESMF_Array, array, array)
-AttWriteMacro(ESMF_Array, array, array, array, array)
-
-!-------------------------------------------------------------------------
-!  ARRAYBUNDLE
-!-------------------------------------------------------------------------
-
-AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttAddPackCustomNMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttAddPackCustomN1Macro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttAddPackStandardMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-
-TypeKind3DeclarationMacro(AttGet, ESMF_ArrayBundle, arraybundle, arraybundle)
-AttGetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttGetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-
-GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)      
-
-AttLinkMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
-                arraybundle, array)
-AttLinkRemoveMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
-                arraybundle, array)
-
-TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
-AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-
-AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
-
-!-------------------------------------------------------------------------
 !  CplComp
 !-------------------------------------------------------------------------
 
@@ -5279,116 +5264,6 @@ AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
-!  DISTGRID
-!-------------------------------------------------------------------------
-
-AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
-AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)
-AttAddPackCustomN1Macro(ESMF_DistGrid, distgrid, distgrid)
-
-TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
-AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
-AttGetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
-
-GetCountNameNumberMacro(ESMF_DistGrid, distgrid, distgrid)      
-
-AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
-
-TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
-AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
-AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
-
-!-------------------------------------------------------------------------
-!  FIELD
-!-------------------------------------------------------------------------
-
-AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
-AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
-AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
-AttAddPackCustomN1Macro(ESMF_Field, field, field%ftypep%base)
-
-TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
-AttGetLogicalMacro(ESMF_Field, field, field%ftypep%base)
-AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
-
-GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
-
-AttLinkMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
-                field%ftypep%base, grid)
-AttLinkRemoveMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
-                field%ftypep%base, grid)
-
-AttReadMacro(ESMF_Field, field, field%ftypep%base)
-
-AttRemoveMacro(ESMF_Field, field, field%ftypep%base)
-
-TypeKind3DeclarationMacro(AttSet, ESMF_Field, field, field%ftypep%base)
-AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
-AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
-
-AttUpdateMacro(ESMF_Field, field, field%ftypep%base)
-AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
-
-!-------------------------------------------------------------------------
-!  FIELDBUNDLE
-!-------------------------------------------------------------------------
-
-AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
-                fieldbundle%btypep%base, field%ftypep%base)
-AttLinkMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
-                fieldbundle%btypep%base, grid)
-AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
-                fieldbundle%btypep%base, field%ftypep%base)
-AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
-                fieldbundle%btypep%base, grid)
-
-AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-
-AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundle, field)
-
-!-------------------------------------------------------------------------
-!  GRID
-!-------------------------------------------------------------------------
-
-AttAddPackStandardMacro(ESMF_Grid, grid, grid)
-AttAddPackCustomMacro(ESMF_Grid, grid, grid)
-AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
-AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
-
-TypeKind3DeclarationMacro(AttGet, ESMF_Grid, grid, grid)
-AttGetLogicalMacro(ESMF_Grid, grid, grid)
-AttGetCharacterMacro(ESMF_Grid, grid, grid)
-
-GetCountNameNumberMacro(ESMF_Grid, grid, grid)
-
-AttReadMacro(ESMF_Grid, grid, grid)
-
-AttRemoveMacro(ESMF_Grid, grid, grid)
-
-TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
-AttSetLogicalMacro(ESMF_Grid, grid, grid)
-AttSetCharacterMacro(ESMF_Grid, grid, grid)
-
-AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
-
-!-------------------------------------------------------------------------
 !  STATE
 !-------------------------------------------------------------------------
 
@@ -5435,6 +5310,167 @@ AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 
 AttUpdateMacro(ESMF_State, state, state%statep%base)
 AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
+
+!-------------------------------------------------------------------------
+!  FIELDBUNDLE
+!-------------------------------------------------------------------------
+
+AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
+GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
+AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
+                fieldbundle%btypep%base, field%ftypep%base)
+AttLinkMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
+                fieldbundle%btypep%base, grid)
+AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
+                fieldbundle%btypep%base, field%ftypep%base)
+AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
+                fieldbundle%btypep%base, grid)
+
+AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
+AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+
+AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundle, field)
+
+!-------------------------------------------------------------------------
+!  FIELD
+!-------------------------------------------------------------------------
+
+AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
+AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
+AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
+AttAddPackCustomN1Macro(ESMF_Field, field, field%ftypep%base)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
+AttGetLogicalMacro(ESMF_Field, field, field%ftypep%base)
+AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
+
+GetCountNameNumberMacro(ESMF_Field, field, field%ftypep%base)
+
+AttLinkMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
+                field%ftypep%base, grid)
+AttLinkRemoveMacro(ESMF_Field, ESMF_Grid, Grid, field, grid, & @\
+                field%ftypep%base, grid)
+
+AttReadMacro(ESMF_Field, field, field%ftypep%base)
+
+AttRemoveMacro(ESMF_Field, field, field%ftypep%base)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_Field, field, field%ftypep%base)
+AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
+AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
+
+AttUpdateMacro(ESMF_Field, field, field%ftypep%base)
+AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
+
+!-------------------------------------------------------------------------
+!  ARRAYBUNDLE
+!-------------------------------------------------------------------------
+
+AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttAddPackCustomNMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttAddPackCustomN1Macro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttAddPackStandardMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_ArrayBundle, arraybundle, arraybundle)
+AttGetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttGetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
+GetCountNameNumberMacro(ESMF_ArrayBundle, arraybundle, arraybundle)      
+
+AttLinkMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
+                arraybundle, array)
+AttLinkRemoveMacro(ESMF_ArrayBundle, ESMF_Array, Array, arraybundle, array, & @\
+                arraybundle, array)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_ArrayBundle, arraybundle, arraybundle)
+AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
+AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
+
+!-------------------------------------------------------------------------
+!  ARRAY
+!-------------------------------------------------------------------------
+
+AttAddPackCustomMacro(ESMF_Array, array, array)
+AttAddPackCustomNMacro(ESMF_Array, array, array)
+AttAddPackCustomN1Macro(ESMF_Array, array, array)
+AttAddPackStandardMacro(ESMF_Array, array, array)
+AttRemoveMacro(ESMF_Array, array, array)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_Array, array, array)
+AttGetLogicalMacro(ESMF_Array, array, array)
+AttGetCharacterMacro(ESMF_Array, array, array)
+
+GetCountNameNumberMacro(ESMF_Array, array, array)      
+
+TypeKind3DeclarationMacro(AttSet, ESMF_Array, array, array)
+AttSetLogicalMacro(ESMF_Array, array, array)
+AttSetCharacterMacro(ESMF_Array, array, array)
+
+AttUpdateMacro(ESMF_Array, array, array)
+AttWriteMacro(ESMF_Array, array, array, array, array)
+
+!-------------------------------------------------------------------------
+!  GRID
+!-------------------------------------------------------------------------
+
+AttAddPackStandardMacro(ESMF_Grid, grid, grid)
+AttAddPackCustomMacro(ESMF_Grid, grid, grid)
+AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
+AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_Grid, grid, grid)
+AttGetLogicalMacro(ESMF_Grid, grid, grid)
+AttGetCharacterMacro(ESMF_Grid, grid, grid)
+
+GetCountNameNumberMacro(ESMF_Grid, grid, grid)
+
+AttReadMacro(ESMF_Grid, grid, grid)
+
+AttRemoveMacro(ESMF_Grid, grid, grid)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
+AttSetLogicalMacro(ESMF_Grid, grid, grid)
+AttSetCharacterMacro(ESMF_Grid, grid, grid)
+
+AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
+
+!-------------------------------------------------------------------------
+!  DISTGRID
+!-------------------------------------------------------------------------
+
+AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
+AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)
+AttAddPackCustomN1Macro(ESMF_DistGrid, distgrid, distgrid)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
+AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
+AttGetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
+
+GetCountNameNumberMacro(ESMF_DistGrid, distgrid, distgrid)      
+
+AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
+AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
+AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.39 2011/05/13 21:26:08 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.40 2011/05/16 18:59:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.39 2011/05/13 21:26:08 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.40 2011/05/16 18:59:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1424,6 +1424,17 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on a Field test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut4 == attpackDfltList), &
+        name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      isPresent = .false.
+      ! Get the isPresent flag from an Attribute in an Attribute package on a Field Test
+      call ESMF_AttributeGet(field, name="Character_name", &
+        convention=nestconv, purpose=nestpurp, isPresent=isPresent, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting the isPresent flag from an Attribute in an Attribute package on a Field test"
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. isPresent.eqv..true., &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

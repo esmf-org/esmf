@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.51 2011/05/13 00:06:42 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.52 2011/05/16 18:59:39 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -492,6 +492,16 @@ extern "C" {
                                   ESMC_TypeKind *tk,
                                   int *count, void *value, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
+  void FTN(c_esmc_attpackgetinfoname)(ESMC_Base **base, char *name, 
+                                  ESMC_TypeKind *tk, int *count,
+                                  char *convention, char *purpose, 
+                                  char *object, char *attPackInstanceName,
+                                  int *rc,
+                                  ESMCI_FortranStrLenArg nlen,
+                                  ESMCI_FortranStrLenArg clen, 
+                                  ESMCI_FortranStrLenArg plen, 
+                                  ESMCI_FortranStrLenArg olen,
+                                  ESMCI_FortranStrLenArg alen);
   void FTN(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
                                   ESMC_TypeKind *tk,
                                   int *count, int *rc,
