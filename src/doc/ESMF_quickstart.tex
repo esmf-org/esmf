@@ -323,8 +323,8 @@ ESMF_F90COMPILEOPTS: -g -fPIC -m64 -mcmodel=small -threads  -openmp
 ESMF_F90COMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/esmf/mod/ \
 	modg/Linux.intel.64.mpiuni.default -I/nobackupp10/scvasque/daily_builds \
 	/intel/esmf/src/include 
-ESMF_F90COMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE -DSx86_64_small=1 -DESMF_OS_Linux=1 \
-	-DESMF_MPIUNI
+ESMF_F90COMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE -DSx86_64_small=1 \
+	-DESMF_OS_Linux=1  -DESMF_MPIUNI
 ESMF_F90COMPILEFREECPP: 
 ESMF_F90COMPILEFREENOCPP: 
 ESMF_F90COMPILEFIXCPP: 
@@ -351,18 +351,18 @@ ESMF_CXXCOMPILEOPTS: -g -fPIC -m64 -mcmodel=small -pthread  -openmp
 ESMF_CXXCOMPILEPATHS: -I/nobackupp10/scvasque/daily_builds/intel/ esmf/src/ \
 	include  -I/nobackupp10/scvasque/daily_builds/intel/esmf/src/Infrastructure \
 	/stubs/mpiuni
-ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DSx86_64_small=1 -DESMF_OS_Linux=1 \
-	-D__SDIR__='' -DESMF_MPIUNI
+ESMF_CXXCOMPILECPPFLAGS: -DESMF_TESTEXHAUSTIVE  -DSx86_64_small=1 \
+	-DESMF_OS_Linux=1 -D__SDIR__='' -DESMF_MPIUNI
 
 C++ linker flags:
 ESMF_CXXLINKOPTS:  -m64 -mcmodel=small -pthread  -openmp
 ESMF_CXXLINKPATHS: -L/nobackupp10/scvasque/daily_builds/intel/esmf/lib/libg/ \
 	Linux.intel.64.mpiuni.default  -L/nasa/intel/fce/10.1.021/lib/
-ESMF_CXXLINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/lib/ \
-	libg/Linux.intel.64.mpiuni.default 
-	-Wl,-rpath,/nasa/intel/fce/10.1.021/lib/
-ESMF_CXXLINKLIBS:  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc -lpthread \
-	-lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
+ESMF_CXXLINKRPATHS: -Wl,-rpath,/nobackupp10/scvasque/daily_builds/intel/esmf/ \
+	lib/libg/Linux.intel.64.mpiuni.default -Wl,-rpath,/nasa/intel/fce/ \
+	10.1.021/lib/
+ESMF_CXXLINKLIBS:  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide -lirc \
+	-lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
 ESMF_CXXESMFLINKLIBS: -lesmf  -lifport -lifcoremt -limf -lsvml -lm -lipgo -lguide \
 	-lirc -lpthread -lgcc_s -lgcc -lirc_s -ldl -lrt -ldl
 
