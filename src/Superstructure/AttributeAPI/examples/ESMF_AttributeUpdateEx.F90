@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.31 2011/05/10 23:26:05 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.32 2011/05/16 18:59:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ implicit none
 
 
 !BOE
-! \subsubsection{{\tt ESMF\_AttributeUpdate} - Attributes in a distributed environment}
+! \subsubsection{Updating Attributes in a distributed environment}
 !
 ! This advanced example illustrates the proper methods of Attribute manipulation
 ! in a distributed environment to ensure consistency of metadata across the VM. 

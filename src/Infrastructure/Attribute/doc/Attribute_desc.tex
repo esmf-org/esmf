@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.45 2011/05/10 23:27:36 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.46 2011/05/16 18:59:37 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,47 +10,57 @@
 
 
 The ESMF Attribute class is a metadata utility that supports emerging standards 
-in a flexible way.  Metadata, which is data about data, is broken down into 
-name-value pairs by the Attribute class.  Attributes can be attached at any 
-level of the ESMF object hierarchy, and they can be grouped into packages to 
-help organize model metadata.  
-
-Most of the ESMF deep objects can hold metadata in the form of an Attribute 
-hierarchy.  The objects that can hold Attributes of various types are listed in 
-the following sections.  The Attribute class is useful for documenting data 
+in a flexible way.  The Attribute class is useful for documenting data 
 provenance and encourages models to be more self describing.  Attributes can 
 also be used for some aspects of model execution and coupling.
 
-Standardized metadata is organized in ESMF by Attribute packages.  These 
-packages are used to aggregate, store, and output model metadata.  They can be 
-nested inside each other to make larger organized package, distributed across 
+Metadata, which is data about data, is broken down into 
+name-value pairs by the Attribute class.  Attributes can be attached at any 
+level of the ESMF object hierarchy, and in some cases the Attributes of 
+different ESMF objects can linked together to form 
+a corresponding Attribute hierarchy.  Attribute hierarchies are linked up
+automatically for the most part, with an exception at the Component-State 
+interaction.  Attribute hierarchies can also be unlinked, copied, and 
+moved around as needed.
+
+ESMF Attribute packages 
+are used to aggregate, store, and output model metadata.  They can be 
+nested inside each other to make larger organized packages, distributed across 
 processors and updated at runtime, and expanded to suite specific needs.  These 
-Attribute packages are designed around accepted metadata standards such as: 
-climate and forecast (CF), ISO standards, and METAFOR Common Information Model 
-(CIM).
+Attribute packages are designed around accepted metadata conventions such as: 
+climate and forecast (CF) \cite{ref:cf}, ISO standards \cite{ref:iso}, and the METAFOR 
+Common Information Model (CIM) \cite{ref:cim}.
+
+Most of the ESMF deep objects can host Attributes, and   
+every object that can hold individual Attributes can also hold
+Attribute packages.  Attribute hierarchies are supported for a majority of
+the Attribute bearing classes.  
+More information on the various Attribute 
+capabilities, and the classes for which they are supported appear in the
+following sections.
 
 \subsubsection{The ESMF approach to Attributes}
 
-ESMF's Approach to Attributes can be summarized as follows:
+ESMF's approach to Attributes can be summarized as follows:
 
 \begin{itemize}
   \item Implement community standards where they exist
   \item Associate Attributes with the ESMF object they describe. Currently, the following ESMF objects can have Attributes:
   \begin{itemize}
-     \item Array
-     \item ArrayBundle
      \item CplComp
      \item GridComp
-     \item DistGrid
-     \item Field
-     \item FieldBundle
-     \item Grid
      \item State
+     \item FieldBundle
+     \item Field
+     \item ArrayBundle
+     \item Array
+     \item Grid
+     \item DistGrid
      \end{itemize}
   \item Establish pre-defined Attribute packages (see Section \ref{sec:AttPacks}) to make Attribute creation easier for the user.
-  \item Allow for user-defined Custom Attribute packages (see Section \ref{sec:CustomAttPacks}).
+  \item Allow for user-defined custom Attribute packages (see Section \ref{sec:CustomAttPacks}).
   \item Enable the nesting of Attribute packages (see Section \ref{sec:AttPackNesting}) including Custom packages.
-  \item Enable complex Attribute heirarchies (see Section \ref{sec:AttHier}.
+  \item Enable complex Attribute hierarchies (see Section \ref{sec:AttHier}.
   \item Export Attributes in more than one format (see Section \ref{sec:AttributeExports}).
   \item Ensure that all Attributes are consistent across the entire virtual machine of the object to which they are attached.
 \end{itemize}
@@ -64,9 +74,10 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 \item CplComp
 \item GridComp
 \item State
-\item Field
 \item FieldBundle
+\item Field
 \item ArrayBundle
+\item Array
 \end{itemize}
 
 The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\tt VariableIntent} Attribute that is part of the ESMF supplied standard Attribute package for Field when that Field is added to the State.  {\tt VariableIntent} will be set to either {\tt Export} or {\tt Import}.
