@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.30 2011/05/17 05:52:54 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.31 2011/05/17 20:16:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -217,10 +217,9 @@ program ESMF_AttributeCIMEx
       !
       ! Top-level model component attributes, set on coupler
       !
-#if 1
       call ESMF_AttributeSet(cplcomp, 'ShortName', 'HiGEM', &
         convention=convCIM, purpose=purpComp, rc=rc)
-#endif
+
       call ESMF_AttributeSet(cplcomp, 'LongName', &
                              'UK High Resolution Global Environment Model', &
         convention=convCIM, purpose=purpComp, rc=rc)
@@ -232,11 +231,11 @@ program ESMF_AttributeCIMEx
         'climate models will allow us to capture climate processes and ' // &
         'weather systems in much greater detail.', &
         convention=convCIM, purpose=purpComp, rc=rc)
-#if 0
+
       call ESMF_AttributeSet(cplcomp, 'Version', &
         '2.0', &
           convention=convCIM, purpose=purpComp, rc=rc)
-#endif
+
       call ESMF_AttributeSet(cplcomp, 'ReleaseDate', &
         '2009-01-01T00:00:00Z', &
           convention=convCIM, purpose=purpComp, rc=rc)
