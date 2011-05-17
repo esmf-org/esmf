@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.56 2011/04/05 19:00:40 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.57 2011/05/17 19:46:36 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -54,6 +54,11 @@ namespace ESMCI {
   };
 }
 
+
+// prototypes from below
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts);
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
+
 // external C functions
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
@@ -89,13 +94,34 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     // Weights matrix
     IWeights wts;
+    // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
+    // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
+    int temp_unmappedaction=ESMC_UNMAPPEDACTION_IGNORE;
 
     if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
                       regridPoleType, regridPoleNPnts, 
-                      regridScheme, unmappedaction))
+                      regridScheme, &temp_unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
-    //wts.Print(Par::Out());
+    // If user is worried about unmapped points then check that
+    // here, because we have all the dest objects and weights
+    // gathered onto the same proc.
+    if (*unmappedaction==ESMC_UNMAPPEDACTION_ERROR) {
+      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+        if (!all_mesh_elem_ids_in_wmat(dstmesh, wts)) {
+            int localrc;
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+	       "- There exist destination cells which don't overlap with any source cell", &localrc)) throw localrc;
+        }
+      } else { // bilinear, patch, ...
+        if (!all_mesh_node_ids_in_wmat(dstmesh, wts)) {
+            int localrc;
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+	       "- There exist destination points which can't be mapped to any source cell", &localrc)) throw localrc;
+        }
+      }
+    }
+
 
     // We have the weights, now set up the sparsemm object
 
@@ -357,5 +383,111 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
   delete *_tw;
 
 }
+
+
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
+
+    // Get  mask field
+  //  _field *mptr = mesh.Getfield("mask_1");
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("mask");
+
+  // Get end of weight iterator
+  WMat::WeightMap::iterator we = wts.end_row();
+
+  // get mesh node iterator
+  MeshDB::iterator ni=mesh.node_begin(), ne=mesh.node_end();
+
+
+  // Loop checking that all nodes have weights
+  for (; ni != ne; ++ni) {
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(*ni);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int id=ni->get_id();
+
+    // Get beginning of row ids that are greater or equal to id
+    WMat::WeightMap::iterator wi = wts.lower_bound_id_row(id);
+
+    // See if we find the id    
+    bool found_id=false;
+    if (wi != we) {
+      const WMat::Entry &w = wi->first;
+      
+      // we found it
+      if (w.id==id) {
+        found_id=true;
+      } else if (w.id>id) {
+        // we went over and didn't find it
+        found_id=false;
+      } 
+    } 
+
+    // If not found, return saying so
+    if (!found_id) return false;
+  }
+
+  // Still here, so must have found them all
+  return true;
+
+}
+
+
+
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("mask");
+
+  // Get end of weight iterator
+  WMat::WeightMap::iterator we = wts.end_row();
+
+  // get mesh elem iterator
+  MeshDB::iterator ei=mesh.elem_begin(), ee=mesh.elem_end();
+
+  // Loop checking that all elements have weights
+  for (; ei != ee; ++ei) {
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(*ei);
+      if (*m > 0.5) continue;
+    }
+
+    // get element id
+    int id=ei->get_id();
+
+    // Get beginning of row ids that are greater or equal to id
+    WMat::WeightMap::iterator wi = wts.lower_bound_id_row(id);
+
+    // See if we find the id    
+    bool found_id=false;
+    if (wi != we) {
+      const WMat::Entry &w = wi->first;
+      
+      // we found it
+      if (w.id==id) {
+        found_id=true;
+      } else if (w.id>id) {
+        // we went over and didn't find it
+        found_id=false;
+      } 
+    } 
+
+    // If not found, return saying so
+    if (!found_id) return false;
+  }
+
+  // Still here, so must have found them all
+  return true;
+
+}
+
 
 #undef  ESMC_METHOD
