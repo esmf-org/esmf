@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.33 2010/12/17 19:31:37 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.34 2011/05/17 00:25:56 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -179,7 +179,8 @@ unit tests are being tracked and corrected by the ESMF development team.
 
 The results of running the unit tests can be found in the following location:
 \begin{verbatim}
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}.${ESMF_SITE}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}. \
+	${ESMF_SITE}
 \end{verbatim}
 
 For example, if your esmf source files have been placed in: 
@@ -287,7 +288,8 @@ The following individual unit tests fail:
 
 
 The stdout files for the unit tests can be found at:
-/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/ \
+	AIX.default.64.default
 
 Found 1224 exhaustive multi processor unit tests, 1220 pass and 4 fail.
 
@@ -336,7 +338,8 @@ are built and run.
 
 The results of the test can be found in the following location:
 \begin{verbatim}
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}.${ESMF_SITE}
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_OS}.${ESMF_COMPILER}.${ESMF_ABI}. \
+	${ESMF_SITE}
 \end{verbatim}
 
 For example, if your ESMF source files have been placed in your home directory:
@@ -414,7 +417,8 @@ src/system_tests/ESMF_RowReduce/ESMF_RowReduceSTest.F90
 
 
 The stdout files for the system_tests can be found at:
-/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/AIX.default.64.default
+/home/bluedawn/svasquez/script_dirs/daily_builds/esmf/test/testO/ \
+	AIX.default.64.default
 
 Found 14 system tests, 12 passed and 2 failed.
 
