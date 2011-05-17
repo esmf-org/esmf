@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.14 2011/04/01 23:06:43 theurich Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.15 2011/05/17 22:45:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.14 2011/04/01 23:06:43 theurich Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.15 2011/05/17 22:45:14 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -80,7 +80,8 @@ contains
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
-        type(ESMF_KeywordEnforcer),           optional  :: keywordEnforcer ! must use keywords below
+        type(ESMF_KeywordEnforcer),           optional  :: keywordEnforcer 
+				! must use keywords below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
