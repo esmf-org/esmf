@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.335 2011/05/11 20:34:00 theurich Exp $
+#  $Id: common.mk,v 1.336 2011/05/17 22:50:23 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -1394,7 +1394,7 @@ lib: info
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
 	@echo " or the more extensive: $(MAKE) all_tests"
 
-build_libs: chkdir_lib include etc
+build_libs: chkdir_lib include_n_etc
 	cd $(ESMF_DIR) ; $(MAKE) ACTION=tree_lib tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	cd $(ESMF_DIR) ; $(MAKE) defer
@@ -1406,9 +1406,8 @@ endif
 
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib chkdir_include chkdir_etc
-	$(MAKE) ACTION=tree_include tree
+	$(MAKE) ACTION="tree_include tree_etc" tree
 	$(MAKE) ACTION=tree_lib tree
-	$(MAKE) ACTION=tree_etc tree
 ifeq ($(ESMF_DEFER_LIB_BUILD),ON)
 	$(MAKE) defer
 endif
@@ -1453,6 +1452,11 @@ tree_etc:
 	    cp -fp ../etc/$$etcfile $(ESMF_ETCDIR) ; \
 	  fi ; \
 	done
+
+# combined include and etc target that walks the tree only once
+include_n_etc: chkdir_include chkdir_etc $(if $(findstring ON,$(ESMF_DEFER_LIB_BUILD)),chkdir_lib)
+	cd $(ESMF_DIR) ;\
+        $(MAKE) ACTION="tree_include tree_etc" tree
         
 # extra indirection to allow build_libs to be turned off in targets using it
 autobuild_libs:
@@ -2815,8 +2819,8 @@ ifeq (,$(findstring k,$(MAKEFLAGS)))
 	  for dir in $(DIRS) foo ; do \
             if [ -d $$dir ]; then \
               (cd $$dir ; \
-              echo $(ACTION) without -k in: `pwd`; \
-              $(MAKE) -f makefile tree ACTION=$(ACTION));\
+              echo "$(ACTION)" in: `pwd`; \
+              $(MAKE) -f makefile tree ACTION="$(ACTION)");\
               if [ "$$?" != 0 ]; then \
                 exit 1; \
               fi; \
@@ -2828,8 +2832,8 @@ else
 	  for dir in $(DIRS) foo ; do \
             if [ -d $$dir ]; then \
               (cd $$dir ; \
-              echo $(ACTION) with -k in: `pwd`; \
-              $(MAKE) -f makefile tree ACTION=$(ACTION));\
+              echo "$(ACTION)" in: `pwd`; \
+              $(MAKE) -f makefile tree ACTION="$(ACTION)");\
             fi; \
 	  done; \
         fi
@@ -3344,7 +3348,7 @@ endif
 # - if SOURCEF or SOURCEC are non-empty
 # - define LOCAL_INCLUDE_FILES based on SOURCEH and ../include
 # - Fortran autogen source files are assumed to be named with the .cppF90 suffix
-ifeq ($(ACTION), tree_include)
+ifneq (,$(findstring tree_include,"$(ACTION)"))
   ifneq (,$(strip $(SOURCEF) $(SOURCEC)))
     LOCAL_INCLUDE_FILES = $(strip $(SOURCEH) $(notdir $(wildcard ../include/*)))
     $(foreach f,$(filter-out $(AUTOGEN),$(SOURCEF)),\
