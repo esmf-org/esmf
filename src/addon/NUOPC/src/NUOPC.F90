@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.7 2011/05/13 00:59:09 theurich Exp $
+! $Id: NUOPC.F90,v 1.8 2011/05/17 23:25:02 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -53,13 +53,13 @@ module NUOPC
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldDictionaryCreate - Create the NUOPC Field dictionary
+! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionarySetup(rc)
 ! !ARGUMENTS:
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Create NUOPC Field dictionary.
+!   Setup the NUOPC Field dictionary.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
