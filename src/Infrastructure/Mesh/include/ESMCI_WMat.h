@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.h,v 1.9 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_WMat.h,v 1.10 2011/05/17 19:46:02 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -136,6 +136,12 @@ public:
   WeightMap::iterator end_row() { return weights.end(); }
   WeightMap::const_iterator begin_row() const { return weights.begin(); }
   WeightMap::const_iterator end_row() const { return weights.end(); }
+
+  // Return iterator to lowest row which contains ids greater than or equal to id
+  WeightMap::iterator lower_bound_id_row(UInt id) {
+    Entry lower(id);
+    return weights.lower_bound(lower);
+  }
   
   void InsertRow(WeightMap::value_type &row) {
     InsertRow(row.first, row.second);
