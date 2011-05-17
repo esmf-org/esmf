@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.32 2011/05/12 23:54:20 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.33 2011/05/17 05:52:52 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -115,10 +115,13 @@ There are many attributes that are used to describe components. There are curren
      {\tt ShortName} & A version of the component name that contains acronyms. & N/A \\
      {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
+     {\tt SimulationMetadataVersion} & The version number of the simulation metadata. & N/A \\ 
+     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A \\ 
      {\tt SimulationRationale} & The reason for performing an experiment. & N/A\\
      {\tt SimulationShortName} & The name of the simulation. & N/A \\
      {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & N/A\\ 
      {\tt URL} & A URL associated with a model component. & N/A \\
+     {\tt Version} & Version number of the component. & N/A \\
 \end{tabular}
 
 \vspace{.20in}
@@ -174,9 +177,10 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
      {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A \\
-     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator responsible party type. & N/A \\
+     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A \\
+     {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position \\
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
-     {\tt ResponsiblePartyRole} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder\\
+     {\tt ResponsiblePartyRole} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder \\
      {\tt URL} & A URL of an individual or organization. & N/A \\
 \end{tabular}
 
@@ -498,6 +502,8 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt MachineVendor} & The brand name of a computer system. & CIM Platform \\
      {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& ESG Basic Component \\
      {\tt ModelType} & A short string describing the discipline of a model component. & CIM Main\\
+     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & ISO Responsible Party \\
+     {\tt NameType} & The type of entity that Name references. & ISO Responsible Party \\
      {\tt NorthPoleLocation} & Defines the lat-long position of the 'north pole' used by the grid tile in the case of rotated/displaced pole grids.& N/A \\ 
      {\tt NumberOfCells} & The number of cells in an unstructured grid. & \\ 
      {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & Gridspec \\ 
@@ -515,6 +521,8 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & ISO Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & CIM Main\\ 
+     {\tt SimulationMetadataVersion} & The version number of the simulation metadata. & CIM Main\\ 
+     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & CIM Main\\ 
      {\tt SimulationRationale} & The reason for performing an experiment. & CIM Main\\
      {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & CIM Main\\ 
      {\tt SimulationShortName} & The name of the simulation. & CIM Main\\

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.29 2011/05/13 23:25:58 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.30 2011/05/17 05:52:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ program ESMF_AttributeCIMEx
       character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
       character(ESMF_MAXSTR), dimension(2)  :: nestConv, nestPurp
       character(ESMF_MAXSTR), dimension(5)  :: nestAttPackName
-      character(ESMF_MAXSTR), dimension(8)  :: compPropAtt
+      character(ESMF_MAXSTR), dimension(3)  :: compPropAtt
       
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -173,14 +173,9 @@ program ESMF_AttributeCIMEx
 
       ! Specify the top-level Coupler Component to have a Component Properties
       ! package with some custom attributes
-      compPropAtt(1) = 'Tag'
-      compPropAtt(2) = 'CaseName'
-      compPropAtt(3) = 'SimulationURL'
-      compPropAtt(4) = 'WorkingGroup'
-      compPropAtt(5) = 'NumPEs'
-      compPropAtt(6) = 'MetadataVersion'
-      compPropAtt(7) = 'SimulationType'
-      compPropAtt(8) = 'Diagnostic'
+      compPropAtt(1) = 'SimulationType'
+      compPropAtt(2) = 'SimulationURL'
+      compPropAtt(3) = 'Visualization'
       call ESMF_AttributeAdd(cplcomp, convention=convCIM, purpose=purpProp, &
         attrList=compPropAtt, rc=rc)
       
@@ -222,8 +217,10 @@ program ESMF_AttributeCIMEx
       !
       ! Top-level model component attributes, set on coupler
       !
+#if 1
       call ESMF_AttributeSet(cplcomp, 'ShortName', 'HiGEM', &
         convention=convCIM, purpose=purpComp, rc=rc)
+#endif
       call ESMF_AttributeSet(cplcomp, 'LongName', &
                              'UK High Resolution Global Environment Model', &
         convention=convCIM, purpose=purpComp, rc=rc)
@@ -235,6 +232,11 @@ program ESMF_AttributeCIMEx
         'climate models will allow us to capture climate processes and ' // &
         'weather systems in much greater detail.', &
         convention=convCIM, purpose=purpComp, rc=rc)
+#if 0
+      call ESMF_AttributeSet(cplcomp, 'Version', &
+        '2.0', &
+          convention=convCIM, purpose=purpComp, rc=rc)
+#endif
       call ESMF_AttributeSet(cplcomp, 'ReleaseDate', &
         '2009-01-01T00:00:00Z', &
           convention=convCIM, purpose=purpComp, rc=rc)
@@ -245,19 +247,25 @@ program ESMF_AttributeCIMEx
 
       ! Simulation run attributes
       call ESMF_AttributeSet(cplcomp, 'SimulationShortName', &
-        'ESMF_ESM1', &
+        'SMS.f09_g16.X.bluefire', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationLongName', &
-        'Earth System Modeling Framework Earth System Model 1.0', &
+        'CESM - Earth System Modeling Framework Earth System Model 1.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationRationale', &
-'ESMF ESM1 simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+'CESM-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationStartDate', &
        '1960-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationDuration', &
        'P10Y', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'SimulationNumberOfProcessingElements', &
+       '16', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'SimulationMetadataVersion', &
+       '1.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Document genealogy
@@ -313,28 +321,13 @@ convention=convCIM, purpose=purpPlatform, rc=rc)
         convention=convCIM, purpose=purpPlatform, rc=rc)
 
       ! Component Properties: custom attributes
-      call ESMF_AttributeSet(cplcomp, 'Tag', &
-       'esmf_cesm1_beta16_04', &
-        convention=convCIM, purpose=purpProp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'CaseName', &
-       'SMS.f09_g16.X.bluefire', &
+      call ESMF_AttributeSet(cplcomp, 'SimulationType', &
+       'branch', &
         convention=convCIM, purpose=purpProp, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'SimulationURL', &
        'www.cesm.ucar.edu', &
         convention=convCIM, purpose=purpProp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'WorkingGroup', &
-       'Atmosphere Model', &
-        convention=convCIM, purpose=purpProp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'NumPEs', &
-       '16', &
-        convention=convCIM, purpose=purpProp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'MetadataVersion', &
-       '1', &
-        convention=convCIM, purpose=purpProp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'SimulationType', &
-       'branch', &
-        convention=convCIM, purpose=purpProp, rc=rc)
-      call ESMF_AttributeSet(cplcomp, 'Diagnostic', &
+      call ESMF_AttributeSet(cplcomp, 'Visualization', &
        'true', &
         convention=convCIM, purpose=purpProp, rc=rc)
 !EOC
@@ -365,25 +358,33 @@ convention=convISO, purpose=purpRP, rc=rc)
        'www.epcc.ed.ac.uk', &
         convention=convISO, purpose=purpRP, rc=rc)
 
-      ! Responsible party attributes (for Center)
+      ! Responsible party attributes (for Author)
       call ESMF_AttributeSet(cplcomp, 'Name', &
-       'Department of Meteorology University of Reading', &
+       'CESM Atmosphere Model Working Group', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'Abbreviation', &
+       'AMWG', &
+        convention=convISO, purpose=purpRP, &
+        attPackInstanceName=nestAttPackName(2),rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'NameType', &
+       'Organization', &
         convention=convISO, purpose=purpRP, &
         attPackInstanceName=nestAttPackName(2),rc=rc)
       call ESMF_AttributeSet(cplcomp, 'PhysicalAddress', &
-       'Reading, Berkshire, United Kingdom', &
+       'Climate and Global Dynamics Division, National Center for Atmospheric Research, Boulder, Colorado', &
         convention=convISO, purpose=purpRP, &
         attPackInstanceName=nestAttPackName(2),rc=rc)
       call ESMF_AttributeSet(cplcomp, 'EmailAddress', &
-       'info@reading.ac.uk', &
+       'hannay@ucar.edu', &
         convention=convISO, purpose=purpRP, &
         attPackInstanceName=nestAttPackName(2),rc=rc)
       call ESMF_AttributeSet(cplcomp, 'ResponsiblePartyRole', &
-       'Center', &
+       'Author', &
         convention=convISO, purpose=purpRP, &
         attPackInstanceName=nestAttPackName(2),rc=rc)
       call ESMF_AttributeSet(cplcomp, 'URL', &
-       'www.epcc.ed.ac.uk', &
+       'http://www.cesm.ucar.edu/working_groups/Atmosphere', &
         convention=convISO, purpose=purpRP, &
         attPackInstanceName=nestAttPackName(2),rc=rc)
 !EOC
@@ -399,22 +400,22 @@ convention=convISO, purpose=purpRP, rc=rc)
        'Shaffrey_2009', &
         convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'LongTitle', &
-'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
-'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
-'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
-'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
-'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
-'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
-'The New U.K. High Resolution Global Environment Model - Model ' // &
-'description and basic evaluation. Journal of Climate, 22 (8). ' // &
-'1861-1896.', &
-convention=convISO, purpose=purpCitation, rc=rc)
-call ESMF_AttributeSet(cplcomp, 'Date', &
-'2009-03-05', &
-convention=convISO, purpose=purpCitation, rc=rc)
-call ESMF_AttributeSet(cplcomp, 'PresentationForm', &
-'Online Refereed', &
-convention=convISO, purpose=purpCitation, rc=rc)
+       'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
+       'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
+       'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
+       'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
+       'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
+       'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
+       'The New U.K. High Resolution Global Environment Model - Model ' // &
+       'description and basic evaluation. Journal of Climate, 22 (8). ' // &
+       '1861-1896.', &
+        convention=convISO, purpose=purpCitation, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'Date', &
+       '2009-03-05', &
+        convention=convISO, purpose=purpCitation, rc=rc)
+      call ESMF_AttributeSet(cplcomp, 'PresentationForm', &
+       'Online Refereed', &
+        convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(cplcomp, 'DOI', &
        'doi:10.1175/2008JCLI2508.1', &
         convention=convISO, purpose=purpCitation, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.105 2011/05/13 23:25:56 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.106 2011/05/17 05:52:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ using std::ostringstream;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.105 2011/05/13 23:25:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.106 2011/05/17 05:52:51 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -488,6 +488,8 @@ int Attribute::count=0;
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("URL", "CIM 1.5",
                             "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("Version", "CIM 1.5",
+                            "Model Component Simulation Description", object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
@@ -498,6 +500,11 @@ int Attribute::count=0;
       localrc = AttPackAddAttribute("SimulationDuration", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationLongName", "CIM 1.5",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationMetadataVersion", "CIM 1.5",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationNumberOfProcessingElements",
+                                                          "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationRationale", "CIM 1.5",
                             "Model Component Simulation Description", object);
@@ -602,6 +609,9 @@ int Attribute::count=0;
       localrc = AttPackAddAttribute("Name", "ISO 19115",
                                       "Responsible Party Description", object);
 
+      localrc = AttPackAddAttribute("NameType", "ISO 19115",
+                                      "Responsible Party Description", object);
+
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
                                       "Responsible Party Description", object);
 
@@ -689,6 +699,7 @@ int Attribute::count=0;
   localrc = stdParent->AttPackAddAttribute("ReleaseDate");
   localrc = stdParent->AttPackAddAttribute("ShortName");
   localrc = stdParent->AttPackAddAttribute("URL");
+  localrc = stdParent->AttPackAddAttribute("Version");
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
@@ -698,6 +709,8 @@ int Attribute::count=0;
   //
   localrc = stdParent->AttPackAddAttribute("SimulationDuration");
   localrc = stdParent->AttPackAddAttribute("SimulationLongName");
+  localrc = stdParent->AttPackAddAttribute("SimulationMetadataVersion");
+  localrc = stdParent->AttPackAddAttribute("SimulationNumberOfProcessingElements");
   localrc = stdParent->AttPackAddAttribute("SimulationRationale");
   localrc = stdParent->AttPackAddAttribute("SimulationShortName");
   localrc = stdParent->AttPackAddAttribute("SimulationStartDate");
@@ -806,6 +819,7 @@ int Attribute::count=0;
         localrc = stdChild->AttPackAddAttribute("Abbreviation");
         localrc = stdChild->AttPackAddAttribute("EmailAddress");
         localrc = stdChild->AttPackAddAttribute("Name");
+        localrc = stdChild->AttPackAddAttribute("NameType");
         localrc = stdChild->AttPackAddAttribute("PhysicalAddress");
         localrc = stdChild->AttPackAddAttribute("ResponsiblePartyRole");
         localrc = stdChild->AttPackAddAttribute("URL");
@@ -5203,6 +5217,14 @@ int Attribute::count=0;
                           "Write items > 1 - Not yet implemented", &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
+    if (attpack->AttributeIsSet("Version")) {
+      localrc = attpack->AttributeGet("Version", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value += valuevector.at(0); // append Version to ShortName
+    }
     localrc = io_xml->writeElement("shortName", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5339,6 +5361,22 @@ int Attribute::count=0;
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
     }
+  }
+
+  if (attpack->AttributeIsSet("SimulationNumberOfProcessingElements")) {
+    localrc = attpack->AttributeGet("SimulationNumberOfProcessingElements",
+                                    &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeStartElement("deployment", "", indent, 0);
+    localrc = io_xml->writeStartElement("parallelisation", "", ++indent, 0);
+    localrc = io_xml->writeElement("processes", value, ++indent, 0);
+    localrc = io_xml->writeEndElement("parallelisation", --indent);
+    localrc = io_xml->writeEndElement("deployment", --indent);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
   if (attpack->AttributeIsSet("ModelType")) {
@@ -5530,6 +5568,18 @@ int Attribute::count=0;
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
   localrc = io_xml->writeElement("documentVersion", "1", 2, 0);
+
+  if (attpack->AttributeIsSet("SimulationMetadataVersion")) {
+    localrc = attpack->AttributeGet("SimulationMetadataVersion", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeElement("metadataVersion", value, 2, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  }
+
   localrc = io_xml->writeElement("documentCreationDate", 
                                  "2010-09-30T11:13:22Z", 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -5782,7 +5832,7 @@ int Attribute::count=0;
   bool inNestedAttPacks;
 
   vector<string> valuevector;
-  string value;
+  string value, nameType;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -5802,8 +5852,25 @@ int Attribute::count=0;
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
+    // determine name type:  individual, organization, or position.
+    //   first choice is the setting of the NameType attribute ...
+    if (attpack->AttributeIsSet("NameType")) {
+        localrc = attpack->AttributeGet("NameType", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
+      transform(value.begin(), value.end(), value.begin(), ::tolower);
+      if (value == "organization") {
+        nameType = "gmd:organisationName";
+      } else if (value == "individual") {
+        nameType = "gmd:individualName";
+      } else if (value == "position") {
+        nameType = "gmd:positionName";
+      }
+    // ... otherwise guess based on the role ...
+    } else if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
         localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
@@ -5812,35 +5879,26 @@ int Attribute::count=0;
       value = valuevector.at(0);
       if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
       if (value == "center" || value == "funder") {
-        if (attpack->AttributeIsSet("Name")) {
-          localrc = attpack->AttributeGet("Name", &valuevector);
-          if (valuevector.size() > 1) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-            return ESMF_FAILURE;}
-          value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("gmd:organisationName", "", indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-          localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-          localrc = io_xml->writeEndElement("gmd:organisationName", --indent);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
+        nameType = "gmd:organisationName";
       } else if (value == "PI" || value == "author" || value == "contact") {
-        if (attpack->AttributeIsSet("Name")) {
-          localrc = attpack->AttributeGet("Name", &valuevector);
-          if (valuevector.size() > 1) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-            return ESMF_FAILURE;}
-          value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("gmd:individualName", "", indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-          localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-          localrc = io_xml->writeEndElement("gmd:individualName", --indent);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
+        nameType = "gmd:individualName";
+      }
+    }
+    // ... and output the Name using the name type
+    if (!nameType.empty()) {
+      if (attpack->AttributeIsSet("Name")) {
+        localrc = attpack->AttributeGet("Name", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement(nameType, "", indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement(nameType, --indent);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
     }
 
