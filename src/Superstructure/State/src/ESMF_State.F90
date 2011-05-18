@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.253 2011/04/28 02:41:48 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.254 2011/05/18 05:06:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.253 2011/04/28 02:41:48 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.254 2011/05/18 05:06:26 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -4043,12 +4043,11 @@ contains
 ! !IROUTINE: ESMF_StateRead -- Read data items from a file into a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateRead(state, fileName, keywordEnforcer, rc)
+      subroutine ESMF_StateRead(state, fileName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State)                          :: state 
       character (len=*),  intent(in)            :: fileName
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -4651,12 +4650,11 @@ contains
 ! !IROUTINE: ESMF_StateWrite -- Write items from a State to file
 !
 ! !INTERFACE:
-      subroutine ESMF_StateWrite(state, fileName, keywordEnforcer, rc)
+      subroutine ESMF_StateWrite(state, fileName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State)                                :: state 
       character (len=*),        intent(in)            :: fileName
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
