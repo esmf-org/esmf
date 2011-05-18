@@ -1,8 +1,9 @@
-/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.3 2011/05/13 18:21:46 ksaint Exp $ */
+/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.4 2011/05/18 19:35:29 w6ws Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "ESMCI_WebServCompSvrClient.h"
 
