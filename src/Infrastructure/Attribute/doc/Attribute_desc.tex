@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.46 2011/05/16 18:59:37 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.47 2011/05/18 20:31:08 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -80,6 +80,22 @@ Of the ESMF objects with Attributes, only some can link their Attributes togethe
 \item Array
 \end{itemize}
 
-The most common use for this capability is for linking the Attributes of a Field to the FieldBundle which holds it, which is then linked to the State that is used to transport all of the data for a Component.  All of these links, with the exception of the link between the Component and the State, are automatically handled by ESMF. Additionally, the State will automatically set the {\tt VariableIntent} Attribute that is part of the ESMF supplied standard Attribute package for Field when that Field is added to the State.  {\tt VariableIntent} will be set to either {\tt Export} or {\tt Import}.
+The most common use for this capability is for linking the Attributes of a 
+Field to the FieldBundle which holds it, which is then linked to the State that 
+is used to transport all of the data for a Component.  All of these links, with 
+the exception of the link between the Component and the State, are 
+automatically handled by ESMF. Additionally, the State will automatically set 
+the {\tt VariableIntent} Attribute that is part of the ESMF supplied standard 
+Attribute package for Field when that Field is added to the State.  {\tt 
+VariableIntent} will be set to either {\tt Export} or {\tt Import}.
 
-Attribute hierarchies are linked in a ``shallow'' manner, meaning that the Attributes belonging to an external object are not copied, they are merely referenced by a pointer.  This is important to ensure that the Attribute hierarchy has a one-to-one correspondence with the object hierarchy.  
+Every ESMF deep object is given a {\tt root} Attribute on creation.
+These {\tt root} Attributes serve as the attachment point for all metadata that 
+is stored on a particular ESMF object.  The {\tt root} Attributes can then be 
+connected together, forming an Attribute hierarchy which mirrors the structure 
+of the underlying object hierarchy.  In order to ensure consistency across a 
+distributed system, a one-to-one correspondence of the Attribute and ESMF 
+object hierarchies must be maintained.  This means that the Attribute 
+hierarchies are linked together with pointers, and changes to a lower level 
+Attribute hierarchy will be reflected on all higher level Attribute hierarchies 
+that can access the one that was changed.
