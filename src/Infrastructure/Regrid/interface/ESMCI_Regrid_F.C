@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.58 2011/05/18 04:37:48 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.59 2011/05/18 23:04:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -100,30 +100,28 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
                       regridPoleType, regridPoleNPnts, 
-                      regridScheme, unmappedaction))
-      //                      regridScheme, &temp_unmappedaction))
+                      regridScheme, &temp_unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
-#if 0
+
     // If user is worried about unmapped points then check that
     // here, because we have all the dest objects and weights
     // gathered onto the same proc.
     if (*unmappedaction==ESMC_UNMAPPEDACTION_ERROR) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         if (!all_mesh_elem_ids_in_wmat(dstmesh, wts)) {
-            int localrc;
-            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-	       "- There exist destination cells which don't overlap with any source cell", &localrc)) throw localrc;
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          "- There exist destination cells which don't overlap with any source cell", &localrc)) throw localrc;
         }
       } else { // bilinear, patch, ...
         if (!all_mesh_node_ids_in_wmat(dstmesh, wts)) {
-            int localrc;
-            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-	       "- There exist destination points which can't be mapped to any source cell", &localrc)) throw localrc;
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   "- There exist destination points which can't be mapped to any source cell", &localrc)) throw localrc;
         }
       }
     }
-#endif
 
     // We have the weights, now set up the sparsemm object
 
@@ -386,6 +384,7 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
 
 }
 
+#if 0
 
 bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
@@ -403,15 +402,19 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
   // Loop checking that all nodes have weights
   for (; ni != ne; ++ni) {
+    MeshObj &node=*ni;
+
+    // Skip non local nodes
+    if (!GetAttr(node).is_locally_owned()) continue;
 
     // Skip masked elements
     if (mptr != NULL) {
-      double *m=mptr->data(*ni);
+      double *m=mptr->data(node);
       if (*m > 0.5) continue;
     }
 
     // get node id
-    int id=ni->get_id();
+    int id=node.get_id();
 
     // Get beginning of row ids that are greater or equal to id
     WMat::WeightMap::iterator wi = wts.lower_bound_id_row(id);
@@ -438,56 +441,108 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
   return true;
 
 }
+#endif
 
 
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
-bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
   // Get mask Field
   MEField<> *mptr = mesh.GetField("mask");
 
-  // Get end of weight iterator
-  WMat::WeightMap::iterator we = wts.end_row();
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
 
-  // get mesh elem iterator
-  MeshDB::iterator ei=mesh.elem_begin(), ee=mesh.elem_end();
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ni=mesh.map_begin(MeshObj::NODE), ne=mesh.map_end(MeshObj::NODE);
 
-  // Loop checking that all elements have weights
-  for (; ei != ee; ++ei) {
+  // Loop checking that all nodes have weights
+  for (; ni != ne; ++ni) {
+    const MeshObj &node=*ni;
+
+    // Skip non local nodes
+    if (!GetAttr(node).is_locally_owned()) continue;
 
     // Skip masked elements
     if (mptr != NULL) {
-      double *m=mptr->data(*ei);
+      double *m=mptr->data(node);
       if (*m > 0.5) continue;
     }
 
-    // get element id
-    int id=ei->get_id();
+    // get node id
+    int node_id=node.get_id();
 
-    // Get beginning of row ids that are greater or equal to id
-    WMat::WeightMap::iterator wi = wts.lower_bound_id_row(id);
+    // get weight id
+    int wt_id=wi->first.id;
 
-    // See if we find the id    
-    bool found_id=false;
-    if (wi != we) {
-      const WMat::Entry &w = wi->first;
-      
-      // we found it
-      if (w.id==id) {
-        found_id=true;
-      } else if (w.id>id) {
-        // we went over and didn't find it
-        found_id=false;
-      } 
-    } 
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id <node_id)) {
+      wi++;
+    }
 
-    // If not found, return saying so
-    if (!found_id) return false;
+    // If we're at the end of the weights then exit saying we don't have 
+    // all of them
+    if (wi==we) return false;
+
+    // If we're not equal to the node id then we must have passed it
+    if (wi->first.id != node_id) return false;
+
   }
 
   // Still here, so must have found them all
   return true;
 
+}
+
+
+
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
+
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("mask");
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ei=mesh.map_begin(MeshObj::ELEMENT), ee=mesh.map_end(MeshObj::ELEMENT);
+
+  // Loop checking that all elems have weights
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local elems
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get elem id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If we're at the end of the weights then exit saying we don't have 
+    // all of them
+    if (wi==we) return false;
+
+    // If we're not equal to the elem id then we must have passed it
+    if (wi->first.id != elem_id) return false;
+
+  }
+
+  // Still here, so must have found them all
+  return true;
 }
 
 
