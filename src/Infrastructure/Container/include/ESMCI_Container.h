@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.10 2011/05/12 03:58:08 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.11 2011/05/18 04:29:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,6 +16,7 @@
 #ifndef ESMCI_Container_H
 #define ESMCI_Container_H
 
+#include <utility>
 #include <map>
 #include <vector>
 #include <iostream>
@@ -28,7 +29,7 @@
 namespace ESMCI {
 
   template <typename Key, typename T>
-  class Container : public std::map<Key, T> {
+  class Container : public std::multimap<Key, T> {
     bool garbageActive;
     std::vector<T> garbage;
    public:
@@ -75,7 +76,8 @@ namespace ESMCI {
   template <typename Key, typename T>
   void Container<Key, T>::add(Key k, T t, bool relaxed){
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-    if (this->find(k)!=this->end()){
+    typename Container::iterator pos = this->find(k);
+    if (pos!=this->end()){
       // already exists
       if (!relaxed){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -85,7 +87,7 @@ namespace ESMCI {
       if (garbageActive)
         garbage.push_back(t); // not added object goes into garbage
     }else{
-      (*this)[k]=t;
+      this->insert(std::pair<Key,T>(k, t));
     }
   }
   
@@ -95,12 +97,14 @@ namespace ESMCI {
   // exists, or replace an existing element with the same key.
   template <typename Key, typename T>
   void Container<Key, T>::addReplace(Key k, T t){
-    if (garbageActive){
-      typename Container::iterator pos = this->find(k);
-      if (pos!=this->end())
+    typename Container::iterator pos = this->find(k);
+    if (pos!=this->end()){
+      // already exists
+      if (garbageActive)
         garbage.push_back(pos->second); // replaced object goes into garbage
+      this->erase(pos);
     }
-    (*this)[k]=t;
+    this->insert(std::pair<Key,T>(k, t));
   }
 
 #undef  ESMC_METHOD
@@ -112,7 +116,7 @@ namespace ESMCI {
     typename Container::iterator pos;
     for (pos = this->begin(); pos != this->end(); ++pos)
       garbage.push_back(pos->second); // object goes into garbage
-    std::map<Key, T>::clear();  // clear the container
+    std::multimap<Key, T>::clear();  // clear the container
   }
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::remove()"
@@ -132,6 +136,7 @@ namespace ESMCI {
         throw rc;  // bail out with exception
       }
     }else{
+      // already exists
       if (garbageActive)
         garbage.push_back(pos->second); // removed object goes into garbage
       this->erase(pos);
@@ -156,9 +161,10 @@ namespace ESMCI {
         throw rc;  // bail out with exception
       }
     }else{
+      // already exists
       if (garbageActive)
         garbage.push_back(pos->second); // replaced object goes into garbage
-      (*this)[k]=t;
+      pos->second = t;
     }
   }
 
@@ -176,7 +182,7 @@ namespace ESMCI {
         "key does not exist", &rc);
       throw rc;  // bail out with exception
     }
-    return (*this)[k];
+    return pos->second;
   }
 
 #undef  ESMC_METHOD
