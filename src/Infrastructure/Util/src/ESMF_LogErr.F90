@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.83 2011/05/03 22:48:31 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.84 2011/05/18 14:49:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -790,7 +790,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             spaceflag = .true.
           end if
           if (alog%LOG_ENTRY(j)%methodflag) then
-            write (alog%unitNumber, '(a)',  advance='no')  &
+            write (alog%unitNumber, '(1x,a)',  advance='no')  &
                 trim(alog%LOG_ENTRY(j)%method)
             spaceflag = .true.
           end if
