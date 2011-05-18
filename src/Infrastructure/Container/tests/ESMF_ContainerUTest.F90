@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.17 2011/05/12 15:56:09 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.18 2011/05/18 00:16:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.17 2011/05/12 15:56:09 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.18 2011/05/18 00:16:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -430,7 +430,7 @@ program ESMF_ContainerUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Add UDT (user derived type) Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ContainerAddUDT(container, "myUDT1", tt, rc)
+  call ESMF_ContainerAddUDT(container, trim("myUDT1"), tt, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -446,7 +446,7 @@ program ESMF_ContainerUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Add 2nd UDT Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ContainerAddUDT(container, "myUDT2", tt, rc)
+  call ESMF_ContainerAddUDT(container, trim("myUDT2"), tt, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -461,7 +461,7 @@ program ESMF_ContainerUTest
   write(name, *) "Container Get item UDT Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(tt%wrap)
-  call ESMF_ContainerGetUDT(container, "myUDT2", tt, rc)
+  call ESMF_ContainerGetUDT(container, trim("myUDT2"), tt, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -495,7 +495,7 @@ program ESMF_ContainerUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Replace UDT Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ContainerReplaceUDT(container, "myUDT2", tt, rc)
+  call ESMF_ContainerReplaceUDT(container, trim("myUDT2"), tt, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -503,7 +503,7 @@ program ESMF_ContainerUTest
   write(name, *) "Container Get item UDT 2nd Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(tt%wrap)
-  call ESMF_ContainerGetUDT(container, "myUDT2", tt, rc)
+  call ESMF_ContainerGetUDT(container, trim("myUDT2"), tt, rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
