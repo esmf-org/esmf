@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.254 2011/05/18 05:06:26 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.255 2011/05/18 13:12:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.254 2011/05/18 05:06:26 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.255 2011/05/18 13:12:12 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -4553,7 +4553,7 @@ contains
 ! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
 ! !INTERFACE:
-      function ESMF_StateReadRestart(name, keywordEnforcer, rc)
+      function ESMF_StateReadRestart(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateReadRestart
@@ -4561,7 +4561,6 @@ contains
 !
 ! !ARGUMENTS:
       character (len = *), intent(in) :: name              
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,  intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
