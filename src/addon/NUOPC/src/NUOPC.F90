@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.8 2011/05/17 23:25:02 theurich Exp $
+! $Id: NUOPC.F90,v 1.9 2011/05/18 04:16:50 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -37,12 +37,14 @@ module NUOPC
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompSetClock
   public NUOPC_GridCompCheckSetClock
+  public NUOPC_StateAddPotentialField
+  public NUOPC_StateAdvertiseField
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
-  public NUOPC_StateSetTimestamp
-  public NUOPC_StateAddPotentialField
-  public NUOPC_StateReplaceWRealField
   public NUOPC_StateIsCurrentTimestamp
+  public NUOPC_StateRealizeField
+  public NUOPC_StateReplaceWRealField
+  public NUOPC_StateSetTimestamp
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_GridCreateSimpleXY
   
@@ -138,20 +140,26 @@ module NUOPC
 !BOP
 ! !IROUTINE: NUOPC_FieldAttributeAdd - Add a NUOPC Field Attribute
 ! !INTERFACE:
-  subroutine NUOPC_FieldAttributeAdd(field, StandardName, Units, Connected, rc)
+  subroutine NUOPC_FieldAttributeAdd(field, StandardName, Units, LongName, &
+    ShortName, Connected, rc)
 ! !ARGUMENTS:
     type(ESMF_Field)                      :: field
     character(*), intent(in)              :: StandardName
-    character(*), intent(in)              :: Units
-    character(*), intent(in)              :: Connected
+    character(*), intent(in),  optional   :: Units
+    character(*), intent(in),  optional   :: LongName
+    character(*), intent(in),  optional   :: ShortName
+    character(*), intent(in),  optional   :: Connected
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: attrList(2)
-    logical                 :: isPresent
-
+    character(ESMF_MAXSTR)            :: attrList(2)
+    character(ESMF_MAXSTR)            :: tempString
+    logical                           :: isPresent
+    integer                           :: i
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
@@ -172,7 +180,8 @@ module NUOPC
     call NUOPC_FieldDictionarySetup(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! see if specified StandardName has an entry in the NUOPC_FieldDictionary
+
+    ! check that StandardName has an entry in the NUOPC_FieldDictionary
     call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=StandardName, &
       isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
@@ -183,26 +192,100 @@ module NUOPC
         line=__LINE__, file=FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
+    call ESMF_ContainerGetUDT(NUOPC_FieldDictionary, trim(StandardName), &
+      fdEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
     
-    ! set Attributes
+    ! set StandardName
     call ESMF_AttributeSet(field, &
       name="StandardName", value=trim(StandardName), &
       convention="ESG", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    ! set Units
+    if (present(Units)) then
+      isPresent = .false. ! reset
+      do i=1, size(fdEntry%wrap%unitOptions)
+        if ((trim(Units))==trim(fdEntry%wrap%unitOptions(i))) then
+          isPresent = .true.
+          exit
+        endif
+      enddo
+      if (.not.isPresent) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg=Units//" is not a supported set of Units in the "// &
+            " NUOPC_FieldDictionary for StandardName: "//StandardName,&
+            line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      tempString = Units
+    else
+      tempString = fdEntry%wrap%unitOptions(1)  ! default
+    endif
     call ESMF_AttributeSet(field, &
-      name="Units", value=trim(Units), &
+      name="Units", value=trim(tempString), &
       convention="ESG", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set LongName
+    if (present(LongName)) then
+      tempString = LongName
+    else
+      tempString = fdEntry%wrap%defaultLongName   ! default
+    endif
     call ESMF_AttributeSet(field, &
-      name="Connected", value=trim(Connected), &
+      name="LongName", value=trim(tempString), &
+      convention="ESG", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set ShortName
+    if (present(ShortName)) then
+      tempString = ShortName
+    else
+      tempString = fdEntry%wrap%defaultShortName  ! default
+    endif
+    call ESMF_AttributeSet(field, &
+      name="ShortName", value=trim(tempString), &
+      convention="ESG", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set Connected
+    if (present(Connected)) then
+      isPresent = .false. ! reset
+      do i=1, size(fdEntry%wrap%connectedOptions)
+        if ((trim(Connected))==trim(fdEntry%wrap%connectedOptions(i))) then
+          isPresent = .true.
+          exit
+        endif
+      enddo
+      if (.not.isPresent) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg=Connected//" is not a supported Connected value in the "// &
+            " NUOPC_FieldDictionary for StandardName: "//StandardName,&
+            line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return  ! bail out
+      endif
+      tempString = Connected
+    else
+      tempString = fdEntry%wrap%connectedOptions(1)  ! default
+    endif
+    call ESMF_AttributeSet(field, &
+      name="Connected", value=trim(tempString), &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set TimeStamp
     call ESMF_AttributeSet(field, &
       name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0/), &
       convention="NUOPC", purpose="General", &
@@ -748,6 +831,148 @@ module NUOPC
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_StateAddPotentialField - Add a potential Field to a State
+! !INTERFACE:
+  subroutine NUOPC_StateAddPotentialField(state, name, StandardName, Units, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    character(*),     intent(in)            :: name
+    character(*),     intent(in)            :: StandardName
+    character(*),     intent(in)            :: Units
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   DEPRECATED. Use {\tt NUOPC\_StateAdvertiseField} instead, which provides
+!   a richer set of features.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)        :: field
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    field = ESMF_FieldCreateEmpty(name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
+      Units=Units, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_StateAdd(state, field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State
+! !INTERFACE:
+  subroutine NUOPC_StateAdvertiseField(state, StandardName, Units, &
+    LongName, ShortName, name, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    character(*),     intent(in)            :: StandardName
+    character(*),     intent(in),  optional :: Units
+    character(*),     intent(in),  optional :: LongName
+    character(*),     intent(in),  optional :: ShortName
+    character(*),     intent(in),  optional :: name
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Advertise a potential Field in a State. This call checks the provided
+!   information against the NUOPC Field Dictionary. Omitted optional
+!   information is filled in using defaults out of the NUOPC Field Dictionary.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object through which the Field is advertised.
+!   \item[StandardName]
+!     The StandardName of the advertised Field. Must be a StandardName found in
+!     the  NUOPC Field Dictionary.
+!   \item[{[Units]}]
+!     The Units of the advertised Field. Must be a supported set of units found
+!     in the NUOPC Field Dictionary for the specified StandardName.
+!     If omitted, the default is to use the first set of units associated with
+!     the StandardName in the NUOPC Field Dictionary.
+!   \item[{[LongName]}]
+!     The LongName of the advertised Field. NUOPC does not restrict the value
+!     of this variable.
+!     If omitted, the default is to use the LongName associated with 
+!     the StandardName in the NUOPC Field Dictionary.
+!   \item[{[ShortName]}]
+!     The ShortName of the advertised Field. NUOPC does not restrict the value
+!     of this variable.
+!     If omitted, the default is to use the ShortName associated with 
+!     the StandardName in the NUOPC Field Dictionary.
+!   \item[{[name]}]
+!     The actual name of the advertised Field by which it is accessed in the
+!     State object. NUOPC does not restrict the value of this variable.
+!     If omitted, the default is to use the value of the ShortName.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)        :: field
+    character(ESMF_MAXSTR)  :: tempString
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    field = ESMF_FieldCreateEmpty(name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
+      Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (.not.present(name)) then
+      ! name was not provided -> default to using ShortName
+      call NUOPC_FieldAttributeGet(field, name="ShortName", value=tempString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      !TODO: simplify the following once ESMF supports changing name of Fields
+      call ESMF_FieldDestroy(field, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      field = ESMF_FieldCreateEmpty(name=trim(tempString), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
+        Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    call ESMF_StateAdd(state, field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_StateBuildStdList - Build a Field list from State according to standardName attribute
 ! !INTERFACE:
   subroutine NUOPC_StateBuildStdList(state, stdAttrNameList, stdItemNameList, &
@@ -931,164 +1156,6 @@ module NUOPC
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateSetTimestamp - Set timestamp on all fields in a State
-! !INTERFACE:
-  subroutine NUOPC_StateSetTimestamp(state, clock, rc)
-! !ARGUMENTS:
-    type(ESMF_State),        intent(inout)         :: state
-    type(ESMF_Clock),        intent(in)            :: clock
-    integer,                 intent(out), optional :: rc
-! !DESCRIPTION:
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
-    type(ESMF_Field)                      :: field
-    type(ESMF_Time)         :: time
-    integer                 :: yy, mm, dd, h, m, s, ms, us, ns
-    integer                 :: i
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    call ESMF_ClockGet(clock, currTime=time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
-      ns=ns, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-  
-    nullify(stdAttrNameList)
-    nullify(stdItemNameList)
-  
-    call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
-      stdItemNameList=stdItemNameList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    if (associated(stdItemNameList)) then
-      do i=1, size(stdItemNameList)
-        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-        call ESMF_AttributeSet(field, &
-          name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-      enddo
-    endif
-    
-    if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
-    if (associated(stdItemNameList)) deallocate(stdItemNameList)
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_StateAddPotentialField - Set timestamp on all fields in a State
-! !INTERFACE:
-  subroutine NUOPC_StateAddPotentialField(state, name, StandardName, Units, rc)
-! !ARGUMENTS:
-    type(ESMF_State), intent(inout)         :: state
-    character(*),     intent(in)            :: name
-    character(*),     intent(in)            :: StandardName
-    character(*),     intent(in)            :: Units
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Field)        :: field
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    field = ESMF_FieldCreateEmpty(name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
-      Units=Units, Connected="false", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_StateAdd(state, field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_StateReplaceWRealField - Replace potential with actual fields
-! !INTERFACE:
-  subroutine NUOPC_StateReplaceWRealField(state, field, rc)
-! !ARGUMENTS:
-    type(ESMF_State), intent(inout)         :: state
-    type(ESMF_Field), intent(in)            :: field
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Field)        :: potentialField
-    character(ESMF_MAXSTR)  :: name
-    character(ESMF_MAXSTR)  :: StandardName
-    character(ESMF_MAXSTR)  :: Units
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    call ESMF_FieldGet(field, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call ESMF_StateGet(state, itemName=name, field=potentialField, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(potentialField, name="StandardName", &
-      value=StandardName, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeGet(potentialField, name="Units", &
-      value=Units, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
-      Units=Units, Connected="false", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    call ESMF_StateReplace(state, field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: NUOPC_StateIsCurrentTimestamp - Check if fields in state are at current time
 ! !INTERFACE:
   function NUOPC_StateIsCurrentTimestamp(state, clock, rc)
@@ -1168,6 +1235,160 @@ module NUOPC
   end function
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateRealizeField - Realize a previously advertised Field in State
+! !INTERFACE:
+  subroutine NUOPC_StateRealizeField(state, field, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    type(ESMF_Field), intent(in)            :: field
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)        :: advertisedField
+    character(ESMF_MAXSTR)  :: name
+    character(ESMF_MAXSTR)  :: StandardName
+    character(ESMF_MAXSTR)  :: Units
+    character(ESMF_MAXSTR)  :: LongName
+    character(ESMF_MAXSTR)  :: ShortName
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_FieldGet(field, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, name="StandardName", &
+      value=StandardName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, name="Units", &
+      value=Units, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, name="LongName", &
+      value=LongName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeGet(advertisedField, name="ShortName", &
+      value=ShortName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
+      Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    call ESMF_StateReplace(state, field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateReplaceWRealField - Replace potential with actual Field
+! !INTERFACE:
+  subroutine NUOPC_StateReplaceWRealField(state, field, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    type(ESMF_Field), intent(in)            :: field
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   DEPRECATED. Use the {\tt NUOPC\_StateRealizeField} call instead for
+!   identical functionality.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_StateRealizeField(state, field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateSetTimestamp - Set timestamp on all Fields in a State
+! !INTERFACE:
+  subroutine NUOPC_StateSetTimestamp(state, clock, rc)
+! !ARGUMENTS:
+    type(ESMF_State),        intent(inout)         :: state
+    type(ESMF_Clock),        intent(in)            :: clock
+    integer,                 intent(out), optional :: rc
+! !DESCRIPTION:
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
+    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    type(ESMF_Field)                      :: field
+    type(ESMF_Time)         :: time
+    integer                 :: yy, mm, dd, h, m, s, ms, us, ns
+    integer                 :: i
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_ClockGet(clock, currTime=time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
+      ns=ns, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  
+    nullify(stdAttrNameList)
+    nullify(stdItemNameList)
+  
+    call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
+      stdItemNameList=stdItemNameList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    if (associated(stdItemNameList)) then
+      do i=1, size(stdItemNameList)
+        call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        call ESMF_AttributeSet(field, &
+          name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
+          convention="NUOPC", purpose="General", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      enddo
+    endif
+    
+    if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
+    if (associated(stdItemNameList)) deallocate(stdItemNameList)
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_FieldBundleUpdateTime - Update the time stamp on all fiels in fieldbundle

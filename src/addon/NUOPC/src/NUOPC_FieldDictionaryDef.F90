@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.3 2011/05/13 20:24:45 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.4 2011/05/18 04:16:50 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -23,6 +23,9 @@ module NUOPC_FieldDictionaryDef
     sequence
     type(NUOPC_FieldDictionaryEntryS), pointer :: wrap
   end type
+
+  ! public types
+  public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
   ! public module interfaces
   public NUOPC_FieldDictionaryDefinition
