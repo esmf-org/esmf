@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegrid.F90,v 1.22 2011/04/27 17:32:44 oehmke Exp $
+! $Id: ESMF_FieldBundleRegrid.F90,v 1.23 2011/05/18 19:04:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@ module ESMF_FieldBundleRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRegrid.F90,v 1.22 2011/04/27 17:32:44 oehmke Exp $'
+      '$Id: ESMF_FieldBundleRegrid.F90,v 1.23 2011/05/18 19:04:38 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -228,7 +228,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
-                                           keywordEnforcer, &
                                            srcMaskValues, dstMaskValues, &
                                            regridMethod, regridPoleType, &
                                            regridPoleNPnts, regridScheme, &
@@ -237,7 +236,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),    intent(in)              :: srcFieldBundle
     type(ESMF_FieldBundle),    intent(inout)           :: dstFieldBundle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
     integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
     type(ESMF_RegridMethod),   intent(in),    optional :: regridMethod

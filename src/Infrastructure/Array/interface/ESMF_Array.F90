@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.147 2011/02/26 00:20:34 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.148 2011/05/18 19:04:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.147 2011/02/26 00:20:34 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.148 2011/05/18 19:04:31 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1308,13 +1308,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayWrite}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
+  subroutine ESMF_ArrayWrite(array, file, &
      variableName, append, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
     character(*),         intent(in)             :: file
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),         intent(in),  optional  :: variableName
     logical,              intent(in),  optional  :: append
     integer,              intent(in),  optional  :: timeslice

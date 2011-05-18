@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.61 2011/05/17 22:52:19 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.62 2011/05/18 19:04:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.61 2011/05/17 22:52:19 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.62 2011/05/18 19:04:33 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1273,13 +1273,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayBundleRead}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRead(arraybundle, file, keywordEnforcer, &
+  subroutine ESMF_ArrayBundleRead(arraybundle, file, &
     singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
     character(*),           intent(in)             :: file
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: singleFile
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
@@ -2862,13 +2861,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, keywordEnforcer, &
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, &
     singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
     character(*),           intent(in)              :: file
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional  :: singleFile
     integer,                intent(in),   optional  :: timeslice
     type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt

@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.76 2011/04/01 16:42:16 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.77 2011/05/18 19:04:34 rokuingh Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -205,6 +205,35 @@
 
      contains
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_ConfigAssignment(=) - Config assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   config1 = config2
+!
+! !ARGUMENTS:
+!   type(ESMF_Config) :: config1
+!   type(ESMF_Config) :: config2
+!
+!
+! !DESCRIPTION:
+!   Assign config1 as an alias to the same ESMF Config object in memory
+!   as config2. If config2 is invalid, then config1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[config1]
+!     The {\tt ESMF\_Config} object on the left hand side of the assignment.
+!   \item[config2]
+!     The {\tt ESMF\_Config} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.84 2011/05/18 14:49:45 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.85 2011/05/18 19:04:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -243,6 +243,35 @@ integer,SAVE :: ESMF_LogTableCount=0                   ! count users' number of 
 
 contains
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_LogAssignment(=) - Log assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   log1 = log2
+!
+! !ARGUMENTS:
+!   type(ESMF_Log) :: log1
+!   type(ESMF_Log) :: log2
+!
+!
+! !DESCRIPTION:
+!   Assign log1 as an alias to the same ESMF Log object in memory
+!   as log2. If log2 is invalid, then log1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[log1]
+!     The {\tt ESMF\_Log} object on the left hand side of the assignment.
+!   \item[log2]
+!     The {\tt ESMF\_Log} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.93 2011/04/12 14:19:11 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.94 2011/05/18 19:04:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1712,13 +1712,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleRead}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleRead(fieldbundle, file, keywordEnforcer, &
+      subroutine ESMF_FieldBundleRead(fieldbundle, file, &
         singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
       character(*),           intent(in)              :: file
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),   optional  :: singleFile
       type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
       integer,                intent(out),  optional  :: rc
@@ -2309,13 +2308,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:FieldBundleWrite}
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBundleWrite(fieldbundle, file, keywordEnforcer, &
+      subroutine ESMF_FieldBundleWrite(fieldbundle, file, &
         singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
       character(*),           intent(in)             :: file
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),  optional  :: singleFile
       integer,                intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt

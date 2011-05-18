@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.89 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_DELayout.F90,v 1.90 2011/05/18 19:04:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.89 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.90 2011/05/18 19:04:36 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -199,6 +199,35 @@ contains
   end function
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAssignment(=) - DELayout assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   delayout1 = delayout2
+!
+! !ARGUMENTS:
+!   type(ESMF_DELayout) :: delayout1
+!   type(ESMF_DELayout) :: delayout2
+!
+!
+! !DESCRIPTION:
+!   Assign delayout1 as an alias to the same ESMF DELayout object in memory
+!   as delayout2. If delayout2 is invalid, then delayout1 will be equally invalid after
+!   the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[delayout1]
+!     The {\tt ESMF\_DELayout} object on the left hand side of the assignment.
+!   \item[delayout2]
+!     The {\tt ESMF\_DELayout} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
