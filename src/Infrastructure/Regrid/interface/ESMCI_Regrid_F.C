@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.57 2011/05/17 19:46:36 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.58 2011/05/18 04:37:48 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -100,9 +100,11 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
                       regridPoleType, regridPoleNPnts, 
-                      regridScheme, &temp_unmappedaction))
+                      regridScheme, unmappedaction))
+      //                      regridScheme, &temp_unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
+#if 0
     // If user is worried about unmapped points then check that
     // here, because we have all the dest objects and weights
     // gathered onto the same proc.
@@ -121,7 +123,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         }
       }
     }
-
+#endif
 
     // We have the weights, now set up the sparsemm object
 
@@ -398,7 +400,6 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
   // get mesh node iterator
   MeshDB::iterator ni=mesh.node_begin(), ne=mesh.node_end();
-
 
   // Loop checking that all nodes have weights
   for (; ni != ne; ++ni) {
