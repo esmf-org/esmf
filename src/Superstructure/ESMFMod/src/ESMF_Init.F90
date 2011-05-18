@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.68 2011/03/09 23:16:56 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.69 2011/05/18 19:55:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -425,7 +425,8 @@
       subroutine ESMF_Finalize(keywordEnforcer, terminationflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer 
+		! must use keywords for the below
       type(ESMF_TerminationFlag), intent(in), optional  :: terminationflag
       integer, intent(out), optional                    :: rc
 

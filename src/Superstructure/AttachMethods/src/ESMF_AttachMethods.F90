@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.2 2011/04/28 15:08:15 theurich Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.3 2011/05/18 19:59:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.2 2011/04/28 15:08:15 theurich Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.3 2011/05/18 19:59:16 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -160,7 +160,8 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodStateAddShObj(state, label, userRoutine, sharedObj, rc)
+  subroutine ESMF_MethodStateAddShObj(state, label, userRoutine, &
+		sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
