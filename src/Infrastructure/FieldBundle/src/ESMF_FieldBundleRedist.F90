@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.27 2011/04/01 23:06:43 theurich Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.28 2011/05/18 20:34:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.27 2011/04/01 23:06:43 theurich Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.28 2011/05/18 20:34:26 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -251,7 +251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldBundleRedistRelease()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with a FieldBundle 
-! redistribution
+! \textbf{redistribution}
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRedistRelease(routehandle, keywordEnforcer, rc)
