@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.132 2011/05/07 00:23:06 samsoncheung Exp $
+// $Id: ESMCI_Array.C,v 1.133 2011/05/18 22:10:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.132 2011/05/07 00:23:06 samsoncheung Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.133 2011/05/18 22:10:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1787,6 +1787,12 @@ Array *Array::create(
     return NULL;
   }
   
+  // reset the distgridCreator flag in the src Array, because the newly
+  // created Array will now point to the same DistGrid by reference
+  // -> leave it up to ESMF automatic garbage collection to clean up the
+  // DistGrid when it is time
+  arrayIn->distgridCreator = false; // drop ownership of the referenced DistGrid
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return arrayOut;

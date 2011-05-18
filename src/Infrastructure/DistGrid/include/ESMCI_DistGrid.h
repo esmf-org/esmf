@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.37 2011/04/28 18:53:34 rokuingh Exp $
+// $Id: ESMCI_DistGrid.h,v 1.38 2011/05/18 22:10:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ namespace ESMCI {
     int destruct(bool followCreator=true);
    public:
     // create() and destroy()
-    static DistGrid *create(DistGrid const *dg,
+    static DistGrid *create(DistGrid *dg,
       InterfaceInt *firstExtra, InterfaceInt *lastExtra, 
       ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,

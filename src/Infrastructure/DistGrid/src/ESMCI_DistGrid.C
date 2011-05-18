@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.56 2011/04/25 15:22:07 rokuingh Exp $
+// $Id: ESMCI_DistGrid.C,v 1.57 2011/05/18 22:10:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.56 2011/04/25 15:22:07 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.57 2011/05/18 22:10:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -70,7 +70,7 @@ DistGrid *DistGrid::create(
 //
 // !ARGUMENTS:
 //
-  DistGrid const *dg,                     // (in)
+  DistGrid *dg,                           // (in)
   InterfaceInt *firstExtra,               // (in)
   InterfaceInt *lastExtra,                // (in)
   ESMC_IndexFlag *indexflag,              // (in)
@@ -460,6 +460,12 @@ DistGrid *DistGrid::create(
     distgrid->vm = dg->vm;
     distgrid->localDeCountAux = dg->localDeCountAux;
   }
+  
+  // reset the delayoutCreator flag in the src DistGrid, because the newly
+  // created DistGrid will now point to the same DELayout by reference
+  // -> leave it up to ESMF automatic garbage collection to clean up the
+  // DELayout when it is time
+  dg->delayoutCreator = false;  // drop ownership of the referenced DELayout
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
