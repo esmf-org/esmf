@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.36 2011/04/01 22:26:28 w6ws Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.37 2011/05/19 22:56:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,13 +43,15 @@ end module
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_Mod 
+      use ESMF_StateContainerMod
+      use ESMF_StateItemMod
       use userMethodMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.36 2011/04/01 22:26:28 w6ws Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.37 2011/05/19 22:56:15 theurich Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -66,6 +68,13 @@ end module
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0
+
+
+  type(ESMF_Container)            :: container
+  type(ESMF_StateItem), pointer   :: si
+  
+  type(ESMF_StateItemWrap):: siw
+  type(ESMF_StateItemWrap), pointer:: siwOut(:)
 
     ! local variables needed to pass into function/subroutine calls
     !character(ESMF_MAXSTR) :: validate_options
@@ -252,6 +261,65 @@ end module
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       
+  ! CONTAINER USE TESTING --- internal API, subject to change!!!!!!!!!
+      
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  container = ESMF_ContainerCreate(rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  allocate(si)
+  si%namep = "test this string"
+  si%datap%fp = ESMF_FieldEmptyCreate(name="testField1", rc=rc)
+  si%otype = ESMF_STATEITEM_FIELD
+  
+  siw%si => si
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add si Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, itemList=(/siw/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Print Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerPrint(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  nullify(siwOut)
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Get item Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGet(container, itemList=siwOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "string in siwOut: ", siwOut(1)%si%namep
+  print *, "string in si: ", si%namep
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get item Test"
+  write(failMsg, *) "Did not verify"
+  call ESMF_Test((trim(siwOut(1)%si%namep)==trim(si%namep)), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerDestroy(container, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     
+  deallocate(si)    
+      
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+
 #ifdef ESMF_TESTEXHAUSTIVE
 
       !------------------------------------------------------------------------
