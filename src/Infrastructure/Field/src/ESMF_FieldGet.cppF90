@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.76 2011/05/19 16:05:37 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.77 2011/05/19 17:40:02 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.76 2011/05/19 16:05:37 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.77 2011/05/19 17:40:02 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -164,8 +164,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_ArraySpec} object containing the type/kind/rank information
 !       of the Field object.
 ! \item [{[status]}]
-!       The status of the Field. It can take one of the following values: ESMF_FIELDSTATUS_EMPTY,
-!       ESMF_FIELDSTATUS_GRIDSET, ESMF_FIELDSTATUS_COMPLETE.
+!       The status of the Field. It can take one of the following values: {\tt ESMF\_FIELDSTATUS\_EMPTY},
+!       {\tt ESMF\_FIELDSTATUS\_GRIDSET}, {\tt ESMF\_FIELDSTATUS\_COMPLETE}.
 ! \item [{[isCommitted]}]
 !       Indicates if the Field is fully committed and ready.
 ! \item [{[geomtype]}]
