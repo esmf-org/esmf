@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.30 2011/04/25 15:22:22 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.31 2011/05/19 21:08:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -63,17 +63,17 @@ program ESMF_RegridWeightGen
       call ESMF_Initialize (defaultCalendar=ESMF_CAL_GREGORIAN, &
 			defaultlogfilename="RegridWeightGen.Log", &
                     	defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
 
       !------------------------------------------------------------------------
       ! get global vm information
       !
       call ESMF_VMGetGlobal(vm, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
 
       ! set up local pet info
       call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
       !------------------------------------------------------------------------
       ! Parse keyword based arguments at Pet 0
@@ -88,7 +88,8 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('-s', argindex=index)
          if (index == -1) call ESMF_UtilGetArgIndex('--source', argindex=index, rc=rc)
          if (index == -1) then
-           print *, 'the required argument [-s|--source] is missing'
+           write(*,*)
+           print *, 'ERROR: The required argument [-s|--source] is missing.'
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
            call ESMF_UtilGetArg(index+1, argvalue=srcfile)
@@ -97,7 +98,8 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('-d', argindex=index, rc=rc)
          if (index == -1) call ESMF_UtilGetArgIndex('--destination', argindex=index, rc=rc)
          if (index == -1) then
-           print *, 'the required argument [-w|--weight] is missing'
+           write(*,*)
+           print *, 'ERROR: The required argument [-w|--weight] is missing.'
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else
            call ESMF_UtilGetArg(index+1, argvalue=dstfile)
@@ -106,7 +108,8 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('-w', argindex=index, rc=rc)
          if (index == -1) call ESMF_UtilGetArgIndex('--weight', argindex=index, rc=rc)
          if (index == -1) then
-           print *, 'the required argument [-w|--weight] is missing'
+           write(*,*)
+           print *, 'ERROR: The required argument [-w|--weight] is missing.'
            call ESMF_Finalize(terminationflag=ESMF_ABORT)
          else	
            call ESMF_UtilGetArg(index+1, argvalue=wgtfile)
@@ -115,7 +118,7 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('-m', argindex=index, rc=rc)
          if (index == -1) call ESMF_UtilGetArgIndex('--method', argindex=index, rc=rc)
          if (index == -1) then
-           print *, 'use default interpolation method: bilinear'
+          !  print *, 'Use default interpolation method: bilinear'
            method = 'bilinear'
          else
            call ESMF_UtilGetArg(index+1, argvalue=method)
@@ -126,11 +129,11 @@ program ESMF_RegridWeightGen
          if (index == -1) call ESMF_UtilGetArgIndex('--pole', argindex=index, rc=rc)
          if (index == -1) then
 	   if (method .eq. 'conserve') then
-              print *, 'use default pole: None'
+             ! print *, 'Use default pole: None'
               pole = ESMF_REGRIDPOLE_NONE
 	      poleptrs = 0
 	   else
-              print *, 'use default pole: All'
+              !print *, 'Use default pole: All'
               pole = ESMF_REGRIDPOLE_ALLAVG
            endif
          else
@@ -149,7 +152,8 @@ program ESMF_RegridWeightGen
            endif
 	   if ((method .eq. 'conserve') .and. &
 	       (pole .ne. ESMF_REGRIDPOLE_NONE)) then
-	     print *, 'Conserve method only works with no pole'
+             write(*,*)
+	     print *, 'ERROR: Conserve method only works with no pole.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
@@ -165,9 +169,11 @@ program ESMF_RegridWeightGen
 	   if (trim(flag) .eq. 'ESMF') then
              srcIsScrip = .false.
              dstIsScrip = .false.
-             print *, 'Set src and dst grid file types to ESMF'
+             write(*,*)
+             print *, 'ERROR: Set src and dst grid file types to ESMF.'
            else if (trim(flag) .ne. 'SCRIP') then
-	     print *, 'Unknown -t: must be either ESMF or SCRIP'
+             write(*,*)
+	     print *, 'ERROR: Unknown -t: must be either ESMF or SCRIP.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif 
            typeSetFlag = .true.
@@ -180,7 +186,8 @@ program ESMF_RegridWeightGen
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. srcIsScrip) .or.   &
 	        (trim(flag) .eq. 'SCRIP' .and. .not. srcIsScrip)) then
-	        print *, 'Source file type conflict: --src_type and -t' 
+                write(*,*)
+	        print *, 'ERROR: Source file type conflict: --src_type and -t.' 
                 call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	        srcIsScrip = .false.
 	     end if
@@ -188,7 +195,8 @@ program ESMF_RegridWeightGen
            if (trim(flag) .eq. 'ESMF') then
 	     srcIsScrip = .false.
            else if (trim(flag) .ne. 'SCRIP') then
-	     print *, 'Unknown --src_type: must be either ESMF or SCRIP'
+             write(*,*)
+	     print *, 'ERROR: Unknown --src_type: must be either ESMF or SCRIP.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
@@ -200,7 +208,8 @@ program ESMF_RegridWeightGen
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. dstIsScrip) .or.   &
 	        (trim(flag) .eq. 'SCRIP' .and. .not. dstIsScrip)) then
-	        print *, 'Destination file type conflict: --dst_type and -t' 
+                write(*,*)
+	        print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
                 call ESMF_Finalize(terminationflag=ESMF_ABORT)
 	        dstIsScrip = .false.
 	     end if
@@ -208,7 +217,8 @@ program ESMF_RegridWeightGen
            if (trim(flag) .eq. 'ESMF') then
 	     dstIsScrip = .false.
            else if (trim(flag) .ne. 'SCRIP') then
-	     print *, 'Unknown --dst_type: must be either ESMF or SCRIP'
+             write(*,*)
+	     print *, 'ERROR: Unknown --dst_type: must be either ESMF or SCRIP.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
          endif
@@ -226,7 +236,7 @@ program ESMF_RegridWeightGen
            dstIsRegional = .true.
            pole = ESMF_REGRIDPOLE_NONE
            poleptrs = 0
-           print *, 'Set pole to None for regional grids'
+           ! print *, 'Set pole to None for regional grids.'
          end if
 
          call ESMF_UtilGetArgIndex('--src_regional', argindex=index, rc=rc)
@@ -234,7 +244,7 @@ program ESMF_RegridWeightGen
            srcIsRegional = .true.
            pole = ESMF_REGRIDPOLE_NONE
            poleptrs = 0
-           print *, 'Set pole to None for regional source grid'
+           ! print *, 'Set pole to None for regional source grid.'
          end if
 
          call ESMF_UtilGetArgIndex('--dst_regional', argindex=index, rc=rc)
@@ -246,8 +256,9 @@ program ESMF_RegridWeightGen
          if (srcIsScrip) then
 	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=rc)
 	   if (rc /= ESMF_SUCCESS) then 
-	     print *, 'Unable to get dimension information from ', srcfile
-             print *, 'Check the log file for the NetCDF error message' 
+             write(*,*)
+	     print *, 'ERROR: Unable to get dimension information from:', srcfile, &
+                      'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message.' 
 	     call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
            if (srcrank == 2) then
@@ -261,8 +272,9 @@ program ESMF_RegridWeightGen
      	 if (dstIsScrip) then
 	   call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=rc)
            if (rc /= ESMF_SUCCESS) then
-	     print *, 'Unable to get dimension information from ', dstfile
-             print *, 'Check the log file for the NetCDF error message' 
+             write(*,*)
+	     print *, 'ERROR: Unable to get dimension information from:', dstfile, &
+                      'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message' 
 	     call ESMF_Finalize(terminationflag=ESMF_ABORT)
            endif
            if (dstrank == 2) then
@@ -320,6 +332,7 @@ program ESMF_RegridWeightGen
         if (ignoreUnmapped) then
 	       print *, "  Ignore unmapped destination points"
         endif
+        write(*,*)
 
         ! Group the command line arguments and broadcast to other PETs
         commandbuf1(1)=srcfile
@@ -328,7 +341,7 @@ program ESMF_RegridWeightGen
 
         ! Broadcast the command line arguments to all the PETs
         call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
         commandbuf2(:)=0
         if (srcIsScrip) commandbuf2(1)=1
@@ -364,16 +377,16 @@ program ESMF_RegridWeightGen
 
 
         call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
         call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         srcfile = commandbuf1(1)
         dstfile = commandbuf1(2)
         wgtfile = commandbuf1(3)
 
         call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         if (commandbuf2(1)==1) then
            srcIsScrip = .true.
         else
@@ -517,27 +530,27 @@ program ESMF_RegridWeightGen
 	if(srcIsReg) then
            srcGrid = ESMF_GridCreate(srcfile,(/xpart,ypart/), addCornerStagger=addCorners, &
                        isSphere=srcIsSphere, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     	   srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	else
            srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
                        convertToDual=convertToDual, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
            srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	endif
       else
 	! if srcfile is not SCRIP, it is always unstructured
 	srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
                     rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
-	if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
       endif
 
      !Read in the dstfile and create the corresponding ESMF object (either
@@ -567,55 +580,55 @@ program ESMF_RegridWeightGen
 	if(dstIsReg) then
            dstGrid = ESMF_GridCreate(dstfile,(/xpart, ypart/), addCornerStagger=addCorners, &
                        isSphere=dstIsSphere, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     	   dstField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	else
            dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
                        convertToDual=convertToDual, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
-	   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	endif
       else
 	! if dstfile is not SCRIP, it is always unstructured
 	dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
                     rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
-        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
       endif
 
       ! Create Frac Fields if conservative
       if (isConserve) then
          if (srcIsReg) then
             call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             srcFracField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
 
          if (dstIsReg) then
             call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             dstFracField = ESMF_FieldCreate(dstGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
       endif
 
@@ -631,7 +644,7 @@ program ESMF_RegridWeightGen
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = regridScheme, rc=rc)
-	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping"
       else if (trim(method) .eq. 'patch') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
@@ -641,7 +654,7 @@ program ESMF_RegridWeightGen
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = regridScheme, rc=rc)
-	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
       else if (trim(method) .eq. 'conserve') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
@@ -652,10 +665,10 @@ program ESMF_RegridWeightGen
             regridMethod = ESMF_REGRID_METHOD_CONSERVE, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
 	    regridScheme = regridScheme, rc=rc)
-	    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Conservative remapping"
       else ! nothing recognizable so report error
-	     print *, 'The -method is not a recognized interpolation method.'
+	     print *, 'ERROR: The -method is not a recognized interpolation method.'
              call ESMF_Finalize(terminationflag=ESMF_ABORT)
       endif
 
@@ -666,22 +679,22 @@ program ESMF_RegridWeightGen
       if (isConserve) then
          if (srcIsReg) then
             call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             call ESMF_MeshMergeSplitSrcInd(srcMesh,indices,rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
 
          if (dstIsReg) then
             call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             call ESMF_MeshMergeSplitDstInd(dstMesh,weights,indices,rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
       endif
 
@@ -692,7 +705,7 @@ program ESMF_RegridWeightGen
                             wasCompacted, &
                             compactedWeights, compactedIndices, &
                             rc)
-         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
          ! If the list was compacted get rid of the old lists and 
          ! point to the new lists
@@ -710,26 +723,28 @@ program ESMF_RegridWeightGen
       if (method .eq. 'bilinear' .or. method .eq. 'patch') then
 	if (dstIsReg) then
 	   call computeFracGrid(dstGrid, vm, indices, dstFrac, rc)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         else
 	   call computeFracMesh(dstMesh, vm, indices, dstFrac, rc)
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         endif
       else if (method .eq. 'conserve') then
          if (srcIsReg) then
             call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
                  srcFrac, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
 
          if (dstIsReg) then
             call gatherFracFieldGrid(dstGrid, dstFracField, petNo, dstFrac, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
                  dstFrac, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
       endif
 
@@ -742,16 +757,16 @@ program ESMF_RegridWeightGen
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodStr, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, dstFrac=dstFrac, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
           else
             call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodStr, dstFrac=dstFrac, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	  endif
       else 
 	 call ESMF_OutputScripWeightFile(wgtfile, weights, indices, rc=rc)
-         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
       endif
 
       !call ESMF_VMBarrier(vm)
@@ -767,9 +782,9 @@ program ESMF_RegridWeightGen
 
       ! Output success
       if (PetNo==0) then
-         write(*,*)
          write(*,*) "Completed weight generation successfully."
 !         write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
+         write(*,*) 
       endif
 
       call ESMF_Finalize()
@@ -1441,6 +1456,20 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
 end subroutine CompactMatrix
 
 
+subroutine ErrorMsgAndAbort(localPet)
+  integer ::  localPet
+
+  if (localPet >= 0) then
+     write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.RegridWeightGen.Log files for a traceback."
+  else
+     write(*,*) "ERROR: Please see the PET*.RegridWeightGen.Log files for a traceback."
+  endif
+
+
+  call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
+end subroutine ErrorMsgAndAbort
+
 
 
 subroutine PrintUsage()
@@ -1486,5 +1515,7 @@ subroutine PrintUsage()
      print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
      print *, "             Without this argument, the dst grids is assumed to be global."
 end subroutine PrintUsage
+
+
 
 end program ESMF_RegridWeightGen
