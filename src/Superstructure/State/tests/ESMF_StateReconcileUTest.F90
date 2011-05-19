@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.38 2011/04/27 02:09:18 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.39 2011/05/19 19:18:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     print *, "i am comp1_init"
 
     rc = ESMF_FAILURE
-    field1 = ESMF_FieldCreateEmpty(name="Comp1 Field", rc=rc)
+    field1 = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
   
     call ESMF_StateAdd(istate, field1, rc=rc)
@@ -51,7 +51,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
     call ESMF_StateAdd(istate, neststate, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
-    field1nest = ESMF_FieldCreateEmpty(name="Comp1 Field in nested State", rc=rc)
+    field1nest = ESMF_FieldEmptyCreate(name="Comp1 Field in nested State", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_StateAdd(neststate, field1nest, rc=rc)
@@ -71,7 +71,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
     print *, "i am comp2_init"
 
     rc = ESMF_FAILURE
-    field2 = ESMF_FieldCreateEmpty(name="Comp2 Field", rc=rc)
+    field2 = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
     call ESMF_StateAdd(istate, field2, rc=rc)

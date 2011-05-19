@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.31 2011/05/17 20:16:01 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.32 2011/05/19 19:13:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -117,14 +117,14 @@ program ESMF_AttributeCIMEx
       fbundle2 = ESMF_FieldBundleCreate(name="fbundle2", rc=rc)
 
       ! Create Fields
-      DMS_emi = ESMF_FieldCreateEmpty(name='DMS_emi', rc=rc)
-      UM = ESMF_FieldCreateEmpty(name='UM', rc=rc)
-      OH = ESMF_FieldCreateEmpty(name='OH', rc=rc)
-      Orog = ESMF_FieldCreateEmpty(name='Orog', rc=rc)
-      Ozone = ESMF_FieldCreateEmpty(name='Ozone', rc=rc)
-      SST = ESMF_FieldCreateEmpty(name='SST', rc=rc)
-      SO2 = ESMF_FieldCreateEmpty(name='SO2', rc=rc)
-      NOx = ESMF_FieldCreateEmpty(name='NOx', rc=rc)
+      DMS_emi = ESMF_FieldEmptyCreate(name='DMS_emi', rc=rc)
+      UM = ESMF_FieldEmptyCreate(name='UM', rc=rc)
+      OH = ESMF_FieldEmptyCreate(name='OH', rc=rc)
+      Orog = ESMF_FieldEmptyCreate(name='Orog', rc=rc)
+      Ozone = ESMF_FieldEmptyCreate(name='Ozone', rc=rc)
+      SST = ESMF_FieldEmptyCreate(name='SST', rc=rc)
+      SO2 = ESMF_FieldEmptyCreate(name='SO2', rc=rc)
+      NOx = ESMF_FieldEmptyCreate(name='NOx', rc=rc)
 !EOC
 
 !BOE

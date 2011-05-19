@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.20 2011/05/12 23:54:25 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.21 2011/05/19 19:13:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.20 2011/05/12 23:54:25 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.21 2011/05/19 19:13:50 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1238,7 +1238,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Construct a field ESMF object that will be decorated with
     ! Attributes to output within <coupling>s in a <modelComponent>
-    field1 = ESMF_FieldCreateEmpty(name="DMS_emi", rc=rc)
+    field1 = ESMF_FieldEmptyCreate(name="DMS_emi", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a field to decorate with Attributes test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.29 2011/03/04 19:00:38 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.30 2011/05/19 19:13:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.29 2011/03/04 19:00:38 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.30 2011/05/19 19:13:47 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -1504,9 +1504,9 @@
       ! I/O specification, and an identifier that specifies whether the bundle 
       ! is to be packed (contiguous data) or loose (noncontiguous data). 
       !  Create several empty Fields and add them to a new FieldBundle.
-      fields(1) = ESMF_FieldCreateEmpty(name="pressure", rc=rc)
-      fields(2) = ESMF_FieldCreateEmpty(name="temperature", rc=rc)
-      fields(3) = ESMF_FieldCreateEmpty(name="heat flux", rc=rc)
+      fields(1) = ESMF_FieldEmptyCreate(name="pressure", rc=rc)
+      fields(2) = ESMF_FieldEmptyCreate(name="temperature", rc=rc)
+      fields(3) = ESMF_FieldEmptyCreate(name="heat flux", rc=rc)
       bundle1 = ESMF_FieldBundleCreate(fieldList=fields(1:3), name="atmosphere data", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating FieldBundle with 3 No Data Fields Test"
@@ -1584,7 +1584,7 @@
 
       !EX_UTest
       ! Creating a Field Test
-      simplefield = ESMF_FieldCreateEmpty(name="rh", rc=rc)
+      simplefield = ESMF_FieldEmptyCreate(name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Create a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

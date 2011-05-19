@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.16 2011/05/19 19:18:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@ program ESMF_AttReadFieldEx
 
 !BOC
       ! Create a field
-      field = ESMF_FieldCreateEmpty(name="field", rc=rc)
+      field = ESMF_FieldEmptyCreate(name="field", rc=rc)
 !EOC
 
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

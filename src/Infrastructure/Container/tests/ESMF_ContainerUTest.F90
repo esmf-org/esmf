@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.18 2011/05/18 00:16:30 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.19 2011/05/19 19:13:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.18 2011/05/18 00:16:30 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.19 2011/05/19 19:13:43 feiliu Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -101,7 +101,7 @@ program ESMF_ContainerUTest
   allocate(fieldList(fieldCount))
   do i=1, fieldCount
     write(iString, *) i
-    fieldList(i) = ESMF_FieldCreateEmpty(name="testField"//&
+    fieldList(i) = ESMF_FieldEmptyCreate(name="testField"//&
       trim(adjustl(iString)), rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   enddo
@@ -423,7 +423,7 @@ program ESMF_ContainerUTest
   if (stat/=0) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   tt%wrap%string = "string in myUDT1"
   tt%wrap%index = 1
-  tt%wrap%field = ESMF_FieldCreateEmpty(name="field in myUDT1", rc=rc)
+  tt%wrap%field = ESMF_FieldEmptyCreate(name="field in myUDT1", rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   !------------------------------------------------------------------------
@@ -438,7 +438,7 @@ program ESMF_ContainerUTest
   if (stat/=0) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   tt%wrap%string = "string in myUDT2"
   tt%wrap%index = 2
-  field = ESMF_FieldCreateEmpty(name="field in myUDT2", rc=rc)
+  field = ESMF_FieldEmptyCreate(name="field in myUDT2", rc=rc)
   tt%wrap%field = field
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -487,7 +487,7 @@ program ESMF_ContainerUTest
   if (stat/=0) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   tt%wrap%string = "string in myUDT2 replacement"
   tt%wrap%index = 20
-  field = ESMF_FieldCreateEmpty(name="field in myUDT2 replacement", rc=rc)
+  field = ESMF_FieldEmptyCreate(name="field in myUDT2 replacement", rc=rc)
   tt%wrap%field = field
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 

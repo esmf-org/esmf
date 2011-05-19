@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.37 2011/04/27 02:10:12 w6ws Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.38 2011/05/19 19:13:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ subroutine comp1_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp1_init"
 
-    field1 = ESMF_FieldCreateEmpty(name="Comp1 Field", rc=localrc)
+    field1 = ESMF_FieldEmptyCreate(name="Comp1 Field", rc=localrc)
   
     call ESMF_StateAdd(istate, field1, rc=localrc)
     
@@ -59,7 +59,7 @@ subroutine comp2_init(gcomp, istate, ostate, clock, rc)
 
     print *, "i am comp2_init"
 
-    field2 = ESMF_FieldCreateEmpty(name="Comp2 Field", rc=localrc)
+    field2 = ESMF_FieldEmptyCreate(name="Comp2 Field", rc=localrc)
     
     call ESMF_StateAdd(istate, field2, rc=localrc)
 

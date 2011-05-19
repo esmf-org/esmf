@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.14 2011/05/12 23:54:28 eschwab Exp $
+! $Id: user_model2.F90,v 1.15 2011/05/19 19:13:55 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -152,7 +152,7 @@ module user_model2
     purpField = 'Inputs Description'
 
     ! OH Field
-    OH = ESMF_FieldCreateEmpty(name='OH', rc=rc)
+    OH = ESMF_FieldEmptyCreate(name='OH', rc=rc)
     call ESMF_AttributeAdd(OH, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -185,7 +185,7 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
     
     ! Orog Field
-    Orog = ESMF_FieldCreateEmpty(name='Orog', rc=rc)
+    Orog = ESMF_FieldEmptyCreate(name='Orog', rc=rc)
     call ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 

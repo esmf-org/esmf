@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.2 2011/05/19 16:05:37 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.3 2011/05/19 19:13:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldEmptyMod
 !    TypeKindRankInterfaceMacro(FieldEmptyCompPtr)
 !
 !! !DESCRIPTION:
-!!   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
+!!   This interface finishes a {\tt ESMF\_Field} started with FieldEmptyCreate
 !!   These methods all take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
 !!   or {\tt ESMF\_XGrid}, and Fortran data array or pointer as input to
 !!   fill in the {\tt ESMF\_Field} internals. 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.91 2011/03/08 16:26:44 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.92 2011/05/19 19:13:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.91 2011/03/08 16:26:44 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.92 2011/05/19 19:13:53 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -338,21 +338,21 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      field5(1) = ESMF_FieldCreateEmpty(name="heat flux", rc=rc)
+      field5(1) = ESMF_FieldEmptyCreate(name="heat flux", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test 1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      field5(2) = ESMF_FieldCreateEmpty(name="density", rc=rc)
+      field5(2) = ESMF_FieldEmptyCreate(name="density", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test 2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      field5(3) = ESMF_FieldCreateEmpty(name="sea surface temperature", rc=rc)
+      field5(3) = ESMF_FieldEmptyCreate(name="sea surface temperature", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test 3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -376,7 +376,7 @@
       !EX_UTest
       ! Test adding Field to a State
       fieldname = "Humidity"
-      field1 = ESMF_FieldCreateEmpty(name=fieldname, rc=rc)
+      field1 = ESMF_FieldEmptyCreate(name=fieldname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -905,7 +905,7 @@
       statename = "Export State"
       x = 4
       fieldname = "Precipitation"
-      field3(1) = ESMF_FieldCreateEmpty(name=fieldname, rc=rc)
+      field3(1) = ESMF_FieldEmptyCreate(name=fieldname, rc=rc)
       state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
                                 fieldList=field3, itemcount=x, rc=rc)
       write(failMsg, *) ""
@@ -922,7 +922,7 @@
       statename = "Export State"
       x = 1
       fieldname = "Precipitation"
-      field3(1) = ESMF_FieldCreateEmpty(name=fieldname, rc=rc)
+      field3(1) = ESMF_FieldEmptyCreate(name=fieldname, rc=rc)
       state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
                                 fieldList=field3(1:1), itemcount=x, rc=rc)
       write(failMsg, *) ""
@@ -1089,7 +1089,7 @@
       !EX_UTest
       ! Test create an Field for replacement
 
-      field10 = ESMF_FieldCreateEmpty (name="pressures",  &
+      field10 = ESMF_FieldEmptyCreate (name="pressures",  &
         rc=rc)
       write (failmsg, *) "Creating field10 for replacement"
       write (name, *) "Creating field10 for replacement test"
@@ -1115,7 +1115,7 @@
       !EX_UTest
       ! Test create a 2nd Field for replacement, but has same name
       ! as the 1st Field
-      field11 = ESMF_FieldCreateEmpty (name="pressures",  &
+      field11 = ESMF_FieldEmptyCreate (name="pressures",  &
         rc=rc)
       write (failmsg, *) "Creating field11 for replacement"
       write (name, *) "Creating field11 for replacement test"

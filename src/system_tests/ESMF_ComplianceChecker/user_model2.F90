@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2011/05/12 23:54:30 eschwab Exp $
+! $Id: user_model2.F90,v 1.8 2011/05/19 19:13:58 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -132,7 +132,7 @@ module user_model2
       convention="CIM 1.5", purpose="Model Component Simulation Description", &
       rc=rc)
    
-    field = ESMF_FieldCreateEmpty(name="myTestField", rc=rc)
+    field = ESMF_FieldEmptyCreate(name="myTestField", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     call ESMF_StateAdd(exportState, field, rc=rc)
@@ -144,13 +144,13 @@ module user_model2
     call ESMF_StateAdd(exportState, fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    field = ESMF_FieldCreateEmpty(name="myTestField 1 in Bundle", rc=rc)
+    field = ESMF_FieldEmptyCreate(name="myTestField 1 in Bundle", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    field = ESMF_FieldCreateEmpty(name="myTestField 2 in Bundle", rc=rc)
+    field = ESMF_FieldEmptyCreate(name="myTestField 2 in Bundle", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)

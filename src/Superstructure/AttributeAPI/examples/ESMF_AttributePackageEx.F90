@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.25 2011/05/10 23:26:05 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.26 2011/05/19 19:13:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -91,16 +91,16 @@ program ESMF_AttributePackageEx
       exportState = ESMF_StateCreate(name="exportState",  &
                                      stateType=ESMF_STATE_EXPORT, rc=rc)
         
-      DPEDT = ESMF_FieldCreateEmpty(name='DPEDT', rc=rc)
-      DTDT = ESMF_FieldCreateEmpty(name='DTDT', rc=rc)
-      DUDT = ESMF_FieldCreateEmpty(name='DUDT', rc=rc)
-      DVDT = ESMF_FieldCreateEmpty(name='DVDT', rc=rc)
-      PHIS = ESMF_FieldCreateEmpty(name='PHIS', rc=rc)
-      QTR = ESMF_FieldCreateEmpty(name='QTR', rc=rc)
-      CNV = ESMF_FieldCreateEmpty(name='CNV', rc=rc)
-      CONVCPT = ESMF_FieldCreateEmpty(name='CONVCPT', rc=rc)
-      CONVKE = ESMF_FieldCreateEmpty(name='CONVKE', rc=rc)
-      CONVPHI = ESMF_FieldCreateEmpty(name='CONVPHI', rc=rc)
+      DPEDT = ESMF_FieldEmptyCreate(name='DPEDT', rc=rc)
+      DTDT = ESMF_FieldEmptyCreate(name='DTDT', rc=rc)
+      DUDT = ESMF_FieldEmptyCreate(name='DUDT', rc=rc)
+      DVDT = ESMF_FieldEmptyCreate(name='DVDT', rc=rc)
+      PHIS = ESMF_FieldEmptyCreate(name='PHIS', rc=rc)
+      QTR = ESMF_FieldEmptyCreate(name='QTR', rc=rc)
+      CNV = ESMF_FieldEmptyCreate(name='CNV', rc=rc)
+      CONVCPT = ESMF_FieldEmptyCreate(name='CONVCPT', rc=rc)
+      CONVKE = ESMF_FieldEmptyCreate(name='CONVKE', rc=rc)
+      CONVPHI = ESMF_FieldEmptyCreate(name='CONVPHI', rc=rc)
       
       fbundle = ESMF_FieldBundleCreate(name="fbundle", rc=rc)
 !EOC

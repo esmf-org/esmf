@@ -1,4 +1,4 @@
-!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $
+!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.31 2011/05/19 19:13:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.30 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.31 2011/05/19 19:13:50 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -108,7 +108,7 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
       ! preparations
       ! fields
-      ffb = ESMF_FieldCreateEmpty(name="fieldforbundle", rc=rc)
+      ffb = ESMF_FieldEmptyCreate(name="fieldforbundle", rc=rc)
       
       ! field bundles
       fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
