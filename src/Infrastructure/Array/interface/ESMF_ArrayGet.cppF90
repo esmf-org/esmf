@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.62 2011/05/13 20:22:20 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.63 2011/05/19 21:03:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.62 2011/05/13 20:22:20 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.63 2011/05/19 21:03:35 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -131,11 +131,11 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
   subroutine ESMF_ArrayGetDefault(array, keywordEnforcer, arrayspec, typekind, &
-    rank, localarrayList, indexflag, distgridToArrayMap, distgridToPackedArrayMap, &
-    arrayToDistGridMap, undistLBound, undistUBound, exclusiveLBound, &
-    exclusiveUBound, computationalLBound, computationalUBound, totalLBound, &
-    totalUBound, computationalLWidth, computationalUWidth, totalLWidth, &
-    totalUWidth, distgrid, dimCount, tileCount, minIndexPTile, &
+    rank, localarrayList, indexflag, distgridToArrayMap, &
+    distgridToPackedArrayMap, arrayToDistGridMap, undistLBound, undistUBound, &
+    exclusiveLBound, exclusiveUBound, computationalLBound, computationalUBound, &
+    totalLBound, totalUBound, computationalLWidth, computationalUWidth, &
+    totalLWidth, totalUWidth, distgrid, dimCount, tileCount, minIndexPTile, &
     maxIndexPTile, deToTileMap, indexCountPDe, delayout, deCount, &
     localDeCount, localDeList, name, rc)
 !
