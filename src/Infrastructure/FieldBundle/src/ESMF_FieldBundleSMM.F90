@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMM.F90,v 1.31 2011/05/19 19:01:35 svasquez Exp $
+! $Id: ESMF_FieldBundleSMM.F90,v 1.32 2011/05/19 19:47:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleSMM.F90,v 1.31 2011/05/19 19:01:35 svasquez Exp $'
+      '$Id: ESMF_FieldBundleSMM.F90,v 1.32 2011/05/19 19:47:17 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleSMMStore
@@ -265,7 +265,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSMMRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleSMMRelease - Release resources associated with a FieldBundle \linebreak sparse matrix multiplication
+! !IROUTINE: ESMF_FieldBundleSMMRelease - Release resources associated with a FieldBundle sparse matrix multiplication
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMMRelease(routehandle, keywordEnforcer, rc)
