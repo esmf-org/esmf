@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.75 2011/05/19 14:17:05 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.76 2011/05/19 16:05:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.75 2011/05/19 14:17:05 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.76 2011/05/19 16:05:37 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -324,7 +324,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(grid)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -337,7 +338,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(staggerloc)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Grid or invalid Grid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -350,7 +352,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(meshLocation)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -364,7 +367,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     if (present(mesh)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No Mesh or invalid Mesh attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -377,7 +381,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(locstream)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No LocStream or invalid LocStream attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -390,7 +395,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(xgrid)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -404,7 +410,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     if (present(xgridSide)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -417,7 +424,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(gridIndex)) then
-        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET) then
+        if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
+            ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
               msg="No XGrid or invalid XGrid attached to Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return

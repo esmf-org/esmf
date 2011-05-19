@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.42 2011/05/19 14:17:05 feiliu Exp $
+! $Id: ESMF_FieldPr.F90,v 1.43 2011/05/19 16:05:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -177,7 +177,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
         write(*, *)  "Field status = ", fp%status
-        if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET) then 
+        if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
+            fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then 
 !           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
 !          if (ESMF_LogFoundError(localrc, &
 !            ESMF_ERR_PASSTHRU, &
