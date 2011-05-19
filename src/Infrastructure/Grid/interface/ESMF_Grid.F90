@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.214 2011/05/19 17:20:53 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.215 2011/05/19 22:33:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -254,7 +254,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.214 2011/05/19 17:20:53 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.215 2011/05/19 22:33:13 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -4791,15 +4791,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)      !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)      !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)      !N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in),  optional :: bipolePos1(2)    !N. IMP.
-       integer,               intent(in),  optional :: bipolePos2(2)    !N. IMP.
-       integer,               intent(in),  optional :: bipolePos3(2)    !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  !N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)!N. IMP.
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -5815,15 +5815,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)       !N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in),  optional :: bipolePos1(2)     !N. IMP.
-       integer,               intent(in),  optional :: bipolePos2(2)     !N. IMP.
-       integer,               intent(in),  optional :: bipolePos3(2)     !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  !N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)!N. IMP.
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -6715,15 +6715,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)       ! N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)       ! N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)       ! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)! N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)! N. IMP.
-       integer,               intent(in),  optional :: bipolePos1(2)     ! N. IMP.
-       integer,               intent(in),  optional :: bipolePos2(2)     ! N. IMP.
-       integer,               intent(in),  optional :: bipolePos3(2)     ! N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  ! N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  ! N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  ! N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)! N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)! N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)! N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)! N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)! N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)! N. IMP.
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -13909,15 +13909,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)       !N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in),  optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in),  optional :: bipolePos1(2)     !N. IMP.
-       integer,               intent(in),  optional :: bipolePos2(2)     !N. IMP.
-       integer,               intent(in),  optional :: bipolePos3(2)     !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  !N. IMP.
+       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  !N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos1(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos2(2)!N. IMP.
+       integer,               intent(in),  optional :: bipolePos3(2)!N. IMP.
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -14930,15 +14930,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in), optional :: minIndex(:)
        integer,               intent(in)           :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       !N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in), optional :: bipolePos1(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos2(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos3(2)     !N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)   !N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)   !N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)   !N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2) !N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2) !N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2) !N. IMP.
        integer,               intent(in), optional :: coordDep1(:)
        integer,               intent(in), optional :: coordDep2(:)
        integer,               intent(in), optional :: coordDep3(:)
@@ -15820,15 +15820,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)           :: arbIndexCount
        integer,               intent(in)           :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)       !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)       !N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc1(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc2(2)!N. IMP.
-       type(ESMF_StaggerLoc), intent(in), optional :: poleStaggerLoc3(2)!N. IMP.
-       integer,               intent(in), optional :: bipolePos1(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos2(2)     !N. IMP.
-       integer,               intent(in), optional :: bipolePos3(2)     !N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)   !N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)   !N. IMP.
+       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)   !N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
+       type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
+       integer,               intent(in), optional :: bipolePos1(2) !N. IMP.
+       integer,               intent(in), optional :: bipolePos2(2) !N. IMP.
+       integer,               intent(in), optional :: bipolePos3(2) !N. IMP.
        integer,               intent(in), optional :: coordDep1(:)
        integer,               intent(in), optional :: coordDep2(:)
        integer,               intent(in), optional :: coordDep3(:)
