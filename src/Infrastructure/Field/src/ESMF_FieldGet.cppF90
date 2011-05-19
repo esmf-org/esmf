@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.77 2011/05/19 17:40:02 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.78 2011/05/19 20:28:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.77 2011/05/19 17:40:02 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.78 2011/05/19 20:28:22 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -112,10 +112,10 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
-    status, isCommitted, geomtype, grid, mesh, locstream, xgrid, array, typekind, &
-    dimCount, rank, staggerloc, meshLocation, xgridSide, gridIndex, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, &
-  	localDeCount, name, rc) 
+    status, isCommitted, geomtype, grid, mesh, locstream, xgrid, array, &
+    typekind, dimCount, rank, staggerloc, meshLocation, xgridSide, &
+    gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    totalLWidth, totalUWidth, localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field),      intent(in)            :: field    
@@ -164,8 +164,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_ArraySpec} object containing the type/kind/rank information
 !       of the Field object.
 ! \item [{[status]}]
+!       \begin{sloppypar}
 !       The status of the Field. It can take one of the following values: {\tt ESMF\_FIELDSTATUS\_EMPTY},
 !       {\tt ESMF\_FIELDSTATUS\_GRIDSET}, {\tt ESMF\_FIELDSTATUS\_COMPLETE}.
+!       \end{sloppypar}
 ! \item [{[isCommitted]}]
 !       Indicates if the Field is fully committed and ready.
 ! \item [{[geomtype]}]
