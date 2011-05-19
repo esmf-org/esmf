@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.30 2011/05/13 17:08:07 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.31 2011/05/19 22:39:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.30 2011/05/13 17:08:07 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.31 2011/05/19 22:39:27 svasquez Exp $'
 
 !==============================================================================
 !
@@ -226,9 +226,12 @@ name, rc)
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-integer, intent(in), optional               :: sideAToXGridScheme, sideBToXGridScheme
-integer, intent(in), optional               :: sideAPriority(:), sideBPriority(:)
-integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:), sideBMaskValues(:)
+integer, intent(in), optional               :: sideAToXGridScheme
+integer, intent(in), optional               :: sideBToXGridScheme
+integer, intent(in), optional               :: sideAPriority(:)
+integer, intent(in), optional               :: sideBPriority(:)
+integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:)
+integer(ESMF_KIND_I4), intent(in), optional :: sideBMaskValues(:)
 logical, intent(in), optional               :: storeOverlay
 logical, intent(in), optional               :: offline
 type(ESMF_XGridSpec), intent(in), optional  :: sparseMatA2X(:)

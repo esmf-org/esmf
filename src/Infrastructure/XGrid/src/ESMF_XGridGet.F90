@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.20 2011/05/13 20:22:32 rokuingh Exp $
+! $Id: ESMF_XGridGet.F90,v 1.21 2011/05/19 22:42:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.20 2011/05/13 20:22:32 rokuingh Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.21 2011/05/19 22:42:50 svasquez Exp $'
 
 !==============================================================================
 !
@@ -130,8 +130,10 @@ type(ESMF_DistGrid), intent(out), optional  :: distgridB(:)
 type(ESMF_DistGrid), intent(out), optional  :: distgridM
 integer, intent(out), optional              :: dimCount
 integer, intent(out), optional              :: localDECount
-type(ESMF_XGridSpec), intent(out), optional :: sparseMatA2X(:), sparseMatX2A(:)
-type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:), sparseMatX2B(:)
+type(ESMF_XGridSpec), intent(out), optional :: sparseMatA2X(:)
+type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2A(:)
+type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:)
+type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2B(:)
 character (len=*), intent(out), optional    :: name
 integer, intent(out), optional              :: rc 
 !
