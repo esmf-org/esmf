@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.59 2011/05/18 23:04:51 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.60 2011/05/19 21:08:17 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -500,7 +500,7 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
 
   // Get mask Field
-  MEField<> *mptr = mesh.GetField("mask");
+  MEField<> *mptr = mesh.GetField("elem_mask");
 
   // Get weight iterators
   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
