@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.33 2011/02/24 23:32:04 oehmke Exp $
+! $Id: ESMF_FieldEx.F90,v 1.34 2011/05/19 14:17:03 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -434,7 +434,7 @@
 
 !BOC
     ! create an empty Field
-    field3 = ESMF_FieldCreateEmpty(name="precip", rc=rc)
+    field3 = ESMF_FieldEmptyCreate(name="precip", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! use FieldGet to retrieve total counts 
@@ -448,7 +448,7 @@
     ! finalize the Field
     call ESMF_FieldSetCommit(field3, grid2d, farray2d, rc=rc)
 !EOC
-    print *, "Finish a Field created by ESMF_FieldCreateEmpty returned"
+    print *, "Finish a Field created by ESMF_FieldEmptyCreate returned"
     call ESMF_FieldDestroy(field3, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray2d)

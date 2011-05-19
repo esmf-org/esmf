@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cppF90,v 1.28 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldSet.cppF90,v 1.29 2011/05/19 14:17:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -14,6 +14,12 @@
 !
 !     ESMF FieldSet module
 module ESMF_FieldSetMod
+
+  use ESMF_FieldMod
+
     implicit none
+
     private
+
+
 end module ESMF_FieldSetMod

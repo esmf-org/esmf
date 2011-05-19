@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.19 2011/03/01 20:48:24 w6ws Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.20 2011/05/19 14:17:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -190,7 +190,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -231,7 +231,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field3 = ESMF_FieldCreateEmpty(rc=localrc)
+  field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field3, grid2d, farrayPtr=fptr1d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -376,7 +376,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -418,7 +418,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field3 = ESMF_FieldCreateEmpty(rc=localrc)
+  field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field3, grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
       copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -557,7 +557,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -599,7 +599,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field3 = ESMF_FieldCreateEmpty(rc=localrc)
+  field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field3, grid3d, farrayPtr=fptr2d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -740,7 +740,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr3d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid3d, farray=fptr3d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
@@ -864,7 +864,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
@@ -988,7 +988,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid3d, farray=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
@@ -1032,7 +1032,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field3 = ESMF_FieldCreateEmpty(rc=localrc)
+  field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field3, grid3d, farrayPtr=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
@@ -1172,7 +1172,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
@@ -1280,7 +1280,7 @@
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
-  field2 = ESMF_FieldCreateEmpty(rc=localrc)
+  field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   call ESMF_FieldSetCommit(field2, grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)

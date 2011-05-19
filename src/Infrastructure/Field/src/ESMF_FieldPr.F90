@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.41 2011/04/08 20:40:23 feiliu Exp $
+! $Id: ESMF_FieldPr.F90,v 1.42 2011/05/19 14:17:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-        write(*, *)  "Field status = ", trim(str)
+        write(*, *)  "Field base status = ", trim(str)
 
         if (fieldstatus .ne. ESMF_STATUS_READY) then
           write(*,*) "Empty or Uninitialized Field"
@@ -176,9 +176,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-        call ESMF_StatusString(fp%gridstatus, str, localrc)
-        write(*, *)  "Grid status = ", trim(str)
-        if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
+        write(*, *)  "Field status = ", fp%status
+        if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET) then 
 !           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
 !          if (ESMF_LogFoundError(localrc, &
 !            ESMF_ERR_PASSTHRU, &
@@ -190,9 +189,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           write(*, *) "gridrank = ", gridrank
         endif
 
-        call ESMF_StatusString(fp%datastatus, str, localrc)
-        write(*, *)  "Data status = ", trim(str)
-        if (fp%datastatus .eq. ESMF_STATUS_READY) then 
+        if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then 
           call ESMF_ArrayPrint(fp%array, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

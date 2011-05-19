@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.359 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.360 2011/05/19 14:17:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,6 +66,20 @@ module ESMF_FieldMod
   private
 
 !------------------------------------------------------------------------------
+! ! ESMF_FieldStatus
+
+  type ESMF_FieldStatus
+    sequence
+    !private
+    integer :: status
+  end type
+
+  type(ESMF_FieldStatus), parameter :: ESMF_FIELDSTATUS_UNINIT = ESMF_FieldStatus(1), &
+                                  ESMF_FIELDSTATUS_EMPTY = ESMF_FieldStatus(2), &
+                                  ESMF_FIELDSTATUS_GRIDSET = ESMF_FieldStatus(3), &
+                                  ESMF_FIELDSTATUS_COMPLETE = ESMF_FieldStatus(4)
+
+!------------------------------------------------------------------------------
 ! ! ESMF_FieldType
 ! ! Definition of the Field class.
 
@@ -75,8 +89,7 @@ module ESMF_FieldMod
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
     type (ESMF_GeomBase)          :: geombase
-    type (ESMF_Status)            :: gridstatus
-    type (ESMF_Status)            :: datastatus
+    type (ESMF_FieldStatus)       :: status
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
@@ -105,7 +118,11 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Field
+  public ESMF_FieldStatus
   public ESMF_FieldType ! For internal use only
+
+  public ESMF_FIELDSTATUS_UNINIT, ESMF_FIELDSTATUS_EMPTY, &
+    ESMF_FIELDSTATUS_GRIDSET, ESMF_FIELDSTATUS_COMPLETE
 
 !------------------------------------------------------------------------------
 !
@@ -113,6 +130,7 @@ module ESMF_FieldMod
 !
 ! - ESMF-public methods:
    public ESMF_FieldValidate           ! Check internal consistency
+   public operator(==), operator(/=)
 
 ! - ESMF-internal methods:
    public ESMF_FieldGetInit            ! For Standardized Initialization
@@ -127,13 +145,20 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.359 2011/02/26 00:20:35 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.360 2011/05/19 14:17:05 feiliu Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+interface operator (==)
+  module procedure ESMF_sfeq
+end interface
+
+interface operator (/=)
+  module procedure ESMF_sfne
+end interface
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -198,7 +223,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_GridDecompType) :: decompType
       type(ESMF_GeomType) :: geomType
       type(ESMF_Grid) :: grid
-      type(ESMF_Status) :: fieldstatus
+      type(ESMF_Status) :: basestatus
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -218,11 +243,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
       ! make sure the field is ready before trying to look at contents
-      call ESMF_BaseGetStatus(ftypep%base, fieldstatus, rc=localrc)
+      call ESMF_BaseGetStatus(ftypep%base, basestatus, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      if (fieldstatus .ne. ESMF_STATUS_READY) then
+      if (basestatus .ne. ESMF_STATUS_READY) then
          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed Field: fieldstatus not ready", &
              ESMF_CONTEXT, rcToReturn=rc)
@@ -230,7 +255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif 
 
       ! make sure there is a grid before asking it questions.
-      if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
+      if (ftypep%status .eq. ESMF_FIELDSTATUS_GRIDSET) then
           call ESMF_GeomBaseValidate(ftypep%geombase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -277,7 +302,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           enddo
       endif
       ! make sure there is data before asking it questions.
-      if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+      if (ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
@@ -434,8 +459,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call c_ESMC_FieldSerialize(fp%gridstatus, &
-                                 fp%datastatus, fp%iostatus, & 
+      call c_ESMC_FieldSerialize(fp%status, &
+                                 fp%iostatus, & 
                                  fp%dimCount, fp%gridToFieldMap, &
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
                                  fp%totalLWidth, fp%totalUWidth, &
@@ -445,7 +470,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+      if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET) then
         call ESMF_GeomBaseSerialize(fp%geombase, buffer, length, offset, &
                                     lattreconflag, linquireflag, localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -453,7 +478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+      if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
           call c_ESMC_ArraySerialize(fp%array, buffer(1), length, offset, &
                                      lattreconflag, linquireflag, localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -547,8 +572,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Deserialize other Field members
 
-      call c_ESMC_FieldDeserialize(fp%gridstatus, &
-                                   fp%datastatus, fp%iostatus, &
+      call c_ESMC_FieldDeserialize(fp%status, &
+                                   fp%iostatus, &
                                    fp%dimCount, fp%gridToFieldMap, &
                                    fp%ungriddedLBound, fp%ungriddedUBound, &
                                    fp%totalLWidth, fp%totalUWidth, &
@@ -557,7 +582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+      if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET) then
           fp%geombase=ESMF_GeomBaseDeserialize(buffer, offset, &
                                               lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -577,7 +602,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       endif
 
-      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+      if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
           call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, &
                                       lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -665,8 +690,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \end{description}
 !
 !EOPI
-        ftypep%gridstatus  = ESMF_STATUS_UNINIT
-        ftypep%datastatus  = ESMF_STATUS_UNINIT
+        ftypep%status      = ESMF_FIELDSTATUS_UNINIT
         ftypep%iostatus    = ESMF_STATUS_UNINIT
        
         ftypep%array_internal = .false. 
@@ -682,5 +706,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine ESMF_FieldInitialize
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+! function to compare two ESMF_Status flags to see if they're the same or not
+
+function ESMF_sfeq(sf1, sf2)
+ logical ESMF_sfeq
+ type(ESMF_FieldStatus), intent(in) :: sf1, sf2
+
+ ESMF_sfeq = (sf1%status == sf2%status)
+end function
+
+function ESMF_sfne(sf1, sf2)
+ logical ESMF_sfne
+ type(ESMF_FieldStatus), intent(in) :: sf1, sf2
+
+ ESMF_sfne = (sf1%status /= sf2%status)
+end function
 
 end module ESMF_FieldMod

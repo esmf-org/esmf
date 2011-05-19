@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.76 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.77 2011/05/19 14:17:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1986,7 +1986,7 @@ contains
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
-        field = ESMF_FieldCreateEmpty(rc=localrc) 
+        field = ESMF_FieldEmptyCreate(rc=localrc) 
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2014,7 +2014,7 @@ contains
 
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
-        field = ESMF_FieldCreateEmpty(rc=localrc) 
+        field = ESMF_FieldEmptyCreate(rc=localrc) 
         if(localrc /= ESMF_SUCCESS) rc = ESMF_FAILURE
         call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
             dimCount=dimCount, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
@@ -4532,7 +4532,7 @@ contains
           endif
         endif
 
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5625,7 +5625,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5876,7 +5876,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6107,7 +6107,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6329,7 +6329,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! create field
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6989,7 +6989,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7053,7 +7053,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        field = ESMF_FieldCreateEmpty(name="field", rc=localrc)
+        field = ESMF_FieldEmptyCreate(name="field", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

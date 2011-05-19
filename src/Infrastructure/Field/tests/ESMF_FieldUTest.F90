@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.158 2011/05/19 14:17:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.157 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.158 2011/05/19 14:17:06 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -105,7 +105,7 @@
       ! specifying an associated data array. In this case specifying the 
       ! grid parameters and data array dimensions may be deferred until 
       ! data is attached.
-      f1 = ESMF_FieldCreateEmpty(rc=rc) 
+      f1 = ESMF_FieldEmptyCreate(rc=rc) 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -343,7 +343,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      f1 = ESMF_FieldCreateEmpty(rc=rc) 
+      f1 = ESMF_FieldEmptyCreate(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -367,7 +367,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! default names unique
-      f2 = ESMF_FieldCreateEmpty(rc=rc)
+      f2 = ESMF_FieldEmptyCreate(rc=rc)
       call ESMF_FieldGet(f1, name=fname1, rc=rc)
       call ESMF_FieldGet(f2, name=fname2, rc=rc)
       call ESMF_FieldPrint(f1)
@@ -422,7 +422,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field can be created with a name
-      f2 = ESMF_FieldCreateEmpty(name="pressure", rc=rc)
+      f2 = ESMF_FieldEmptyCreate(name="pressure", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating Field with name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -440,7 +440,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verifying that recreating a Field is allowed.
-      f2 = ESMF_FieldCreateEmpty(name="temperature", rc=rc)
+      f2 = ESMF_FieldEmptyCreate(name="temperature", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreate a created Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -450,7 +450,7 @@
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field can be created after it has been destroyed
       call ESMF_FieldDestroy(f2)
-      f2 = ESMF_FieldCreateEmpty(name="precipitation", rc=rc)
+      f2 = ESMF_FieldEmptyCreate(name="precipitation", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreate a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -478,8 +478,8 @@
       ! Field names must be unique within an address 
       ! space and it shall be possible to check this.
       ! Bug 705087 "Default Field names not unique"
-      f1 = ESMF_FieldCreateEmpty(rc=rc)
-      f2 = ESMF_FieldCreateEmpty(rc=rc)
+      f1 = ESMF_FieldEmptyCreate(rc=rc)
+      f2 = ESMF_FieldEmptyCreate(rc=rc)
       call ESMF_FieldGet(f1, name=fname1, rc=rc)
       call ESMF_FieldGet(f2, name=fname2, rc=rc)
       write(failMsg, *) "Field names not unique"
@@ -494,7 +494,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      f4 = ESMF_FieldCreateEmpty(rc=rc) 
+      f4 = ESMF_FieldEmptyCreate(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -638,7 +638,7 @@
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       ! Verify that a Grid cannot be gotten from a Field created with no data
-      f5 = ESMF_FieldCreateEmpty(rc=rc)
+      f5 = ESMF_FieldEmptyCreate(rc=rc)
       call ESMF_FieldGet(f5, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"

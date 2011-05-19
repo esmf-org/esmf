@@ -1,0 +1,249 @@
+! $Id: ESMF_FieldEmpty.cppF90,v 1.1 2011/05/19 14:17:05 feiliu Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+^define ESMF_FILENAME "ESMF_FieldEmpty.F90"
+!==============================================================================
+!
+!     ESMF FieldEmpty module
+module ESMF_FieldEmptyMod
+
+^include "ESMF.h"
+
+  use ESMF_UtilTypesMod
+  use ESMF_BaseMod
+  use ESMF_InitMacrosMod
+  use ESMF_LogErrMod
+  use ESMF_ArraySpecMod
+  use ESMF_LocalArrayMod
+  use ESMF_DELayoutMod
+  use ESMF_StaggerLocMod
+  use ESMF_GridMod
+  use ESMF_XGridMod
+  use ESMF_DistGridMod
+  use ESMF_MeshMod
+  use ESMF_LocStreamMod
+  use ESMF_GeomBaseMod
+  use ESMF_ArrayMod
+  use ESMF_ArrayGetMod
+  use ESMF_ArrayCreateMod
+  use ESMF_FieldMod
+  use ESMF_FieldGetMod
+
+  implicit none
+
+  private
+
+  public ESMF_FieldEmptyCreate
+  public ESMF_FieldEmptySet
+  !public ESMF_FieldEmptyComplete
+
+!!------------------------------------------------------------------------------
+!!BOPI 
+!! !IROUTINE: ESMF_FieldEmptyComplete - Finishes a Field started with FieldEmptyCreate
+!!
+!! !INTERFACE:
+!  interface ESMF_FieldEmptyComplete
+!
+!! !PRIVATE MEMBER FUNCTIONS:
+!!
+!    module procedure ESMF_FieldEmptyCompAS
+!    module procedure ESMF_FieldEmptyCompTK
+!    TypeKindRankInterfaceMacro(FieldEmptyComp)
+!    TypeKindRankInterfaceMacro(FieldEmptyCompPtr)
+!
+!! !DESCRIPTION:
+!!   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
+!!   These methods all take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
+!!   or {\tt ESMF\_XGrid}, and Fortran data array or pointer as input to
+!!   fill in the {\tt ESMF\_Field} internals. 
+!  end interface
+!!EOPI
+!------------------------------------------------------------------------------
+
+contains
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptyCreate"
+!BOP
+! !IROUTINE: ESMF_FieldEmptyCreate- Create an empty Field with no Grid
+
+! !INTERFACE:
+  function ESMF_FieldEmptyCreate(keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldEmptyCreate
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character (len = *), intent(in),  optional :: name  
+    integer,             intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+! \begin{sloppypar}
+! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
+! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+! it. Attributes can be added to an empty Field object. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_empty}.
+! \end{sloppypar}
+!
+!
+! The arguments are:
+! \begin{description}
+! \item [{[name]}] 
+!       Field name. 
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
+    integer :: localrc                     
+    
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    nullify(ftype)
+    nullify(ESMF_FieldEmptyCreate%ftypep)
+
+    allocate(ftype, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldInitialize(ftype, rc=localrc) 
+    if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call field construction method
+    call ESMF_FieldConstructEmpty(ftype, name, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return values.
+    ESMF_FieldEmptyCreate%ftypep => ftype
+    
+    ! Add reference to this object into ESMF garbage collection table
+    ! Only call this in those Create() methods that call Construct()
+    call c_ESMC_VMAddFObject(ESMF_FieldEmptyCreate, ESMF_ID_FIELD%objectID)
+
+    ESMF_INIT_SET_CREATED(ESMF_FieldEmptyCreate)
+
+    call ESMF_FieldValidate(ESMF_FieldEmptyCreate, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldEmptyCreate
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+  subroutine ESMF_FieldEmptySet(field, grid, staggerloc, rc)
+
+  type(ESMF_Field), intent(inout)       :: field
+  type(ESMF_Grid), intent(in)           :: grid
+  type(ESMF_STAGGERLOC), intent(in), optional :: staggerloc
+  integer, intent(out), optional        :: rc
+
+  type(ESMF_STAGGERLOC)                 :: l_staggerloc
+  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_FieldStatus)                :: status
+  integer                               :: localrc
+
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+  call ESMF_FieldGet(field, status=status, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(status == ESMF_FIELDSTATUS_GRIDSET) then
+    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+      msg="FieldEmptySet - cannot replace an existing Grid in a Field", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  l_staggerloc = ESMF_STAGGERLOC_CENTER
+  if(present(staggerloc)) l_staggerloc = staggerloc
+
+  geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  field%ftypep%geombase = geombase
+  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldEmptySet
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldConstructEmpty"
+!BOPI
+! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no GeomBase or Array
+!
+! !INTERFACE:
+  subroutine ESMF_FieldConstructEmpty(ftypep, name, rc)
+!
+! !ARGUMENTS:     
+    type(ESMF_FieldType), pointer :: ftypep
+    character (len = *), intent(in), optional :: name  
+    integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+! Constructs an empty {\tt ESMF\_Field}.
+!
+! The arguments are:
+! \begin{description}
+! \item [ftypep]
+!       Pointer to an {\tt ESMF\_Field} object.
+! \item [{[name]}]
+!       Field name.
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+    ! Local variables
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Construct a default name if one is not given
+    call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Initialize field contents
+    ftypep%status = ESMF_FIELDSTATUS_EMPTY
+
+    call ESMF_BaseSetStatus(ftypep%base, ESMF_STATUS_READY, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_FieldConstructEmpty
+!------------------------------------------------------------------------------
+
+end module ESMF_FieldEmptyMod
