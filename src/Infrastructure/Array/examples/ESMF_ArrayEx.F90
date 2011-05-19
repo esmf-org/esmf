@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.71 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.72 2011/05/19 20:56:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -214,7 +214,8 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+       rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
@@ -372,7 +373,8 @@ program ESMF_ArrayEx
 !
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+       rc=rc)
     do i=1, size(myFarray, 1)
       do j=1, size(myFarray, 2)
         print *, "PET-local DE=", de, ": array(",i,",",j,")=", myFarray(i,j)
@@ -418,7 +420,8 @@ program ESMF_ArrayEx
     ! this is the default
 !    print *, "DE-local exclusive regions start at (1,1)"
     do de=1, localDeCount
-      call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, rc=rc)
+      call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+          rc=rc)
       do i=1, exclusiveUBound(1, de)
         do j=1, exclusiveUBound(2, de)
 !          print *, "DE-local exclusive region for PET-local DE=", de, &
@@ -430,7 +433,8 @@ program ESMF_ArrayEx
     ! only if set during ESMF_ArrayCreate()
 !    print *, "DE-local exclusive regions of this Array have global bounds"
     do de=1, localDeCount
-      call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, rc=rc)
+      call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+         rc=rc)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
         do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
 !          print *, "DE-local exclusive region for PET-local DE=", de, &
@@ -491,8 +495,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   allocate(localDeList(localDeCount))
-  call ESMF_ArrayGet(array, localarrayList=larrayList, localDeList=localDeList, &
-    rc=rc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, &
+    localDeList=localDeList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -559,7 +563,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+       rc=rc)
     ! initialize the DE-local array
     myFarray = 0.1d0 * localDeList(de)
     ! first time through the total region of array    
@@ -1148,7 +1153,8 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, docopy=ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, docopy=ESMF_DATA_REF, &
+       rc=rc)
     myFarray3D = 0.0 ! initialize
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       exclusiveLBound(2,de):exclusiveUBound(2,de), 1) = 5.1 ! dummy assignment
@@ -1221,7 +1227,8 @@ program ESMF_ArrayEx
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, docopy=ESMF_DATA_REF, rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, docopy=ESMF_DATA_REF, &
+       rc=rc)
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       1, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 10.5 !dummy assignment
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
@@ -1298,8 +1305,8 @@ program ESMF_ArrayEx
 !BOC
   allocate(larrayList(localDeCount))
   allocate(localDeList(localDeCount))
-  call ESMF_ArrayGet(array, localarrayList=larrayList, localDeList=localDeList, &
-    rc=rc)
+  call ESMF_ArrayGet(array, localarrayList=larrayList, &
+    localDeList=localDeList, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOE
@@ -1322,8 +1329,8 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray1D, docopy=ESMF_DATA_REF, &
-      rc=rc)
+    call ESMF_LocalArrayGet(larrayList(de), myFarray1D, &
+      docopy=ESMF_DATA_REF, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC
