@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.9 2011/05/18 04:16:50 theurich Exp $
+! $Id: NUOPC.F90,v 1.10 2011/05/19 14:45:23 feiliu Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -850,7 +850,7 @@ module NUOPC
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    field = ESMF_FieldCreateEmpty(name=name, rc=rc)
+    field = ESMF_FieldEmptyCreate(name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -927,7 +927,7 @@ module NUOPC
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    field = ESMF_FieldCreateEmpty(name=name, rc=rc)
+    field = ESMF_FieldEmptyCreate(name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -950,7 +950,7 @@ module NUOPC
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      field = ESMF_FieldCreateEmpty(name=trim(tempString), rc=rc)
+      field = ESMF_FieldEmptyCreate(name=trim(tempString), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &
         file=FILENAME)) &
