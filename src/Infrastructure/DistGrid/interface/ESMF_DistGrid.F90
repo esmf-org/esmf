@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.78 2011/05/13 20:22:23 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.79 2011/05/19 23:07:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.78 2011/05/13 20:22:23 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.79 2011/05/19 23:07:21 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -654,19 +654,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minIndex(:)
-    integer,                      intent(in)            :: maxIndex(:)
+    integer,                     intent(in)            :: minIndex(:)
+    integer,                     intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,               target,intent(in), optional  :: regDecomp(:)
-    type(ESMF_DecompFlag), target,intent(in), optional  :: decompflag(:)
-    integer,               target,intent(in), optional  :: regDecompFirstExtra(:)
-    integer,               target,intent(in), optional  :: regDecompLastExtra(:)
-    integer,               target,intent(in), optional  :: deLabelList(:)
-    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
-    integer,               target,intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in), optional  :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer,              target,intent(in),optional::regDecomp(:)
+    type(ESMF_DecompFlag),target,intent(in),optional::decompflag(:)
+    integer,              target,intent(in),optional::regDecompFirstExtra(:)
+    integer,              target,intent(in),optional::regDecompLastExtra(:)
+    integer,              target,intent(in),optional::deLabelList(:)
+    type(ESMF_IndexFlag),        intent(in),optional::indexflag
+    integer,              target,intent(in),optional::connectionList(:,:)
+    type(ESMF_DELayout),         intent(in),optional::delayout
+    type(ESMF_VM),               intent(in),optional::vm
+    integer,                     intent(out),optional::rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
@@ -1388,19 +1388,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     regDecompLastExtraPTile, deLabelList, indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                      intent(in)            :: minIndexPTile(:,:)
-    integer,                      intent(in)            :: maxIndexPTile(:,:)
+    integer,             intent(in)            :: minIndexPTile(:,:)
+    integer,             intent(in)            :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                      intent(in), optional  :: regDecompPTile(:,:)
-    type(ESMF_DecompFlag),target, intent(in), optional  :: decompflagPTile(:,:)
-    integer,              target, intent(in), optional  :: regDecompFirstExtraPTile(:,:)
-    integer,              target, intent(in), optional  :: regDecompLastExtraPTile(:,:)
-    integer,                      intent(in), optional  :: deLabelList(:)
-    type(ESMF_IndexFlag),         intent(in), optional  :: indexflag
-    integer,                      intent(in), optional  :: connectionList(:,:)
-    type(ESMF_DELayout),          intent(in), optional  :: delayout
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer,             intent(in),optional   :: regDecompPTile(:,:)
+    type(ESMF_DecompFlag),target,intent(in),optional::decompflagPTile(:,:)
+    integer,     target, intent(in), optional  :: regDecompFirstExtraPTile(:,:)
+    integer,     target, intent(in), optional  :: regDecompLastExtraPTile(:,:)
+    integer,             intent(in), optional  :: deLabelList(:)
+    type(ESMF_IndexFlag),intent(in), optional  :: indexflag
+    integer,             intent(in), optional  :: connectionList(:,:)
+    type(ESMF_DELayout), intent(in), optional  :: delayout
+    type(ESMF_VM),       intent(in), optional  :: vm
+    integer,             intent(out),optional  :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
