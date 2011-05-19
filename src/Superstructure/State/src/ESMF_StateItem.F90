@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.2 2011/05/12 04:56:30 theurich Exp $
+! $Id: ESMF_StateItem.F90,v 1.3 2011/05/19 22:51:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -177,6 +177,19 @@
         logical :: removedflag
          ESMF_INIT_DECLARE
       end type
+      
+!------------------------------------------------------------------------------
+!     ! ESMF_StateItemWrap
+!
+!     ! Extra level of indirection, allowing use of ESMF_Container
+
+      type ESMF_StateItemWrap
+#ifndef ESMF_SEQUENCE_BUG
+      sequence
+#endif
+      !private
+        type(ESMF_StateItem), pointer  :: si
+      end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateType
@@ -242,7 +255,7 @@
                                    ESMF_VALIDITYUNKNOWN
 
       ! only public for other files in the state class (should be friend)
-      public ESMF_StateClass, ESMF_StateItem, ESMF_DataHolder
+      public ESMF_StateClass, ESMF_StateItem, ESMF_StateItemWrap, ESMF_DataHolder
       public ESMF_STATEITEM_INDIRECT, ESMF_STATEITEM_UNKNOWN
       public ESMF_STATE_INVALID
 

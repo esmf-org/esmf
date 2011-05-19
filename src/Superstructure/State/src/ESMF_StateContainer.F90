@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.2 2011/05/12 03:45:38 theurich Exp $
+! $Id: ESMF_StateContainer.F90,v 1.3 2011/05/19 22:51:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -57,14 +57,14 @@ module ESMF_StateContainerMod
   public ESMF_ContainerReplace
 
   public ESMF_ContainerGarbageGet
-
+  
 !EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.2 2011/05/12 03:45:38 theurich Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.3 2011/05/19 22:51:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -171,13 +171,16 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAdd()
-  subroutine ESMF_ContainerAddSIL(container, itemList, relaxedflag, rc)
+  subroutine ESMF_ContainerAddSIL(container, itemList, keywordEnforcer, &
+    multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(inout)         :: container
-    type(ESMF_StateItem), intent(in)            :: itemList(:)
-    logical,              intent(in),  optional :: relaxedflag
-    integer,              intent(out), optional :: rc
+    type(ESMF_Container),     intent(inout)         :: container
+    type(ESMF_StateItemWrap), intent(in)            :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                  intent(in),  optional :: multiflag
+    logical,                  intent(in),  optional :: relaxedflag
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Add elements to an {\tt ESMF\_Container} object.
@@ -206,10 +209,10 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
-    type(ESMF_Pointer)          :: vector
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -218,6 +221,11 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -227,13 +235,13 @@ contains
     do i=1, size(itemList)
     
       ! Get the name of the item
-      call ESMF_StateItemGet(itemList(i), name=name, rc=localrc)
+      call ESMF_StateItemGet(itemList(i)%si, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
       call c_ESMC_ContainerAdd(container, trim(name), itemList(i), &
-        relaxedflagArg, localrc)
+        multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -257,9 +265,9 @@ contains
   subroutine ESMF_ContainerAddReplaceSIL(container, itemList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(inout)         :: container
-    type(ESMF_StateItem), intent(in)            :: itemList(:)
-    integer,              intent(out), optional :: rc
+    type(ESMF_Container),     intent(inout)         :: container
+    type(ESMF_StateItemWrap), intent(in)            :: itemList(:)
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Elements in {\tt itemList} that do not match any items by name in 
@@ -284,7 +292,6 @@ contains
     integer                     :: localrc      ! local return code
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
-    type(ESMF_Pointer)          :: vector
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -296,7 +303,7 @@ contains
     do i=1, size(itemList)
     
       ! Get the name of the StateItems
-      call ESMF_StateItemGet(itemList(i), name=name, rc=localrc)
+      call ESMF_StateItemGet(itemList(i)%si, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -326,11 +333,11 @@ contains
   subroutine ESMF_ContainerGetSI(container, itemName, item, isPresent, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(in)            :: container
-    character(len=*),     intent(in)            :: itemName
-    type(ESMF_StateItem), intent(out)           :: item
-    logical,              intent(out), optional :: isPresent
-    integer,              intent(out), optional :: rc
+    type(ESMF_Container),     intent(in)            :: container
+    character(len=*),         intent(in)            :: itemName
+    type(ESMF_StateItemWrap), intent(out)           :: item
+    logical,                  intent(out), optional :: isPresent
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -394,10 +401,10 @@ contains
   subroutine ESMF_ContainerGetSIL(container, itemCount, itemList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(in)            :: container
-    integer,              intent(out), optional :: itemCount
-    type(ESMF_StateItem), pointer               :: itemList(:)
-    integer,              intent(out), optional :: rc
+    type(ESMF_Container),     intent(in)            :: container
+    integer,                  intent(out), optional :: itemCount
+    type(ESMF_StateItemWrap), pointer               :: itemList(:)
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -494,14 +501,16 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerReplace()
-  subroutine ESMF_ContainerReplaceSIL(container, itemList, relaxedflag, &
-    rc)
+  subroutine ESMF_ContainerReplaceSIL(container, itemList, keywordEnforcer, &
+    multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(inout)         :: container
-    type(ESMF_StateItem), intent(in)            :: itemList(:)
-    logical,              intent(in),  optional :: relaxedflag
-    integer,              intent(out), optional :: rc
+    type(ESMF_Container),     intent(inout)         :: container
+    type(ESMF_StateItemWrap), intent(in)            :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                  intent(in),  optional :: multiflag
+    logical,                  intent(in),  optional :: relaxedflag
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Replace items in an {\tt ESMF\_Container} object.
@@ -528,10 +537,10 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
-    type(ESMF_Pointer)          :: vector
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -540,6 +549,11 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -549,13 +563,13 @@ contains
     do i=1, size(itemList)
 
       ! Get the name of the StateItem
-      call ESMF_StateItemGet(itemList(i), name=name, rc=localrc)
+      call ESMF_StateItemGet(itemList(i)%si, name=name, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
       call c_ESMC_ContainerReplace(container, trim(name), itemList(i), &
-        relaxedflagArg, localrc)
+        multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -580,10 +594,10 @@ contains
     garbageList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container), intent(in)            :: container
-    integer,              intent(out), optional :: garbageCount
-    type(ESMF_StateItem), pointer               :: garbageList(:)
-    integer,              intent(out), optional :: rc
+    type(ESMF_Container),     intent(in)            :: container
+    integer,                  intent(out), optional :: garbageCount
+    type(ESMF_StateItemWrap), pointer               :: garbageList(:)
+    integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
