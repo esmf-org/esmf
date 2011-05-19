@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.69 2011/05/18 19:55:56 svasquez Exp $
+! $Id: ESMF_Init.F90,v 1.70 2011/05/19 19:24:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -99,7 +99,8 @@
         ioUnitLBound, ioUnitUBound, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer 
+					     ! must use keywords for the below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar
       character(len=*),        intent(in),  optional :: defaultLogFileName
