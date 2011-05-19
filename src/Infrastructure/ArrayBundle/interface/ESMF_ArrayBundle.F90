@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.63 2011/05/19 20:39:54 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.64 2011/05/19 22:46:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.63 2011/05/19 20:39:54 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.64 2011/05/19 22:46:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -401,12 +401,13 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleAdd(arraybundle, arrayList, keywordEnforcer, &
-      relaxedflag, rc)
+      multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     type(ESMF_Array),       intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: multiflag
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
@@ -423,12 +424,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} to be added to.
 !   \item [arrayList]
 !     List of {\tt ESMF\_Array} objects to be added.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be added to {\tt arraybundle}. For {\tt .false.} added items must
+!     have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
-!     where it is {\em not} an error if {\tt arrayList} contains Arrays with
-!     names that are also found in {\tt arraybundle}. The {\tt arraybundle} 
-!     is left unchanged for these Arrays. For {\tt .false.} this is treated
-!     as an error condition. The default setting is {\tt .false.}.
+!     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
+!     {\tt arrayList} contains items with names that are also found in 
+!     {\tt arraybundle}. The {\tt arraybundle} is left unchanged for these items.
+!     For {\tt .false.} this is treated as an error condition. 
+!     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -436,6 +442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: multiflagArg
     type(ESMF_Logical)            :: relaxedflagArg
     integer :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
@@ -455,6 +462,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
     enddo
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
+    
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -473,7 +486,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleAdd(arraybundle, arrayPointerList, arrayCount, &
-      relaxedflagArg, localrc)
+      multiflagArg, relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1998,12 +2011,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleRemove(arraybundle, arrayNameList, &
-      keywordEnforcer, relaxedflag, rc)
+      keywordEnforcer, multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     character(len=*),       intent(in)            :: arrayNameList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: multiflag
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
@@ -2021,11 +2035,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} from which to remove items.
 !   \item [arrayNameList]
 !     List of items to remove.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple Arrays with the same name
+!     to be removed from {\tt arraybundle}. For {\tt .false.}, items to be
+!     removed must have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "remove"
-!     where it is {\em not} an error if {\tt arrayNameList} contains names
-!     that are not found in {\tt arraybundle}. For {\tt .false.} this is treated
-!     as an error condition. The default setting is {\tt .false.}.
+!     where it is {\em not} an error if {\tt arrayNameList} contains item
+!     names that are not found in {\tt arraybundle}. For {\tt .false.} this is 
+!     treated as an error condition. 
+!     Further, in {\tt multiflag=.false.} mode, the relaxed definition of
+!     "remove" also covers the case where there are multiple items in
+!     {\tt arraybundle} that match a single entry in {\tt arrayNameList}.
+!     For {\tt relaxedflag=.false.} this is treated as an error condition.
+!     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2033,6 +2056,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: multiflagArg
     type(ESMF_Logical)            :: relaxedflagArg
     integer                       :: itemCount
 
@@ -2045,6 +2069,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     itemCount = size(arrayNameList)
 
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -2053,7 +2082,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleRemove(arraybundle, arrayNameList, itemCount, &
-      relaxedflagArg, localrc)
+      multiflagArg, relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2072,12 +2101,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleReplace(arraybundle, arrayList, &
-      keywordEnforcer, relaxedflag, rc)
+      keywordEnforcer, multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
     type(ESMF_Array),       intent(in)            :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: multiflag
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
@@ -2095,11 +2125,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} in which to replace items.
 !   \item [arrayList]
 !     List of items to replace.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be replaced in {\tt arraybundle}. For {\tt .false.}, items to be
+!     replaced must have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "replace"
-!     where it is {\em not} an error if {\tt arrayList} contains items that
-!     do not match by name any item in {\tt arraybundle}. For {\tt .false.}
-!     this is an error condition. The default setting is {\tt .false.}.
+!     where it is {\em not} an error if {\tt arrayList} contains items with
+!     names that are not found in {\tt arraybundle}. These items in 
+!     {\tt arrayList} are ignored in the relaxed mode. For {\tt .false.} this
+!     is treated as an error condition.
+!     Further, in {\tt multiflag=.false.} mode, the relaxed definition of
+!     "replace" also covers the case where there are multiple items in
+!     {\tt arraybundle} that match a single entry by name in {\tt arrayList}.
+!     For {\tt relaxedflag=.false.} this is treated as an error condition.
+!     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2107,6 +2147,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: multiflagArg
     type(ESMF_Logical)            :: relaxedflagArg
     integer :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
@@ -2136,6 +2177,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -2144,7 +2190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleReplace(arraybundle, arrayPointerList, arrayCount, &
-      relaxedflagArg, localrc)
+      multiflagArg, relaxedflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

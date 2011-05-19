@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.31 2011/05/05 17:23:03 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.32 2011/05/19 22:46:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,13 +48,19 @@ extern "C" {
   // - ESMF-public methods:
 
   void FTN(c_esmc_arraybundleadd)(ESMCI::ArrayBundle **ptr, 
-    ESMCI::Array **arrayList, int *arrayCount, ESMC_Logical *relaxedflag,
-    int *rc){
+    ESMCI::Array **arrayList, int *arrayCount,
+    ESMC_Logical *multiflag, ESMC_Logical *relaxedflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleadd()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
 
     bool relaxed;
     if (*relaxedflag == ESMF_TRUE)
@@ -67,7 +73,7 @@ extern "C" {
       
       for (int i=0; i<*arrayCount; i++){
         // call into C++ layer
-        (*ptr)->add(arrayList[i], relaxed);
+        (*ptr)->add(arrayList[i], multi, relaxed);
       }
 
     }catch(int localrc){
@@ -347,13 +353,19 @@ extern "C" {
   }
 
   void FTN(c_esmc_arraybundleremove)(ESMCI::ArrayBundle **ptr,
-    char *arrayNameList, int *itemCount, ESMC_Logical *relaxedflag, int *rc,
-    ESMCI_FortranStrLenArg nlen){
+    char *arrayNameList, int *itemCount, ESMC_Logical *multiflag,
+    ESMC_Logical *relaxedflag, int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleremove()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
 
     bool relaxed;
     if (*relaxedflag == ESMF_TRUE)
@@ -366,7 +378,7 @@ extern "C" {
       
       for (int i=0; i<*itemCount; i++){
         // call into C++ layer
-        (*ptr)->remove(std::string(arrayNameList+i*nlen, nlen), relaxed);
+        (*ptr)->remove(std::string(arrayNameList+i*nlen, nlen), multi, relaxed);
       }
 
     }catch(int localrc){
@@ -388,14 +400,20 @@ extern "C" {
   }
  
   void FTN(c_esmc_arraybundlereplace)(ESMCI::ArrayBundle **ptr,
-    ESMCI::Array **arrayList, int *itemCount, ESMC_Logical *relaxedflag,
-    int *rc){
+    ESMCI::Array **arrayList, int *itemCount, ESMC_Logical *multiflag, 
+    ESMC_Logical *relaxedflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlereplace()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
+
     bool relaxed;
     if (*relaxedflag == ESMF_TRUE)
       relaxed=true;
@@ -407,7 +425,7 @@ extern "C" {
       
       for (int i=0; i<*itemCount; i++){
         // call into C++ layer
-        (*ptr)->replace(arrayList[i], relaxed);
+        (*ptr)->replace(arrayList[i], multi, relaxed);
       }
 
     }catch(int localrc){

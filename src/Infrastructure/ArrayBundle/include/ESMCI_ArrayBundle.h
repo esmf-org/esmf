@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.30 2011/05/05 17:23:01 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.31 2011/05/19 22:46:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -76,13 +76,13 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static ArrayBundle *create(Array **arrayList, int arrayCount, int *rc);
     static int destroy(ArrayBundle **arraybundle);
     // add(), get(), isPresent(), remove(), replace(), set()
-    void add(Array *array, bool relaxed=false){
-      arrayContainer.add(array->getName(), array, relaxed);
+    void add(Array *array, bool multi=false, bool relaxed=false){
+      arrayContainer.add(array->getName(), array, multi, relaxed);
     }
     void addReplace(Array *array){
       arrayContainer.addReplace(array->getName(), array);
     }
-    Array *get(std::string arrayName){
+    Array *get(std::string arrayName)const{
       return arrayContainer.get(arrayName);
     }
     void getVector(std::vector<Array *> &arrayVector)const{ 
@@ -96,11 +96,11 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     bool isPresent(std::string arrayName)const{
       return arrayContainer.isPresent(arrayName);
     }
-    void remove(std::string arrayName, bool relaxed=false){
-      arrayContainer.remove(arrayName, relaxed);
+    void remove(std::string arrayName, bool multi=false, bool relaxed=false){
+      arrayContainer.remove(arrayName, multi, relaxed);
     }
-    void replace(Array *array, bool relaxed=false){
-      arrayContainer.replace(array->getName(), array, relaxed);
+    void replace(Array *array, bool multi=false, bool relaxed=false){
+      arrayContainer.replace(array->getName(), array, multi, relaxed);
     }
     int setName(char *name){return ESMC_BaseSetName(name, "ArrayBundle");}
     // misc.
