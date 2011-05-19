@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedist.F90,v 1.28 2011/05/18 20:34:26 svasquez Exp $
+! $Id: ESMF_FieldBundleRedist.F90,v 1.29 2011/05/19 18:50:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldBundleRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleRedist.F90,v 1.28 2011/05/18 20:34:26 svasquez Exp $'
+      '$Id: ESMF_FieldBundleRedist.F90,v 1.29 2011/05/19 18:50:49 svasquez Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldBundleRedistStore
@@ -250,8 +250,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRedistRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with a FieldBundle 
-! \textbf{redistribution}
+! !IROUTINE: ESMF_FieldBundleRedistRelease - Release resources associated with a FieldBundle \linebreak redistribution
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRedistRelease(routehandle, keywordEnforcer, rc)
@@ -299,8 +298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !---------------------------------------------------------------------------- 
 !BOP 
-! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution 
-! with local factor argument 
+! !IROUTINE: ESMF_FieldBundleRedistStore - Precompute a FieldBundle redistribution \linebreak with local factor argument 
 ! 
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleRedistStore() 
@@ -309,13 +307,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),   intent(in)             :: srcFieldBundle  
-!   type(ESMF_FieldBundle),   intent(inout)          :: dstFieldBundle  
-!   type(ESMF_RouteHandle),   intent(inout)          :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)             :: factor
+!   type(ESMF_FieldBundle), intent(in)             :: srcFieldBundle  
+!   type(ESMF_FieldBundle), intent(inout)          :: dstFieldBundle  
+!   type(ESMF_RouteHandle), intent(inout)          :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)           :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in),   optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out),  optional :: rc 
+!   integer,                intent(in),   optional :: srcToDstTransposeMap(:)
+!   integer,                intent(out),  optional :: rc 
 ! 
 !
 ! !STATUS:
@@ -787,12 +785,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_FieldBundle),  intent(in)             :: srcFieldBundle  
-!   type(ESMF_FieldBundle),  intent(inout)          :: dstFieldBundle  
-!   type(ESMF_RouteHandle),  intent(inout)          :: routehandle
+!   type(ESMF_FieldBundle), intent(in)             :: srcFieldBundle  
+!   type(ESMF_FieldBundle), intent(inout)          :: dstFieldBundle  
+!   type(ESMF_RouteHandle), intent(inout)          :: routehandle
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                 intent(in),   optional :: srcToDstTransposeMap(:)
-!   integer,                 intent(out),  optional :: rc 
+!   integer,                intent(in),   optional :: srcToDstTransposeMap(:)
+!   integer,                intent(out),  optional :: rc 
 ! 
 !
 ! !STATUS:
