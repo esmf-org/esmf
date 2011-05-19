@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.27 2011/02/10 04:18:45 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.28 2011/05/19 20:44:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -216,10 +216,12 @@ program ESMF_ArrayLarrayEx
   allocate(larrayList(2))   ! 2 DEs per PET
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 123.456d0
-  larrayList(1) = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, rc=rc) !1st DE
+  larrayList(1) = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, &
+    rc=rc) !1st DE
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 456.789d0
-  larrayList(2) = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, rc=rc) !2nd DE  
+  larrayList(2) = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, &
+    rc=rc) !2nd DE  
 !EOC
 !BOE
 ! Notice that it is perfectly fine to {\em re}-use {\tt farrayP} for all

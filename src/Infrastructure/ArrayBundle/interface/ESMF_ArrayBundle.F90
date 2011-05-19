@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.62 2011/05/18 19:04:33 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.63 2011/05/19 20:39:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.62 2011/05/18 19:04:33 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.63 2011/05/19 20:39:54 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -2327,13 +2327,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   dstArrayBundle, routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),           intent(in)            :: srcArrayBundle
-!   type(ESMF_ArrayBundle),           intent(inout)         :: dstArrayBundle
-!   type(ESMF_RouteHandle),           intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), target, intent(in)            :: factorList(:)
-!   integer,                          intent(in)            :: factorIndexList(:,:)
+!   type(ESMF_ArrayBundle),       intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle),       intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle),       intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), target, intent(in)        :: factorList(:)
+!   integer,                      intent(in)            :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                          intent(out), optional :: rc
+!   integer,                      intent(out), optional :: rc
 !
 !
 ! !STATUS:
