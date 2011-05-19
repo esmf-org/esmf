@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHalo.F90,v 1.16 2011/05/19 18:39:07 svasquez Exp $
+! $Id: ESMF_FieldBundleHalo.F90,v 1.17 2011/05/19 19:35:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,7 +62,7 @@ module ESMF_FieldBundleHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldBundleHalo.F90,v 1.16 2011/05/19 18:39:07 svasquez Exp $'
+      '$Id: ESMF_FieldBundleHalo.F90,v 1.17 2011/05/19 19:35:57 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 contains
@@ -174,7 +174,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleHaloRelease()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleHaloRelease - Release resources associated with a FieldBundle \linebreak halo operation
+! !IROUTINE: ESMF_FieldBundleHaloRelease - Release resources associated with a FieldBundle halo operation
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleHaloRelease(routehandle, keywordEnforcer, rc)
