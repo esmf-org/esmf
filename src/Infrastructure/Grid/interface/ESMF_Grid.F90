@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.213 2011/05/13 20:22:26 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.214 2011/05/19 17:20:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -215,7 +215,6 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridGet
   public ESMF_GridGetCoord
   public ESMF_GridGetCoordBounds
-  public ESMF_GridGetStatus
 
 
 
@@ -255,7 +254,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.213 2011/05/13 20:22:26 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.214 2011/05/19 17:20:53 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -7378,7 +7377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         dimCount, tileCount, staggerlocCount, localDECount, distgrid, &
         distgridToGridMap, coordDimCount, coordDimMap, arbDim, &
         rank, arbDimCount, gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
-        indexFlag, name, rc)
+        indexFlag, status, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
@@ -7399,6 +7398,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,       target, intent(out), optional :: gridEdgeUWidth(:)
       integer,       target, intent(out), optional :: gridAlign(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
+      type(ESMF_GridStatus), intent(out), optional :: status
       character (len=*),     intent(out), optional :: name
       integer,               intent(out), optional :: rc
 !
@@ -7456,6 +7456,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[indexflag]}]
 !    Flag indicating the indexing scheme being used in the Grid. Please
 !    see Section~\ref{opt:indexflag} for the list of options. 
+! \item[{[status]}]
+!    Flag indicating the status of the Grid. Please
+!    see Section~\ref{sec:opt:gridstatus} for the list of options. 
 !\item[{[name]}]
 !   {\tt ESMF\_Grid} name.
 !\item[{[rc]}]
@@ -7493,79 +7496,102 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          return 
 	endif
     endif
-
-    ! name 
-    if (present(name)) then
-      call c_ESMC_GetName(grid, name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    !! coordTypeKind
-    ! It doesn't look like it needs to be translated, but test to make sure
-
-    !! distgridToGridMap
-    distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !! Description of array factorization
-    coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    !! Grid Boundary Info
-    gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
     
-    ! Call C++ Subroutine to do the get
-    call c_ESMC_gridget(grid%this, &
-      coordTypeKind, dimCount, tileCount, distgrid,  staggerlocCount, &
-      distgridToGridMapArg, coordDimCountArg, arbDim, &
-      rank, arbDimCount, coordDimMapArg, &
-      gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
-      indexflag, localDECount, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Deallocate helper variables
-    call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set Deep Classes as created
-    if (present(distgrid)) then
-       call ESMF_DistGridSetInitCreated(distgrid, rc=localrc)
+    ! get name 
+    if (present(name)) then
+       call c_ESMC_GetName(grid, name, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-   	   ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
+    if (present(coordTypeKind)   .or.  &
+         present(dimCount)        .or.  &
+         present(tileCount)       .or.  &
+         present(staggerlocCount) .or. &
+         present(localDECount)    .or. &
+         present(distgrid)        .or. &
+         present(distgridToGridMap) .or. &
+         present(coordDimCount)     .or. &
+         present(coordDimMap)       .or. &
+         present(arbDim)            .or. & 
+         present(rank)              .or. & 
+         present(arbDimCount)       .or. &
+         present(gridEdgeLWidth)    .or. &
+         present(gridEdgeUWidth)    .or. &
+         present(gridAlign)         .or. &  
+         present(indexFlag)) then
+
+       !! coordTypeKind
+       ! It doesn't look like it needs to be translated, but test to make sure
+
+       !! distgridToGridMap
+       distgridToGridMapArg = ESMF_InterfaceIntCreate(distgridToGridMap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       !! Description of array factorization
+       coordDimCountArg = ESMF_InterfaceIntCreate(coordDimCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       coordDimMapArg = ESMF_InterfaceIntCreate(farray2D=coordDimMap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       !! Grid Boundary Info
+       gridEdgeLWidthArg = ESMF_InterfaceIntCreate(gridEdgeLWidth, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       gridEdgeUWidthArg = ESMF_InterfaceIntCreate(gridEdgeUWidth, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       gridAlignArg = ESMF_InterfaceIntCreate(gridAlign, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+       ! Call C++ Subroutine to do the get
+       call c_ESMC_gridget(grid%this, &
+            coordTypeKind, dimCount, tileCount, distgrid,  staggerlocCount, &
+            distgridToGridMapArg, coordDimCountArg, arbDim, &
+            rank, arbDimCount, coordDimMapArg, &
+            gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
+            indexflag, localDECount, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Deallocate helper variables
+       call ESMF_InterfaceIntDestroy(distgridToGridMapArg, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_InterfaceIntDestroy(coordDimCountArg, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_InterfaceIntDestroy(coordDimMapArg, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_InterfaceIntDestroy(gridEdgeUWidthArg, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_InterfaceIntDestroy(gridAlignArg, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Set Deep Classes as created
+       if (present(distgrid)) then
+          call ESMF_DistGridSetInitCreated(distgrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+       endif
+    endif
+
+
+    ! Call C++ Subroutine to get the status
+    if (present(status)) then
+       call c_ESMC_gridgetstatus(grid%this, status)
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -13294,47 +13320,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGetStatus"
-!BOP
-! !IROUTINE: ESMF_GridGetStatus - Return the status of the Grid
-
-! !INTERFACE:
-     function ESMF_GridGetStatus(grid)
-!
-! !RETURN VALUE:
-     type(ESMF_GridStatus) :: ESMF_GridGetStatus
-!
-! !ARGUMENTS:
-     type(ESMF_Grid)                :: grid
-
-!
-! !DESCRIPTION:
-! Returns the status of the passed in Grid object. 
-!
-! The arguments are:
-! \begin{description}
-! \item[{grid}]
-!      The grid to return the status from. 
-! \end{description}
-!
-!EOP
-
-    integer :: rc
-
-    ! init grid status
-    ESMF_GridGetStatus=ESMF_GRIDSTATUS_UNINIT
-
-    ! check variables
-    ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-    ! Call C++ Subroutine to get the status
-    call c_ESMC_gridgetstatus(grid%this, ESMF_GridGetStatus)
-
-      end function ESMF_GridGetStatus
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSerialize"
 
 !BOPI
@@ -13817,7 +13802,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordFromArray(grid, coordDim, staggerloc, &
-        array, keywordEnforcer, doCopy, rc)
+        array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -13825,7 +13810,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type(ESMF_Array),       intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_CopyFlag),    intent(in),  optional :: docopy !NOT IMPLEMENTED
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -13846,13 +13830,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{array}]
 !    An array to set the grid coordinate information from.
-!\item[{[doCopy]}]
-!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
-!    coordinate Array will be set to a reference to {\tt array}. Please see 
-!    Section~\ref{opt:copyflag} for further description and a list of
-!    valid values. 
-!    \newline
-!    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -13861,6 +13838,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType
+    type(ESMF_CopyFlag) :: docopy
+
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -13889,6 +13868,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
  
+    ! Use reference
+    docopy=ESMF_DATA_REF
+
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetcoordfromarray(grid%this,tmp_staggerloc, coordDim, &
       array, docopy, localrc)
@@ -16433,7 +16415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
       subroutine ESMF_GridSetItemFromArray(grid, item, staggerloc, &
-        array, keywordEnforcer, doCopy, rc)
+        array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -16441,7 +16423,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
       type(ESMF_Array),       intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_CopyFlag),    intent(in),  optional :: docopy ! NOT IMPLEMENTED
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -16466,14 +16447,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{array}]
 !    An array to set the grid item information from.
-!\item[{[doCopy]}]
-!    \begin{sloppypar}
-!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
-!    coordinate Array will be set to a reference to {\tt array}. Please see 
-!    Section~\ref{opt:copyflag} for further description and a list of
-!    valid values. 
-!    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
-!    \end{sloppypar}
 !\item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
@@ -16482,6 +16455,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType
+    type(ESMF_CopyFlag) :: docopy 
+
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -16509,6 +16484,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
         tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
+
+    ! Use reference
+    docopy=ESMF_DATA_REF
 
     ! Call C++ Subroutine 
     call c_ESMC_gridsetitemfromarray(grid%this,tmp_staggerloc, item, &
