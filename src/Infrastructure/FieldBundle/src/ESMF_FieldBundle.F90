@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.94 2011/05/18 19:04:38 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.95 2011/05/19 20:15:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1423,8 +1423,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldBundleGet()
-      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, fieldname, field, &
-        keywordEnforcer, rc)
+      subroutine ESMF_FieldBundleGetFieldByName(fieldbundle, fieldname, &
+	field, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldBundle), intent(in)            :: fieldbundle
