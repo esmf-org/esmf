@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.87 2011/02/24 23:31:31 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.88 2011/05/19 22:06:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -430,14 +430,14 @@ if (petCount .le. 6) then
    ! specifying decompFlag. 
    !-------------------------------------------------------------------
    grid2D=ESMF_GridCreateShapeTile(          &
-            ! Define a regular distribution
-            maxIndex=(/10,20/), & ! define index space
-            regDecomp=(/2,3/),  & ! define how to divide among DEs
-            ! Specify mapping of coords dim to Grid dim
-            coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
-            coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
-            indexflag=ESMF_INDEX_GLOBAL, &
-            rc=rc)
+         ! Define a regular distribution
+         maxIndex=(/10,20/), & ! define index space
+         regDecomp=(/2,3/),  & ! define how to divide among DEs
+         ! Specify mapping of coords dim to Grid dim
+         coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
+         coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
+         indexflag=ESMF_INDEX_GLOBAL, &
+         rc=rc)
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage and associate it with the center
@@ -622,14 +622,14 @@ if (petCount .le. 6) then
    ! been set, so it defaults to (1,1,...).
    !-------------------------------------------------------------------
    grid2D=ESMF_GridCreateShapeTile(      &
-            ! Define an irregular distribution
-            countsPerDEDim1=(/3,7/),     &
-            countsPerDEDim2=(/11,2,7/),   &
-            ! Specify mapping of coords dim to Grid dim
-            coordDep1=(/1,2/), & ! 1st coord is 2D and depends on both Grid dim
-            coordDep2=(/1,2/), & ! 2nd coord is 1D and depends on both Grid dim
-            indexflag=ESMF_INDEX_GLOBAL, &
-            rc=rc)
+        ! Define an irregular distribution
+        countsPerDEDim1=(/3,7/),     &
+        countsPerDEDim2=(/11,2,7/),   &
+        ! Specify mapping of coords dim to Grid dim
+        coordDep1=(/1,2/), & ! 1st coord is 2D and depends on both Grid dim
+        coordDep2=(/1,2/), & ! 2nd coord is 1D and depends on both Grid dim
+        indexflag=ESMF_INDEX_GLOBAL, &
+        rc=rc)
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage and associate it with the center
