@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.14 2011/05/12 03:58:10 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.15 2011/05/19 22:44:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,12 +47,19 @@ extern "C" {
   void FTN(c_esmc_containeradd)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
     char const *itemName, ESMCI::F90ClassHolder *f90p, 
-    ESMC_Logical *relaxedflag, int *rc, ESMCI_FortranStrLenArg nlen){
+    ESMC_Logical *multiflag, ESMC_Logical *relaxedflag, int *rc,
+    ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containeradd()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
 
     bool relaxed;
     if (*relaxedflag == ESMF_TRUE)
@@ -63,7 +70,7 @@ extern "C" {
     // call into C++
     try{
       
-      (*ptr)->add(std::string(itemName,nlen), *f90p, relaxed);
+      (*ptr)->add(std::string(itemName,nlen), *f90p, multi, relaxed);
       
     }catch(int localrc){
       // catch standard ESMF return code
@@ -656,13 +663,19 @@ extern "C" {
 
   void FTN(c_esmc_containerremove)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
-    char const *itemName, ESMC_Logical *relaxedflag, int *rc,
-    ESMCI_FortranStrLenArg nlen){
+    char const *itemName, ESMC_Logical *multiflag, ESMC_Logical *relaxedflag,
+    int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containerremove()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
 
     bool relaxed;
     if (*relaxedflag == ESMF_TRUE)
@@ -673,7 +686,7 @@ extern "C" {
     // call into C++
     try{
 
-      (*ptr)->remove(std::string(itemName, nlen), relaxed);
+      (*ptr)->remove(std::string(itemName, nlen), multi, relaxed);
       
     }catch(int localrc){
       // catch standard ESMF return code
@@ -698,12 +711,19 @@ extern "C" {
   void FTN(c_esmc_containerreplace)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
     char const *itemName, ESMCI::F90ClassHolder *f90p, 
-    ESMC_Logical *relaxedflag, int *rc, ESMCI_FortranStrLenArg nlen){
+    ESMC_Logical *multiflag, ESMC_Logical *relaxedflag, int *rc,
+    ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containerreplace()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
 
     bool relaxed;
     if (*relaxedflag == ESMF_TRUE)
@@ -714,7 +734,7 @@ extern "C" {
     // call into C++
     try{
       
-      (*ptr)->replace(std::string(itemName,nlen), *f90p, relaxed);
+      (*ptr)->replace(std::string(itemName,nlen), *f90p, multi, relaxed);
       
     }catch(int localrc){
       // catch standard ESMF return code

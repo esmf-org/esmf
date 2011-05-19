@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.15 2011/05/12 23:30:06 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.16 2011/05/19 22:44:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.15 2011/05/12 23:30:06 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.16 2011/05/19 22:44:08 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -200,11 +200,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAdd()
-  subroutine ESMF_ContainerAddFieldList(container, itemList, relaxedflag, rc)
+  subroutine ESMF_ContainerAddFieldList(container, itemList, keywordEnforcer, &
+    multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
     type(ESMF_Field),     intent(in)            :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,              intent(in),  optional :: multiflag
     logical,              intent(in),  optional :: relaxedflag
     integer,              intent(out), optional :: rc
 !         
@@ -222,12 +225,17 @@ contains
 !     {\tt ESMF\_Container} object to be added to.
 !   \item[itemList]
 !     Items to be added.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be added to {\tt container}. For {\tt .false.}, added items must
+!     have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
-!     where it is {\em not} an error if {\tt itemList} contains items
-!     with names that are also found in {\tt container}. The {\tt container} 
-!     is left unchanged for these items. For {\tt .false.} this is treated
-!     as an error condition. The default setting is {\tt .false.}.
+!     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
+!     {\tt itemList} contains items with names that are also found in 
+!     {\tt container}. The {\tt container} is left unchanged for these items. 
+!     For {\tt .false.} this is treated as an error condition. 
+!     The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -235,6 +243,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
@@ -247,6 +256,11 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -264,7 +278,7 @@ contains
       
       ! Call into the C++ interface layer
       call c_ESMC_ContainerAdd(container, trim(name), itemList(i), &
-        relaxedflagArg, localrc)
+        multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -687,11 +701,14 @@ contains
 ! !IROUTINE: ESMF_ContainerRemove - Remove object from Container
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerRemove(container, itemNameList, relaxedflag, rc)
+  subroutine ESMF_ContainerRemove(container, itemNameList, keywordEnforcer, &
+    multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
     character(len=*),     intent(in)            :: itemNameList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,              intent(in),  optional :: multiflag
     logical,              intent(in),  optional :: relaxedflag
     integer,              intent(out), optional :: rc
 !         
@@ -708,11 +725,20 @@ contains
 !     {\tt ESMF\_Container} object to be queried.
 !   \item[itemNameList]
 !     The names of the items to remove
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be removed from {\tt container}. For {\tt .false.}, items to be removed
+!     must have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "remove"
 !     where it is {\em not} an error if {\tt itemNameList} contains item
 !     names that are not found in {\tt container}. For {\tt .false.} this is 
-!     treated as an error condition. The default setting is {\tt .false.}.
+!     treated as an error condition. 
+!     Further, in {\tt multiflag=.false.} mode, the relaxed definition of
+!     "remove" also covers the case where there are multiple items in
+!     {\tt container} that match a single entry in {\tt itemNameList}.
+!     For {\tt relaxedflag=.false.} this is treated as an error condition.
+!     The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -720,6 +746,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i
     character(len=ESMF_MAXSTR)  :: name
@@ -731,6 +758,11 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -740,7 +772,7 @@ contains
     do i=1, size(itemNameList)
       ! Call into the C++ interface layer
       call c_ESMC_ContainerRemove(container, trim(itemNameList(i)), &
-        relaxedflagArg, localrc)
+        multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
@@ -760,12 +792,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerReplace()
-  subroutine ESMF_ContainerReplaceFieldList(container, itemList, relaxedflag, &
-    rc)
+  subroutine ESMF_ContainerReplaceFieldList(container, itemList, &
+    keywordEnforcer, multiflag, relaxedflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
     type(ESMF_Field),     intent(in)            :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,              intent(in),  optional :: multiflag
     logical,              intent(in),  optional :: relaxedflag
     integer,              intent(out), optional :: rc
 !         
@@ -781,12 +815,21 @@ contains
 !     {\tt ESMF\_Container} object to be added to.
 !   \item[itemList]
 !     Elements used to replace container items.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be replaced in {\tt container}. For {\tt .false.}, items to be replaced
+!     must have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "replace"
 !     where it is {\em not} an error if {\tt itemList} contains items with
 !     names that are not found in {\tt container}. These items in 
 !     {\tt itemList} are ignored in the relaxed mode. For {\tt .false.} this
-!     is treated as an error condition. The default setting is {\tt .false.}.
+!     is treated as an error condition.
+!     Further, in {\tt multiflag=.false.} mode, the relaxed definition of
+!     "replace" also covers the case where there are multiple items in
+!     {\tt container} that match a single entry by name in {\tt itemList}.
+!     For {\tt relaxedflag=.false.} this is treated as an error condition.
+!     The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -794,6 +837,7 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
+    type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
@@ -806,6 +850,11 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
     if (present(relaxedflag)) then
       relaxedflagArg = relaxedflag
     else
@@ -823,7 +872,7 @@ contains
       
       ! Call into the C++ interface layer
       call c_ESMC_ContainerReplace(container, trim(name), itemList(i), &
-        relaxedflagArg, localrc)
+        multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
         

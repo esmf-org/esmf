@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.11 2011/05/18 04:29:10 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.12 2011/05/19 22:44:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,12 +36,10 @@ namespace ESMCI {
     Container(){
       garbageOff();   // by default no garbage is kept
     }
-    void add(Key k, T t, bool relaxed=false);
+    void add(Key k, T t, bool multi=false, bool relaxed=false);
     void addReplace(Key k, T t);
     void clear();
-    void remove(Key k, bool relaxed=false);
-    void replace(Key k, T t, bool relaxed=false);
-    T get(Key k);
+    T get(Key k)const;
     void getVector(std::vector<T> &v)const;
     void getKeyVector(std::vector<Key> &v)const;
     bool isPresent(Key k)const{
@@ -49,6 +47,8 @@ namespace ESMCI {
         return true;  // key found
       return false;   // key not found
     }
+    void remove(Key k, bool multi=false, bool relaxed=false);
+    void replace(Key k, T t, bool multi=false, bool relaxed=false);
     void garbageOn(){
       garbageActive = true;
     }
@@ -73,21 +73,27 @@ namespace ESMCI {
   // mode, where it is an error if an element with the same key already exists.
   // In relaxed mode this condition turns this method into a no-op and no
   // error is thrown.
+  // However, in multi mode, items with the same name are added to the container
+  // and the relaxed flag is irrelevant.
   template <typename Key, typename T>
-  void Container<Key, T>::add(Key k, T t, bool relaxed){
+  void Container<Key, T>::add(Key k, T t, bool multi, bool relaxed){
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-    typename Container::iterator pos = this->find(k);
-    if (pos!=this->end()){
+    typename Container::iterator pos = this->lower_bound(k);
+    if (pos != this->end() && pos->first == k){
       // already exists
-      if (!relaxed){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key already exists", &rc);
-        throw rc;  // bail out with exception
+      if (multi){
+        this->insert(pos, std::pair<Key,T>(k, t));
+      }else{
+        if (!relaxed){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "key already exists", &rc);
+          throw rc;  // bail out with exception
+        }
+        if (garbageActive)
+          garbage.push_back(t); // not added object goes into garbage
       }
-      if (garbageActive)
-        garbage.push_back(t); // not added object goes into garbage
     }else{
-      this->insert(std::pair<Key,T>(k, t));
+      this->insert(pos, std::pair<Key,T>(k, t));
     }
   }
   
@@ -118,71 +124,30 @@ namespace ESMCI {
       garbage.push_back(pos->second); // object goes into garbage
     std::multimap<Key, T>::clear();  // clear the container
   }
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Container::remove()"
-  // Remove the element with specified key. By default the method executes in
-  // strict mode, where it is an error if no element with the specified key
-  // exists. In relaxed mode this condition turns this method into a no-op
-  // and no error is thrown.
-  template <typename Key, typename T>
-  void Container<Key, T>::remove(Key k, bool relaxed){
-    int rc = ESMC_RC_NOT_IMPL;              // final return code
-    typename Container::iterator pos = this->find(k);
-    if (pos==this->end()){
-      // does not exist
-      if (!relaxed){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key does not exist", &rc);
-        throw rc;  // bail out with exception
-      }
-    }else{
-      // already exists
-      if (garbageActive)
-        garbage.push_back(pos->second); // removed object goes into garbage
-      this->erase(pos);
-    }
-  }
   
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Container::replace()"
-  // Replace the element that has matching key with the specified element. By
-  // default the method executes in strict mode, where it is an error if no
-  // element with the same key as the specified element exists. In relaxed mode
-  // this condition turns this method into a no-op and no error is thrown.
-  template <typename Key, typename T>
-  void Container<Key, T>::replace(Key k, T t, bool relaxed){
-    int rc = ESMC_RC_NOT_IMPL;              // final return code
-    typename Container::iterator pos = this->find(k);
-    if (pos==this->end()){
-      // does not exist
-      if (!relaxed){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key does not exist", &rc);
-        throw rc;  // bail out with exception
-      }
-    }else{
-      // already exists
-      if (garbageActive)
-        garbage.push_back(pos->second); // replaced object goes into garbage
-      pos->second = t;
-    }
-  }
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::get()"
   // Access an element by key. It is an error if no element with the specified
   // key exists.
   template <typename Key, typename T>
-  T Container<Key, T>::get(Key k){
+  T Container<Key, T>::get(Key k)const{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-    typename Container::const_iterator pos = this->find(k);
-    if (pos==this->end()){
+    std::pair<typename Container::const_iterator,
+      typename Container::const_iterator> range;
+    range = this->equal_range(k);
+    if (range.first == range.second){
       // does not exist -> error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "key does not exist", &rc);
       throw rc;  // bail out with exception
     }
-    return pos->second;
+    if (range.first != --range.second){
+      // key is not unique -> error
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "key is not unique", &rc);
+      throw rc;  // bail out with exception
+    }
+    return range.first->second;
   }
 
 #undef  ESMC_METHOD
@@ -223,6 +188,75 @@ namespace ESMCI {
     for (pos = this->begin(); pos != this->end(); ++pos)
       std::cout << "Container::print() item="<<i++<<" key="<<pos->first
         <<" value="<<pos->second<<"\n";
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::remove()"
+  // Remove the element with specified key. By default the method executes in
+  // strict mode, where it is an error if no element with the specified key
+  // exists. In relaxed mode this condition turns this method into a no-op
+  // and no error is thrown.
+  // Further, for multi==false, the relaxed flag also covers the case where
+  // there are multiple items in the container that match the key. Again the 
+  // relaxed mode turns this into a no-op, and no error is thrown.
+  // With multi==true the latter condition isn't an error anyway, instead
+  // all items that match the key are removed.
+  template <typename Key, typename T>
+  void Container<Key, T>::remove(Key k, bool multi, bool relaxed){
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+    std::pair<typename Container::iterator,
+      typename Container::iterator> range;
+    typename Container::iterator pos;
+    range = this->equal_range(k);
+    if (range.first == range.second){
+      // does not exist
+      if (!relaxed){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "key does not exist", &rc);
+        throw rc;  // bail out with exception
+      }
+    }
+    pos = range.second;
+    if (range.first != --pos){
+      // key is not unique
+      if (!multi){
+        if (!relaxed){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+            "key is not unique", &rc);
+          throw rc;  // bail out with exception
+        }
+        return; // bail out without exception
+      }
+    }
+    if (garbageActive)
+      for (pos=range.first; pos!=range.second; ++pos)
+        garbage.push_back(pos->second); // removed object goes into garbage
+    this->erase(range.first, range.second);
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::replace()"
+  // Replace the element that has matching key with the specified element. By
+  // default the method executes in strict mode, where it is an error if no
+  // element with the same key as the specified element exists. In relaxed mode
+  // this condition turns this method into a no-op and no error is thrown.
+  template <typename Key, typename T>
+  void Container<Key, T>::replace(Key k, T t, bool multi, bool relaxed){
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+    typename Container::iterator pos = this->find(k);
+    if (pos==this->end()){
+      // does not exist
+      if (!relaxed){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "key does not exist", &rc);
+        throw rc;  // bail out with exception
+      }
+    }else{
+      // already exists
+      if (garbageActive)
+        garbage.push_back(pos->second); // replaced object goes into garbage
+      pos->second = t;
+    }
   }
 
 } // namespace ESMCI
