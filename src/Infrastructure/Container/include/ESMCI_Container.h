@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.13 2011/05/20 00:12:28 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.14 2011/05/20 05:14:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,6 +40,8 @@ namespace ESMCI {
     void addReplace(Key k, T t);
     void clear();
     T get(Key k)const;
+    void get(Key k, std::vector<T> &v)const;
+    int getCount(Key k)const;
     void getVector(std::vector<T> &v)const;
     void getKeyVector(std::vector<Key> &v)const;
     bool isPresent(Key k)const{
@@ -151,11 +153,41 @@ namespace ESMCI {
   }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::get()"
+  // Access all elements that match the key.
+  template <typename Key, typename T>
+  void Container<Key, T>::get(Key k, std::vector<T> &v)const{
+    std::pair<typename Container::const_iterator,
+      typename Container::const_iterator> range;
+    range = this->equal_range(k);
+    typename Container::const_iterator pos;
+    v.clear();
+    for (pos=range.first; pos!=range.second; ++pos)
+      v.push_back(pos->second);
+  }
+    
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Container::getCount()"
+  // Number of items that match the key.
+  template <typename Key, typename T>
+  int Container<Key, T>::getCount(Key k)const{
+    std::pair<typename Container::const_iterator,
+      typename Container::const_iterator> range;
+    range = this->equal_range(k);
+    typename Container::const_iterator pos;
+    int count = 0;  // initialize
+    for (pos=range.first; pos!=range.second; ++pos)
+      ++count;
+    return count;
+  }
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Container::getVector()"
   // Access the entire contents of the container in form of a vector.
   template <typename Key, typename T>
   void Container<Key, T>::getVector(std::vector<T> &v)const{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
+    v.clear();
     v.resize(this->size());
     typename Container::const_iterator pos;
     int i = 0;
@@ -170,6 +202,7 @@ namespace ESMCI {
   template <typename Key, typename T>
   void Container<Key, T>::getKeyVector(std::vector<Key> &v)const{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
+    v.clear();
     v.resize(this->size());
     typename Container::const_iterator pos;
     int i = 0;
