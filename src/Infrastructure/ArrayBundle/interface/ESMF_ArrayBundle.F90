@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.65 2011/05/20 05:15:24 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.66 2011/05/20 05:59:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.65 2011/05/20 05:15:24 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.66 2011/05/20 05:59:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -814,7 +814,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (present(array)) then
       ! Call into the C++ interface
-      call c_ESMC_ArrayBundleGetItem(arraybundle, arrayName, array, localrc)
+      call c_ESMC_ArrayBundleGetItem(arraybundle, trim(arrayName), array, &
+        localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! Set init code for deep C++ object
@@ -825,7 +826,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (present(arrayCount)) then
       ! Call into the C++ interface
-      call c_ESMC_ArrayBundleGetCount(arraybundle, arrayName, &
+      call c_ESMC_ArrayBundleGetCount(arraybundle, trim(arrayName), &
         arrayCount, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -833,7 +834,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(isPresent)) then
       ! Call into the C++ interface
-      call c_ESMC_ArrayBundleGetIsPresent(arraybundle, arrayName, &
+      call c_ESMC_ArrayBundleGetIsPresent(arraybundle, trim(arrayName), &
         dummyIsPresent, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -905,8 +906,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(opt_arrayPtrList(len_arrayPtrList))
 
     ! Call into the C++ interface layer
-    call c_ESMC_ArrayBundleGetList(arraybundle, arrayName, opt_arrayCount, &
-      opt_arrayPtrList, len_arrayPtrList, localrc)
+    call c_ESMC_ArrayBundleGetList(arraybundle, trim(arrayName), &
+      opt_arrayCount, opt_arrayPtrList, len_arrayPtrList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
