@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.16 2011/05/19 22:44:08 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.17 2011/05/20 00:12:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.16 2011/05/19 22:44:08 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.17 2011/05/20 00:12:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -299,11 +299,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAddReplace()
-  subroutine ESMF_ContainerAddReplaceFL(container, itemList, rc)
+  subroutine ESMF_ContainerAddReplaceFL(container, itemList, keywordEnforcer, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)         :: container
     type(ESMF_Field),     intent(in)            :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
@@ -369,10 +371,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ContainerClear - Clear Container object
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerClear(container, rc)
+  subroutine ESMF_ContainerClear(container, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
@@ -472,10 +475,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ContainerDestroy - Destroy Container object
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerDestroy(container, rc)
+  subroutine ESMF_ContainerDestroy(container, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
@@ -526,11 +530,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetField(container, itemName, item, isPresent, rc)
+  subroutine ESMF_ContainerGetField(container, itemName, keywordEnforcer, &
+    item, isPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
     character(len=*),     intent(in)            :: itemName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),     intent(out), optional :: item
     logical,              intent(out), optional :: isPresent
     integer,              intent(out), optional :: rc
@@ -596,12 +602,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetFieldList(container, itemCount, itemList, rc)
+  subroutine ESMF_ContainerGetFieldList(container, keywordEnforcer, &
+    itemList, itemCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
-    integer,              intent(out), optional :: itemCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),     pointer,     optional :: itemList(:)
+    integer,              intent(out), optional :: itemCount
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
@@ -611,8 +619,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[{[itemCount]}]
-!     Number of items {\tt container}.
 !   \item[{[itemList]}]
 !     List of items in {\tt container}. This argument has the pointer
 !     attribute. If the argument comes into this call associated the memory 
@@ -623,6 +629,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     memory will be allocated internally and filled with the container
 !     elements. In both cases it is the caller responsibility to deallocate
 !     the memory.
+!   \item[{[itemCount]}]
+!     Number of items {\tt container}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -892,10 +900,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ContainerPrint - Print Container object
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerPrint(container, rc)
+  subroutine ESMF_ContainerPrint(container, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
@@ -975,10 +984,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ContainerGarbageOn - Turn on garbage feature in container
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerGarbageOn(container, rc)
+  subroutine ESMF_ContainerGarbageOn(container, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
@@ -1022,10 +1032,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ContainerGarbageOff - Turn off garbage feature in container
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerGarbageOff(container, rc)
+  subroutine ESMF_ContainerGarbageOff(container, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
@@ -1069,10 +1080,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ContainerGarbageClear - Clear garbage in container
 
 ! !INTERFACE:
-  subroutine ESMF_ContainerGarbageClear(container, rc)
+  subroutine ESMF_ContainerGarbageClear(container, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(inout)           :: container
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !DESCRIPTION:
@@ -1117,13 +1129,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGarbageGet()
-  subroutine ESMF_ContainerGarbageGetFL(container, garbageCount, &
-    garbageList, rc)
+  subroutine ESMF_ContainerGarbageGetFL(container, keywordEnforcer, &
+    garbageList, garbageCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
-    integer,              intent(out), optional :: garbageCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),     pointer,     optional :: garbageList(:)
+    integer,              intent(out), optional :: garbageCount
     integer,              intent(out), optional :: rc
 !         
 ! !DESCRIPTION:

@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.20 2011/05/19 22:45:28 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.21 2011/05/20 00:12:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.20 2011/05/19 22:45:28 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.21 2011/05/20 00:12:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -65,7 +65,7 @@ program ESMF_ContainerUTest
   !LOCAL VARIABLES:
   type(ESMF_Container)            :: container
   type(ESMF_Field), allocatable   :: fieldList(:)
-  type(ESMF_Field)                :: field
+  type(ESMF_Field)                :: field, fieldOut
   type(ESMF_Field), pointer       :: fieldListOut(:)
   type(ESMF_Field), pointer       :: fieldGarbageList(:)
   character(ESMF_MAXSTR)          :: iString
@@ -411,6 +411,7 @@ program ESMF_ContainerUTest
   container = ESMF_ContainerCreate(rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
   field = ESMF_FieldEmptyCreate(name="testField1", rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -425,7 +426,7 @@ program ESMF_ContainerUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Get item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ContainerGet(container, itemName="testField1", item=field, rc=rc)
+  call ESMF_ContainerGet(container, itemName="testField1", item=fieldOut, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -446,7 +447,7 @@ program ESMF_ContainerUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Get item from multiple item container Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
-  call ESMF_ContainerGet(container, itemName="testField1", item=field, rc=rc)
+  call ESMF_ContainerGet(container, itemName="testField1", item=fieldOut, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -459,6 +460,14 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Remove item from multiple item container relaxed Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerRemove(container, itemNameList=(/"testField1"/), &
+    relaxedflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Remove item from multiple item container Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
   call ESMF_ContainerRemove(container, itemNameList=(/"testField1"/), rc=rc)
@@ -466,11 +475,77 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Remove item from multiple item container multi Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerRemove(container, itemNameList=(/"testField1"/), &
+    multiflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add Field after multi Remove Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, itemList=(/field/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Add same Field two more times with multiflag Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerAdd(container, itemList=(/field, field/), &
+    multiflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Replace Field in multiple item container relaxed Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerReplace(container, itemList=(/field/), &
+    relaxedflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Replace Field in multiple item container strict Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_ContainerReplace(container, itemList=(/field/), rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container itemCount Test"
+  write(failMsg, *) "fieldCountOut incorrect"
+  call ESMF_ContainerGet(container, itemCount=fieldCountOut, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Test(fieldCountOut==3, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Container Replace Field in multiple item container multi Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerReplace(container, itemList=(/field/), &
+    multiflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container itemCount Test"
+  write(failMsg, *) "fieldCountOut incorrect"
+  call ESMF_ContainerGet(container, itemCount=fieldCountOut, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Test(fieldCountOut==1, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "Container Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerDestroy(container, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
+  !------------------------------------------------------------------------
+  call ESMF_FieldDestroy(field, rc=rc)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
