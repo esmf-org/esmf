@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2011/05/17 16:33:20 svasquez Exp $ 
+# $Id: makefile,v 1.6 2011/05/20 17:28:17 ksaint Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -10,10 +10,10 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_WebServUTest \
                   $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest
 
 TESTS_RUN     =	RUN_ESMF_WebServUTest \
-		RUN_ESMC_WebServCompSvrClientUTest
+                  RUN_ESMC_WebServCompSvrClientUTest
 
-TESTS_RUN_UNI =	 RUN_ESMF_WebServUTestUNI \
-		 RUN_ESMC_WebServCompSvrClientUTestUNI
+TESTS_RUN_UNI =	RUN_ESMF_WebServUTestUNI \
+		            RUN_ESMC_WebServCompSvrClientUTestUNI
 
 
 include $(ESMF_DIR)/makefile
