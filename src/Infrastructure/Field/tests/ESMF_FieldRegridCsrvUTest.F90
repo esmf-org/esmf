@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.17 2011/02/23 17:08:09 w6ws Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.18 2011/05/20 18:47:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -53,18 +53,30 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_TESTEXHAUSTIVE
+      ! initialize 
+      rc=ESMF_SUCCESS
+
       ! do test
       call test_csrvregrid(itrp, csrv, rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding interpolation
-      write(failMsg, *) "Interpolation maximum error is greater than 10^-1"
-      write(name, *) "Conservative regridding interpolation error"
+      write(failMsg, *) "Returned an error"
+      write(name, *) "Conservative regridding on a sphere"
 
-      ! initialize 
-      rc=ESMF_SUCCESS
-      
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
+                      failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test conservative regridding interpolation
+      write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
+      write(name, *) "Conservative regridding on a sphere interpolation error"
+
       ! return result
       call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
@@ -72,16 +84,16 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding conservation
-      write(failMsg, *) "Conservation relative error is greater than 10^-5"
-      write(name, *) "Conservative regridding conservation error"
+      write(failMsg, *) "Conservation relative error is greater than 10^-12"
+      write(name, *) "Conservative regridding on a sphere conservation error"
 
-      ! initialize 
-      rc=ESMF_SUCCESS
       
       ! return result
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
+      ! initialize 
+      rc=ESMF_SUCCESS
 
       ! do test
       call test_csrvregridWMasks(itrp, csrv, rc)
@@ -89,11 +101,19 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding interpolation
-      write(failMsg, *) "Interpolation maximum error is greater than 10^-1"
-      write(name, *) "Conservative regridding with Masks interpolation error"
+      write(failMsg, *) "Returned an error"
+      write(name, *) "Conservative regridding on a sphere with masks"
 
-      ! initialize 
-      rc=ESMF_SUCCESS
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
+                      failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test conservative regridding interpolation
+      write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
+      write(name, *) "Conservative regridding on a sphere with masks interpolation error"
+
       
       ! return result
       call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
@@ -102,15 +122,16 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding conservation
-      write(failMsg, *) "Conservation relative error is greater than 10^-5"
-      write(name, *) "Conservative regridding with Masks conservation error"
+      write(failMsg, *) "Conservation relative error is greater than 10^-12"
+      write(name, *) "Conservative regridding on a sphere with masks conservation error"
 
-      ! initialize 
-      rc=ESMF_SUCCESS
       
       ! return result
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
+
+      ! initialize 
+      rc=ESMF_SUCCESS
 
       ! do test
       call test_cartcsrvregridWMasks(itrp, csrv, rc)
@@ -118,11 +139,19 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding interpolation
-      write(failMsg, *) "Interpolation maximum error is greater than 10^-1"
-      write(name, *) "Conservative regridding on cartesian grid with Masks interpolation error"
+      write(failMsg, *) "Returned an error"
+      write(name, *) "Conservative regridding on a cartesian grid with masks"
 
-      ! initialize 
-      rc=ESMF_SUCCESS
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
+                      failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test conservative regridding interpolation
+      write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
+      write(name, *) "Conservative regridding on a cartesian grid with masks interpolation error"
+
       
       ! return result
       call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
@@ -131,11 +160,9 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test conservative regridding conservation
-      write(failMsg, *) "Conservation relative error is greater than 10^-5"
-      write(name, *) "Conservative regridding on cartesian grid with Masks conservation error"
+      write(failMsg, *) "Conservation relative error is greater than 10^-12"
+      write(name, *) "Conservative regridding on a cartesian grid with Masks conservation error"
 
-      ! initialize 
-      rc=ESMF_SUCCESS
       
       ! return result
       call ESMF_Test((csrv.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
@@ -726,10 +753,10 @@ contains
 
   ! return answer based on correct flags
   csrv = .false.
-  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-7) csrv = .true.
+  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-12) csrv = .true.
 
   itrp = .false.
-  if (maxerrorg(1) < 10E-1) itrp = .true.
+  if (maxerrorg(1) < 10E-2) itrp = .true.
 
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then
@@ -1290,6 +1317,7 @@ contains
           routeHandle=routeHandle, &
           dstFracField=dstFracField, &
           srcFracField=srcFracField, &
+          unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -1487,10 +1515,10 @@ contains
 
   ! return answer based on correct flags
   csrv = .false.
-  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-7)  csrv = .true.
+  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-12)  csrv = .true.
 
   itrp = .false.
-  if (maxerrorg(1) < 10E-1) itrp = .true.
+  if (maxerrorg(1) < 10E-2) itrp = .true.
 
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then
@@ -2061,6 +2089,7 @@ contains
           routeHandle=routeHandle, &
           dstFracField=dstFracField, &
           srcFracField=srcFracField, &
+          unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
           regridScheme=ESMF_REGRID_SCHEME_NATIVE, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -2258,10 +2287,10 @@ contains
 
   ! return answer based on correct flags
   csrv = .false.
-  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-7)  csrv = .true.
+  if (ABS(dstmassg(1)-srcmassg(1))/srcmassg(1) < 10E-12)  csrv = .true.
 
   itrp = .false.
-  if (maxerrorg(1) < 10E-1) itrp = .true.
+  if (maxerrorg(1) < 10E-2) itrp = .true.
 
   ! Uncomment these calls to see some actual regrid results
   if (localPet == 0) then
