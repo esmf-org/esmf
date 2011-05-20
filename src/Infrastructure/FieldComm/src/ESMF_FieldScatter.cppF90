@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.23 2011/05/20 20:55:07 feiliu Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.24 2011/05/20 21:31:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.23 2011/05/20 20:55:07 feiliu Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.24 2011/05/20 21:31:11 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
@@ -104,11 +104,11 @@ contains
 !   The implementation of Scatter and Gather is not seqence index based. @\
 !   If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, @\
 !   Scatter will not scatter data from rootPet @\
-!   to the destination data points corresponding to the sequence index. @\
-!   Scatter will scatter a contiguous memory range from rootPet to @\
+!   to the destination data points corresponding to the sequence index on the rootPet. @\
+!   Instead Scatter will scatter a contiguous memory range from rootPet to @\
 !   destination PET. The size of the memomy range is equal to the number of  @\
 !   data elements on the destination PET. Vice versa for the Gather operation. @\
-!   In this case, the user is advised to use {\tt ESMF\_FieldRedist} to achieve @\
+!   In this case, the user should use {\tt ESMF\_FieldRedist} to achieve @\
 !   the same data operation result. For examples how to use {\tt ESMF\_FieldRedist} @\
 !   to perform Gather and Scatter, please refer to @\
 !   \ref{sec:field:usage:redist_gathering} and @\
