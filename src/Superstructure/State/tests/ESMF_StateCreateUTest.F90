@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.37 2011/05/19 22:56:15 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.38 2011/05/20 14:12:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.37 2011/05/19 22:56:15 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.38 2011/05/20 14:12:03 theurich Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -264,7 +264,7 @@ end module
   ! CONTAINER USE TESTING --- internal API, subject to change!!!!!!!!!
       
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "Container Create Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   container = ESMF_ContainerCreate(rc=rc)
@@ -278,14 +278,14 @@ end module
   siw%si => si
   
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "Container Add si Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerAdd(container, itemList=(/siw/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "Container Print Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerPrint(container, rc=rc)
@@ -293,7 +293,7 @@ end module
   
   nullify(siwOut)
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "Container Get item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerGet(container, itemList=siwOut, rc=rc)
@@ -303,13 +303,13 @@ end module
   print *, "string in si: ", si%namep
   
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "Verify Container Get item Test"
   write(failMsg, *) "Did not verify"
   call ESMF_Test((trim(siwOut(1)%si%namep)==trim(si%namep)), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "Container Destroy Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerDestroy(container, rc=rc)
