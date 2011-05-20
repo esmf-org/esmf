@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.40 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.41 2011/05/20 20:55:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.40 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.41 2011/05/20 20:55:05 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -74,6 +74,19 @@
 !
 ! User can use {\tt ESMF\_FieldGather} interface to gather Field data from multiple
 ! PETS onto a single root PET. This interface is overloaded by type, kind, and rank.
+!
+! Note that the implementation of Scatter and Gather is not seqence index based.
+! If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, 
+! Gather will not gather data to rootPet 
+! from source data points corresponding to the sequence index. 
+! Gather will gather a contiguous memory range from source PET to
+! rootPet. The size of the memomy range is equal to the number of 
+! data elements on the source PET. Vice versa for the Scatter operation. 
+! In this case, the user is advised to use {\tt ESMF\_FieldRedist} to achieve
+! the same data operation result. For examples how to use {\tt ESMF\_FieldRedist}
+! to perform Gather and Scatter, please refer to
+! \ref{sec:field:usage:redist_gathering} and
+! \ref{sec:field:usage:redist_scattering}.
 ! 
 ! In this example, we first create a 2D Field, then use {\tt ESMF\_FieldGather} to
 ! collect all the data in this Field into a data pointer on PET 0.

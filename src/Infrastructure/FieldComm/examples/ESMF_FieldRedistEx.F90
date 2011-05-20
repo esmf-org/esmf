@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.36 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.37 2011/05/20 20:55:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.36 2011/01/05 20:05:43 svasquez Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.37 2011/05/20 20:55:05 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -216,7 +216,7 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !------------------------------------------------------------------------------
 !BOE
-! \subsubsection{Field redistribution as a form of scattering on arbitrarily distributed structures}
+! \subsubsection{FieldRedist as a form of scatter involving arbitrary distribution}
 ! \label{sec:field:usage:redist_scattering}
 !
 ! User can use {\tt ESMF\_FieldRedist} interface to redistribute data from 
@@ -466,6 +466,37 @@
 ! Now it's time to release all the resources.
 !EOE
 !BOC
+    call ESMF_FieldRedistRelease(routehandle=routehandle, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!------------------------------------------------------------------------------
+!BOE
+! \subsubsection{FieldRedist as a form of gather involving arbitrary distribution}
+! \label{sec:field:usage:redist_gathering}
+!
+! Similarly, one can use the same approach to gather the data from an arbitrary distribution
+! to a non-arbitrary distribution. This concept is demonstrated by using the previous Fields but 
+! the data operation is reversed. This time data is gathered from the Field built on the mesh to the Field
+! that has only data allocation on rootPet.
+!
+!EOE
+
+!BOE
+! First a FieldRedist routehandle is created from the Field built on Mesh to the Field
+! that has only data allocation on rootPet.
+!EOE
+!BOC
+    call ESMF_FieldRedistStore(dstField, srcField, routehandle=routehandle, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOE
+! Perform FieldRedist, this will gather the data points from the Field built on mesh to
+! the data pointer on the rootPet (default to 0) stored in the srcField.
+!BOC
+    call ESMF_FieldRedist(dstField, srcField, routehandle=routehandle, rc=rc)
+!EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
     call ESMF_FieldRedistRelease(routehandle=routehandle, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(srcField, rc=rc)

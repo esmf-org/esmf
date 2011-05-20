@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.23 2011/04/08 21:21:06 feiliu Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.24 2011/05/20 20:55:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.23 2011/04/08 21:21:06 feiliu Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.24 2011/05/20 20:55:07 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -101,6 +101,19 @@ contains
 !   If the Field contains replicating DistGrid dimensions data will be @\
 !   gathered from the numerically higher DEs. Replicated data elements in @\
 !   numericaly lower DEs will be ignored. @\
+! @\
+!   The implementation of Scatter and Gather is not seqence index based. @\
+!   If the Field is built on arbitrarily distributed Grid, Mesh, LocStream or XGrid, @\
+!   Gather will not gather data to rootPet @\
+!   from source data points corresponding to the sequence index. @\
+!   Gather will gather a contiguous memory range from source PET to @\
+!   rootPet. The size of the memomy range is equal to the number of  @\
+!   data elements on the source PET. Vice versa for the Scatter operation. @\
+!   In this case, the user is advised to use {\tt ESMF\_FieldRedist} to achieve @\
+!   the same data operation result. For examples how to use {\tt ESMF\_FieldRedist} @\
+!   to perform Gather and Scatter, please refer to @\
+!   \ref{sec:field:usage:redist_gathering} and @\
+!   \ref{sec:field:usage:redist_scattering}. @\
 ! @\
 !   This version of the interface implements the PET-based blocking paradigm: @\
 !   Each PET of the VM must issue this call exactly once for {\em all} of its @\
