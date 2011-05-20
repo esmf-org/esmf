@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.34 2011/05/19 14:17:03 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.35 2011/05/20 20:06:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -72,6 +72,7 @@
     type(ESMF_DistGrid) :: distgrid5d
     integer             :: fsize(7)
     integer             :: flbound(7), fubound(7)
+    type(ESMF_FieldStatus) :: fstatus
 
     real(4) :: PI=3.14159265
     integer :: finalrc, i, j, k
@@ -397,7 +398,95 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create an empty Field and finish it with FieldSetCommit}
+!\subsubsection{Create an empty Field and complete it in two more steps
+! with FieldEmptySet and FieldEmptyComplete}
+!\label{sec:field:usage:create_empty}
+!
+!  A user can create an {\tt ESMF\_Field} in three steps: first create an empty 
+!  {\tt ESMF\_Field}; then set a {\tt ESMF\_Grid} on the empty {\tt ESMF\_Field};
+!  and finally complete the {\tt ESMF\_Field} by calling {\tt ESMF\_FieldEmptyComplete}.
+!
+!EOE
+
+!BOC
+    ! create an empty Field
+    field3 = ESMF_FieldEmptyCreate(name="precip", rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    ! use FieldGet to retrieve the Field Status
+    call ESMF_FieldGet(field3, status=fstatus, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOE
+!  Once the Field is created, we can verify that the status of the Field
+!  is {\tt ESMF\_FIELDSTATUS\_EMPTY}.
+!EOE
+!BOC
+    ! Test the status of the Field
+    if(fstatus /= ESMF_FIELDSTATUS_EMPTY) finalrc = ESMF_FAILURE
+!EOC
+
+!BOE
+!  Next we set a Grid on the empty Field. We use the 2D grid created in
+!  a previous example simply to demonstrate the method. The Field data points
+!  will be on east edge of the Grid cells with the specified
+!  {\tt ESMF\_STAGGERLOC\_EDGE1}.
+!EOE
+!BOC
+    ! Set a grid on the Field
+    call ESMF_FieldEmptySet(field3, grid2d, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    ! use FieldGet to retrieve the Field Status again
+    call ESMF_FieldGet(field3, status=fstatus, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    ! Test the status of the Field
+    if(fstatus /= ESMF_FIELDSTATUS_GRIDSET) finalrc = ESMF_FAILURE
+!EOC
+
+!BOE
+!   The partially created Field is completed by specifying the typekind of its
+!   data storage. This method is overloaded with one of the
+!   following parameters, arrayspec, typekind, Fortran array, or Fortran array pointer.
+!   Additional optional arguments can be used to specify ungridded dimensions and
+!   halo regions similar to the other Field creation methods. 
+!EOE
+!BOC
+    ! Complete the Field by specifying the data typekind 
+    ! to be allocated internally.
+    call ESMF_FieldEmptyComplete(field3, typekind=ESMF_TYPEKIND_R8, &
+      ungriddedLBound=(/1/), ungriddedUBound=(/5/), rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    ! use FieldGet to retrieve the Field Status again
+    call ESMF_FieldGet(field3, status=fstatus, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+    ! Test the status of the Field
+    if(fstatus /= ESMF_FIELDSTATUS_COMPLETE) finalrc = ESMF_FAILURE
+!EOC
+
+    print *, "Complete a Field created by ESMF_FieldEmptyCreate returned"
+    call ESMF_FieldDestroy(field3, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!-------------------------------- Example -----------------------------
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Create an empty Field and complete it with FieldSetCommit}
 !\label{sec:field:usage:create_empty_setcommit}
 !
 !  A user can create an empty {\tt ESMF\_Field}.
@@ -411,7 +500,7 @@
 !  1st dimension of Fortran array pointer, 2nd dimension of grid maps to 2nd dimension of
 !  Fortran array pointer, so on and so forth. 
 !
-!  In order to create or finish a Field from a Grid and a Fortran array pointer, 
+!  In order to create or complete a Field from a Grid and a Fortran array pointer, 
 !  certain rules of the Fortran array bounds must be obeyed. We will discuss these
 !  rules as we progress in Field creation examples.  We will make
 !  frequent reference to the terminologies for bounds and widths in ESMF. 
@@ -448,7 +537,7 @@
     ! finalize the Field
     call ESMF_FieldSetCommit(field3, grid2d, farray2d, rc=rc)
 !EOC
-    print *, "Finish a Field created by ESMF_FieldEmptyCreate returned"
+    print *, "Complete a Field created by ESMF_FieldEmptyCreate returned"
     call ESMF_FieldDestroy(field3, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray2d)

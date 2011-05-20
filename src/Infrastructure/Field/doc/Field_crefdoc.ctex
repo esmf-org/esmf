@@ -1,4 +1,4 @@
-% $Id: Field_crefdoc.ctex,v 1.9 2010/10/14 23:49:31 theurich Exp $
+% $Id: Field_crefdoc.ctex,v 1.10 2011/05/20 20:06:14 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -89,6 +89,7 @@
 #ifdef STANDALONE
 \input{ESMC_Field_chapi.tex}
 %\input{ESMF_FieldCreate_fapi}
+%\input{ESMF_FieldEmpty_fapi}
 %\input{ESMF_FieldGet_fapi}
 %\input{ESMF_FieldPr_fapi}
 %\input{ESMF_FieldSet_fapi}
@@ -97,6 +98,7 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMC_Field_chapi.tex}
 %\input{../Infrastructure/Field/doc/ESMF_FieldCreate_fapi}
+%\input{../Infrastructure/Field/doc/ESMF_FieldEmpty_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldPr_fapi}
 %\input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}

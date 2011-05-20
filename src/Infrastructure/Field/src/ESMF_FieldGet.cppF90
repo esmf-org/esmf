@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.78 2011/05/19 20:28:22 svasquez Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.79 2011/05/20 20:06:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.78 2011/05/19 20:28:22 svasquez Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.79 2011/05/20 20:06:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -112,7 +112,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
-    status, isCommitted, geomtype, grid, mesh, locstream, xgrid, array, &
+    status, geomtype, grid, mesh, locstream, xgrid, array, &
     typekind, dimCount, rank, staggerloc, meshLocation, xgridSide, &
     gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, name, rc) 
@@ -122,7 +122,6 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),  intent(out), optional :: arrayspec
     type(ESMF_FieldStatus),intent(out), optional :: status
-    logical,               intent(out), optional :: isCommitted
     type(ESMF_GeomType),   intent(out), optional :: geomtype     
     type(ESMF_Grid),       intent(out), optional :: grid     
     type(ESMF_Mesh),       intent(out), optional :: mesh     
@@ -165,11 +164,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       of the Field object.
 ! \item [{[status]}]
 !       \begin{sloppypar}
-!       The status of the Field. It can take one of the following values: {\tt ESMF\_FIELDSTATUS\_EMPTY},
-!       {\tt ESMF\_FIELDSTATUS\_GRIDSET}, {\tt ESMF\_FIELDSTATUS\_COMPLETE}.
+!       The status of the Field. It can take one of the following returned values: 
+!       {\tt ESMF\_FIELDSTATUS\_EMPTY}
+!       (the Field is empty without a GeomBase or Array),
+!       {\tt ESMF\_FIELDSTATUS\_GRIDSET} (the Field has a GeomBase internally), 
+!       {\tt ESMF\_FIELDSTATUS\_COMPLETE} (the Field has a GeomBase and an Array internally).
 !       \end{sloppypar}
-! \item [{[isCommitted]}]
-!       Indicates if the Field is fully committed and ready.
 ! \item [{[geomtype]}]
 !       Specifies the type of geometry on which the Field is built. Please see Section~\ref{opt:geomtype} for 
 !       the range of values.
@@ -305,14 +305,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       status = ftype%status
     endif
 
-    if(present(isCommitted)) then
-        if(fieldstatus .eq. ESMF_STATUS_READY.and.ftype%status == ESMF_FIELDSTATUS_COMPLETE) then
-            isCommitted = .true.
-        else 
-            isCommitted = .false.
-        endif
-    endif
- 
     ! set default decomp type to non-arb.
     decompType = ESMF_GRID_NONARBITRARY
 

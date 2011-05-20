@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.56 2010/09/30 19:37:43 oehmke Exp $
+% $Id: Field_refdoc.ctex,v 1.57 2011/05/20 20:06:14 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -100,6 +100,7 @@
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_FieldCreate_fapi}
+\input{ESMF_FieldEmpty_fapi}
 \input{ESMF_FieldGet_fapi}
 \input{ESMF_FieldPr_fapi}
 \input{ESMF_FieldSet_fapi}
@@ -108,6 +109,7 @@
 \input{ESMF_FieldWr_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMF_FieldCreate_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldEmpty_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldPr_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}

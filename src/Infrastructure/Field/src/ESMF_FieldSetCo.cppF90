@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.36 2011/05/19 14:17:05 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.37 2011/05/20 20:06:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@ module ESMF_FieldSetCoMod
 !
 !==============================================================================
 !
-! This file contains the FieldSet() methods.
+! This file contains the FieldSetCommit() methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.36 2011/05/19 14:17:05 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.37 2011/05/20 20:06:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -70,7 +70,7 @@ module ESMF_FieldSetCoMod
 
 !------------------------------------------------------------------------------
 !BOPI 
-! !IROUTINE: ESMF_FieldSetCommit - Finishes a Field started with FieldCreateEmpty
+! !IROUTINE: ESMF_FieldSetCommit - Completes a Field started with FieldCreateEmpty
 !
 ! !INTERFACE:
   interface ESMF_FieldSetCommit
@@ -89,14 +89,13 @@ module ESMF_FieldSetCoMod
     TypeKindRankInterfaceMacro(FieldSetCommitGBPtr)
 
 ! !DESCRIPTION:
-!   This interface finishes a {\tt ESMF\_Field} started with FieldCreateEmpty
+!   This interface Completes a {\tt ESMF\_Field} started with FieldCreateEmpty
 !   These methods all take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
 !   or {\tt ESMF\_XGrid}, and Fortran data array or pointer as input to
 !   fill in the {\tt ESMF\_Field} internals. 
   end interface
 !EOPI
 !------------------------------------------------------------------------------
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -110,7 +109,7 @@ contains
 #define FieldSetCommitGridDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field from Grid started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Grid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -149,7 +148,7 @@ contains
 !       committed in this call. The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [grid]  @\
-!       The {\tt ESMF\_Grid} object to finish the Field. @\
+!       The {\tt ESMF\_Grid} object to complete the Field. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -322,7 +321,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 #define FieldSetCommitGridPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field pointer from Grid started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Grid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -359,7 +358,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [grid]  @\
-!       The {\tt ESMF\_Grid} object to finish the Field. @\
+!       The {\tt ESMF\_Grid} object to complete the Field. @\
 ! \item [farrayPtr] @\
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -509,7 +508,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 #define FieldSetCommitLSDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field from LocStream started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from LocStream started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -545,7 +544,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [locstream]  @\
-!       The {\tt ESMF\_LocStream} object to finish the Field. @\
+!       The {\tt ESMF\_LocStream} object to complete the Field. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -657,7 +656,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 #define FieldSetCommitLSPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field pointer from LocStream started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from LocStream started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -690,7 +689,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [locstream]  @\
-!       The {\tt ESMF\_LocStream} object to finish the Field. @\
+!       The {\tt ESMF\_LocStream} object to complete the Field. @\
 ! \item [farrayPtr] @\
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -776,7 +775,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 #define FieldSetCommitMeshDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field from Mesh started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Mesh started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -813,7 +812,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [mesh]  @\
-!       The {\tt ESMF\_Mesh} object to finish the Field. @\
+!       The {\tt ESMF\_Mesh} object to complete the Field. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -932,7 +931,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 #define FieldSetCommitMeshPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field pointer from Mesh started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Mesh started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -966,7 +965,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [mesh]  @\
-!       The {\tt ESMF\_Mesh} object to finish the Field. @\
+!       The {\tt ESMF\_Mesh} object to complete the Field. @\
 ! \item [farrayPtr] @\
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -1058,7 +1057,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 #define FieldSetCommitXGDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field from XGrid started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from XGrid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -1097,7 +1096,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [xgrid]  @\
-!       The {\tt ESMF\_XGrid} object to finish the Field. @\
+!       The {\tt ESMF\_XGrid} object to complete the Field. @\
 ! \item [{[xgridSide]}] @\
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
 !       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
@@ -1219,7 +1218,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 #define FieldSetCommitXGPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field pointer from XGrid started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from XGrid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -1255,7 +1254,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [xgrid]  @\
-!       The {\tt ESMF\_XGrid} object to finish the Field. @\
+!       The {\tt ESMF\_XGrid} object to complete the Field. @\
 ! \item [{[xgridSide]}] @\
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
 !       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
@@ -1350,7 +1349,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 #define FieldSetCommitGBDoc() \
 !---------------------------------------------------------------------------- @\
 !BOPI @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -1387,7 +1386,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXGPtr)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [geombase]  @\
-!       The {\tt ESMF\_GeomBase} object to finish the Field. @\
+!       The {\tt ESMF\_GeomBase} object to complete the Field. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -1896,7 +1895,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 #define FieldSetCommitGBPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOPI @\
-! !IROUTINE: ESMF_FieldSetCommit - Finish a create Field started with FieldCreateEmpty @\
+! !IROUTINE: ESMF_FieldSetCommit - Complete a Field started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldSetCommit() @\
@@ -1931,7 +1930,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGB)
 !       committed in this call.  The {\tt field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [geombase]  @\
-!       The {\tt ESMF\_GeomBase} object to finish the Field.  The dimCount of the @\
+!       The {\tt ESMF\_GeomBase} object to complete the Field.  The dimCount of the @\
 !       GeomBase must be smaller than or equal to the rank of the {\tt farrayPtr}. @\
 ! \item [farrayPtr] @\
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.158 2011/05/19 14:17:06 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.159 2011/05/20 20:06:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.158 2011/05/19 14:17:06 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.159 2011/05/20 20:06:19 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,6 @@
       !type(ESMF_RelLoc) :: rl
       !type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, fieldAlias
-      logical          :: isCommitted
       logical:: fieldBool
 
 
@@ -73,7 +72,8 @@
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
       type(ESMF_Grid) :: grid, grid2
       real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
-      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS
+      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS, f7
+      type(ESMF_FieldStatus) :: fstatus
       integer :: ulb(1), uub(1)
       character (len = 20) :: gname, gname3
       character (len = 20) :: fname, fname1, fname2
@@ -109,14 +109,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with no data"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !NEX_UTest_Multi_Proc_Only
-      ! Test isCommitted in FieldGet api
-      call ESMF_FieldGet(f1, isCommitted=isCommitted, rc=rc)
-      write(failMsg, *) "isCommitted or rc wrong"
-      write(name, *) "Query isCommitted flag from an empty Field"
-      call ESMF_Test(((.not.isCommitted).and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
-
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
@@ -185,7 +177,7 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
-      call ESMF_FieldGet(fls, arrayspec=arrayspec1, isCommitted=isCommitted, rc=localrc)
+      call ESMF_FieldGet(fls, arrayspec=arrayspec1, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       ! check bounds
@@ -234,7 +226,7 @@
             ungriddedLBound=(/1/), ungriddedUBound=(/4/), rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
-      call ESMF_FieldGet(fls, arrayspec=arrayspec1, isCommitted=isCommitted, rc=localrc)
+      call ESMF_FieldGet(fls, arrayspec=arrayspec1, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE         
 
       call ESMF_ArrayspecPrint(arrayspec1, rc=localrc)
@@ -263,13 +255,6 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
 
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only
-      ! Test isCommitted in FieldGet api
-      write(failMsg, *) "isCommitted or rc wrong"
-      write(name, *) "Query isCommitted flag from a commmitted Field on locstream"
-      call ESMF_Test((isCommitted.and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -554,11 +539,12 @@
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
-      ! Test isCommitted in FieldGet api
-      call ESMF_FieldGet(f2, isCommitted=isCommitted, rc=rc)
-      write(failMsg, *) "isCommitted or rc wrong"
-      write(name, *) "Query isCommitted flag from a commmitted Field"
-      call ESMF_Test((isCommitted.and.(rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+      ! Test status in FieldGet api
+      call ESMF_FieldGet(f2, status=fstatus, rc=rc)
+      write(failMsg, *) "status or rc wrong"
+      write(name, *) "Query status flag from a completed Field"
+      call ESMF_Test(((fstatus == ESMF_FIELDSTATUS_COMPLETE).and. &
+        (rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
@@ -768,6 +754,68 @@
       call ESMF_FieldDestroy(f3)
 ! grid destroy to clear previous grids.
       deallocate(fptr)
+
+      ! Test the new Partial Field features
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      f7 = ESMF_FieldEmptyCreate(rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create an empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldGet(f7, status=fstatus, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Retrieve the status from the empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      write(failMsg, *) ""
+      write(name, *) "test the returned empty Field status"
+      call ESMF_Test((fstatus == ESMF_FIELDSTATUS_EMPTY), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldEmptySet(f7, grid=grid, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Set a grid in the empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldGet(f7, status=fstatus, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Retrieve the status from the empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      write(failMsg, *) ""
+      write(name, *) "test the returned gridset Field status"
+      call ESMF_Test((fstatus == ESMF_FIELDSTATUS_GRIDSET), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldEmptySet(f7, grid=grid, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Cannot set a grid in a gridset Field"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldEmptyComplete(f7, typekind=ESMF_TYPEKIND_R8, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Complete the gridset Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldGet(f7, status=fstatus, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Retrieve the status from the complete Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      write(failMsg, *) ""
+      write(name, *) "test the returned complete Field status"
+      call ESMF_Test((fstatus == ESMF_FIELDSTATUS_COMPLETE), name, failMsg, result, ESMF_SRCLINE)
+
+      ! destroy the paritial creation field
+      call ESMF_FieldDestroy(f7, rc=rc)
       call ESMF_GridDestroy(grid, rc=rc)
 
 #endif
