@@ -1,8 +1,9 @@
-% $Id: ESMF_refdoc.ctex,v 1.109 2011/05/02 18:47:51 theurich Exp $
+% $Id: ESMF_refdoc.ctex,v 1.110 2011/05/20 22:43:58 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
 \usepackage{supertabular}
+\usepackage{longtable}
 \usepackage{html}
 \usepackage{times}
 %\usepackage{subsections}
@@ -26,6 +27,7 @@
 
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
+\setlongtables
 
 %\renewcommand\paragraph{%
 %\@startsection{paragraph}% section name
