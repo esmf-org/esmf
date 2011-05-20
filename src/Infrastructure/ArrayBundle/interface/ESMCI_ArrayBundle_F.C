@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.32 2011/05/19 22:46:52 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.33 2011/05/20 05:15:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -167,10 +167,38 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, int *arrayCount,
-    ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc){
+  void FTN(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, char *arrayName,
+    int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc,
+    ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlegetlist()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // fill simple return values
+    *arrayCount = (*ptr)->getCount(std::string(arrayName, nlen));
+    // fill arrayList
+    if (*len_arrayList != 0){
+      // opt_arrayList was provided
+      if (*len_arrayList < *arrayCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "- opt_arrayList must provide arrayCount elements", rc);
+        return;
+      }
+      // opt_arrayList has correct number of elements
+      vector<ESMCI::Array *> arrayVector;
+      (*ptr)->get(std::string(arrayName, nlen), arrayVector);
+      for (int i=0; i<*arrayCount; i++)
+        opt_arrayList[i] = arrayVector[i];
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+ 
+  void FTN(c_esmc_arraybundlegetlistall)(ESMCI::ArrayBundle **ptr,
+    int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlegetlistall()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -240,6 +268,36 @@ extern "C" {
         *isPresent = ESMF_TRUE;
       else
         *isPresent = ESMF_FALSE;
+
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+ 
+  void FTN(c_esmc_arraybundlegetcount)(ESMCI::ArrayBundle **ptr,
+    char *arrayName, int *arrayCount, int *rc, ESMCI_FortranStrLenArg nlen){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlegetcount()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    try{
+
+      // query the C++ layer
+      *arrayCount = (*ptr)->getCount(std::string(arrayName, nlen));
 
     }catch(int localrc){
       // catch standard ESMF return code

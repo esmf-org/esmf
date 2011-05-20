@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.31 2011/05/19 22:46:50 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.32 2011/05/20 05:15:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -85,14 +85,20 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     Array *get(std::string arrayName)const{
       return arrayContainer.get(arrayName);
     }
+    void get(std::string arrayName, std::vector<Array *> &arrayVector)const{ 
+      arrayContainer.get(arrayName, arrayVector);
+    }
     void getVector(std::vector<Array *> &arrayVector)const{ 
       arrayContainer.getVector(arrayVector);
     }
     void getNameVector(std::vector<std::string> &arrayNameVector)const{ 
       arrayContainer.getKeyVector(arrayNameVector);
     }
-    int getCount()        const {return arrayContainer.size();}
-    char const *getName() const {return ESMC_BaseGetName();}
+    int getCount()const{return arrayContainer.size();}
+    int getCount(std::string arrayName)const{
+      return arrayContainer.getCount(arrayName);
+    }
+    char const *getName()const{return ESMC_BaseGetName();}
     bool isPresent(std::string arrayName)const{
       return arrayContainer.isPresent(arrayName);
     }

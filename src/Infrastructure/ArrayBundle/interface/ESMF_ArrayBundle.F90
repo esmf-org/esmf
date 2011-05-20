@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.64 2011/05/19 22:46:52 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.65 2011/05/20 05:15:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.64 2011/05/19 22:46:52 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.65 2011/05/20 05:15:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -126,8 +126,9 @@ module ESMF_ArrayBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_ArrayBundleGetList
     module procedure ESMF_ArrayBundleGetItem
+    module procedure ESMF_ArrayBundleGetList
+    module procedure ESMF_ArrayBundleGetListAll
 !EOPI
 
   end interface
@@ -756,30 +757,205 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleGetList()"
+#define ESMF_METHOD "ESMF_ArrayBundleGetItem()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Get info from ArrayBundle in form of lists
+! !IROUTINE: ESMF_ArrayBundleGet - Query scalar information about a specific arrayName
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
-    subroutine ESMF_ArrayBundleGetList(arraybundle, keywordEnforcer, arrayCount, &
-      arrayList, arrayNameList, name, rc)
+    subroutine ESMF_ArrayBundleGetItem(arraybundle, arrayName, &
+      keywordEnforcer, array, arrayCount, isPresent, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    character(len=*),       intent(in)            :: arrayName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional :: arrayCount
-    type(ESMF_Array),       intent(out),  optional :: arrayList(:)
-    character(len=*),       intent(out),  optional :: arrayNameList(:)
-    character(len=*),       intent(out),  optional :: name
-    integer,                intent(out),  optional :: rc
+    type(ESMF_Array),       intent(out), optional :: array
+    integer,                intent(out), optional :: arrayCount
+    logical,                intent(out), optional :: isPresent
+    integer,                intent(out), optional :: rc
 !
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get the list of Arrays and Array names bundled in an ArrayBundle.
+!   Get information about items that match {\tt arrayName} in ArrayBundle.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} to be queried.
+!   \item [arrayName]
+!     Specified name.
+!   \item [{[array]}]
+!     Upon return holds the requested Array item. It is an error if this
+!     argument was specified and there is not exactly one Array item in 
+!     {\tt arraybundle} that matches {\tt arrayName}.
+!   \item [{[arrayCount]}]
+!     Number of Arrays with {\tt arrayName} in {\tt arraybundle}.
+!   \item [{[isPresent]}]
+!     Upon return indicates whether Array(s) with {\tt arrayName} exist
+!     in {\tt arraybundle}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    type(ESMF_Logical)            :: dummyIsPresent
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    if (present(array)) then
+      ! Call into the C++ interface
+      call c_ESMC_ArrayBundleGetItem(arraybundle, arrayName, array, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Set init code for deep C++ object
+      call ESMF_ArraySetInitCreated(array, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    if (present(arrayCount)) then
+      ! Call into the C++ interface
+      call c_ESMC_ArrayBundleGetCount(arraybundle, arrayName, &
+        arrayCount, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(isPresent)) then
+      ! Call into the C++ interface
+      call c_ESMC_ArrayBundleGetIsPresent(arraybundle, arrayName, &
+        dummyIsPresent, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      isPresent = dummyIsPresent
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_ArrayBundleGetItem
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleGetList()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleGet - Access a list of Arrays matching arrayName
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ArrayBundleGet()   
+    subroutine ESMF_ArrayBundleGetList(arraybundle, arrayName, arrayList, &
+      keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    character(len=*),       intent(in)            :: arrayName
+    type(ESMF_Array),       intent(out)           :: arrayList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Get the list of Arrays from ArrayBundle that match arrayName.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} to be queried.
+!   \item [arrayName]
+!     Specified name.
+!   \item [{[arrayList]}]
+!     List of Arrays in {\tt arraybundle} that match {\tt arrayName}. The
+!     argument must be allocated to be at least of size {\tt arrayCount}
+!     returned for this {\tt arrayName}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: opt_arrayCount         ! helper variable
+    type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)    ! helper variable
+    integer                       :: len_arrayPtrList       ! helper variable
+    integer                       :: i                      ! helper variable
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Prepare local variables
+    len_arrayPtrList = size(arrayList)
+    allocate(opt_arrayPtrList(len_arrayPtrList))
+
+    ! Call into the C++ interface layer
+    call c_ESMC_ArrayBundleGetList(arraybundle, arrayName, opt_arrayCount, &
+      opt_arrayPtrList, len_arrayPtrList, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set init code for deep C++ objects
+    do i=1, min(size(arrayList), opt_arrayCount)
+      call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_ArraySetInitCreated(arrayList(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    
+    ! Garbage collection
+    deallocate(opt_arrayPtrList)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_ArrayBundleGetList
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleGetListAll()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleGet - Access a list of all Arrays
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ArrayBundleGet()   
+    subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, arrayCount, &
+      arrayList, arrayNameList, name, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: arrayCount
+    type(ESMF_Array),       intent(out), optional :: arrayList(:)
+    character(len=*),       intent(out), optional :: arrayNameList(:)
+    character(len=*),       intent(out), optional :: name
+    integer,                intent(out), optional :: rc
+!
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Get the list of all Arrays and Array names bundled in an ArrayBundle.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -829,7 +1005,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface layer
-    call c_ESMC_ArrayBundleGetList(arraybundle, opt_arrayCount, &
+    call c_ESMC_ArrayBundleGetListAll(arraybundle, opt_arrayCount, &
       opt_arrayPtrList, len_arrayPtrList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -842,8 +1018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set init code for deep C++ objects
     if (present(arrayList)) then
       do i=1, min(size(arrayList), opt_arrayCount)
-        call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), &
-          rc=localrc)
+        call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_ArraySetInitCreated(arrayList(i), rc=localrc)
@@ -874,87 +1049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   
-  end subroutine ESMF_ArrayBundleGetList
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleGetItem()"
-!BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Get info from ArrayBundle for single item
-!
-! !INTERFACE:
-    ! Private name; call using ESMF_ArrayBundleGet()   
-    subroutine ESMF_ArrayBundleGetItem(arraybundle, arrayName, &
-      keywordEnforcer, array, isPresent, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
-    character(len=*),       intent(in)            :: arrayName
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Array),       intent(out), optional :: array
-    logical,                intent(out), optional :: isPresent
-    integer,                intent(out), optional :: rc
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!   Get an Array by name from ArrayBundle. It is an error if no Array called
-!   {\tt arrayName} exists in {\tt arraybundle}.
-!
-!   \begin{description}
-!   \item [arraybundle]
-!         {\tt ESMF\_ArrayBundle} to be queried.
-!   \item [arrayName]
-!         Specific item by name.
-!   \item [{[array]}]
-!         Upon return holds the requested Array item.
-!   \item [{[isPresent]}]
-!         Upon return indicates whether Array item with {\tt arrayName} is
-!         contained in {\tt arraybundle}.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
-    type(ESMF_Logical)            :: dummyIsPresent
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
-    
-    if (present(array)) then
-      ! Call into the C++ interface
-      call c_ESMC_ArrayBundleGetItem(arraybundle, arrayName, array, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Set init code for deep C++ object
-      call ESMF_ArraySetInitCreated(array, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    
-    if (present(isPresent)) then
-      ! Call into the C++ interface
-      call c_ESMC_ArrayBundleGetIsPresent(arraybundle, arrayName, &
-        dummyIsPresent, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      isPresent = dummyIsPresent
-    endif
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-  end subroutine ESMF_ArrayBundleGetItem
+  end subroutine ESMF_ArrayBundleGetListAll
 !------------------------------------------------------------------------------
 
 

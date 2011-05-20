@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.21 2011/05/05 17:23:05 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.22 2011/05/20 05:15:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.21 2011/05/05 17:23:05 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.22 2011/05/20 05:15:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,11 +54,12 @@ program ESMF_ArrayBundleCreateUTest
   type(ESMF_DistGrid):: distgrid
   type(ESMF_Array):: array(10), arrayOut(5), arraySingle
   type(ESMF_Array), pointer :: arrays(:)
+  type(ESMF_Array), allocatable :: arrayList(:)
   character(len=ESMF_MAXSTR):: arrayNameList(5)
   integer:: arrayCount, i
   type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
   character (len=80)      :: arrayName
-  logical:: arraybundleBool, isPresent
+  logical:: arraybundleBool, isPresent, loopResult
   
   character, allocatable :: buffer(:)
   integer :: buff_len, offset
@@ -372,6 +373,61 @@ program ESMF_ArrayBundleCreateUTest
   call ESMF_ArrayBundleRemove(arraybundle, arrayNameList=(/"MyArray3", &
     "MyArray5"/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleAdd with multiflag #1 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"  
+  call ESMF_ArrayBundleAdd(arraybundle, arrayList=arrays, multiflag=.true., &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleAdd with multiflag #2 Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"  
+  call ESMF_ArrayBundleAdd(arraybundle, arrayList=arrays, multiflag=.true., &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  call ESMF_ArrayBundlePrint(arraybundle, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleGet with arrayName to get count Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayName="MyArray6", &
+    arrayCount=arrayCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  allocate(arrayList(arrayCount))
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayBundleGet arrayList for arrayName Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayName="MyArray6", &
+    arrayList=arrayList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Container Get arrayList for arrayname Test"
+  write(failMsg, *) "arrayList contains incorrect Arrays"
+  loopResult = .false. ! initialize
+  if (allocated(arrayList)) then
+    loopResult = .true. ! initialize
+    do i=1, arrayCount
+      call ESMF_ArrayGet(arrayList(i), name=arrayName, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      print *, "name of arrayList(",i,") is: ", arrayName
+      if (trim(arrayName)/="MyArray6") loopResult = .false.
+    enddo
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
