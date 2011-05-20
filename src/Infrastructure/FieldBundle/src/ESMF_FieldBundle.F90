@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.95 2011/05/19 20:15:44 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.96 2011/05/20 21:09:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -2539,8 +2539,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: grid, gridToCheck
       type(ESMF_LocStream) :: locstream, locstreamToCheck
       type(ESMF_Mesh) :: mesh, meshToCheck
-      logical :: wasempty, isCommitted,theyMatch
+      logical :: wasempty, theyMatch
       integer :: indexToStartChecking
+      type(ESMF_FieldStatus) :: fstatus
 
 
       ! Initialize return code.  Assume routine not implemented.
@@ -2583,11 +2584,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (btype%gridstatus /= ESMF_STATUS_READY) then
           do i=1, fieldCount
             ! determine if a Field is committed and has a Grid associated with it
-            call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
+            call ESMF_FieldGet(fields(i), status=fstatus, rc=status)
             if (ESMF_LogFoundError(status, &
               msg="Invalid Field found when trying to access Field", &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            if(.not.isCommitted) cycle
+            if(fstatus /= ESMF_FIELDSTATUS_COMPLETE) cycle
 
             ! Get geomtype
             call ESMF_FieldGet(fields(i), geomtype=geomtype, rc=status)
@@ -2701,11 +2702,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           do i=indexToStartChecking, fieldCount
 
             ! determine if a Field is committed and has a Grid associated with it
-            call ESMF_FieldGet(fields(i), isCommitted=isCommitted, rc=status)
+            call ESMF_FieldGet(fields(i), status=fstatus, rc=status)
             if (ESMF_LogFoundError(status, &
                         msg="Invalid Field found when trying to access Field", &
                         ESMF_CONTEXT, rcToReturn=rc)) return
-            if(.not.isCommitted) cycle
+            if(fstatus/=ESMF_FIELDSTATUS_COMPLETE) cycle
 
             ! Get geomtype from field
             call ESMF_FieldGet(fields(i), geomtype=geomtypeToCheck, rc=status)
