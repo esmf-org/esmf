@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.34 2011/05/20 16:57:37 rokuingh Exp $
+% $Id: Attribute_pack.tex,v 1.35 2011/05/20 22:41:51 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
@@ -72,6 +72,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& CCA, ESMF, Flume, FMS, OASIS, SWMF \\
      {\tt PhysicalDomain} & A description of the geographic range being simulated. & Atmosphere, Earth System, Ice, Lake, Land Ocean, River\\
      {\tt Version} & A specific form or variation of an artifact, i.e. a unit of software or metadata. & N/A\\ 
+     \hline\hline
 \end{tabular}
 
 
@@ -103,7 +104,8 @@ There are many attributes that are used to describe components. There are curren
     \end{itemize}
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}}
+     \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
      {\tt Description} & A multi-line description of the component. & N/A \\
@@ -122,6 +124,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & N/A\\ 
      {\tt URL} & A URL associated with a model component. & N/A \\
      {\tt Version} & Version number of the component. & N/A \\
+     \hline\hline
 \end{tabular}
 
 \vspace{.20in}
@@ -140,7 +143,8 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+     \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt CompilerName} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
@@ -154,6 +158,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel em64t, intel IA-64, Itanium, NEC, operteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000\\
      {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector \\
      {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Rahtyon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
+     \hline\hline
 \end{tabular}
 
 
@@ -172,7 +177,8 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+     \hline\hline
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
@@ -182,6 +188,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
      {\tt ResponsiblePartyRole} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder \\
      {\tt URL} & A URL of an individual or organization. & N/A \\
+     \hline\hline
 \end{tabular}
 
 
@@ -199,7 +206,8 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+     \hline\hline
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Date} & The date of the citation. & N/A\\
@@ -207,6 +215,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
      {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
+     \hline\hline
 \end{tabular}
 
 
@@ -237,10 +246,12 @@ There is currently only 1 predefined State-level Attribute package:
     \item Description: This package is used to define whether an ESMF State object is an Import State or Export State.   
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+    \hline\hline
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt Intent} & An indication of whether a field is imported into or exported from a particular model component. This refers to coupling, and not history output. & Export,Import \\
+    \hline\hline
 \end{tabular}
 
 
@@ -278,7 +289,8 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the ESG (or ESMF) General, CF Extended, and CF General Field packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.  The attribute values within these ESG and CF nested packages currently appear in the Component Properties section of the CIM output file.  A separate Component Properties package may be developed for this purpose in a future ESMF release.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+    \hline\hline
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
@@ -289,6 +301,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & 1D, 2D, 3D\\ 
     {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared\\ 
     {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time accumulation, Time averaged\\ 
+    \hline\hline
 \end{tabular}
 
 
@@ -311,10 +324,12 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: ESG has the ability to list variables as either import or export variables. This should not be confused with the ESMF State Attribute Package, which has similiar attributes. This attribute is assigned to individual variables.   This package nests the CF Extended and CF General packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+     \hline\hline
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
      {\tt Intent} & An indication of whether a variable is exported or imported. This refers to coupling and not history output. & Export,Import\\
+     \hline\hline
 \end{tabular}
 
 
@@ -337,10 +352,12 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: The CF standard for fields contains an optional standard\_name Attribute. Standard names are controlled vocabularies and not every variable in the earth system sciences contains a standard name. Because of this, ESMF implemented this optional Attribute in its own package. This package nests the CF General package (below) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+    \hline\hline
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt StandardName} & The approved CF standard name for a variable if it exists. &  N/A\\
+    \hline\hline
 \end{tabular}
 
 \vspace{.20in}
@@ -359,13 +376,15 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item  Description: The climate and forecast (CF) convention contains metadata that is designed to promote the processing and sharing of files created with the NetCDF API. The CF conventions are increasingly gaining acceptance and have been adopted by a number of projects and groups as a primary standard. The conventions define metadata that provide a definitive description of what the data in each variable represents, and the spatial and temporal properties of the data. This enables users of data from different sources to decide which quantities are comparable, and facilitates building applications with powerful extraction, regridding, and display capabilities. The ESMF CF Attribute package contains the three mandatory Attributes required to describe fields. 
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+    \hline\hline
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
     {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is
  distinct from the long\_name & N/A \\
     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package & None\\
+    \hline\hline
 \end{tabular}
 
 
@@ -405,7 +424,8 @@ There are 2 grid attribute packages in ESMF.
     \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\hline\hline
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
 {\tt CongruentTiles} & Indicates whether or not all the tiles contained within a grid mosaic are of the same size and shape. & True, False \\
@@ -422,6 +442,7 @@ There are 2 grid attribute packages in ESMF.
 {\tt NumberOfGridTiles} & The number of tiles in a mosaic. & N/A \\
 {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & N/A \\ 
 {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & N/A \\ 
+\hline\hline
 \end{tabular}
 
 
@@ -447,12 +468,14 @@ There are 2 grid attribute packages in ESMF.
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}|}
+\begin{longtable}{|p{5cm}|p{5cm}|p{4cm}|}
+\hline\hline
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
 {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& N/A\\
 {\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& N/A\\
-\end{tabular}
+\hline\hline
+\end{longtable}
 
 
 
@@ -462,8 +485,9 @@ There are 2 grid attribute packages in ESMF.
 The following is an alphabetical list of all the attributes implemented in ESMF, their definitions, and which packages they are contained within. 
 % TODO: A list of attributes by package exists in the following section. 
 
+\noindent
 
-\begin{tabular}{|p{5cm}|p{7cm}|p{5cm}}
+\begin{longtable}{|p{5cm}|p{5cm}|p{4cm}}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
      \hline\hline
@@ -534,8 +558,9 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt URL} & URL of the object being described. Exists in multple packages. & ISO Responsible Party, CIM Main, ISO Citation\\
      {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package. & CF General\\
      {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & ESG Basic Component, CIM Main\\ 
+     \hline\hline
 
-\end{tabular}
+\end{longtable}
 
 \vspace{.20in}
 
