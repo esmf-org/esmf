@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.106 2011/05/17 05:52:51 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.107 2011/05/20 21:25:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,11 +40,12 @@
 using std::string;
 using std::vector;
 using std::ostringstream;
+using std::transform;
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.106 2011/05/17 05:52:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.107 2011/05/20 21:25:25 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5392,7 +5393,8 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("documentID", 
                                    "507a5b52-a91b-11df-a484-00163e9152a5", 
                                    indent, 0);
-    localrc = io_xml->writeElement("documentVersion", "1", indent, 0);
+    localrc = io_xml->writeElement("documentVersion", "1.0", indent, 0);
+    // TODO:  use TimeMgr's ESMF_TimeSyncToRealTime() 
     localrc = io_xml->writeElement("documentCreationDate", 
                                    "2010-09-30T11:13:22Z", indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -5567,7 +5569,6 @@ int Attribute::count=0;
   localrc = io_xml->writeEndElement("model", 2);
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
-  localrc = io_xml->writeElement("documentVersion", "1", 2, 0);
 
   if (attpack->AttributeIsSet("SimulationMetadataVersion")) {
     localrc = attpack->AttributeGet("SimulationMetadataVersion", &valuevector);
@@ -5576,10 +5577,13 @@ int Attribute::count=0;
                           "Write items > 1 - Not yet implemented", &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
-    localrc = io_xml->writeElement("metadataVersion", value, 2, 0);
+    localrc = io_xml->writeElement("documentVersion", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
   }
 
+  // TODO:  use TimeMgr's ESMF_TimeSyncToRealTime() 
   localrc = io_xml->writeElement("documentCreationDate", 
                                  "2010-09-30T11:13:22Z", 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -5796,7 +5800,8 @@ int Attribute::count=0;
 
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
-  localrc = io_xml->writeElement("documentVersion", "1", 2, 0);
+  localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
+  // TODO:  use TimeMgr's ESMF_TimeSyncToRealTime() 
   localrc = io_xml->writeElement("documentCreationDate", 
                                    "2010-09-30T11:13:22Z", 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
