@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.3 2011/05/19 22:51:38 theurich Exp $
+! $Id: ESMF_StateContainer.F90,v 1.4 2011/05/20 10:06:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_StateContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.3 2011/05/19 22:51:38 theurich Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.4 2011/05/20 10:06:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -116,6 +116,7 @@ module ESMF_StateContainerMod
 !
     module procedure ESMF_ContainerGetSI
     module procedure ESMF_ContainerGetSIL
+    module procedure ESMF_ContainerGetSILAll
 
 ! !DESCRIPTION: 
 !   Query Container.
@@ -196,12 +197,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Container} object to be added to.
 !   \item[itemList]
 !     Items to be added.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be added to {\tt container}. For {\tt .false.}, added items must
+!     have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
-!     where it is {\em not} an error if {\tt itemList} contains items
-!     with names that are also found in {\tt container}. The {\tt container} 
-!     is left unchanged for these items. For {\tt .false.} this is treated
-!     as an error condition. The default setting is {\tt .false.}.
+!     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
+!     {\tt itemList} contains items with names that are also found in 
+!     {\tt container}. The {\tt container} is left unchanged for these items. 
+!     For {\tt .false.} this is treated as an error condition. 
+!     The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -262,11 +268,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerAddReplace()
-  subroutine ESMF_ContainerAddReplaceSIL(container, itemList, rc)
+  subroutine ESMF_ContainerAddReplaceSIL(container, itemList, keywordEnforcer, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container),     intent(inout)         :: container
     type(ESMF_StateItemWrap), intent(in)            :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
@@ -326,16 +334,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ContainerGetSI()"
 !BOPI
-! !IROUTINE: ESMF_ContainerGet - Query Container object
+! !IROUTINE: ESMF_ContainerGet - Query scalar information about a specific itemName
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetSI(container, itemName, item, isPresent, rc)
+  subroutine ESMF_ContainerGetSI(container, itemName, item, keywordEnforcer, &
+    itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container),     intent(in)            :: container
     character(len=*),         intent(in)            :: itemName
     type(ESMF_StateItemWrap), intent(out)           :: item
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                  intent(out), optional :: itemCount
     logical,                  intent(out), optional :: isPresent
     integer,                  intent(out), optional :: rc
 !         
@@ -350,6 +361,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The name of the specified item.
 !   \item[item]
 !     Returned item.
+!   \item [{[itemCount]}]
+!     Number of items with {\tt itemName} in {\tt container}.
 !   \item [{[isPresent]}]
 !     Upon return indicates whether item with {\tt itemName} is contained in 
 !     {\tt container}.
@@ -370,13 +383,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     ! Call into the C++ interface
-    call c_ESMC_ContainerGetSI(container, itemName, item, localrc)
+    call c_ESMC_ContainerGetSI(container, trim(itemName), item, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    if (present(itemCount)) then
+      ! Call into the C++ interface
+      call c_ESMC_ContainerGetCount(container, trim(itemName), itemCount, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     if (present(isPresent)) then
       ! Call into the C++ interface
-      call c_ESMC_ContainerGetIsPresent(container, itemName, &
+      call c_ESMC_ContainerGetIsPresent(container, trim(itemName), &
         dummyIsPresent, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -394,16 +415,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ContainerGetSIL()"
 !BOPI
-! !IROUTINE: ESMF_ContainerGet - Query Container object
+! !IROUTINE: ESMF_ContainerGet - Access a list of items matching itemName
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetSIL(container, itemCount, itemList, rc)
+  subroutine ESMF_ContainerGetSIL(container, itemName, itemList, &
+    keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container),     intent(in)            :: container
-    integer,                  intent(out), optional :: itemCount
+    character(len=*),         intent(in)            :: itemName
     type(ESMF_StateItemWrap), pointer               :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
@@ -413,11 +436,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[{[itemCount]}]
-!     Number of items {\tt container}.
-!   \item[itemList]
-!     List of items in {\tt container}. This argument has the pointer
-!     attribute. If the argument comes into this call associated the memory 
+!   \item[{[itemList]}]
+!     List of items in {\tt container} that match {\tt itemName}. 
+!     This argument has the pointer attribute.
+!     If the argument comes into this call associated the memory 
 !     allocation is not changed. Instead the size of the memory allocation is
 !     checked against the total number of elements in the container, and if
 !     sufficiently sized the container elements are returned in the provided
@@ -444,7 +466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     ! Call into the C++ interface
-    call c_ESMC_ContainerGetCount(container, itemC, localrc)
+    call c_ESMC_ContainerGetCount(container, trim(itemName), itemC, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -462,7 +484,108 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
       
     ! Call into the C++ interface to set up the vector on the C++ side
-    call c_ESMC_ContainerGetVector(container, vector, localrc)
+    call c_ESMC_ContainerGetVector(container, trim(itemName), vector, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    do i=0, itemC-1 ! C-style indexing, zero-based
+        
+      ! Call into the C++ interface to set up the vector on the C++ side
+      call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+        itemList(i+1), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    enddo
+      
+    ! release vector here
+    ! Call into the C++ interface to release the vector on the C++ side
+    call c_ESMC_ContainerReleaseVector(container, vector, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGetSIL
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGetSILAll()"
+!BOPI
+! !IROUTINE: ESMF_ContainerGet - Query Container object
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ContainerGet()
+  subroutine ESMF_ContainerGetSILAll(container, itemList, keywordEnforcer, &
+    itemCount, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container),     intent(in)            :: container
+    type(ESMF_StateItemWrap), pointer               :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                  intent(out), optional :: itemCount
+    integer,                  intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Get items from a {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to be queried.
+!   \item[itemList]
+!     List of items in {\tt container}. This argument has the pointer
+!     attribute. If the argument comes into this call associated the memory 
+!     allocation is not changed. Instead the size of the memory allocation is
+!     checked against the total number of elements in the container, and if
+!     sufficiently sized the container elements are returned in the provided
+!     memory allocation. If the argument comes into this call unassociated,
+!     memory will be allocated internally and filled with the container
+!     elements. In both cases it is the caller responsibility to deallocate
+!     the memory.
+!   \item[{[itemCount]}]
+!     Number of items {\tt container}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: stat
+    integer                       :: i, itemC
+    type(ESMF_Pointer)            :: vector
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface
+    call c_ESMC_ContainerGetCountAll(container, itemC, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    if (associated(itemList)) then
+      if (size(itemList) < itemC) then
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+          msg="itemList is too small", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return  ! bail out
+      endif
+    else
+      allocate(itemList(itemC), stat=stat)
+      if (ESMF_LogFoundAllocError(stat, msg= "allocating itemList", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+    endif
+      
+    ! Call into the C++ interface to set up the vector on the C++ side
+    call c_ESMC_ContainerGetVectorAll(container, vector, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -489,7 +612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_ContainerGetSIL
+  end subroutine ESMF_ContainerGetSILAll
 !------------------------------------------------------------------------------
 
 
@@ -524,12 +647,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Container} object to be added to.
 !   \item[itemList]
 !     Elements used to replace container items.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be replaced in {\tt container}. For {\tt .false.}, items to be replaced
+!     must have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "replace"
 !     where it is {\em not} an error if {\tt itemList} contains items with
 !     names that are not found in {\tt container}. These items in 
 !     {\tt itemList} are ignored in the relaxed mode. For {\tt .false.} this
-!     is treated as an error condition. The default setting is {\tt .false.}.
+!     is treated as an error condition.
+!     Further, in {\tt multiflag=.false.} mode, the relaxed definition of
+!     "replace" also covers the case where there are multiple items in
+!     {\tt container} that match a single entry by name in {\tt itemList}.
+!     For {\tt relaxedflag=.false.} this is treated as an error condition.
+!     The default setting is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -590,13 +722,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGarbageGet()
-  subroutine ESMF_ContainerGarbageGetSIL(container, garbageCount, &
-    garbageList, rc)
+  subroutine ESMF_ContainerGarbageGetSIL(container, garbageList, &
+    keywordEnforcer, garbageCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container),     intent(in)            :: container
-    integer,                  intent(out), optional :: garbageCount
     type(ESMF_StateItemWrap), pointer               :: garbageList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                  intent(out), optional :: garbageCount
     integer,                  intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
@@ -606,8 +739,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[container]
 !     {\tt ESMF\_Container} object to be queried.
-!   \item[{[garbageCount]}]
-!     Number of objects in {\tt container} garbage.
 !   \item[garbageList]
 !     List of objects in {\tt container} garbage. This argument has the pointer
 !     attribute. If the argument comes into this call associated the memory 
@@ -618,6 +749,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     unassociated, memory will be allocated internally and filled with the
 !     container garbage elements. In both cases it is the caller responsibility
 !     to deallocate the memory.
+!   \item[{[garbageCount]}]
+!     Number of objects in {\tt container} garbage.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

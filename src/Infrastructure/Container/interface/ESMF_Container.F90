@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.17 2011/05/20 00:12:30 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.18 2011/05/20 10:06:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.17 2011/05/20 00:12:30 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.18 2011/05/20 10:06:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -145,6 +145,7 @@ module ESMF_ContainerMod
 !
     module procedure ESMF_ContainerGetField
     module procedure ESMF_ContainerGetFieldList
+    module procedure ESMF_ContainerGetFieldListAll
 
 ! !DESCRIPTION: 
 !   Query Container.
@@ -526,18 +527,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ContainerGetField()"
 !BOPI
-! !IROUTINE: ESMF_ContainerGet - Query Container object
+! !IROUTINE: ESMF_ContainerGet - Query scalar information about a specific itemName
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
   subroutine ESMF_ContainerGetField(container, itemName, keywordEnforcer, &
-    item, isPresent, rc)
+    item, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Container), intent(in)            :: container
     character(len=*),     intent(in)            :: itemName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),     intent(out), optional :: item
+    integer,              intent(out), optional :: itemCount
     logical,              intent(out), optional :: isPresent
     integer,              intent(out), optional :: rc
 !         
@@ -552,6 +554,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The name of the specified item.
 !   \item[{[item]}]
 !     Returned item.
+!   \item [{[itemCount]}]
+!     Number of items with {\tt itemName} in {\tt container}.
 !   \item [{[isPresent]}]
 !     Upon return indicates whether item with {\tt itemName} is contained in 
 !     {\tt container}.
@@ -578,6 +582,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     
+    if (present(itemCount)) then
+      ! Call into the C++ interface
+      call c_ESMC_ContainerGetCount(container, trim(itemName), itemCount, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
     if (present(isPresent)) then
       ! Call into the C++ interface
       call c_ESMC_ContainerGetIsPresent(container, trim(itemName), &
@@ -598,11 +610,115 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ContainerGetFieldList()"
 !BOPI
+! !IROUTINE: ESMF_ContainerGet - Access a list of items matching itemName
+
+! !INTERFACE:
+  ! Private name; call using ESMF_ContainerGet()
+  subroutine ESMF_ContainerGetFieldList(container, itemName, itemList, &
+    keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Container), intent(in)            :: container
+    character(len=*),     intent(in)            :: itemName
+    type(ESMF_Field),     pointer               :: itemList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Get items from a {\tt ESMF\_Container} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[container]
+!     {\tt ESMF\_Container} object to be queried.
+!   \item[itemName]
+!     The name of the specified item.
+!   \item[{[itemList]}]
+!     List of items in {\tt container} that match {\tt itemName}. 
+!     This argument has the pointer attribute.
+!     If the argument comes into this call associated the memory 
+!     allocation is not changed. Instead the size of the memory allocation is
+!     checked against the total number of elements in the container, and if
+!     sufficiently sized the container elements are returned in the provided
+!     memory allocation. If the argument comes into this call unassociated,
+!     memory will be allocated internally and filled with the container
+!     elements. In both cases it is the caller responsibility to deallocate
+!     the memory.
+!   \item[{[itemCount]}]
+!     Number of items {\tt container}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: stat
+    integer                       :: i, itemC
+    type(ESMF_Pointer)            :: vector
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Call into the C++ interface
+    call c_ESMC_ContainerGetCount(container, trim(itemName), itemC, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    if (associated(itemList)) then
+      if (size(itemList) < itemC) then
+        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+          msg="itemList is too small", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return  ! bail out
+      endif
+    else
+      allocate(itemList(itemC), stat=stat)
+      if (ESMF_LogFoundAllocError(stat, msg= "allocating itemList", &
+        ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
+    endif
+    
+    ! Call into the C++ interface to set up the vector on the C++ side
+    call c_ESMC_ContainerGetVector(container, trim(itemName), vector, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    do i=0, itemC-1 ! C-style indexing, zero-based
+      
+      ! Call into the C++ interface to set up the vector on the C++ side
+      call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+        itemList(i+1), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    enddo
+    
+    ! release vector here
+    ! Call into the C++ interface to release the vector on the C++ side
+    call c_ESMC_ContainerReleaseVector(container, vector, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ContainerGetFieldList
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ContainerGetFieldListAll()"
+!BOPI
 ! !IROUTINE: ESMF_ContainerGet - Query Container object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
-  subroutine ESMF_ContainerGetFieldList(container, keywordEnforcer, &
+  subroutine ESMF_ContainerGetFieldListAll(container, keywordEnforcer, &
     itemList, itemCount, rc)
 !
 ! !ARGUMENTS:
@@ -650,7 +766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     ! Call into the C++ interface
-    call c_ESMC_ContainerGetCount(container, itemC, localrc)
+    call c_ESMC_ContainerGetCountAll(container, itemC, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -669,7 +785,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       
       ! Call into the C++ interface to set up the vector on the C++ side
-      call c_ESMC_ContainerGetVector(container, vector, localrc)
+      call c_ESMC_ContainerGetVectorAll(container, vector, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -698,7 +814,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_ContainerGetFieldList
+  end subroutine ESMF_ContainerGetFieldListAll
 !------------------------------------------------------------------------------
 
 
