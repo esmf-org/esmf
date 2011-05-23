@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.15 2011/05/19 19:13:55 feiliu Exp $
+! $Id: user_model2.F90,v 1.16 2011/05/23 05:59:38 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -117,32 +117,33 @@ module user_model2
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttributeSet(comp, 'ShortName', &
-      'HiGEM_AtmosChem', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'ShortName', 'HiGEM_AtmosChem', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'LongName', &
-      'Atmospheric chemistry component of HiGEM', &
+                           'Atmospheric chemistry component of HiGEM', &
+      convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'ReleaseDate', &
+      '2009-05-31T23:59:59Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'AtmosphericChemistry', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+      'AtmosphericChemistry', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! Responsible party attributes (for Principal Investigator)
+    ! Responsible party attributes (for Center)
     convISO = 'ISO 19115'
     purpRP = 'Responsible Party Description'
     call ESMF_AttributeSet(comp, 'Name', &
-      'Gerard Devine', &
-        convention=convISO, purpose=purpRP, rc=rc)
+     'GHI', &
+      convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Meteorology University of Reading Earley Gate, Reading UK',&
-        convention=convISO, purpose=purpRP, rc=rc)
+     'Department of Meteorology University of GHI', &
+      convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-      'g.m.devine@reading.ac.uk', &
-        convention=convISO, purpose=purpRP, rc=rc)
+     'info@ughi.edu', &
+      convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'PI', &
-        convention=convISO, purpose=purpRP, rc=rc)
+     'Center', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create two Fields, and add CIM Attribute packages.
@@ -158,30 +159,37 @@ module user_model2
 
     ! OH CF-Extended Attributes
     call ESMF_AttributeSet(OH, 'ShortName', 'OH_Conc_1900', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'StandardName', 'OH_Concentrations', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'LongName', 'seasonal_oxidant_conc', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'StandardName', &
+                               'OH_Concentrations', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'LongName', &
+                               'seasonal_oxidant_conc', &
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'Units', 'unknown', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! OH CIM Attributes
     call ESMF_AttributeSet(OH, 'CouplingPurpose', 'boundaryCondition', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'CouplingSource', 'HiGEM_OceanChem', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'CouplingTarget', 'HiGEM_AtmosChem', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'CouplingSource', &
+                               'Land_Emissions', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'CouplingTarget', &
+                               'HiGEM_AtmosChem', &
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
-                               'conservative-first-order', &
-        convention=convCIM, purpose=purpField, rc=rc)
+                               'Conservative-First-Order', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'SpatialRegriddingDimension', &
+                               '2D', &
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'Frequency', '15 minutes', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'TimeTransformationType', &
                                'TimeInterpolation', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
     ! Orog Field
@@ -191,24 +199,27 @@ module user_model2
 
     ! Orog CF-Extended Attributes
     call ESMF_AttributeSet(Orog, 'ShortName', 'UM_Orog_n320', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'StandardName', 'Height', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'LongName', 'Orography', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'Units', 'unknown', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Orog CIM Attributes
     call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'initialCondition', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'CouplingSource', 'HiGEM_Ocean', &
-        convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'CouplingTarget', 'HiGEM_Atmos', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'CouplingSource', &
+                                 'Land_Emissions', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'CouplingTarget', &
+                                 'HiGEM_Atmos', &
+         convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'TimeTransformationType', 'Exact', &
-        convention=convCIM, purpose=purpField, rc=rc)
+         convention=convCIM, purpose=purpField, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
    
     ! Create a FieldBundle for the two Fields
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle2", rc=rc)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2010/09/09 05:42:41 eschwab Exp $
+# $Id: makefile,v 1.2 2011/05/23 05:59:38 eschwab Exp $
 
 ALL: tree_build_system_tests
 
@@ -13,7 +13,8 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_AttributeCIMSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
+SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o \
+                        user_model3.o user_model4.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_AttributeCIM
 
@@ -32,7 +33,7 @@ CLOBBERDIRS =
 
 
 RUN_AttributeCIM:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=AttributeCIM NP=6 stest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=AttributeCIM NP=8 stest
 
 RUN_AttributeCIMUNI:
 	$(MAKE) TNAME=AttributeCIM NP=1 stest
