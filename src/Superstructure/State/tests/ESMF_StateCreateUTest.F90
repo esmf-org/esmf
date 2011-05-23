@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.38 2011/05/20 14:12:03 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.39 2011/05/23 19:40:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.38 2011/05/20 14:12:03 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.39 2011/05/23 19:40:52 theurich Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -307,6 +307,18 @@ end module
   write(name, *) "Verify Container Get item Test"
   write(failMsg, *) "Did not verify"
   call ESMF_Test((trim(siwOut(1)%si%namep)==trim(si%namep)), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  nullify(siw%si)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get item Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ContainerGet(container, itemName="testField1", item=siw, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  print *, "string in siw%si: ", siw%si%namep
 
   !------------------------------------------------------------------------
   !NEX_UTest

@@ -1,4 +1,4 @@
-// $Id: ESMCI_StateItem.h,v 1.1 2011/05/11 16:40:39 theurich Exp $
+// $Id: ESMCI_StateItem.h,v 1.2 2011/05/23 19:40:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,13 +31,13 @@
 //-----------------------------------------------------------------------------
 namespace ESMCI{
 
-  class StateItem{
+  class StateItemWrap{
     // pointer to fortran derived type
     F90ClassHolder fortranclass;
     // methods
    public:
-    StateItem(){}
-    StateItem(F90ClassHolder fc){
+    StateItemWrap(){}
+    StateItemWrap(F90ClassHolder fc){
       fortranclass = fc;
     }
     int castToFortran(F90ClassHolder *fc);
@@ -46,15 +46,15 @@ namespace ESMCI{
 
 extern "C" {
   // Prototypes of the Fortran interface functions.
-  void FTN(f_esmf_stateitemcast)(ESMCI::F90ClassHolder *statItemOut,
-    ESMCI::StateItem *stateItemIn, int *rc);
+  void FTN(f_esmf_stateitemwrapcast)(ESMCI::F90ClassHolder *statItemWrapOut,
+    ESMCI::StateItemWrap *stateItemWrapIn, int *rc);
 }
 
 namespace ESMCI{
-  int StateItem::castToFortran(F90ClassHolder *fc){
+  int StateItemWrap::castToFortran(F90ClassHolder *fc){
     int localrc = ESMC_RC_NOT_IMPL;
     int rc=ESMC_RC_NOT_IMPL;
-    FTN(f_esmf_stateitemcast)(fc, this, &localrc);
+    FTN(f_esmf_stateitemwrapcast)(fc, this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     // return successfully

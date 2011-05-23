@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.16 2011/05/20 10:06:27 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.17 2011/05/23 19:40:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -478,10 +478,11 @@ extern "C" {
     // call into C++
     try{
 
-      ESMCI::StateItem stateItem = (*ptr)->get(std::string(itemName, nlen));
+      ESMCI::StateItemWrap stateItemWrap = 
+        (*ptr)->get(std::string(itemName, nlen));
       
       // cast C++ StateItem object into Fortran
-      localrc = stateItem.castToFortran(f90p);
+      localrc = stateItemWrap.castToFortran(f90p);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
       

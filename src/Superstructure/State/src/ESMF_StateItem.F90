@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.3 2011/05/19 22:51:38 theurich Exp $
+! $Id: ESMF_StateItem.F90,v 1.4 2011/05/23 19:40:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -367,9 +367,10 @@ contains
 end module ESMF_StateItemMod
 
 
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_stateitemcast"
-subroutine f_esmf_stateitemcast(stateitemOut, stateitemIn, rc)
+#define ESMF_METHOD "f_esmf_stateitemwrapcast"
+subroutine f_esmf_stateitemwrapcast(stateItemWrapOut, stateItemWrapIn, rc)
 
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
@@ -378,8 +379,8 @@ subroutine f_esmf_stateitemcast(stateitemOut, stateitemIn, rc)
 
   implicit none
 
-  type(ESMF_StateItem),intent(inout) :: stateItemOut
-  type(ESMF_StateItem),intent(inout) :: stateItemIn
+  type(ESMF_StateItemWrap),intent(inout) :: stateItemWrapOut
+  type(ESMF_StateItemWrap),intent(inout) :: stateItemWrapIn
   integer, intent(out)           :: rc              
 
   integer :: localrc
@@ -387,10 +388,10 @@ subroutine f_esmf_stateitemcast(stateitemOut, stateitemIn, rc)
   localrc = ESMF_RC_NOT_IMPL
 
   ! simple assignment
-  stateItemOut = stateItemIn
+  stateItemWrapOut = stateItemWrapIn
 
   ! return successfully
   rc = ESMF_SUCCESS
 
-end subroutine f_esmf_stateitemcast
+end subroutine f_esmf_stateitemwrapcast
 
