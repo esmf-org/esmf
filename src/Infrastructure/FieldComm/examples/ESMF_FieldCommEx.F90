@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.42 2011/05/20 21:31:09 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.43 2011/05/23 20:47:42 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.42 2011/05/20 21:31:09 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.43 2011/05/23 20:47:42 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -80,7 +80,7 @@
 ! Gather will not gather data to rootPet 
 ! from source data points corresponding to the sequence index on the rootPet. 
 ! Instead Gather will gather a contiguous memory range from source PET to
-! rootPet. The size of the memomy range is equal to the number of 
+! rootPet. The size of the memory range is equal to the number of 
 ! data elements on the source PET. Vice versa for the Scatter operation. 
 ! In this case, the user should use {\tt ESMF\_FieldRedist} to achieve
 ! the same data operation result. For examples how to use {\tt ESMF\_FieldRedist}

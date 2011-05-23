@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.25 2011/05/20 21:31:11 feiliu Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.26 2011/05/23 20:47:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.25 2011/05/20 21:31:11 feiliu Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.26 2011/05/23 20:47:43 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -107,7 +107,7 @@ contains
 !   Gather will not gather data to rootPet @\
 !   from source data points corresponding to the sequence index on rootPet. @\
 !   Instead Gather will gather a contiguous memory range from source PET to @\
-!   rootPet. The size of the memomy range is equal to the number of  @\
+!   rootPet. The size of the memory range is equal to the number of  @\
 !   data elements on the source PET. Vice versa for the Scatter operation. @\
 !   In this case, the user should use {\tt ESMF\_FieldRedist} to achieve @\
 !   the same data operation result. For examples how to use {\tt ESMF\_FieldRedist} @\
