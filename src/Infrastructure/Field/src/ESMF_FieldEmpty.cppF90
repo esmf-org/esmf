@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.4 2011/05/20 20:06:17 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.5 2011/05/23 16:16:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.4 2011/05/20 20:06:17 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.5 2011/05/23 16:16:31 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -118,7 +118,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! the {\tt ESMF\_FieldEmptySet} and {\tt ESMF\_FieldEmptyComplete} methods.
 ! Attributes can be added to an empty Field object. For an example and
 ! associated documentation using this method see Section 
-! \ref{sec:field:usage:create_empty}.
+! \ref{sec:field:usage:create_empty} and \ref{sec:field:usage:create_empty_setcommit}.
 ! \end{sloppypar}
 !
 !
@@ -202,6 +202,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! built on the {\tt ESMF\_Grid} internally but holds on data. 
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET} to {\tt ESMF\_FIELDSTATUS\_COMPLETE}.
+!
+! For an example and
+! associated documentation using this method see Section
+! \ref{sec:field:usage:create_empty}.
 ! \end{sloppypar}
 !
 !
@@ -330,7 +334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptyCompAS"
 !BOP
-! !IROUTINE:   ESMF_FieldEmptyComplete - Complete a Field with GeomBase from arrayspec
+! !IROUTINE:   ESMF_FieldEmptyComplete - Complete a Field with a GeomBase from arrayspec
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptyComplete()
@@ -361,6 +365,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! stored internally before calling this method and has a status of 
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field}
 ! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+!
+! For an example and
+! associated documentation using this method see Section
+! \ref{sec:field:usage:create_empty}.
 ! 
 ! The arguments are:
 ! \begin{description}
@@ -566,6 +574,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! stored internally before calling this method and has a status of 
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field}
 ! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+!
+! For an example and
+! associated documentation using this method see Section
+! \ref{sec:field:usage:create_empty}.
+! 
 ! 
 ! The arguments are:
 ! \begin{description}
@@ -1615,6 +1628,11 @@ end subroutine ESMF_FieldEmptyCompTK
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
 ! @\
+! For an example and @\
+! associated documentation using this method see Section @\
+! \ref{sec:field:usage:create_empty}. @\
+! @\
+! @\
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
@@ -1826,6 +1844,11 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! @\
+! For an example and @\
+! associated documentation using this method see Section @\
+! \ref{sec:field:usage:create_empty}. @\
+! @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
