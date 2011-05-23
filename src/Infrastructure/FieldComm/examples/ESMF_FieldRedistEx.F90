@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.37 2011/05/20 20:55:05 feiliu Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.38 2011/05/23 14:29:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.37 2011/05/20 20:55:05 feiliu Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.38 2011/05/23 14:29:50 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -467,6 +467,7 @@
 !EOE
 !BOC
     call ESMF_FieldRedistRelease(routehandle=routehandle, rc=rc)
+!EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !------------------------------------------------------------------------------
 !BOE
@@ -492,12 +493,18 @@
 !BOE
 ! Perform FieldRedist, this will gather the data points from the Field built on mesh to
 ! the data pointer on the rootPet (default to 0) stored in the srcField.
+!EOE
 !BOC
     call ESMF_FieldRedist(dstField, srcField, routehandle=routehandle, rc=rc)
 !EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOE
+! Release the routehandle used for the gather operation.
+!EOE
+!BOC
     call ESMF_FieldRedistRelease(routehandle=routehandle, rc=rc)
+!EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(srcField, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -505,7 +512,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_MeshDestroy(mesh, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-!EOC
     call ESMF_Finalize(rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
