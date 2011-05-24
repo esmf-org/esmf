@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.30 2011/02/23 06:48:42 eschwab Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.31 2011/05/24 20:23:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 
 !BOC
       alarm(1) = ESMF_AlarmCreate(clock, &
-                                  ringTime=alarmTime, name="Example alarm 1", rc=rc)
+         ringTime=alarmTime, name="Example alarm 1", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
