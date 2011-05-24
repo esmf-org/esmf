@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.35 2011/05/20 22:41:51 svasquez Exp $
+% $Id: Attribute_pack.tex,v 1.36 2011/05/24 20:02:33 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@ There are many attributes that are used to describe components. There are curren
     \end{itemize}
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}}
+\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
@@ -289,7 +289,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the ESG (or ESMF) General, CF Extended, and CF General Field packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.  The attribute values within these ESG and CF nested packages currently appear in the Component Properties section of the CIM output file.  A separate Component Properties package may be developed for this purpose in a future ESMF release.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{6cm}|p{5cm}|p{3cm}|}
     \hline\hline
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
@@ -424,7 +424,7 @@ There are 2 grid attribute packages in ESMF.
     \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{longtable}{|p{5cm}|p{5cm}|p{4cm}|}
 \hline\hline
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
@@ -443,7 +443,7 @@ There are 2 grid attribute packages in ESMF.
 {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & N/A \\ 
 {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & N/A \\ 
 \hline\hline
-\end{tabular}
+\end{longtable}
 
 
 
@@ -487,7 +487,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
 
 \noindent
 
-\begin{longtable}{|p{5cm}|p{5cm}|p{4cm}}
+\begin{longtable}{|p{7cm}|p{5cm}|p{2cm}}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
      \hline\hline
