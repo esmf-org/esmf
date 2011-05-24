@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.5 2011/05/17 17:22:30 ksaint Exp $
+// $Id: ESMCI_WebServLowLevelSocket.C,v 1.6 2011/05/24 23:55:46 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.5 2011/05/17 17:22:30 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.6 2011/05/24 23:55:46 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -227,10 +227,13 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 
 	//***
 	// Set the SO_REUSEADDR to true so that the server can be restarted quickly
-	// without rejecting the bind
+	// without rejecting the bind (This isn't supported on all platforms, so
+	// we'll need to put a compile-time condition around it)
 	//***
+#ifndef ESMF_NO_SOCKOPT
 	int	optVal = 1;
 	setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal));
+#endif
 
 	struct sockaddr_in	server;
 	server.sin_family = AF_INET;

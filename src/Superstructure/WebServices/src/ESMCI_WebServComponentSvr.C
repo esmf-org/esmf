@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.8 2011/03/09 14:16:37 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.9 2011/05/24 23:55:46 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.8 2011/03/09 14:16:37 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.9 2011/05/24 23:55:46 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -872,6 +872,8 @@ int  ESMCI_WebServComponentSvr::processRun(
 
 		return localrc;
 	}
+
+   return ESMF_SUCCESS;
 }
 
 
@@ -985,6 +987,8 @@ int  ESMCI_WebServComponentSvr::processFinal(
 
 		return localrc;
 	}
+
+   return ESMF_SUCCESS;
 }
 
 
@@ -1051,6 +1055,8 @@ int  ESMCI_WebServComponentSvr::processState(
 
 		return localrc;
 	}
+
+   return ESMF_SUCCESS;
 }
 
 
@@ -1224,6 +1230,8 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 		return localrc;
 	}
+
+   return ESMF_SUCCESS;
 }
 
 
@@ -1266,10 +1274,10 @@ int  ESMCI_WebServComponentSvr::processGetData(
 	int	status = NET_ESMF_STAT_IDLE;
 	int	numFiles = 0;
 
-/*
 	//***
 	// Get the client id 
 	//***
+/*
 	int	bytesRead = 0;
 	char	buf[1024];
 
@@ -1300,9 +1308,9 @@ int  ESMCI_WebServComponentSvr::processGetData(
 	strncpy(varName, (char*)buf, 255);
 	//printf("Var Name: %s\n", varName);
 
-	//***
+	/////
 	// These next values are read as strings and then converted to double values
-	//***
+	/////
 	char	tempValue[256];
 
 	// Read time
@@ -1347,11 +1355,11 @@ int  ESMCI_WebServComponentSvr::processGetData(
 	//printf("Lon: %s\n", tempValue);
 	double	lonValue = atof(tempValue);
 
-	//***
+	/////
 	// Now that everything's been read off the socket, lookup the client info
 	// based on the client id.  If the client can't be found, then send back
 	// an error
-	//***
+	/////
 	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
 	ESMCI_WebServClientInfo*								clientInfo = NULL;
 
@@ -1392,11 +1400,11 @@ int  ESMCI_WebServComponentSvr::processGetData(
 	clientInfo = iter->second;
 	//clientInfo->print();
 
-	//***
+	/////
 	// If the data files (to be added to ClientInfo) have not been retrieved
 	// from the component server, then get them.
 	// KDS: Right now, I'm hardcoding the output filename...
-	//***
+	/////
 	if (theOutputFile == NULL)
 	{
 		theOutputFile = new ESMCI_WebServCAMOutputFile(
@@ -1419,9 +1427,9 @@ int  ESMCI_WebServComponentSvr::processGetData(
                                                     lonValue);
 	//printf("Data Value: %e\n", dataValue);
 
-	//***
+	/////
 	// Write the data back to the client
-	//***
+	/////
 	sprintf(tempValue, "%e", dataValue);
 	int	valueLen = strlen(tempValue) + 1;
 
@@ -1435,10 +1443,10 @@ int  ESMCI_WebServComponentSvr::processGetData(
       return localrc;
    }
 
-	//***
+	/////
 	// Send the current state back to the client (use the return code from
 	// the component initialize call to determine the state)
-	//***
+	/////
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
 
@@ -1548,6 +1556,8 @@ int  ESMCI_WebServComponentSvr::processEnd(
 
 		return localrc;
 	}
+
+   return ESMF_SUCCESS;
 }
 
 
