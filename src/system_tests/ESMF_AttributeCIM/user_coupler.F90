@@ -181,7 +181,6 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'Version', &
       '2.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
-
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
@@ -196,10 +195,10 @@ module user_coupler
       'SMS.f09_g16.X.bluefire', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationLongName', &
-      'CESM - Earth System Modeling Framework Earth System Model 1.0', &
+      'HiGEM - Earth System Modeling Framework Earth System Model 1.0', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationRationale', &
-'CESM-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+'HiGEM-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationStartDate', &
      '1960-01-01T00:00:00Z', &
@@ -220,12 +219,12 @@ module user_coupler
      'HadGEM1 Atmosphere', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'PreviousVersionDescription', &
-     'Horizontal resolution increased to 1.25 x 0.83 degrees;&#13; ' // &
-     'Timestep reduced from 30 minutes to 20 minutes;&#13; ' // &
-     'Magnitude of polar filtering in the advection scheme reduced;&#13; ' // &
+     'Horizontal resolution increased to 1.25 x 0.83 degrees; ' // &
+     'Timestep reduced from 30 minutes to 20 minutes; ' // &
+     'Magnitude of polar filtering in the advection scheme reduced; ' // &
      'Vertical velocity threshold at which targeted moisture diffusion ' // &
-     'is triggered was increased from 0.1m/s to 0.4m/s;&#13; ' // &
-     'Snow-free sea-ice albedo reduced from 0.61 to 0.57;&#13; ' // &
+     'is triggered was increased from 0.1m/s to 0.4m/s; ' // &
+     'Snow-free sea-ice albedo reduced from 0.61 to 0.57; ' // &
      'Total ocean current included in the calculation of surface ' // &
      'fluxes of heat, moisture, and momentum.', &
       convention=convCIM, purpose=purpComp, rc=rc)
@@ -274,7 +273,7 @@ module user_coupler
      'branch', &
       convention=convCIM, purpose=purpProp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationURL', &
-     'www.cesm.ucar.edu', &
+     'http://higem.nerc.ac.uk', &
       convention=convCIM, purpose=purpProp, rc=rc)
     call ESMF_AttributeSet(comp, 'Visualization', &
      'true', &
@@ -366,7 +365,7 @@ module user_coupler
      'doi:10.1175/2008JCLI2508.1', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.ecmwf.int/', &
+     'http://www.ecmwf.int', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2011/05/23 05:59:38 eschwab Exp $
+! $Id: user_model1.F90,v 1.15 2011/05/25 05:59:05 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -108,11 +108,6 @@ module user_model1
     ! CIM Component contains several Attributes, grouped into sub-packages.
     ! These Attributes conform to the CIM convention as defined by Metafor and
     ! their values are set individually.
-
-      !
-      !  Child component attributes, set on gridcomp1, child of cplcomp
-      !
-      ! Responsible party attributes (for Author)
 
     !
     !  CIM child component attributes, set on this comp, child of the coupler
