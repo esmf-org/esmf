@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.133 2011/05/18 22:10:37 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.134 2011/05/25 23:56:52 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
 // LogErr headers
 #include "ESMCI_LogErr.h"                 // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_IO.h"
 
 
 extern "C" {
@@ -58,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.133 2011/05/18 22:10:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.134 2011/05/25 23:56:52 samsoncheung Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2514,8 +2515,7 @@ int Array::read(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into Fortran interface
-  FTN(f_esmf_arrayread)(array, file, variableName, timeslice, 
-      iofmt, &localrc);
+  IO::read(array, file, variableName, timeslice, iofmt);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
@@ -2559,8 +2559,7 @@ int Array::write(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // call into Fortran interface
-  FTN(f_esmf_arraywrite)(array, file, variableName, append, timeslice,
-      iofmt, &localrc);
+  IO::write(array, file, variableName, append, timeslice, iofmt);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
