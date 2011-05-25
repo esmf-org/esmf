@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.43 2011/05/23 20:47:42 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.44 2011/05/25 16:01:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.43 2011/05/23 20:47:42 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.44 2011/05/25 16:01:19 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -107,19 +107,7 @@
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    allocate(farray(fa_shape(1), fa_shape(2)))
-    farray = lpe
-    array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    field = ESMF_FieldCreate(grid, array, rc=rc)
+    field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, rc=localrc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! allocate the Fortran data array on PET 0 to store gathered data
@@ -153,9 +141,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_ArrayDestroy(array, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    deallocate(farray)
     if(lpe .eq. 0) deallocate(farrayDst)
 !EOC
 
@@ -179,19 +164,7 @@
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridGet(grid, distgrid=distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    allocate(farray(fa_shape(1), fa_shape(2)))
-    farray = lpe
-    array = ESMF_ArrayCreate(farray, distgrid=distgrid, &
-        indexflag=ESMF_INDEX_DELOCAL, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    field = ESMF_FieldCreate(grid, array, rc=rc)
+    field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, rc=localrc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! initialize values to be scattered
@@ -233,9 +206,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_ArrayDestroy(array, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    deallocate(farray)
     if(lpe .eq. 0) deallocate(farraySrc)
 !EOC
 !------------------------------------------------------------------------------
