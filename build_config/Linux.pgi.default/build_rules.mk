@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.61 2011/03/16 18:36:54 theurich Exp $
+# $Id: build_rules.mk,v 1.57.2.1 2011/05/25 21:09:46 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -77,7 +77,6 @@ ifeq ($(ESMF_COMM),openmpi)
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
-ESMF_CXXLINKLIBS       += -lmpi_f77
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
@@ -100,18 +99,6 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgf90 $(ESMF_F90COMPILER)
 ESMF_CXXCOMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgCC $(ESMF_CXXCOMPILER)
-
-############################################################
-# Determine PGI version
-#
-ESMF_PGIVERSION_MAJOR = $(shell $(ESMF_DIR)/scripts/version.pgi 1 $(ESMF_F90COMPILER_VERSION))
-ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MAJOR=$(ESMF_PGIVERSION_MAJOR)
-
-ESMF_PGIVERSION_MINOR = $(shell $(ESMF_DIR)/scripts/version.pgi 2 $(ESMF_F90COMPILER_VERSION))
-ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
-
-ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMPILER_VERSION))
-ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
 
 ############################################################
 # Construct the ABISTRING
@@ -184,20 +171,12 @@ ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(shell $(ESMF_DIR)/scripts/libpath.
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ifeq ($(ESMF_PGIVERSION_MAJOR),7)
-ESMF_F90LINKLIBS += -lrt -lstd -lC $(shell $(ESMF_DIR)/scripts/libs.pgCC $(ESMF_CXXCOMPILER)) -ldl
-else
 ESMF_F90LINKLIBS += -pgcpplibs -ldl
-endif
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ifeq ($(ESMF_PGIVERSION_MAJOR),7)
-ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_DIR)/scripts/libs.pgf90 $(ESMF_F90COMPILER)) -ldl
-else
 ESMF_CXXLINKLIBS += -pgf90libs -ldl
-endif
 
 ############################################################
 # Shared library options
