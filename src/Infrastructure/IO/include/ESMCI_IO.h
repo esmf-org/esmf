@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.7 2011/05/18 15:51:26 samsoncheung Exp $
+// $Id: ESMCI_IO.h,v 1.8 2011/05/25 23:58:23 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,9 +31,11 @@
 //EOPI
 //-------------------------------------------------------------------------
 
+#include <ESMC_Util.h>
+
 #include "ESMCI_Base.h"       // Base is superclass to ArrayBundle
 #include "ESMCI_VM.h"
-#include "ESMCI_Array.h"
+#include "ESMCI_ArrayBundle.h"
 #include "ESMCI_Container.h"
 
 #include <vector>
@@ -51,7 +53,7 @@ class IO;
 class IO : public ESMC_Base {    // inherits from ESMC_Base class
   
   private:
-    Container<std::string, Array *> dataContainer;
+    ESMCI::ArrayBundle *dataContainer;
     bool dataCreator;
   
   public:
@@ -66,25 +68,21 @@ class IO : public ESMC_Base {    // inherits from ESMC_Base class
     }
 
   private:
-    IO(Array **dataList, int dataCount, int *rc);
+    IO(ArrayBundle **dataList, int dataCount, int *rc);
   public:
     ~IO(){destruct(false);}
   private:
     int destruct(bool followCreator=true);
   public:
     // create() and destroy()
-    static IO *create(Array **dataList, int dataCount, int *rc);
+    static IO *create(ArrayBundle **dataList, int dataCount, int *rc);
     static int destroy(IO **ioclass);
 
     // 
-    void getVector(std::vector<Array *> &dataVector)const{
-      dataContainer.getVector(dataVector);
-    }
-    int getCount()        const {return dataContainer.size();}
-    int read(Array *array, char *file, char *variableName,
+    static int read(Array *array, char *file, char *variableName,
              int *timeslice, ESMC_IOFmtFlag *iofmt);
-    int write(Array *array, char *file, char *variableName,
-              bool *append, int *timeslice, ESMC_IOFmtFlag *iofmt);
+    static int write(Array *array, char *file, char *variableName,
+               bool *append, int *timeslice, ESMC_IOFmtFlag *iofmt);
 
 };  // class IO
 
