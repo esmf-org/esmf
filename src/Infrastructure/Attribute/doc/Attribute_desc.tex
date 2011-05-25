@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.48 2011/05/20 16:57:37 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.49 2011/05/25 20:04:21 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -12,22 +12,23 @@
 The ESMF Attribute class is a metadata utility that supports emerging standards 
 in a flexible way.  The Attribute class is useful for documenting data 
 provenance and encourages models to be more self describing.  Attributes can 
-also be used for some aspects of model execution and coupling.
+also be used to automate some aspects of model execution and coupling.
 
 Metadata, which is data about data, is broken down into 
 name-value pairs by the Attribute class.  Attributes can be attached at any 
 level of the ESMF object hierarchy, and in some cases the Attributes of 
-different ESMF objects can linked together to form 
+different ESMF objects can be linked together to form 
 a corresponding Attribute hierarchy.  Attribute hierarchies are linked up
-automatically for the most part, with an exception at the Component-State 
-interaction.  Attribute hierarchies can also be unlinked, copied, and 
-moved around as needed.
+automatically for the most part, with the exception of links between a 
+Component and a State.  Attribute hierarchies can also be unlinked, copied, 
+and moved around as needed.
 
 ESMF Attribute packages 
 are used to aggregate, store, and output model metadata.  They can be 
 nested inside each other to make larger organized packages, distributed across 
-processors and updated at runtime, and expanded to suite specific needs.  These 
-Attribute packages are designed around accepted metadata conventions such as: 
+processors and updated at runtime, and expanded to suite specific needs.  The
+ESMF-supplied  
+Attribute packages are designed around accepted metadata conventions, such as: 
 climate and forecast (CF) \cite{ref:cf}, ISO standards \cite{ref:iso}, and the METAFOR 
 Common Information Model (CIM) \cite{ref:cim}.
 
@@ -38,6 +39,10 @@ the Attribute bearing classes.
 More information on the various Attribute 
 capabilities, and the classes for which they are supported appear in the
 following sections.
+
+Reading and writing Attribute XML files requires the Xerces C++ library, v3.1.0 
+or better.  For more details, see the ``ESMF Users Guide'', ``Building and 
+Installing the ESMF, Third Party Libraries, Xerces".
 
 \subsubsection{The ESMF approach to Attributes}
 
