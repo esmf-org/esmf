@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.38 2011/05/23 14:29:50 feiliu Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.39 2011/05/25 16:17:30 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.38 2011/05/23 14:29:50 feiliu Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.39 2011/05/25 16:17:30 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -49,8 +49,6 @@
     type(ESMF_ArraySpec)                        :: arrayspec
     integer                                     :: localrc, localPet, i
 
-    integer, allocatable                        :: src_farray(:), dst_farray(:)
-    integer                                     :: fa_shape(1)
     integer, pointer                            :: fptr(:)
 
     integer, pointer                            :: srcfptr(:), dstfptr(:)
@@ -96,7 +94,7 @@
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! create distgrid and grid
+    ! create grid
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
         regDecomp=(/4/), &
         rc=rc)
@@ -107,34 +105,31 @@
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(grid, localDe=0, totalCount=fa_shape, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    ! create src_farray, srcArray, and srcField
+    ! create srcField
     ! +--------+--------+--------+--------+
     !      0        1        2        3            ! value
     ! 1        4        8        12       16       ! bounds
-    allocate(src_farray(fa_shape(1)) )
-    src_farray = localPet
-    srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, &
-	indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+    srcField = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, &
+      indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    srcField = ESMF_FieldCreate(grid, srcArray, rc=rc)
+    call ESMF_FieldGet(srcField, farrayPtr=srcfptr, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! create dst_farray, dstArray, and dstField
+    srcfptr(:) = localPet
+
+    ! create dstField
     ! +--------+--------+--------+--------+
     !      0        0        0        0            ! value
     ! 1        4        8        12       16       ! bounds
-    allocate(dst_farray(fa_shape(1)) )
-    dst_farray = 0
-    dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, &
-		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+    dstField = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, &
+      indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    dstField = ESMF_FieldCreate(grid, dstArray, rc=rc)
+    call ESMF_FieldGet(dstField, farrayPtr=dstfptr, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  
+    dstfptr(:) = 0
 
     ! perform redist
     ! 1. setup routehandle from source Field to destination Field
@@ -163,11 +158,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_FieldDestroy(dstField, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_ArrayDestroy(srcArray, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_ArrayDestroy(dstArray, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    deallocate(src_farray, dst_farray)
 !BOE
 ! Field redistribution can also be performed between weakly congruent Fields.
 ! In this case, source and destination Fields can have ungridded dimensions
@@ -191,6 +181,7 @@
     dstFieldA = ESMF_FieldCreate(grid, arrayspec, gridToFieldMap=(/2/), &
         ungriddedLBound=(/1/), ungriddedUBound=(/10/), rc=rc)
 !EOC
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
 ! Using the previously computed routehandle, weakly congruent Fields can be
@@ -236,9 +227,12 @@
 !BOC
     ! a one dimensional grid whose elements are all located on PET 0
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/9/), &
-        regDecomp=(/1/), rc=rc)
+        regDecomp=(/1/), &
+        rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     grid = ESMF_GridCreate(distgrid=distgrid, &
-                     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
+        indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
@@ -512,6 +506,9 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_MeshDestroy(mesh, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    call ESMF_DistGridDestroy(distgrid, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
     call ESMF_Finalize(rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
