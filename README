@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF v5.2.0r beta snapshot
+                        README - ESMF v5.2.0p1
 
                     Earth System Modeling Framework (ESMF)
 
@@ -454,6 +454,8 @@ lib:             Contains the ESMF library file.
 
 mod:             Contains the Fortran module files.
 
+quick_start:     Contains skeleton application files to use as a template.
+
 test:            Contains unit and system test executables and output.
 
 examples:        Contains examples executables and output.
@@ -497,4 +499,4 @@ Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.117 2011/05/04 23:02:48 theurich Exp $
+ $Id: README,v 1.115.2.1 2011/05/25 21:23:16 theurich Exp $

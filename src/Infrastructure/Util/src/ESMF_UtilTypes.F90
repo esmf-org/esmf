@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.118 2011/05/06 19:00:13 feiliu Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.112.2.1 2011/05/25 21:23:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
       integer, parameter :: ESMF_MAXSTR = 128
 
 ! Maximum length of a file name, including its path.
-      integer, parameter :: ESMF_MAXPATHLEN = 1024
+      integer, parameter :: ESMF_MAXPATHLEN = 1023
 
 ! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
       integer, parameter :: ESMF_MAXDIM = 7, &
@@ -84,9 +84,9 @@
       integer, parameter :: ESMF_MAJOR_VERSION = 5
       integer, parameter :: ESMF_MINOR_VERSION = 2
       integer, parameter :: ESMF_REVISION      = 0
-      integer, parameter :: ESMF_PATCHLEVEL    = 0
+      integer, parameter :: ESMF_PATCHLEVEL    = 1
       character(*), parameter :: ESMF_VERSION_STRING = &
-                                 "5.2.0r beta snapshot"
+                                 "5.2.0p1"
 
 !------------------------------------------------------------------------------
 !
@@ -216,15 +216,16 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_MapPtr - used to provide Fortran access to C++ STL map containers
-!     ! for associative lookup name-pointer pairs.
+!     ! ESMF_MapName - used to provide Fortran access to C++ STL map containers
+!     ! for name-value pairs.
 
-      type ESMF_MapPtr
+      type ESMF_MapName
         sequence
         !private
         type(ESMF_Pointer) :: this
         ! only used internally -> no init macro!
       end type
+
 
 
 !------------------------------------------------------------------------------
@@ -656,16 +657,6 @@
            ESMF_REGRID_CONSERVE_ON      = ESMF_RegridConserve(1)
 
 
-!------------------------------------------------------------------------------
-!
-!
-      integer, parameter :: ESMF_REGRID_SCHEME_FULL3D = 0, &
-                            ESMF_REGRID_SCHEME_NATIVE = 1, &
-                            ESMF_REGRID_SCHEME_REGION3D = 2, &
-                            ESMF_REGRID_SCHEME_FULLTOREG3D=3, &
-                            ESMF_REGRID_SCHEME_REGTOFULL3D=4, &
-                            ESMF_REGRID_SCHEME_DCON3D=5, &
-                            ESMF_REGRID_SCHEME_DCON3DWPOLE=6
 
 
 !------------------------------------------------------------------------------
@@ -751,14 +742,6 @@
        public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
                                    ESMF_REGRID_CONSERVE_ON
 
-       public ESMF_REGRID_SCHEME_FULL3D, &
-              ESMF_REGRID_SCHEME_NATIVE, &
-              ESMF_REGRID_SCHEME_REGION3D, &
-              ESMF_REGRID_SCHEME_FULLTOREG3D, &
-              ESMF_REGRID_SCHEME_REGTOFULL3D, &
-              ESMF_REGRID_SCHEME_DCON3D, &
-              ESMF_REGRID_SCHEME_DCON3DWPOLE
-
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
       public ESMF_MAXPATHLEN
@@ -791,7 +774,7 @@
       public ESMF_Status, ESMF_Pointer, ESMF_TypeKind
       public ESMF_DataValue
 
-      public ESMF_MapPtr
+      public ESMF_MapName
 
       public ESMF_PointerPrint
 
@@ -850,19 +833,6 @@ interface assignment (=)
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
 end interface  
-
-
-!------------------------------------------------------------------------------
-! ! ESMF_MethodTable
-
-  type ESMF_MethodTable
-    sequence
-    !private
-    type(ESMF_Pointer) :: this
-    ! only use internally -> no init macro!
-  end type
-     
-  public ESMF_MethodTable
 
 
 !------------------------------------------------------------------------------
@@ -957,7 +927,7 @@ end interface
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ObjectIDGetInit,ESMF_ObjectIDInit,s)
+     ESMF_INIT_CHECK_SHALLOW(ESMF_ObjectIDGetInit,ESMF_ObjectIDInit,s)
 
      ! return success
      if(present(rc)) then
