@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.11 2011/05/18 15:49:43 samsoncheung Exp $
+// $Id: ESMCI_IO.C,v 1.12 2011/05/25 23:59:17 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,6 +35,7 @@
 #include "ESMCI_Container.h"
 #include <ESMCI_LogErr.h>
 #include <ESMF_LogMacros.inc>
+#include <ESMCI_ArrayBundle.h>
 
 
 
@@ -57,7 +58,7 @@ void FTN(f_esmf_piowrite)(ESMCI::Array *array, char *file,
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.11 2011/05/18 15:49:43 samsoncheung Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.12 2011/05/25 23:59:17 samsoncheung Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -82,7 +83,7 @@ namespace ESMCI
 //     pointer to newly allocated IO
 //
 // !ARGUMENTS:
-      Array          **dataList,     // in
+      ArrayBundle     **dataList,     // in
       int             dataCount,         // in
       int             *rc                // (out)
       ) { 
@@ -99,8 +100,6 @@ namespace ESMCI
 
     try 
     {
-      for (int i=0; i<dataCount; i++)
-        dataContainer.add(string(dataList[i]->getName()), dataList[i]);
 
       dataCreator = false; // Array objects were provided externally
 
@@ -145,15 +144,7 @@ namespace ESMCI
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
-    // garbage collection
-    if (dataCreator && followCreator){
-      vector<Array *> dataVector;
-      getVector(dataVector);
-      for (int i=0; i<getCount(); i++)
-        Array::destroy(&dataVector[i]);
-    }
-  }
+  // ArrayBundle::destroy(&arrayList);
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -182,7 +173,7 @@ IO *IO::create(
 //
 // !ARGUMENTS:
 //
-  Array **arrayList,                       // (in)
+  ArrayBundle **arrayList,                 // (in)
   int arrayCount,                          // (in)
   int *rc                                  // (out) return code
   ){
