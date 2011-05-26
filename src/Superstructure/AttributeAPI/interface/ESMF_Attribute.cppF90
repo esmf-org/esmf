@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.89 2011/05/26 06:00:58 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.90 2011/05/26 20:25:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.89 2011/05/26 06:00:58 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.90 2011/05/26 20:25:03 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1024,9 +1024,9 @@ contains
 !     character (len = *), intent(in) :: name
 !     <valueList argument>, see below for supported values
 !     <defaultvalueList argument>, see below for supported values   
-!     character (len = *), intent(in),   optional :: convention
-!     character (len = *), intent(in),   optional :: purpose
-!     character (len = *), intent(in),   optional :: attPackInstanceName
+!     character (len = *), intent(in),    optional :: convention
+!     character (len = *), intent(in),    optional :: purpose
+!     character (len = *), intent(in),    optional :: attPackInstanceName
 !     integer,             intent(inout), optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc   
@@ -1089,13 +1089,15 @@ contains
 !           The name of an Attribute package instance, specifying which one of
 !           multiple Attribute package instances of the same convention and
 !           purpose, within a nest.  (Not implemented yet)
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute.  If the itemCount 
+!           is passed in, only itemCount items of the desired Attribute will be 
+!           returned, as long as there is enough space and there are  itemCount 
+!           items to return.  Regardless of whether itemCount is passed in, it 
+!           will be returned as the number of items that was {\it actually} 
+!           returned.
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
-!     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute.  If the itemCount is passed in, only itemCount
-!           items of the desired Attribute will be returned, as long as there is enough space and there are 
-!           itemCount items to return.  Regardless of whether itemCount is passed in, it will be returned as the
-!           number of items that was {\it actually} returned.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1160,15 +1162,22 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet() 
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, typekind, &
-!                                           itemCount, rc)
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, keywordEnforcer, &
+!                                           convention, purpose, &
+!                                           attPackInstanceName, typekind, &
+!                                           itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
-!     <object>, see below for supported values  
+!     <object>, see below for supported values
 !     character (len = *), intent(in) :: name
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len=*), intent(in), optional :: convention
+!     character (len=*), intent(in), optional :: purpose
+!     character (len=*), intent(in), optional :: attPackInstanceName
 !     type(ESMF_TypeKind), intent(out), optional :: typekind
-!     integer, intent(out), optional :: itemCount   
-!     integer, intent(out), optional :: rc   
+!     integer, intent(out), optional :: itemCount
+!     logical, intent(out), optional :: isPresent
+!     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return information associated with the named Attribute, 
@@ -1192,10 +1201,20 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to query
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  (Not implemented yet)
 !     \item [{[typekind}]]
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute
+!     \item [{[isPresent]}] @\
+!           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -3296,14 +3315,13 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetChar(mthis, name, value, keywordEnforcer, defaultvalue, & @\
+      subroutine mclass##AttGetChar(mthis, name, value, defaultvalue, & @\
         convention, purpose, attPackInstanceName, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(inout), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
@@ -3671,8 +3689,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetInfoByNam(mthis, name, keywordEnforcer, convention, purpose, & @\
-        attPackInstanceName, typekind, itemCount, isPresent, rc) @\
+      subroutine mclass##AttGetInfoByNam(mthis, name, keywordEnforcer, & @\
+                             convention, purpose, attPackInstanceName, & @\
+                             typekind, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
