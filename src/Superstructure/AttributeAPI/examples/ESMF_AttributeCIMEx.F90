@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.34 2011/05/25 05:58:19 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.35 2011/05/26 06:01:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -347,8 +347,7 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !\begin{sloppypar}
-!     The Attribute link between a State and the Component, and between
-!     Components, must be set manually.
+!     The Attribute link between a Component and a State must be set manually.
 !\end{sloppypar}
 !EOE
 
