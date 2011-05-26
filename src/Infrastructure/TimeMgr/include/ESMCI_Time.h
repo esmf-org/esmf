@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.18 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Time.h,v 1.19 2011/05/26 05:51:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -194,9 +194,6 @@
 
  // < declare the rest of the public interface methods here >
 
-// !PRIVATE MEMBER FUNCTIONS:
-//
-  private:
     // return in string format (TMG 2.4.7)
     int getString(char *timeString, const char *options=0) const;
 
@@ -206,6 +203,10 @@
     int getDayOfYear(ESMC_I4 *dayOfYear) const;
     int getDayOfYear(ESMC_R8 *dayOfYear) const; // (TMG 2.5.2)
     int getDayOfYear(TimeInterval *dayOfYear) const;
+
+// !PRIVATE MEMBER FUNCTIONS:
+//
+  private:
 
     friend class TimeInterval;
     friend class Calendar;

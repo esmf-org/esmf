@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.16 2011/02/22 21:35:57 w6ws Exp $"
+// $Id: ESMCI_Time.C,v 1.17 2011/05/26 05:51:08 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.16 2011/02/22 21:35:57 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.17 2011/05/26 05:51:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1262,7 +1262,7 @@ namespace ESMCI{
  }  // end ~Time
 
 //-------------------------------------------------------------------------
-//  Private methods to support Time::get() API
+//  Public methods to support Time::get() API
 //-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
