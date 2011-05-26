@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.107 2011/05/20 21:25:25 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.108 2011/05/26 05:55:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,6 +31,7 @@
 #include "ESMCI_IO_XML.h"
 #include "ESMCI_Base.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_Time.h"
 #include "ESMF_LogMacros.inc"
 //#include "ESMCI_VM.h"
 
@@ -45,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.107 2011/05/20 21:25:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.108 2011/05/26 05:55:13 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5390,15 +5391,37 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("type", "", indent, 2,
                                    "open", "true", 
                                    "value", value.c_str());
-    localrc = io_xml->writeElement("documentID", 
-                                   "507a5b52-a91b-11df-a484-00163e9152a5", 
-                                   indent, 0);
-    localrc = io_xml->writeElement("documentVersion", "1.0", indent, 0);
-    // TODO:  use TimeMgr's ESMF_TimeSyncToRealTime() 
-    localrc = io_xml->writeElement("documentCreationDate", 
-                                   "2010-09-30T11:13:22Z", indent, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
+  localrc = io_xml->writeElement("documentID", 
+                                 "507a5b52-a91b-11df-a484-00163e9152a5", 
+                                 indent, 0);
+  localrc = io_xml->writeElement("documentVersion", "1.0", indent, 0);
+
+  // stamp the metadata source as ESMF, version x
+  string metadataSource = "ESMF Version ";
+  metadataSource += ESMF_VERSION_STRING;
+  localrc = io_xml->writeStartElement("documentAuthor", "", indent, 0);
+  localrc = io_xml->writeStartElement("gmd:individualName", "", ++indent, 0);
+  localrc = io_xml->writeElement("gco:CharacterString", metadataSource.c_str(),                                  ++indent, 0);
+  localrc = io_xml->writeEndElement("gmd:individualName", --indent);
+  localrc = io_xml->writeStartElement("gmd:role", "", indent, 0);
+  localrc = io_xml->writeElement("gmd:CI_RoleCode", "", ++indent, 2,
+                                     "codeList", "",
+                                     "codeListValue",
+                                     "documentAuthor");
+  localrc = io_xml->writeEndElement("gmd:role", --indent);
+  localrc = io_xml->writeEndElement("documentAuthor", --indent);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+  // use TimeMgr for timestamping
+  // TODO: also use timezone when implemented in TimeMgr
+  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CAL_GREGORIAN, 0);
+  char dateTimeString[ESMF_MAXSTR];
+  dateTime.syncToRealTime();
+  dateTime.getString(dateTimeString);
+  localrc = io_xml->writeElement("documentCreationDate", 
+                                 dateTimeString, indent, 0);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   // <documentGenealogy>
   if (attpack->AttributeIsSet("PreviousVersionDescription") || 
@@ -5583,9 +5606,14 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
   }
 
-  // TODO:  use TimeMgr's ESMF_TimeSyncToRealTime() 
+  // use TimeMgr for timestamping
+  // TODO: also use timezone when implemented in TimeMgr
+  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CAL_GREGORIAN, 0);
+  char dateTimeString[ESMF_MAXSTR];
+  dateTime.syncToRealTime();
+  dateTime.getString(dateTimeString);
   localrc = io_xml->writeElement("documentCreationDate", 
-                                 "2010-09-30T11:13:22Z", 2, 0);
+                                 dateTimeString, 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeEndElement("simulationRun", 1);
@@ -5801,9 +5829,15 @@ int Attribute::count=0;
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
   localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
-  // TODO:  use TimeMgr's ESMF_TimeSyncToRealTime() 
+
+  // use TimeMgr for timestamping
+  // TODO: also use timezone when implemented in TimeMgr
+  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CAL_GREGORIAN, 0);
+  char dateTimeString[ESMF_MAXSTR];
+  dateTime.syncToRealTime();
+  dateTime.getString(dateTimeString);
   localrc = io_xml->writeElement("documentCreationDate", 
-                                   "2010-09-30T11:13:22Z", 2, 0);
+                                 dateTimeString, 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeEndElement("platform", 1);
