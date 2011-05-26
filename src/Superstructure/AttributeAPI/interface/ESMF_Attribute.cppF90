@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.88 2011/05/16 18:59:44 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.89 2011/05/26 06:00:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.88 2011/05/16 18:59:44 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.89 2011/05/26 06:00:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -4301,7 +4301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS @\
       !TODO: Remove the following dummy test when dummy argument actually used @\
-      if (convention == convention .and. purpose==purpose) continue @\
+      if (present(convention) .and. present(purpose)) continue @\
  @\
       ! get length of given fileNames for C++ validation @\
       if (present(fileName)) then @\
