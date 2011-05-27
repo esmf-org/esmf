@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.54 2011/01/12 23:28:43 svasquez Exp $
+% $Id: Grid_desc.tex,v 1.55 2011/05/27 23:46:30 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -302,7 +302,7 @@ be used in a regridding operation.
 When creating the Grid shape and specifying the Grid coordinates,
 the user can either specify all required information at once,
 or can provide information incrementally.  The call
-{\tt ESMF\_GridCreateEmpty()} builds a Grid object
+{\tt ESMF\_GridEmptyCreate()} builds a Grid object
 container that can be filled in with a subsequent call to 
 the {\tt ESMF\_GridSetCommitShapeTile()} method. 
 The {\tt ESMF\_GridSetCommitShapeTile()} creates the 
@@ -313,12 +313,12 @@ after the commit). The Grid is implicitly in a valid state after being committed
 \begin{sloppypar}
 For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
 call must occur on the same or a subset of the PETs as the
-{\tt ESMF\_GridCreateEmpty()} call. The 
+{\tt ESMF\_GridEmptyCreate()} call. The 
 {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
 the context in which it's executed and the "empty" Grid contains
 no information about the VM in which it was run.  If the
 {\tt ESMF\_GridSetCommitShapeTile()} call occurs
-in a subset of the PETs in which the {\tt ESMF\_GridCreateEmpty()} was 
+in a subset of the PETs in which the {\tt ESMF\_GridEmptyCreate()} was 
 executed, the Grid is created only in that subset. The grid objects outside the subset will
 still be "empty" and not usable. 
 \end{sloppypar}
@@ -335,7 +335,7 @@ for building Grids.
 {\tt distgrid = ESMF\_DistGridCreate(...)} \\
 {\tt grid = ESMF\_GridCreate(distgrid, ...)} \\
 {\it Incremental} \\
-{\tt grid = ESMF\_GridCreateEmpty(...)} \\
+{\tt grid = ESMF\_GridEmptyCreate(...)} \\
 {\tt call ESMF\_GridSetCommitShapeTile(grid, ...)} \\ \hline
 {\bf Set Coordinates} \\
 {\it Set coordinates by copy or reference} \\

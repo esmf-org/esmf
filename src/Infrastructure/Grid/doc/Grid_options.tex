@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.35 2011/04/27 17:28:44 oehmke Exp $
+% $Id: Grid_options.tex,v 1.36 2011/05/27 23:46:30 oehmke Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -40,14 +40,15 @@ are the valid values of ESMF\_GRIDSTATUS.
 
 \medskip
 \begin{description}
-\item [ESMF\_GRIDSTATUS\_NOT\_READY:] Status after a Grid has been created with 
+\item [ESMF\_GRIDSTATUS\_EMPTY:] Status after a Grid has been created with 
       {\tt ESMF\_GridCreateEmpty}.  A Grid object container is allocated but
       space for internal objects is not.  Topology information and coordinate
-      information is incomplete.  This object can be used in {\tt ESMF\_GridSet()}
+      information is incomplete.  This object can be used in {\tt ESMF\_GridComplete()}
       methods in which additional information is added to the Grid.
-\item [ESMF\_GRIDSTATUS\_SHAPE\_READY:] The Grid has a specific topology and
+\item [ESMF\_GRIDSTATUS\_COMPLETE:] The Grid has a specific topology and
       distribution, but incomplete coordinate arrays.  The Grid can be used
-      as the basis for allocating a Field.
+      as the basis for allocating a Field, and coordinates can be added
+      via {\tt ESMF\_GridCoordAdd()} to allow other functionality. 
 \end{description}
 
 \subsubsection{ESMF\_GridMatchType}

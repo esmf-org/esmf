@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.24 2011/05/13 20:22:28 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.25 2011/05/27 23:46:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.24 2011/05/13 20:22:28 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.25 2011/05/27 23:46:34 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -151,7 +151,7 @@ program ESMF_GridArbitraryUTest
   !----------------------------------------------------------------------------=
   ! Test Set 1:  2D Arbitrary Grid with both dimensions distributed
   !-----------------------------------------------------------------------------
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
 	name="arbgrid", rc=rc)
@@ -399,7 +399,7 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
   zdim = 4
 
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, ydim, zdim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
 	name="arbgrid", rc=rc)
@@ -590,7 +590,7 @@ program ESMF_GridArbitraryUTest
   ! Second grid, the undistributed coord array is 2D
   !------------------------------------------------------------------------------
 
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
     coordDep3=(/ESMF_GRID_ARBDIM,3/), name="arbgrid", rc=rc)
@@ -909,7 +909,7 @@ program ESMF_GridArbitraryUTest
   zdim = 4
   
   ! switch ydim and zdim and set distDim to make xdim and ydim distributed
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, distDim=(/1,3/), &
 	name="arbgrid", rc=rc)
@@ -943,7 +943,7 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
 
   ! switch ydim and zdim and set distDim to make xdim and ydim distributed
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, distDim=(/1,3/), &
 	name="arbgrid", rc=rc)
@@ -998,7 +998,7 @@ program ESMF_GridArbitraryUTest
   rc=ESMF_SUCCESS
 
   ! switch ydim and zdim and set distDim to make xdim and ydim distributed
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, distDim=(/1,3/), &
 	name="arbgrid", rc=rc)
@@ -1095,7 +1095,7 @@ program ESMF_GridArbitraryUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
-  ! Fourth grid, using GridCreateEmpty() and GridSetCommitShapeTile() to create a 2D arb. grid
+  ! Fourth grid, using GridEmptyCreate() and GridSetCommitShapeTile() to create a 2D arb. grid
   !------------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Create an empty grid then set the values"
@@ -1103,7 +1103,7 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
-  grid = ESMF_GridCreateEmpty(rc=localrc)
+  grid = ESMF_GridEmptyCreate(rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
@@ -1157,7 +1157,7 @@ program ESMF_GridArbitraryUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  ! Fifth Grid: Use GridCreateEmpty() and GridSetCommitShapeTile() to create grid with undistributed dimension
+  ! Fifth Grid: Use GridEmptyCreate() and GridSetCommitShapeTile() to create grid with undistributed dimension
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Create an empty grid then set the values with undistributed dimension and non-default distdim"
@@ -1165,7 +1165,7 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
-  grid = ESMF_GridCreateEmpty(rc=localrc)
+  grid = ESMF_GridEmptyCreate(rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
@@ -1357,7 +1357,7 @@ program ESMF_GridArbitraryUTest
 	deallocate(localIndices)
 	allocate(localIndices(localCount,2))
   endif		
-  grid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  grid = ESMF_GridCreateNoPeriodicDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
 	name="arbgrid", rc=rc)
@@ -1384,7 +1384,7 @@ program ESMF_GridArbitraryUTest
   
 
   !-----------------------------------------------------------------------------
-  ! Test set 9: Use GridCreateEmpty() and GridSetCommitShapeTile() to create grid with undistributed dimension
+  ! Test set 9: Use GridEmptyCreate() and GridSetCommitShapeTile() to create grid with undistributed dimension
   ! with one PET with 0 elements
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1393,7 +1393,7 @@ program ESMF_GridArbitraryUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
-  grid = ESMF_GridCreateEmpty(rc=localrc)
+  grid = ESMF_GridEmptyCreate(rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &

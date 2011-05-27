@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.41 2011/05/19 19:13:50 feiliu Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.42 2011/05/27 23:46:36 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.41 2011/05/19 19:13:50 feiliu Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.42 2011/05/27 23:46:36 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -113,7 +113,7 @@ program ESMF_AttributeFieldUTest
       ! fields
       field = ESMF_FieldEmptyCreate(name="original field", rc=rc)
 
-      grid = ESMF_GridCreateEmpty(rc=rc)
+      grid = ESMF_GridEmptyCreate(rc=rc)
 
 !-------------------------------------------------------------------------
 !  FIELD

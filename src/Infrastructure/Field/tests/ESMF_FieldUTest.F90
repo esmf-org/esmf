@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.159 2011/05/20 20:06:19 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.160 2011/05/27 23:46:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.159 2011/05/20 20:06:19 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.160 2011/05/27 23:46:28 oehmke Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -611,7 +611,7 @@
       !EX_UTest_Multi_Proc_Only
       ! Verifying that a Field cannot be created with an uninitialized Grid 
       ! and Array.  f6 is *not* created here and should be invalid.
-      grid2 = ESMF_GridCreateEmpty(rc=rc)
+      grid2 = ESMF_GridEmptyCreate(rc=rc)
       call ESMF_GridDestroy(grid2, rc=rc)
       f6 = ESMF_FieldCreate(grid2, arrayspec=arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
                         staggerloc=ESMF_STAGGERLOC_CENTER, &

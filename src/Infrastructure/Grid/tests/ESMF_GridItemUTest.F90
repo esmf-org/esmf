@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.16 2011/04/27 17:28:48 oehmke Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.17 2011/05/27 23:46:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.16 2011/04/27 17:28:48 oehmke Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.17 2011/05/27 23:46:35 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -97,7 +97,7 @@ program ESMF_GridItemUTest
   correct=.true.
 
   ! Create Grid with globalXCountxglobalYCount cells
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+  gridA=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
                                   indexflag=ESMF_INDEX_GLOBAL,         &
                                   rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -130,7 +130,7 @@ program ESMF_GridItemUTest
   enddo
 
   ! Create Grid with globalXCountxglobalYCount cells
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+  gridB=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
                                   indexflag=ESMF_INDEX_GLOBAL,         &
                                   rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -190,7 +190,7 @@ program ESMF_GridItemUTest
   correct=.true.
 
   ! Create Grid with globalXCountxglobalYCount cells
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+  gridA=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
                                   indexflag=ESMF_INDEX_GLOBAL,         &
                                   rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -223,7 +223,7 @@ program ESMF_GridItemUTest
   enddo
 
   ! Create Grid with globalXCountxglobalYCount cells
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+  gridB=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
                                   indexflag=ESMF_INDEX_GLOBAL,         &
                                   rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -479,7 +479,7 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -488,7 +488,7 @@ program ESMF_GridItemUTest
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -547,14 +547,14 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -609,13 +609,13 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
@@ -669,14 +669,14 @@ program ESMF_GridItemUTest
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               petMap=petMap2D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/3,4/),  &
                               countsPerDeDim3=(/5/),  & 
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -801,7 +801,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
   ! Check if bounds are correct for each DE
   if (petCount .eq. 1) then
       ! Note the order of DE's here is dependant on the ordering
-      ! in ESMF_GridCreateShapeTile, if that changes then this will
+      ! in ESMF_GridCreateNoPeriodicDim, if that changes then this will
       ! probably have to change also. 
 
       ! check DE 0

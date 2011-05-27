@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.112 2011/05/19 17:20:55 oehmke Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.113 2011/05/27 23:46:35 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.112 2011/05/19 17:20:55 oehmke Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.113 2011/05/27 23:46:35 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -277,7 +277,7 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
 
   ! Create Grid 1
-  grid=ESMF_GridCreateShapeTile(maxIndex=(/20,20/), regDecomp=(/2,2/), rc=localrc)
+  grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/20,20/), regDecomp=(/2,2/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get name, so we can set name in the grid create copy
@@ -564,7 +564,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2,3,4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2,3,4/), &
                                     countsPerDeDim2=(/3,4,5/), &
                                     rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -594,7 +594,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2,3,4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2,3,4/), &
                                     countsPerDeDim2=(/3,4,5/), &
                                     countsPerDeDim3=(/6,8/), &
                                     rc=localrc)
@@ -629,13 +629,13 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! Create empty grid
-  grid=ESMF_GridCreateEmpty(rc=localrc)
+  grid=ESMF_GridEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! make sure empty grid returns not ready
   call ESMF_GridGet(grid, status=status, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  if (status /=ESMF_GRIDSTATUS_NOT_READY) correct=.false. 
+  if (status /=ESMF_GRIDSTATUS_EMPTY) correct=.false. 
 
   ! Commit grid
   call ESMF_GridSetCommitShapeTile(grid, countsPerDEDim1=(/4/), &
@@ -647,7 +647,7 @@ program ESMF_GridCreateUTest
   ! make sure empty grid returns not ready
   call ESMF_GridGet(grid, status=status, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  if (status /=ESMF_GRIDSTATUS_SHAPE_READY) correct=.false. 
+  if (status /=ESMF_GRIDSTATUS_COMPLETE) correct=.false. 
 
   ! destroy grid
   call ESMF_GridDestroy(grid,rc=localrc)
@@ -665,7 +665,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/4/), &
                                     countsPerDeDim2=(/5/), &
                                     countsPerDeDim3=(/8/), &
                                     rc=localrc)
@@ -695,7 +695,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateEmpty(rc=localrc)
+  grid=ESMF_GridEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_GridSetCommitShapeTile(grid, countsPerDEDim1=(/4/), &
@@ -729,7 +729,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2,3,4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2,3,4/), &
                                     countsPerDeDim2=(/3,4,5/), &
                                     countsPerDeDim3=(/6/), &
                                     rc=localrc)
@@ -760,7 +760,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), countsPerDEDim1=(/1,2,3,4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,2,3/), countsPerDEDim1=(/1,2,3,4/), &
                                     countsPerDeDim2=(/5/), &
                                     countsPerDeDim3=(/6,8/), &
                                     coordDep1=(/1/), &
@@ -798,7 +798,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2,3,4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2,3,4/), &
                                     countsPerDeDim2=(/3,4,5/), &
                                     countsPerDeDim3=(/6/), &
                                     gridEdgeLWidth=(/0,1,0/), &
@@ -836,7 +836,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), countsPerDEDim1=(/1,2,3,4/), &
+  grid=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,2,3/), countsPerDEDim1=(/1,2,3,4/), &
                                     countsPerDeDim2=(/5/), &
                                     countsPerDeDim3=(/6,8/), &
                                     rc=localrc)
@@ -873,7 +873,7 @@ program ESMF_GridCreateUTest
 
   ! create empty grid
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateEmpty(rc=localrc)
+  grid=ESMF_GridEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! destroy grid
@@ -892,7 +892,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(maxIndex=(/4,2/),rc=localrc)
+  grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/4,2/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
@@ -920,7 +920,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(maxIndex=(/4,2/),regDecomp=(/1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/4,2/),regDecomp=(/1,2/), &
                               rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -948,7 +948,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(maxIndex=(/4,2/),regDecomp=(/2,2/),rc=localrc)
+  grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/4,2/),regDecomp=(/2,2/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
@@ -975,7 +975,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(maxIndex=(/4,2/), regDecomp=(/1,1/), rc=localrc)
+  grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/4,2/), regDecomp=(/1,1/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
@@ -1004,7 +1004,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), &
+  grid=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,2,3/), &
                                 maxIndex=(/3,4,5/), &
                                 gridEdgeLWidth=(/0,1,0/), &
                                 gridEdgeUWidth=(/1,0,0/), &
@@ -1040,7 +1040,7 @@ program ESMF_GridCreateUTest
 
   ! create grid with nondefault parameter
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/),maxIndex=(/4,5,6/),regDecomp=(/2,1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,2,3/),maxIndex=(/4,5,6/),regDecomp=(/2,1,2/), &
         rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1070,7 +1070,7 @@ program ESMF_GridCreateUTest
 
   ! create a grid with all defaults
   rc=ESMF_SUCCESS
-  grid=ESMF_GridCreateEmpty(rc=localrc)
+  grid=ESMF_GridEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_GridSet(grid=grid, distgrid=distgrid, rc=localrc)
@@ -1113,7 +1113,7 @@ program ESMF_GridCreateUTest
   rc=ESMF_SUCCESS
   
   ! Create Empty Grid
-  grid=ESMF_GridCreateEmpty(rc=localrc)
+  grid=ESMF_GridEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set information
@@ -1149,7 +1149,7 @@ program ESMF_GridCreateUTest
 
   ! create grid 
 
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2/), maxIndex=(/4,3/), rc=localrc)
+  grid=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,2/), maxIndex=(/4,3/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get info back from grid
@@ -1220,7 +1220,7 @@ program ESMF_GridCreateUTest
 
   ! create grid 
 
-  grid=ESMF_GridCreateShapeTile(minIndex=(/1,2,3/), maxIndex=(/4,5,6/), &
+  grid=ESMF_GridCreateNoPeriodicDim(minIndex=(/1,2,3/), maxIndex=(/4,5,6/), &
        gridEdgeLWidth=(/1,1,1/), gridEdgeUWidth=(/0,0,0/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1283,7 +1283,7 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! create grid
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/),    &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/),    &
                                 countsPerDeDim2=(/3,4/),    &
                                 indexflag=ESMF_INDEX_GLOBAL,&
                                 rc=localrc)
@@ -1329,7 +1329,7 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! create grid
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -1382,7 +1382,7 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! create grid
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -1435,7 +1435,7 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! create grid
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
 	                      gridEdgeLWidth=(/1,2,3/), &
@@ -1553,7 +1553,7 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! create grid
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -1605,7 +1605,7 @@ program ESMF_GridCreateUTest
   correct=.true.
 
   ! create grid
-  grid=ESMF_GridCreateShapeTile(countsPerDEDim1=(/1,2/), &
+  grid=ESMF_GridCreateNoPeriodicDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
 	                      gridEdgeLWidth=(/1,2,3/), &
@@ -1957,11 +1957,11 @@ print *, ' '
      petMap2D(:,1,1)=(/0,1/)
      petMap2D(:,2,1)=(/2,3/)
 
-     grid=ESMF_GridCreateShapeTile(maxIndex=(/8,8/),regDecomp=(/2,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/8,8/),regDecomp=(/2,2/), &
             petMap=petMap2D,rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   else
-     grid=ESMF_GridCreateShapeTile(maxIndex=(/8,8/),regDecomp=(/2,2/), &
+     grid=ESMF_GridCreateNoPeriodicDim(maxIndex=(/8,8/),regDecomp=(/2,2/), &
             rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   endif
