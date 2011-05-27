@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.31 2011/05/10 23:26:05 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.32 2011/05/27 19:48:46 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -476,7 +476,7 @@ module ESMF_AttributeUpdateMod
 
 !BOC
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
-    call ESMF_FieldBundleSetGrid(fieldbundle, grid=grid, rc=status)
+    call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=status)
       
     call ESMF_FieldBundleAdd(fieldbundle, DPEDT, rc=status)
     call ESMF_FieldBundleAdd(fieldbundle, DTDT, rc=status)
