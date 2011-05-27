@@ -1,4 +1,4 @@
-% $Id: FieldBundle_refdoc.ctex,v 1.7 2010/05/04 23:06:30 feiliu Exp $
+% $Id: FieldBundle_refdoc.ctex,v 1.8 2011/05/27 21:49:15 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -99,19 +99,6 @@
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleGet_fapi}
 %#endif
-
-\subsection{Class API: FieldBundle Communications}
-#ifdef STANDALONE
-\input{../../FieldBundleComm/doc/ESMF_FieldBundleHalo_fapi}
-\input{../../FieldBundleComm/doc/ESMF_FieldBundleRedist_fapi}
-\input{../../FieldBundleComm/doc/ESMF_FieldBundleRegrid_fapi}
-\input{../../FieldBundleComm/doc/ESMF_FieldBundleSMM_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleHalo_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRedist_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleRegrid_fapi}
-\input{../Infrastructure/FieldBundle/doc/ESMF_FieldBundleSMM_fapi}
-#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}
