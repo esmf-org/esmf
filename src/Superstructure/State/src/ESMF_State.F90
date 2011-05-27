@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.255 2011/05/18 13:12:12 w6ws Exp $
+! $Id: ESMF_State.F90,v 1.256 2011/05/27 15:16:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.255 2011/05/18 13:12:12 w6ws Exp $'
+      '$Id: ESMF_State.F90,v 1.256 2011/05/27 15:16:51 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1034,7 +1034,7 @@ contains
       !  link the Attribute hierarchies
       linkChange = ESMF_TRUE
       call c_ESMC_AttributeLink(state%statep%base, &
-        fieldbundle%btypep%base, linkChange, localrc)
+        fieldbundle%this%base, linkChange, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
 
@@ -1834,7 +1834,7 @@ contains
       linkChange = ESMF_TRUE
       do i=1,localcount
          call c_ESMC_AttributeLink(state%statep%base, &
-          fieldbundleList(i)%btypep%base, linkChange, localrc)
+          fieldbundleList(i)%this%base, linkChange, localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
@@ -7741,7 +7741,7 @@ contains
               !  here we relink the State Attribute hierarchy to the FieldBundle
               !  Attribute hierarchy, as they were linked before
               if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%btypep%base, &
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%this%base, &
                   linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &

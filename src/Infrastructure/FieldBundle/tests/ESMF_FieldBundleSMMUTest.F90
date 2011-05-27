@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.16 2011/03/04 19:00:38 feiliu Exp $
+! $Id: ESMF_FieldBundleSMMUTest.F90,v 1.17 2011/05/27 15:21:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -30,14 +30,13 @@ program ESMF_FieldBundleSMMUTest
 ! !USES:
     use ESMF_TestMod     ! test methods
     use ESMF_Mod
-    use ESMF_FieldBundleSMMMod
   
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.16 2011/03/04 19:00:38 feiliu Exp $'
+    '$Id: ESMF_FieldBundleSMMUTest.F90,v 1.17 2011/05/27 15:21:31 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -165,7 +164,7 @@ contains
 
             srcfptr = 1
 
-            call ESMF_FieldBundleAdd(srcFieldBundle, srcField(i), rc=localrc)
+            call ESMF_FieldBundleAdd(srcFieldBundle, (/srcField(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -184,7 +183,7 @@ contains
 
             dstfptr = 0
 
-            call ESMF_FieldBundleAdd(dstFieldBundle, dstField(i), rc=localrc)
+            call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -353,12 +352,12 @@ contains
 
             srcfptr = 1
 
-            call ESMF_FieldBundleAdd(srcFieldBundle, srcField(i), rc=localrc)
+            call ESMF_FieldBundleAdd(srcFieldBundle, (/srcField(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_FieldBundleAdd(srcFieldBundleA, srcFieldA(i), rc=localrc)
+            call ESMF_FieldBundleAdd(srcFieldBundleA, (/srcFieldA(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -388,12 +387,12 @@ contains
 
             dstfptr = 0
 
-            call ESMF_FieldBundleAdd(dstFieldBundle, dstField(i), rc=localrc)
+            call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_FieldBundleAdd(dstFieldBundleA, dstFieldA(i), rc=localrc)
+            call ESMF_FieldBundleAdd(dstFieldBundleA, (/dstFieldA(i)/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

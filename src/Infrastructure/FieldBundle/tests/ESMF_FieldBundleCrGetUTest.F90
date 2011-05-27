@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.27 2011/03/04 19:00:38 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.28 2011/05/27 15:21:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -244,7 +244,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldBundleAdd(bundle, f1, rc=localrc)
+        call ESMF_FieldBundleAdd(bundle, (/f1/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -255,7 +255,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldBundleAdd(bundle, f2, rc=localrc)
+        call ESMF_FieldBundleAdd(bundle, (/f2/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -268,7 +268,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_FieldBundleAdd(bundle, f3, rc=localrc)
+            call ESMF_FieldBundleAdd(bundle, (/f3/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -281,7 +281,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_FieldBundleAdd(bundle, f4, rc=localrc)
+            call ESMF_FieldBundleAdd(bundle, (/f4/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -292,7 +292,7 @@ contains
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_FieldBundleAdd(bundle, f5, rc=localrc)
+            call ESMF_FieldBundleAdd(bundle, (/f5/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -323,7 +323,7 @@ contains
         if(present(do_slicing)) ldo_slicing = do_slicing
         if(present(do_slicing1)) ldo_slicing1 = do_slicing1
 
-        call ESMF_FieldBundleGet(bundle, 'field1', f1, rc=localrc)
+        call ESMF_FieldBundleGet(bundle, 'field1', field=f1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -333,7 +333,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldBundleGet(bundle, 'field2', f2, rc=localrc)
+        call ESMF_FieldBundleGet(bundle, 'field2', field=f2, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -364,7 +364,7 @@ contains
         if(ldo_slicing) then
             ! test field3 created from farray3 :, 4:13
             ! contiguous slice -> will work in DATA_REF and DATA_COPY mode              
-            call ESMF_FieldBundleGet(bundle, 'field3', f3, rc=localrc)
+            call ESMF_FieldBundleGet(bundle, 'field3', field=f3, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -385,7 +385,7 @@ contains
         if(ldo_slicing1) then
             ! test field4 created from farray4 3:7, 4:13
             ! discontiguous slice -> DATA_COPY will work, DATA_REF will not work
-            call ESMF_FieldBundleGet(bundle, 'field4', f4, rc=localrc)
+            call ESMF_FieldBundleGet(bundle, 'field4', field=f4, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -413,7 +413,7 @@ contains
 
             ! test field5 created from farray4 3:7, ::2
             ! discontiguous slice -> DATA_COPY will work, DATA_REF will not work
-            call ESMF_FieldBundleGet(bundle, 'field5', f5, rc=localrc)
+            call ESMF_FieldBundleGet(bundle, 'field5', field=f5, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.90 2011/05/26 20:25:03 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.91 2011/05/27 15:16:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.90 2011/05/26 20:25:03 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.91 2011/05/27 15:16:48 feiliu Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -5305,7 +5305,7 @@ AttLinkStateMacro(ESMF_ArrayBundle, ArrayBundle, state, arraybundle, state%state
 AttLinkStateMacro(ESMF_Field, Field, state, field, state%statep%base, & @\
                           field%ftypep%base, statep%st, field)
 AttLinkStateMacro(ESMF_FieldBundle, FieldBundle, state, fieldbundle, state%statep%base, & @\
-                          fieldbundle%btypep%base, statep%st, field)
+                          fieldbundle%this%base, statep%st, field)
 AttLinkStateMacro(ESMF_State, State, state1, state2, state1%statep%base, & @\
                           state2%statep%base, statep%st, field)
 AttLinkRemoveMacro(ESMF_State, ESMF_Array, Array, state, array, & @\
@@ -5315,7 +5315,7 @@ AttLinkRemoveMacro(ESMF_State, ESMF_ArrayBundle, ArrayBundle, state, arraybundle
 AttLinkRemoveMacro(ESMF_State, ESMF_Field, Field, state, field, & @\
                 state%statep%base, field%ftypep%base)
 AttLinkRemoveMacro(ESMF_State, ESMF_FieldBundle, FieldBundle, state, fieldbundle, & @\
-                state%statep%base, fieldbundle%btypep%base)
+                state%statep%base, fieldbundle%this%base)
 AttLinkRemoveMacro(ESMF_State, ESMF_State, State, state1, state2, & @\
                 state1%statep%base, state2%statep%base)
 
@@ -5334,35 +5334,35 @@ AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
 
-AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
-TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
-GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+GetCountNameNumberMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
 AttLinkMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
-                fieldbundle%btypep%base, field%ftypep%base)
+                fieldbundle%this%base, field%ftypep%base)
 AttLinkMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
-                fieldbundle%btypep%base, grid)
+                fieldbundle%this%base, grid)
 AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Field, Field, fieldbundle, field, & @\
-                fieldbundle%btypep%base, field%ftypep%base)
+                fieldbundle%this%base, field%ftypep%base)
 AttLinkRemoveMacro(ESMF_FieldBundle, ESMF_Grid, Grid, fieldbundle, grid, & @\
-                fieldbundle%btypep%base, grid)
+                fieldbundle%this%base, grid)
 
-AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttReadMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
-AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+AttRemoveMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
-TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
+TypeKind3DeclarationMacro(AttSet, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
-AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base)
-AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%btypep%base, fieldbundle, field)
+AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base, fieldbundle, field)
 
 !-------------------------------------------------------------------------
 !  FIELD

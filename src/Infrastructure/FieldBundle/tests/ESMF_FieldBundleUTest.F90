@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.30 2011/05/19 19:13:47 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.31 2011/05/27 15:21:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.30 2011/05/19 19:13:47 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.31 2011/05/27 15:21:31 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -146,9 +146,9 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       write(name, *) "Double FieldBundleDestroy through alias Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Returned ESMF_SUCCESS"
       call ESMF_FieldBundleDestroy(fieldbundleAlias, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -182,7 +182,7 @@
       ! Try creating a bundle of these
       ! SHOULD FAIL BECAUSE ON DIFFERENT GRIDS
       bundleTst=ESMF_FieldBundleCreate(2,fieldTst,rc=localrc)      
-      if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
 
 
       ! Destroy Fields
@@ -200,7 +200,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       write(failMsg, *) "Test not successful"
-      write(name, *) "Make sure FieldBundleCreate fails when fields created on different Grids"
+      write(name, *) "FieldBundleCreate works when fields created on different Grids"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
@@ -277,7 +277,7 @@
       ! Try creating a bundle of these
       ! SHOULD FAIL BECAUSE ON DIFFERENT LocStreams
       bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=localrc)      
-      if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
 
       ! Destroy Fields
       call ESMF_FieldDestroy(fieldTst(1), rc=localrc)
@@ -294,7 +294,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       write(failMsg, *) "Test not successful"
-      write(name, *) "Make sure FieldBundleCreate fails when fields created on different Location Streams"
+      write(name, *) "Make sure FieldBundleCreate works when fields created on different Location Streams"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -322,12 +322,8 @@
       bundleTst=ESMF_FieldBundleCreate(rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
-      ! Set locstream
-      call  ESMF_FieldBundleSet(bundleTst, locstreamTst1, rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
-
       ! Add fields
-      call ESMF_FieldBundleAdd(bundleTst,fieldTst,rc=localrc)      
+      call ESMF_FieldBundleAdd(bundleTst, (/fieldTst/),rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Destroy FieldBundle
@@ -346,7 +342,7 @@
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       write(failMsg, *) "Test not successful"
-      write(name, *) "Test of creating a LocStream FieldBundle using FieldBundleSet"
+      write(name, *) "Test of creating a LocStream FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1069,7 +1065,7 @@
       ! Create FieldBundle
       ! SHOULD FAIL BECAUSE ON DIFFERENT Meshes
       bundleTst=ESMF_FieldBundleCreate(fieldList=fieldTst,rc=localrc)      
-      if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE ! SHOULD FAIL
 
 
       ! Destroy Fields
@@ -1089,7 +1085,7 @@
      endif ! if 1 or 4 PETS
 
       write(failMsg, *) "Test not successful"
-      write(name, *) "Make sure FieldBundleCreate fails when fields created on different Meshes"
+      write(name, *) "Make sure FieldBundleCreate works when fields created on different Meshes"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1332,12 +1328,8 @@
       bundleTst=ESMF_FieldBundleCreate(rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
-      ! Set Mesh
-      call  ESMF_FieldBundleSet(bundleTst, meshTst1, rc=localrc)
-      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
-
       ! Add fields
-      call ESMF_FieldBundleAdd(bundleTst, fieldTst,rc=localrc)      
+      call ESMF_FieldBundleAdd(bundleTst, (/fieldTst/),rc=localrc)      
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
 
       ! Destroy FieldBundle
@@ -1358,7 +1350,7 @@
      endif ! if 1 or 4 PETS
 
       write(failMsg, *) "Test not successful"
-      write(name, *) "Test of creating a Mesh FieldBundle using FieldBundleSet"
+      write(name, *) "Test of creating a Mesh FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -1394,23 +1386,6 @@
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Getting name of non-create FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-! Think these next two should really be called with a valid grid
-      !EX_removeUTest
-      ! Set Grid in deleted FieldBundle Test
-!      call ESMF_FieldBundleSetGrid(bundle2, grid, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
-!      write(name, *) "Set Grid in deleted FieldBundle  Test"
-!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_removeUTest
-      ! Set Grid in non-created FieldBundle Test
-!      call ESMF_FieldBundleSetGrid(bundle1, grid, rc=rc)
-!      write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-!      write(name, *) "Set Grid in non-created FieldBundle  Test"
-!      call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1481,13 +1456,6 @@
       !------------------------------------------------------------------------
      
       !EX_UTest
-      !  Verify the Field count query from an uninitialized FieldBundle is 0
-      write(failMsg, *) "Field count not zero"
-      write(name, *) "Verify Field count from an uninitialized FieldBundle is zero Test"
-      call ESMF_Test((fieldCount.eq.0), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       !This test crashes, bug 1169299 created, commented out
       !  Verify the getting Field names query from an uninitialized FieldBundle is handled
       ! (I think its fixed - Bob 2/12/2007)
@@ -1537,27 +1505,17 @@
 
       !EX_UTest
       !  Verify the Field names query count is correct
+      print *, "The Field names are:"
+      do i = 1 , fieldcount
+      print *, fieldNameList(i)
+      end do
       write(failMsg, *) "Field count not 3"
       write(name, *) "Verifying Field count from a FieldBundle Test"
       call ESMF_Test((fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
       !EX_UTest
-      !  Verify the Field names are correct
-      write(failMsg, *) "Field names are wrong"
-      write(name, *) "Verifying Field names from a FieldBundle Test"
-      call ESMF_Test((fieldNameList(1).eq."pressure".and.fieldNameList(2).eq."temperature" &
-        .and.fieldNameList(3).eq."heat flux"), name, failMsg, result, ESMF_SRCLINE)
-
-      print *, "The Field names are:"
-      do i = 1 , fieldcount
-      print *, fieldNameList(i)
-      end do
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      call ESMF_FieldBundleAdd(bundle2, field=simplefield, rc=rc)
+      call ESMF_FieldBundleAdd(bundle2, (/simplefield/), rc=rc)
       write(failMsg, *) "Add uninitialized Field to uncreated FieldBundle failed"
       write(name, *) "Adding an uninitialized Field to an uncreated FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1592,14 +1550,6 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! FieldBundle Set Grid Test
-      call ESMF_FieldBundleSetGrid(bundle2, grid, rc=rc)
-      write(failMsg, *) "Did not Return ESMF_SUCCESS"
-      write(name, *) "FieldBundle Set Grid Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       !  Verify the getting Field names query from FieldBundle returns ESMF_SUCCESS
       call ESMF_FieldBundleGet(bundle2, fieldnameList=fieldNameList, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1618,7 +1568,7 @@
 
       !EX_UTest
       ! Add a field to an empty FieldBundle
-      call ESMF_FieldBundleAdd(bundle2, field=simplefield, rc=rc)
+      call ESMF_FieldBundleAdd(bundle2, (/simplefield/), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding a field to an Empty FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1664,13 +1614,6 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! FieldBundle Set Grid Test
-      call ESMF_FieldBundleSetGrid(bundle2, grid, rc=rc)
-      write(failMsg, *) "Did not Return ESMF_SUCCESS"
-      write(name, *) "FieldBundle Set Grid Test after recreating bundle"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !EX_UTest
       !  Verify that the Field count query from an empty FieldBundle is handled properly
       print *, 'fieldcount = ', fieldcount
       call ESMF_FieldBundleGet(bundle2, fieldCount=fieldcount, rc=rc)
@@ -1684,7 +1627,7 @@
 
       !EX_UTest
       !  Verify that a Field can be added to an empty FieldBundle
-      call ESMF_FieldBundleAdd(bundle2, field=simplefield, rc=rc)
+      call ESMF_FieldBundleAdd(bundle2, (/simplefield/), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding a Field to an Empty FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1697,15 +1640,6 @@
       write(name, *) "Getting Field count from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.1), &
                        name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      !  Test Requirement Return Grid
-      call ESMF_FieldBundleGet(bundle2, grid=grid2, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Getting a Grid from a FieldBundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldBundleDestroy(bundle2)
       !------------------------------------------------------------------------
 
       call ESMF_FieldBundleDestroy(bundle3)
@@ -1734,7 +1668,7 @@
 
       !EX_UTest
       ! Verify that the first Field name can be queried fron a FieldBundle
-      call ESMF_FieldBundleGet(bundle1, "pressure", returnedfield1, rc=rc)
+      call ESMF_FieldBundleGet(bundle1, "pressure", field=returnedfield1, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting first Field by name from a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1759,7 +1693,7 @@
       !EX_UTest
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting a second Field from a FieldBundle Test continued"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname2.eq."temperature"), name, &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
                         failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1776,7 +1710,7 @@
       !EX_UTest
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting a third Field from a FieldBundle Test continued"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname3.eq."heat flux"), name, &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, &
                         failMsg, result, ESMF_SRCLINE)
       print *, "FieldBundle returned, field names = ", &
                     trim(fname1), ", ", trim(fname2), ", ", trim(fname3)
@@ -1885,7 +1819,7 @@
 
       !EX_UTest
       ! Verify that the querying Field with wrong name from a FieldBundle returns FAILURE
-      call ESMF_FieldBundleGet(bundle1, "nressure", returnedfield1, rc=rc)
+      call ESMF_FieldBundleGet(bundle1, "nressure", field=returnedfield1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting wrong Field name from a FieldBundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

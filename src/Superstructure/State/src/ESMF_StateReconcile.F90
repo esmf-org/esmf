@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.95 2011/04/27 04:25:31 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.96 2011/05/27 15:16:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.95 2011/04/27 04:25:31 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.96 2011/05/27 15:16:52 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -467,12 +467,12 @@
         offset = 0
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-             call c_ESMC_GetID(stateitem%datap%fbp%btypep, si%idsend(i), localrc)
+             call c_ESMC_GetID(stateitem%datap%fbp%this, si%idsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
                              msg="nested fieldbundle get ID", &
                              ESMF_CONTEXT, rcToReturn=rc)) return
 
-             call c_ESMC_GetVMId(stateitem%datap%fbp%btypep, si%vmidsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%fbp%this, si%vmidsend(i), localrc)
              if (ESMF_LogFoundError(localrc, &
                              msg="nested fieldbundle get VM ID", &
                              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1004,7 +1004,7 @@ itemloop:  do k=attreconstart, si%theircount
                              ESMF_CONTEXT, rcToReturn=rc)) return
 
 !!DEBUG "created fieldbundle, ready to set id and add to local state"
-                    call c_ESMC_SetVMId(fieldbundle%btypep, si%vmidrecv(k), localrc)
+                    call c_ESMC_SetVMId(fieldbundle%this, si%vmidrecv(k), localrc)
                     if (ESMF_LogFoundError(localrc, &
                              msg="nested fieldbundle SetVMId call", &
                              ESMF_CONTEXT, rcToReturn=rc)) return
