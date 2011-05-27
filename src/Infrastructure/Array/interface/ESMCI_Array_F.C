@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.47 2011/02/22 23:30:47 w6ws Exp $
+// $Id: ESMCI_Array_F.C,v 1.48 2011/05/27 14:03:26 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -583,6 +583,20 @@ extern "C" {
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN(c_esmc_arraywritec)(ESMCI::Array **array,
+    char *file, char *variableName, bool *append,
+    ESMC_IOFmtFlag *iofmt, int *timeslice, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraywritec()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::write(
+      *array, file, variableName, append, timeslice, iofmt),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN(c_esmc_arrayprint)(ESMCI::Array **ptr, int *rc){
