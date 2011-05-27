@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.61 2011/03/21 23:18:01 svasquez Exp $
+! $Id: user_model1.F90,v 1.62 2011/05/27 18:07:13 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -305,7 +305,7 @@ module user_model1
 
     ! Create a FieldBundle for Fields
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=rc)
-    call ESMF_FieldBundleSetGrid(fieldbundle, grid=grid, rc=rc)
+    call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
       
     ! Add the Fields to the FieldBundle (this will connect the Attribute hierarchies)

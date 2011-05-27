@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.10 2011/02/23 20:58:24 w6ws Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.11 2011/05/27 18:07:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -254,7 +254,7 @@ module ESMF_AttributeUpdateUTestMod
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
-    call ESMF_FieldBundleSetGrid(fieldbundle, grid=grid, rc=status)
+    call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     call ESMF_FieldBundleAdd(fieldbundle, field, rc=status)
@@ -527,7 +527,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.10 2011/02/23 20:58:24 w6ws Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.11 2011/05/27 18:07:11 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 

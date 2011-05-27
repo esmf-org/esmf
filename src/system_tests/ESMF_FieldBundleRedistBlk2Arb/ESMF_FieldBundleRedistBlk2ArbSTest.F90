@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.16 2011/05/04 14:12:04 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.17 2011/05/27 18:07:16 feiliu Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -227,7 +227,7 @@ program Blk2ArbBunRedist
 
     ! Call redistribution method here, output ends up in humidity2
     call ESMF_FieldBundleRedist(bundle1, bundle2, rh12, rc=status)
-    call ESMF_FieldBundleGet(bundle2, "humidity2", humidity2, rc=status)
+    call ESMF_FieldBundleGet(bundle2, "humidity2", field=humidity2, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
@@ -235,7 +235,7 @@ program Blk2ArbBunRedist
     ! Redistribute back so we can compare contents
     ! output ends up in humidity3
     call ESMF_FieldBundleRedist(bundle2, bundle3, rh23, rc=status)
-    call ESMF_FieldBundleGet(bundle3, "humidity3", humidity3, rc=status)
+    call ESMF_FieldBundleGet(bundle3, "humidity3", field=humidity3, rc=status)
     if (status .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Redistribution, should match original:"

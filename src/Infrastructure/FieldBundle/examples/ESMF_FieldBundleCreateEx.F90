@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.12 2011/05/18 20:03:21 svasquez Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.13 2011/05/27 18:07:09 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -150,7 +150,7 @@
 !   !  Get a Field back from a FieldBundle, first by name and then by index.
 !   !  Also get the FieldBundle name.
 
-    call ESMF_FieldBundleGet(bundle1, "pressure", returnedfield1, rc=rc)
+    call ESMF_FieldBundleGet(bundle1, "pressure", field=returnedfield1, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
