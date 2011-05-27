@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.4 2011/05/23 19:40:50 theurich Exp $
+! $Id: ESMF_StateItem.F90,v 1.5 2011/05/27 02:02:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -175,7 +175,7 @@
         integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
         logical :: removedflag
-         ESMF_INIT_DECLARE
+        ESMF_INIT_DECLARE
       end type
       
 !------------------------------------------------------------------------------
@@ -224,11 +224,11 @@
         type(ESMF_ReadyFlag) :: ready_default
         type(ESMF_ValidFlag) :: stvalid_default
         type(ESMF_ReqForRestartFlag) :: reqrestart_default
-        integer :: alloccount
         integer :: datacount
         type(ESMF_MapPtr) :: nameMap
         type(ESMF_StateItem), pointer :: datalist(:)
         type(ESMF_Container):: stateContainer
+        integer :: alloccount
         logical :: reconcileneededflag
          ESMF_INIT_DECLARE
       end type
@@ -241,6 +241,7 @@
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
         ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, ESMF_STATEITEM_NAME, &
         ESMF_STATEITEM_NOTFOUND
+      public ESMF_StateItemConstruct
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_UNSPECIFIED
       public ESMF_NeededFlag, ESMF_NEEDED, &
@@ -275,6 +276,69 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateItemConstruct()"
+!BOPI
+! !IROUTINE: ESMF_StateItemConstruct - Create a new State Item
+
+! !INTERFACE:
+  function ESMF_StateItemConstruct (name, itemtype, keywordEnforcer, &
+      proxyflag, rc) result (sip)
+!
+! !RETURN VALUE:
+    type(ESMF_StateItem),     pointer    :: sip
+!
+! !ARGUMENTS:
+    character(*),             intent(in) :: name
+    type(ESMF_StateItemType), intent(in) :: itemtype
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                  intent(in),  optional :: proxyflag
+    integer,                  intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Pointer-valued function to create a StateItem.
+!   \item[name]
+!     Item name
+!   \item[itemtype]
+!     State item type code
+!   \item[{[proxyflag]}]
+!     Set proxy flag
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! local vars
+    integer :: localrc
+    integer :: memstat
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    allocate (sip, stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, msg="creating StateItem", &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+! print *, ESMF_METHOD, ': creating sip with name = ', trim (name)
+    sip%namep = name
+    sip%otype = itemtype
+    sip%datap%spp => null ()
+
+    if (present (proxyflag)) then
+      sip%proxyFlag = proxyflag
+    else
+      sip%proxyFlag = .false.
+    end if
+
+    ESMF_INIT_SET_CREATED(sip)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_StateItemConstruct
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
@@ -354,6 +418,7 @@ contains
       call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
         msg="- unsupported StateItemType", &
         ESMF_CONTEXT, rcToReturn=rc)
+      name = '(unknown)'
       return  ! bail out
     end select
     
