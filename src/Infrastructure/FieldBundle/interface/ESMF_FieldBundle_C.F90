@@ -1,4 +1,4 @@
-!  $Id: ESMF_FieldBundle_C.F90,v 1.14 2011/02/23 20:38:46 w6ws Exp $
+!  $Id: ESMF_FieldBundle_C.F90,v 1.15 2011/05/27 15:11:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_FieldBundle_C.F90,v 1.14 2011/02/23 20:38:46 w6ws Exp $'
+!      '$Id: ESMF_FieldBundle_C.F90,v 1.15 2011/05/27 15:11:35 feiliu Exp $'
 !==============================================================================
    subroutine f_esmf_bundlecreate(bundlep, rc)
      use ESMF_UtilTypesMod    ! ESMF generic types class
@@ -88,20 +88,20 @@
     !print *, "collecting FieldBundle garbage"
   
     ! destruct internal data allocations
-    call ESMF_FieldBundleDestruct(fb%btypep, rc=localrc)
+    call ESMF_FieldBundleDestruct(fb%this, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
     ! deallocate actual FieldBundleType allocation      
-    if (associated(fb%btypep)) then
-      deallocate(fb%btypep, stat=localrc)
+    if (associated(fb%this)) then
+      deallocate(fb%this, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating FieldBundle", &
         ESMF_CONTEXT, &
         rcToReturn=rc)) return
     endif
-    nullify(fb%btypep)
+    nullify(fb%this)
 
     ! return successfully
     rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-// $Id: ESMCI_FieldBundle_F.C,v 1.10 2011/01/05 20:05:43 svasquez Exp $
+// $Id: ESMCI_FieldBundle_F.C,v 1.11 2011/05/27 15:11:35 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_FieldBundle_F.C,v 1.10 2011/01/05 20:05:43 svasquez Exp $";
+             "$Id: ESMCI_FieldBundle_F.C,v 1.11 2011/05/27 15:11:35 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -41,12 +41,8 @@ extern "C" {
 
 // non-method functions
 void FTN(c_esmc_fieldbundleserialize)(
-                            ESMC_Status *gridstatus,
-                            ESMC_Status *iostatus,
+                            int *status,
                             int *field_count,
-                            int *pack_flag,
-                            int *isCongruent,
-                            int *hasPattern,
                             char *buffer, int *length, int *offset,
                             ESMC_InquireFlag *inquireflag, int *localrc,
                             ESMCI_FortranStrLenArg buffer_l){
@@ -71,21 +67,12 @@ void FTN(c_esmc_fieldbundleserialize)(
     }
 
 
-    sp = (ESMC_Status *)(buffer + *offset);
+    ip = (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
-      *sp++ = *gridstatus; 
-      *sp++ = *iostatus; 
-    } else
-      sp += 2;
-
-    ip = (int *)sp;
-    if (*inquireflag != ESMF_INQUIREONLY) {
+      *ip++ = *status;
       *ip++ = *field_count; 
-      *ip++ = *pack_flag; 
-      *ip++ = *isCongruent; 
-      *ip++ = *hasPattern; 
     } else
-      ip += 4;
+      ip += 2;
 
     *offset = (char *)ip - buffer;
 
@@ -96,12 +83,8 @@ void FTN(c_esmc_fieldbundleserialize)(
 
 // non-method functions
 void FTN(c_esmc_fieldbundledeserialize)( 
-                              ESMC_Status *gridstatus, 
-                              ESMC_Status *iostatus, 
+                              int *status,
                               int *field_count, 
-                              int *pack_flag, 
-                              int *isCongruent,
-                              int *hasPattern,
                               char *buffer, int *offset, int *localrc,
                               ESMCI_FortranStrLenArg buffer_l){
 
@@ -109,14 +92,9 @@ void FTN(c_esmc_fieldbundledeserialize)(
     ESMC_Status *sp;
     int *ip;
 
-    sp = (ESMC_Status *)(buffer + *offset);
-    *gridstatus = *sp++;
-    *iostatus = *sp++;
-    ip = (int *)sp;
+    ip = (int *)(buffer + *offset);
+    *status = *ip++;
     *field_count = *ip++;
-    *pack_flag = *ip++;
-    *isCongruent = *ip++;
-    *hasPattern = *ip++;
 
     *offset = (char *)ip - buffer;
 
