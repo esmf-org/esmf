@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.98 2011/05/27 16:55:35 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.99 2011/05/27 20:31:53 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.98 2011/05/27 16:55:35 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.99 2011/05/27 20:31:53 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1023,7 +1023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this fieldbundle as invalid
-    nullify(fieldbundle%this)
+    if(associated(fieldbundle%this)) nullify(fieldbundle%this)
 
     ! Set init code
     ESMF_INIT_SET_DELETED(fieldbundle)
@@ -1063,18 +1063,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
     integer                                   :: localrc
+    type(ESMF_Status) :: basestatus
 
-    ! Destroy internal container
-    call ESMF_ContainerDestroy(this%container, rc=localrc)
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_BaseGetStatus(this%base, basestatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(this%status == ESMF_FBSTATUS_GRIDSET) then
-      call ESMF_GeomBaseDestroy(this%geombase, rc=localrc)
+    if (basestatus .eq. ESMF_STATUS_READY) then
+      ! Destroy internal container
+      call ESMF_ContainerDestroy(this%container, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if(this%status == ESMF_FBSTATUS_GRIDSET) then
+        call ESMF_GeomBaseDestroy(this%geombase, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
     
     ! Mark base object invalid
@@ -1624,6 +1636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! local variables to buffer optional arguments
         logical                 :: l_checkflag! helper variable
         type(ESMF_Field)        :: l_field ! helper variable
+        type(ESMF_Field), allocatable        :: l_fieldList(:) ! helper variable
 
         ! local internal variables
         integer                 :: fcount, i
@@ -1648,13 +1661,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+        allocate(l_fieldList(fcount))
+
+        call ESMF_FieldBundleGet(fieldbundle, fieldList=l_fieldList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         ! build arrayBundle on-the-fly
         allocate(arrays(fcount))
         do i = 1, fcount
-            call ESMF_FieldBundleGet(fieldbundle, i, l_field, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_FieldGet(l_field, array=arrays(i), rc=localrc)
+            call ESMF_FieldGet(l_fieldList(i), array=arrays(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
@@ -1672,6 +1688,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        deallocate(l_fieldList)
         
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
@@ -1788,6 +1806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Field)                              :: l_field
         type(ESMF_ArrayBundle)                        :: arrayBundle
         type(ESMF_Array), allocatable                 :: arrays(:)
+        type(ESMF_Field), allocatable                 :: l_fieldList(:) ! helper variable
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -1801,12 +1820,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+        allocate(l_fieldList(fcount))
+
+        call ESMF_FieldBundleGet(fieldbundle, fieldList=l_fieldList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         allocate(arrays(fcount))
         do i = 1, fcount
-            call ESMF_FieldBundleGet(fieldbundle, i, l_field, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_FieldGet(l_field, array=arrays(i), rc=localrc)
+            call ESMF_FieldGet(l_fieldList(i), array=arrays(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
@@ -1823,6 +1845,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call ESMF_ArrayBundleDestroy(arrayBundle, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        deallocate(l_fieldList)
 
         ! return successfully
         if (present(rc)) rc = ESMF_SUCCESS
