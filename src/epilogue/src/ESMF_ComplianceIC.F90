@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.25 2011/05/27 23:39:43 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.26 2011/05/27 23:55:54 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1106,7 +1106,7 @@ module ESMF_ComplianceICMod
         return  ! bail out
         
       attributeName = "CplList"
-      call checkComponentAttributeL(prefix, comp=comp, &
+      call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
         rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -1121,58 +1121,6 @@ module ESMF_ComplianceICMod
   end subroutine
     
   recursive subroutine checkComponentAttribute(prefix, comp, attributeName, &
-    convention, purpose, rc)
-    character(*), intent(in)              :: prefix
-    type(ESMF_GridComp)                   :: comp
-    character(*), intent(in)              :: attributeName
-    character(*), intent(in)              :: convention
-    character(*), intent(in)              :: purpose
-    integer,      intent(out), optional   :: rc
-    
-    character(10*ESMF_MAXSTR)             :: value
-    character(ESMF_MAXSTR)                :: defaultvalue
-
-    defaultvalue = "ComplianceICdefault"
-
-    value = " " !TODO: remove this work around once Attribute code is fixed
-
-    call ESMF_AttributeGet(comp, name=attributeName, value=value, &
-      defaultvalue=defaultvalue, convention=convention, purpose=purpose, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-    if (trim(value) == trim(defaultvalue)) then
-      ! attribute not present
-      call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", ESMF_LOG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-    else if (len_trim(value) == 0) then
-!    else if (zeroTerminatedString(value)) then
-      ! attribute present but not set
-      call ESMF_LogWrite(trim(prefix)//" ==> Component level attribute: <"// &
-        trim(attributeName)//"> present but NOT set!", ESMF_LOG_WARNING, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-    else
-      ! attribute present and set
-      call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-        trim(attributeName)//"> present and set: "//trim(value), &
-        ESMF_LOG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
-    endif
-    
-  end subroutine
-
-  recursive subroutine checkComponentAttributeL(prefix, comp, attributeName, &
     convention, purpose, rc)
     character(*), intent(in)              :: prefix
     type(ESMF_GridComp)                   :: comp
