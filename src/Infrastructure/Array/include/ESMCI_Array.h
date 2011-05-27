@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.60 2011/05/06 17:19:24 samsoncheung Exp $
+// $Id: ESMCI_Array.h,v 1.61 2011/05/27 14:01:32 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -251,9 +251,9 @@ namespace ESMCI {
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
     static bool match(Array *array1, Array *array2, int *rc=NULL);
-    int read(Array *array, char *file, char *variableName,
+    static int read(Array *array, char *file, char *variableName,
          int *timeslice, ESMC_IOFmtFlag *iofmt);
-    int write(Array *array, char *file, char *variableName, bool *append,
+    static int write(Array *array, char *file, char *variableName, bool *append,
          int *timeslice, ESMC_IOFmtFlag *iofmt);
     int print() const;
     int validate() const;
