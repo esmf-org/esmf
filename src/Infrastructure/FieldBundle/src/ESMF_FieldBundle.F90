@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.97 2011/05/27 15:10:51 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.98 2011/05/27 16:55:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -104,8 +104,8 @@ module ESMF_FieldBundleMod
 
   ! F90 class type to hold pointer to FieldBundleType
   type ESMF_FieldBundle
-  sequence
-  private
+    sequence
+    !private
     type(ESMF_FieldBundleType), pointer :: this
     ESMF_INIT_DECLARE
   end type
@@ -167,7 +167,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.97 2011/05/27 15:10:51 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.98 2011/05/27 16:55:35 feiliu Exp $'
 
 !==============================================================================
 ! 
