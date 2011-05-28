@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.26 2011/05/27 23:55:54 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.27 2011/05/28 00:08:56 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1273,45 +1273,65 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
-    character(10*ESMF_MAXSTR)             :: value
-    character(ESMF_MAXSTR)                :: defaultvalue
+    integer                               :: itemCount, i
+    logical                               :: isPresent
+    character(10*ESMF_MAXSTR), pointer    :: valueList(:)
+    character(ESMF_MAXSTR)                :: iStr
 
-    defaultvalue = "ComplianceICdefault"
-
-    value = " " !TODO: remove this work around once Attribute code is fixed
-
-    call ESMF_AttributeGet(field, name=attributeName, value=value, &
-      defaultvalue=defaultvalue, convention=convention, purpose=purpose, rc=rc)
+    call ESMF_AttributeGet(field, name=attributeName, itemCount=itemCount, &
+      isPresent=isPresent, convention=convention, purpose=purpose, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    if (trim(value) == trim(defaultvalue)) then
+    if (.not.isPresent) then      
       ! attribute not present
       call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> is NOT present!", ESMF_LOG_WARNING, rc=rc)
+        trim(attributeName)//"> is NOT present!", &
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-    else if (len_trim(value) == 0) then
-!    else if (zeroTerminatedString(value)) then
+    else if (itemCount == 0) then
       ! attribute present but not set
       call ESMF_LogWrite(trim(prefix)//" ==> Field level attribute: <"// &
-        trim(attributeName)//"> present but NOT set!", ESMF_LOG_WARNING, rc=rc)
+        trim(attributeName)//"> present but NOT set!", &
+        ESMF_LOG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
     else
       ! attribute present and set
-      call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
-        trim(attributeName)//"> present and set: "//trim(value), &
-        ESMF_LOG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rc, &
-        line=__LINE__, &
-        file=__FILE__)) &
-        return  ! bail out
+      allocate(valueList(itemCount))
+      call ESMF_AttributeGet(field, name=attributeName, valueList=valueList, &
+        convention=convention, purpose=purpose, rc=rc)
+      if (itemCount == 1) then
+        ! single valued
+        call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+          trim(attributeName)//"> "// &
+          "present and set: "// trim(valueList(1)), &
+          ESMF_LOG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+      else
+        ! multi valued -> requires loop
+        do i=1, itemCount
+          write(iStr,*) i
+          call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
+            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+            "present and set: "// trim(valueList(i)), &
+            ESMF_LOG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=__FILE__)) &
+            return  ! bail out
+        enddo
+      endif
+      deallocate(valueList)
     endif
     
   end subroutine
