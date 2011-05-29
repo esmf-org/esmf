@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.216 2011/05/27 23:46:33 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.217 2011/05/29 05:03:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -257,7 +257,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.216 2011/05/27 23:46:33 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.217 2011/05/29 05:03:12 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5721,6 +5721,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (ESMF_LogFoundAllocError(localrc, msg="Allocating coordDimMap", &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+   if (present(coordDep1)) then
+      coordDimCount(1)=size(coordDep1)
+      coordDimMap(1,:)=0
+      do i=1,size(coordDep1)
+         coordDimMap(1,i)=coordDep1(i)
+      enddo
+   else 
+      coordDimCount(1)=dimCount
+      do i=1,dimCount
+         coordDimMap(1,i)=i      
+      enddo
+   endif
+
+   if (present(coordDep2)) then
+      coordDimCount(2)=size(coordDep2)
+      coordDimMap(2,:)=0
+      do i=1,size(coordDep2)
+         coordDimMap(2,i)=coordDep2(i)
+      enddo
+   else 
+      coordDimCount(2)=dimCount
+      do i=1,dimCount
+         coordDimMap(2,i)=i      
+      enddo
+   endif
+
+   if (dimCount > 2) then
+      if (present(coordDep3)) then 
+         coordDimCount(3)=size(coordDep3)
+          coordDimMap(3,:)=0
+          do i=1,size(coordDep3)
+             coordDimMap(3,i)=coordDep3(i)
+          enddo
+      else 
+        coordDimCount(3)=dimCount
+        do i=1,dimCount
+	   coordDimMap(3,i)=i      
+        enddo
+      endif
+   endif
 
  
    ! Create Grid from specification -----------------------------------------------

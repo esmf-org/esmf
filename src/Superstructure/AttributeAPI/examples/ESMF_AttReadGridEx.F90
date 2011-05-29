@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.17 2011/01/13 23:20:40 svasquez Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.18 2011/05/29 05:03:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@ program ESMF_AttReadGridEx
 
 !BOC
       ! Create a grid
-      grid = ESMF_GridCreateEmpty(rc=rc)
+      grid = ESMF_GridEmptyCreate(rc=rc)
 !EOC
 
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)

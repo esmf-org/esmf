@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.89 2011/05/27 23:46:31 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.90 2011/05/29 05:03:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -126,6 +126,7 @@ program ESMF_GridCreateEx
   call ESMF_GridDestroy(grid3D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
+
 !BOE
 ! Irregular distribution requires the user to specify the
 ! exact number of Grid cells per DE in each dimension.  In the
@@ -151,9 +152,9 @@ program ESMF_GridCreateEx
 !BOC
    grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/), &
           countsPerDEDim2=(/11,2,7/), rc=rc)   
+
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -309,6 +310,7 @@ endif
    call ESMF_GridDestroy(grid2D, rc=rc)
    call ESMF_GridDestroy(grid3D, rc=rc)
    deallocate(localArbIndex)
+
 
 #ifdef LOCAL_NOT_IMPL
 !BOEI
