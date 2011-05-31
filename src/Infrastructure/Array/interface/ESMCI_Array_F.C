@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.48 2011/05/27 14:03:26 samsoncheung Exp $
+// $Id: ESMCI_Array_F.C,v 1.49 2011/05/31 17:10:54 samsoncheung Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -587,7 +587,7 @@ extern "C" {
 
   void FTN(c_esmc_arraywritec)(ESMCI::Array **array,
     char *file, char *variableName, bool *append,
-    ESMC_IOFmtFlag *iofmt, int *timeslice, int *rc){
+    int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywritec()"
     // Initialize return code; assume routine not implemented
