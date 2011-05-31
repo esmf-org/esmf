@@ -1,4 +1,4 @@
-!  $Id: ESMF_IO_C.F90,v 1.1 2011/05/18 15:48:10 samsoncheung Exp $
+!  $Id: ESMF_IO_C.F90,v 1.2 2011/05/31 17:22:53 samsoncheung Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_IO_C.F90,v 1.1 2011/05/18 15:48:10 samsoncheung Exp $'
+!      '$Id: ESMF_IO_C.F90,v 1.2 2011/05/31 17:22:53 samsoncheung Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -264,11 +264,11 @@
   !arguments
     type(ESMF_Array),     intent(inout)          :: array
     character(*),         intent(in)             :: file
-    character(*),         intent(in),  optional  :: variableName
-    logical,              intent(in),  optional  :: append
-    integer,              intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
-    integer,              intent(out), optional  :: rc
+    character(*),         intent(in)             :: variableName
+    logical,              intent(in)             :: append
+    integer,              intent(in)             :: timeslice
+    type(ESMF_IOFmtFlag), intent(in)             :: iofmt
+    integer,              intent(out)            :: rc
 
 !------------------------------------------------------------------------------
     ! Local vars
@@ -284,13 +284,13 @@
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
 
 #ifdef ESMF_PIO
 
     ! Handle IO format
     iofmt_internal = ESMF_IOFMT_NETCDF   ! default format
-    if (present(iofmt)) iofmt_internal = iofmt
+    iofmt_internal = iofmt
 
     if (iofmt_internal .eq. ESMF_IOFMT_NETCDF) then
       ! NETCDF format selected
@@ -333,18 +333,6 @@
 #ifdef ESMF_MPIIO
       ! binary format selected
       piofmt = "bin"
-      if (present(variableName)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      if (present(timeslice)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="The input argument timeslice cannot be sepcified in ESMF_IOFMT_BIN mode",  &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
 #else
       call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
       msg="ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
@@ -364,17 +352,17 @@
 
     ! Handle time dimension
     time = -1   ! default, no time dimension
-    if (present(timeslice)) time = timeslice
+    time = timeslice
 
     !
     ! Obtain typekind and rank
     call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if(present(variableName)) varname = variableName
+    varname = variableName
 
     appd_internal = .false.
-    if(present(append)) appd_internal = append
+    appd_internal = append
 
 
     ! Call a T/K/R specific interface in order to create the proper
@@ -483,7 +471,7 @@
     end select
 
     ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    rc = ESMF_SUCCESS
 
 #else
     ! Return indicating PIO not present
