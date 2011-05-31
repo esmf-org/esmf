@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.31 2011/05/27 15:21:31 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.32 2011/05/31 18:29:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.31 2011/05/27 15:21:31 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.32 2011/05/31 18:29:50 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -148,7 +148,7 @@
       write(name, *) "Double FieldBundleDestroy through alias Test"
       write(failMsg, *) "Returned ESMF_SUCCESS"
       call ESMF_FieldBundleDestroy(fieldbundleAlias, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
