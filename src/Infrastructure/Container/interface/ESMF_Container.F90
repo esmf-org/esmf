@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.18 2011/05/20 10:06:27 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.19 2011/06/01 20:56:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.18 2011/05/20 10:06:27 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.19 2011/06/01 20:56:16 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -642,8 +642,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     sufficiently sized the container elements are returned in the provided
 !     memory allocation. If the argument comes into this call unassociated,
 !     memory will be allocated internally and filled with the container
-!     elements. In both cases it is the caller responsibility to deallocate
-!     the memory.
+!     elements. In the latter case the size of the returned {\tt itemList}
+!     will be identical to the number of items in the container that matches
+!     {\tt itemName} - even if that number is zero.
+!     In both cases the returned {\tt itemList} will be associated. It is the
+!     responsibility of the caller to deallocate the memory.
 !   \item[{[itemCount]}]
 !     Number of items {\tt container}.
 !   \item[{[rc]}]
@@ -743,8 +746,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     sufficiently sized the container elements are returned in the provided
 !     memory allocation. If the argument comes into this call unassociated,
 !     memory will be allocated internally and filled with the container
-!     elements. In both cases it is the caller responsibility to deallocate
-!     the memory.
+!     elements. In the latter case the size of the returned {\tt itemList}
+!     will be identical to the number of items in the container - even if that
+!     number is zero.
+!     In both cases the returned {\tt itemList} will be associated. It is the
+!     responsibility of the caller to deallocate the memory.
 !   \item[{[itemCount]}]
 !     Number of items {\tt container}.
 !   \item[{[rc]}]
@@ -1272,8 +1278,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     and if sufficiently sized the container garbage elements are returned in
 !     the provided memory allocation. If the argument comes into this call
 !     unassociated, memory will be allocated internally and filled with the
-!     container garbage elements. In both cases it is the caller responsibility
-!     to deallocate the memory.
+!     container garbage elements. In the latter case the size of the returned
+!     {\tt garbageList} will be identical to the number of items in the
+!     container garbage - even if that number is zero.
+!     In both cases the returned {\tt garbageList} will be associated. It is the
+!     responsibility of the caller to deallocate the memory.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
