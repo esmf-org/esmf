@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.99 2011/05/27 20:31:53 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.100 2011/06/01 19:27:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.99 2011/05/27 20:31:53 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.100 2011/06/01 19:27:50 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -616,20 +616,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           enddo
         endif  ! partial add
       endif ! there are garbage
-    endif ! associated(garbageList)
 
-    ! Attribute link
-    linkChange = ESMF_TRUE
-    if(associated(addedList)) then
-      do i=1, size(addedList)
-        call c_ESMC_AttributeLink(fieldbundle%this%base, addedList(i)%ftypep%base, linkChange, localrc)
+      ! Attribute link
+      linkChange = ESMF_TRUE
+      if(associated(addedList)) then
+        do i=1, size(addedList)
+          call c_ESMC_AttributeLink(fieldbundle%this%base, addedList(i)%ftypep%base, linkChange, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc))  return
+        enddo
+        deallocate(addedList)
+      endif
+
+      deallocate(garbageList)
+    else
+      ! No garbage, all fieldList should be linked
+      ! Attribute link
+      linkChange = ESMF_TRUE
+      do i=1, size(fieldList)
+        call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
-      deallocate(addedList)
-    endif
-
-    if(associated(garbageList)) deallocate(garbageList)
+      
+    endif ! associated(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
