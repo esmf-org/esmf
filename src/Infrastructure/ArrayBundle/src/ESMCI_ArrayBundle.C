@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.37 2011/04/15 22:39:06 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.38 2011/06/01 21:11:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.37 2011/04/15 22:39:06 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.38 2011/06/01 21:11:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1441,7 +1441,7 @@ int ArrayBundle::deserialize(
   for (int i=0; i<arrayCount; i++){
     Array *array = new Array(-1); // prevent baseID counter increment
     array->deserialize(buffer,offset,attreconflag);
-    arrayContainer.add(string(array->getName()), array);
+    arrayContainer.add(string(array->getName()), array, true);
   }
   arrayCreator = true;  // deserialize creates local Array objects
   
