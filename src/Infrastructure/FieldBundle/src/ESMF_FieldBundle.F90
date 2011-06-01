@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.100 2011/06/01 19:27:50 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.101 2011/06/01 21:05:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -167,7 +167,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.100 2011/06/01 19:27:50 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.101 2011/06/01 21:05:54 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -577,45 +577,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Deduce the list of Field actually got added.
     nullify(addedList)
     if(associated(garbageList)) then
-      if(size(garbageList) .ge. 1) then
-        garbageSize = size(garbageList)
+      garbageSize = size(garbageList)
 
-        ! error checking
-        if(garbageSize .gt. fieldCount) then
+      ! error checking
+      if(garbageSize .gt. fieldCount) then
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          msg = " - there are more garbage in garbageList than FieldList", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+
+      ! at least 1 Field was added
+      if(garbageSize .lt. fieldCount) then
+
+        allocate(addedList(fieldCount - garbageSize), stat=localrc)
+        if(localrc /= 0) then
           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-            msg = " - there are more garbage in garbageList than FieldList", &
+            msg = " - cannot allocate addedList", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
 
-        ! Partial add
-        if(garbageSize .lt. fieldCount) then
-
-          allocate(addedList(fieldCount - garbageSize), stat=localrc)
-          if(localrc /= 0) then
-            call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-              msg = " - cannot allocate addedList", &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-          endif
-
-          ! TODO: this is a performance bottlnect
-          ! if this causes problem, the container add method should return
-          ! a list of field actually are added
-          addedIndex = 1
-          do i = 1, fieldCount
-            isGarbage = .false.
-            do j = 1, garbageSize
-              if(fieldList(i) == garbageList(j)) isGarbage = .true.
-            enddo
-
-            if(.not. isGarbage)  then
-              addedList(addedIndex) = fieldList(i)
-              addedIndex = addedIndex + 1
-            endif
+        ! TODO: this is a performance bottlnect
+        ! if this causes problem, the container add method should return
+        ! a list of field actually are added
+        addedIndex = 1
+        do i = 1, fieldCount
+          isGarbage = .false.
+          do j = 1, garbageSize
+            if(fieldList(i) == garbageList(j)) isGarbage = .true.
           enddo
-        endif  ! partial add
-      endif ! there are garbage
+
+          if(.not. isGarbage)  then
+            addedList(addedIndex) = fieldList(i)
+            addedIndex = addedIndex + 1
+          endif
+        enddo
+      endif  ! partial add
 
       ! Attribute link
       linkChange = ESMF_TRUE
@@ -5328,6 +5326,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        !  link the Attribute hierarchies
+        call ESMF_GeomBaseGet(bp%geombase, geomtype=geomtype, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        if(geomtype == ESMF_GEOMTYPE_GRID) then
+          call ESMF_GeomBaseGet(bp%geombase, grid=grid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          linkChange = ESMF_TRUE
+          call c_ESMC_AttributeLink(bp%base, grid, linkChange, status)
+          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc))  return
+        endif
       endif
 
       ! TODO: decide if these need to be sent before or after
@@ -5337,33 +5350,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       do i = 1, fieldCount
-          flist(i) = ESMF_FieldDeserialize(buffer, offset, &
-                                      attreconflag=lattreconflag, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) then
-            deallocate(flist)
-            return
-          endif
-          !  here we relink the Field Attribute hierarchies to the FieldBundle
-          !  Attribute hierarchies, as they were before
-          if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
-            call c_ESMC_AttributeLink(bp%base, flist(i)%ftypep%base, &
-              linkChange, localrc)
-            if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) then
-              deallocate(flist)
-              return
-            endif
-          endif
+        flist(i) = ESMF_FieldDeserialize(buffer, offset, &
+                                    attreconflag=lattreconflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) then
+          deallocate(flist)
+          return
+        endif
       enddo
 
       bp%container = ESMF_ContainerCreate(rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call ESMF_ContainerAdd(bp%container, flist, multiflag=.true., relaxedflag=.true., rc=localrc)
+      call ESMF_ContainerAdd(bp%container, flist, multiflag=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
