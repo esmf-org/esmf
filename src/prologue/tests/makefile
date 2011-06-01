@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2010/04/08 17:09:04 theurich Exp $ 
+# $Id: makefile,v 1.20 2011/06/01 04:50:51 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -9,19 +9,22 @@ LOCDIR	  = src/prologue/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
-		$(ESMF_TESTDIR)/ESMF_LAPACKUTest
+		$(ESMF_TESTDIR)/ESMF_LAPACKUTest \
+		$(ESMF_TESTDIR)/ESMCI_ExceptionsUTest
 #		$(ESMF_TESTDIR)/ESMF_F95PtrUTest
 
 TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
                 RUN_ESMF_F90ArrayPtrUTest \
-		RUN_ESMF_LAPACKUTest
+		RUN_ESMF_LAPACKUTest \
+		RUN_ESMCI_ExceptionsUTest
 #		RUN_ESMF_F95PtrUTest
 
 TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
                 RUN_ESMF_F90ArrayPtrUTestUNI \
-		RUN_ESMF_LAPACKUTestUNI
+		RUN_ESMF_LAPACKUTestUNI \
+		RUN_ESMCI_ExceptionsUTestUNI
 #		RUN_ESMF_F95PtrUTestUNI
 
 include ${ESMF_DIR}/makefile
@@ -97,3 +100,14 @@ RUN_ESMF_LAPACKUTest:
 
 RUN_ESMF_LAPACKUTestUNI:
 	$(MAKE) TNAME=LAPACK NP=1 ftest
+
+
+#
+# Test whether C++ exceptions work correctly
+#
+
+RUN_ESMCI_ExceptionsUTest:
+	$(MAKE) TNAME=Exceptions NP=4 citest
+
+RUN_ESMCI_ExceptionsUTestUNI:
+	$(MAKE) TNAME=Exceptions NP=1 citest
