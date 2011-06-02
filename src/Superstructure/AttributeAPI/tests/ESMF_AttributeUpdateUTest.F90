@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.12 2011/06/02 18:45:36 feiliu Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.13 2011/06/02 21:10:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -355,8 +355,10 @@ module ESMF_AttributeUpdateUTestMod
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
       attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(1), valueList(1), &
       convention=convESMF, purpose=purp2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(2), valueList(2), &
       convention=convESMF, purpose=purp2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
@@ -529,7 +531,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.12 2011/06/02 18:45:36 feiliu Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.13 2011/06/02 21:10:44 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -653,7 +655,6 @@ program ESMF_AttributeUpdateUTest
       purpose=purpGen, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a Field test"
-    ! shouldn't outVal be tendency_of_air_pressure?
     call ESMF_Test((rc==ESMF_SUCCESS).and.(value2==outVal), &
                     name, failMsg, result, ESMF_SRCLINE)
 
