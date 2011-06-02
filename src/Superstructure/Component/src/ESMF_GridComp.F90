@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.161 2011/04/22 17:36:50 eschwab Exp $
+! $Id: ESMF_GridComp.F90,v 1.162 2011/06/02 20:36:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.161 2011/04/22 17:36:50 eschwab Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.162 2011/06/02 20:36:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -1982,27 +1982,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxPEs"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Set VM for GridComp to associate max PEs with PETs
+! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Associate PEs with PETs in GridComp VM
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, keywordEnforcer, &
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(in),  optional :: maxPeCountPerPet
+    integer,             intent(in),  optional :: prefIntraProcess
+    integer,             intent(in),  optional :: prefIntraSsi
+    integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
-!   Attempts to associate {\tt max} PEs with each PET. Only PEs that are 
-!   located on the same single system image can be associated with the same PET.
-!   Within this constraint the call tries to get as close as possible to the
-!   number specified by {\tt max}.
+!   Attempts to associate up to {\tt maxPeCountPerPet} PEs with each PET. Only
+!   PEs that are located on the same single system image (SSI) can be associated
+!   with the same PET. Within this constraint the call tries to get as close as
+!   possible to the number specified by {\tt maxPeCountPerPet}.
+!
+!   The other constraint to this call is that the number of PEs is preserved.
+!   This means that the child Component in the end is associated with as many
+!   PEs as the parent Component provided to the child. The number of child PETs 
+!   however is adjusted according to the above rule.
 !
 !   The typical use of {\tt ESMF\_GridCompSetVMMaxPEs()} is to allocate
 !   multiple PEs per PET in a Component for user-level threading, e.g. OpenMP.
@@ -2011,16 +2016,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[gridcomp] 
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
-! \item[{[max]}] 
-!   Maximum number of PEs per PET. Default is peCount.
-! \item[{[pref\_intra\_process]}] 
-!   Intra process communication preference.
+! \item[{[maxPeCountPerPet]}] 
+!   Maximum number of PEs on each PET.
+!   Default for each SSI is the local number of PEs.
+! \item[{[prefIntraProcess]}] 
+!   Communication preference withing a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+! \item[{[prefIntraSsi]}] 
+!   Communication preference withing a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+! \item[{[prefInterSsi]}] 
+!   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2037,8 +2043,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompSetVMMaxPEs(gridcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
+    call ESMF_CompSetVMMaxPEs(gridcomp%compp, maxPeCountPerPet, &
+      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -2053,46 +2059,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMaxThreads"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Set VM for GridComp with multi-threaded PETs
+! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Set multi-threaded PETs in GridComp VM
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, keywordEnforcer, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, keywordEnforcer, &
+    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(in),  optional :: maxPetCountPerVas
+    integer,             intent(in),  optional :: prefIntraProcess
+    integer,             intent(in),  optional :: prefIntraSsi
+    integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
-!   Attempts to provide {\tt max} threaded PETs in each VAS. Only as many
-!   threaded PETs as there are PEs located on the same single system image
-!   can be associated with the same VAS. Within this constraint the call
-!   tries to get as close as possible to the number specified by {\tt max}.
+!   Attempts to provide {\tt maxPetCountPerVas} threaded PETs in each 
+!   virtual address space (VAS). Only as many threaded PETs as there are PEs
+!   located on the single system image (SSI) can be associated with the VAS. 
+!   Within this constraint the call tries to get as close as possible to the 
+!   number specified by {\tt maxPetCountPerVas}.
+!
+!   The other constraint to this call is that the number of PETs is preserved.
+!   This means that the child Component in the end is associated with as many
+!   PETs as the parent Component provided to the child. The threading level of
+!   the child PETs however is adjusted according to the above rule.
 !
 !   The typical use of {\tt ESMF\_GridCompSetVMMaxThreads()} is to run a 
-!   Component multi-threaded with a groups of PETs that execute within the
-!   same virtual address space.
+!   Component multi-threaded with groups of PETs executing within a common
+!   virtual address space.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp] 
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
-! \item[{[max]}] 
-!   Maximum threading level.
-! \item[{[pref\_intra\_process]}] 
-!   Intra process communication preference.
+! \item[{[maxPetCountPerVas]}] 
+!   Maximum number of threaded PETs in each virtual address space (VAS). 
+!   Default for each SSI is the local number of PEs.
+! \item[{[prefIntraProcess]}] 
+!   Communication preference withing a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+! \item[{[prefIntraSsi]}] 
+!   Communication preference withing a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+! \item[{[prefInterSsi]}] 
+!   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2109,8 +2122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompSetVMMaxThreads(gridcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
+    call ESMF_CompSetVMMaxThreads(gridcomp%compp, maxPetCountPerVas, &
+      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -2125,26 +2138,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetVMMinThreads"
 !BOP
-! !IROUTINE: ESMF_GridCompSetVMMinThreads - Set VM for GridComp with reduced threading level
+! !IROUTINE: ESMF_GridCompSetVMMinThreads - Set a reduced threading level in GridComp VM
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetVMMinThreads(gridcomp, keywordEnforcer, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_GridCompSetVMMinThreads(gridcomp, keywordEnforcer, &
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(in),  optional :: maxPeCountPerPet
+    integer,             intent(in),  optional :: prefIntraProcess
+    integer,             intent(in),  optional :: prefIntraSsi
+    integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
 !   Reduces the number of threaded PETs in each VAS. The {\tt max} argument
 !   may be specified to limit the maximum number of PEs that a single PET 
-!   may be associated with.
+!   can be associated with.
+!
+!   Several constraints apply: 1) the number of PEs cannot change, 2) PEs
+!   cannot migrate between single system images (SSIs), 3) the number of PETs
+!   cannot increase, only decrease, 4) PETs cannot migrate between virtual
+!   address spaces (VASs), nor can VASs migrate between SSIs.
 !
 !   The typical use of {\tt ESMF\_GridCompSetVMMinThreads()} is to run a 
 !   Component across a set of single-threaded PETs.
@@ -2153,16 +2171,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[gridcomp] 
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
-! \item[{[max]}] 
-!   Maximum number of PEs per PET. Default is peCount.
-! \item[{[pref\_intra\_process]}] 
-!   Intra process communication preference.
+! \item[{[maxPeCountPerPet]}] 
+!   Maximum number of PEs on each PET.
+!   Default for each SSI is the local number of PEs.
+! \item[{[prefIntraProcess]}] 
+!   Communication preference withing a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+! \item[{[prefIntraSsi]}] 
+!   Communication preference withing a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+! \item[{[prefInterSsi]}] 
+!   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2179,8 +2198,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompSetVMMinThreads(gridcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
+    call ESMF_CompSetVMMinThreads(gridcomp%compp, maxPeCountPerPet, &
+      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return

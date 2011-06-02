@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.138 2011/04/22 17:36:50 eschwab Exp $
+! $Id: ESMF_CplComp.F90,v 1.139 2011/06/02 20:36:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.138 2011/04/22 17:36:50 eschwab Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.139 2011/06/02 20:36:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -1891,27 +1891,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxPEs"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Set VM for CplComp to associate max PEs with PETs
+! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Associate PEs with PETs in CplComp VM
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, keywordEnforcer, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, keywordEnforcer, &
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(in),  optional :: maxPeCountPerPet
+    integer,             intent(in),  optional :: prefIntraProcess
+    integer,             intent(in),  optional :: prefIntraSsi
+    integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
-!   Attempts to associate {\tt max} PEs with each PET. Only PEs that are 
-!   located on the same single system image can be associated with the same PET.
-!   Within this constraint the call tries to get as close as possible to the
-!   number specified by {\tt max}.
+!   Attempts to associate up to {\tt maxPeCountPerPet} PEs with each PET. Only
+!   PEs that are located on the same single system image (SSI) can be associated
+!   with the same PET. Within this constraint the call tries to get as close as
+!   possible to the number specified by {\tt maxPeCountPerPet}.
+!
+!   The other constraint to this call is that the number of PEs is preserved.
+!   This means that the child Component in the end is associated with as many
+!   PEs as the parent Component provided to the child. The number of child PETs 
+!   however is adjusted according to the above rule.
 !
 !   The typical use of {\tt ESMF\_CplCompSetVMMaxPEs()} is to allocate
 !   multiple PEs per PET in a Component for user-level threading, e.g. OpenMP.
@@ -1920,16 +1925,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-! \item[{[max]}] 
-!   Maximum number of PEs per PET. Default is peCount.
-! \item[{[pref\_intra\_process]}] 
-!   Intra process communication preference.
+! \item[{[maxPeCountPerPet]}] 
+!   Maximum number of PEs on each PET.
+!   Default for each SSI is the local number of PEs.
+! \item[{[prefIntraProcess]}] 
+!   Communication preference withing a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+! \item[{[prefIntraSsi]}] 
+!   Communication preference withing a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+! \item[{[prefInterSsi]}] 
+!   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1946,8 +1952,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
+    call ESMF_CompSetVMMaxPEs(cplcomp%compp, maxPeCountPerPet, &
+      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -1962,46 +1968,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMaxThreads"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Set VM for CplComp with multi-threaded PETs
+! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Set multi-threaded PETs in CplComp VM
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, keywordEnforcer, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, keywordEnforcer, &
+    maxPetCountPerVas, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(in),  optional :: maxPetCountPerVas
+    integer,             intent(in),  optional :: prefIntraProcess
+    integer,             intent(in),  optional :: prefIntraSsi
+    integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
-!   Attempts to provide {\tt max} threaded PETs in each VAS. Only as many
-!   threaded PETs as there are PEs located on the same single system image
-!   can be associated with the same VAS. Within this constraint the call
-!   tries to get as close as possible to the number specified by {\tt max}.
+!   Attempts to provide {\tt maxPetCountPerVas} threaded PETs in each 
+!   virtual address space (VAS). Only as many threaded PETs as there are PEs
+!   located on the single system image (SSI) can be associated with the VAS. 
+!   Within this constraint the call tries to get as close as possible to the 
+!   number specified by {\tt maxPetCountPerVas}.
 !
-!   The typical use of {\tt ESMF\_CplCompSetVMMaxThreads()} is to run a 
-!   Component multi-threaded with a groups of PETs that execute within the
-!   same virtual address space.
+!   The other constraint to this call is that the number of PETs is preserved.
+!   This means that the child Component in the end is associated with as many
+!   PETs as the parent Component provided to the child. The threading level of
+!   the child PETs however is adjusted according to the above rule.
+!
+!   The typical use of {\tt ESMF\_GridCompSetVMMaxThreads()} is to run a 
+!   Component multi-threaded with groups of PETs executing within a common
+!   virtual address space.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-! \item[{[max]}] 
-!   Maximum threading level.
-! \item[{[pref\_intra\_process]}] 
-!   Intra process communication preference.
+! \item[{[maxPetCountPerVas]}] 
+!   Maximum number of threaded PETs in each virtual address space (VAS). 
+!   Default for each SSI is the local number of PEs.
+! \item[{[prefIntraProcess]}] 
+!   Communication preference withing a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+! \item[{[prefIntraSsi]}] 
+!   Communication preference withing a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+! \item[{[prefInterSsi]}] 
+!   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2018,8 +2031,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
+    call ESMF_CompSetVMMaxThreads(cplcomp%compp, maxPetCountPerVas, &
+      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -2034,44 +2047,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMinThreads"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set VM for CplComp with reduced threading level
+! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set a reduced threading level in GridComp VM
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, keywordEnforcer, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, keywordEnforcer, &
+    maxPeCountPerPet, prefIntraProcess, prefIntraSsi, prefInterSsi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: max
-    integer,             intent(in),  optional :: pref_intra_process
-    integer,             intent(in),  optional :: pref_intra_ssi
-    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(in),  optional :: maxPeCountPerPet
+    integer,             intent(in),  optional :: prefIntraProcess
+    integer,             intent(in),  optional :: prefIntraSsi
+    integer,             intent(in),  optional :: prefInterSsi
     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !   Reduces the number of threaded PETs in each VAS. The {\tt max} argument
 !   may be specified to limit the maximum number of PEs that a single PET 
-!   may be associated with.
+!   can be associated with.
 !
-!   The typical use of {\tt ESMF\_CplCompSetVMMinThreads()} is to run a 
+!   Several constraints apply: 1) the number of PEs cannot change, 2) PEs
+!   cannot migrate between single system images (SSIs), 3) the number of PETs
+!   cannot increase, only decrease, 4) PETs cannot migrate between virtual
+!   address spaces (VASs), nor can VASs migrate between SSIs.
+!
+!   The typical use of {\tt ESMF\_GridCompSetVMMinThreads()} is to run a 
 !   Component across a set of single-threaded PETs.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-! \item[{[max]}] 
-!   Maximum number of PEs per PET. Default is peCount.
-! \item[{[pref\_intra\_process]}] 
-!   Intra process communication preference.
+! \item[{[maxPeCountPerPet]}] 
+!   Maximum number of PEs on each PET.
+!   Default for each SSI is the local number of PEs.
+! \item[{[prefIntraProcess]}] 
+!   Communication preference withing a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_intra\_ssi]}] 
-!   Intra SSI communication preference.
+! \item[{[prefIntraSsi]}] 
+!   Communication preference withing a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[pref\_inter\_ssi]}] 
-!   Inter process communication preference.
+! \item[{[prefInterSsi]}] 
+!   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2088,8 +2107,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc=localrc)
+    call ESMF_CompSetVMMinThreads(cplcomp%compp, maxPeCountPerPet, &
+      prefIntraProcess, prefIntraSsi, prefInterSsi, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
