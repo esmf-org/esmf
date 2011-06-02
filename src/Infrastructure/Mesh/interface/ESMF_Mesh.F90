@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.60 2011/03/08 13:31:40 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.61 2011/06/02 22:58:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.60 2011/03/08 13:31:40 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.61 2011/06/02 22:58:36 w6ws Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -110,7 +110,7 @@ module ESMF_MeshMod
         ESMF_MESHELEMTYPE_TETRA  = 10, &  ! Tetrahedron
         ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
 
-  type ESMF_MeshPartitionType
+  type, public :: ESMF_MeshPartitionType
   sequence
 !  private
     integer :: meshpartition
@@ -195,7 +195,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.60 2011/03/08 13:31:40 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.61 2011/06/02 22:58:36 w6ws Exp $'
 
 !==============================================================================
 ! 
