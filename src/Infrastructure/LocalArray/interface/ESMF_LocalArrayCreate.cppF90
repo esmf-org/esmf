@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.45 2011/05/13 20:22:29 rokuingh Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.46 2011/06/02 23:34:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_LocalArrayCreateMod
   !  This matches an enum on the C++ side and the values must match.
   !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
-  type ESMF_LocalArrayOrigin
+  type, public :: ESMF_LocalArrayOrigin
   sequence
   private
     integer :: origin
@@ -138,7 +138,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.45 2011/05/13 20:22:29 rokuingh Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.46 2011/06/02 23:34:15 w6ws Exp $'
 
 !==============================================================================
 ! 
