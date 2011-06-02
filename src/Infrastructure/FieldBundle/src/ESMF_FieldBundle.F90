@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.101 2011/06/01 21:05:54 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.102 2011/06/02 18:44:00 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,17 +83,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 
   type ESMF_FieldBundleType
-  sequence
-  ! this data type is not private so the fieldbundlecomm code can
-  ! reach directly in and get at the localdata without a loop
-  ! of subroutine calls.  but this causes problems with the 'pattern'
-  ! declaration below - the fieldbundlecongruentdata derived type is
-  ! private and so it wants this to be private as well.
-  ! since pattern is not being used yet, comment it out below, but this
-  ! needs to be rationalized at some point soon.  perhaps the comm code
-  ! will have to go through a subroutine interface.  this is where
-  ! fortran needs a 'friend' type of access.
-  !private
+    sequence
     type(ESMF_Base)              :: base      ! base class object
     type(ESMF_GeomBase)          :: geombase  ! base class object
     type(ESMF_Container)         :: container ! internal storage implementation
@@ -105,7 +95,6 @@ module ESMF_FieldBundleMod
   ! F90 class type to hold pointer to FieldBundleType
   type ESMF_FieldBundle
     sequence
-    !private
     type(ESMF_FieldBundleType), pointer :: this
     ESMF_INIT_DECLARE
   end type
@@ -167,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.101 2011/06/01 21:05:54 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.102 2011/06/02 18:44:00 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -576,18 +565,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! There are garbage, some fields are not added. 
     ! Deduce the list of Field actually got added.
     nullify(addedList)
-    if(associated(garbageList)) then
-      garbageSize = size(garbageList)
+    garbageSize = size(garbageList)
+    if(garbageSize /= 0) then
 
+      ! There are garbage after ContainerAdd, figure out which fields are added
       ! error checking
       if(garbageSize .gt. fieldCount) then
         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
-          msg = " - there are more garbage in garbageList than FieldList", &
+          msg = " - there are more garbage in garbageList than fields in FieldList", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
 
       ! at least 1 Field was added
+      ! No need to handle the case when garbageSize == fieldCount when no Field is added
       if(garbageSize .lt. fieldCount) then
 
         allocate(addedList(fieldCount - garbageSize), stat=localrc)
@@ -617,19 +608,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Attribute link
       linkChange = ESMF_TRUE
-      if(associated(addedList)) then
-        do i=1, size(addedList)
-          call c_ESMC_AttributeLink(fieldbundle%this%base, addedList(i)%ftypep%base, linkChange, localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc))  return
-        enddo
-        deallocate(addedList)
+
+      if(size(addedList) .ge. 1) then
+        call ESMF_FieldBundleSetGeom(fieldbundle, addedList(1), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc))  return
       endif
 
-      deallocate(garbageList)
+      do i=1, size(addedList)
+        call c_ESMC_AttributeLink(fieldbundle%this%base, addedList(i)%ftypep%base, linkChange, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc))  return
+      enddo
+      deallocate(addedList)
+
     else
       ! No garbage, all fieldList should be linked
+      !
+      ! Obviously the attribute linking of the geombase object is a bit tricky,
+      ! right now, we don't restrict the geombase to be matched among the fields in the
+      ! fieldBundle. But for attribute hierarchy, we actually assume that all fields in
+      ! the fieldBundle should be built on the same geombase object.
+      !
       ! Attribute link
+      if(size(fieldList) .ge. 1) then
+        ! setgeom links grid geombase automatically
+        call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+      endif ! non-empty fieldlist
+
       linkChange = ESMF_TRUE
       do i=1, size(fieldList)
         call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
@@ -637,7 +645,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
       
-    endif ! associated(garbageList)
+    endif ! garbageSize /= 0
+
+    ! always deallocate garbageList because it's always associated returning from Container
+    deallocate(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -649,7 +660,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddItem()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAddItem - Add Fields to an fieldbundle
+! !IROUTINE: ESMF_FieldBundleAddItem - Add one Field to an fieldbundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleAdd()   
@@ -701,9 +712,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
-
     ! Call into the list version
     call ESMF_FieldBundleAddList(fieldbundle, (/field/), multiflag=multiflag, &
       relaxedflag=relaxedflag, rc=localrc)
@@ -752,7 +760,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    integer                       :: fieldCount, i
+    integer                       :: fieldCount, i, garbageSize
     type(ESMF_Logical)            :: linkChange
     type(ESMF_Field), pointer     :: garbageList(:)
 
@@ -790,6 +798,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Attribute link
+    if(size(fieldList) .ge. 1) then
+      ! setgeom links grid geombase automatically
+      call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
+    endif ! non-empty fieldlist
     linkChange = ESMF_TRUE
     ! Add all fields in fieldList
     do i = 1, fieldCount
@@ -799,14 +813,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
     
     ! Remove those that were replaced
-    if(associated(garbageList)) then
-      do i=1, size(garbageList)
-        call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc))  return
-      enddo
-      deallocate(garbageList)
-    endif
+    garbageSize = size(garbageList)
+    do i=1, garbageSize
+      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+    enddo
+    deallocate(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -920,56 +933,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FieldBundleAdd(ESMF_FieldBundleCreate, fieldList, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      ! link the Attribute hierarchies
-      linkChange = ESMF_TRUE;
-      do i=1, size(fieldList)
-        call c_ESMC_AttributeLink(this%base, fieldList(i)%ftypep%base, linkChange, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc))  return
-      enddo
-      if(size(fieldList) .ge. 1) then
-        call ESMF_FieldGet(fieldList(1), status=fstatus, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc))  return
-
-        if(fstatus == ESMF_FIELDSTATUS_GRIDSET .or. &
-           fstatus == ESMF_FIELDSTATUS_COMPLETE) then
-          call ESMF_FieldGet(fieldList(1), geomtype=geomtype, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc))  return
-          if(geomtype == ESMF_GEOMTYPE_GRID) then
-            call ESMF_FieldGet(fieldList(1), grid=grid, rc=localrc)  
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-            call ESMF_FieldBundleSet(ESMF_FieldBundleCreate, grid, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-          else if(geomtype == ESMF_GEOMTYPE_XGRID) then
-            call ESMF_FieldGet(fieldList(1), xgrid=xgrid, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-            call ESMF_FieldBundleSet(ESMF_FieldBundleCreate, xgrid, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-          else if(geomtype == ESMF_GEOMTYPE_MESH) then
-            call ESMF_FieldGet(fieldList(1), mesh=mesh, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-            call ESMF_FieldBundleSet(ESMF_FieldBundleCreate, mesh, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-          else if(geomtype == ESMF_GEOMTYPE_LOCSTREAM) then
-            call ESMF_FieldGet(fieldList(1), locstream=locstream, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-            call ESMF_FieldBundleSet(ESMF_FieldBundleCreate, locstream, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc))  return
-          endif
-          this%status = ESMF_FBSTATUS_GRIDSET
-        endif ! field has a geombase internally
-      endif ! non-empty fieldlist
-    endif ! present
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1031,7 +995,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Mark this fieldbundle as invalid
-    if(associated(fieldbundle%this)) nullify(fieldbundle%this)
+    nullify(fieldbundle%this)
 
     ! Set init code
     ESMF_INIT_SET_DELETED(fieldbundle)
@@ -3491,7 +3455,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    integer                       :: fieldCount, i
+    integer                       :: fieldCount, i, fcount
     type(ESMF_Logical)            :: linkChange
     type(ESMF_Field), pointer     :: garbageList(:)
 
@@ -3527,13 +3491,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Remove those that were removed
-    if(associated(garbageList)) then
-      do i=1, size(garbageList)
-        call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc))  return
-      enddo
-      deallocate(garbageList)
+    do i=1, size(garbageList)
+      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+    enddo
+    deallocate(garbageList)
+
+    ! check if the fieldbundle is empty
+    call ESMF_FieldBundleGet(fieldbundle, fieldCount=fcount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  
+    if(fcount == 0) then
+      call ESMF_FieldBundleRemoveGeom(fieldbundle, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Return successfully
@@ -3632,15 +3605,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Remove those that were replaced
-    if(associated(garbageList)) then
-      do i=1, size(garbageList)
-        call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
+    ! Attribute link
+    fieldCount = size(fieldList)
+    if(fieldCount .ge. 1) then
+      ! setgeom links grid geombase automatically
+      call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
+    endif ! non-empty fieldlist
+
+    ! TODO: handle those in fieldList when relaxed is .true., 
+    ! I don't know if a field in fieldList was added to FB or not when its
+    ! name didn't exist in FB.
+    ! For now, I am linking all fieldList when relaxed mode is false.
+    if(.not. relaxedflag) then
+      do i = 1, fieldCount
+        call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc))  return
       enddo
-      deallocate(garbageList)
     endif
+    
+    ! Remove those that were replaced
+    do i=1, size(garbageList)
+      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+    enddo
+    deallocate(garbageList)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -5217,7 +5209,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
 
-      if(associated(l_fieldList)) deallocate(l_fieldList)
+      deallocate(l_fieldList)
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -5385,6 +5377,178 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_FieldBundleDeserialize
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleSetGeom()"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleSetGeom - Set a GeomBase in FieldBundle
+!
+! !INTERFACE:
+  subroutine ESMF_FieldBundleSetGeom(fieldbundle, field, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(inout)             :: fieldbundle
+    type(ESMF_Field), intent(in)                      :: field
+    integer, intent(out), optional                    :: rc 
+!
+! !DESCRIPTION:
+!      Set a geombase in FieldBundle, if the geombase is a Grid, attribute
+!     linking is done inside FieldBundleSetGrid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!           fieldbundle object.
+!     \item [field]
+!           field object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer                                           :: localrc
+    type(ESMF_GeomType)                               :: geomtype
+    type(ESMF_Grid)                                   :: grid
+    type(ESMF_XGrid)                                  :: xgrid
+    type(ESMF_Mesh)                                   :: mesh
+    type(ESMF_LocStream)                              :: locstream
+    type(ESMF_FieldStatus)                            :: fstatus
+
+    localrc = ESMF_RC_NOT_IMPL
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check input arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field, rc)
+
+    ! Don't do anything if fieldbundle already has a geombase
+    ! TODO: we'll check matchness here in the future between field%geombase
+    ! and fieldbundle%geombase
+    if(fieldbundle%this%status == ESMF_FBSTATUS_GRIDSET) then
+      if(present(rc)) rc = ESMF_SUCCESS
+      return
+    endif
+
+    call ESMF_FieldGet(field, status=fstatus, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc))  return
+
+    if(fstatus == ESMF_FIELDSTATUS_GRIDSET .or. &
+       fstatus == ESMF_FIELDSTATUS_COMPLETE) then
+      call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
+      if(geomtype == ESMF_GEOMTYPE_GRID) then
+        call ESMF_FieldGet(field, grid=grid, rc=localrc)  
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+        ! this call takes care of attribute linking of Grid
+        call ESMF_FieldBundleSet(fieldbundle, grid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+      else if(geomtype == ESMF_GEOMTYPE_XGRID) then
+        call ESMF_FieldGet(field, xgrid=xgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+        call ESMF_FieldBundleSet(fieldbundle, xgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+      else if(geomtype == ESMF_GEOMTYPE_MESH) then
+        call ESMF_FieldGet(field, mesh=mesh, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+        call ESMF_FieldBundleSet(fieldbundle, mesh, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+      else if(geomtype == ESMF_GEOMTYPE_LOCSTREAM) then
+        call ESMF_FieldGet(field, locstream=locstream, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+        call ESMF_FieldBundleSet(fieldbundle, locstream, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc))  return
+      endif
+      fieldbundle%this%status = ESMF_FBSTATUS_GRIDSET
+    endif
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldBundleSetGeom
+
+! -----------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleRemoveGeom()"
+!BOPI
+! !IROUTINE: ESMF_FieldBundleRemoveGeom - Remove the GeomBase in FieldBundle
+!
+! !INTERFACE:
+  subroutine ESMF_FieldBundleRemoveGeom(fieldbundle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(inout)             :: fieldbundle
+    integer, intent(out), optional                    :: rc 
+!
+! !DESCRIPTION:
+!      Remove the geombase in FieldBundle, if the geombase is a Grid, attribute
+!     linking is removed as well. Called when the fieldbundle is emptied.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [fieldbundle]
+!           fieldbundle object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer                                           :: localrc
+    type(ESMF_GeomType)                               :: geomtype
+    type(ESMF_Grid)                                   :: grid
+    type(ESMF_Logical)                                :: linkChange
+
+    localrc = ESMF_RC_NOT_IMPL
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check input arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundle,rc)
+
+    ! should never call this method when it's not GRIDSET
+    if(fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) then
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        msg = " - cannot remove a gemobase from a fieldbundle that is empty", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    call ESMF_GeomBaseGet(fieldbundle%this%geombase, geomtype=geomtype, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc))  return
+    if(geomtype == ESMF_GEOMTYPE_GRID) then
+      call ESMF_GeombaseGet(fieldbundle%this%geombase, grid=grid, rc=localrc)  
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc))  return
+
+      linkChange = ESMF_TRUE
+      call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, grid, linkChange, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+    endif
+    call ESMF_GeomBaseDestroy(fieldbundle%this%geombase, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc))  return
+
+    fieldbundle%this%status = ESMF_FBSTATUS_EMPTY
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldBundleRemoveGeom
+! -----------------------------------------------------------------------------
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
