@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.162 2011/06/02 20:36:25 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.163 2011/06/02 21:54:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.162 2011/06/02 20:36:25 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.163 2011/06/02 21:54:56 theurich Exp $'
 
 !==============================================================================
 !
@@ -748,7 +748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[clock]}]
 !   Return the private clock for this {\tt ESMF\_GridComp}.
 ! \item[{[localPet]}]
-!   Return the local PET id withing the {\tt ESMF\_GridComp} object.
+!   Return the local PET id within the {\tt ESMF\_GridComp} object.
 ! \item[{[petCount]}]
 !   Return the number of PETs in the the {\tt ESMF\_GridComp} object.
 ! \item[{[contextflag]}]
@@ -2020,10 +2020,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Maximum number of PEs on each PET.
 !   Default for each SSI is the local number of PEs.
 ! \item[{[prefIntraProcess]}] 
-!   Communication preference withing a single process.
+!   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
 ! \item[{[prefIntraSsi]}] 
-!   Communication preference withing a single system image (SSI).
+!   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[prefInterSsi]}] 
 !   Communication preference between different single system images (SSIs).
@@ -2099,10 +2099,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Maximum number of threaded PETs in each virtual address space (VAS). 
 !   Default for each SSI is the local number of PEs.
 ! \item[{[prefIntraProcess]}] 
-!   Communication preference withing a single process.
+!   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
 ! \item[{[prefIntraSsi]}] 
-!   Communication preference withing a single system image (SSI).
+!   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[prefInterSsi]}] 
 !   Communication preference between different single system images (SSIs).
@@ -2175,10 +2175,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Maximum number of PEs on each PET.
 !   Default for each SSI is the local number of PEs.
 ! \item[{[prefIntraProcess]}] 
-!   Communication preference withing a single process.
+!   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
 ! \item[{[prefIntraSsi]}] 
-!   Communication preference withing a single system image (SSI).
+!   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
 ! \item[{[prefInterSsi]}] 
 !   Communication preference between different single system images (SSIs).
