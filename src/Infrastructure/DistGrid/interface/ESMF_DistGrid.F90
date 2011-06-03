@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.79 2011/05/19 23:07:21 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.80 2011/06/03 05:18:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -53,7 +53,7 @@ module ESMF_DistGridMod
 !
 !------------------------------------------------------------------------------
 
-  ! F90 class type to hold pointer to C++ object
+  ! Fortran type to hold pointer to C++ object
   type ESMF_DistGrid
   sequence
   private
@@ -63,26 +63,52 @@ module ESMF_DistGridMod
 
 !------------------------------------------------------------------------------
 
-  ! type for decomp flag
+  ! DecompFlag
   type ESMF_DecompFlag
   private
+#ifdef ESMF_NO_INITIALIZERS
     integer :: value
+#else
+    integer :: value = 0
+#endif
   end type
 
   type(ESMF_DecompFlag), parameter:: &
+    ESMF_DECOMP_INVALID   = ESMF_DecompFlag(0), &
     ESMF_DECOMP_DEFAULT   = ESMF_DecompFlag(1), &
     ESMF_DECOMP_HOMOGEN   = ESMF_DecompFlag(2), &
     ESMF_DECOMP_RESTFIRST = ESMF_DecompFlag(3), &
     ESMF_DECOMP_RESTLAST  = ESMF_DecompFlag(4), &
     ESMF_DECOMP_CYCLIC    = ESMF_DecompFlag(5)
+    
+!------------------------------------------------------------------------------
+
+  ! DistGridMatchType
+  type ESMF_DistGridMatchType
+  private
+#ifdef ESMF_NO_INITIALIZERS
+    integer :: value
+#else
+    integer :: value = 0
+#endif
+  end type
+
+  type(ESMF_DistGridMatchType), parameter:: &
+    ESMF_DISTGRIDMATCH_INVALID  = ESMF_DistGridMatchType(0), &
+    ESMF_DISTGRIDMATCH_NONE     = ESMF_DistGridMatchType(1), &
+    ESMF_DISTGRIDMATCH_EXACT    = ESMF_DistGridMatchType(2), &
+    ESMF_DISTGRIDMATCH_ALIAS    = ESMF_DistGridMatchType(3)
+    
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_DistGrid
-  public ESMF_DecompFlag, ESMF_DECOMP_DEFAULT, &
+  public ESMF_DecompFlag, ESMF_DECOMP_INVALID, ESMF_DECOMP_DEFAULT, &
     ESMF_DECOMP_HOMOGEN, ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, &
     ESMF_DECOMP_CYCLIC
+  public ESMF_DistGridMatchType, ESMF_DISTGRIDMATCH_INVALID, &
+    ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
   
 !------------------------------------------------------------------------------
 !
@@ -91,6 +117,10 @@ module ESMF_DistGridMod
 ! - ESMF-public methods:
   public operator(==)
   public operator(/=)
+  public operator(<)
+  public operator(>)
+  public operator(<=)
+  public operator(>=)
 
   public ESMF_DistGridCreate
   public ESMF_DistGridDestroy
@@ -114,7 +144,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.79 2011/05/19 23:07:21 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.80 2011/06/03 05:18:35 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -177,7 +207,7 @@ module ESMF_DistGridMod
 ! DistGridOperator() interfaces
 !===============================================================================
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-public interface ----------------------------
 !BOP
 ! !IROUTINE: ESMF_DistGridAssignment(=) - DistGrid assignment
 !
@@ -209,7 +239,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-public interface ----------------------------
 !BOP
 ! !IROUTINE: ESMF_DistGridOperator(==) - DistGrid equality operator
 !
@@ -230,9 +260,10 @@ module ESMF_DistGridMod
 !
 ! !DESCRIPTION:
 !   Test whether distgrid1 and distgrid2 are valid aliases to the same ESMF
-!   DistGrid object in memory. For a more general comparison of two ESMF DistGrids,
-!   going beyond the simple alias test, the ESMF\_DistGridMatch() function (not yet
-!   fully implemented) must be used.
+!   DistGrid object in memory. For a more general comparison of two 
+!   ESMF DistGrids, going beyond the simple alias test, the 
+!   {\tt ESMF\_DistGridMatch()} function (not yet fully implemented) must 
+!   be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -251,7 +282,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-public interface ----------------------------
 !BOP
 ! !IROUTINE: ESMF_DistGridOperator(/=) - DistGrid not equal operator
 !
@@ -272,9 +303,10 @@ module ESMF_DistGridMod
 !
 ! !DESCRIPTION:
 !   Test whether distgrid1 and distgrid2 are {\it not} valid aliases to the
-!   same ESMF DistGrid object in memory. For a more general comparison of two ESMF
-!   DistGrids, going beyond the simple alias test, the ESMF\_DistGridMatch() function
-!   (not yet fully implemented) must be used.
+!   same ESMF DistGrid object in memory. For a more general comparison of two
+!   ESMF DistGrids, going beyond the simple alias test, the
+!   {\tt ESMF\_DistGridMatch()} function (not yet fully implemented) must 
+!   be used.
 !
 !   The arguments are:
 !   \begin{description}
@@ -293,6 +325,48 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(==)
+    module procedure ESMF_DistGridMatchTypeEQ
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(/=)
+    module procedure ESMF_DistGridMatchTypeNE
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(<)
+    module procedure ESMF_DistGridMatchTypeLT
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(>)
+    module procedure ESMF_DistGridMatchTypeGT
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(<=)
+    module procedure ESMF_DistGridMatchTypeLE
+  end interface
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal interface --------------------------
+  interface operator(>=)
+    module procedure ESMF_DistGridMatchTypeGE
+  end interface
+!------------------------------------------------------------------------------
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -302,7 +376,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-!-------------------------------------------------------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridEQ()"
 !BOPI
@@ -346,14 +420,14 @@ contains
       dginit2 .eq. ESMF_INIT_CREATED) then
       ESMF_DistGridEQ = distgrid1%this .eq. distgrid2%this
     else
-      ESMF_DistGridEQ = ESMF_FALSE
+      ESMF_DistGridEQ = .false.
     endif
 
   end function ESMF_DistGridEQ
 !-------------------------------------------------------------------------------
 
 
-!-------------------------------------------------------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridNE()"
 !BOPI
@@ -389,6 +463,169 @@ contains
 
   end function ESMF_DistGridNE
 !-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatchTypeEQ()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridMatchTypeEQ - Compare two DistGridMatchTypes for equality
+!
+! !INTERFACE:
+  function ESMF_DistGridMatchTypeEQ(dgmt1, dgmt2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridMatchTypeEQ
+
+! !ARGUMENTS:
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt1
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DistGridMatchTypeEQ = dgmt1%value .eq. dgmt2%value
+
+  end function ESMF_DistGridMatchTypeEQ
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatchTypeNE()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridMatchTypeNE - Compare two DistGridMatchTypes for non-equality
+!
+! !INTERFACE:
+  function ESMF_DistGridMatchTypeNE(dgmt1, dgmt2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridMatchTypeNE
+
+! !ARGUMENTS:
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt1
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DistGridMatchTypeNE = .not.ESMF_DistGridMatchTypeEQ(dgmt1, dgmt2)
+
+  end function ESMF_DistGridMatchTypeNE
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatchTypeLT()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridMatchTypeLT - Compare two DistGridMatchTypes
+!
+! !INTERFACE:
+  function ESMF_DistGridMatchTypeLT(dgmt1, dgmt2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridMatchTypeLT
+
+! !ARGUMENTS:
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt1
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DistGridMatchTypeLT = dgmt1%value .lt. dgmt2%value
+
+  end function ESMF_DistGridMatchTypeLT
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatchTypeGT()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridMatchTypeGT - Compare two DistGridMatchTypes
+!
+! !INTERFACE:
+  function ESMF_DistGridMatchTypeGT(dgmt1, dgmt2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridMatchTypeGT
+
+! !ARGUMENTS:
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt1
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DistGridMatchTypeGT = dgmt1%value .gt. dgmt2%value
+
+  end function ESMF_DistGridMatchTypeGT
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatchTypeLE()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridMatchTypeLE - Compare two DistGridMatchTypes
+!
+! !INTERFACE:
+  function ESMF_DistGridMatchTypeLE(dgmt1, dgmt2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridMatchTypeLE
+
+! !ARGUMENTS:
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt1
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DistGridMatchTypeLE = dgmt1%value .le. dgmt2%value
+
+  end function ESMF_DistGridMatchTypeLE
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridMatchTypeGE()"
+!BOPI
+! !IROUTINE:  ESMF_DistGridMatchTypeGE - Compare two DistGridMatchTypes
+!
+! !INTERFACE:
+  function ESMF_DistGridMatchTypeGE(dgmt1, dgmt2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DistGridMatchTypeGE
+
+! !ARGUMENTS:
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt1
+    type(ESMF_DistGridMatchType), intent(in) :: dgmt2
+
+! !DESCRIPTION:
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DistGridMatchTypeGE = dgmt1%value .ge. dgmt2%value
+
+  end function ESMF_DistGridMatchTypeGE
+!-------------------------------------------------------------------------------
+
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -2931,7 +3168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_DistGridMatch(distgrid1, distgrid2, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
-    logical :: ESMF_DistGridMatch
+    type(ESMF_DistGridMatchType) :: ESMF_DistGridMatch
       
 ! !ARGUMENTS:
     type(ESMF_DistGrid),  intent(in)              :: distgrid1
@@ -2942,27 +3179,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !DESCRIPTION:
-!      Check if {\tt distgrid1} and {\tt distgrid2} match. Returns
-!      {\tt .TRUE.} if DistGrid objects match, {\tt .FALSE.} otherwise.
+!   Determine to which level {\tt distgrid1} and {\tt distgrid2} match. 
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid1] 
-!          {\tt ESMF\_DistGrid} object.
-!     \item[distgrid2] 
-!          {\tt ESMF\_DistGrid} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   Returns a range of values of type {\tt ESMF\_DistGridMatchType}, indicating
+!   how closely the DistGrids match. For a description of the possible return 
+!   values, see~\ref{sec:opt:distgridmatchtype}. 
+!   Note that this call only performs PET local matching. Different return values
+!   may be returned on different PETs for the same DistGrid pair.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[distgrid1] 
+!     {\tt ESMF\_DistGrid} object.
+!   \item[distgrid2] 
+!     {\tt ESMF\_DistGrid} object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_Logical)      :: matchResult
+    integer                       :: localrc      ! local return code
+    type(ESMF_DistGridMatchType)  :: matchResult
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! Initialize return value to invalid, in case of bail-out
+    ESMF_DistGridMatch = ESMF_DISTGRIDMATCH_INVALID
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid1, rc)
@@ -2973,8 +3218,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! return successfully
+    ! Set the actual return value
     ESMF_DistGridMatch = matchResult
+
+    ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
     
   end function ESMF_DistGridMatch

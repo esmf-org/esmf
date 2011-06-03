@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.57 2011/05/18 22:10:40 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.58 2011/06/03 05:18:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.57 2011/05/18 22:10:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.58 2011/06/03 05:18:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2357,7 +2357,7 @@ int DistGrid::fillIndexListPDimPDe(
 // !IROUTINE:  ESMCI::DistGrid::match
 //
 // !INTERFACE:
-bool DistGrid::match(
+DistGridMatchType DistGrid::match(
 //
 // !RETURN VALUE:
 //    bool according to match
@@ -2379,7 +2379,7 @@ bool DistGrid::match(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // initialize return value
-  bool matchResult = false;
+  DistGridMatchType matchResult = DISTGRIDMATCH_INVALID;
   
   // return with errors for NULL pointer
   if (distgrid1 == NULL){
@@ -2396,7 +2396,7 @@ bool DistGrid::match(
   // check if DistGrid pointers are identical
   if (distgrid1 == distgrid2){
     // pointers are identical -> nothing more to check
-    matchResult = true;
+    matchResult = DISTGRIDMATCH_ALIAS;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -2405,21 +2405,21 @@ bool DistGrid::match(
   int dimCount1 = distgrid1->dimCount;
   int dimCount2 = distgrid2->dimCount;
   if (dimCount1 != dimCount2){
-    matchResult = false;
+    matchResult = DISTGRIDMATCH_NONE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   int tileCount1 = distgrid1->tileCount;
   int tileCount2 = distgrid2->tileCount;
   if (tileCount1 != tileCount2){
-    matchResult = false;
+    matchResult = DISTGRIDMATCH_NONE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   int deCount1 = distgrid1->delayout->getDeCount();
   int deCount2 = distgrid2->delayout->getDeCount();
   if (deCount1 != deCount2){
-    matchResult = false;
+    matchResult = DISTGRIDMATCH_NONE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -2427,7 +2427,7 @@ bool DistGrid::match(
   int *int2 = distgrid2->minIndexPDimPTile;
   for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2436,7 +2436,7 @@ bool DistGrid::match(
   int2 = distgrid2->maxIndexPDimPTile;
   for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2445,7 +2445,7 @@ bool DistGrid::match(
   int2 = distgrid2->elementCountPTile;
   for (int i=0; i<tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2454,7 +2454,7 @@ bool DistGrid::match(
   int2 = distgrid2->minIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2463,7 +2463,7 @@ bool DistGrid::match(
   int2 = distgrid2->maxIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2472,7 +2472,7 @@ bool DistGrid::match(
   int2 = distgrid2->elementCountPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2481,7 +2481,7 @@ bool DistGrid::match(
   int2 = distgrid2->tileListPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -2490,14 +2490,14 @@ bool DistGrid::match(
   int2 = distgrid2->contigFlagPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = false;
+      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
   }
   
   // return successfully indicating match
-  matchResult = true;
+  matchResult = DISTGRIDMATCH_EXACT;
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return matchResult;
 }

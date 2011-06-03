@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.361 2011/05/19 16:05:36 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.362 2011/06/03 05:18:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.361 2011/05/19 16:05:36 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.362 2011/06/03 05:18:40 theurich Exp $'
 
 !==============================================================================
 !
@@ -321,7 +321,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif 
           
           ! Verify the distgrids in array and grid match.
-          if(.not. ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc)) then
+          if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) &
+            < ESMF_DISTGRIDMATCH_EXACT) then
               call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
                  msg="grid DistGrid does not match array DistGrid", &
                   ESMF_CONTEXT, rcToReturn=rc)

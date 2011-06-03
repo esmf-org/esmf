@@ -1,4 +1,4 @@
-% $Id: DistGrid_refdoc.ctex,v 1.13 2011/01/05 20:05:42 svasquez Exp $ 
+% $Id: DistGrid_refdoc.ctex,v 1.14 2011/06/03 05:18:31 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,12 +55,12 @@
 \input{../Infrastructure/DistGrid/doc/DistGrid_desc}
 #endif
 
-%\subsection{DistGrid Options}
-%#ifdef STANDALONE
-%\input{DistGrid_options}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_options}
-%#endif
+\subsection{DistGrid Options}
+#ifdef STANDALONE
+\input{DistGrid_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_options}
+#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

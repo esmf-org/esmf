@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.61 2011/06/02 22:58:36 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.62 2011/06/03 05:18:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.61 2011/06/02 22:58:36 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.62 2011/06/03 05:18:41 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -195,7 +195,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.61 2011/06/02 22:58:36 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.62 2011/06/03 05:18:41 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1857,8 +1857,8 @@ end function ESMF_MeshCreateFromScrip
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer      :: localrc      ! local return code
-    logical      :: matchResultNode, matchResultElem
+    integer                       :: localrc      ! local return code
+    type(ESMF_DistGridMatchType)  :: matchResultNode, matchResultElem
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1898,10 +1898,11 @@ end function ESMF_MeshCreateFromScrip
 
 
     ! return successfully
-    if (matchResultNode .and. matchResultElem) then
-       ESMF_MeshMatch = .true.
+    if ((matchResultNode >= ESMF_DISTGRIDMATCH_EXACT) .and. &
+      (matchResultElem >= ESMF_DISTGRIDMATCH_EXACT)) then
+      ESMF_MeshMatch = .true.
     else
-       ESMF_MeshMatch = .false.
+      ESMF_MeshMatch = .false.
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS

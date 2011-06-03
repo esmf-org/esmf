@@ -1,0 +1,28 @@
+% $Id: DistGrid_options.tex,v 1.1 2011/06/03 05:18:31 theurich Exp $
+
+% Earth System Modeling Framework
+% Copyright 2002-2011, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+\subsubsection{ESMF\_DistGridMatchType}
+\label{sec:opt:distgridmatchtype}
+
+{\sf DESCRIPTION:\\}
+Indicates the level to which two DistGrid variables match.
+
+\medskip
+\begin{description}
+\item [ESMF\_DISTGRIDMATCH\_INVALID:] Indicates a non-valid matching level.
+\item [ESMF\_DISTGRIDMATCH\_NONE:] The lowest valid level of DistGrid matching. 
+  This indicates that the DistGrid variables don't match at any of the higher
+  levels.
+\item [ESMF\_DISTGRIDMATCH\_EXACT:] All the DistGrid pieces except the name
+  match between the two DistGrid variables. 
+\item [ESMF\_DISTGRIDMATCH\_ALIAS:] Both DistGrid variables are aliases to the
+  exact same DistGrid object in memory.
+\end{description}
+

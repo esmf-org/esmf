@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2010/09/16 04:33:44 theurich Exp $
+# $Id: makefile,v 1.17 2011/06/03 05:18:31 theurich Exp $
 
 All: onedoc
 
@@ -30,7 +30,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhaustive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) DistGrid_desc.tex DistGrid_usage.tex DistGrid_rest.tex DistGrid_implnotes.tex
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) DistGrid_desc.tex DistGrid_options.tex DistGrid_usage.tex DistGrid_rest.tex DistGrid_implnotes.tex
 
 
 include $(ESMF_DIR)/makefile

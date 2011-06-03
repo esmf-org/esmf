@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.25 2011/05/13 17:08:07 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.26 2011/06/03 05:18:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.25 2011/05/13 17:08:07 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.26 2011/06/03 05:18:43 theurich Exp $'
 
 !==============================================================================
 !
@@ -590,7 +590,8 @@ contains
       endif
 
       ! Balanced DistGrid
-      if(.not. ESMF_DistGridMatch(fp1%distgridM, fp2%distgridM)) then
+      if(ESMF_DistGridMatch(fp1%distgridM, fp2%distgridM) &
+        == ESMF_DISTGRIDMATCH_NONE) then
         if(present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -604,7 +605,8 @@ contains
       endif
       if(.not. associated(fp1%distgridA, fp2%distgridA)) then
         do i = 1, ngridA1
-          if(.not. ESMF_DistGridMatch(fp1%distgridA(i), fp2%distgridA(i))) then
+          if(ESMF_DistGridMatch(fp1%distgridA(i), fp2%distgridA(i)) &
+            == ESMF_DISTGRIDMATCH_NONE) then
             if(present(rc)) rc = ESMF_SUCCESS
             return
           endif
@@ -619,7 +621,8 @@ contains
       endif
       if(.not. associated(fp1%distgridB, fp2%distgridB)) then
         do i = 1, ngridB1
-          if(.not. ESMF_DistGridMatch(fp1%distgridB(i), fp2%distgridB(i))) then
+          if(ESMF_DistGridMatch(fp1%distgridB(i), fp2%distgridB(i)) &
+            == ESMF_DISTGRIDMATCH_NONE) then
             if(present(rc)) rc = ESMF_SUCCESS
             return
           endif
