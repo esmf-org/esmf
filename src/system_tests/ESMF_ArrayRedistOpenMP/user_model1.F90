@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2011/04/05 20:51:08 theurich Exp $
+! $Id: user_model1.F90,v 1.8 2011/06/03 14:52:56 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -46,7 +46,7 @@ module user_model1
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
-      call ESMF_GridCompSetVMMaxPEs(comp, max=2, rc=rc)
+      call ESMF_GridCompSetVMMaxPEs(comp, maxPeCountPerPet=2, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
     
