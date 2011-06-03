@@ -1,4 +1,4 @@
-! $Id: ESMF_StdCompMethodsUTest.F90,v 1.5 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_StdCompMethodsUTest.F90,v 1.6 2011/06/03 02:59:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -169,7 +169,7 @@ module ESMF_StdCompMethods_mod
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (pthreadsEnabled) then
-      call ESMF_CplCompSetVMMaxThreads(cplcomp, max=1, rc=rc)
+      call ESMF_CplCompSetVMMaxThreads(cplcomp, maxPetCountPerVas=1, rc=rc)
     endif
 #endif
 
@@ -198,7 +198,7 @@ module ESMF_StdCompMethods_mod
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (pthreadsEnabled) then
-      call ESMF_CplCompSetVMMaxPEs(cplcomp, max=1, rc=rc)
+      call ESMF_CplCompSetVMMaxPEs(cplcomp, maxPeCountPerPet=1, rc=rc)
     endif
 #endif
 
@@ -327,7 +327,7 @@ program ESMF_StdCompMethodsUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_StdCompMethodsUTest.F90,v 1.5 2011/01/05 20:05:47 svasquez Exp $'
+    '$Id: ESMF_StdCompMethodsUTest.F90,v 1.6 2011/06/03 02:59:57 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
