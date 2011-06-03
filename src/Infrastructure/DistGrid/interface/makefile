@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.13 2008/09/26 05:18:05 cdeluca Exp $
+# $Id: makefile,v 1.14 2011/06/03 23:33:59 theurich Exp $
 
 ALL: build_here
 
 SOURCEC	  = ESMCI_DistGrid_F.C ESMC_DistGrid.C
-SOURCEF	  = ESMF_DistGrid.F90
+SOURCEF	  = ESMF_DistGridConnection.F90 ESMF_DistGrid.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
