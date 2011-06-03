@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.6 2011/06/03 20:06:59 w6ws Exp $
+! $Id: ESMF_StateItem.F90,v 1.7 2011/06/03 22:17:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -164,7 +164,15 @@
       !private
         type(ESMF_DataHolder) :: datap
         type(ESMF_StateItemType) :: otype
+        type(ESMF_NeededFlag) :: needed 
+        type(ESMF_ReadyFlag) :: ready
+        type(ESMF_ValidFlag) :: valid
+        type(ESMF_ReqForRestartFlag) :: reqrestart
+ 
+        ! VMId is currently needed for FieldBundles and their indirect Fields. 	 
+        type(ESMF_VMId)      :: FldBundleVMId
         logical :: proxyFlag
+        integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
         logical :: removedflag
         ESMF_INIT_DECLARE
@@ -212,7 +220,6 @@
         type(ESMF_Base) :: base
         type(ESMF_MethodTable) :: methodTable
         type(ESMF_StateType) :: st
-#if 0
         type(ESMF_NeededFlag) :: needed_default
         type(ESMF_ReadyFlag) :: ready_default
         type(ESMF_ValidFlag) :: stvalid_default
@@ -220,11 +227,8 @@
         integer :: datacount
         type(ESMF_MapPtr) :: nameMap
         type(ESMF_StateItem), pointer :: datalist(:)
-#endif
         type(ESMF_Container):: stateContainer
-#if 0
         integer :: alloccount
-#endif
         logical :: reconcileneededflag
          ESMF_INIT_DECLARE
       end type
@@ -320,7 +324,7 @@ contains
     if (ESMF_LogFoundAllocError(memstat, msg="creating StateItem", &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-print *, ESMF_METHOD, ': creating sip with name = ', trim (name)
+! print *, ESMF_METHOD, ': creating sip with name = ', trim (name)
     sip%namep = name
     sip%otype = itemtype
     sip%datap%spp => null ()
