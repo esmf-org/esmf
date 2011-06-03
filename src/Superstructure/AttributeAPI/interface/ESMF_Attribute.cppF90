@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.91 2011/05/27 15:16:48 feiliu Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.92 2011/06/03 22:17:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.91 2011/05/27 15:16:48 feiliu Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.92 2011/06/03 22:17:50 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2817,9 +2817,9 @@ contains
       if(lisPresent .ne. ESMF_TRUE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
-        else if (.not.present(isPresent)) then @\
+        else @\
           call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-               msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+               msg="Attribute not found and default value not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
@@ -2981,12 +2981,10 @@ contains
           if(present(itemCount)) then @\
             itemCount = 0 @\
           endif @\
-          if (.not.present(isPresent).and..not.present(itemCount)) then @\
-            call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-               msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+               msg="Attribute not found and default value not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
-          endif @\
         endif @\
  @\
       else @\
@@ -3118,9 +3116,9 @@ contains
       if(lisPresent .ne. ESMF_TRUE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
-        else if (.not.present(isPresent)) then @\
+        else @\
           call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-               msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+               msg="Attribute not found and default values not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
@@ -3285,12 +3283,10 @@ contains
           if(present(itemCount)) then @\
             itemCount = 0 @\
           endif @\
-          if (.not.present(isPresent).and..not.present(itemCount)) then @\
-            call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-               msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+               msg="Attribute not found and default values not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
-            return @\
-          endif @\
+          return @\
         endif @\
  @\
       else @\
@@ -3418,9 +3414,9 @@ contains
       if(lisPresent .ne. ESMF_TRUE) then @\
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
-        else if (.not.present(isPresent)) then @\
+        else @\
           call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-               msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+               msg="Attribute not found and default value not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
@@ -3591,12 +3587,10 @@ contains
           if(present(itemCount)) then @\
             itemCount = 0 @\
           endif @\
-          if (.not.present(isPresent).and..not.present(itemCount)) then @\
-            call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
-               msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+               msg="Attribute not found and default values not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
-            return @\
-          endif @\
+          return @\
         endif @\
  @\
       else @\

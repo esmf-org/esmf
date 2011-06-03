@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.42 2011/05/27 23:46:36 oehmke Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.43 2011/06/03 22:17:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.42 2011/05/27 23:46:36 oehmke Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.43 2011/06/03 22:17:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -460,7 +460,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Getting an ESMF_R8 Attribute from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
                      .and.(inR8==outR8) &
-                     .and.isPresent.eqv..true., &
+                     .and.(isPresent.eqv..true.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -489,8 +489,8 @@ program ESMF_AttributeFieldUTest
         isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8 Attribute isPresent flag from a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false., &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -522,7 +522,7 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and.isPresent.eqv..true. &
+                     .and.(isPresent.eqv..true.) &
                      .and. all (inR8l==outR8l), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -565,9 +565,9 @@ program ESMF_AttributeFieldUTest
         valueList=outR8l, itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute isPresent flag and itemCount from a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false. &
-                     .and.items == 0, &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.) &
+                     .and.(items == 0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -577,8 +577,8 @@ program ESMF_AttributeFieldUTest
         valueList=outR8l, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute isPresent flag from a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false., &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -589,8 +589,8 @@ program ESMF_AttributeFieldUTest
         valueList=outR8l, itemCount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute itemCount from a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and.items == 0, &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and.(items == 0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -624,7 +624,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Getting a char Attribute from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
                      .and. (inChar==outChar) &
-                     .and.isPresent.eqv..true., &
+                     .and.(isPresent.eqv..true.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -653,11 +653,10 @@ program ESMF_AttributeFieldUTest
         isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a char Attribute isPresent flag from a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false., &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
       !NEX_UTest
       ! Get a char Attribute error from a Field Test
       call ESMF_AttributeGet(field, name=attrname, value=outChar, rc=rc)
@@ -700,7 +699,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Getting an Attribute char list from a Field test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
                      .and. all (InCharl==OutCharl) &
-                     .and. isPresent.eqv..true. &
+                     .and. (isPresent.eqv..true.) &
                      .and. (items==3), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -750,7 +749,7 @@ program ESMF_AttributeFieldUTest
         valueList=OutCharl, itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list isPresent flag and itemCount from a Field test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
                      .and. (isPresent.eqv..false.) &
                      .and. (items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
@@ -762,7 +761,7 @@ program ESMF_AttributeFieldUTest
         valueList=OutCharl, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list isPresent flag from a Field test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
                      .and. (isPresent.eqv..false.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -774,7 +773,7 @@ program ESMF_AttributeFieldUTest
         valueList=OutCharl, itemCount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting an Attribute char list itemCount from a Field test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
                      .and. (items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -809,9 +808,9 @@ program ESMF_AttributeFieldUTest
         isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Field Attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS) &
+      call ESMF_Test((rc==ESMF_SUCCESS) &
                      .and.(inLog .eqv. outLog) &
-                     .and.isPresent.eqv..true., &
+                     .and.(isPresent.eqv..true.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -831,7 +830,7 @@ program ESMF_AttributeFieldUTest
         defaultvalue=defaultLog, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting Field default Attribute (type Fortran logical scalar)"
-      call ESMF_Test((rc == ESMF_SUCCESS).and.(defaultLog .eqv. dfltoutLog),   &
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultLog .eqv. dfltoutLog),   &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -841,8 +840,8 @@ program ESMF_AttributeFieldUTest
         isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting a logical Attribute isPresent flag on a Field test"
-      call ESMF_Test((rc == ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false., &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -878,7 +877,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Getting Field Attribute (type Fortran logical field)"
       call ESMF_Test((rc == ESMF_SUCCESS) &
                      .and. all (inLogl .eqv. outLogl) &
-                     .and.isPresent.eqv..true., &
+                     .and.(isPresent.eqv..true.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -921,9 +920,9 @@ program ESMF_AttributeFieldUTest
         valueList=outLogl, itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting a logical list Attribute isPresent flag and itemCount on a Field test"
-      call ESMF_Test((rc == ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false. &
-                     .and.items==0, &
+      call ESMF_Test((rc == ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.) &
+                     .and.(items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -933,8 +932,8 @@ program ESMF_AttributeFieldUTest
         valueList=outLogl, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting a logical list Attribute isPresent flag on a Field test"
-      call ESMF_Test((rc == ESMF_SUCCESS) &
-                     .and.isPresent.eqv..false., &
+      call ESMF_Test((rc == ESMF_RC_ATTR_NOTSET) &
+                     .and.(isPresent.eqv..false.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -945,8 +944,8 @@ program ESMF_AttributeFieldUTest
         valueList=outLogl, itemCount=items, rc=rc)
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting a logical list Attribute itemCount on a Field test"
-      call ESMF_Test((rc == ESMF_SUCCESS) &
-                     .and.items==0, &
+      call ESMF_Test((rc == ESMF_RC_ATTR_NOTSET) &
+                     .and.(items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -995,7 +994,7 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an ESMF_R8l Attribute from a Field Test with long valueList"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inR8l==outR8lLong(4:6) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+                    (itemCount==3)), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !-------------------------------------------------------------------------
@@ -1028,7 +1027,7 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute char list from a Field test with long valueList"
       call ESMF_Test((rc==ESMF_SUCCESS).and. all (inCharl==outCharlLong(4:6) .and. &
-                    itemCount==3), name, failMsg, result, ESMF_SRCLINE)
+                    (itemCount==3)), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
@@ -1061,7 +1060,7 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return logical .TRUE."
       write(name, *) "Getting an logical list Attribute from a Field Test with long valueList"
       call ESMF_Test((rc == ESMF_SUCCESS).and. all (inLogl .eqv. outLoglLong(4:6)) .and. &
-                    itemCount==3, name, failMsg, result, ESMF_SRCLINE)
+                    (itemCount==3), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
@@ -1128,7 +1127,7 @@ program ESMF_AttributeFieldUTest
       write(name, *) "Getting a char list Attribute in an Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
                      .and. all (attpackList == attpackListOut)& 
-                     .and. isPresent.eqv..true., &
+                     .and. (isPresent.eqv..true.), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1163,9 +1162,9 @@ program ESMF_AttributeFieldUTest
         itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute isPresent flag and itemCount in an Attribute package on a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and. isPresent.eqv..false.& 
-                     .and. items==0, &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and. (isPresent.eqv..false.)& 
+                     .and. (items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1176,8 +1175,8 @@ program ESMF_AttributeFieldUTest
         isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute isPresent flag in an Attribute package on a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and. isPresent.eqv..false.,& 
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and. (isPresent.eqv..false.),& 
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1189,8 +1188,8 @@ program ESMF_AttributeFieldUTest
         itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute itemCount in an Attribute package on a Field Test"
-      call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and. items==0, &
+      call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET) &
+                     .and. (items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1434,7 +1433,7 @@ program ESMF_AttributeFieldUTest
         convention=nestconv, purpose=nestpurp, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting the isPresent flag from an Attribute in an Attribute package on a Field test"
-      call ESMF_Test((rc==ESMF_SUCCESS) .and. isPresent.eqv..true., &
+      call ESMF_Test((rc==ESMF_SUCCESS) .and. (isPresent.eqv..true.), &
         name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1535,9 +1534,9 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting Attribute info by name with isPresent flag, itemCount, and typekind from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and. attrTK==ESMF_NOKIND &
-                     .and. items==0 &
-                     .and. isPresent.eqv..false.,& 
+                     .and. (attrTK==ESMF_NOKIND) &
+                     .and. (items==0) &
+                     .and. (isPresent.eqv..false.),& 
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1548,10 +1547,10 @@ program ESMF_AttributeFieldUTest
       call ESMF_AttributeGet(field, name="NOTHERE", &
         typekind=attrTK, itemCount=items, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Getting Attribute info by name with isPresent flag and itemCount from a Field Test"
+      write(name, *) "Getting Attribute info by name with typekind and itemCount from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and. attrTK==ESMF_NOKIND &
-                     .and. items==0, &
+                     .and. (attrTK==ESMF_NOKIND) &
+                     .and. (items==0), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1563,7 +1562,7 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting Attribute info by name with typekind from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
-                     .and. attrTK==ESMF_NOKIND, &
+                     .and. (attrTK==ESMF_NOKIND), &
                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
