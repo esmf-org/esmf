@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.5 2011/06/01 20:56:17 theurich Exp $
+! $Id: ESMF_StateContainer.F90,v 1.6 2011/06/03 19:06:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_StateContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.5 2011/06/01 20:56:17 theurich Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.6 2011/06/03 19:06:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -647,7 +647,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Replace items in an {\tt ESMF\_Container} object.
 !
 !   This method defines garbage as those elements in {\tt container} that
-!   were replaced as a consequence of this call.
+!   were replaced as a consequence of this operation {\em and} elements in
+!   {\tt itemList} that were not used for replacement (in relaxed mode).
 !
 !   The arguments are:
 !   \begin{description}

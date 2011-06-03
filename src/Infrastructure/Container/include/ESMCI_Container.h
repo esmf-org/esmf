@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.14 2011/05/20 05:14:34 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.15 2011/06/03 19:06:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -292,6 +292,8 @@ namespace ESMCI {
           "key does not exist", &rc);
         throw rc;  // bail out with exception
       }
+      garbage.push_back(t); // object not used to replace item goes into garbage
+      return; // bail out without exception
     }
     pos = range.second;
     if (range.first != --pos){
