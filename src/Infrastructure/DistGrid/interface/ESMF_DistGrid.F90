@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.80 2011/06/03 05:18:35 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.81 2011/06/03 22:34:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -144,7 +144,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.80 2011/06/03 05:18:35 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.81 2011/06/03 22:34:01 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -3102,64 +3102,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridPrint()"
-!BOP
-! !IROUTINE: ESMF_DistGridPrint - Print DistGrid internals
-
-! !INTERFACE:
-  subroutine ESMF_DistGridPrint(distgrid, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_DistGrid),  intent(in)              :: distgrid
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc  
-!         
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!     Prints internal information about the specified {\tt ESMF\_DistGrid} 
-!     object to {\tt stdout}. \\
-!
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[distgrid] 
-!          Specified {\tt ESMF\_DistGrid} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
-    
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DistGridPrint(distgrid, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_DistGridPrint
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridMatch()"
 !BOP
 ! !IROUTINE: ESMF_DistGridMatch - Check if two DistGrid objects match
@@ -3225,6 +3167,64 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
     
   end function ESMF_DistGridMatch
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridPrint()"
+!BOP
+! !IROUTINE: ESMF_DistGridPrint - Print DistGrid internals
+
+! !INTERFACE:
+  subroutine ESMF_DistGridPrint(distgrid, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGrid),  intent(in)              :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,              intent(out),  optional  :: rc  
+!         
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!     Prints internal information about the specified {\tt ESMF\_DistGrid} 
+!     object to {\tt stdout}. \\
+!
+!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
+!     On some platforms/compilers there is a potential issue with interleaving
+!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
+!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
+!     may be used on unit 6 to get coherent output.  \\
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Specified {\tt ESMF\_DistGrid} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DistGridPrint(distgrid, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DistGridPrint
 !------------------------------------------------------------------------------
 
 
