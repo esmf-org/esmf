@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.5 2011/05/27 02:02:05 w6ws Exp $
+! $Id: ESMF_StateItem.F90,v 1.6 2011/06/03 20:06:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
       use ESMF_FieldBundleMod
       use ESMF_RHandleMod
       use ESMF_InitMacrosMod
+      use ESMF_IOUtilMod
       use ESMF_ContainerMod
       implicit none
 
@@ -163,16 +164,7 @@
       !private
         type(ESMF_DataHolder) :: datap
         type(ESMF_StateItemType) :: otype
-        type(ESMF_NeededFlag) :: needed
-        type(ESMF_ReadyFlag) :: ready
-        type(ESMF_ValidFlag) :: valid
-        type(ESMF_ReqForRestartFlag) :: reqrestart
-
-        ! VMId is currently needed for FieldBundles and their indirect Fields.
-        type(ESMF_VMId)      :: FldBundleVMId
-
         logical :: proxyFlag
-        integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
         logical :: removedflag
         ESMF_INIT_DECLARE
@@ -220,6 +212,7 @@
         type(ESMF_Base) :: base
         type(ESMF_MethodTable) :: methodTable
         type(ESMF_StateType) :: st
+#if 0
         type(ESMF_NeededFlag) :: needed_default
         type(ESMF_ReadyFlag) :: ready_default
         type(ESMF_ValidFlag) :: stvalid_default
@@ -227,8 +220,11 @@
         integer :: datacount
         type(ESMF_MapPtr) :: nameMap
         type(ESMF_StateItem), pointer :: datalist(:)
+#endif
         type(ESMF_Container):: stateContainer
+#if 0
         integer :: alloccount
+#endif
         logical :: reconcileneededflag
          ESMF_INIT_DECLARE
       end type
@@ -267,6 +263,7 @@
 
 ! - ESMF-internal methods:
   public ESMF_StateItemGet
+  public ESMF_StateItemPrint
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -323,7 +320,7 @@ contains
     if (ESMF_LogFoundAllocError(memstat, msg="creating StateItem", &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-! print *, ESMF_METHOD, ': creating sip with name = ', trim (name)
+print *, ESMF_METHOD, ': creating sip with name = ', trim (name)
     sip%namep = name
     sip%otype = itemtype
     sip%datap%spp => null ()
@@ -428,6 +425,102 @@ contains
   end subroutine ESMF_StateItemGet
 !------------------------------------------------------------------------------
 
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateItemPrint ()"
+!BOPI
+! !IROUTINE: ESMF_StateItemPrint - Print a StateItem
+
+! !INTERFACE:
+  subroutine ESMF_StateItemPrint (stateItem, header, prefixstr, longflag, unit, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_StateItem), intent(in)            :: stateItem
+    character(*),         intent(in)            :: header
+    character(*),         intent(in)            :: prefixstr
+    logical,              intent(in)            :: longflag
+    integer,              intent(in),  optional :: unit
+    integer,              intent(out), optional :: rc
+!         
+! !DESCRIPTION:
+!   Print a StateItem.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[stateItem]
+!     {\tt ESMF\_StateItem} queried.
+!   \item[header]
+!     Title line
+!   \item[prefixstr]
+!     Leading characters for output string (for indentation levels)
+!   \item[longflag]
+!     Print additional information such as proxyflag
+!   \item[unit]
+!     Fortran unit number
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                     :: localrc      ! local return code
+    integer                     :: localunit
+    character(2*ESMF_MAXSTR)    :: outbuf
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    localunit = ESMF_IOstdout
+    if (present (unit)) then
+      localunit = unit
+    end if
+
+    write (localunit, *) prefixstr, header, 'name: ', trim (stateItem%namep)
+
+    outbuf = prefixstr // "          type:"
+
+    select case (stateItem%otype%ot)
+    case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+        outbuf = trim (outbuf) // " FieldBundle"
+    case (ESMF_STATEITEM_FIELD%ot)
+        outbuf = trim (outbuf) // " Field"
+    case (ESMF_STATEITEM_ARRAY%ot)
+        outbuf = trim (outbuf) // " Array"
+    case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+        outbuf = trim (outbuf) // " ArrayBundle"
+    case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+        outbuf = trim (outbuf) // " Route handle"
+    case (ESMF_STATEITEM_STATE%ot)
+        outbuf = trim (outbuf) // " State"
+    case (ESMF_STATEITEM_NAME%ot)
+        outbuf = trim (outbuf) // " Placeholder name"
+    case (ESMF_STATEITEM_INDIRECT%ot)
+        outbuf = trim (outbuf) // " Indirect Field inside a FieldBundle"
+    case (ESMF_STATEITEM_UNKNOWN%ot)
+        outbuf = trim (outbuf) // " Unknown"
+    case (ESMF_STATEITEM_NOTFOUND%ot)
+        outbuf = trim (outbuf) // " Not found"
+    case default
+        outbuf = trim (outbuf) // " (bad type value)"
+    end select
+
+    if (longflag) then
+      outbuf = trim (outbuf) //  &
+            ", proxy flag: " // merge ("yes", "no ", stateItem%proxyFlag)
+
+    end if
+
+    write (localunit,*) trim(outbuf)
+
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_StateItemPrint
+!------------------------------------------------------------------------------
+    
 
 end module ESMF_StateItemMod
 
