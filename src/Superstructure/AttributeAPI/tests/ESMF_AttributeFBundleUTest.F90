@@ -1,4 +1,4 @@
-!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.31 2011/05/19 19:13:50 feiliu Exp $
+!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.32 2011/06/04 16:46:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.31 2011/05/19 19:13:50 feiliu Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.32 2011/06/04 16:46:22 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -771,9 +771,9 @@ program ESMF_AttributeFBundleUTest
       ! Too Short Get an ESMF_R8 list Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name="AttrR8l", &
         valueList=outR8lLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_ITEMSOFF"
       write(name, *) "Getting an ESMF_R8l Attribute from a FieldBundle Test with short valueList"
-      call ESMF_Test(rc==ESMF_RC_ARG_BAD, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(rc/=ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3
@@ -837,9 +837,9 @@ program ESMF_AttributeFBundleUTest
       ! Too Short Get an ESMF_R8 list Attribute from a FieldBundle Test
       call ESMF_AttributeGet(fieldbundle, name=attrname,  &
         valueList=outLoglLong(1:2), itemCount=itemCount, rc=rc)
-      write(failMsg, *) "Did not return ESMF_RC_ARG_BAD"
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_ITEMSOFF"
       write(name, *) "Getting an logical list Attribute from a FieldBundle Test with short valueList"
-      call ESMF_Test((rc==ESMF_RC_ARG_BAD), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       itemCount = 3

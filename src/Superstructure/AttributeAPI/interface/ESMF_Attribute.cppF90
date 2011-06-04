@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.92 2011/06/03 22:17:50 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.93 2011/06/04 16:46:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.92 2011/06/03 22:17:50 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.93 2011/06/04 16:46:20 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1027,7 +1027,7 @@ contains
 !     character (len = *), intent(in),    optional :: convention
 !     character (len = *), intent(in),    optional :: purpose
 !     character (len = *), intent(in),    optional :: attPackInstanceName
-!     integer,             intent(inout), optional :: itemCount
+!     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc   
 !
@@ -1090,12 +1090,7 @@ contains
 !           multiple Attribute package instances of the same convention and
 !           purpose, within a nest.  (Not implemented yet)
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute.  If the itemCount 
-!           is passed in, only itemCount items of the desired Attribute will be 
-!           returned, as long as there is enough space and there are  itemCount 
-!           items to return.  Regardless of whether itemCount is passed in, it 
-!           will be returned as the number of items that was {\it actually} 
-!           returned.
+!           The number of items in a multi-valued Attribute.  
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}] 
@@ -2849,7 +2844,7 @@ contains
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
-      integer, intent(inout), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -2887,6 +2882,7 @@ contains
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_TypeKind) :: localTk @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -2897,29 +2893,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(itemCount)) then @\
-        if (itemCount > size(valueList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-            msg="itemCount cannot be larger than size(valueList)", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-	    litemCount = itemCount @\
-        if (litemCount .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="itemCount must be greater than 0!", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      else @\
-	    litemCount = size(valueList) @\
-        if (litemCount .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="valueList is too small", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      end if @\
+      litemcount = size(valueList) @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -2990,6 +2964,10 @@ contains
       else @\
  @\
         if(present(itemCount)) then @\
+          call c_ESMC_AttributeGetInfoName(mthisfield, name, localTk, & @\
+            litemCount, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
           itemCount = litemCount @\
         endif @\
  @\
@@ -3149,7 +3127,7 @@ contains
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
-      integer, intent(inout), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -3189,6 +3167,7 @@ contains
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_TypeKind) :: localTk @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3199,29 +3178,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(itemCount)) then @\
-        if (itemCount > size(valueList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      	litemCount = itemCount @\
-        if (litemCount .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="itemCount must be greater than 0!", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      else @\
-        litemCount = size(valueList) @\
-        if (litemCount .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="valueList is too small", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      end if @\
+      litemCount = size(valueList) @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -3292,6 +3249,10 @@ contains
       else @\
  @\
         if(present(itemCount)) then @\
+          call c_ESMC_AttributeGetInfoName(mthisfield, name, localTk, & @\
+            litemCount, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
           itemCount = litemCount @\
         endif @\
  @\
@@ -3446,7 +3407,7 @@ contains
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
-      integer, intent(inout), optional :: itemCount @\
+      integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3486,6 +3447,7 @@ contains
       integer :: localrc, i, j, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_TypeKind) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
  @\
@@ -3499,29 +3461,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(itemCount)) then @\
-        if (itemCount > size(valueList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="itemCount cannot be larger than size(valueList)", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      	litemCount = itemCount @\
-        if (litemCount .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="itemCount must be greater than 0!", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      else @\
-	    litemCount = size(valueList) @\
-        if (litemCount .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
-                              msg="valueList is too small", & @\
-                              ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-      end if @\
+	  litemCount = size(valueList) @\
  @\
       do  i=1,litemCount @\
         lens(i) = len(valueList) @\
@@ -3602,6 +3542,10 @@ contains
         enddo @\
  @\
         if(present(itemCount)) then @\
+          call c_ESMC_AttributeGetInfoName(mthisfield, name, localTk, & @\
+            litemCount, localrc) @\
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
           itemCount = litemCount @\
         endif @\
  @\
