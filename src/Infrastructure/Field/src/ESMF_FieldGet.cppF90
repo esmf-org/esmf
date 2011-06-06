@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.79 2011/05/20 20:06:17 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.80 2011/06/06 15:57:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.79 2011/05/20 20:06:17 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.80 2011/06/06 15:57:10 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1325,14 +1325,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetLSAllocBounds(locstream, keywordEnforcer, &
+    subroutine ESMF_FieldGetLSAllocBounds(locstream, &
         localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)            :: locstream     
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: localDe
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -1456,14 +1455,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetMeshAllocBounds(mesh, keywordEnforcer, localDe, &
+    subroutine ESMF_FieldGetMeshAllocBounds(mesh, localDe, &
         gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)            :: mesh     
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(in),  optional :: localDe
     integer,         intent(in),  optional :: gridToFieldMap(:)    
     integer,         intent(in),  optional :: ungriddedLBound(:)
@@ -1587,14 +1585,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
-    subroutine ESMF_FieldGetXGAllocBounds(xgrid, keywordEnforcer, &
+    subroutine ESMF_FieldGetXGAllocBounds(xgrid, &
         xgridSide, gridIndex, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_XGrid),     intent(in)            :: xgrid
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_XGridSide), intent(in),  optional :: xgridSide
     integer,              intent(in),  optional :: gridIndex
     integer,              intent(in),  optional :: localDe
