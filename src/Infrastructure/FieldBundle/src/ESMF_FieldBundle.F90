@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.103 2011/06/03 18:49:04 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.104 2011/06/06 20:32:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.103 2011/06/03 18:49:04 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.104 2011/06/06 20:32:07 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -3203,19 +3203,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                      regridScheme=regridScheme, &
                      unmappedDstAction=unmappedDstAction, &
                      routehandle=rh, &
-                     indices=tmp_indices, weights=prev_weights, &
+                     indices=prev_indices, weights=prev_weights, &
                      rc=localrc)
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
-
-                ! Swap order
-                ! TODO: fix order in regrid
-                allocate(prev_indices(2,size(tmp_indices,1)))
-                do j=1,size(tmp_indices,1)
-                   prev_indices(1,j)=tmp_indices(j,1)
-                   prev_indices(2,j)=tmp_indices(j,2)
-                enddo
-                deallocate(tmp_indices)
 
                 ! Mark as prev and record info about prev
                 havePrev=.true.

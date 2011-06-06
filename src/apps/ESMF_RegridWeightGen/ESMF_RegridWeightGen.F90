@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.31 2011/05/19 21:08:58 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.32 2011/06/06 20:32:17 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1019,19 +1019,19 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   count = 0
   saved = 0
   do i=1,total
-    if (indices(i,2) /= saved) then
+    if (indices(2,i) /= saved) then
 	count = count+1
-        saved = indices(i,2)
+        saved = indices(2,i)
     endif
   enddo
   allocate(buffer(count))
   saved = 0
   j=1
   do i=1,total
-   if (indices(i,2) /= saved) then
-     buffer(j)=indices(i,2)
+   if (indices(2,i) /= saved) then
+     buffer(j)=indices(2,i)
      j=j+1
-     saved = indices(i,2)
+     saved = indices(2,i)
    endif
   enddo
 
@@ -1118,24 +1118,24 @@ subroutine computeFracMesh(mesh, vm, indices, frac, rc)
   endif
 
   call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
-  total = size(indices,1)
-  ! find unique indices in the destination column: indices(:,2)
+  total = size(indices,2)
+  ! find unique indices in the destination column: indices(2,:)
   count = 0
   saved = 0
   do i=1,total
-    if (indices(i,2) /= saved) then
+    if (indices(2,i) /= saved) then
 	count = count+1
-        saved = indices(i,2)
+        saved = indices(2,i)
     endif
   enddo
   allocate(buffer(count))
   saved = 0
   j=1
   do i=1,total
-   if (indices(i,2) /= saved) then
-     buffer(j)=indices(i,2)
+   if (indices(2,i) /= saved) then
+     buffer(j)=indices(2,i)
      j=j+1
-     saved = indices(i,2)
+     saved = indices(2,i)
    endif
   enddo
   
@@ -1385,7 +1385,7 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
 
 
     ! Get size of list
-    inListCount=size(inFactorIndexList,1)
+    inListCount=size(inFactorIndexList,2)
  
     ! if too small to need compacting (e.g. <2) return
     if (inListCount .lt. 2) then
@@ -1396,12 +1396,12 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
     ! Loop counting unique entries
     outListCount=1 ! 1 because counting switches below
     srcInd=inFactorIndexList(1,1)
-    dstInd=inFactorIndexList(1,2)
+    dstInd=inFactorIndexList(2,1)
     do i=2,inListCount
-       if ((srcInd /= inFactorIndexList(i,1)) .or. &
-           (dstInd /= inFactorIndexList(i,2))) then
-          srcInd=inFactorIndexList(i,1)
-          dstInd=inFactorIndexList(i,2)
+       if ((srcInd /= inFactorIndexList(1,i)) .or. &
+           (dstInd /= inFactorIndexList(2,i))) then
+          srcInd=inFactorIndexList(1,i)
+          dstInd=inFactorIndexList(2,i)
           outListCount=outListCount+1
        endif
     enddo
@@ -1415,24 +1415,24 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
 
     ! Allocate new lists
     allocate(outFactorList(outListCount)) 
-    allocate(outFactorIndexList(outListCount,2))
+    allocate(outFactorIndexList(2,outListCount))
 
     ! Loop counting unique entries
     outListPos=1 
     srcInd=inFactorIndexList(1,1)
-    dstInd=inFactorIndexList(1,2)
+    dstInd=inFactorIndexList(2,1)
     factorSum=inFactorList(1)
     do i=2,inListCount
-       if ((srcInd /= inFactorIndexList(i,1)) .or. &
-           (dstInd /= inFactorIndexList(i,2))) then
+       if ((srcInd /= inFactorIndexList(1,i)) .or. &
+           (dstInd /= inFactorIndexList(2,i))) then
           ! Save the old entry
-          outFactorIndexList(outListPos,1)=srcInd
-          outFactorIndexList(outListPos,2)=dstInd
+          outFactorIndexList(1,outListPos)=srcInd
+          outFactorIndexList(2,outListPos)=dstInd
           outFactorList(outListPos)=factorSum
           
           ! Change to a new entry
-          srcInd=inFactorIndexList(i,1)
-          dstInd=inFactorIndexList(i,2)
+          srcInd=inFactorIndexList(1,i)
+          dstInd=inFactorIndexList(2,i)
           factorSum=inFactorList(i)
 
           outListPos=outListPos+1
@@ -1442,8 +1442,8 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
     enddo
 
     ! Save the last entry
-    outFactorIndexList(outListPos,1)=srcInd
-    outFactorIndexList(outListPos,2)=dstInd
+    outFactorIndexList(1,outListPos)=srcInd
+    outFactorIndexList(2,outListPos)=dstInd
     outFactorList(outListPos)=factorSum
 
 

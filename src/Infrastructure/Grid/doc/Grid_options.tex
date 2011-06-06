@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.36 2011/05/27 23:46:30 oehmke Exp $
+% $Id: Grid_options.tex,v 1.37 2011/06/06 20:32:09 oehmke Exp $
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -28,6 +28,27 @@ element i+n/2.
 that the edge is n elements long, element i is connected to element n-i-1.
 
 \end{description}
+
+\subsubsection{ESMF\_PoleType}
+\label{sec:opt:poletype}
+{\sf DESCRIPTION:\\}
+This type describes the type of connection that occurs at the pole when a Grid is 
+created with {\tt ESMF\_GridCreate1PeriodicDim()}.
+
+\medskip
+\begin{description}
+\item [ESMF\_POLETYPE\_NONE] No connection at pole.
+
+\item [ESMF\_POLETYPE\_MONOPOLE] This edge is connected to itself. Given
+that the edge is n elements long, then element i is connected to
+element i+n/2.
+
+\item [ESMF\_POLETYPE\_BIPOLE] This edge is connected to itself. Given
+that the edge is n elements long, element i is connected to element n-i-1.
+
+\end{description}
+
+
 
 \subsubsection{ESMF\_GridStatus}
 \label{sec:opt:gridstatus}

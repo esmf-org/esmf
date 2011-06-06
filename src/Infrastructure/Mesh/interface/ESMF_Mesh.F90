@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.62 2011/06/03 05:18:41 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.63 2011/06/06 20:32:12 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.62 2011/06/03 05:18:41 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.63 2011/06/06 20:32:12 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -195,7 +195,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.62 2011/06/03 05:18:41 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.63 2011/06/06 20:32:12 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2812,7 +2812,7 @@ end function ESMF_MeshCreateFromScrip
     endif    
 
     ! Get size of list
-    indCount=size(factorIndexList,1)
+    indCount=size(factorIndexList,2)
 
     ! Get VM
     call ESMF_VMGetCurrent(vm,rc=localrc)
@@ -2865,7 +2865,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! Loop processing factorIndexList
     do i=1,indCount
-       factorIndexList(i,1)=globalSplitElemMap(factorIndexList(i,1))
+       factorIndexList(1,i)=globalSplitElemMap(factorIndexList(1,i))
     enddo
 
     ! Get rid of global Map
@@ -2947,7 +2947,7 @@ end function ESMF_MeshCreateFromScrip
     endif    
 
     ! Get size of list
-    indCount=size(factorIndexList,1)
+    indCount=size(factorIndexList,2)
 
 
     ! Allocate array to hold split areas
@@ -2969,16 +2969,16 @@ end function ESMF_MeshCreateFromScrip
 
     ! Loop changing factorIndexList and weights
     do i=1,indCount
-       split_dst_id=factorIndexList(i,2)
+       split_dst_id=factorIndexList(2,i)
        split_dst_pos=split_dst_id-mesh%splitElemStart+1
        orig_dst_id=mesh%splitElemMap(split_dst_pos)
        orig_dst_pos=orig_dst_id-mesh%origElemStart+1
 
-!       write(*,*) i,"b:",factorIndexList(i,2),"a:",orig_dst_id,"  ", &
+!       write(*,*) i,"b:",factorIndexList(2,i),"a:",orig_dst_id,"  ", &
 !                  (splitAreaList(split_dst_pos))/origAreaList(orig_dst_pos)                                       
 
        ! Set new index
-       factorIndexList(i,2)=orig_dst_id
+       factorIndexList(2,i)=orig_dst_id
 
        ! Set new weight
        factorList(i)=(factorList(i)*splitAreaList(split_dst_pos))/ &

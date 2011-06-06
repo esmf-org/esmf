@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.23 2011/03/10 22:05:53 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.24 2011/06/06 20:32:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1553,9 +1553,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           localCount(1)=allCounts(i)
  	  if (i==1) then 
   	    !do j=1,localCount(1)
-            !    indexbuf(j) = factorIndexList(j,1)
+            !    indexbuf(j) = factorIndexList(1,j)
             !enddo
-            next => factorIndexList(:,1)
+            next => factorIndexList(1,:)
             ncStatus=nf90_inq_varid(ncid,"col",VarId)
    	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
             errmsg = "Variable col in "//trim(wgtfile)
@@ -1564,9 +1564,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               ESMF_SRCLINE,errmsg,&
               rc)) return
             !do j=1,localCount(1)
-            !  indexbuf(j) = factorIndexList(j,2)
+            !  indexbuf(j) = factorIndexList(2,j)
             !enddo
-            next => factorIndexList(:,2)
+            next => factorIndexList(2,:)
             ncStatus=nf90_inq_varid(ncid,"row",VarId)
    	    ncStatus=nf90_put_var(ncid,VarId, next,(/start/),localCount)          
             errmsg = "Variable row in "//trim(wgtfile)
@@ -1623,8 +1623,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
        allocate(indexbuf(localcount(1)*2))
        if (localcount(1) > 0) then
          do j=1,localCount(1)
-             indexbuf(j) = factorIndexList(j,1)
-             indexbuf(j+localCount(1)) = factorIndexList(j,2)
+             indexbuf(j) = factorIndexList(1,j)
+             indexbuf(j+localCount(1)) = factorIndexList(2,j)
          enddo
          ! a non-root PET, send the results to PET 0
          call ESMF_VMSend(vm, indexbuf, localCount(1)*2, 0, rc=status)

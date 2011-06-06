@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.161 2011/05/06 18:59:50 feiliu Exp $
+! $Id: ESMF_Regrid.F90,v 1.162 2011/06/06 20:32:15 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.161 2011/05/06 18:59:50 feiliu Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.162 2011/06/06 20:32:15 oehmke Exp $'
 
 !==============================================================================
 !
@@ -384,7 +384,7 @@ end function my_xor
 
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then
-         allocate(indices(nentries,2))
+         allocate(indices(2,nentries))
          allocate(weights(nentries))
 
          call c_ESMC_Copy_TempWeights(tweights, indices(1,1), weights(1))
