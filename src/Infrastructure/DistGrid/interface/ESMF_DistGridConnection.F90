@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.1 2011/06/03 23:33:59 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.2 2011/06/07 00:29:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -42,12 +42,26 @@ module ESMF_DistGridConnectionMod
   private
 
 !------------------------------------------------------------------------------
+! ! ESMF_DistGridConnection
+
+  type ESMF_DistGridConnection
+    sequence
+    private
+    integer :: connection(2*7+2)  ! reserve for maximum dimCount
+    integer :: elementCount       ! number of actual elements in connection
+    ESMF_INIT_DECLARE
+  end type
+
+!------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
 
   public ESMF_DistGridConnection
+  public ESMF_DistGridConnectionSet
+  public ESMF_InterfaceIntCreateDGConn
+  
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -60,11 +74,11 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridConnection()"
+#define ESMF_METHOD "ESMF_DistGridConnectionInt()"
 !BOP
-! !IROUTINE: ESMF_DistGridConnection - Construct a DistGrid connection element
+! !IROUTINE: ESMF_DistGridConnectionInt - Construct a DistGrid connection element
 ! !INTERFACE:
-  subroutine ESMF_DistGridConnection(connection, tileIndexA, tileIndexB, &
+  subroutine ESMF_DistGridConnectionInt(connection, tileIndexA, tileIndexB, &
     positionVector, keywordEnforcer, orientationVector, rc)
 !
 ! !ARGUMENTS:
@@ -150,7 +164,162 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_DistGridConnection
+  end subroutine ESMF_DistGridConnectionInt
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridConnectionSet()"
+!BOP
+! !IROUTINE: ESMF_DistGridConnectionSet - Set DistGridConnetion
+! !INTERFACE:
+  subroutine ESMF_DistGridConnectionSet(connection, tileIndexA, tileIndexB, &
+    positionVector, keywordEnforcer, orientationVector, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGridConnection), intent(out)           :: connection
+    integer,                       intent(in)            :: tileIndexA
+    integer,                       intent(in)            :: tileIndexB
+    integer,                       intent(in)            :: positionVector(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(in),  optional :: orientationVector(:)
+    integer,                       intent(out), optional :: rc
+!         
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!     This call helps to construct a DistGrid connection,
+!     which is a simple vector of integers, out of its components.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[connection] 
+!        DistGridConnection object.
+!     \item[tileIndexA] 
+!        Index of one of the two tiles that are to be connected.
+!     \item[tileIndexB] 
+!        Index of one of the two tiles that are to be connected.
+!     \item[positionVector] 
+!        Position of tile B's minIndex with respect to tile A's minIndex.
+!     \item[{[orientationVector]}]
+!        Associates each dimension of tile A with a dimension in tile B's 
+!        index space. Negative index values may be used to indicate a 
+!        reversal in index orientation. It is erroneous to associate multiple
+!        dimensions of tile A with the same index in tile B. By default
+!        {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as
+!        tile A.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: dimCount
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! mark output as uninitialized    
+    ESMF_INIT_SET_DELETED(connection)
+
+    ! set the actual elementCount in connection member
+    dimCount = size(positionVector)
+    connection%elementCount = 2*dimCount+2
+    
+    call ESMF_DistGridConnectionInt(connection%connection(1:2*dimCount+2), &
+      tileIndexA=tileIndexA, tileIndexB=tileIndexB, &
+      positionVector=positionVector, orientationVector=orientationVector, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! mark output as successfully initialized
+    ESMF_INIT_SET_DEFINED(connection)
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_DistGridConnectionSet
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_InterfaceIntCreateDGConn()"
+!BOPI
+! !IROUTINE: ESMF_InterfaceIntCreateDGConn - Create InterfaceInt from DistGrid Connection List
+
+! !INTERFACE:
+  function ESMF_InterfaceIntCreateDGConn(connectionList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    integer,                       intent(out), optional :: rc
+!         
+! !RETURN VALUE:
+    type(ESMF_InterfaceInt) :: ESMF_InterfaceIntCreateDGConn
+!
+! !DESCRIPTION:
+!   Create an {\tt ESMF\_InterfaceInt} from list of DistGridConnection objects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[connectionList}]]
+!     List of DistGridConnection objects.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: i, elementCount, stat
+    integer, pointer        :: farray(:,:)
+    type(ESMF_InterfaceInt) :: array
+    
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    if (present(connectionList).and.(size(connectionList)>0)) then
+      ! allocate 2D Fortran array to hold connectionList in the internal format
+      elementCount = connectionList(1)%elementCount ! initialize
+      allocate(farray(elementCount,size(connectionList)), stat=stat)
+      if (ESMF_LogFoundAllocError(stat, msg="deallocating array%farray1D", &
+        ESMF_CONTEXT)) &
+        return  ! bail out
+      do i=1, size(connectionList)
+        if (connectionList(i)%elementCount /= elementCount) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="elementCount mismatch between DistGridConnection elements.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+            return
+        endif
+        farray(:,i) = connectionList(i)%connection(1:elementCount)
+      enddo
+      ! create InterfaceInt for farray and transfer ownership
+      array = ESMF_InterfaceIntCreate(farray2D=farray, &
+        transferOwnership=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      ! dummy InterfaceInt
+      array = ESMF_InterfaceIntCreate(rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+ 
+    ! set return value
+    ESMF_InterfaceIntCreateDGConn = array
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end function ESMF_InterfaceIntCreateDGConn
 !------------------------------------------------------------------------------
 
 
