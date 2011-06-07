@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.83 2011/06/07 00:29:27 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.84 2011/06/07 00:57:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.83 2011/06/07 00:29:27 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.84 2011/06/07 00:57:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -660,7 +660,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     unchanged. The {\tt firstExtra} and {\tt lastExtra} arguments allow extra
 !     elements to be added at the first/last edge DE in each dimension. The 
 !     method also allows the {\tt indexflag} to be set. Further, if the 
-!     {\tt connectionList} argument is passed in it will be used to set 
+!     {\tt connectionList} argument is provided it will be used to set 
 !     connections in the newly created DistGrid, otherwise the connections of
 !     the incoming DistGrid will be used.
 !     If neither {\tt firstExtra}, {\tt lastExtra}, {\tt indexflag}, nor 
@@ -683,24 +683,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -796,7 +780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     unchanged. The {\tt firstExtraPTile} and {\tt lastExtraPTile} arguments allow extra
 !     elements to be added at the first/last edge DE in each dimension. The 
 !     method also allows the {\tt indexflag} to be set. Further, if the 
-!     {\tt connectionList} argument is passed in it will be used to set 
+!     {\tt connectionList} argument provided in it will be used to set 
 !     connections in the newly created DistGrid, otherwise the connections of
 !     the incoming DistGrid will be used.
 !     If neither {\tt firstExtraPTile}, {\tt lastExtraPTile}, {\tt indexflag}, nor 
@@ -816,6 +800,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          {\tt maxIndex} arguments are to be interpreted to form a flat
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!     \item[{[connectionList]}]
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -896,16 +883,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: minIndex(:)
     integer,                       intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,               target, intent(in),  optional ::regDecomp(:)
-    type(ESMF_DecompFlag), target, intent(in),  optional ::decompflag(:)
-    integer,               target, intent(in),  optional ::regDecompFirstExtra(:)
-    integer,               target, intent(in),  optional ::regDecompLastExtra(:)
-    integer,               target, intent(in),  optional ::deLabelList(:)
-    type(ESMF_IndexFlag),          intent(in),  optional ::indexflag
+    integer,               target, intent(in),  optional :: regDecomp(:)
+    type(ESMF_DecompFlag), target, intent(in),  optional :: decompflag(:)
+    integer,               target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,               target, intent(in),  optional :: regDecompLastExtra(:)
+    integer,               target, intent(in),  optional :: deLabelList(:)
+    type(ESMF_IndexFlag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout),           intent(in),  optional ::delayout
-    type(ESMF_VM),                 intent(in),  optional ::vm
-    integer,                       intent(out), optional ::rc
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
+    type(ESMF_VM),                 intent(in),  optional :: vm
+    integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
@@ -953,24 +940,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1155,24 +1126,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1331,24 +1286,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.
@@ -1523,24 +1462,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.
@@ -1632,7 +1555,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),  optional :: regDecompPTile(:,:)
-    type(ESMF_DecompFlag), target, intent(in),  optional ::decompflagPTile(:,:)
+    type(ESMF_DecompFlag), target, intent(in),  optional :: decompflagPTile(:,:)
     integer,               target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
     integer,               target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
@@ -1697,24 +1620,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndexPTile to tile B's minIndexPTile.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1904,24 +1811,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -2061,24 +1952,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.
@@ -2221,24 +2096,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
 !          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
 !     \item[{[connectionList]}]
-!          List of connections between tiles in index space. The second dimension
-!          of {\tt connectionList} steps through the connection interface elements, 
-!          defined by the first index. The first index must be of size
-!          {\tt 2 x dimCount + 2}, where {\tt dimCount} is the rank of the 
-!          decomposed index space. Each {\tt connectionList} element specifies
-!          the connection interface in the format
-!
-!         {\tt (/tileIndex\_A,
-!          tileIndex\_B, positionVector, orientationVector/)} where:
-!          \begin{itemize}
-!          \item {\tt tileIndex\_A} and {\tt tileIndex\_B} are the tile
-!                index of the two connected tiles respectively,
-!          \item {\tt positionVector} is the vector that points from tile A's
-!                minIndex to tile B's minIndex.
-!          \item {\tt orientationVector} associates each dimension of tile A
-!                with a dimension in tile B's index space. Negative index
-!                values may be used to indicate a reversal in index orientation.
-!          \end{itemize}
+!          List of {\tt ESMF\_DistGridConnection} objects, defining connections
+!          between DistGrid tiles in index space.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.

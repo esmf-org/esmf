@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.2 2011/06/07 00:29:27 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.3 2011/06/07 00:57:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridConnectionInt()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridConnectionInt - Construct a DistGrid connection element
 ! !INTERFACE:
   subroutine ESMF_DistGridConnectionInt(connection, tileIndexA, tileIndexB, &
@@ -94,33 +94,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     This call helps to construct a DistGrid connection,
-!     which is a simple vector of integers, out of its components.
+!   This call helps to construct a DistGrid connection,
+!   which is a simple vector of integers, out of its components.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[connection] 
-!        Element to be constructed. The provided {\tt connection} must 
-!        be dimensioned to hold exactly the number of integers that result from
-!        the input information.
-!     \item[tileIndexA] 
-!        Index of one of the two tiles that are to be connected.
-!     \item[tileIndexB] 
-!        Index of one of the two tiles that are to be connected.
-!     \item[positionVector] 
-!        Position of tile B's minIndex with respect to tile A's minIndex.
-!     \item[{[orientationVector]}]
-!        Associates each dimension of tile A with a dimension in tile B's 
-!        index space. Negative index values may be used to indicate a 
-!        reversal in index orientation. It is erroneous to associate multiple
-!        dimensions of tile A with the same index in tile B. By default
-!        {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as
-!        tile A.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[connection] 
+!     Element to be constructed. The provided {\tt connection} array must 
+!     be dimensioned to hold exactly the number of integers that result from
+!     the input information.
+!   \item[tileIndexA] 
+!     Index of one of the two tiles that are to be connected.
+!   \item[tileIndexB] 
+!     Index of one of the two tiles that are to be connected.
+!   \item[positionVector] 
+!     Position of tile B's minIndex with respect to tile A's minIndex.
+!   \item[{[orientationVector]}]
+!     Associates each dimension of tile A with a dimension in tile B's 
+!     index space. Negative index values may be used to indicate a 
+!     reversal in index orientation. It is erroneous to associate multiple
+!     dimensions of tile A with the same index in tile B. By default
+!     {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as tile A.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_InterfaceInt) :: connectionArg        ! helper variable
@@ -190,29 +189,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     This call helps to construct a DistGrid connection,
-!     which is a simple vector of integers, out of its components.
+!   This call helps to construct a DistGrid connection,
+!   which is a simple vector of integers, out of its components.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[connection] 
-!        DistGridConnection object.
-!     \item[tileIndexA] 
-!        Index of one of the two tiles that are to be connected.
-!     \item[tileIndexB] 
-!        Index of one of the two tiles that are to be connected.
-!     \item[positionVector] 
-!        Position of tile B's minIndex with respect to tile A's minIndex.
-!     \item[{[orientationVector]}]
-!        Associates each dimension of tile A with a dimension in tile B's 
-!        index space. Negative index values may be used to indicate a 
-!        reversal in index orientation. It is erroneous to associate multiple
-!        dimensions of tile A with the same index in tile B. By default
-!        {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as
-!        tile A.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[connection] 
+!     DistGridConnection object.
+!   \item[tileIndexA] 
+!     Index of one of the two tiles that are to be connected.
+!   \item[tileIndexB] 
+!     Index of one of the two tiles that are to be connected.
+!   \item[positionVector] 
+!     Position of tile B's minIndex with respect to tile A's minIndex.
+!   \item[{[orientationVector]}]
+!     Associates each dimension of tile A with a dimension in tile B's 
+!     index space. Negative index values may be used to indicate a 
+!     reversal in index orientation. It is erroneous to associate multiple
+!     dimensions of tile A with the same index in tile B. By default
+!     {\tt orientationVector = (/1,2,3,.../)}, i.e. same orientation as tile A.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -264,7 +262,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt) :: ESMF_InterfaceIntCreateDGConn
 !
 ! !DESCRIPTION:
-!   Create an {\tt ESMF\_InterfaceInt} from list of DistGridConnection objects.
+!   Create a compacted 2D {\tt ESMF\_InterfaceInt} from a list of 
+!   DistGridConnection objects. All of the DistGridConnetion objects in
+!   {\tt connectionLis} must have the same elementCount.
 !
 !   The arguments are:
 !   \begin{description}
