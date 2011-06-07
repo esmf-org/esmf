@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.37 2011/05/06 23:14:20 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.38 2011/06/07 17:30:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1267,13 +1267,15 @@ contains
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights), '-', weights
     print *, lpet, 'indices: ', size(indices,1),'-', size(indices,2)
-    do j = 1, size(indices,1)
-         print *, indices(j,1), '->', indices(j,2)
+    do j = 1, size(indices,2)
+         print *, indices(1,j), '->', indices(2,j)
     enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,1) /), gn, 2, ESMF_SUM, rc=localrc)
+
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     print *, gn(1), gn(2)
     if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
@@ -1283,10 +1285,10 @@ contains
     endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
-    do j = 1, size(indices,1)
-      do i = 1, size(indices,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,1), size(indices,2)))
+    do i = 1, size(indices,1)
+      do j = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(i,j)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -1570,7 +1572,7 @@ contains
     do j = 1, size(indices,1)
          print *, indices(j,1), '->', indices(j,2)
     enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,1) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1583,10 +1585,10 @@ contains
     endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
-    do j = 1, size(indices,1)
-      do i = 1, size(indices,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,1), size(indices,2)))
+    do i = 1, size(indices,1)
+      do j = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(i,j)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -1864,18 +1866,18 @@ contains
 
     ! make sure the numbers are consistent
     print *, lpet, 'weights: ', size(weights)
-    print *, lpet, 'indices: ', size(indices,1)
-    !do j = 1, size(indices,1)
-    !     print *, indices(j,1), '->', indices(j,2)
+    print *, lpet, 'indices: ', size(indices,2)
+    !do j = 1, size(indices,2)
+    !     print *, indices(1,j), '->', indices(2,j)
     !enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,1) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     print *, gn(1), gn(2)
-    print *, lpet, 'src idx range: ', minval(indices(:,1)), maxval(indices(:,1))
-    print *, lpet, 'dst idx range: ', minval(indices(:,2)), maxval(indices(:,2))
+    print *, lpet, 'src idx range: ', minval(indices(1,:)), maxval(indices(1,:))
+    print *, lpet, 'dst idx range: ', minval(indices(2,:)), maxval(indices(2,:))
     !if(gn(1) /= gn(2) .or. gn(1) /= ocn_nx*ocn_ny) then
     !  call ESMF_LogSetError(ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
     !    ESMF_CONTEXT, rcToReturn=rc)
@@ -1883,10 +1885,10 @@ contains
     !endif
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
-    do j = 1, size(indices,1)
-      do i = 1, size(indices,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,1), size(indices,2)))
+    do i = 1, size(indices,1)
+      do j = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(i,j)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
@@ -2175,12 +2177,12 @@ contains
     ! make sure the numbers are consistent
     print *, lpet, size(weights), '-', weights
     print *, lpet, size(indices,1),'-', size(indices,2)
-    do j = 1, size(indices,1)
-         print *, indices(j,1), '->', indices(j,2)
+    do j = 1, size(indices,2)
+         print *, indices(1,j), '->', indices(2,j)
     enddo
 
-    simax = maxval(indices(:,1))
-    dimax = maxval(indices(:,2))
+    simax = maxval(indices(1,:))
+    dimax = maxval(indices(2,:))
     call ESMF_VMAllReduce(vm, (/ simax, dimax /), gn, 2, ESMF_MAX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2196,10 +2198,10 @@ contains
     ! analyze the returned the weights based on area information
 
     ! use the weights to generate an XGrid
-    allocate(sparseMatA2X(1)%factorIndexList(size(indices,2), size(indices,1)))
-    do j = 1, size(indices,1)
-      do i = 1, size(indices,2)
-         sparseMatA2X(1)%factorIndexList(i,j) = indices(j,i)
+    allocate(sparseMatA2X(1)%factorIndexList(size(indices,1), size(indices,2)))
+    do i = 1, size(indices,1)
+      do j = 1, size(indices,2)
+         sparseMatA2X(1)%factorIndexList(i,j) = indices(i,j)
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
