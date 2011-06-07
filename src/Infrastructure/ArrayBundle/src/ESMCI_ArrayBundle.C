@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.38 2011/06/01 21:11:24 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.39 2011/06/07 16:13:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.38 2011/06/01 21:11:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.39 2011/06/07 16:13:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -72,43 +72,44 @@ ArrayBundle::ArrayBundle(
 //
 // !ARGUMENTS:
 //
-  Array **arrayList,                   // (in)
-  int arrayCount,                      // (in)
-  int *rc                              // (out)
+  Array **arrayList,                  // (in)
+  int arrayCount,                     // (in)
+  bool multi,                         // (in)
+  bool relaxed                        // (in)
   ){
 //
 // !DESCRIPTION:
 //    Construct the internal structure of an ESMCI::ArrayBundle object.
-//    No error checking wrt consistency of input arguments is needed because
-//    this ArrayBundle constructor is only to be called by ArrayCreate()
-//    interfaces which are responsible for providing consistent arguments to
-//    this layer.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   try{  
     
     // fill in the ArrayBundle object
     for (int i=0; i<arrayCount; i++)
-      arrayContainer.add(string(arrayList[i]->getName()), arrayList[i]);
+      arrayContainer.add(string(arrayList[i]->getName()), arrayList[i],
+        multi, relaxed);
     
     arrayCreator = false; // Array objects were provided externally
   
     // invalidate the name for this ArrayBundle object in the Base class
     ESMC_BaseSetName(NULL, "ArrayBundle");
    
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    throw rc;  // bail out with exception
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", rc);
-    return;
+      "- Caught exception", &rc);
+    throw rc;  // bail out with exception
   }
   
   // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -173,9 +174,11 @@ ArrayBundle *ArrayBundle::create(
 //
 // !ARGUMENTS:
 //
-  Array **arrayList,                       // (in)
-  int arrayCount,                          // (in)
-  int *rc                                  // (out) return code
+  Array **arrayList,                  // (in)
+  int arrayCount,                     // (in)
+  bool multi,                         // (in)
+  bool relaxed,                       // (in)
+  int *rc                             // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -193,19 +196,21 @@ ArrayBundle *ArrayBundle::create(
 
   // call class constructor
   try{
-    arraybundle = new ArrayBundle(arrayList, arrayCount, &localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return ESMC_NULL_POINTER;
+    arraybundle = new ArrayBundle(arrayList, arrayCount, multi, relaxed);
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return ESMC_NULL_POINTER; // bail out
   }catch(...){
     // allocation error
     ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMCI::ArrayBundle.", rc);  
-    return ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER; // bail out
   }
   
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
-    return ESMC_NULL_POINTER;
+    return ESMC_NULL_POINTER; // bail out
   }
   
   // return successfully

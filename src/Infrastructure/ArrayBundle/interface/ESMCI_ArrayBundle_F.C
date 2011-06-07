@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.33 2011/05/20 05:15:24 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.34 2011/06/07 16:13:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -128,16 +128,31 @@ extern "C" {
   }
   
   void FTN(c_esmc_arraybundlecreate)(ESMCI::ArrayBundle **ptr, 
-    ESMCI::Array **arrayList, int *arrayCount, char *name, int *len_name,
-    int *rc,
+    ESMCI::Array **arrayList, int *arrayCount,
+    ESMC_Logical *multiflag, ESMC_Logical *relaxedflag, 
+    char *name, int *len_name, int *rc,
     ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlecreate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+
+    bool multi;
+    if (*multiflag == ESMF_TRUE)
+      multi=true;
+    else
+      multi=false;
+
+    bool relaxed;
+    if (*relaxedflag == ESMF_TRUE)
+      relaxed=true;
+    else
+      relaxed=false;
+
     // call into C++
-    *ptr = ESMCI::ArrayBundle::create(arrayList, *arrayCount, &localrc);
+    *ptr = ESMCI::ArrayBundle::create(arrayList, *arrayCount, multi, relaxed,
+      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the ArrayBundle object

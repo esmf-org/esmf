@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.66 2011/05/20 05:59:10 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.67 2011/06/07 16:13:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.66 2011/05/20 05:59:10 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.67 2011/06/07 16:13:32 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -588,12 +588,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleCreate - Create an ArrayBundle from a list of Arrays
 !
 ! !INTERFACE:
-  function ESMF_ArrayBundleCreate(keywordEnforcer, arrayList, name, rc)
+  function ESMF_ArrayBundleCreate(keywordEnforcer, arrayList, multiflag, &
+    relaxedflag, name, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array), intent(in),  optional :: arrayList(:)
-    character (len=*),intent(in),  optional :: name
+    logical,          intent(in),  optional :: multiflag
+    logical,          intent(in),  optional :: relaxedflag
+    character(len=*), intent(in),  optional :: name
     integer,          intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
@@ -611,6 +614,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[arrayList]}]
 !     List of {\tt ESMF\_Array} objects to be bundled.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be added to {\tt arraybundle}. For {\tt .false.} added items must
+!     have unique names. The default setting is {\tt .false.}.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "add"
+!     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
+!     {\tt arrayList} contains items with names that are also found in 
+!     {\tt arraybundle}. The {\tt arraybundle} is left unchanged for these items.
+!     For {\tt .false.} this is treated as an error condition. 
+!     The default setting is {\tt .false.}.
 !   \item [{[name]}]
 !     Name of the created {\tt ESMF\_ArrayBundle}. A default name is generated
 !     if not specified.
@@ -622,10 +636,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer                 :: localrc    ! local return code
     type(ESMF_ArrayBundle)  :: arraybundle! opaque pointer to ESMCI class
-    integer :: arrayCount, i
+    integer                 :: arrayCount, i
     type(ESMF_Pointer), allocatable :: arrayPointerList(:)
-    integer :: len_name
-    type(ESMF_Logical) :: linkChange
+    integer                       :: len_name
+    type(ESMF_Logical)            :: linkChange
+    type(ESMF_Logical)            :: multiflagArg
+    type(ESMF_Logical)            :: relaxedflagArg
 
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -643,6 +659,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, arrayList(i), rc)
     enddo
     
+    if (present(multiflag)) then
+      multiflagArg = multiflag
+    else
+      multiflagArg = ESMF_FALSE
+    endif
+    
+    if (present(relaxedflag)) then
+      relaxedflagArg = relaxedflag
+    else
+      relaxedflagArg = ESMF_FALSE
+    endif
+
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
     ! This is necessary in order to strip off the F90 init check members
     ! when passing into C++
@@ -661,13 +689,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(name)) then
       len_name = len(name)
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
-        arrayCount, name, len_name, localrc)
+        arrayCount, multiflagArg, relaxedflagArg, name, len_name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
       len_name = 0
       call c_ESMC_ArrayBundleCreate(arraybundle, arrayPointerList, &
-        arrayCount, "", len_name, localrc)
+        arrayCount, multiflagArg, relaxedflagArg, "", len_name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif    

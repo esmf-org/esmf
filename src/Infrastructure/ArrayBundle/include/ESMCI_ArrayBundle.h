@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.32 2011/05/20 05:15:22 theurich Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.33 2011/06/07 16:13:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,14 +66,16 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
       arrayCreator = false;
     }
   private:
-    ArrayBundle(Array **arrayList, int arrayCount, int *rc);
+    ArrayBundle(Array **arrayList, int arrayCount, bool multi=false, 
+      bool relaxed=false);
   public:
     ~ArrayBundle(){destruct(false);}
   private:
     int destruct(bool followCreator=true);
   public:
     // create() and destroy()
-    static ArrayBundle *create(Array **arrayList, int arrayCount, int *rc);
+    static ArrayBundle *create(Array **arrayList, int arrayCount,
+      bool multi=false, bool relaxed=false, int *rc=NULL);
     static int destroy(ArrayBundle **arraybundle);
     // add(), get(), isPresent(), remove(), replace(), set()
     void add(Array *array, bool multi=false, bool relaxed=false){
