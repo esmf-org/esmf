@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.3 2011/06/07 00:57:56 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.4 2011/06/07 06:00:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -89,9 +89,6 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: orientationVector(:)
     integer,                intent(out), optional :: rc
-!         
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   This call helps to construct a DistGrid connection,
@@ -189,8 +186,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   This call helps to construct a DistGrid connection,
-!   which is a simple vector of integers, out of its components.
+!   Set an {\tt ESMF\_DistGridConnection} object to represent a connection 
+!   according to the provided index space information.
 !
 !   The arguments are:
 !   \begin{description}
