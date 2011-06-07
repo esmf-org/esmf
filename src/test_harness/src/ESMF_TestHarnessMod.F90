@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.61 2011/02/23 20:19:38 w6ws Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.62 2011/06/07 00:32:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1064,7 +1064,7 @@ logical                       :: checkpoint = .FALSE.
   integer, allocatable :: BIndx(:), EIndx(:)
   integer, allocatable :: decompOrder(:)
   type(ESMF_DecompFlag), allocatable :: decompType(:)
-  integer, allocatable :: connectionList(:,:)
+  type(ESMF_DistGridConnection), allocatable :: connectionList(:)
   integer, allocatable :: positionVector(:),orientationVector(:)
 
   ! local logicals
@@ -1094,7 +1094,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="Type "//                &
      " decompType in create_distribution", rcToReturn=rc)) then
   endif
-  allocate( connectionList(2*Memory%GridRank+2,1), stat=allocRcToTest )
+  allocate( connectionList(1), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
      " connectionList in create_distribution", rcToReturn=rc)) then
   endif
@@ -1219,8 +1219,8 @@ logical                       :: checkpoint = .FALSE.
   else
     ! singlely periodic connection
 
-    call ESMF_DistGridConnection(connection=connectionList(:,1),               &
-                                 tileIndexA=1, tileIndexB=1,                 &
+    call ESMF_DistGridConnectionSet(connection=connectionList(1),              &
+                                 tileIndexA=1, tileIndexB=1,                   &
                                  positionVector=positionVector,                &
                                  orientationVector=orientationVector,          &
                                  rc=localrc)

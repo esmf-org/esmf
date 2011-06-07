@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.13 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.14 2011/06/07 00:32:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.13 2011/01/07 18:32:16 rokuingh Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.14 2011/06/07 00:32:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -58,7 +58,7 @@ program ESMF_ArrayHaloUTest
   integer               :: tLB(2,1), tUB(2,1)
   integer               :: hLB(2,1), hUB(2,1)
   integer               :: uLB(1), uUB(1)
-  integer, allocatable  :: connectionList(:,:)
+  type(ESMF_DistGridConnection), allocatable :: connectionList(:)
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -1603,8 +1603,8 @@ program ESMF_ArrayHaloUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Distgrid Connection Test-5"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
-  call ESMF_DistGridConnection(connection=connectionList(:,1), &
+  allocate(connectionList(1))  ! single connection
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
      tileIndexA=1, tileIndexB=1, &
      positionVector=(/0, 20/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

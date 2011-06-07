@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloEx.F90,v 1.8 2011/01/07 18:32:16 rokuingh Exp $
+! $Id: ESMF_ArrayHaloEx.F90,v 1.9 2011/06/07 00:32:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,8 +36,7 @@ program ESMF_ArrayHaloEx
   
   real(ESMF_KIND_R8)          :: farrayGather(10,20)
   real(ESMF_KIND_R8), allocatable :: farrayTemp(:,:)
-  integer, allocatable        :: connectionList(:,:)
-  
+  type(ESMF_DistGridConnection), allocatable        :: connectionList(:)
 
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
@@ -290,10 +289,9 @@ program ESMF_ArrayHaloEx
 ! Create a DistGrid with periodic boundary condition along the first dimension.
 !EOE
 !BOC
-  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
-  call ESMF_DistGridConnection(connection=connectionList(:,1), &
-     tileIndexA=1, tileIndexB=1, &
-     positionVector=(/10, 0/), rc=rc)
+  allocate(connectionList(1))  ! one connection
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
+     tileIndexA=1, tileIndexB=1, positionVector=(/10, 0/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 !BOC

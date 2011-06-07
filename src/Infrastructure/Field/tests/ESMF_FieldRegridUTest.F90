@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.28 2011/06/06 20:32:05 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.29 2011/06/07 00:32:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -7809,7 +7809,7 @@ write(*,*) "LOCALRC=",localrc
 
   integer :: localPet, petCount
 
-  integer :: connectionList(2*2+2,2) ! (2*dimCount+2, number of connections)
+  type(ESMF_DistGridConnection) :: connectionList(2) ! 2 connections
 
 
   ! result code
@@ -7849,7 +7849,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Create connectionList
   ! periodicity
-  call ESMF_DistgridConnection(connection=connectionList(:,1), &
+  call ESMF_DistgridConnectionSet(connection=connectionList(1), &
         tileIndexA=1,tileIndexB=1, &
         positionVector=(/src_nx,0/), &
         orientationVector=(/1,2/), rc=localrc)
@@ -7859,7 +7859,7 @@ write(*,*) "LOCALRC=",localrc
   endif
 
 
-  call ESMF_DistgridConnection(connection=connectionList(:,2), &
+  call ESMF_DistgridConnectionSet(connection=connectionList(2), &
         tileIndexA=1,tileIndexB=1, &
         positionVector=(/src_nx+1,2*src_ny+1/), &
         orientationVector=(/-1,-2/), rc=localrc)

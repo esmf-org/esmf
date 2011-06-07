@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.40 2011/05/13 20:22:21 rokuingh Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.41 2011/06/07 00:32:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,8 @@ program ESMF_DistGridEx
   type(ESMF_DistGrid):: distgrid
   integer, allocatable:: dimExtent(:,:), localIndexList(:)
   integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
-  integer, allocatable:: deBlockList(:,:,:), connectionList(:,:)
+  integer, allocatable:: deBlockList(:,:,:)
+  type(ESMF_DistGridConnection), allocatable:: connectionList(:)
   integer, allocatable:: localDeList(:), arbSeqIndexList(:)
   ! result code
   integer :: finalrc
@@ -590,36 +591,25 @@ program ESMF_DistGridEx
 ! By default the edges of all tiles have solid wall boundary conditions. 
 ! Periodic boundary conditions can be imposed by specifying connections between
 ! tiles. For the single LR domain of the last section periodic boundaries 
-! along the first dimension are imposed by adding a
-! {\tt connectionList} argument with only one element to the create call.
-!
-! Each {\tt connectionList} element is a vector of {\tt (2 * dimCount + 2)}
-! integer numbers:
+! along the first dimension are imposed by adding a {\tt connectionList} 
+! argument with only one element to the create call.
 !EOE
 !BOC
-  allocate(connectionList(2*2+2, 1))  ! (2*dimCount+2, number of connections)
+  allocate(connectionList(1))
 !EOC
 !BOE
-! and has the following format:
 !
-! {\tt (/tileIndex\_A, tileIndex\_B, positionVector, orientationVector/)}.
-!
-! The following constructor call can be used to construct a suitable connectionList
-! element.
+! The connection element holds information about {\tt tileIndex\_A}, 
+! {\tt tileIndex\_B}, {\tt positionVector}, and {\tt orientationVector/)}.
 !EOE
 !BOC
-  call ESMF_DistGridConnection(connection=connectionList(:,1), &
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
      tileIndexA=1, tileIndexB=1, &
      positionVector=(/5, 0/), &
      orientationVector=(/1, 2/), &
      rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  
-!  print *, "connectionList(:,1) = ", connectionList(:,1)
-  
-
-
 !BOE
 ! \begin{sloppypar}
 ! The {\tt tileIndexA} and {\tt tileIndexB} arguments specify that this is a
@@ -635,16 +625,16 @@ program ESMF_DistGridEx
 ! of tileB and the same for index 2). The {\tt orientationVector} could have
 ! been omitted in this case which corresponds to the default orientation.
 !
-! The {\tt connectionList} can now be used to create a {\tt DistGrid} object with the
-! desired boundary conditions.
+! The {\tt connectionList} can now be used to create a {\tt DistGrid} object 
+! with the desired boundary conditions.
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     deBlockList=deBlockList, connectionList=connectionList, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
-!  call ESMF_DistGridPrint(distgrid, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
   
   call ESMF_DistGridDestroy(distgrid, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -892,8 +882,8 @@ program ESMF_DistGridEx
 !BOC
   deallocate(arbSeqIndexList)
 !EOC
-  call ESMF_DistGridPrint(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  call ESMF_DistGridPrint(distgrid, rc=rc)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
