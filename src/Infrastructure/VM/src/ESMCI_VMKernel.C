@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.21 2011/01/25 04:36:35 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.22 2011/06/07 20:00:37 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -258,6 +258,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #if !defined (ESMF_NO_SIGNALS)
   struct sigaction action;
   action.sa_handler = SIG_DFL;
+  action.sa_flags   = 0;
   sigemptyset (&(action.sa_mask));
   sigaction(VM_SIG1, &action, NULL);  // restore default handle for VM_SIG1
   sigset_t sigs_to_block;
