@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.32 2011/06/06 20:32:17 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.33 2011/06/07 16:51:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -1014,8 +1014,8 @@ subroutine computeFracGrid(grid, vm, indices, frac, rc)
   endif
 
   call ESMF_DistGridGet(distgrid, elementCountPTile=elementCount, rc=rc)
-  total = size(indices,1)
-  ! find unique indices in the destination column: indices(:,2)
+  total = size(indices,2)
+  ! find unique indices in the destination column: indices(2,:)
   count = 0
   saved = 0
   do i=1,total
