@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.35 2011/05/26 06:01:28 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.36 2011/06/08 05:47:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -315,7 +315,7 @@ program ESMF_AttributeCIMEx
        convention=convCIM, purpose=purpField, rc=rc)
 
       ! ozone CIM Attributes
-      call ESMF_AttributeSet(ozone, 'CouplingPurpose', 'boundaryCondition', &
+      call ESMF_AttributeSet(ozone, 'CouplingPurpose', 'Boundary', &
        convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(ozone, 'CouplingSource', 'Global_O3_mon', &
        convention=convCIM, purpose=purpField, rc=rc)
@@ -326,7 +326,7 @@ program ESMF_AttributeCIMEx
        convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(ozone, 'SpatialRegriddingDimension', '3D', &
        convention=convCIM, purpose=purpField, rc=rc)
-      call ESMF_AttributeSet(ozone, 'Frequency', '15 minutes', &
+      call ESMF_AttributeSet(ozone, 'Frequency', '15 Minutes', &
        convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(ozone, 'TimeTransformationType', &
                                     'TimeInterpolation', &

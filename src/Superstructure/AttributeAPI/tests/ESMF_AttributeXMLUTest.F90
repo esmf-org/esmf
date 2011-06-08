@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.21 2011/05/19 19:13:50 feiliu Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.22 2011/06/08 05:47:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.21 2011/05/19 19:13:50 feiliu Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.22 2011/06/08 05:47:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1270,7 +1270,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd <coupling> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'CouplingPurpose', 'boundaryCondition', &
+    call ESMF_AttributeSet(field1, 'CouplingPurpose', 'Boundary', &
                            convention='CIM 1.5', &
                            purpose='Inputs Description', &
                            rc=rc)
@@ -1314,7 +1314,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 10th <coupling> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'Frequency', &
-     '15 minutes', &
+     '15 Minutes', &
                            convention='CIM 1.5', &
                            purpose='Inputs Description', &
                            rc=rc)
