@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.17 2011/05/23 19:40:47 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.18 2011/06/08 18:50:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -656,12 +656,12 @@ extern "C" {
   
   //-------------------------------------------------------------------------
 
-  void FTN(c_esmc_containergetvectoritem)
+  void FTN(c_esmc_containergetvfield)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
     std::vector<ESMCI::F90ClassHolder> **vector, int *item, 
     ESMCI::F90ClassHolder *f90p, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_containergetvectoritem()"
+#define ESMC_METHOD "c_esmc_containergetvfield()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -674,6 +674,47 @@ extern "C" {
       
       // cast C++ Field object into Fortran
       localrc = field.castToFortran(f90p);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return;
+      
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+        ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  //-------------------------------------------------------------------------
+
+  void FTN(c_esmc_containergetvsi)
+    (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
+    std::vector<ESMCI::F90ClassHolder> **vector, int *item, 
+    ESMCI::F90ClassHolder *f90p, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_containergetvsi()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // call into C++
+    try{
+
+      // query the C++ layer
+      ESMCI::StateItemWrap stateItemWrap = (**vector)[*item];
+      
+      // cast C++ Field object into Fortran
+      localrc = stateItemWrap.castToFortran(f90p);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return;
       

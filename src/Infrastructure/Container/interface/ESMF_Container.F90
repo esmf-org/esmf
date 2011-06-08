@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.20 2011/06/03 19:06:58 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.21 2011/06/08 18:50:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.20 2011/06/03 19:06:58 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.21 2011/06/08 18:50:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -693,7 +693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i=0, itemC-1 ! C-style indexing, zero-based
       
       ! Call into the C++ interface to set up the vector on the C++ side
-      call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+      call c_ESMC_ContainerGetVField(container, vector, i, &
         itemList(i+1), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -798,7 +798,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do i=0, itemC-1 ! C-style indexing, zero-based
         
         ! Call into the C++ interface to set up the vector on the C++ side
-        call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+        call c_ESMC_ContainerGetVField(container, vector, i, &
           itemList(i+1), localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1330,7 +1330,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do i=0, garbageC-1 ! C-style indexing, zero-based
         
         ! Call into the C++ interface to obtain item in vector
-        call c_ESMC_ContainerGetVectorItem(container, vector, i, &
+        call c_ESMC_ContainerGetVField(container, vector, i, &
           garbageList(i+1), localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
