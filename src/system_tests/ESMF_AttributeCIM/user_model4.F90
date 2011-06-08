@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.1 2011/05/23 05:59:38 eschwab Exp $
+! $Id: user_model4.F90,v 1.2 2011/06/08 05:46:18 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -164,7 +164,7 @@ module user_model4
     if (rc .ne. ESMF_SUCCESS) return
 
     ! SO2 CIM Attributes
-    call ESMF_AttributeSet(SO2, 'CouplingPurpose', 'boundaryCondition', &
+    call ESMF_AttributeSet(SO2, 'CouplingPurpose', 'Boundary', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SO2, 'CouplingSource', &
                                 'POP2 Ocean', &
@@ -178,7 +178,7 @@ module user_model4
     call ESMF_AttributeSet(SO2, 'SpatialRegriddingDimension', &
                                 '3D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'Frequency', '10 minutes', &
+    call ESMF_AttributeSet(SO2, 'Frequency', '2 Years', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SO2, 'TimeTransformationType', &
                                 'Exact', &
@@ -196,7 +196,7 @@ module user_model4
     if (rc .ne. ESMF_SUCCESS) return
 
     ! NOx CIM Attributes
-    call ESMF_AttributeSet(NOx, 'CouplingPurpose', 'initialCondition', &
+    call ESMF_AttributeSet(NOx, 'CouplingPurpose', 'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(NOx, 'CouplingSource', &
                                  'POP2 Ocean', &
@@ -210,7 +210,7 @@ module user_model4
     call ESMF_AttributeSet(NOx, 'SpatialRegriddingDimension', &
                                 '1D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'Frequency', '5 minutes', &
+    call ESMF_AttributeSet(NOx, 'Frequency', '45 Seconds', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(NOx, 'TimeTransformationType', &
                                 'TimeAccumulation', &

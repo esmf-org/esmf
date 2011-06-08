@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.16 2011/05/23 05:59:38 eschwab Exp $
+! $Id: user_model2.F90,v 1.17 2011/06/08 05:46:18 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -171,7 +171,7 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! OH CIM Attributes
-    call ESMF_AttributeSet(OH, 'CouplingPurpose', 'boundaryCondition', &
+    call ESMF_AttributeSet(OH, 'CouplingPurpose', 'Boundary', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'CouplingSource', &
                                'Land_Emissions', &
@@ -180,12 +180,12 @@ module user_model2
                                'HiGEM_AtmosChem', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
-                               'Conservative-First-Order', &
+                               'Near-Neighbor', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'SpatialRegriddingDimension', &
                                '2D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'Frequency', '15 minutes', &
+    call ESMF_AttributeSet(OH, 'Frequency', '10 Hours', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(OH, 'TimeTransformationType', &
                                'TimeInterpolation', &
@@ -209,7 +209,7 @@ module user_model2
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Orog CIM Attributes
-    call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'initialCondition', &
+    call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'CouplingSource', &
                                  'Land_Emissions', &

@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.1 2011/05/23 05:59:38 eschwab Exp $
+! $Id: user_model3.F90,v 1.2 2011/06/08 05:46:18 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -170,7 +170,7 @@ module user_model3
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Ozone CIM Attributes
-    call ESMF_AttributeSet(Ozone, 'CouplingPurpose', 'boundaryCondition', &
+    call ESMF_AttributeSet(Ozone, 'CouplingPurpose', 'Boundary', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'CouplingSource', &
                                   'Global_O3_mon', &
@@ -179,12 +179,12 @@ module user_model3
                                   'HiGEM_Atmos', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'SpatialRegriddingMethod', &
-                                  'Conservative-First-Order', &
+                                  'Conservative-Second-Order', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'SpatialRegriddingDimension', &
                                   '3D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Ozone, 'Frequency', '15 minutes', &
+    call ESMF_AttributeSet(Ozone, 'Frequency', '20 Days', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'TimeTransformationType', &
                                   'TimeInterpolation', &
@@ -202,7 +202,7 @@ module user_model3
     if (rc .ne. ESMF_SUCCESS) return
 
     ! SST CIM Attributes
-    call ESMF_AttributeSet(SST, 'CouplingPurpose', 'initialCondition', &
+    call ESMF_AttributeSet(SST, 'CouplingPurpose', 'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SST, 'CouplingSource', &
                                 'seasonal_oxidant_conc', &
@@ -211,12 +211,12 @@ module user_model3
                                 'HiGEM_Atmos', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SST, 'SpatialRegriddingMethod', &
-                                'Conservative-First-Order', &
+                                'Non-Conservative', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SST, 'SpatialRegriddingDimension', &
                                 '2D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'Frequency', '15 minutes', &
+    call ESMF_AttributeSet(SST, 'Frequency', '5 Months', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SST, 'TimeTransformationType', &
                                 'TimeAverage', &

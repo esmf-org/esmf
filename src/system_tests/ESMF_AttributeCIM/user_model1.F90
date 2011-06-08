@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.15 2011/05/25 05:59:05 eschwab Exp $
+! $Id: user_model1.F90,v 1.16 2011/06/08 05:46:18 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -160,6 +160,10 @@ module user_model1
     call ESMF_AttributeAdd(DMS_emi, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
+    ! DMS_emi ESMF-General Attribute
+    call ESMF_AttributeSet(DMS_emi, 'Intent', 'Export', &
+         convention=convCIM, purpose=purpField, rc=rc)
+
     ! DMS_emi CF-Extended Attributes
     call ESMF_AttributeSet(DMS_emi, 'ShortName', 'DMS_emi', &
          convention=convCIM, purpose=purpField, rc=rc)
@@ -172,7 +176,7 @@ module user_model1
 
     ! DMS_emi CIM Attributes
     call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', &
-                                    'boundaryCondition', &
+                                    'Ancillary', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'CouplingSource', &
                                     'DMS_emi', &
@@ -186,7 +190,7 @@ module user_model1
     call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingDimension', &
                                     '1D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 minutes', &
+    call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 Minutes', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'TimeTransformationType', &
                                     'TimeAverage', &
@@ -203,7 +207,7 @@ module user_model1
          convention=convCIM, purpose=purpField, rc=rc)
     ! UM CIM Attributes
     call ESMF_AttributeSet(UM, 'CouplingPurpose', &
-                               'initialCondition', &
+                               'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(UM, 'CouplingSource', &
                                'Ocean Biogeo Chemistry', &
