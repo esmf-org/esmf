@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.46 2011/06/02 23:34:15 w6ws Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.47 2011/06/08 21:32:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,8 +74,7 @@ module ESMF_LocalArrayCreateMod
     ESMF_DATA_COPY  = ESMF_CopyFlag(1), &
     ESMF_DATA_REF   = ESMF_CopyFlag(2), &
     ESMF_DATA_DEFER = ESMF_CopyFlag(3), &
-    ESMF_DATA_SPACE = ESMF_CopyFlag(4), &
-    ESMF_DATA_NONE  = ESMF_CopyFlag(5)    ! this value is _not_ public
+    ESMF_DATA_SPACE = ESMF_CopyFlag(4)
 
 !------------------------------------------------------------------------------
   ! ESMF_LocalArrayOrigin
@@ -138,7 +137,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.46 2011/06/02 23:34:15 w6ws Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.47 2011/06/08 21:32:39 theurich Exp $'
 
 !==============================================================================
 ! 
