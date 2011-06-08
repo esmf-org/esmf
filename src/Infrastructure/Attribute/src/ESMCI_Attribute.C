@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.109 2011/06/07 17:44:35 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.110 2011/06/08 05:44:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.109 2011/06/07 17:44:35 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.110 2011/06/08 05:44:12 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5106,6 +5106,17 @@ int Attribute::count=0;
 //    Print the contents of a CIM {\tt Attribute}.  Expected to be
 //    called internally.
 //
+//    The output logic design for the WriteCIM*() methods is to match the CIM
+//    release validation requirements, no more, no less.  It imposes the least
+//    restrictions on what attributes are required to be set in order to
+//    produce a valid CIM XML file.  If a required attribute is not set, a 
+//    warning message is logged, and output continues with whatever else can be 
+//    output.  When the user tries to validate such output, it will be invalid,
+//    but between the output file, its validation errors, and the ESMF warning
+//    messages in the log files, the user should be able to determine what
+//    attributes to set to make the output valid.  The ESMF Fortran Reference
+//    manual for Attribute packages documents what the required attributes are.
+//
 //EOPI
 //-----------------------------------------------------------------------------
   int localrc;
@@ -5229,6 +5240,11 @@ int Attribute::count=0;
     }
     localrc = io_xml->writeElement("shortName", value, indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    ESMC_LogDefault.Write("Attribute ShortName in standard attribute package "
+      "(convention='CIM 1.5', purpose='Model Component Simulation Description')"
+      " required to be set, to produce valid CIM XML output.",
+      ESMC_LOG_WARN, ESMC_CONTEXT);
   }
   if (attpack->AttributeIsSet("LongName")) {
     localrc = attpack->AttributeGet("LongName", &valuevector);
@@ -5391,7 +5407,14 @@ int Attribute::count=0;
     localrc = io_xml->writeElement("type", "", indent, 2,
                                    "open", "true", 
                                    "value", value.c_str());
+  } else {
+    ESMC_LogDefault.Write("Attribute ModelType in standard attribute package "
+      "(convention='CIM 1.5', purpose='Model Component Simulation Description')"
+      " required to be set, to produce valid CIM XML output.",
+      ESMC_LOG_WARN, ESMC_CONTEXT);
   }
+
+  // TODO:  auto-generate documentID and documentVersion?
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 
                                  indent, 0);
@@ -5433,7 +5456,8 @@ int Attribute::count=0;
                                         "direction", "toTarget",
       // direction: {'toTarget', 'fromTarget'}
                                         "type", "laterVersionOf");
-      // type: {'similarTo', 'other', 'laterVersionOf', 'fixedVersionOf'}
+      // type: {'similarTo', 'other', 'laterVersionOf', 
+      //        'previousVersionOf', 'fixedVersionOf'}
 
     if (attpack->AttributeIsSet("PreviousVersionDescription")) {
       localrc = attpack->AttributeGet("PreviousVersionDescription", &valuevector);
@@ -5459,6 +5483,13 @@ int Attribute::count=0;
       localrc = io_xml->writeEndElement("reference", --indent);
       localrc = io_xml->writeEndElement("target", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {
+      ESMC_LogDefault.Write("Attribute PreviousVersion in standard attribute "
+        "package (convention='CIM 1.5', "
+        "purpose='Model Component Simulation Description') "
+        "required to be set, when attribute PreviousVersionDescription is also "
+        "set, to produce valid CIM XML output.",
+        ESMC_LOG_WARN, ESMC_CONTEXT);
     }
 
     localrc = io_xml->writeEndElement("documentRelationship", --indent);
@@ -5531,6 +5562,12 @@ int Attribute::count=0;
     value = valuevector.at(0);
     localrc = io_xml->writeElement("shortName", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    ESMC_LogDefault.Write("Attribute SimulationShortName in standard attribute "
+      "package (convention='CIM 1.5', "
+      "purpose='Model Component Simulation Description') "
+      "required to be set, to produce valid CIM XML output.",
+      ESMC_LOG_WARN, ESMC_CONTEXT);
   }
   if (attpack->AttributeIsSet("SimulationLongName")) {
     localrc = attpack->AttributeGet("SimulationLongName", &valuevector);
@@ -5541,23 +5578,21 @@ int Attribute::count=0;
     value = valuevector.at(0);
     localrc = io_xml->writeElement("longName", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    ESMC_LogDefault.Write("Attribute SimulationLongName in standard attribute "
+      "package (convention='CIM 1.5', "
+      "purpose='Model Component Simulation Description') "
+      "required to be set, to produce valid CIM XML output.",
+      ESMC_LOG_WARN, ESMC_CONTEXT);
   }
 
   // TODO: required elements in CIM 1.5; need atts defined in package ?
-  localrc = io_xml->writeElement("description", "", 2, 0);
   localrc = io_xml->writeStartElement("supports", "", 2, 0);
   localrc = io_xml->writeElement("reference", "", 3, 0);
   localrc = io_xml->writeEndElement("supports", 2);
-  localrc = io_xml->writeElement("simulationID", "", 2, 0);
   localrc = io_xml->writeStartElement("calendar", "", 2, 0);
   localrc = io_xml->writeElement("realCalendar", "", 3, 0);
   localrc = io_xml->writeEndElement("calendar", 2);
-  localrc = io_xml->writeStartElement("spinupDateRange", "", 2, 0);
-  localrc = io_xml->writeElement("endDate", "2010-12-31T23:59:59Z", 3, 0);
-  localrc = io_xml->writeElement("startDate", "2010-01-01T00:00:00Z", 3, 0);
-  localrc = io_xml->writeEndElement("spinupDateRange", 2);
-  localrc = io_xml->writeElement("spinupSimulation", "", 2, 0);
-  localrc = io_xml->writeElement("controlSimulation", "", 2, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
@@ -5590,6 +5625,7 @@ int Attribute::count=0;
   localrc = io_xml->writeStartElement("model", "", 2, 0);
   localrc = io_xml->writeElement("reference", "", 3, 0);
   localrc = io_xml->writeEndElement("model", 2);
+  // TODO:  auto-generate GUID?
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
 
@@ -5659,25 +5695,42 @@ int Attribute::count=0;
   localrc = io_xml->writeStartElement("platform", "", 1, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  if (attpack->AttributeIsSet("MachineName") &&
-      attpack->AttributeIsSet("CompilerName")) {
+  if (attpack->AttributeIsSet("MachineName")) {
     localrc = attpack->AttributeGet("MachineName", &machineNameVector);
     if (machineNameVector.size() > 1) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
+      return ESMF_FAILURE;}
     machineName = machineNameVector.at(0);
+  } else {
+    ESMC_LogDefault.Write("Attribute MachineName in "
+      "standard attribute package (convention='CIM 1.5', "
+      "purpose='Platform Description') "
+      "required to be set, to produce valid CIM XML output.",
+      ESMC_LOG_WARN, ESMC_CONTEXT);
+  }
+  if (attpack->AttributeIsSet("CompilerName")) {
     localrc = attpack->AttributeGet("CompilerName", &compilerNameVector);
     if (compilerNameVector.size() > 1) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
+      return ESMF_FAILURE;}
     compilerName = compilerNameVector.at(0);
-    localrc = io_xml->writeElement("shortName", machineName + compilerName, 2, 0);
-    localrc = io_xml->writeElement("longName", "Machine " + machineName +
-                                   " and compiler " + compilerName, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
+
+  if (!machineName.empty()) {
+    if (compilerName.empty()) {
+      localrc = io_xml->writeElement("shortName", machineName, 2, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {
+      localrc = io_xml->writeElement("shortName", machineName + "_" + 
+                                                compilerName, 2, 0);
+      localrc = io_xml->writeElement("longName", "Machine " + machineName +
+                                     " and compiler " + compilerName, 2, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
+  }
+
   if (attpack->AttributeIsSet("MachineDescription")) {
     localrc = attpack->AttributeGet("MachineDescription", &valuevector);
     if (valuevector.size() > 1) {
@@ -5693,14 +5746,8 @@ int Attribute::count=0;
   localrc = io_xml->writeStartElement("machine", "", 3, 0);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  if (attpack->AttributeIsSet("MachineName")) {
-    localrc = attpack->AttributeGet("MachineName", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-    localrc = io_xml->writeElement("machineName", value, 4, 0);
+  if (!machineName.empty()) {
+    localrc = io_xml->writeElement("machineName", machineName, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("MachineSystem")) {
@@ -5785,7 +5832,7 @@ int Attribute::count=0;
   localrc = io_xml->writeEndElement("machine", 3);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  if (attpack->AttributeIsSet("CompilerName") || 
+  if (attpack->AttributeIsSet("CompilerName") ||
       attpack->AttributeIsSet("CompilerVersion")) {
 
     localrc = io_xml->writeStartElement("compiler", "", 3, 0);
@@ -5796,22 +5843,35 @@ int Attribute::count=0;
       if (valuevector.size() > 1) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", &localrc);
-      return ESMF_FAILURE;}
+        return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeElement("compilerName", value, 4, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {
+      ESMC_LogDefault.Write("Attribute CompilerName in "
+       "standard attribute package (convention='CIM 1.5', "
+       "purpose='Platform Description') "
+       "required to be set, when attribute CompilerVersion is also set, "
+       "to produce valid CIM XML output.",
+        ESMC_LOG_WARN, ESMC_CONTEXT);
     }
     if (attpack->AttributeIsSet("CompilerVersion")) {
       localrc = attpack->AttributeGet("CompilerVersion", &valuevector);
       if (valuevector.size() > 1) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                             "Write items > 1 - Not yet implemented", &localrc);
-      return ESMF_FAILURE;}
+        return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeElement("compilerVersion", value, 4, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {
+      ESMC_LogDefault.Write("Attribute CompilerVersion in "
+       "standard attribute package (convention='CIM 1.5', "
+       "purpose='Platform Description') "
+       "required to be set, when attribute CompilerName is also set, "
+       "to produce valid CIM XML output.",
+        ESMC_LOG_WARN, ESMC_CONTEXT);
     }
-
     localrc = io_xml->writeEndElement("compiler", 3);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -5826,6 +5886,7 @@ int Attribute::count=0;
   //localrc = io_xml->writeEndElement("contact", 2);
   //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
+  // TODO:  auto-generate?
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
   localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
@@ -5891,54 +5952,59 @@ int Attribute::count=0;
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    // determine name type:  individual, organization, or position.
-    //   first choice is the setting of the NameType attribute ...
-    if (attpack->AttributeIsSet("NameType")) {
-        localrc = attpack->AttributeGet("NameType", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
-      transform(value.begin(), value.end(), value.begin(), ::tolower);
-      if (value == "organization") {
-        nameType = "gmd:organisationName";
-      } else if (value == "individual") {
-        nameType = "gmd:individualName";
-      } else if (value == "position") {
-        nameType = "gmd:positionName";
-      }
-    // ... otherwise guess based on the role ...
-    } else if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
-        localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
-      if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
-      if (value == "center" || value == "funder") {
-        nameType = "gmd:organisationName";
-      } else if (value == "PI" || value == "author" || value == "contact") {
-        nameType = "gmd:individualName";
-      }
-    }
-    // ... and output the Name using the name type
-    if (!nameType.empty()) {
-      if (attpack->AttributeIsSet("Name")) {
-        localrc = attpack->AttributeGet("Name", &valuevector);
+    if (attpack->AttributeIsSet("Name")) {
+      // first, determine name type:  individual, organization, or position.
+      //   first choice is the setting of the NameType attribute ...
+      nameType = "gmd:individualName";  // default
+      if (attpack->AttributeIsSet("NameType")) {
+          localrc = attpack->AttributeGet("NameType", &valuevector);
         if (valuevector.size() > 1) {
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+                            "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeStartElement(nameType, "", indent, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement(nameType, --indent);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value == "individual") {
+          nameType = "gmd:individualName";
+        } else if (value == "organization") {
+          nameType = "gmd:organisationName";
+        } else if (value == "position") {
+          nameType = "gmd:positionName";
+        } else {
+          ESMC_LogDefault.Write("Attribute NameType in "
+            "standard attribute package (convention='ISO 19115', "
+            "purpose='Responsible Party Description' should be one of "
+            "{Individual, Organization, Position}.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+      // ... otherwise guess based on the role ...
+      } else if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
+          localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        if (value != "PI") transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value == "center" || value == "funder") {
+          nameType = "gmd:organisationName";
+        } else if (value == "PI" || value == "author" || value == "contact") {
+          nameType = "gmd:individualName";
+        }
       }
+      // ... finally output the Name using the name type
+      localrc = attpack->AttributeGet("Name", &valuevector);
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
+      localrc = io_xml->writeStartElement(nameType, "", indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      localrc = io_xml->writeEndElement(nameType, --indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
 
     if (attpack->AttributeIsSet("PhysicalAddress") ||
@@ -6046,8 +6112,13 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:role", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    } else {  // output empty tag (required in CIM 1.5)
-      localrc = io_xml->writeElement("gmd:role", "", indent, 0);
+    } else {
+      ESMC_LogDefault.Write("Attribute ResponsiblePartyRole in "
+        "standard attribute package (convention='ISO 19115', "
+        "purpose='Responsible Party Description') "
+        "required to be set, when other attributes in this package are set, "
+        "to produce valid CIM XML output.",
+        ESMC_LOG_WARN, ESMC_CONTEXT);
     }
 
     // use "Abbreviation" attribute if set ...
@@ -6203,6 +6274,25 @@ int Attribute::count=0;
             attpack->attrObject.compare("field")==0)) {
         continue; // skip non-CIM fields and others
       } 
+
+      // skip if no ESMF/General, CF/Extended, or CF/general  attributes set
+      if ((((ap = attpack->AttPackGetAttribute("Intent")) != NULL) &&
+           (!ap->parent->AttributeIsSet("Intent")) || ap == NULL) &&
+
+          (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
+           (!ap->parent->AttributeIsSet("ShortName")) || ap == NULL) &&
+
+          (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
+           (!ap->parent->AttributeIsSet("LongName")) || ap == NULL) &&
+
+          (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
+           (!ap->parent->AttributeIsSet("Units")) || ap == NULL) &&
+
+          (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
+           (!ap->parent->AttributeIsSet("StandardName")) || ap == NULL)) { 
+        continue;
+      }
+
       // found CIM/Inputs package, now write its set attributes
       if (((ap = attpack->AttPackGetAttribute("Intent")) != NULL) &&
            (ap->parent->AttributeIsSet("Intent"))) {
@@ -6212,6 +6302,19 @@ int Attribute::count=0;
                           "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
+        // map ESMF values {Export,Import} to CIM values {out,in}
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value == "export") {
+          value = "out";
+        } else if (value == "import") {
+          value = "in";
+        } else {
+          ESMC_LogDefault.Write("Attribute Intent in "
+            "standard attribute package (convention='CIM 1.5', "
+            "purpose='Inputs Description') must be one of "
+            "{Export, Import} to produce valid CIM XML output.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             2, "intent", value.c_str(), 
                                             "represented", "true");
@@ -6231,6 +6334,13 @@ int Attribute::count=0;
         value = valuevector.at(0);
         localrc = io_xml->writeElement("shortName", value, indent+2, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        ESMC_LogDefault.Write("Attribute ShortName in attpack "
+          "CF/General, nested within std attpack (conv='CIM 1.5', "
+          "purp='Inputs Description'), required to be set, if other "
+          "attributes are set in nested packages CF/General, "
+          "CF/Extended, or ESMF/General, to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
       }
       if (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
            (ap->parent->AttributeIsSet("LongName"))) {
@@ -6299,6 +6409,7 @@ int Attribute::count=0;
 
   int localrc;
   Attribute *attpack = NULL;
+  bool inNestedAttPacks;
 
   vector<string> valuevector;
   string value;
@@ -6313,15 +6424,10 @@ int Attribute::count=0;
           attpack->attrPurpose.compare("Citation Description")==0))
       continue; // skip non-Citations
 
-    // skip if no citation attributes set
-    if (!attpack->AttributeIsSet("ShortTitle") &&
-        !attpack->AttributeIsSet("Date") &&
-        !attpack->AttributeIsSet("PresentationForm") &&
-        !attpack->AttributeIsSet("DOI") &&
-        !attpack->AttributeIsSet("LongTitle") &&
-        !attpack->AttributeIsSet("URL")) {
-      continue;
-    }
+    // if no attributes set in this attpack instance, skip it ...
+    if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
+
+    // otherwise, write it out ...
 
     // citation header
     localrc = io_xml->writeStartElement("citation", "", indent, 0);
@@ -6329,25 +6435,32 @@ int Attribute::count=0;
 
     if (attpack->AttributeIsSet("ShortTitle")) {
       localrc = attpack->AttributeGet("ShortTitle", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:title", "", ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:title", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {
+      ESMC_LogDefault.Write("Attribute ShortTitle in "
+        "standard attribute package (convention='ISO 19115', "
+        "purpose='Citation Description') "
+        "required to be set, when other attributes in this package are set, "
+        "to produce valid CIM XML output.",
+        ESMC_LOG_WARN, ESMC_CONTEXT);
     }
     if (attpack->AttributeIsSet("Date")) {
       localrc = attpack->AttributeGet("Date", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:date", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeStartElement("gmd:CI_Date", "", ++indent, 0);
@@ -6371,14 +6484,21 @@ int Attribute::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeEndElement("gmd:date", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    } else {
+      ESMC_LogDefault.Write("Attribute Date in "
+        "standard attribute package (convention='ISO 19115', "
+        "purpose='Citation Description') "
+        "required to be set, when other attributes in this package are set, "
+        "to produce valid CIM XML output.",
+        ESMC_LOG_WARN, ESMC_CONTEXT);
     }
     if (attpack->AttributeIsSet("PresentationForm")) {
       localrc = attpack->AttributeGet("PresentationForm", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", value,
@@ -6391,11 +6511,11 @@ int Attribute::count=0;
     }
     if (attpack->AttributeIsSet("DOI")) {
       localrc = attpack->AttributeGet("DOI", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:otherCitationDetails", "", 
                                           indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -6406,11 +6526,11 @@ int Attribute::count=0;
     }
     if (attpack->AttributeIsSet("LongTitle")) {
       localrc = attpack->AttributeGet("LongTitle", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      if (valuevector.size() > 1) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
+        return ESMF_FAILURE;}
+      value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
@@ -6449,6 +6569,7 @@ int Attribute::count=0;
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL, *ap;
+  bool inNestedAttPacks;
 
   vector<string> valuevector, value2vector;
   string value, value2;
@@ -6462,140 +6583,248 @@ int Attribute::count=0;
       attpack = linkList.at(i)->packList.at(j);
       if (!(attpack->attrConvention.compare("CIM 1.5")==0 &&
             attpack->attrPurpose.compare("Inputs Description")==0 &&
-            attpack->attrObject.compare("field")==0)) {
+            attpack->attrObject.compare("field")==0))
         continue; // skip non-CIM fields
-      } else {
-        if (attpack->AttributeIsSet("CouplingPurpose")) {
-          localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("coupling", "", 3, 2,
-                       "fullySpecified", "false", "purpose", value.c_str());
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        if (attpack->AttributeIsSet("Frequency")) {
-          localrc = attpack->AttributeGet("Frequency", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          char s[2*ESMF_MAXSTR], *freq, *units;
-          strcpy(s, value.c_str());
-          freq = strtok(s, " ");
-          if (freq == NULL) {
-            sprintf(msgbuf,"InputFrequency time value bad");
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-            return ESMF_FAILURE;
-          }
-          units = strtok(NULL, " ");
-          if (units == NULL) {
-            sprintf(msgbuf,"InputFrequency units bad");
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-            return ESMF_FAILURE;
-          }
-          localrc = io_xml->writeStartElement("timeProfile", "", 4, 2,
-                                      "units", units, "variableRate", "false");
-          localrc = io_xml->writeElement("rate", freq, 5, 0);
-          localrc = io_xml->writeEndElement("timeProfile", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
-        if (attpack->AttributeIsSet("SpatialRegriddingMethod") &&
-            attpack->AttributeIsSet("SpatialRegriddingDimension")) {
-          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&value2vector);
-    if (value2vector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value2 = value2vector.at(0);
-          transform(value.begin(), value.end(), value.begin(), ::tolower);
-          transform(value2.begin(), value2.end(), value2.begin(), ::toupper);
-          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
-                                 "spatialRegriddingDimension", value2.c_str()); 
-                                             // enum: {'1D', '2D', '3D'}
-          localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
-                                         value.c_str(), 5, 0);
-// enum: {'linear', 'near-neighbour', 'cubic', 'conservative-first-order', 'conservative-second-order'}
-          localrc = io_xml->writeEndElement("spatialRegridding", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
-        if (attpack->AttributeIsSet("TimeTransformationType")) {
-          localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("timeTransformation", "", 4, 0);
-          localrc = io_xml->writeElement("mappingType", "", 5, 2,
-                                         "open", "true", 
-                                         "value", value.c_str());
-          localrc = io_xml->writeEndElement("timeTransformation", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
-        if (attpack->AttributeIsSet("CouplingSource")) {
-          localrc = attpack->AttributeGet("CouplingSource", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
-          localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
-          localrc = io_xml->writeStartElement("reference", "", 6, 0);
-          localrc = io_xml->writeElement("name", value, 7, 0);
-          localrc = io_xml->writeEndElement("reference", 6);
-          localrc = io_xml->writeEndElement("dataSource", 5);
-          localrc = io_xml->writeEndElement("couplingSource", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
-        if (attpack->AttributeIsSet("CouplingTarget")) {
-          localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
-          localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
-          localrc = io_xml->writeStartElement("reference", "", 6, 0);
-          localrc = io_xml->writeElement("name", value, 7, 0);
-          localrc = io_xml->writeEndElement("reference", 6);
-          localrc = io_xml->writeEndElement("dataSource", 5);
-          localrc = io_xml->writeEndElement("couplingTarget", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
-        if ((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) {
-          localrc = ap->parent->AttributeGet("ShortName", &valuevector);
-    if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-    return ESMF_FAILURE;}
-    value = valuevector.at(0);
-          localrc = io_xml->writeStartElement("connection", "", 4, 0);
-          localrc = io_xml->writeStartElement("connectionTarget", "", 5, 0);
-          localrc = io_xml->writeStartElement("dataSource", "", 6, 0);
-          localrc = io_xml->writeStartElement("reference", "", 7, 0);
-          localrc = io_xml->writeElement("name", value, 8, 0);
-          localrc = io_xml->writeEndElement("reference", 7);
-          localrc = io_xml->writeEndElement("dataSource", 6);
-          localrc = io_xml->writeEndElement("connectionTarget", 5);
-          localrc = io_xml->writeEndElement("connection", 4);
-          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        }
 
-        localrc = io_xml->writeEndElement("coupling", 3);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      // if no attributes set in this attpack, skip it ...
+      if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
+
+      // otherwise, write it out ...
+
+      if (attpack->AttributeIsSet("CouplingPurpose")) {
+        localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        // map ESMF values {Ancillary, Boundary, Initial} to CIM 1.5 enum
+        // values {ancillaryFile, boundaryCondition, initialCondition}
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value == "ancillary") {
+          value = "ancillaryFile";
+        } else if (value == "boundary") {
+          value = "boundaryCondition";
+        } else if (value == "initial") {
+          value = "initialCondition";
+        } else {
+          ESMC_LogDefault.Write("Attribute CouplingPurpose in "
+            "standard attribute package (convention='CIM 1.5', "
+            "purpose='Inputs Description') must be one of "
+            "{Ancillary, Boundary, Initial} "
+            "to produce valid CIM XML output.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
         }
+        localrc = io_xml->writeStartElement("coupling", "", 3, 2,
+                     "fullySpecified", "false", "purpose", value.c_str());
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        // Output starting <coupling> element, to match ending element
+        // </coupling>, but with a blank purpose="" attr. This will produce an
+        // invalid CIM 1.5 file, yet keep it well-formed XML.  Better than 
+        // outputting no <coupling></coupling> pair, which would produce far
+        // more validation errors, confusing a user as to what the real 
+        // problem is -- that attribute CouplingPurpose is not set.
+        localrc = io_xml->writeStartElement("coupling", "", 3, 2,
+                     "fullySpecified", "false", "purpose", "");
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.Write("Attribute CouplingPurpose in "
+          "standard attribute package (convention='CIM 1.5', "
+          "purpose='Inputs Description') "
+          "required to be set, when other attributes in this package are set, "
+          "to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
       }
+      if (attpack->AttributeIsSet("Frequency")) {
+        localrc = attpack->AttributeGet("Frequency", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+
+        // parse frequency value and units
+        char s[2*ESMF_MAXSTR], empty[]="", *freq, *units;
+        strcpy(s, value.c_str());
+        freq = strtok(s, " ");
+        units = strtok(NULL, " ");
+        if (freq == NULL || units == NULL) {
+          ESMC_LogDefault.Write("Attribute InputFrequency, in CIM 1.5/Inputs "
+            "Description standard attribute package, must have both a time "
+            "value and a units specification, e.g. '15 Minutes'.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+          // prevent Xerces crash upon null ptr exception throw (with F90 main)
+          if (freq == NULL) freq = empty;
+          if (units == NULL) units = empty;
+        }
+        // CIM 1.5 enum: {seconds, minutes, hours, days, months, years,
+        //                decades, centuries}
+        value = units;
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value != "seconds" && value != "minutes" && value != "hours" &&
+            value != "days" && value != "months" && value != "years" &&
+            value != "decades" && value != "centuries") {
+          ESMC_LogDefault.Write("Attribute InputFrequency, in CIM 1.5/Inputs "
+            "Description standard attribute package, must have units as one of "
+            "{Seconds, Minutes, Hours, Days, Months, Years, "
+            "Decades, Centuries}, to produce valid CIM XML output.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+        localrc = io_xml->writeStartElement("timeProfile", "", 4, 2,
+                              "units", value.c_str(), "variableRate", "false");
+        localrc = io_xml->writeElement("rate", freq, 5, 0);
+        localrc = io_xml->writeEndElement("timeProfile", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
+          attpack->AttributeIsSet("SpatialRegriddingDimension")) {
+
+        if (attpack->AttributeIsSet("SpatialRegriddingDimension")) {
+          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&valuevector);
+          if (valuevector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value = valuevector.at(0);
+          // CIM 1.5 enum: {1D, 2D, 3D}
+          transform(value.begin(), value.end(), value.begin(), ::toupper);
+          if (value != "1D" && value != "2D" && value != "3D") {
+            ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension, in "
+              "CIM 1.5/Inputs Description standard attribute package, must "
+              "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
+              ESMC_LOG_WARN, ESMC_CONTEXT);
+          }
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
+                             "spatialRegriddingDimension", value.c_str()); 
+        } else {
+          // Output starting <spatialRegridding> element, to match ending 
+          // element </spatialRegridding>, but with a blank 
+          // spatialRegriddingDimension="" attr. This will produce an
+          // invalid CIM 1.5 file, yet keep it well-formed XML.  Better than 
+          // outputting no 
+          // <spatialRegriddingDimension></spatialRegriddingDimension> pair, 
+          // which would produce a more confusing validation error.
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
+                             "spatialRegriddingDimension", ""); 
+          ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension in "
+            "standard attribute package (convention='CIM 1.5', "
+            "purpose='Inputs Description') must to be set (to one of {1D, "
+            "2D, 3D}), when attribute SpatialRegriddingMethod is set, "
+            "to produce valid CIM XML output.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+        if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
+          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
+          if (value2vector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value2 = value2vector.at(0);
+          // CIM 1.5 enum: {linear, near-neighbour, 
+          //                cubic, conservative-first-order,
+          //                conservative-second-order,
+          //                conservative, non-conservative}
+          transform(value2.begin(), value2.end(), value2.begin(), ::tolower);
+          if (value2 == "near-neighbor") value2 = "near-neighbour";
+          if (value2 != "linear" && value2 != "near-neighbour" && 
+              value2 != "cubic" && value2 != "conservative-first-order" && 
+              value2 != "conservative-second-order" && 
+              value2 != "conservative" && value2 != "non-conservative") {
+            ESMC_LogDefault.Write("Attribute SpatialRegriddingMethod, in "
+              "CIM 1.5/Inputs Description standard attribute package, must be "
+              "one of {Linear, Near-Neighbor, Cubic, "
+              "Conservative-First-Order, Conservative-Second-Order, "
+              "Conservative, Non-Conservative} to produce valid CIM "
+              "XML output.",
+              ESMC_LOG_WARN, ESMC_CONTEXT);
+          }
+          localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
+                                       value2.c_str(), 5, 0);
+        }
+        localrc = io_xml->writeEndElement("spatialRegridding", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      if (attpack->AttributeIsSet("TimeTransformationType")) {
+        localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("timeTransformation", "", 4, 0);
+        localrc = io_xml->writeElement("mappingType", "", 5, 2,
+                                       "open", "true", 
+                                       "value", value.c_str());
+        localrc = io_xml->writeEndElement("timeTransformation", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      if (attpack->AttributeIsSet("CouplingSource")) {
+        localrc = attpack->AttributeGet("CouplingSource", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
+        localrc = io_xml->writeStartElement("reference", "", 6, 0);
+        localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeEndElement("reference", 6);
+        localrc = io_xml->writeEndElement("dataSource", 5);
+        localrc = io_xml->writeEndElement("couplingSource", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        ESMC_LogDefault.Write("Attribute CouplingSource in "
+          "standard attribute package (convention='CIM 1.5', "
+          "purpose='Inputs Description') "
+          "required to be set, when other attributes in this package are set, "
+          "to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
+      }
+      if (attpack->AttributeIsSet("CouplingTarget")) {
+        localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
+        localrc = io_xml->writeStartElement("reference", "", 6, 0);
+        localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeEndElement("reference", 6);
+        localrc = io_xml->writeEndElement("dataSource", 5);
+        localrc = io_xml->writeEndElement("couplingTarget", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        ESMC_LogDefault.Write("Attribute CouplingTarget in "
+          "standard attribute package (convention='CIM 1.5', "
+          "purpose='Inputs Description') "
+          "required to be set, when other attributes in this package are set, "
+          "to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
+      }
+      if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
+           (ap->parent->AttributeIsSet("ShortName"))) {
+        localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("connection", "", 4, 0);
+        localrc = io_xml->writeStartElement("connectionTarget", "", 5, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 6, 0);
+        localrc = io_xml->writeStartElement("reference", "", 7, 0);
+        localrc = io_xml->writeElement("name", value, 8, 0);
+        localrc = io_xml->writeEndElement("reference", 7);
+        localrc = io_xml->writeEndElement("dataSource", 6);
+        localrc = io_xml->writeEndElement("connectionTarget", 5);
+        localrc = io_xml->writeEndElement("connection", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      localrc = io_xml->writeEndElement("coupling", 3);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     // recurse through ESMF objects
     localrc = linkList.at(i)->AttributeWriteCIMcomposition(io_xml);
