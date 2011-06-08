@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.14 2011/06/07 22:38:09 theurich Exp $
+! $Id: ESMF_F90Interface.F90,v 1.15 2011/06/08 17:32:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -181,9 +181,9 @@ contains
     transferOwnership, rc)
 !
 ! !ARGUMENTS:
-    integer, pointer, intent(in),  optional :: farray1D(:)
-    integer, pointer, intent(in),  optional :: farray2D(:,:)
-    integer, pointer, intent(in),  optional :: farray3D(:,:,:)
+    integer, pointer,              optional :: farray1D(:)
+    integer, pointer,              optional :: farray2D(:,:)
+    integer, pointer,              optional :: farray3D(:,:,:)
     logical,          intent(in)            :: transferOwnership
     integer,          intent(out), optional :: rc
 !         
