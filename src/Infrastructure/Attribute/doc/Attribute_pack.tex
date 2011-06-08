@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.36 2011/05/24 20:02:33 svasquez Exp $
+% $Id: Attribute_pack.tex,v 1.37 2011/06/08 05:45:11 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ Some Attributes come with a controlled vocabulary. A controlled vocabulary is a 
 \subsubsection{Component Attribute packages}
 \label{ComponentAttributePackages}
 
-There are many attributes that are used to describe components. There are currently 2 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
+There are many attributes that are used to describe components. There are currently 3 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
 
 \begin{enumerate}
     \item Earth System Grid (ESG) Basic
@@ -41,6 +41,7 @@ There are many attributes that are used to describe components. There are curren
         \item International Organization for Standardization (ISO) Responsible Party
         \item International Organization for Standardization (ISO) Citation
     \end{enumerate}
+    \item Common Information Model (CIM) Component Properties
 \end{enumerate}
 
 \vspace{.20in}
@@ -110,14 +111,14 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\tt Description} & A multi-line description of the component. & N/A \\
      {\tt LongName} & A version of the component name with all acronyms spelled out. & N/A\\
-     {\tt ModelType} & A short string describing the discipline of a model component. & Advection, Aerosol3D-Sources etc.\\
-     {\tt PreviousVersion} & Name of the previous version of a model or model component. & N/A\\ 
-     {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & N/A \\ 
+     {\tt ModelType*} & A short string describing the discipline of a model component. & Advection, Aerosol3D-Sources etc.\\
+     {\tt PreviousVersion**} & Name of the previous version of a model or model component. & N/A\\ 
+     {\tt PreviousVersionDescription**} &  A short note about the previous version of the model or model component. & N/A \\ 
      {\tt ReleaseDate} & The date a model component was issued. & N/A \\
-     {\tt ShortName} & A version of the component name that contains acronyms. & N/A \\
+     {\tt ShortName*} & A version of the component name that contains acronyms. & N/A \\
      {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
-     {\tt SimulationMetadataVersion} & The version number of the simulation metadata. & N/A \\ 
+     {\tt SimulationMetadataVersion***} & The version number of the simulation metadata. & N/A \\ 
      {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A \\ 
      {\tt SimulationRationale} & The reason for performing an experiment. & N/A\\
      {\tt SimulationShortName} & The name of the simulation. & N/A \\
@@ -126,6 +127,9 @@ There are many attributes that are used to describe components. There are curren
      {\tt Version} & Version number of the component. & N/A \\
      \hline\hline
 \end{tabular}
+* Attribute required to be set to produce valid CIM XML output. \\
+** If PreviousVersionDescription is set, PreviousVersion must also be set, to produce valid CIM XML output. \\
+*** If not set, defaults to 1.0
 
 \vspace{.20in}
 
@@ -147,19 +151,21 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
-     {\tt CompilerName} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
-     {\tt CompilerVersion} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
+     {\tt CompilerName*} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
+     {\tt CompilerVersion*} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
      {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A\\
      {\tt MachineDescription} & A short note about the machine. & N/A \\
      {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & Cray Interconnect, Fat Tree, Gigabit Ethernet, Infiniband, Mixed, Myrinet, Numalink, Quadrics, SP Switch\\
      {\tt MachineMaximumProcessors} & The highest number of computer chips on a computer system. & N/A\\
-     {\tt MachineName} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A \\
+     {\tt MachineName**} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A \\
      {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & Aix, Darwin, Irix64, Linux, SUNOS, Unicos\\
      {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel em64t, intel IA-64, Itanium, NEC, operteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000\\
      {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector \\
-     {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Rahtyon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
+     {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
      \hline\hline
 \end{tabular}
+* Both CompilerName and CompilerVersion are required to be set, or else neither one, to produce valid CIM XML output; setting one without the other will produce invalid CIM XML output. \\
+** Attribute required to be set to produce valid CIM XML output. \\
 
 
 \vspace{.20in}
@@ -186,10 +192,11 @@ There are many attributes that are used to describe components. There are curren
      {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A \\
      {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position \\
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
-     {\tt ResponsiblePartyRole} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder \\
+     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder \\
      {\tt URL} & A URL of an individual or organization. & N/A \\
      \hline\hline
 \end{tabular}
+* Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Responsible Party package instance, although there may be other populated instances, which, because they have attributes set, will appear in the output. \\
 
 
 \vspace{.20in}
@@ -210,16 +217,44 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
-     {\tt Date} & The date of the citation. & N/A\\
+     {\tt Date*} & The date of the citation. & N/A\\
      {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A\\
      {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
      {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
-     {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
+     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
+     \hline\hline
+\end{tabular}
+* Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Citation package instance, although there may be other populated instances, which, because they have attributes set, will appear in the output. \\
+
+
+
+\vspace{.20in}
+{\bf 3. Common Information Model (CIM) Component Properties Package}
+
+\begin{itemize}
+    \item Convention: CIM 1.5
+    \item Purpose: General Component Properties Description
+    \item Output Options: 
+    \begin{itemize}
+        \item CIM XML
+    \end{itemize}  
+    \item Description: This package is used to specify any user-defined attributes of a component and have them output in valid CIM XML format.
+\end{itemize}
+
+\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
+     \hline\hline
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     \hline\hline
+     {\tt <User-defined name 1>} & <User-defined definition 1>. & N/A \\
+     {\tt <User-defined name 2>} & <User-defined definition 2>. & N/A \\
+     {\tt <...>} & <...> & N/A \\
+     {\tt <User-defined name n>} & <User-defined definition n>. & N/A \\
      \hline\hline
 \end{tabular}
 
 
 
+\vspace{.20in}
 \vspace{.20in}
 \subsubsection{State Attribute packages}
 \label{StateAttributePackages}
@@ -293,16 +328,18 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \hline\hline
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
-    {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
-    {\tt CouplingSource} & The component the input condition is coming from. & N/A \\ 
-    {\tt CouplingTarget} & The component the input condition is going to. & N/A \\ 
-    {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & N/A\\ 
-    {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Linear, Near-Neighbor, Cubic, Conservative-First-Order, Conservative-Second-Order\\ 
-    {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & 1D, 2D, 3D\\ 
+    {\tt CouplingPurpose*} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
+    {\tt CouplingSource*} & The component the input condition is coming from. & N/A \\ 
+    {\tt CouplingTarget*} & The component the input condition is going to. & N/A \\ 
+    {\tt Frequency} & The frequency (e.g. 2 months or 5 days) that a field from one component is input to another. & n Seconds, n Minutes, n Hours, n Days, n Months, n Years, n Decades, n Centuries\\ 
+    {\tt SpatialRegriddingMethod**} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Linear, Near-Neighbor, Cubic, Conservative-First-Order, Conservative-Second-Order, Conservative, Non-Conservative\\ 
+    {\tt SpatialRegriddingDimension**} & Dimension of the regridding method. & 1D, 2D, 3D\\ 
     {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared\\ 
-    {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time accumulation, Time averaged\\ 
+    {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time Accumulation, Time Average, Time Interpolation\\ 
     \hline\hline
 \end{tabular}
+* Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Inputs package. \\
+** If SpatialRegriddingMethod is set, SpatialRegriddingDimension must also be set, to produce valid CIM XML output. \\
 
 
 \vspace{.20in}
@@ -381,11 +418,12 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
-    {\tt ShortName}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is
+    {\tt ShortName*}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is
  distinct from the long\_name & N/A \\
     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package & None\\
     \hline\hline
 \end{tabular}
+* Attribute required to be set, if any attributes are set within this package, the CF/Extended, or ESMF/General package, to produce valid CIM XML output. It is valid to set none of the attributes in this package, the CF/Extended, or ESMF/General package, in which case no field CIM output will be produced. \\
 
 
 \vspace{.20in}
