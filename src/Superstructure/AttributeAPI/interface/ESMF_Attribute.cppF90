@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.93 2011/06/04 16:46:20 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.94 2011/06/08 05:59:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.93 2011/06/04 16:46:20 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.94 2011/06/08 05:59:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1001,9 +1001,10 @@ contains
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one of
 !           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.
-!     \item [{[isPresent]}] @\
-!           A logical flag to tell if this Attribute is present or not @\
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1088,11 +1089,12 @@ contains
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one of
 !           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  (Not implemented yet)
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.  (Not implemented yet)
 !     \item [{[itemCount]}]
-!           The number of items in a multi-valued Attribute.  
-!     \item [{[isPresent]}] @\
-!           A logical flag to tell if this Attribute is present or not @\
+!           The number of items in a multi-valued Attribute
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1769,7 +1771,8 @@ contains
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one of
 !           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  (Not implemented yet)
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance. (Not implemented yet)
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1845,7 +1848,8 @@ contains
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one of
 !           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1917,7 +1921,8 @@ contains
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one of
 !           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  (Not implemented yet)
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.  (Not implemented yet)
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}] 
@@ -2744,7 +2749,8 @@ contains
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -2869,7 +2875,8 @@ contains
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3023,7 +3030,8 @@ contains
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3152,7 +3160,8 @@ contains
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -3307,7 +3316,8 @@ contains
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest. @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3432,7 +3442,8 @@ contains
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -3661,7 +3672,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[typekind]}] @\
 !           The typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -4318,7 +4330,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4413,7 +4426,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4506,7 +4520,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
@@ -4616,7 +4631,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4711,7 +4727,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  (Not implemented yet) @\
 !     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
@@ -4821,7 +4838,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest. @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -4918,7 +4936,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
 !           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  (Not implemented yet) @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance. (Not implemented yet) @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
