@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.7 2011/06/08 18:51:01 theurich Exp $
+! $Id: ESMF_StateContainer.F90,v 1.8 2011/06/08 22:37:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_StateContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.7 2011/06/08 18:51:01 theurich Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.8 2011/06/08 22:37:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -219,6 +219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
+    type(ESMF_StateItemWrap)    :: siw
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -246,7 +247,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerAdd(container, trim(name), itemList(i), &
+      siw = itemList(i) ! makes object passing robust
+      call c_ESMC_ContainerAdd(container, trim(name), siw, &
         multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -300,7 +302,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                     :: localrc      ! local return code
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
-
+    type(ESMF_StateItemWrap)    :: siw
+    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -316,8 +319,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerAddReplace(container, trim(name), itemList(i), &
-        localrc)
+      siw = itemList(i) ! makes object passing robust
+      call c_ESMC_ContainerAddReplace(container, trim(name), siw, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -462,6 +465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: stat
     integer                       :: i, itemC
     type(ESMF_Pointer)            :: vector
+    type(ESMF_StateItemWrap)      :: siw
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -495,11 +499,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     do i=0, itemC-1 ! C-style indexing, zero-based
         
-      ! Call into the C++ interface to set up the vector on the C++ side
-      call c_ESMC_ContainerGetVSI(container, vector, i, &
-        itemList(i+1), localrc)
+      ! Call into the C++ interface to get item from vector
+      call c_ESMC_ContainerGetVSI(container, vector, i, siw, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      itemList(i+1) = siw ! makes object passing robust
 
     enddo
       
@@ -566,7 +570,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: stat
     integer                       :: i, itemC
     type(ESMF_Pointer)            :: vector
-
+    type(ESMF_StateItemWrap)      :: siw
+    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -599,11 +604,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     do i=0, itemC-1 ! C-style indexing, zero-based
         
-      ! Call into the C++ interface to set up the vector on the C++ side
-      call c_ESMC_ContainerGetVSI(container, vector, i, &
-        itemList(i+1), localrc)
+      ! Call into the C++ interface to get item from vector
+      call c_ESMC_ContainerGetVSI(container, vector, i, siw, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      itemList(i+1) = siw ! makes object passing robust
 
     enddo
       
@@ -682,6 +687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical)          :: relaxedflagArg
     integer                     :: i, stat
     character(len=ESMF_MAXSTR)  :: name
+    type(ESMF_StateItemWrap)    :: siw
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -709,7 +715,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Call into the C++ interface layer
-      call c_ESMC_ContainerReplace(container, trim(name), itemList(i), &
+      siw = itemList(i) ! makes object passing robust
+      call c_ESMC_ContainerReplace(container, trim(name), siw, &
         multiflagArg, relaxedflagArg, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -773,6 +780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: stat
     integer                       :: i, garbageC
     type(ESMF_Pointer)            :: vector
+    type(ESMF_StateItemWrap)      :: siw
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -806,11 +814,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     do i=0, garbageC-1 ! C-style indexing, zero-based
       
-      ! Call into the C++ interface to obtain item in vector
-      call c_ESMC_ContainerGetVSI(container, vector, i, &
-        garbageList(i+1), localrc)
+      ! Call into the C++ interface to get item from vector
+      call c_ESMC_ContainerGetVSI(container, vector, i, siw, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+      garbageList(i+1) = siw ! makes object passing robust
 
     enddo
     
