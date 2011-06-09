@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.7 2011/06/03 22:17:27 w6ws Exp $
+! $Id: ESMF_StateItem.F90,v 1.8 2011/06/09 05:37:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -476,7 +476,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    localunit = ESMF_IOstdout
+    localunit = ESMF_UtilIOstdout
     if (present (unit)) then
       localunit = unit
     end if

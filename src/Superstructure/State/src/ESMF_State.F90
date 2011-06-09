@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.256 2011/05/27 15:16:51 feiliu Exp $
+! $Id: ESMF_State.F90,v 1.257 2011/06/09 05:37:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@ module ESMF_StateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.256 2011/05/27 15:16:51 feiliu Exp $'
+      '$Id: ESMF_State.F90,v 1.257 2011/06/09 05:37:40 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3830,7 +3830,7 @@ contains
 !     On some platforms/compilers there is a potential issue with interleaving
 !     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
 !     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit {\tt ESMF\_IOstdout} to get coherent output.  \\
+!     may be used on unit {\tt ESMF\_UtilIOStdout} to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}
@@ -3891,25 +3891,25 @@ contains
        case ("long")
            longflag  = .true.
        case default
-           write (ESMF_IOstderr,*) "ESMF_StatePrint: Illegal options arg: ", &
+           write (ESMF_UtilIOStderr,*) "ESMF_StatePrint: Illegal options arg: ", &
                trim (localopts)
            return 
        end select
 
        !nsc write(msgbuf,*) "StatePrint: "  
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,*) "StatePrint: "  
+       write (ESMF_UtilIOStdout,*) "StatePrint: "  
        if (.not.associated(state%statep)) then 
            !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)
-           write (ESMF_IOstdout,*) "Uninitialized or already destroyed State"
+           write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
            if (present (rc)) rc = ESMF_SUCCESS
            return
        endif
        if (state%statep%st .eq. ESMF_STATE_INVALID) then
            !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
            !nsc                   ESMF_LOG_INFO)
-           write (ESMF_IOstdout,*) "Uninitialized or already destroyed State"
+           write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
            if (present (rc)) rc = ESMF_SUCCESS
            return
        endif
@@ -3944,7 +3944,7 @@ contains
        if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc1)) return
-       write (ESMF_IOstdout,*) nestr, "State name: ", trim(name)
+       write (ESMF_UtilIOStdout,*) nestr, "State name: ", trim(name)
        if (sp%st == ESMF_STATE_IMPORT) then
          msgbuf = "Import State"
        else if (sp%st == ESMF_STATE_EXPORT) then
@@ -3962,10 +3962,10 @@ contains
        end if
 
        !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-       write (ESMF_IOstdout,'(1x,4a,i0)') nestr,  &
+       write (ESMF_UtilIOStdout,'(1x,4a,i0)') nestr,  &
            "    status: ", trim(msgbuf),  &
            ", object count: ", sp%datacount
-       write (ESMF_IOstdout,'(1x,2a,L1)') nestr,  &
+       write (ESMF_UtilIOStdout,'(1x,2a,L1)') nestr,  &
            "    reconcile needed: ", sp%reconcileneededflag
 
        !pli print attribute name/value pairs using c_esmc_baseprint() 
@@ -3978,7 +3978,7 @@ contains
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
-         write (ESMF_IOstdout,'(1x,2a,i0,2a)') nestr, "    object: ", i, &
+         write (ESMF_UtilIOStdout,'(1x,2a,i0,2a)') nestr, "    object: ", i, &
              ", name: ", trim(dp%namep)
          outbuf = "      type:"
 
@@ -4025,7 +4025,7 @@ contains
          end if
 
 
-         write (ESMF_IOstdout,*) nestr, trim(outbuf)
+         write (ESMF_UtilIOStdout,*) nestr, trim(outbuf)
 
          if (localnestedflag .and. dp%otype%ot == ESMF_STATEITEM_STATE%ot) then
              call statePrintWorker (dp%datap%spp, level=level+1)
