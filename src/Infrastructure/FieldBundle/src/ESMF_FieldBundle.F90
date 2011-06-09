@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.104 2011/06/06 20:32:07 oehmke Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.105 2011/06/09 20:35:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.104 2011/06/06 20:32:07 oehmke Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.105 2011/06/09 20:35:17 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -836,11 +836,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldBundleCreate - Create an fieldbundle from a list of Fields
 !
 ! !INTERFACE:
-  function ESMF_FieldBundleCreate(keywordEnforcer, fieldList, name, rc)
+  function ESMF_FieldBundleCreate(keywordEnforcer, fieldList, &
+      multiflag, relaxedflag, name, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field), intent(in),  optional :: fieldList(:)
+    logical,          intent(in),  optional :: multiflag
+    logical,          intent(in),  optional :: relaxedflag
     character (len=*),intent(in),  optional :: name
     integer,          intent(out), optional :: rc
 !         
@@ -859,6 +862,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [{[fieldList]}]
 !     List of {\tt ESMF\_Field} objects to be bundled.
+!   \item [{[multiflag]}]
+!     A setting of {\tt .true.} allows multiple items with the same name
+!     to be added to {\tt fieldbundle}. For {\tt .false.} added items must
+!     have unique names. The default setting is {\tt .false.}.
+!   \item [{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "add"
+!     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
+!     {\tt fieldList} contains items with names that are also found in 
+!     {\tt fieldbundle}. The {\tt fieldbundle} is left unchanged for these items.
+!     For {\tt .false.} this is treated as an error condition. 
+!     The default setting is {\tt .false.}.
 !   \item [{[name]}]
 !     Name of the created {\tt ESMF\_FieldBundle}. A default name is generated
 !     if not specified.
@@ -931,7 +945,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_SET_CREATED(ESMF_FieldBundleCreate)
 
     if(present(fieldList)) then
-      call ESMF_FieldBundleAdd(ESMF_FieldBundleCreate, fieldList, rc=localrc)
+      call ESMF_FieldBundleAdd(ESMF_FieldBundleCreate, fieldList, &
+        multiflag=multiflag, relaxedflag=relaxedflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -1035,8 +1050,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
 
-    integer                                   :: localrc
+    integer                                   :: localrc, fcount, i
     type(ESMF_Status) :: basestatus
+    type(ESMF_Field), pointer                 :: flist(:)
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1048,19 +1064,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (basestatus .eq. ESMF_STATUS_READY) then
+      
+      ! Destroy internal geombase and mark this fieldBundle UNINIT
+      if(this%status == ESMF_FBSTATUS_GRIDSET) then
+        call ESMF_GeomBaseDestroy(this%geombase, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        this%status = ESMF_FBSTATUS_UNINIT
+      endif
+
+      ! Destroy all the internal Fields if this is a proxy fieldBundle
+      if(this%is_proxy) then
+        call ESMF_ContainerGet(this%container, itemCount=fcount, itemList=flist, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        do i = 1, fcount
+          call ESMF_FieldDestroy(flist(i), rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+        deallocate(flist)
+      endif
+
       ! Destroy internal container
       call ESMF_ContainerDestroy(this%container, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if(this%status == ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_GeomBaseDestroy(this%geombase, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
     endif
+
     
     ! Mark base object invalid
     call ESMF_BaseSetStatus(this%base, ESMF_STATUS_INVALID, rc=localrc)
@@ -3350,7 +3386,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Remove those that were removed
+    ! Remove attribute link for those Fields that were removed
     do i=1, size(garbageList)
       call c_ESMC_AttributeLinkRemove(fieldbundle%this%base, garbageList(i)%ftypep%base, linkChange, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3475,6 +3511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif ! non-empty fieldlist
 
     ! Add all the input Fields in fieldList
+    linkChange = ESMF_TRUE
     do i = 1, fieldCount
       call c_ESMC_AttributeLink(fieldbundle%this%base, fieldList(i)%ftypep%base, linkChange, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
