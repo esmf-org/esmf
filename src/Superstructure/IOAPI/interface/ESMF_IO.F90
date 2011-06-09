@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.9 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_IO.F90,v 1.10 2011/06/09 20:26:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -59,37 +59,35 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-#if 0
-!TODO: uncomment these types if/when ESMF_IOSpec deprecated
+
       ! File format
-      type ESMF_IOFileFormat
-      sequence
-      private
-         integer :: iofileformat
-      end type
+!      type ESMF_IOFileFormat
+!      sequence
+!      private
+!         integer :: iofileformat
+!      end type
 
       ! Predefined file formats
-      type(ESMF_IOFileFormat), parameter :: &
-                       ESMF_IO_FILEFORMAT_UNSPECIFIED = ESMF_IOFileFormat(0), &
-                       ESMF_IO_FILEFORMAT_NETCDF      = ESMF_IOFileFormat(1), &
-                       ESMF_IO_FILEFORMAT_HDF         = ESMF_IOFileFormat(2), &
-                       ESMF_IO_FILEFORMAT_XML         = ESMF_IOFileFormat(3)
+!      type(ESMF_IOFileFormat), parameter :: &
+!                       ESMF_IO_FILEFORMAT_UNSPECIFIED = ESMF_IOFileFormat(0), &
+!                       ESMF_IO_FILEFORMAT_NETCDF      = ESMF_IOFileFormat(1), &
+!                       ESMF_IO_FILEFORMAT_HDF         = ESMF_IOFileFormat(2), &
+!                       ESMF_IO_FILEFORMAT_XML         = ESMF_IOFileFormat(3)
 
       ! What type of I/O - Read only, write only, R/W, append with truncation
-      type ESMF_IORWType
-      sequence
-      private
-         integer :: iorwtype
-      end type
+!      type ESMF_IORWType
+!      sequence
+!      private
+!         integer :: iorwtype
+!      end type
 
-      type(ESMF_IORWType), parameter :: &
-                             ESMF_IO_RWTYPE_UNSPECIFIED = ESMF_IORWType(0), &
-                             ESMF_IO_RWTYPE_READONLY    = ESMF_IORWType(1), &
-                             ESMF_IO_RWTYPE_WRITEONLY   = ESMF_IORWType(2), &
-                             ESMF_IO_RWTYPE_READWRITE   = ESMF_IORWType(3), &
-                             ESMF_IO_RWTYPE_APPEND      = ESMF_IORWType(4), &
-                             ESMF_IO_RWTYPE_TRUNCATE    = ESMF_IORWType(5)
-#endif
+!      type(ESMF_IORWType), parameter :: &
+!                             ESMF_IO_RWTYPE_UNSPECIFIED = ESMF_IORWType(0), &
+!                             ESMF_IO_RWTYPE_READONLY    = ESMF_IORWType(1), &
+!                             ESMF_IO_RWTYPE_WRITEONLY   = ESMF_IORWType(2), &
+!                             ESMF_IO_RWTYPE_READWRITE   = ESMF_IORWType(3), &
+!                             ESMF_IO_RWTYPE_APPEND      = ESMF_IORWType(4), &
+!                             ESMF_IO_RWTYPE_TRUNCATE    = ESMF_IORWType(5)
 
       type ESMF_IO
       sequence
@@ -139,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.9 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_IO.F90,v 1.10 2011/06/09 20:26:39 eschwab Exp $'
 
 !==============================================================================
 !
