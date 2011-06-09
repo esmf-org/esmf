@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.44 2011/02/23 06:44:59 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.45 2011/06/09 05:58:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.44 2011/02/23 06:44:59 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.45 2011/06/09 05:58:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &
@@ -56,7 +56,8 @@
 
 
 
-      integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
+      ! days per month array, 12 months per year
+      integer, dimension(12) :: DaysPerMonth
 
 #ifdef ESMF_TESTEXHAUSTIVE
       ! individual test name

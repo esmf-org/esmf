@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.63 2011/04/27 19:36:10 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.64 2011/06/09 05:58:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.63 2011/04/27 19:36:10 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.64 2011/06/09 05:58:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -72,9 +72,10 @@
       ! instantiate a clock 
       type(ESMF_Clock) :: clock_360day, clock_no_leap, clock_gregorian
 
-      integer, dimension(MONTHS_PER_YEAR) :: &
+      ! set up days per month arrays, 12 months per year
+      integer, dimension(12) :: &
              days_per_month =(/30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30/)
-      integer, dimension(MONTHS_PER_YEAR) :: &
+      integer, dimension(12) :: &
          dayspermonth =(/1000, 0, 8900, -120, 930, 70, 80, 90, 0, -70, 90, 60/)
 
       integer :: dayOfWeek

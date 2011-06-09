@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.134 2011/04/28 20:54:44 svasquez Exp $
+! $Id: ESMF_Calendar.F90,v 1.135 2011/06/09 05:57:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,8 +52,6 @@
       private
 !------------------------------------------------------------------------------
 
-      integer, parameter :: MONTHS_PER_YEAR = 12
-
 !------------------------------------------------------------------------------
 !     ! ESMF_CalendarType
 !
@@ -93,7 +91,6 @@
 !
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public MONTHS_PER_YEAR
       public ESMF_CalendarType
       public ESMF_CAL_GREGORIAN,    ESMF_CAL_JULIAN, ESMF_CAL_JULIANDAY, &
              ESMF_CAL_MODJULIANDAY, ESMF_CAL_NOLEAP, ESMF_CAL_360DAY, &
@@ -147,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.134 2011/04/28 20:54:44 svasquez Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.135 2011/06/09 05:57:56 eschwab Exp $'
 
 !==============================================================================
 ! 

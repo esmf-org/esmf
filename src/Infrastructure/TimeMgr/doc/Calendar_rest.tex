@@ -1,7 +1,7 @@
-% $Id: Calendar_rest.tex,v 1.5 2004/06/17 20:06:38 eschwab Exp $
+% $Id: Calendar_rest.tex,v 1.6 2011/06/09 05:57:58 eschwab Exp $
 
 \begin{enumerate}
 
-\item {\bf Months per year set to 12.} Due to the requirement of only Earth modeling, the number of months per year is hard-coded at 12.  However, for easy modification, this is implemented via a Fortran parameter and a C preprocessor \#define.
+\item {\bf Months per year set to 12.} Due to the requirement of only Earth modeling, the number of months per year is hard-coded at 12.  However, for easy modification, this is implemented via a C preprocessor \#define MONTHS\_PER\_YEAR in ESMCI\_Calendar.h.
 
 \end{enumerate}
