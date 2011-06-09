@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.120 2011/06/09 19:47:16 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.121 2011/06/09 21:15:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -505,21 +505,6 @@
         ESMF_ATTWRITE_XML = ESMF_AttWriteFlag(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_AttPackNestFlag
-!
-!     ! Interface flag for Attribute package nesting
-
-      type ESMF_AttPackNestFlag
-      sequence
-      !private
-        integer :: value
-      end type
-
-      type(ESMF_AttPackNestFlag), parameter ::  &
-        ESMF_ATTPACKNEST_OFF = ESMF_AttPackNestFlag(0), &
-        ESMF_ATTPACKNEST_ON = ESMF_AttPackNestFlag(1)
-
-!------------------------------------------------------------------------------
 !     ! ESMF_AttReconcileFlag
 !
 !     ! Interface flag for Attribute reconcile
@@ -716,7 +701,6 @@
                                ESMF_ATTCOPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
                                    ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
-      public ESMF_AttPackNestFlag, ESMF_ATTPACKNEST_OFF, ESMF_ATTPACKNEST_ON
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
       public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
