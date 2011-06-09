@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.6 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_ModUTest.F90,v 1.7 2011/06/09 20:36:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.6 2011/01/05 20:05:47 svasquez Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.7 2011/06/09 20:36:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -115,7 +115,6 @@ contains
     type(ESMF_Grid) :: grid
     type(ESMF_GridComp) :: gridcomp
     type(ESMF_GridConn) :: gridconn
-    type(ESMF_IOFileFormat) :: iofileformat
     type(ESMF_LocalArray) :: localarray
     type(ESMF_LocStream) :: locstream
     type(ESMF_Log) :: log
@@ -335,18 +334,6 @@ contains
     type(ESMF_GridConn), intent(in), optional :: dummy
     failMsg = "GridConn type fail"  
     name = "GridConn type"  
-    call ESMF_Test (.true.,  &  
-      name, failMsg, result, ESMF_SRCLINE)  
-  end subroutine
-
-!-------------------------------------------------------------------------------
-! NEX_noUTest
-
-  subroutine iofileformat_type (dummy)
-    use ESMF_Mod, only: ESMF_IOFileFormat
-    type(ESMF_IOFileFormat), intent(in), optional :: dummy
-    failMsg = "IOFileFormat type fail"  
-    name = "IOFileFormat type"  
     call ESMF_Test (.true.,  &  
       name, failMsg, result, ESMF_SRCLINE)  
   end subroutine
