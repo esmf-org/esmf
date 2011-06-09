@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.4 2011/06/07 06:00:21 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.5 2011/06/09 18:58:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -274,7 +274,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: i, elementCount, stat
+    integer                 :: i, elementCount, stat, connListSize
     integer, pointer        :: farray(:,:)
     type(ESMF_InterfaceInt) :: array
     
@@ -282,7 +282,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    if (present(connectionList).and.(size(connectionList)>0)) then
+    connListSize = 0
+    if (present(connectionList)) connListSize = size(connectionList)
+    if (connListSize > 0) then
       ! allocate 2D Fortran array to hold connectionList in the internal format
       elementCount = connectionList(1)%elementCount ! initialize
       allocate(farray(elementCount,size(connectionList)), stat=stat)
