@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.38 2011/05/04 16:18:49 samsoncheung Exp $
+// $Id: ESMCI_Util.h,v 1.39 2011/06/09 21:15:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -117,10 +117,6 @@ enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
                             ESMC_ATTGETCOUNT_ATTLINK,
                             ESMC_ATTGETCOUNT_TOTAL};
                         
-// nested Attribute package flag type
-enum ESMC_AttPackNestFlag { ESMC_ATTPACKNEST_OFF=0,
-                            ESMC_ATTPACKNEST_ON};
-
 // Attribute reconcile type
 enum ESMC_AttReconcileFlag { ESMC_ATTRECONCILE_OFF=0,
                             ESMC_ATTRECONCILE_ON};
