@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.14 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_IOUtil.F90,v 1.15 2011/06/09 05:12:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -72,30 +72,30 @@ module ESMF_IOUtilMod
 ! ISO_FORTRAN_ENV intrinsic module, these should access the constants
 ! 'input_unit', 'output_unit', and 'error_unit'.)
 
-  integer, parameter, public :: ESMF_IOstdin  = 5
-  integer, parameter, public :: ESMF_IOstdout = 6
+  integer, parameter, public :: ESMF_UtilIOStdin  = 5
+  integer, parameter, public :: ESMF_UtilIOStdout = 6
 
 #ifdef sysHP_UX
 
 ! Special setting for HP_UX
 
-  integer, parameter, public :: ESMF_IOstderr = 7
+  integer, parameter, public :: ESMF_UtilIOStderr = 7
 #else
 ! Generic setting for UNIX other than HP-UX
 
-  integer, parameter, public :: ESMF_IOstderr = 0
+  integer, parameter, public :: ESMF_UtilIOStderr = 0
 #endif
 
 ! Unit number range for ESMF internal use.
 
-  integer, private :: ESMF_IOUnitLower = ESMF_LOG_FORT_UNIT_NUMBER
-  integer, private :: ESMF_IOUnitUpper = ESMF_LOG_UPPER
+  integer, private :: ESMF_UtilIOUnitLower = ESMF_LOG_FORT_UNIT_NUMBER
+  integer, private :: ESMF_UtilIOUnitUpper = ESMF_LOG_UPPER
 
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.14 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.15 2011/06/09 05:12:55 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -215,12 +215,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     if (present(rc)) rc = ESMF_FAILURE
   
-    do, i=ESMF_IOUnitLower, ESMF_IOUnitUpper
+    do, i=ESMF_UtilIOUnitLower, ESMF_UtilIOUnitUpper
       inquire (unit=i, opened=inuse, iostat=localstat)
       if (.not. inuse .and. localstat == 0) exit
     end do
   
-    if (i <= ESMF_IOUnitUpper) then
+    if (i <= ESMF_UtilIOUnitUpper) then
       unit = i
       if (present (rc)) rc = ESMF_SUCCESS
     else
@@ -273,11 +273,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     if (present (lower) .and. .not. present (upper)) then
-      if (lower > ESMF_IOUnitUpper) return
+      if (lower > ESMF_UtilIOUnitUpper) return
     end if
 
     if (present (upper) .and. .not. present (lower)) then
-      if (upper < ESMF_IOUnitLower) return
+      if (upper < ESMF_UtilIOUnitLower) return
     end if
 
     if (present (upper) .and. present (lower)) then
@@ -287,11 +287,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 
     if (present (lower)) then
-      ESMF_IOUnitLower = lower
+      ESMF_UtilIOUnitLower = lower
     end if
 
     if (present (upper)) then
-      ESMF_IOUnitUpper = upper
+      ESMF_UtilIOUnitUpper = upper
     end if
 
     if (present (rc)) rc = ESMF_SUCCESS

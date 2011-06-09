@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.61 2011/04/14 05:33:44 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.62 2011/06/09 05:16:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.61 2011/04/14 05:33:44 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.62 2011/06/09 05:16:53 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1468,16 +1468,16 @@
           !call ESMF_ClockGet(clock2, currTime=currentTime, rc=rc)
           !call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, m=m, rc=rc)
           !print *, mm, "/", dd, "/", yy, " ", h, ":", m
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           if (ESMF_AlarmIsRinging(alarm4)) then
             nstep = nstep + 1
             !print *, "on"
-            !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+            !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           else
             !print *, "off"
           endif
           !call ESMF_AlarmPrint(alarm4, options="ringtime string", rc=rc)
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_ClockAdvance(clock2, rc=rc)
         enddo
 
@@ -1504,7 +1504,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "nstep = ", nstep, " nclock = ", nclock
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
@@ -1546,16 +1546,16 @@
           call ESMF_ClockGet(clock2, currTime=currentTime, rc=rc)
           call ESMF_TimeGet(currentTime, yy=yy, mm=mm, dd=dd, h=h, m=m, rc=rc)
           !print *, mm, "/", dd, "/", yy, " ", h, ":", m
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           if (ESMF_AlarmIsRinging(alarm4)) then
             nring = nring + 1
             !print *, "ringing!"
-            !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+            !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           endif
           !call ESMF_AlarmPrint(alarm4, options="ringbegin string", rc=rc)
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           !call ESMF_AlarmPrint(alarm4, options="ringtime string", rc=rc)
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_ClockAdvance(clock2, rc=rc)
         enddo
 
@@ -1570,7 +1570,7 @@
         endif
 
         !print *, "Going in REVERSE ..."
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
         nclock = nclock + 1
 
@@ -1584,7 +1584,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !print *, "nring = ", nring, " nclock = ", nclock
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
@@ -1979,7 +1979,7 @@
       do while (.not.ESMF_ClockIsStopTime(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (iteration .eq. 10) then
           ! waiting period is over, clear any alarm which may have occurred
           if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
@@ -1987,16 +1987,16 @@
           endif
         endif
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
 
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (iteration .gt. 10) then
           ! process any alarm occuring after initial 10 hour waiting period
           if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
             nring = nring + 1
             !print *, "alarm4 is ringing!"
-            !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+            !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
             call ESMF_AlarmRingerOff(alarm4, rc=rc)
           endif
         endif
@@ -2008,15 +2008,15 @@
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
       end do
@@ -2027,21 +2027,21 @@
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
       end do
 
       !print *, "alarm4 rang ", nring, " times, clock stepped ", iteration, " times."
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       if (nring.eq.44 .and. iteration.eq.144) testPass = .true.
       call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2075,15 +2075,15 @@
       do while (.not.ESMF_ClockIsStopTime(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
       end do
@@ -2094,15 +2094,15 @@
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
       end do
@@ -2113,21 +2113,21 @@
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
       end do
 
       !print *, "alarm4 rang ", nring, " times, clock stepped ", iteration, " times."
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       if (nring.eq.576 .and. iteration.eq.576) testPass = .true.
       call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -2161,22 +2161,22 @@
       do while (.not.ESMF_ClockIsStopTime(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
         !call ESMF_AlarmPrint(alarm4, options="ringtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       end do
       !print *, "At end of 1st forward run, nring = ", nring
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       ! TODO: test in REVERSE mode (not from James)
       !       currently doesn't ring in REVERSE
@@ -2185,22 +2185,22 @@
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
         !call ESMF_AlarmPrint(alarm4, options="ringtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       end do
       !print *, "At end of reverse run, nring = ", nring
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       ! TODO: test double back in FORWARD mode (not from James)
       !       currently doesn't work until back into day 2  
@@ -2209,29 +2209,29 @@
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
         !print *, "clock2 timestep ", iteration
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock2, rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock2, options="currTime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm4, rc=rc)) then
           nring = nring + 1
           !print *, "alarm4 is ringing!"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmRingerOff(alarm4, rc=rc)
         endif
         !call ESMF_AlarmPrint(alarm4, options="ringtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       end do
       !print *, "At end of 2nd forward run, nring = ", nring
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       !print *, "alarm4 rang ", nring, " times, clock stepped ", iteration, " times."
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       if (nring.eq.288 .and. iteration.eq.288) testPass = .true.
       call ESMF_Test(testPass.and.(rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
@@ -2732,80 +2732,80 @@
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       !call ESMF_AlarmPrint(alarm1, options="ringduration string", rc=rc)
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       !call ESMF_AlarmPrint(alarm1, options="ringtimestepcount string", rc=rc)
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       alarmCount = 0
       expectedCount = 22 
       do
         !print *, "***********************Top of loop 1 **********************"
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock, options="currtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm1, rc=rc)) then
           alarmCount = alarmCount + 1
           !print *, "alarm1 is ringing"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           !call ESMF_AlarmRingerOff(alarm1, rc=rc)
         endif
         !call ESMF_AlarmPrint(alarm1, options="ringbegin string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_AlarmPrint(alarm1, options="ringtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_AlarmPrint(alarm1, options="ringend string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock, rc=rc)
         !call ESMF_AlarmPrint(alarm1, options="ringend string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_ClockIsStopTime(clock, rc=rc)) exit
       enddo
       !print *, "At end of 1st forward run, alarmCount = ", alarmCount
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
 
       i=0
       do
         !print *, "***********************Top of loop 2 **********************"
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock, options="currtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm1, rc=rc)) then
           alarmCount = alarmCount + 1
           !print *, "alarm1 is ringing"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           !call ESMF_AlarmRingerOff(alarm1, rc=rc)
         endif
         !call ESMF_AlarmPrint(alarm1, options="ringbegin string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_AlarmPrint(alarm1, options="ringtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock, rc=rc)
         i = i+1
         if (i == 5) exit
       enddo
       !print *, "At end of reverse run, alarmCount = ", alarmCount
-      !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       call ESMF_ClockSet(clock, direction=ESMF_MODE_FORWARD, rc=rc)
 
       i=0
       do
         !print *, "***********************Top of loop 3 **********************"
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_ClockPrint(clock, options="currtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         if (ESMF_AlarmIsRinging(alarm1, rc=rc)) then
           alarmCount = alarmCount + 1
           !print *, "alarm1 is ringing"
-          !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           !call ESMF_AlarmRingerOff(alarm1, rc=rc)
         endif
         !call ESMF_AlarmPrint(alarm1, options="ringbegin string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         !call ESMF_AlarmPrint(alarm1, options="ringtime string", rc=rc)
-        !call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+        !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
         call ESMF_ClockAdvance(clock, rc=rc)
         i = i+1
         if (i == 15) exit
@@ -2815,14 +2815,14 @@
           if (.not. testPass) print *, 'bad return codes discovered'
           write (failMsg,*) trim (failMsg), ', alarmCount = ', alarmCount, ', expected = ', expectedCount
           print *, 'The alarm ringTime may be stuck at:'
-          call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
           call ESMF_AlarmPrint (alarm1, options="ringTime string", rc=rc)
-          call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+          call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
       end if
 
       call ESMF_Test (testPass .and. alarmCount == expectedCount, &
                      name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_UtilIOUnitFlush(ESMF_IOstdout)
+      call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
       call ESMF_AlarmDestroy (alarm1, rc=rc)
       call ESMF_ClockDestroy (clock, rc=rc)
