@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.39 2011/06/03 05:18:33 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.40 2011/06/09 23:51:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -71,7 +71,8 @@ namespace ESMCI {
     int **indexListPDimPLocalDe;  // local DEs' indices [dimCount*localDeCount]
                                   // [indexCountPDimPDe(localDe,dim)]
     int connectionCount;          // number of elements in connection list
-    int **connectionList;         // list of connection elements
+    int **connectionList;         // connection elements
+                                  // [connectionCount][2*dimCount+2]
     int ***arbSeqIndexListPCollPLocalDe;// local arb sequence indices
                                   // [diffCollocationCount][localDeCount]
                                   // [elementCountPCollPLocalDe(localDe)]
@@ -141,39 +142,41 @@ namespace ESMCI {
     bool isLocalDeOnEdgeL(int localDe, int dim, int *rc) const;
     bool isLocalDeOnEdgeU(int localDe, int dim, int *rc) const;
     // get() and set()
-    int getDimCount()                   const {return dimCount;}
-    int getTileCount()                 const {return tileCount;}
-    int getDiffCollocationCount()   const {return diffCollocationCount;}
-    const int *getMinIndexPDimPTile()  const {return minIndexPDimPTile;}
-    const int *getMinIndexPDimPTile(int tile, int *rc) const;
-    const int *getMaxIndexPDimPTile()  const {return maxIndexPDimPTile;}
-    const int *getMaxIndexPDimPTile(int tile, int *rc) const;
-    const int *getElementCountPTile()  const {return elementCountPTile;}
-    const int *getMinIndexPDimPDe()     const {return minIndexPDimPDe;}
-    const int *getMinIndexPDimPDe(int de, int *rc) const;
-    const int *getMaxIndexPDimPDe()     const {return maxIndexPDimPDe;}
-    const int *getMaxIndexPDimPDe(int de, int *rc) const;
-    const int *getElementCountPDe()      const {return elementCountPDe;}
+    int getDimCount() const {return dimCount;}
+    int getTileCount() const {return tileCount;}
+    int getDiffCollocationCount() const {return diffCollocationCount;}
+    int const *getMinIndexPDimPTile() const {return minIndexPDimPTile;}
+    int const *getMinIndexPDimPTile(int tile, int *rc) const;
+    int const *getMaxIndexPDimPTile() const {return maxIndexPDimPTile;}
+    int const *getMaxIndexPDimPTile(int tile, int *rc) const;
+    int const *getElementCountPTile() const {return elementCountPTile;}
+    int const *getMinIndexPDimPDe() const {return minIndexPDimPDe;}
+    int const *getMinIndexPDimPDe(int de, int *rc) const;
+    int const *getMaxIndexPDimPDe() const {return maxIndexPDimPDe;}
+    int const *getMaxIndexPDimPDe(int de, int *rc) const;
+    int const *getElementCountPDe() const {return elementCountPDe;}
     int getElementCountPDe(int de, int *rc) const;
-    const int *getTileListPDe()        const {return tileListPDe;}
-    const int *getContigFlagPDimPDe()   const {return contigFlagPDimPDe;}
+    int const *getTileListPDe() const {return tileListPDe;}
+    int const *getContigFlagPDimPDe() const {return contigFlagPDimPDe;}
     int getContigFlagPDimPDe(int de, int dim, int *rc) const;
-    const int *getIndexCountPDimPDe()   const {return indexCountPDimPDe;}
-    const int *getIndexListPDimPLocalDe(int localDe, int dim, int *rc=NULL)
+    int const *getIndexCountPDimPDe() const {return indexCountPDimPDe;}
+    int const *getIndexListPDimPLocalDe(int localDe, int dim, int *rc=NULL)
       const;
-    const int *getCollocationPDim() const {return collocationPDim;}
-    const int *getCollocationTable() const {return collocationTable;}
-    DELayout *getDELayout()         const {return delayout;}
-    const int *getRegDecomp()       const {return regDecomp;}
-    int getSequenceIndexLocalDe(int localDe, const int *index, int depth=0,
+    int getConnectionCount() const {return connectionCount;}
+    int *const *getConnectionList() const {return connectionList;}
+    int const *getCollocationPDim() const {return collocationPDim;}
+    int const *getCollocationTable() const {return collocationTable;}
+    DELayout *getDELayout() const {return delayout;}
+    int const *getRegDecomp() const {return regDecomp;}
+    int getSequenceIndexLocalDe(int localDe, int const *index, int depth=0,
       int *rc=NULL) const;
-    int getSequenceIndexTileRelative(int tile, const int *index, int depth,
+    int getSequenceIndexTileRelative(int tile, int const *index, int depth,
       int *rc=NULL)const;
-    int getSequenceIndexTile(int tile, const int *index, int depth,
+    int getSequenceIndexTile(int tile, int const *index, int depth,
       int *rc=NULL)const;
-    int *const*getElementCountPCollPLocalDe()
+    int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
-    const int *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
+    int const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
       const;
     int setArbSeqIndex(InterfaceInt *arbSeqIndex, int localDe, int collocation);
     int setCollocationPDim(InterfaceInt *collocationPDim);
