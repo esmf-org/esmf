@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.37 2011/06/08 05:45:11 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.38 2011/06/09 05:58:47 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -151,21 +151,21 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
-     {\tt CompilerName*} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
-     {\tt CompilerVersion*} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
+     {\tt CompilerName**} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
+     {\tt CompilerVersion**} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
      {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A\\
      {\tt MachineDescription} & A short note about the machine. & N/A \\
      {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & Cray Interconnect, Fat Tree, Gigabit Ethernet, Infiniband, Mixed, Myrinet, Numalink, Quadrics, SP Switch\\
      {\tt MachineMaximumProcessors} & The highest number of computer chips on a computer system. & N/A\\
-     {\tt MachineName**} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A \\
+     {\tt MachineName*} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A \\
      {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & Aix, Darwin, Irix64, Linux, SUNOS, Unicos\\
      {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel em64t, intel IA-64, Itanium, NEC, operteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000\\
      {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector \\
      {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
      \hline\hline
 \end{tabular}
-* Both CompilerName and CompilerVersion are required to be set, or else neither one, to produce valid CIM XML output; setting one without the other will produce invalid CIM XML output. \\
-** Attribute required to be set to produce valid CIM XML output. \\
+* Attribute required to be set to produce valid CIM XML output. \\
+** Both CompilerName and CompilerVersion are required to be set, or else neither one, to produce valid CIM XML output; setting one without the other will produce invalid CIM XML output. \\
 
 
 \vspace{.20in}
