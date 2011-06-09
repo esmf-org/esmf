@@ -1,22 +1,22 @@
-% $Id: IOUtil_usage.tex,v 1.3 2009/11/17 00:01:37 w6ws Exp $
+% $Id: IOUtil_usage.tex,v 1.4 2011/06/09 06:07:26 w6ws Exp $
 
 %\subsection{Usage and Examples}
 
 \subsubsection{Fortran unit number management} \label{fio:unitnumbers}
-The {\tt ESMF\_IOUnitGet()} method is provided so that applications
+The {\tt ESMF\_UtilIOUnitGet()} method is provided so that applications
 using ESMF can remain free of unit number conflicts --- both when combined
 with other third party code, or with ESMF itself.  This call is typically
 used just prior to an {\tt OPEN} statement:
 
 \begin{verbatim}
-  call ESMF_IOUnitGet (unit=grid_unit, rc=rc)
+  call ESMF_UtilIOUnitGet (unit=grid_unit, rc=rc)
   open (unit=grid_unit, file='grid_data.dat', status='old', action='read')
 \end{verbatim}
 
 By default, unit numbers between 50 and 99 are scanned to find an unopened
 unit number.
 
-Internally, ESMF also uses {\tt ESMF\_IOUnitGet()} when it needs to open
+Internally, ESMF also uses {\tt ESMF\_UtilIOUnitGet()} when it needs to open
 Fortran unit numbers for file I/O.  By using the same API for both user and
 ESMF code, unit number collisions can be avoided.
 
@@ -52,7 +52,7 @@ points in the program in order to get the needed results.
 Likewise, in parallel code, predictable flushing of output buffers is a common
 requirement, often in conjunction with {\tt ESMF\_VMBarrier()} calls.  
 
-The {\tt ESMF\_IOUnitFlush()} API is provided to flush a unit as desired.  Here is
+The {\tt ESMF\_UtilIOUnitFlush()} API is provided to flush a unit as desired.  Here is
 an example of code which prints debug values, and serializes the output to a
 terminal in PET order:
 
@@ -65,14 +65,14 @@ terminal in PET order:
   call ESMF_Initialize (vm=vm, rc=rc)
   call ESMF_VMGet (vm, localPet=me, petCount=npes)
 
-  call ESMF_IOUnitGet (unit=tty_unit)
+  call ESMF_UtilIOUnitGet (unit=tty_unit)
   open (unit=tty_unit, file='/dev/tty', status='old', action='write')
   ...
   call ESMF_VMBarrier (vm=vm)
   do, i=0, npets-1
     if (i == me) then
       write (tty_unit, *) 'PET: ', i, ', values are: ', a, b, c
-      call ESMF_IOUnitFlush (unit=tty_unit)
+      call ESMF_UtilIOUnitFlush (unit=tty_unit)
     end if
     call ESMF_VMBarrier (vm=vm)
   end do
