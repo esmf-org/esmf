@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.38 2011/06/07 17:45:18 rokuingh Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.39 2011/06/09 18:32:42 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.38 2011/06/07 17:45:18 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.39 2011/06/09 18:32:42 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -263,29 +263,40 @@ static const int keySize = 4*sizeof(int) + 1;
   if (AttributeUpdateKeyCompare(thiskey, distkey) == false) {
 #ifdef DEBUG
     printf("PET %d  -  DeleteMe!!!\n", localPet);
-    printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s\n\n", 
-            localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
+    printf("PET %d  -  Name = %s, Convention = %s, Purpose = %s, AttrRoot = %s\n\n", 
+            localPet, attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str(),
+            attrRoot ? "true":"false");
 #endif
 
-    if (attrPackHead == ESMF_TRUE) {
+    // first two blocks are a hack for non-ordered containers
+    if (attrUpdateDone == ESMF_TRUE) {
       delete [] thiskey;
       delete [] distkey;
       *offset -= keySize;
-      //return ESMF_SUCCESS;
+      return ESMF_SUCCESS;
+    }
+    else if (attrRoot == ESMF_TRUE) {
+      delete [] thiskey;
+      delete [] distkey;
+      *offset -= keySize;
+      return ESMC_ATTUPDATERM_HOOKANDCONTINUE;
+    }
+    else if (attrPackHead == ESMF_TRUE) {
+      delete [] thiskey;
+      delete [] distkey;
+      *offset -= keySize;
       return ESMC_ATTUPDATERM_ATTPACK;
     }
     else if (attrPack == ESMF_TRUE) {
       delete [] thiskey;
       delete [] distkey;
       *offset -= keySize;
-      //return ESMF_SUCCESS;
       return ESMC_ATTUPDATERM_ATTPACKATT;
     }
     else {
       delete [] thiskey;
       delete [] distkey;
       *offset -= keySize;
-      //return ESMF_SUCCESS;
       return ESMC_ATTUPDATERM_ATTRIBUTE;
     }
   }
@@ -476,7 +487,7 @@ static const int keySize = 4*sizeof(int) + 1;
     }
     else if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                "AttributeUpdateBufRecv failed recurse attrList", &localrc);
+                "AttributeUpdateBufRecv failed recursing attrList", &localrc);
         delete [] thiskey;
         delete [] distkey;
         return ESMF_FAILURE;
@@ -510,25 +521,38 @@ static const int keySize = 4*sizeof(int) + 1;
   }
 
   // recurse the linkList
-  for (i=0; i<linkList.size(); ++i) {
+  int hook_index = 0; // hack for non_ordered containers (next 5 lines)
+  bool hook = true;
+  while (hook == true) {
+	hook = false; // reset hook to start off with a clean slate
+  for (i=hook_index; i<linkList.size(); ++i) {
+//  for (i=0; i<linkList.size(); ++i) {
     localrc = linkList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
 #ifdef DEBUG
-    if (localrc == ESMC_ATTUPDATERM_ATTPACK) 
-      printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACK\n", localPet);
+    if (localrc == ESMC_ATTUPDATERM_HOOKANDCONTINUE) 
+      printf("PET%d - returned ESMC_ATTUPDATERM_HOOKANDCONTINUE from linkList traversal\n", localPet);
+    else if (localrc == ESMC_ATTUPDATERM_ATTPACK) 
+      printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACK from linkList traversal\n", localPet);
     else if (localrc == ESMC_ATTUPDATERM_ATTRIBUTE) 
-      printf("PET%d - returned ESMC_ATTUPDATERM_ATTRIBUTE\n", localPet);
+      printf("PET%d - returned ESMC_ATTUPDATERM_ATTRIBUTE from linkList traversal\n", localPet);
     else if (localrc == ESMC_ATTUPDATERM_ATTPACKATT) 
-      printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACKATT\n", localPet);
+      printf("PET%d - returned ESMC_ATTUPDATERM_ATTPACKATT from linkList traversal\n", localPet);
     else
-#endif 
-    if (localrc != ESMF_SUCCESS) {
+#endif
+    // first if block is a hack for non-ordered containers
+    if (localrc == ESMC_ATTUPDATERM_HOOKANDCONTINUE) {
+		hook = true;
+		hook_index = i;
+    }
+    else if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-        "AttributeUpdate failed recursing linkList", &localrc);
+        "AttributeUpdateBufRecv failed recursing linkList", &localrc);
       delete [] thiskey;
       delete [] distkey;
       return ESMF_FAILURE;
     }
-  }
+  }  // for loop
+  }  // while loop - hack for non-ordered containers
     
   // make sure offset is aligned correctly
   nbytes=(*offset)%8;
@@ -545,7 +569,8 @@ static const int keySize = 4*sizeof(int) + 1;
     
   delete [] thiskey;
   delete [] distkey;
-    
+
+  attrUpdateDone = ESMF_TRUE;
   return ESMF_SUCCESS;
   
   } // end AttributeUpdateBufRecv

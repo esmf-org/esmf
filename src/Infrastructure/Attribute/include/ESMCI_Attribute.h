@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.52 2011/05/16 18:59:39 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.53 2011/06/09 18:32:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -42,7 +42,8 @@
 // Eventually move this to ESMCI_Util.h
 enum ESMC_AttUpdateRm{ESMC_ATTUPDATERM_ATTRIBUTE=-42,
                       ESMC_ATTUPDATERM_ATTPACKATT,
-                      ESMC_ATTUPDATERM_ATTPACK};
+                      ESMC_ATTUPDATERM_ATTPACK,
+                      ESMC_ATTUPDATERM_HOOKANDCONTINUE}; // hack for nonordered containers
 
 // !PUBLIC TYPES:
   class ESMC_Base;
@@ -60,11 +61,14 @@ class Attribute
     std::string attrName; // inline to reduce memory thrashing
     ESMC_TypeKind tk;           // typekind indicator
     int items;                  // number of items (NOT byte count) for lists
+
     ESMC_Logical attrRoot;
+	ESMC_Logical attrUpdateDone; // hack for non-ordered containers
   
     std::string attrConvention;             // Convention of Attpack
     std::string attrPurpose;                // Purpose of Attpack
     std::string attrObject;                 // Object of Attpack
+
     ESMC_Logical attrPack;             // an Attribute in an Attpack
     ESMC_Logical attrPackHead;         // the head of an Attpack
     ESMC_Logical attrNested;           // a nested Attpack
@@ -81,19 +85,12 @@ class Attribute
     std::vector<Attribute*>  linkList;  // attributes - array of pointers
 
     // Attribute values
-//ESMC_I4               vi;       // integer, or
-    std::vector<ESMC_I4>       vip;       // pointer to integer list, or
-//ESMC_I8               vl;       // long, or
-                            //  ^  TODO: change back to vl when Cray X1 compiler fixed
-    std::vector<ESMC_I8>       vlp;       // pointer to long list, or
-//ESMC_R4               vf;       // float (real*4), or
-    std::vector<ESMC_R4>       vfp;       // pointer to float (real*4) list, or
-//ESMC_R8               vd;       // double (real*8), or
-    std::vector<ESMC_R8>       vdp;       // pointer to double (real*8) list, or
-//ESMC_Logical          vb;       // boolean (logical), or
-    std::vector<ESMC_Logical>  vbp;       // pointer to boolean (logical) list, or
-//string                vcp;       // pointer to a NULL term character string, or
-    std::vector<std::string>        vcpp;
+    std::vector<ESMC_I4>       vip;       // vector of integers
+    std::vector<ESMC_I8>       vlp;       // vector of longs
+    std::vector<ESMC_R4>       vfp;       // vector of floats (real*4)
+    std::vector<ESMC_R8>       vdp;       // vector of doubles (real*8)
+    std::vector<ESMC_Logical>  vbp;       // vector of booleans (logical)
+    std::vector<std::string>   vcpp;      // vector of strings
 
     int        id;         // unique identifier. used to generate unique 
                                   // default names.

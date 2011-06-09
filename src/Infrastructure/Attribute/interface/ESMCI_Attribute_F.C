@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.50 2011/05/16 18:59:41 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.51 2011/06/09 18:32:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.50 2011/05/16 18:59:41 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.51 2011/06/09 18:32:40 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1249,8 +1249,11 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     if (rc) *rc = status;
     return;
   }
+
   // set the itemcount out to the itemcount of the attribute
-  *count = lcount;
+  // remove the count as a return value here, only use as input to check that there are
+  // not more items than space in the list
+  //*count = lcount;
   
   //   use the count to allocate llens
   llens = new int[lcount];
@@ -1477,40 +1480,40 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   }
 
   if (value) {
-    if (*count >= 1) {
+    if (attrCount >= 1) {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
-        temp.reserve(*count);
-        status = attpack->AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(attrCount);
+        status = attpack->AttributeGet(cname, &attrCount, &temp);
+        for (unsigned int i=0; i<attrCount; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
-        temp.reserve(*count);
-        status = attpack->AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(attrCount);
+        status = attpack->AttributeGet(cname, &attrCount, &temp);
+        for (unsigned int i=0; i<attrCount; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
-        temp.reserve(*count);
-        status = attpack->AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(attrCount);
+        status = attpack->AttributeGet(cname, &attrCount, &temp);
+        for (unsigned int i=0; i<attrCount; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
-        temp.reserve(*count);
-        status = attpack->AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(attrCount);
+        status = attpack->AttributeGet(cname, &attrCount, &temp);
+        for (unsigned int i=0; i<attrCount; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
-        temp.reserve(*count);
-        status = attpack->AttributeGet(cname, count, &temp);
-        for (unsigned int i=0; i<*count; i++)
+        temp.reserve(attrCount);
+        status = attpack->AttributeGet(cname, &attrCount, &temp);
+        for (unsigned int i=0; i<attrCount; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
@@ -2721,7 +2724,9 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     return;
   }
   // now set *count to the actual number of items in the attribute
-  *count = lcount;
+  // remove the count as a return value here, only use as input to check that there are
+  // not more items than space in the list
+//  *count = lcount;
   
   //   use the count to allocate llens
   llens = new int[lcount];
@@ -2858,40 +2863,40 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   }
   
   if (value) {
-    if (*items >= 1) {
+    if (attrItems >= 1) {
       if (*tk == ESMC_TYPEKIND_I4) {
         vector<ESMC_I4> temp;
-        temp.reserve(*items);
-        status = (**base).root.AttributeGet(cname, items, &temp);
-        for (unsigned int i=0; i<*items; i++)
+        temp.reserve(attrItems);
+        status = (**base).root.AttributeGet(cname, &attrItems, &temp);
+        for (unsigned int i=0; i<attrItems; i++)
           (static_cast<ESMC_I4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_I8) {
         vector<ESMC_I8> temp;
-        temp.reserve(*items);
-        status = (**base).root.AttributeGet(cname, items, &temp);
-        for (unsigned int i=0; i<*items; i++)
+        temp.reserve(attrItems);
+        status = (**base).root.AttributeGet(cname, &attrItems, &temp);
+        for (unsigned int i=0; i<attrItems; i++)
           (static_cast<ESMC_I8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R4) {
         vector<ESMC_R4> temp;
-        temp.reserve(*items);
-        status = (**base).root.AttributeGet(cname, items, &temp);
-        for (unsigned int i=0; i<*items; i++)
+        temp.reserve(attrItems);
+        status = (**base).root.AttributeGet(cname, &attrItems, &temp);
+        for (unsigned int i=0; i<attrItems; i++)
           (static_cast<ESMC_R4*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_R8) {
         vector<ESMC_R8> temp;
-        temp.reserve(*items);
-        status = (**base).root.AttributeGet(cname, items, &temp);
-        for (unsigned int i=0; i<*items; i++)
+        temp.reserve(attrItems);
+        status = (**base).root.AttributeGet(cname, &attrItems, &temp);
+        for (unsigned int i=0; i<attrItems; i++)
           (static_cast<ESMC_R8*> (value))[i] = temp[i];
         temp.clear();
       } else if (*tk == ESMC_TYPEKIND_LOGICAL) {
         vector<ESMC_Logical> temp;
-        temp.reserve(*items);
-        status = (**base).root.AttributeGet(cname, items, &temp);
-        for (unsigned int i=0; i<*items; i++)
+        temp.reserve(attrItems);
+        status = (**base).root.AttributeGet(cname, &attrItems, &temp);
+        for (unsigned int i=0; i<attrItems; i++)
           (static_cast<ESMC_Logical*> (value))[i] = temp[i];
         temp.clear();
       } else {
