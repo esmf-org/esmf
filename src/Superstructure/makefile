@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2011/04/05 15:10:22 theurich Exp $ 
+# $Id: makefile,v 1.24 2011/06/09 20:33:30 eschwab Exp $ 
 
 ALL: build_here
 
@@ -6,7 +6,7 @@ LOCDIR   = src/Superstructure
 
 include $(ESMF_DIR)/makefile
 
-DIRS     =  State Component AttachMethods AttributeAPI IOAPI WebServices ESMFMod AppDriver
+DIRS     =  State Component AttachMethods AttributeAPI WebServices ESMFMod AppDriver
 
 CLEANDIRS   =
 CLEANFILES  =
