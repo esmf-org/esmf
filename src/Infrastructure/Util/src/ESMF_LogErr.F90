@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.85 2011/05/18 19:04:39 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.86 2011/06/09 21:35:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,10 +81,11 @@ character(8), parameter ::  &
     /)
 
 type(ESMF_MsgType), parameter           :: &
-    ESMF_LOG_ALL(3) = (/ &
+    ESMF_LOG_ALL(4) = (/ &
       ESMF_LOG_INFO,     &
       ESMF_LOG_WARNING,  &
-      ESMF_LOG_ERROR     &
+      ESMF_LOG_ERROR,    &
+      ESMF_LOG_TRACE     &
     /)
 
 !     ! ESMF_Halt
@@ -95,9 +96,9 @@ end type
 
 !     ! Halt Types
 type(ESMF_HaltType), parameter           :: &
-    ESMF_LOG_HALTNEVER  =  ESMF_HaltType(1), &
-    ESMF_LOG_HALTWARNING = ESMF_HaltType(2), &
-    ESMF_LOG_HALTERROR =   ESMF_HaltType(3)
+    ESMF_LOG_HALT_NEVER  =  ESMF_HaltType(1), &
+    ESMF_LOG_HALT_ON_WARNING = ESMF_HaltType(2), &
+    ESMF_LOG_HALT_ON_ERROR =   ESMF_HaltType(3)
     
 !     ! ESMF_LogType
 type ESMF_LogType
@@ -185,9 +186,9 @@ end type ESMF_LogPrivate
     public ESMF_LOG_SINGLE
     public ESMF_LOG_MULTI
     public ESMF_LOG_NONE    
-    public ESMF_LOG_HALTNEVER
-    public ESMF_LOG_HALTWARNING
-    public ESMF_LOG_HALTERROR
+    public ESMF_LOG_HALT_NEVER
+    public ESMF_LOG_HALT_ON_WARNING
+    public ESMF_LOG_HALT_ON_ERROR
     
 !------------------------------------------------------------------------------
 !
@@ -1468,7 +1469,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     alog%flushed = ESMF_FALSE
     alog%dirty = ESMF_FALSE
     alog%FileIsOpen=ESMF_FALSE
-    alog%halt=ESMF_LOG_HALTNEVER
+    alog%halt=ESMF_LOG_HALT_NEVER
     nullify(alog%errorMask)
     alog%errorMaskCount=0
     if (present(logtype)) then
@@ -1606,9 +1607,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[halt]}]
 !	     Halt definition, with the following valid values:
 !            \begin{description}
-!              \item {\tt ESMF\_LOG\_HALTWARNING};
-!              \item {\tt ESMF\_LOG\_HALTERROR};
-!              \item {\tt ESMF\_LOG\_HALTNEVER}.
+!              \item {\tt ESMF\_LOG\_HALT\_ON\_WARNING};
+!              \item {\tt ESMF\_LOG\_HALT\_ON\_ERROR};
+!              \item {\tt ESMF\_LOG\_HALT\_NEVER}.
 !            \end{description}
 !      \item [{[stream]}]
 !            The type of stream, with the following valid values and meanings:
@@ -1625,7 +1626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            valid message types.  In addition, the following named constant
 !            may be used:
 !            \begin{description}
-!              \item {\tt {ESMF\_LOG\_ALL} - Log all message types};
+!              \item {\tt ESMF\_LOG\_ALL} - Log all message types;
 !            \end{description}
 !            If an empty array is provided, no messages will be logged.  
 !      \item [{[errorMask]}]
@@ -2010,11 +2011,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     	alog%LOG_ENTRY(alog%fIndex)%ms = ms	
     	alog%LOG_ENTRY(alog%fIndex)%msg = msg
 	alog%flushed = ESMF_FALSE	
-    	if ((ESMF_LogTable(1)%halt == ESMF_LOG_HALTERROR).and. (msgtype == ESMF_LOG_ERROR)) then
+    	if ((ESMF_LogTable(1)%halt == ESMF_LOG_HALT_ON_ERROR).and. (msgtype == ESMF_LOG_ERROR)) then
         	alog%stopprogram=.TRUE.
         	call ESMF_LogClose(ESMF_LogDefault,rc=rc2)
     	endif    	 
-    	if ((alog%halt == ESMF_LOG_HALTWARNING).and. (msgtype > ESMF_LOG_WARNING)) then
+    	if ((alog%halt == ESMF_LOG_HALT_ON_WARNING).and. (msgtype > ESMF_LOG_WARNING)) then
         	alog%stopprogram=.TRUE.
         	call ESMF_LogClose(log,rc=rc2)
     	endif
