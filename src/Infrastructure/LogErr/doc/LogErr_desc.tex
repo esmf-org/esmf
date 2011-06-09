@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.30 2011/01/05 20:05:44 svasquez Exp $
+% $Id: LogErr_desc.tex,v 1.31 2011/06/09 21:51:31 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -30,11 +30,11 @@ Log is closed).
 
 The user has the capability to halt the program on an error or on a warning by
 using the {\tt ESMF\_LogSet()} method with the {\tt halt} property.  When the 
-{\tt halt} property is set to {\tt ESMF\_LOG\_HALTWARNING}, the program will 
+{\tt halt} property is set to {\tt ESMF\_LOG\_HALT\_ON\_WARNING}, the program will 
 stop on any and all warning or errors.  When the {\tt halt} property is set to 
-{\tt ESMF\_LOG\_HALTERROR}, the program will only halt only on errors.  Lastly,
+{\tt ESMF\_LOG\_HALT\_ON\_ERROR}, the program will only halt only on errors.  Lastly,
 the user can choose to never halt by setting the {\tt halt} property to 
-{\tt ESMF\_LOG\_HALTNEVER}; this is the default.
+{\tt ESMF\_LOG\_HALT\_NEVER}; this is the default.
 
 Log will automatically put the PET number into the Log.  Also, the user can 
 either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
@@ -47,7 +47,14 @@ Opening multiple log files and writing log messages from all the processors
 may affect the application performance while running on a large number of
 processors.  For that reason, {\tt ESMF\_LOG\_NONE} is provided to
 switch off the Log capability.  All the Log methods have no effect
-in the {\tt ESMF\_LOG\_NONE} mode. 
+in the {\tt ESMF\_LOG\_NONE} mode.
+
+A tracing capability may be enabled by setting the {\tt trace} flag
+using the {\tt ESMF\_LogSet()} method.  When tracing is enabled, calls to
+methods such as {\tt ESMF\_LogFoundError}, {\tt ESMF\_LogFoundAllocError},
+and {\tt ESMF\_LogFoundDeallocError} are logged in the default log file.
+This can result in voluminous output.  It is typically used only around areas
+of code which are being debugged.
    
 Other options that are planned for Log are to adjust the verbosity of output, and to optionally write to {\tt stdout} instead of file(s).
 

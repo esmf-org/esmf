@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.19 2011/01/19 02:13:18 svasquez Exp $
+% $Id: LogErr_options.tex,v 1.20 2011/06/09 21:51:31 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,11 +17,11 @@ error message is encountered.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_LOG\_HALTNEVER] 
+   \item [ESMF\_LOG\_HALT\_NEVER] 
          Never halt.  (Default.)
-   \item [ESMF\_LOG\_HALTWARNING]
+   \item [ESMF\_LOG\_HALT\_ON\_WARNING]
          Halt when either a warning or an error message is issued.
-   \item [ESMF\_LOG\_HALTERROR]
+   \item [ESMF\_LOG\_HALT\_ON\_ERROR]
          Halt only when an error message is issued.
 \end{description}
 
@@ -32,8 +32,8 @@ Valid values are:
 \begin{sloppypar}
 Specifies what message level --- e.g., informational, warning, 
 error --- will be written to log files.  This may be used both when
-writing the message with {\tt ESMF\_LogWrite()}, and when setting the msgAllow
-option with {\tt ESMF\_LogSet()}.
+writing the message with {\tt ESMF\_LogWrite()}, and when setting the
+{\tt msgAllow} option with {\tt ESMF\_LogSet()}.
 \end{sloppypar}
 
 Valid values are:
@@ -44,6 +44,8 @@ Valid values are:
          Write or allow warning messages.
    \item [ESMF\_LOG\_ERROR]
          Write or allow error messages.
+   \item [ESMF\_LOG\_TRACE]
+         Write or allow trace messages, when tracing is turned on.
 \end{description}
 
 \subsubsection{ESMF\_LogType}
