@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.10 2011/05/19 14:45:23 feiliu Exp $
+! $Id: NUOPC.F90,v 1.11 2011/06/09 17:36:13 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -37,17 +37,14 @@ module NUOPC
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompSetClock
   public NUOPC_GridCompCheckSetClock
-  public NUOPC_StateAddPotentialField
   public NUOPC_StateAdvertiseField
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsCurrentTimestamp
   public NUOPC_StateRealizeField
-  public NUOPC_StateReplaceWRealField
   public NUOPC_StateSetTimestamp
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_GridCreateSimpleXY
-  
   
   !-----------------------------------------------------------------------------
   contains
@@ -831,47 +828,6 @@ module NUOPC
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateAddPotentialField - Add a potential Field to a State
-! !INTERFACE:
-  subroutine NUOPC_StateAddPotentialField(state, name, StandardName, Units, rc)
-! !ARGUMENTS:
-    type(ESMF_State), intent(inout)         :: state
-    character(*),     intent(in)            :: name
-    character(*),     intent(in)            :: StandardName
-    character(*),     intent(in)            :: Units
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   DEPRECATED. Use {\tt NUOPC\_StateAdvertiseField} instead, which provides
-!   a richer set of features.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Field)        :: field
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    field = ESMF_FieldEmptyCreate(name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call NUOPC_FieldAttributeAdd(field, StandardName=StandardName, &
-      Units=Units, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_StateAdd(state, field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State
 ! !INTERFACE:
   subroutine NUOPC_StateAdvertiseField(state, StandardName, Units, &
@@ -1294,29 +1250,6 @@ module NUOPC
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_StateReplaceWRealField - Replace potential with actual Field
-! !INTERFACE:
-  subroutine NUOPC_StateReplaceWRealField(state, field, rc)
-! !ARGUMENTS:
-    type(ESMF_State), intent(inout)         :: state
-    type(ESMF_Field), intent(in)            :: field
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   DEPRECATED. Use the {\tt NUOPC\_StateRealizeField} call instead for
-!   identical functionality.
-!EOP
-  !-----------------------------------------------------------------------------
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    call NUOPC_StateRealizeField(state, field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-
   end subroutine
   !-----------------------------------------------------------------------------
 
