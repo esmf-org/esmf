@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.119 2011/06/08 20:47:17 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.120 2011/06/09 19:47:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -441,21 +441,6 @@
                                ESMF_INDEX_USER = ESMF_IndexFlag(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_NestedFlag
-!
-!     ! Interface flag for whether to process nested objects or not.
-
-      type ESMF_NestedFlag
-        sequence
-        private
-        integer :: value
-      end type
-
-      type(ESMF_NestedFlag), parameter ::  &
-        ESMF_NESTED_OFF = ESMF_NestedFlag(0),  &
-        ESMF_NESTED_ON  = ESMF_NestedFlag(1)
-
-!------------------------------------------------------------------------------
 !     ! ESMF_HaloStartRegionFlag
 !
 !     ! Interface flag for setting index bounds
@@ -713,8 +698,6 @@
 
       public ESMF_IndexFlag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
-      public ESMF_NestedFlag
-      public ESMF_NESTED_OFF, ESMF_NESTED_ON
       public ESMF_HaloStartRegionFlag, &
              ESMF_REGION_EXCLUSIVE, ESMF_REGION_COMPUTATIONAL
       public ESMF_RegionFlag, &
@@ -818,7 +801,6 @@ interface operator (==)
   module procedure ESMF_tnfeq
   module procedure ESMF_freq
   module procedure ESMF_ifeq
-  module procedure ESMF_nfeq
   module procedure ESMF_rfeq
   module procedure ESMF_unmappedActioneq
   module procedure ESMF_ioeq
@@ -1186,16 +1168,6 @@ function ESMF_ifeq(if1, if2)
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
 end function
-
-!------------------------------------------------------------------------------
-! function to compare two ESMF_NestedFlag types
-
-function ESMF_nfeq (nf1, nf2)
-  logical :: ESMF_nfeq
-  type(ESMF_NestedFlag), intent(in) :: nf1, nf2
-
-  ESMF_nfeq = nf1%value == nf2%value
-end function ESMF_nfeq
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_RegionFlag types
