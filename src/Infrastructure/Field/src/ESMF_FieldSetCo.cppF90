@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetCo.cppF90,v 1.37 2011/05/20 20:06:17 feiliu Exp $
+! $Id: ESMF_FieldSetCo.cppF90,v 1.38 2011/06/13 13:50:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ module ESMF_FieldSetCoMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldSetCo.cppF90,v 1.37 2011/05/20 20:06:17 feiliu Exp $'
+    '$Id: ESMF_FieldSetCo.cppF90,v 1.38 2011/06/13 13:50:15 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -108,7 +108,7 @@ contains
 
 #define FieldSetCommitGridDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Grid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -222,7 +222,7 @@ contains
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitGridMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -320,7 +320,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 
 #define FieldSetCommitGridPtrDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Grid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -411,7 +411,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGrid)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitGridPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -507,7 +507,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 
 #define FieldSetCommitLSDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from LocStream started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -596,7 +596,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitGridPtr)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitLSMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -655,7 +655,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 
 #define FieldSetCommitLSPtrDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from LocStream started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -720,7 +720,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLS)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitLSPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -774,7 +774,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 
 #define FieldSetCommitMeshDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Mesh started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -870,7 +870,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitLSPtr)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitMeshMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -930,7 +930,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 
 #define FieldSetCommitMeshPtrDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from Mesh started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -1002,7 +1002,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMesh)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitMeshPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -1056,7 +1056,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 ! XGrid
 #define FieldSetCommitXGDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from XGrid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -1155,7 +1155,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitMeshPtr)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitXGMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
@@ -1217,7 +1217,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 
 #define FieldSetCommitXGPtrDoc() \
 !---------------------------------------------------------------------------- @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_FieldSetCommit - Complete a Field from XGrid started with FieldCreateEmpty @\
 ! @\
 ! !INTERFACE: @\
@@ -1292,7 +1292,7 @@ TypeKindRankDeclarationMacro(FieldSetCommitXG)
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
 ! @\
-!EOP @\
+!EOPI @\
 !---------------------------------------------------------------------------- @\
 
 #define FieldSetCommitXGPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
