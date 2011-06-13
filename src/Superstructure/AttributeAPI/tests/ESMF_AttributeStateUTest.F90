@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.34 2011/06/04 16:46:22 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.35 2011/06/13 18:05:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.34 2011/06/04 16:46:22 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.35 2011/06/13 18:05:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1236,7 +1236,7 @@ program ESMF_AttributeStateUTest
       call ESMF_AttributeLink(state, sfs, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a State hierarchy to a State hierarchy Test, again"
-      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1244,7 +1244,7 @@ program ESMF_AttributeStateUTest
       call ESMF_AttributeLink(state, ffs, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a State hierarchy to a Field hierarchy Test, again"
-      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1252,7 +1252,7 @@ program ESMF_AttributeStateUTest
       call ESMF_AttributeLink(state, fbfs, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a State hierarchy to a FieldBundle hierarchy Test, again"
-      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
@@ -1280,6 +1280,58 @@ program ESMF_AttributeStateUTest
       write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+#ifdef ESMF_TESTEXHAUSTIVE
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test 2
+      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test 2
+      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test 2
+      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a State Attribute hierarchy State Test 3
+      call ESMF_AttributeLinkRemove(state, sfs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy from a State hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a Field Attribute hierarchy State Test 3
+      call ESMF_AttributeLinkRemove(state, ffs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy from a Field hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Unlink a State Attribute hierarchy from a FieldBundle Attribute hierarchy State Test 3
+      call ESMF_AttributeLinkRemove(state, fbfs, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a State hierarchy from a FieldBundle hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+#endif
 
     !-------------------------------------------------------------------------
     !  Attribute Info

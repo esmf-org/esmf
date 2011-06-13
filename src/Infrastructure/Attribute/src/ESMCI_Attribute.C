@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.111 2011/06/09 18:32:42 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.112 2011/06/13 18:05:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.111 2011/06/09 18:32:42 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.112 2011/06/13 18:05:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2940,7 +2940,7 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
     
-  for (i=0; i<linkList.size(); i++) {
+/*  for (i=0; i<linkList.size(); i++) {
     if ((destination->attrBase->ESMC_BaseGetID() == 
       linkList.at(i)->attrBase->ESMC_BaseGetID()) &&
       ESMCI::VMIdCompare(destination->attrBase->ESMC_BaseGetVMId(),
@@ -2950,7 +2950,8 @@ if (attrRoot == ESMF_TRUE) {
       return localrc;
     }
   }
-  
+*/
+
   // actually set the link
   attr = destination;
   // attrBase and parent should already be set

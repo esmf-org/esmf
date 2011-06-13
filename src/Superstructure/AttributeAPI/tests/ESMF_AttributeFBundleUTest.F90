@@ -1,4 +1,4 @@
-!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.32 2011/06/04 16:46:22 rokuingh Exp $
+!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.33 2011/06/13 18:05:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.32 2011/06/04 16:46:22 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.33 2011/06/13 18:05:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1194,7 +1194,7 @@ program ESMF_AttributeFBundleUTest
       call ESMF_AttributeLink(fieldbundle, ffb, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a FieldBundle hierarchy to a Field hierarchy Test, again"
-      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1203,6 +1203,22 @@ program ESMF_AttributeFBundleUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Unlinking a FieldBundle hierarchy from a Field hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a FieldBundle Attribute hierarchy from a Field Attribute hierarchy FieldBundle Test 2
+      call ESMF_AttributeLinkRemove(fieldbundle, ffb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a FieldBundle hierarchy from a Field hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a FieldBundle Attribute hierarchy from a Field Attribute hierarchy FieldBundle Test 3
+      call ESMF_AttributeLinkRemove(fieldbundle, ffb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a FieldBundle hierarchy from a Field hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.29 2011/06/04 16:46:22 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.30 2011/06/13 18:05:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.29 2011/06/04 16:46:22 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.30 2011/06/13 18:05:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1197,7 +1197,7 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_AttributeLink(arraybundle, afb, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking an ArrayBundle hierarchy to a Array hierarchy Test, again"
-      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1206,6 +1206,22 @@ program ESMF_AttributeArrayBundleUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 2
+      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink an ArrayBundle Attribute hierarchy from a Array Attribute hierarchy ArrayBundle Test 3
+      call ESMF_AttributeLinkRemove(arraybundle, afb, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking an ArrayBundle hierarchy from a Array hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

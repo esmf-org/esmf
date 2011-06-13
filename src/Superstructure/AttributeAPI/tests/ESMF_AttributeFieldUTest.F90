@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.44 2011/06/04 16:46:22 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.45 2011/06/13 18:05:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.44 2011/06/04 16:46:22 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.45 2011/06/13 18:05:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1481,7 +1481,7 @@ program ESMF_AttributeFieldUTest
       call ESMF_AttributeLink(field, grid, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_LINK"
       write(name, *) "Linking a Field hierarchy to a Grid hierarchy Test, again"
-      call ESMF_Test((rc==ESMC_RC_ATTR_LINK), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1490,6 +1490,22 @@ program ESMF_AttributeFieldUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Test 2
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test 2"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Unlink a Field Attribute hierarchy from a Grid Attribute hierarchy Field Tes3
+      call ESMF_AttributeLinkRemove(field, grid, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Unlinking a Field hierarchy from a Grid hierarchy Test 3"
+      call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif
