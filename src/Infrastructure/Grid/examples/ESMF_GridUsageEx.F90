@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.90 2011/05/29 05:03:10 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.91 2011/06/13 18:44:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ program ESMF_GridCreateEx
 !
 !\subsubsection{Create single-tile Grid shortcut method}
 
-! The method {\tt ESMF\_GridCreateShapeTile()} is a shortcut
+! The method {\tt ESMF\_GridCreateNoPeriDim()} is a shortcut
 ! for building single tile logically rectangular Grids up to 
 ! three dimensions.
 ! It is partially implemented.  The user can specify Grid
@@ -84,7 +84,7 @@ program ESMF_GridCreateEx
 ! to create many common grid shapes, including
 ! rectangle, bipole sphere, and tripole sphere. 
 !
-! In v5.1.0, the {\tt ESMF\_GridCreateShapeTile()} method supports 
+! In v5.1.0, the {\tt ESMF\_GridCreateNoPeriDim()} method supports 
 ! all three types of distributions described in 
 ! Section~\ref{sec:desc:dist}: regular, irregular and arbitrary.
 !
@@ -116,7 +116,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-  grid3D=ESMF_GridCreateShapeTile(regDecomp=(/2,4,1/), maxIndex=(/10,20,30/), &
+  grid3D=ESMF_GridCreateNoPeriDim(regDecomp=(/2,4,1/), maxIndex=(/10,20,30/), &
            rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -130,7 +130,7 @@ program ESMF_GridCreateEx
 !BOE
 ! Irregular distribution requires the user to specify the
 ! exact number of Grid cells per DE in each dimension.  In the
-! {\tt ESMF\_GridCreateShapeTile()} call the {\tt countsPerDEDim1},
+! {\tt ESMF\_GridCreateNoPeriDim()} call the {\tt countsPerDEDim1},
 ! {\tt countsPerDim2}, and {\tt countsPerDim3}
 ! arguments are used to specify a rectangular distribution
 ! containing size(countsPerDEDim1) by size(countsPerDEDim2) by
@@ -150,7 +150,7 @@ program ESMF_GridCreateEx
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/3,7/), &
           countsPerDEDim2=(/11,2,7/), rc=rc)   
 
 !EOC
@@ -169,7 +169,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid3d=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/), &
+   grid3d=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/3,7/), &
           countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/15,15/), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -187,7 +187,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOE
 
 !BOC
-   grid3D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/),  &
+   grid3D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/3,7/),  &
           countsPerDEDim2=(/11,2,7/), countsPerDEDim3=(/30/), rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -228,7 +228,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! \begin{sloppypar}
 ! The {\tt petMap} parameter may be used to specify on to which specific PETs 
 ! The following example demonstrates how to specify the PET to DE association 
-! for an {\tt ESMF\_GridCreateShapeTile()} call.
+! for an {\tt ESMF\_GridCreateNoPeriDim()} call.
 ! \end{sloppypar}
 !EOE
 
@@ -244,7 +244,7 @@ if (petcount .eq. 4) then
 
 
    ! Let the 3D grid be be distributed only in the first two dimensions.
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/3,7/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/3,7/), &
            countsPerDEDim2=(/7,6/), petMap=petMap, rc=rc)   
 !EOC
 
@@ -287,7 +287,7 @@ endif
    localArbIndex(5,:)=(/5,5/)
 
    ! Create a 2D Arbitrarily distributed Grid
-   grid2D=ESMF_GridCreateShapeTile(maxIndex=(/5,5/), & 
+   grid2D=ESMF_GridCreateNoPeriDim(maxIndex=(/5,5/), & 
          arbIndexList=localArbIndex, arbIndexCount=5, rc=rc)   
 !EOC
 
@@ -299,7 +299,7 @@ endif
 
 !BOC
    ! Create a 3D Grid with the 1st and 3rd dimension arbitrarily distributed
-   grid3D=ESMF_GridCreateShapeTile(maxIndex=(/5,6,5/), & 
+   grid3D=ESMF_GridCreateNoPeriDim(maxIndex=(/5,6,5/), & 
          arbIndexList=localArbIndex, arbIndexCount=5, &
          distDim=(/1,3/), rc=rc)   
 !EOC
@@ -318,7 +318,7 @@ endif
 !\subsubsection{Specifying tile edge connections}
 ! \label{example:TileEdgeConn}
 !
-! The {\tt ESMF\_GridCreateShapeTile} command has three arguments 
+! The {\tt ESMF\_GridCreateNoPeriDim} command has three arguments 
 ! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} which specify the
 ! tile connectivitay. Each of these consists of a two element array of 
 ! type {\tt ESMF\_GridConn}. The two elements specify the connectivity using 
@@ -334,7 +334,7 @@ endif
 !EOEI
 
 !BOCI
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
                        countsPerDEDim2=(/7,7,6/), &
                        connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
                        connDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
@@ -357,7 +357,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !xEOE
 
 !BOCI
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
                        countsPerDEDim2=(/7,7,6/), &
                        connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
                        connDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
@@ -384,7 +384,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOEI
 
 !BOCI
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
            countsPerDEDim2=(/7,7,6/), &
            connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
            connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
@@ -402,7 +402,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !
 ! The following is an example of creating a simple rectilinear grid 
 ! and loading in a set of coordinates. It illustrates a straightforward use
-! of the {\tt ESMF\_GridCreateShapeTile()} call described in the previous section. 
+! of the {\tt ESMF\_GridCreateNoPeriDim()} call described in the previous section. 
 ! This code creates a 10x20 2D grid with uniformly spaced coordinates varying from (10,10) to (100,200).
 ! The grid is partitioned using a regular distribution. The first dimension
 ! is divided into two pieces, and the second dimension is divided into 3.
@@ -422,16 +422,14 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object, define the
    ! topology and distribution of the Grid, and specify that it 
-   ! will have global indices.  Note that aperiodic bounds are
-   ! specified by default - if periodic bounds were desired they
-   ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet). In this call the minIndex hasn't 
+   ! will have global indices.  Note that here aperiodic bounds are
+   ! specified by the argument name. In this call the minIndex hasn't 
    ! been set, so it defaults to (1,1,...). The default is to 
    ! divide the index range as equally as possible among the DEs
    ! specified in regDecomp. This behavior can be changed by 
    ! specifying decompFlag. 
    !-------------------------------------------------------------------
-   grid2D=ESMF_GridCreateShapeTile(          &
+   grid2D=ESMF_GridCreateNoPeriDim(          &
          ! Define a regular distribution
          maxIndex=(/10,20/), & ! define index space
          regDecomp=(/2,3/),  & ! define how to divide among DEs
@@ -526,12 +524,10 @@ if (petCount .le. 6) then
    ! Create the Grid:  Allocate space for the Grid object, define the
    ! topology and distribution of the Grid, and specify that it 
    ! will have global coordinates.  Note that aperiodic bounds are
-   ! specified by default - if periodic bounds were desired they
-   ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet). In this call the minIndex hasn't 
+   ! indicated by the method name. In this call the minIndex hasn't 
    ! been set, so it defaults to (1,1,...).
    !-------------------------------------------------------------------
-   grid2D=ESMF_GridCreateShapeTile(          &
+   grid2D=ESMF_GridCreateNoPeriDim(          &
             ! Define an irregular distribution
             countsPerDEDim1=(/3,7/),    &
             countsPerDEDim2=(/11,2,7/), &
@@ -618,12 +614,11 @@ if (petCount .le. 6) then
    ! Create the Grid:  Allocate space for the Grid object, define the
    ! distribution of the Grid, and specify that it 
    ! will have global indices.  Note that aperiodic bounds are
-   ! specified by default - if periodic bounds were desired they
-   ! would need to be specified using an additional gridConn argument
-   ! (which isn't implemented yet). In this call the minIndex hasn't 
-   ! been set, so it defaults to (1,1,...).
+   ! indicated by the method name. If periodic bounds were desired they
+   ! could be specified by using the ESMF_GridCreate1PeriDim() call.
+   ! In this call the minIndex hasn't been set, so it defaults to (1,1,...).
    !-------------------------------------------------------------------
-   grid2D=ESMF_GridCreateShapeTile(      &
+   grid2D=ESMF_GridCreateNoPeriDim(      &
         ! Define an irregular distribution
         countsPerDEDim1=(/3,7/),     &
         countsPerDEDim2=(/11,2,7/),   &
@@ -706,11 +701,11 @@ endif
    ! (e.g. latitude), and 40 Grid cells in the third dimension 
    ! (e.g. height).  The first dimension is decomposed over 4 DEs, 
    ! the second over 3 DEs, and the third is not distributed.  
-   ! The connectivities in each dimension default to aperiodic 
-   ! since they are not yet implemented. In this call 
-   ! the minIndex hasn't been set, so it defaults to (1,1,...). 
+   ! The connectivities in each dimension are set to aperiodic 
+   ! by this method. In this call the minIndex hasn't been set, 
+   ! so it defaults to (1,1,...). 
    !-------------------------------------------------------------------
-   grid3D=ESMF_GridCreateShapeTile( &
+   grid3D=ESMF_GridCreateNoPeriDim( &
             ! Define an irregular distribution
             countsPerDEDim1=(/45,75,40,20/), &
             countsPerDEDim2=(/30,40,20/),    &
@@ -925,7 +920,7 @@ endif
    ! default values for coordDepX in the arbitrary distribution are
    ! different from the non-arbitrary distributions.
    !-------------------------------------------------------------------
-   grid3D=ESMF_GridCreateShapeTile( &
+   grid3D=ESMF_GridCreateNoPeriDim( &
 	    maxIndex = (/xdim, ydim, zdim/), &
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount, &
@@ -1033,8 +1028,8 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
 
-
-!BOE
+#if 0
+!BOEI
 !\subsubsection{Create an empty Grid in a parent Component 
 ! for completion in a child Component}\label{sec:usage:setcommit}
 !
@@ -1057,9 +1052,9 @@ endif
 ! incremental technique to create a rectangular 10x20 Grid with coordinates at
 ! the center and corner stagger locations. 
 ! \end{sloppypar}
-!EOE
+!EOEI
 
-!BOC
+!BOCI
 !---------------------------------------------------------------------------
 ! IN THE PARENT COMPONENT:
 ! Create an empty Grid in the parent component for use in a child component.
@@ -1088,12 +1083,12 @@ endif
 !---------------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 
-!EOC
+!EOCI
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
-
+#endif
 
 
 !BOE
@@ -1231,7 +1226,7 @@ endif
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/5,5/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
           countsPerDEDim2=(/7,7,6/),                    &
           coordDep1=(/2/),                              &
           coordDep2=(/1/), rc=rc)   
@@ -1252,7 +1247,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/6,4/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/6,4/), &
           countsPerDEDim2=(/10,7,3/), countsPerDEDim3=(/30/), &
           coordDep1=(/1,2/), coordDep2=(/1,2/), &
           coordDep3=(/3/), rc=rc)   
@@ -1271,7 +1266,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/6,4/), &
+   grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/6,4/), &
            countsPerDEDim2=(/10,7,3/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1291,7 +1286,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !EOE
 
 !BOC
-   grid3D=ESMF_GridCreateShapeTile( &
+   grid3D=ESMF_GridCreateNoPeriDim( &
 	    maxIndex = (/xdim, ydim, zdim/), &
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount,	 &
@@ -1314,7 +1309,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOE
 
 !BOC
-   grid3D=ESMF_GridCreateShapeTile( &
+   grid3D=ESMF_GridCreateNoPeriDim( &
 	    maxIndex = (/xdim, ydim, zdim/), &
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount,	 &
@@ -1682,7 +1677,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOE
 
 !BOC
-  grid2D=ESMF_GridCreateShapeTile(regDecomp=(/2,4/), maxIndex=(/5,15/), &
+  grid2D=ESMF_GridCreateNoPeriDim(regDecomp=(/2,4/), maxIndex=(/5,15/), &
            indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1693,7 +1688,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
 !BOC
-  grid2D=ESMF_GridCreateShapeTile(countsPerDEDim1=(/4,4,4,3/), &
+  grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/4,4,4,3/), &
            countsPerDEDim2=(/3,2/), indexflag=ESMF_INDEX_GLOBAL, rc=rc)   
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -2015,7 +2010,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Setup For Example
 !!!!!!!!!!!!!!!!!!!!!!
-    grid3D=ESMF_GridCreateShapeTile( &
+    grid3D=ESMF_GridCreateNoPeriDim( &
 	    maxIndex = (/xdim, ydim, zdim/), &
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount, &
@@ -2181,7 +2176,7 @@ endif
 
 !BOCI
    ! Create the Grid.
-   grid=ESMF_GridCreateShapeTile(maxIndex=(/100,100,100/), regDecomp=(/5,5,5/), rc=rc)   
+   grid=ESMF_GridCreateNoPeriDim(maxIndex=(/100,100,100/), regDecomp=(/5,5,5/), rc=rc)   
 
    ! Add a center stagger location 
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
@@ -2258,7 +2253,7 @@ endif
    petMap(:,1,1) = (/1,2/)
 
    ! Create Grid
-   grid=ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, &
+   grid=ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R4, &
                            countsPerDEDim1=(/10,10/), &
                            countsPerDEDim2=(/10,10/), &
                            coordDep1=(/1,2/), &
@@ -2336,7 +2331,7 @@ endif
 !\label{sec:usage:adv:create}
 !
 ! Besides the shortcut methods for creating a Grid object such as
-! {\tt ESMF\_GridCreateShapeTile()}, there is
+! {\tt ESMF\_GridCreateNoPeriDim()}, there is
 ! a set of methods which give the user more control over the
 ! specifics of the grid.  The following describes the more 
 ! general interface, using DistGrid.
@@ -2652,7 +2647,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
 
 !BOC 
-   grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+   grid2D=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
             gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/0,0/), rc=rc)
 
 !EOC  
@@ -2689,7 +2684,7 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
 
 !BOC 
-   grid2D=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/10,10/), &
+   grid2D=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
             gridAlign=(/1,1/), rc=rc)
 
 !EOC  

@@ -1,4 +1,29 @@
-% $Id: Grid_options.tex,v 1.37 2011/06/06 20:32:09 oehmke Exp $
+% $Id: Grid_options.tex,v 1.38 2011/06/13 18:44:19 oehmke Exp $
+
+\subsubsection{ESMF\_CoordSys}
+\label{sec:opt:coordsys}
+{\sf DESCRIPTION:\\}
+ A set of values which indicates in which system the coordinates in the Grid are. This value is useful both to indicate to 
+other users the type of the coordinates, but also to control how the coordinates are interpreted in regridding methods 
+(e.g. {\tt ESMF\_FieldRegridStore()}).
+
+\medskip
+\begin{description}
+\item [ESMF\_COORDSYS\_CART] Cartesian coordinate system. 
+
+\item [ESMF\_COORDSYS\_SPH\_DEG] Spherical coordinates in degrees.
+
+\item [ESMF\_COORDSYS\_SPH\_RAD] Spherical coordinates in radians.
+
+\end{description}
+
+
+\subsubsection{ESMF\_GRID\_ARBDIM}
+\label{sec:opt:arbdim}
+{\sf DESCRIPTION:\\}
+A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
+
+
 
 \subsubsection{ESMF\_GridConn}
 \label{sec:opt:gridconn}
@@ -29,23 +54,42 @@ that the edge is n elements long, element i is connected to element n-i-1.
 
 \end{description}
 
-\subsubsection{ESMF\_PoleType}
-\label{sec:opt:poletype}
+
+\subsubsection{ESMF\_GridItem}
+\label{sec:opt:griditem}
+
 {\sf DESCRIPTION:\\}
-This type describes the type of connection that occurs at the pole when a Grid is 
-created with {\tt ESMF\_GridCreate1PeriodicDim()}.
+The ESMF Grid can contain other kinds of data besides coordinates. 
+This data is referred to as Grid ``items''. Some items may be used
+by ESMF for calculations involving the Grid. The following
+are the valid values of ESMF\_GRIDITEM.
+
+\medskip
+\begin{tabular}{|l|c|c|c|c||}
+\hline
+\hline
+Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\bf Controls} \\
+\hline
+{\bf ESMF\_GRIDITEM\_MASK}  & ESMF\_TYPEKIND\_I4 & ESMF\_TYPEKIND\_I4 & YES & Masking in Regrid \\
+{\bf ESMF\_GRIDITEM\_AREA} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
+\hline
+\hline
+\end{tabular}
+
+
+
+\subsubsection{ESMF\_GridMatchType}
+\label{sec:opt:gridmatchtype}
+
+{\sf DESCRIPTION:\\}
+ This type is used to indicate the level to which two grids match.
 
 \medskip
 \begin{description}
-\item [ESMF\_POLETYPE\_NONE] No connection at pole.
-
-\item [ESMF\_POLETYPE\_MONOPOLE] This edge is connected to itself. Given
-that the edge is n elements long, then element i is connected to
-element i+n/2.
-
-\item [ESMF\_POLETYPE\_BIPOLE] This edge is connected to itself. Given
-that the edge is n elements long, element i is connected to element n-i-1.
-
+\item [ESMF\_GRIDMATCH\_NONE:] The lowest level of grid matching. 
+      This indicates that the Grid's don't match at any of the higher levels. 
+\item [ESMF\_GRIDMATCH\_EXACT:] All the pieces of the Grid (e.g. distgrids, 
+      coordinates, etc.) except the name, match between the two Grids. 
 \end{description}
 
 
@@ -72,43 +116,26 @@ are the valid values of ESMF\_GRIDSTATUS.
       via {\tt ESMF\_GridCoordAdd()} to allow other functionality. 
 \end{description}
 
-\subsubsection{ESMF\_GridMatchType}
-\label{sec:opt:gridmatchtype}
 
+
+\subsubsection{ESMF\_PoleType}
+\label{sec:opt:poletype}
 {\sf DESCRIPTION:\\}
- This type is used to indicate the level to which two grids match.
+This type describes the type of connection that occurs at the pole when a Grid is 
+created with {\tt ESMF\_GridCreate1PeriodicDim()}.
 
 \medskip
 \begin{description}
-\item [ESMF\_GRIDMATCH\_NONE:] The lowest level of grid matching. 
-      This indicates that the Grid's don't match at any of the higher levels. 
-\item [ESMF\_GRIDMATCH\_EXACT:] All the pieces of the Grid (e.g. distgrids, 
-      coordinates, etc.) except the name, match between the two Grids. 
+\item [ESMF\_POLETYPE\_NONE] No connection at pole.
+
+\item [ESMF\_POLETYPE\_MONOPOLE] This edge is connected to itself. Given
+that the edge is n elements long, then element i is connected to
+element i+n/2.
+
+\item [ESMF\_POLETYPE\_BIPOLE] This edge is connected to itself. Given
+that the edge is n elements long, element i is connected to element n-i-1.
+
 \end{description}
-
-
-\subsubsection{ESMF\_GridItem}
-\label{sec:opt:griditem}
-
-{\sf DESCRIPTION:\\}
-The ESMF Grid can contain other kinds of data besides coordinates. 
-This data is referred to as Grid ``items''. Some items may be used
-by ESMF for calculations involving the Grid. The following
-are the valid values of ESMF\_GRIDITEM.
-
-\medskip
-\begin{tabular}{|l|c|c|c|c||}
-\hline
-\hline
-Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\bf Controls} \\
-\hline
-{\bf ESMF\_GRIDITEM\_MASK}  & ESMF\_TYPEKIND\_I4 & ESMF\_TYPEKIND\_I4 & YES & Masking in Regrid \\
-{\bf ESMF\_GRIDITEM\_AREA} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
-{\bf ESMF\_GRIDITEM\_AREAM} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
-{\bf ESMF\_GRIDITEM\_FRAC} & NONE & ESMF\_TYPEKIND\_R8 & NO & N/A \\
-\hline
-\hline
-\end{tabular}
 
 
 

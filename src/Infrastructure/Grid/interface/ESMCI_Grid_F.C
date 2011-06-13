@@ -86,6 +86,7 @@ extern "C" {
     int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
 					  ESMCI::DistGrid **distgrid,
 					  ESMCI::InterfaceInt **distgridToGridMapArg, 
+                                          ESMC_CoordSys *coordSys, 
 					  ESMCI::InterfaceInt **coordDimCountArg,
 					  ESMCI::InterfaceInt **coordDimMapArg,		  
 					  ESMCI::InterfaceInt **gridEdgeLWidthArg,    	  
@@ -124,32 +125,33 @@ extern "C" {
 
     // call into C++
     *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
-      ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, 
-      *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
-      *coordDimCountArg, *coordDimMapArg,
-      *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
-      destroyDistgridPtr, destroyDELayoutPtr, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                               ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid,
+                               *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
+                                ESMC_NOT_PRESENT_FILTER(coordSys), *coordDimCountArg, *coordDimMapArg,
+                               *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
+                               destroyDistgridPtr, destroyDELayoutPtr, &localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
 }
 
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN(c_esmc_gridcreatedistgridarb)(ESMCI::Grid **ptr, 
-    int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
-					  ESMCI::DistGrid **distgrid,
-					  ESMCI::InterfaceInt **distDimArg, 
-					  int *arbDim,   
-					  ESMCI::InterfaceInt **coordDimCountArg,
-					  ESMCI::InterfaceInt **coordDimMapArg,		  
-					  ESMCI::InterfaceInt **minIndexArg, 
-					  ESMCI::InterfaceInt **maxIndexArg,
-					  ESMCI::InterfaceInt **localArbIndexArg, 
-					  int *localArbIndexCount, 
-                                          int *destroyDistgridArg, 
-                                          int *destroyDELayoutArg, 
-					  int *rc,
-                                          ESMCI_FortranStrLenArg name_l){
+                                         int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
+                                         ESMCI::DistGrid **distgrid,
+                                         ESMCI::InterfaceInt **distDimArg, 
+                                         int *arbDim,   
+                                         ESMC_CoordSys *coordSys, 
+                                         ESMCI::InterfaceInt **coordDimCountArg,
+                                         ESMCI::InterfaceInt **coordDimMapArg,		  
+                                         ESMCI::InterfaceInt **minIndexArg, 
+                                         ESMCI::InterfaceInt **maxIndexArg,
+                                         ESMCI::InterfaceInt **localArbIndexArg, 
+                                         int *localArbIndexCount, 
+                                         int *destroyDistgridArg, 
+                                         int *destroyDELayoutArg, 
+                                         int *rc,
+                                         ESMCI_FortranStrLenArg name_l){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcreatedistgridarb()"
@@ -179,7 +181,7 @@ extern "C" {
     *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
       ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid, 
       *minIndexArg, *maxIndexArg, *localArbIndexArg, *localArbIndexCount,
-      *distDimArg, *arbDim, *coordDimCountArg, *coordDimMapArg,
+      *distDimArg, *arbDim, ESMC_NOT_PRESENT_FILTER(coordSys), *coordDimCountArg, *coordDimMapArg,
       destroyDistgridPtr, destroyDELayoutPtr, &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -747,24 +749,25 @@ extern "C" {
   // - ESMF-public methods:        
   void FTN(c_esmc_gridsetfromdistgrid)(ESMCI::Grid **grid, 
     int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
-					  ESMCI::DistGrid **distgrid,
-					  ESMCI::InterfaceInt **distgridToGridMapArg, 
-					  ESMCI::InterfaceInt **distDimArg, 
-					  ESMCI::InterfaceInt **coordDimCountArg,
-					  ESMCI::InterfaceInt **coordDimMapArg,		  
-					  ESMCI::InterfaceInt **minIndexArg,		  
-					  ESMCI::InterfaceInt **maxIndexArg,		  
-					  ESMCI::InterfaceInt **localArbIndexArg,		  
-					  int *localArbIndexCount,		  
-					  ESMCI::InterfaceInt **gridEdgeLWidthArg,    	  
-					  ESMCI::InterfaceInt **gridEdgeUWidthArg,    	  
-					  ESMCI::InterfaceInt **gridAlignArg,		  
-					  ESMCI::InterfaceInt **gridMemLBoundArg,		  
-					  ESMC_IndexFlag *indexflag,
-                                          int *destroyDistgridArg, 
-                                          int *destroyDELayoutArg, 
-					  int *rc,
-                                          ESMCI_FortranStrLenArg name_l){
+                                       ESMCI::DistGrid **distgrid,
+                                       ESMCI::InterfaceInt **distgridToGridMapArg, 
+                                       ESMCI::InterfaceInt **distDimArg, 
+                                       ESMC_CoordSys *coordSys, 
+                                       ESMCI::InterfaceInt **coordDimCountArg,
+                                       ESMCI::InterfaceInt **coordDimMapArg,		  
+                                       ESMCI::InterfaceInt **minIndexArg,		  
+                                       ESMCI::InterfaceInt **maxIndexArg,		  
+                                       ESMCI::InterfaceInt **localArbIndexArg,		  
+                                       int *localArbIndexCount,		  
+                                       ESMCI::InterfaceInt **gridEdgeLWidthArg,    	  
+                                       ESMCI::InterfaceInt **gridEdgeUWidthArg,    	  
+                                       ESMCI::InterfaceInt **gridAlignArg,		  
+                                       ESMCI::InterfaceInt **gridMemLBoundArg,		  
+                                       ESMC_IndexFlag *indexflag,
+                                       int *destroyDistgridArg, 
+                                       int *destroyDELayoutArg, 
+                                       int *rc,
+                                       ESMCI_FortranStrLenArg name_l){
     int localrc;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridsetfromdistgrid()"
@@ -804,7 +807,7 @@ extern "C" {
       *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, 
       *distgridToGridMapArg, *distDimArg,
       *minIndexArg, *maxIndexArg, *localArbIndexArg, ESMC_NOT_PRESENT_FILTER(localArbIndexCount),
-      *coordDimCountArg, *coordDimMapArg,
+      ESMC_NOT_PRESENT_FILTER(coordSys),*coordDimCountArg, *coordDimMapArg,
       *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
        destroyDistgridPtr, destroyDELayoutPtr);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

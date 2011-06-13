@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.121 2011/02/23 18:53:49 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.122 2011/06/13 18:44:29 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.121 2011/02/23 18:53:49 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.122 2011/06/13 18:44:29 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -88,6 +88,7 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
               InterfaceInt *_gridEdgeUWidth, InterfaceInt *_gridAlign,
                InterfaceInt *_distgridToGridMap,
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
+              ESMC_CoordSys *coordSys, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
 	      InterfaceInt *_gridMemLBound,
               ESMC_IndexFlag *_indexflag, bool destroyDistgrid,
@@ -99,6 +100,7 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind *_typekind,
 	      InterfaceInt *_localArbIndex, int localArbIndexCount,
               InterfaceInt *_distDim, int arbDim, 
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
+              ESMC_CoordSys *coordSys, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
               bool destroyDistgrid, bool destroyDELayout);
 
@@ -936,7 +938,7 @@ int Grid::commit(
 			proto->distDim, 
 			proto->arbDim,
 			proto->undistLBound,
-			proto->undistUBound,
+			proto->undistUBound, proto->coordSys, 
 			proto->coordDimCount, proto->coordDimMap,
                         proto->destroyDistgrid, proto->destroyDELayout);
   } else {
@@ -945,7 +947,8 @@ int Grid::commit(
                        proto->gridEdgeLWidth, proto->gridEdgeUWidth,
                        proto->gridAlign,
                        proto->distgridToGridMap, 
-                       proto->undistLBound, proto->undistUBound, 
+                       proto->undistLBound, proto->undistUBound,
+                       proto->coordSys,  
                        proto->coordDimCount, proto->coordDimMap,
                        proto->gridMemLBound,
 		       proto->indexflag,
@@ -986,6 +989,7 @@ Grid *Grid::create(
   InterfaceInt *gridEdgeUWidthArg,           // (in) optional
   InterfaceInt *gridAlignArg,                // (in) optional
   InterfaceInt *distgridToGridMapArg,                  // (in) optional
+  ESMC_CoordSys *coordSys, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   InterfaceInt *gridMemLBoundArg,          // (in) optional
@@ -1025,7 +1029,7 @@ Grid *Grid::create(
                     distgridToGridMapArg, 
                     (InterfaceInt *)ESMC_NULL_POINTER,
                     (InterfaceInt *)ESMC_NULL_POINTER,
-                    coordDimCountArg, coordDimMapArg, gridMemLBoundArg,
+                    coordSys, coordDimCountArg, coordDimMapArg, gridMemLBoundArg,
                     indexflagArg,
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -1061,6 +1065,7 @@ Grid *Grid::create(
   int  localArbIndexCount,                          // (in)
   InterfaceInt *distDimArg,                 // (in) 
   int  arbDim,                              // (in)
+  ESMC_CoordSys *coordSys, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   bool *destroyDistgridArg,
@@ -1099,7 +1104,8 @@ Grid *Grid::create(
 		    distDimArg, arbDim, 
                     (InterfaceInt *)ESMC_NULL_POINTER,
                     (InterfaceInt *)ESMC_NULL_POINTER,
-		    coordDimCountArg,
+		    coordSys, 
+                    coordDimCountArg,
 		    coordDimMapArg,  
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -2469,6 +2475,7 @@ int Grid::set(
   InterfaceInt *maxIndexArg,           // (int) optional
   InterfaceInt *localArbIndexArg,           // (int) optional
   int  *localArbIndexCountArg,                    // (int) optional
+  ESMC_CoordSys *coordSysArg, 
   InterfaceInt *coordDimCountArg,    // (in) optional
   InterfaceInt *coordDimMapArg,  // (in) optional
   InterfaceInt *gridMemLBoundArg,          // (in)
@@ -2525,6 +2532,12 @@ int Grid::set(
   if (typekindArg != ESMC_NULL_POINTER) {
     if (proto->typekind == ESMC_NULL_POINTER) proto->typekind= new ESMC_TypeKind;
     *(proto->typekind)=*typekindArg;
+  }
+
+  //  if passed in, set typekind
+  if (coordSysArg != ESMC_NULL_POINTER) {
+    if (proto->coordSys == ESMC_NULL_POINTER) proto->coordSys= new ESMC_CoordSys;
+    *(proto->coordSys)=*coordSysArg;
   }
 
   // if passed in, set distgrid
@@ -2653,6 +2666,7 @@ int Grid::set(
     if (proto->destroyDELayout == ESMC_NULL_POINTER) proto->destroyDELayout= new bool;
     *(proto->destroyDELayout)=*destroyDELayoutArg;
   }
+
 
 
   // return successfully
@@ -3097,6 +3111,7 @@ int Grid::constructInternal(
   int *gridEdgeLWidthArg,                 // (in)
   int *gridEdgeUWidthArg,                 // (in)
   int *gridAlignArg,                      // (in)
+  ESMC_CoordSys coordSysArg, 
   int *coordDimCountArg,                  // (in)
   int **coordDimMapArg,                   // (in)
   int *gridMemLBoundArg,                  // (in)
@@ -3123,7 +3138,7 @@ int Grid::constructInternal(
 
   // Init lat lon flag
   // Eventually this'll come through the interface
-  coordGeom=ESMC_GRIDCOORDGEOM_CART;
+  coordSys=coordSysArg;
 
   // Connections aren't being forced at the start
   forceConn=false;
@@ -3599,7 +3614,7 @@ Grid::Grid(
 //-----------------------------------------------------------------------------
 
   // Init lat lon flag
-  coordGeom=ESMC_GRIDCOORDGEOM_CART;
+  coordSys=ESMC_COORDSYS_CART;
   
   // Start out with connections unforced
   forceConn=false;
@@ -3698,7 +3713,7 @@ Grid::Grid(
   proto = ESMC_NULL_POINTER; 
   
   // Init lat lon flag
-  coordGeom=ESMC_GRIDCOORDGEOM_CART;
+  coordSys=ESMC_COORDSYS_CART;
 
   forceConn=false;
 
@@ -3926,6 +3941,7 @@ ProtoGrid::ProtoGrid(
   distDim=ESMC_NULL_POINTER;   
   undistLBound=ESMC_NULL_POINTER;  
   undistUBound=ESMC_NULL_POINTER;  
+  coordSys=ESMC_NULL_POINTER;  
   coordDimCount=ESMC_NULL_POINTER;  
   coordDimMap=ESMC_NULL_POINTER; 
   indexflag=ESMC_NULL_POINTER; 
@@ -3973,6 +3989,7 @@ ProtoGrid::ProtoGrid(
   if (distDim != ESMC_NULL_POINTER) _freeInterfaceInt(&distDim);
   if (undistLBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistLBound);
   if (undistUBound != ESMC_NULL_POINTER) _freeInterfaceInt(&undistUBound);
+  if (coordSys != ESMC_NULL_POINTER) delete coordSys; 
   if (coordDimCount != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimCount);
   if (coordDimMap != ESMC_NULL_POINTER) _freeInterfaceInt(&coordDimMap);
   if (indexflag != ESMC_NULL_POINTER) delete indexflag; 
@@ -4561,7 +4578,7 @@ int Grid::serialize(
     // the protogrid
 
     // Don't do status since we're changing it anyway  
-    SERIALIZE_VAR(cp, buffer,loffset,coordGeom,int);
+    SERIALIZE_VAR(cp, buffer,loffset,coordSys,ESMC_CoordSys);
 
     SERIALIZE_VAR(cp, buffer,loffset,forceConn,bool);
 
@@ -4797,7 +4814,7 @@ int Grid::deserialize(
   // Set status (instead of reading it)
   status =  ESMC_GRIDSTATUS_SHAPE_READY;
 
-  DESERIALIZE_VAR( buffer,loffset, coordGeom, int);
+  DESERIALIZE_VAR( buffer,loffset, coordSys, ESMC_CoordSys);
 
   DESERIALIZE_VAR( buffer,loffset, forceConn, bool);
 
@@ -5303,6 +5320,7 @@ int construct(
   InterfaceInt *distgridToGridMapArg,                  // (in) optional
   InterfaceInt *undistLBoundArg,                 // (in) optional
   InterfaceInt *undistUBoundArg,                 // (in) optional
+  ESMC_CoordSys *coordSysArg, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   InterfaceInt *gridMemLBoundArg,             // (in) optional
@@ -5345,6 +5363,7 @@ int construct(
   const int *distGridMaxIndex; 
   bool destroyDistgrid;
   bool destroyDELayout;
+  ESMC_CoordSys coordSys;
 
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -5380,6 +5399,14 @@ int construct(
     typekind=ESMC_TYPEKIND_R8;  // Default
   } else {
     typekind=*typekindArg;
+  }
+
+  // If coordSys wasn't passed in then use default, otherwise 
+  // copy passed in value
+  if (coordSysArg==NULL) {
+    coordSys=ESMC_COORDSYS_CART;
+  } else {
+    coordSys=*coordSysArg;
   }
 
 
@@ -5742,7 +5769,7 @@ int construct(
 				     distDimCount, distgridToGridMap, 
 				     undistDimCount, undistLBound, undistUBound,
 				     dimCount, gridEdgeLWidth, gridEdgeUWidth,
-				     gridAlign, coordDimCount, coordDimMap, 
+				     gridAlign, coordSys, coordDimCount, coordDimMap, 
 				     gridMemLBound, indexflag,
 				     minIndex, maxIndex, NULL, 0, 0, 
 				     destroyDistgrid, destroyDELayout);
@@ -5802,6 +5829,7 @@ int construct(
   int arbDimArg,                           // (in)
   InterfaceInt *undistLBoundArg,            // (in) optional
   InterfaceInt *undistUBoundArg,            // (in) optional
+  ESMC_CoordSys *coordSysArg, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
   bool *destroyDistgridArg,
@@ -5839,7 +5867,7 @@ int construct(
   char *name;  
   bool destroyDistgrid;
   bool destroyDELayout;
-
+  ESMC_CoordSys coordSys;
 
   // initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -5876,6 +5904,15 @@ int construct(
   } else {
     typekind=*typekindArg;
   }
+
+  // If coordSys wasn't passed in then use default, otherwise 
+  // copy passed in value
+  if (coordSysArg==NULL) {
+    coordSys=ESMC_COORDSYS_CART;
+  } else {
+    coordSys=*coordSysArg;
+  }
+
 
   // find out the dimCount of the grid from maxindex
   dimCount = maxIndexArg->extent[0];
@@ -6104,7 +6141,7 @@ int construct(
              distDimCount, distgridToGridMap, 
              undistDimCount, undistLBound, undistUBound,
              dimCount, gridEdgeLWidth, gridEdgeUWidth, gridAlign, 
-	     coordDimCount, coordDimMap, gridMemLBound, 
+             coordSys, coordDimCount, coordDimMap, gridMemLBound, 
              indexflag, minIndex, maxIndex, localArbIndex, 
 	     localArbIndexCount, arbDimArg, destroyDistgrid, destroyDELayout);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -7112,16 +7149,24 @@ void GridIter::getCartCoord(
   grid->getCoordInternal(staggerloc, curDE, curInd, coord);
 
   // transform if necessary to cartesian
-  if (grid->getCoordGeom()==ESMC_GRIDCOORDGEOM_SPH_DEG) {
-    double DEG2RAD = M_PI/180.0;
+  if (grid->getCoordSys()==ESMC_COORDSYS_SPH_DEG) {
+    const double DEG2RAD = M_PI/180.0;
     double lon = coord[0];
     double lat = coord[1];
-    double ninety = 90.0;
+    const double ninety = 90.0;
     double theta = DEG2RAD*lon, phi = DEG2RAD*(ninety-lat);
     coord[0] = std::cos(theta)*std::sin(phi);
     coord[1] = std::sin(theta)*std::sin(phi);
     coord[2] = std::cos(phi);    
+  } else if (grid->getCoordSys()==ESMC_COORDSYS_SPH_RAD) {
+    const double half_pi = 0.5*M_PI;
+    double theta = coord[0];
+    double phi = half_pi-coord[1];
+    coord[0] = std::cos(theta)*std::sin(phi);
+    coord[1] = std::sin(theta)*std::sin(phi);
+    coord[2] = std::cos(phi);    
   }
+
 }
 // Add more types here if necessary
 template void GridIter::getCartCoord(ESMC_R8 *data);
@@ -8845,15 +8890,15 @@ bool Grid::match(
 }
 
 int Grid::getCartCoordDimCount() {
-  if (coordGeom==ESMC_GRIDCOORDGEOM_CART) {
+  if (coordSys==ESMC_COORDSYS_CART) {
     return dimCount;
-  } else if (coordGeom==ESMC_GRIDCOORDGEOM_SPH_DEG) {
+  } else if ((coordSys==ESMC_COORDSYS_SPH_DEG) || (coordSys==ESMC_COORDSYS_SPH_RAD)) {
     if (dimCount==2) {
       return 3;
     } else {
       int rc;
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- coord geom sphere deg only applies to spheres of dimcount 2", &rc);
+        "- ESMF_COORDSYS_SPH currently only works with Grids of dimcount 2", &rc);
       throw rc;
       return -1;
     }

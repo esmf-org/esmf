@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.55 2011/05/27 23:46:30 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.56 2011/06/13 18:44:19 oehmke Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -16,13 +16,14 @@ The most frequent use of the Grid class is to describe physical grids
 in user code so that sufficient information is available to perform ESMF
 methods such as regridding.  
 
-In the current release (v5.1.0)
-the functionality in this class is partially implemented.  
-Multi-tile grids are not supported, and edge connectivities 
-are not implemented and default to aperiodic.  
-Other constraints of the current
-implementation are noted in the usage section and in the API
-descriptions.
+%In the current release (v5.2.0)
+%the functionality in this class is partially implemented.  
+%Multi-tile grids are not supported, and edge connectivities 
+%are not implemented and default to aperiodic.  
+%Other constraints of the current
+%implementation are noted in the usage section and in the API
+%descriptions.
+
 
 \begin{center}
 \begin{tabular}{|p{6in}|}
@@ -32,16 +33,14 @@ descriptions.
 Representation of grids formed by logically rectangular regions,
 including uniform and rectilinear grids (e.g. lat-lon grids),
 curvilinear grids (e.g. displaced pole grids), and grids formed
-by connected logically rectangular regions (e.g. cubed sphere grids)
-[CONNECTED REGIONS ARE NOT YET SUPPORTED].\\
+by connected logically rectangular regions (e.g. cubed sphere grids).\\
 Support for 1D, 2D, 3D, and higher dimension grids.\\ 
 Distribution of grids across computational resources for parallel
 operations - users set which grid dimensions are distributed.\\
 Grids can be created already distributed, so that no single
 resource needs global information during the creation process.\\
 Options to define periodicity and other edge connectivities either 
-explicitly or implicitly via shape shortcuts [EDGE CONNECTIVITIES
-CURRENTLY DEFAULT TO APERIODIC BOUNDS].\\ 
+explicitly or implicitly via shape shortcuts.\\ 
 Options for users to define grid coordinates themselves or call
 prefabricated coordinate generation routines for standard grids
 [NO GENERATION ROUTINES YET].\\
@@ -76,8 +75,7 @@ index space, topology, distribution, and connectivities.  It enables
 the user to define the complex edge relationships of tripole and other
 grids.  The DistGrid can be created explicitly and passed into a Grid
 creation routine, or it can be created implicitly if the user takes
-a Grid creation shortcut.  Options for grid creation are described in 
-more detail in section \ref{sec:gridcreateoptions}. The DistGrid used
+a Grid creation shortcut. The DistGrid used
 in Grid creation describes the properties of the Grid cells. In addition
 to this one, the Grid internally creates DistGrids for each stagger location. 
 These stagger DistGrids are related to the original DistGrid, but may 
@@ -104,21 +102,37 @@ and curvilinear coordinates.  For more details see section \ref{sec:coordspec}.
 \begin{sloppypar}
 ESMF has shortcuts for the creation of standard Grid topologies 
 or {\bf shapes} up to 3D.  In many cases, these enable the user to
-bypass the step of creating a DistGrid before creating the Grid.  The basic call is 
-{\tt ESMF\_GridCreateShapeTile()}.  With this call, the user can specify for
-each dimension whether there is no connection, it is periodic, it
-is a pole, or it is a bipole.  The assumed connectivities for poles and
-bipoles are described in section \ref{sec:opt:gridconn}.  Connectivities
-are specified using the ESMF\_GridConn parameter, which has values
-such as ESMF\_GRIDCONN\_PERIODIC.
+bypass the step of creating a DistGrid before creating the Grid. 
+There are two sets of methods which allow the user to do this. These two sets of methods cover the same set of topologies, but
+allow the user to specify them in different ways.
+
+ The first set of these are a group of overloaded
+calls broken up by the number of periodic dimensions they specify. With these the user can pick 
+the method which creates a Grid with the number of periodic dimensions they need, and then specify other connectivity 
+options via arguments to the method. The following is a description of these methods:  
 \end{sloppypar}
 
+\medskip
+
+\begin{description}
+\item [ESMF\_GridCreateNoPeriDim()] Allows the user to create a Grid with no edge connections, for example, a regional Grid with closed boundaries.
+
+\item [ESMF\_GridCreate1PeriDim()] Allows the user to create a Grid with 1 periodic dimension and supports a range of options for what to do at the pole (see ~Section~\ref{sec:opt:poletype}. Some examples of Grids which can be created here are tripole spheres, bipole spheres, cylinders with open poles. 
+
+\item [ESMF\_GridCreate2PeriDim()] Allows the user to create a Grid with 2 periodic dimensions, for example a torus, or a regional Grid with
+doubly periodic boundaries. 
+\end{description}
+
+More detailed information can be found in the API description of each.
+
+\medskip
+
 \begin{sloppypar}
-The table below shows the ESMF\_GridConn settings used to create 
-standard shapes in 2D using the ESMF\_GridCreateShapeTile() call.  Two values
+The second set of shortcut methods is a set of methods overloaded under the name {\tt ESMF\_GridCreateTile()}. These methods
+allow the user to specify the connectivites at the end of each dimension, by using the ESMF\_GridConn flag. The table below shows the ESMF\_GridConn settings used to create 
+standard shapes in 2D using the ESMF\_GridCreateTile() call.  Two values
 are specified for each dimension, one for the low end and one for 
-the high end of the dimension's index values.  Note that connectivities
-have not been implemented as of v5.1.0 and default to aperiodic bounds.
+the high end of the dimension's index values. 
 \end{sloppypar}
 
 \medskip
@@ -158,7 +172,7 @@ DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any grid cell can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Support for arbitrary distribution 
-is limited in v5.1.0, See section \ref{example:ArbGridWithUndistDim} for
+is limited in v5.2.0, See section \ref{example:ArbGridWithUndistDim} for
 more detail descriptions.
 
 
@@ -188,10 +202,10 @@ have been warped; for example, to place a pole over a land mass so that it
 does not affect the computations performed on an ocean model grid.  Figure
 \ref{fig:LogRectGrids} shows examples of each type of grid.
 
-Any of these logically rectangular grid types can be combined through edge
-connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
-of mosaic grids.  Note that as of v5.1.0 multi-tile grids have not yet been
-implemented.
+%Any of these logically rectangular grid types can be combined through edge
+%connections to form a mosaic.  Cubed sphere and yin-yang grids are examples
+%of mosaic grids.  Note that as of v5.2.0 multi-tile grids have not yet been
+%implemented.
  
 \begin{figure}
 \scalebox{0.9}{\includegraphics{LogRectGrids}}
@@ -253,95 +267,6 @@ However, to achieve other types of staggering, the user may alter
 or eliminate this padding by using the appropriate options when adding
 coordinates to a Grid. 
  
-In v5.1.0, only the cell center stagger location is supported for an
+In v5.2.0, only the cell center stagger location is supported for an
 arbitrarily distributed grid. For examples and a full description of the stagger interface 
 see Section~\ref{sec:usage:staggerloc}. 
-
-\subsubsection{Options for Building Grids}
-\label{sec:gridcreateoptions}
-
-ESMF Grid objects must represent a wide range of grid types 
-and use cases, some of them quite complex.  As a result, multiple
-ways to build Grid objects are required.  This section describes
-the stages to building Grids, the options for each stage, and 
-typical calling sequences.
-
-In ESMF there are two main stages to building Grids.  The
-{\tt ESMF\_GridStatus} value stored within the Grid object reflects
-the stage the Grid has attained (see Section~\ref{sec:opt:gridstatus}).
-These stages are:
-
-\begin{enumerate}
-
-\item 
-\begin{sloppypar}
-Create the Grid topology or shape.  At the completion of this
-stage, the Grid has a specific topology and distribution, but
-empty coordinate arrays.  The Grid can be used as the basis for
-allocating a Field. Its {\tt ESMF\_GridStatus} parameter has 
-a value of {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}.  
-\end{sloppypar}
-
-The options for specifying the Grid shape are:
-\begin{itemize}
-\item Use the {\tt ESMF\_GridCreateShapeTile()} shortcut method to 
-specify the Grid size and dimension, and to select from a limited set
-of edge connectivities.   
-\item Create a DistGrid using the {\tt ESMF\_DistGridCreate()}
-method.  This enables the user to specify connectivities in 
-greater detail than using {\tt ESMF\_GridCreateShapeTile()}.  Then
-pass the DistGrid into a general {\tt ESMF\_GridCreate()} method.
-\end{itemize}
-
-\item Specify the Grid coordinates and any other information
-required for regridding (this can vary depending on the particular
-regridding method).  At the completion of this stage, the Grid can
-be used in a regridding operation.
-\end{enumerate}
-
-When creating the Grid shape and specifying the Grid coordinates,
-the user can either specify all required information at once,
-or can provide information incrementally.  The call
-{\tt ESMF\_GridEmptyCreate()} builds a Grid object
-container that can be filled in with a subsequent call to 
-the {\tt ESMF\_GridSetCommitShapeTile()} method. 
-The {\tt ESMF\_GridSetCommitShapeTile()} creates the 
-grid and sets the appropriate flag to indicate that
-its usable (the status equals {\tt ESMF\_GRIDSTATUS\_SHAPE\_READY}
-after the commit). The Grid is implicitly in a valid state after being committed. 
-
-\begin{sloppypar}
-For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
-call must occur on the same or a subset of the PETs as the
-{\tt ESMF\_GridEmptyCreate()} call. The 
-{\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
-the context in which it's executed and the "empty" Grid contains
-no information about the VM in which it was run.  If the
-{\tt ESMF\_GridSetCommitShapeTile()} call occurs
-in a subset of the PETs in which the {\tt ESMF\_GridEmptyCreate()} was 
-executed, the Grid is created only in that subset. The grid objects outside the subset will
-still be "empty" and not usable. 
-\end{sloppypar}
-
-The following table summarizes possible call sequences
-for building Grids.
-
-\begin{tabular}{|l|}
-\hline
-{\bf Create Shape} \\
-{\it From shape shortcut} \\
-{\tt grid = ESMF\_GridCreateShapeTile(...)} \\
-{\it Using DistGrid with general create interface} \\
-{\tt distgrid = ESMF\_DistGridCreate(...)} \\
-{\tt grid = ESMF\_GridCreate(distgrid, ...)} \\
-{\it Incremental} \\
-{\tt grid = ESMF\_GridEmptyCreate(...)} \\
-{\tt call ESMF\_GridSetCommitShapeTile(grid, ...)} \\ \hline
-{\bf Set Coordinates} \\
-{\it Set coordinates by copy or reference} \\
-{\tt call ESMF\_GridSetCoord(grid, ...)} \\
-{\it Retrieve ESMF Array of coordinates from Grid and set values} \\
-{\tt call ESMF\_GridGetCoord(grid, esmfArray, ...), set values} \\
-{\it Retrieve local bounds and native array from Grid and set values} \\
-{\tt call ESMF\_GridGetCoord(grid, lbound, ubound, array), set values} \\ \hline
-\end{tabular}

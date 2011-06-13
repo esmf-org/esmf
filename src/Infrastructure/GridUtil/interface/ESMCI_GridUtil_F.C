@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.36 2011/02/23 01:07:32 w6ws Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.37 2011/06/13 18:44:33 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -158,8 +158,8 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
   bool prevIsSphere=grid.isSphere();
   if (*spherical != 0) grid.setSphere();
 
-  int prevCoordGeom=grid.getCoordGeom();
-  if (*islatlondeg != 0) grid.setCoordGeom(ESMC_GRIDCOORDGEOM_SPH_DEG);
+  ESMC_CoordSys prevCoordSys=grid.getCoordSys();
+  if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
 
 
   for (UInt i = 0; i < *num_arrays; ++i)
@@ -192,7 +192,7 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
   // Reset Grid back to previous state
   //  if (!prevIsSphere) grid.clearSphere();
-  //grid.setCoordGeom(prevCoordGeom);
+  //grid.setCoordSys(prevCoordSys);
 
 
   *rc = ESMF_SUCCESS;
@@ -214,8 +214,8 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
   if (*isSphere != 0) grid.setSphere();
 
   // Map coords to surface of a sphere if reqeusted
-  int prevCoordGeom=grid.getCoordGeom();
-  if (*islatlondeg != 0) grid.setCoordGeom(ESMC_GRIDCOORDGEOM_SPH_DEG);
+  ESMC_CoordSys prevCoordSys=grid.getCoordSys();
+  if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
 
 
   Mesh *meshp = new Mesh();
@@ -252,7 +252,7 @@ void FTN(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
 
   // Reset Grid back to previous state
   //if (!prevIsSphere) grid.clearSphere();
-  //grid.setCoordGeom(prevCoordGeom);
+  //grid.setCoordSys(prevCoordSys);
 
 
   // Set return code 

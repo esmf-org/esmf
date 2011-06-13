@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.78 2011/04/25 15:49:29 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.79 2011/06/13 18:44:22 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,6 +47,14 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
 
 
 // Eventually move this to ESMCI_Util.h
+enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
+                    ESMC_COORDSYS_UNINIT,
+                    ESMC_COORDSYS_CART,
+		    ESMC_COORDSYS_SPH_DEG,
+		    ESMC_COORDSYS_SPH_RAD
+};
+
+// Eventually move this to ESMCI_Util.h
 #define ESMC_GRIDITEM_INVALID -2
 #define ESMC_GRIDITEM_UNINIT  -1
 #define ESMC_GRIDITEM_MASK     0
@@ -93,7 +101,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
 
   // prototype for indicating coordGeom
-  int coordGeom;
+  ESMC_CoordSys coordSys;
 
   // forceConn
   bool forceConn; // connections being forced by Store()
@@ -232,6 +240,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int *gridEdgeLWidth,
        int *gridEdgeUWidth,
        int *gridAlign,
+       ESMC_CoordSys coordSys, 
        int *coordDimCountArg,                     // (in)
        int **coordDimMapArg,                   // (in)
        int *gridMemLBoundArg,                      // (in)
@@ -314,8 +323,8 @@ template <class TYPE>
   // bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
   // Prototype coordGeom call
-  int getCoordGeom() {return coordGeom;}  
-  void setCoordGeom(int _coordGeom) {coordGeom=_coordGeom;}  
+  ESMC_CoordSys getCoordSys() {return coordSys;}  
+  void setCoordSys(ESMC_CoordSys _coordSys) {coordSys=_coordSys;}  
 
   int getCartCoordDimCount();
 
@@ -363,6 +372,7 @@ template <class TYPE>
           InterfaceInt *_maxIndex,          // (in)
           InterfaceInt *_localArbIndex,          // (in)
           int *localArbIndexCount,          // (in)
+          ESMC_CoordSys *coordSys,
 	  InterfaceInt *_coordDimCount,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
 	  InterfaceInt *gridMemLBound,          // (in)
@@ -393,6 +403,7 @@ template <class TYPE>
 	       InterfaceInt *gridEdgeUWidth,          // (in)
 	       InterfaceInt *gridAlign,          // (in)
 	       InterfaceInt *distgridToGridMap,                  // (in)
+                     ESMC_CoordSys *coordSys, 
 	       InterfaceInt *coordDimCount,              // (in)
 	       InterfaceInt *coordDimMap,             // (in)
 	       InterfaceInt *gridMemLBound,          // (in)
@@ -412,7 +423,8 @@ template <class TYPE>
 	       InterfaceInt *localArbIndex,          // (in)
                int localArbIndexCount,				  // (in)
 	       InterfaceInt *distDimMap,                  // (in)
-	       int arbDim, 	     
+	       int arbDim,
+               ESMC_CoordSys *coordSys,
   	       InterfaceInt *coordDimCount,       // (in) optional
                InterfaceInt *coordDimMap,         // (in) optional
     	       bool *destroyDistgrid,
@@ -627,7 +639,8 @@ int getComputationalUBound(
                       InterfaceInt *gridAlignArg,
 		      InterfaceInt *_distgridToGridMap,   
 		      InterfaceInt *_undistLBound,  
-		      InterfaceInt *_undistUBound,  
+		      InterfaceInt *_undistUBound,
+                      ESMC_CoordSys *coordSys, 
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
                       InterfaceInt *gridMemLBound,
@@ -650,6 +663,7 @@ int getComputationalUBound(
 		      int arbDim,
 		      InterfaceInt *_undistLBound,  
 		      InterfaceInt *_undistUBound,
+                      ESMC_CoordSys *coordSys, 
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
 		      bool *destroyDistgrid,
@@ -807,6 +821,7 @@ class ProtoGrid {
   InterfaceInt *distDim;   
   InterfaceInt *undistLBound;  
   InterfaceInt *undistUBound;  
+  ESMC_CoordSys *coordSys;
   InterfaceInt *coordDimCount;  
   InterfaceInt *coordDimMap; 
   ESMC_IndexFlag *indexflag; 
