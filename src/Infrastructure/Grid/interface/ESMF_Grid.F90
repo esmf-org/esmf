@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.219 2011/06/13 19:41:15 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.220 2011/06/13 20:42:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.219 2011/06/13 19:41:15 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.220 2011/06/13 20:42:14 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -21633,7 +21633,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
             return 
        endif
-       distDimOut(:)=distDimOut(:)
+       distDimOut(:)=distDim(:)
        do i=1,distDimCount
 	  isDistOut(distDimOut(i))=.true.
        enddo
