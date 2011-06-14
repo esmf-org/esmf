@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.39 2011/06/09 21:15:48 eschwab Exp $
+// $Id: ESMCI_Util.h,v 1.40 2011/06/14 05:57:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,8 +69,8 @@ enum ESMC_DePinFlag { ESMF_DE_PIN_PET=1,
                         ESMF_DE_PIN_VAS};
 
 // direction type
-enum ESMC_Direction { ESMF_MODE_FORWARD=1,
-                      ESMF_MODE_REVERSE};
+enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,
+                      ESMF_DIRECTION_REVERSE};
 
 // io format type
 enum ESMC_IOFmtFlag { ESMF_IOFMT_BIN=0,

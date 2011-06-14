@@ -1,11 +1,11 @@
-% $Id: Alarm_usage.tex,v 1.6 2005/06/23 04:38:13 eschwab Exp $
+% $Id: Alarm_usage.tex,v 1.7 2011/06/14 05:57:46 eschwab Exp $
 
 Alarms are used in conjunction with Clocks (see Section~\ref{sec:Clock}).
 Multiple Alarms can be associated with a Clock.  During the
 {\tt ESMF\_ClockAdvance()} method, a Clock iterates over its internal Alarms
 to determine if any are ringing.  Alarms ring when a specified Alarm 
 time is reached or exceeded, taking into account whether the time step is
-positive or negative.  In {\tt ESMF\_MODE\_REVERSE}
+positive or negative.  In {\tt ESMF\_DIRECTION\_REVERSE}
 (see Section~\ref{sec:Clock}), alarms ring in reverse, i.e., they begin
 ringing when they originally ended, and end ringing when they originally
 began.  On completion of the time advance call, the Clock optionally returns

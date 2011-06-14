@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.18 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Alarm.h,v 1.19 2011/06/14 05:57:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -269,7 +269,7 @@ class Alarm {
     // check if time to turn on alarm
     bool checkTurnOn(bool timeStepPositive);
 
-    // reconstruct ringBegin during ESMF_MODE_REVERSE
+    // reconstruct ringBegin during ESMF_DIRECTION_REVERSE
     int resetRingBegin(bool timeStepPositive);
 
     // friend class alarm

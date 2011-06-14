@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.121 2011/06/09 21:15:24 eschwab Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.122 2011/06/14 05:57:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -405,8 +405,8 @@
       end type
 
       type(ESMF_Direction), parameter:: &
-        ESMF_MODE_FORWARD = ESMF_Direction(1), &
-        ESMF_MODE_REVERSE = ESMF_Direction(2)
+        ESMF_DIRECTION_FORWARD = ESMF_Direction(1), &
+        ESMF_DIRECTION_REVERSE = ESMF_Direction(2)
 
 !------------------------------------------------------------------------------
 !
@@ -676,7 +676,7 @@
       public ESMF_InquireFlag
       public ESMF_INQUIREONLY, ESMF_NOINQUIRE
 
-      public ESMF_Direction, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE
+      public ESMF_Direction, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmtFlag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
              ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C

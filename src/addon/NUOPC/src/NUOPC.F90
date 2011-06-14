@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.11 2011/06/09 17:36:13 theurich Exp $
+! $Id: NUOPC.F90,v 1.12 2011/06/14 05:57:59 eschwab Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -813,7 +813,7 @@ module NUOPC
     endif
     
     ! set the new stopTime of the internalClock
-    if (direction==ESMF_MODE_FORWARD) then
+    if (direction==ESMF_DIRECTION_FORWARD) then
       stopTime = currTime + externalTimeStep
     else
       stopTime = currTime - externalTimeStep

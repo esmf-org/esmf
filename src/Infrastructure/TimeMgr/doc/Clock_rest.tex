@@ -1,4 +1,4 @@
-% $Id: Clock_rest.tex,v 1.10 2011/01/19 02:13:18 svasquez Exp $
+% $Id: Clock_rest.tex,v 1.11 2011/06/14 05:57:46 eschwab Exp $
 
 \begin{enumerate}
 
@@ -10,7 +10,7 @@ of modification.
 \item {\bf Clock variable timesteps in reverse} 
 \begin{sloppypar}
 In order for a clock with
-variable timesteps to be run in {\tt ESMF\_MODE\_REVERSE}, the user must
+variable timesteps to be run in {\tt ESMF\_DIRECTION\_REVERSE}, the user must
 supply those timesteps to {\tt ESMF\_ClockAdvance()}.  Essentially, the user
 must save the timesteps while in forward mode.  In a future release, the
 Time Manager will assume this responsibility by saving the clock state

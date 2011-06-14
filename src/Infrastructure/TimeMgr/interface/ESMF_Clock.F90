@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.116 2011/04/22 17:33:58 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.117 2011/06/14 05:57:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.116 2011/04/22 17:33:58 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.117 2011/06/14 05:57:51 eschwab Exp $'
 
 !==============================================================================
 !
@@ -303,9 +303,9 @@
 !     \begin{sloppypar}
 !     Advances the {\tt clock}'s current time by one time step:  either the
 !     {\tt clock}'s, or the passed-in {\tt timeStep} (see below).  When the
-!     {\tt clock} is in {\tt ESMF\_MODE\_FORWARD} (default), this method adds
-!     the {\tt timeStep} to the {\tt clock}'s current time.
-!     In {\tt ESMF\_MODE\_REVERSE}, {\tt timeStep} is subtracted from the
+!     {\tt clock} is in {\tt ESMF\_DIRECTION\_FORWARD} (default), this method
+!     adds the {\tt timeStep} to the {\tt clock}'s current time.
+!     In {\tt ESMF\_DIRECTION\_REVERSE}, {\tt timeStep} is subtracted from the
 !     current time.  In either case, {\tt timeStep} can be positive or negative.
 !     See the "direction" argument in method {\tt ESMF\_ClockSet()}.
 !     {\tt ESMF\_ClockAdvance()} optionally returns a list and number of ringing
@@ -734,9 +734,9 @@
 !          The timezone within which all the {\tt Clock}'s times are defined.
 !     \item[{[advanceCount]}]
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
-!          Increments in {\tt ESMF\_MODE\_FORWARD} and decrements in
-!          {\tt ESMF\_MODE\_REVERSE}; see "direction" argument below and in
-!          {\tt ESMF\_ClockSet()}.
+!          Increments in {\tt ESMF\_DIRECTION\_FORWARD} and decrements in
+!          {\tt ESMF\_DIRECTION\_REVERSE}; see "direction" argument below and 
+!          in {\tt ESMF\_ClockSet()}.
 !     \item[{[alarmCount]}]
 !          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
 !          {\tt ESMF\_Alarm} list.
@@ -1103,8 +1103,9 @@
 !
 ! !DESCRIPTION:
 !     Returns true if currentTime is greater than or equal to stopTime
-!     in {\tt ESMF\_MODE\_FORWARD}, or if currentTime is less than or equal to
-!     startTime in {\tt ESMF\_MODE\_REVERSE}.  It returns false otherwise.
+!     in {\tt ESMF\_DIRECTION\_FORWARD}, or if currentTime is less than or 
+!     equal to startTime in {\tt ESMF\_DIRECTION\_REVERSE}.  It returns false 
+!     otherwise.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1159,9 +1160,10 @@
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Returns true if clock is in {\tt ESMF\_MODE\_REVERSE}, and false if in
-!     {\tt ESMF\_MODE\_FORWARD}.  Allows convenient use in "if" and "do while"
-!     constructs.  Alternative to {\tt ESMF\_ClockGet(...direction=...)}.
+!     Returns true if clock is in {\tt ESMF\_DIRECTION\_REVERSE}, and false if 
+!     in {\tt ESMF\_DIRECTION\_FORWARD}.  Allows convenient use in "if" and 
+!     "do while" constructs.  Alternative to 
+!     {\tt ESMF\_ClockGet(...direction=...)}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1482,7 +1484,7 @@
 !          {\tt ESMF\_ClockAdvance()} below for specifying variable timesteps
 !          that are NOT saved as the clock's internal time step property.
 !          See "direction" argument below for behavior with
-!          {\\t ESMF\_MODE\_REVERSE} direction.
+!          {\\t ESMF\_DIRECTION\_REVERSE} direction.
 !     \item[{[startTime]}]
 !          The {\tt ESMF\_Clock}'s starting time.  Can be less than or
 !          or greater than stopTime, depending on a positive or negative
@@ -1515,21 +1517,22 @@
 !          The number of times the clock has been timestepped.
 !     \item[{[direction]}]
 !          Sets the clock's time-stepping direction.  If called with
-!          {\tt ESMF\_MODE\_REVERSE}, sets the clock in "reverse" mode,
+!          {\tt ESMF\_DIRECTION\_REVERSE}, sets the clock in "reverse" mode,
 !          causing it to timestep back towards its startTime.  If called
-!          with {\tt ESMF\_MODE\_FORWARD}, sets the clock in normal,
+!          with {\tt ESMF\_DIRECTION\_FORWARD}, sets the clock in normal,
 !          "forward" mode, causing it to timestep in the direction of its
 !          startTime to stopTime.  This holds true for negative timestep
 !          clocks as well, which are initialized (created) with
 !          stopTime < startTime.  The default mode is
-!          {\tt ESMF\_MODE\_FORWARD}, established at {\tt ESMF\_ClockCreate()}.
-!          timeStep can also be specified as an argument at the same time,
-!          which allows for a change in magnitude and/or sign of the clock's
-!          timeStep.  If not specified with {\tt ESMF\_MODE\_REVERSE}, the
-!          clock's current timeStep is effectively negated.  If timeStep is
-!          specified, its sign is used as specified; it is not negated
-!          internally.  E.g., if the specified timeStep is negative and the
-!          clock is placed in {\tt ESMF\_MODE\_REVERSE}, subsequent calls to
+!          {\tt ESMF\_DIRECTION\_FORWARD}, established at 
+!          {\tt ESMF\_ClockCreate()}.  timeStep can also be specified as an 
+!          argument at the same time, which allows for a change in magnitude 
+!          and/or sign of the clock's timeStep.  If not specified with 
+!          {\tt ESMF\_DIRECTION\_REVERSE}, the clock's current timeStep is 
+!          effectively negated.  If timeStep is specified, its sign is used as 
+!          specified; it is not negated internally.  E.g., if the specified 
+!          timeStep is negative and the clock is placed in 
+!          {\tt ESMF\_DIRECTION\_REVERSE}, subsequent calls to
 !          {\tt ESMF\_ClockAdvance()} will cause the clock's current time to
 !          be decremented by the new timeStep's magnitude.
 !     \item[{[name]}]

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.52 2011/02/23 06:48:42 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.53 2011/06/14 05:57:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -158,7 +158,7 @@
 !EOE
 
 !BOC
-      call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.22 2011/04/14 05:33:42 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.23 2011/06/14 05:57:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.22 2011/04/14 05:33:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.23 2011/06/14 05:57:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -569,7 +569,7 @@ int Clock::count=0;
       return(rc);
     }
 
-    if (direction == ESMF_MODE_FORWARD) {
+    if (direction == ESMF_DIRECTION_FORWARD) {
 
       // save current time, then advance it
       prevTime = currTime;
@@ -585,7 +585,7 @@ int Clock::count=0;
       // count number of timesteps
       advanceCount++;
 
-    } else { // ESMF_MODE_REVERSE
+    } else { // ESMF_DIRECTION_REVERSE
 
       // TODO: make more robust by removing simplifying assumptions:
       //       1) timeSteps are constant throughout clock run.
@@ -847,8 +847,8 @@ int Clock::count=0;
 //
 // !DESCRIPTION:
 //    Checks if {\tt ESMC\_Clock}'s stop time has been reached if in
-//    {\tt ESMF\_MODE\_FORWARD} or if it has reached start time if in
-//    {\tt ESMF\_MODE\_REVERSE}.
+//    {\tt ESMF\_DIRECTION\_FORWARD} or if it has reached start time if in
+//    {\tt ESMF\_DIRECTION\_REVERSE}.
 //
 //EOP
 // !REQUIREMENTS:
@@ -864,7 +864,7 @@ int Clock::count=0;
       return(false);
     }
 
-    if (direction == ESMF_MODE_FORWARD) {
+    if (direction == ESMF_DIRECTION_FORWARD) {
 
       if (!stopTimeEnabled) return(false);
 
@@ -881,7 +881,7 @@ int Clock::count=0;
       // or no stopTime direction ? (stopTime == startTime)
       } else return(currTime == stopTime);
 
-    } else { // ESMF_MODE_REVERSE
+    } else { // ESMF_DIRECTION_REVERSE
 
       // check if startTime has been reached or crossed
 
@@ -914,7 +914,7 @@ int Clock::count=0;
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//    Checks if {\tt ESMC\_Clock}'s direction is {\tt ESMF\_MODE\_REVERSE}.
+//    Checks if {\tt ESMC\_Clock}'s direction is {\tt ESMF\_DIRECTION\_REVERSE}.
 //
 //EOP
 // !REQUIREMENTS:
@@ -930,7 +930,7 @@ int Clock::count=0;
       return(false);
     }
 
-    return(direction == ESMF_MODE_REVERSE);
+    return(direction == ESMF_DIRECTION_REVERSE);
 
  } // end Clock::isReverse
 
@@ -1582,10 +1582,11 @@ int Clock::count=0;
        return(rc);
     }
 
-    if (direction != ESMF_MODE_FORWARD && direction != ESMF_MODE_REVERSE) {
+    if (direction != ESMF_DIRECTION_FORWARD && 
+        direction != ESMF_DIRECTION_REVERSE) {
       char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "direction property %d is not ESMF_MODE_FORWARD or "
-              "ESMF_MODE_REVERSE", direction);
+      sprintf(logMsg, "direction property %d is not ESMF_DIRECTION_FORWARD or "
+              "ESMF_DIRECTION_REVERSE", direction);
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
     }
@@ -1895,7 +1896,7 @@ int Clock::count=0;
 
     name[0] = '\0';
     advanceCount = 0;
-    direction = ESMF_MODE_FORWARD;
+    direction = ESMF_DIRECTION_FORWARD;
     userChangedDirection = false;
     stopTimeEnabled = false;
     id = ++count;  // TODO: inherit from ESMC_Base class

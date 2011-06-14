@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.62 2011/06/09 05:16:53 w6ws Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.63 2011/06/14 05:57:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.62 2011/06/09 05:16:53 w6ws Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.63 2011/06/14 05:57:54 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1491,15 +1491,15 @@
           !print *, "reverseCount = ", reverseCount
         endif
 
-        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
         nclock = nclock + 1
 
       enddo
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.24).and. &
                      (forwardCount.eq.96).and.(reverseCount.eq.0).and. &
-                     (forwardDirection.eq.ESMF_MODE_FORWARD).and. &
-                     (reverseDirection.eq.ESMF_MODE_REVERSE).and. &
+                     (forwardDirection.eq.ESMF_DIRECTION_FORWARD).and. &
+                     (reverseDirection.eq.ESMF_DIRECTION_REVERSE).and. &
                      ESMF_ClockIsReverse(clock2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -1571,15 +1571,15 @@
 
         !print *, "Going in REVERSE ..."
         !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
-        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
         nclock = nclock + 1
 
       enddo
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nring.eq.48).and. &
                      (forwardCount.eq.96).and.(reverseCount.eq.0).and. &
-                     (forwardDirection.eq.ESMF_MODE_FORWARD).and. &
-                     (reverseDirection.eq.ESMF_MODE_REVERSE).and. &
+                     (forwardDirection.eq.ESMF_DIRECTION_FORWARD).and. &
+                     (reverseDirection.eq.ESMF_DIRECTION_REVERSE).and. &
                      ESMF_ClockIsReverse(clock2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -1628,7 +1628,7 @@
           call ESMF_ClockAdvance(clock2, rc=rc)
         enddo
 
-        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
         nclock = nclock + 1
       enddo
 
@@ -1681,7 +1681,7 @@
           call ESMF_ClockAdvance(clock2, rc=rc)
         enddo
 
-        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
         nclock = nclock + 1
       enddo
 
@@ -1768,7 +1768,7 @@
       enddo
 
       ! run the clock backwards
-      call ESMF_ClockSet(domainClock, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(domainClock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
       !print *
       !print *, "domainClock set in reverse"
       !print *
@@ -1899,7 +1899,7 @@
       enddo
 
       ! run the clock backwards
-      call ESMF_ClockSet(domainClock, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(domainClock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
       !print *
       !print *, "domainClock set in reverse"
       !print *
@@ -2003,7 +2003,7 @@
       end do
 
       ! test in REVERSE mode (not from James)
-      call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
 
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
@@ -2022,7 +2022,7 @@
       end do
 
       ! test double back in FORWARD mode (not from James)
-      call ESMF_ClockSet(clock2, direction=ESMF_MODE_FORWARD, rc=rc)
+      call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_FORWARD, rc=rc)
 
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
@@ -2089,7 +2089,7 @@
       end do
 
       ! test in REVERSE mode (not from James)
-      call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
 
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
@@ -2108,7 +2108,7 @@
       end do
 
       ! test double back in FORWARD mode (not from James),
-      call ESMF_ClockSet(clock2, direction=ESMF_MODE_FORWARD, rc=rc)
+      call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_FORWARD, rc=rc)
 
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
@@ -2180,7 +2180,7 @@
 
       ! TODO: test in REVERSE mode (not from James)
       !       currently doesn't ring in REVERSE
-      call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
 
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
@@ -2204,7 +2204,7 @@
 
       ! TODO: test double back in FORWARD mode (not from James)
       !       currently doesn't work until back into day 2  
-      call ESMF_ClockSet(clock2, direction=ESMF_MODE_FORWARD, rc=rc)
+      call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_FORWARD, rc=rc)
 
       do while (.not.ESMF_ClockIsDone(clock2, rc=rc))
         iteration = iteration + 1
@@ -2521,7 +2521,7 @@
           !print *, "reverseCount = ", reverseCount
         endif
 
-        call ESMF_ClockSet(clock2, direction=ESMF_MODE_REVERSE, rc=rc)
+        call ESMF_ClockSet(clock2, direction=ESMF_DIRECTION_REVERSE, rc=rc)
         nclock = nclock + 1
       enddo
 
@@ -2536,8 +2536,8 @@
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nring.eq.41).and. &
                      (forwardCount.eq.60).and.(reverseCount.eq.0).and. &
-                     (forwardDirection.eq.ESMF_MODE_FORWARD).and. &
-                     (reverseDirection.eq.ESMF_MODE_REVERSE).and. &
+                     (forwardDirection.eq.ESMF_DIRECTION_FORWARD).and. &
+                     (reverseDirection.eq.ESMF_DIRECTION_REVERSE).and. &
                      ESMF_ClockIsReverse(clock2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -2709,7 +2709,7 @@
       !EX_UTest
       ! Based on reproducer clocktester.F90 from Atanas. See bug #1531948.
       write(failMsg, *) " Did not ring enough times during forward/backward march"
-      write(name, *) "Test ESMF_MODE_FORWARD to a non-sticky alarm point, ESMF_MODE_REVERSE, ESMF_MODE_FORWARD"
+      write(name, *) "Test ESMF_DIRECTION_FORWARD to a non-sticky alarm point, ESMF_DIRECTION_REVERSE, ESMF_DIRECTION_FORWARD"
       testPass = .true.
       call ESMF_TimeSet (startTime, yy=2009, mm=1, dd=1, &
           calendar=gregorianCalendar, rc=rc)
@@ -2763,7 +2763,7 @@
       !print *, "At end of 1st forward run, alarmCount = ", alarmCount
       !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
-      call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
 
       i=0
       do
@@ -2788,7 +2788,7 @@
       !print *, "At end of reverse run, alarmCount = ", alarmCount
       !call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout)
 
-      call ESMF_ClockSet(clock, direction=ESMF_MODE_FORWARD, rc=rc)
+      call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_FORWARD, rc=rc)
 
       i=0
       do
@@ -2831,12 +2831,12 @@
       !EX_UTest
       !Test Alarm ringTime increment, first forwards a fixed number of
       !timesteps, stopping at an alarm ringing time step.
-      !Using ESMF_MODE_REVERSE, step backwards to some time prior to the
-      !clock's startTime.  Then go ESMF_MODE_FORWARD to one step past an
-      !alarm ringing time step, and then ESMF_MODE_REVERSE once more. 
+      !Using ESMF_DIRECTION_REVERSE, step backwards to some time prior to the
+      !clock's startTime.  Then go ESMF_DIRECTION_FORWARD to one step past an
+      !alarm ringing time step, and then ESMF_DIRECTION_REVERSE once more. 
       ! Count number of rings.  See bug #1531948.
       write(failMsg, *) " Did not ring enough times during forward/backward march"
-      write(name, *) "Test ESMF_MODE_FORWARD to an alarm point, ESMF_MODE_REVERSE, ESMF_MODE_FORWARD, ESMF_MODE_REVERSE"
+      write(name, *) "Test ESMF_DIRECTION_FORWARD to an alarm point, ESMF_DIRECTION_REVERSE, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE"
 
       testPass = .true.
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
@@ -2871,7 +2871,7 @@
       end do
 
       !print *, 'SETTING CLOCK BACKWARDS'
-      call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet (clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       do, i=5, -5, -1
@@ -2890,7 +2890,7 @@
       end do
 
       !print *, 'SETTING CLOCK FORWARDS'
-      call ESMF_ClockSet (clock, direction=ESMF_MODE_FORWARD, rc=rc)
+      call ESMF_ClockSet (clock, direction=ESMF_DIRECTION_FORWARD, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       do, i=-4,7
@@ -2907,7 +2907,7 @@
       end do
 
       !print *, 'SETTING CLOCK BACKWARDS'
-      call ESMF_ClockSet (clock, direction=ESMF_MODE_REVERSE, rc=rc)
+      call ESMF_ClockSet (clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
       if (testPass .and. rc /= ESMF_SUCCESS) testPass = .false.
 
       do, i=6, -5, -1

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.128 2011/04/21 13:42:58 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.129 2011/06/14 05:57:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.128 2011/04/21 13:42:58 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.129 2011/06/14 05:57:54 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2367,12 +2367,12 @@
 
         call ESMF_ClockGet(clock, advanceCount=advanceCounts, &
                            direction=direction, rc=rc)
-        if (direction .eq. ESMF_MODE_FORWARD) then
+        if (direction .eq. ESMF_DIRECTION_FORWARD) then
           !print *, "Reverse clock advanced ", advanceCounts, " times forward."
           if (advanceCounts .eq. 31 .and. rc .eq. ESMF_SUCCESS) then
             stepOnePass = .true.
           end if
-          call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+          call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
         else
           !print *, "Reverse clock count is ", advanceCounts, "."
           if (advanceCounts .eq. 0 .and. rc .eq. ESMF_SUCCESS) then
@@ -2411,11 +2411,11 @@
                            direction=direction, rc=rc)
         ! print *, "Reverse clock advanceCount = ", advanceCounts
 
-        if (direction .eq. ESMF_MODE_FORWARD) then
+        if (direction .eq. ESMF_DIRECTION_FORWARD) then
           if (advanceCounts .eq. 20 .and. rc .eq. ESMF_SUCCESS) then
            !print *, "Reverse clock advanced ", advanceCounts, " times forward."
             stepOnePass = .true.
-            call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+            call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
           end if
         else
           if (advanceCounts .eq. 0 .and. rc .eq. ESMF_SUCCESS) then
@@ -2455,18 +2455,18 @@
                            direction=direction, rc=rc)
         !print *, "Reverse clock advanceCount = ", advanceCounts
 
-        if (direction .eq. ESMF_MODE_FORWARD) then
+        if (direction .eq. ESMF_DIRECTION_FORWARD) then
           if (.not.stepOnePass) then
             if (advanceCounts .eq. 20 .and. rc .eq. ESMF_SUCCESS) then
               !print *, "Reverse clock advanced ", advanceCounts, " times forward."
               stepOnePass = .true.
-              call ESMF_ClockSet(clock, direction=ESMF_MODE_REVERSE, rc=rc)
+              call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
             end if
           end if
         else
           if (advanceCounts .eq. 10 .and. rc .eq. ESMF_SUCCESS) then
             !print *, "Reverse clock reversed to ", advanceCounts, "."
-            call ESMF_ClockSet(clock, direction=ESMF_MODE_FORWARD, rc=rc)
+            call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_FORWARD, rc=rc)
             stepTwoPass = .true.
           end if
         end if

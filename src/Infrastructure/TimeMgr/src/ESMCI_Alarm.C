@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.C,v 1.20 2011/02/22 21:35:57 w6ws Exp $
+// $Id: ESMCI_Alarm.C,v 1.21 2011/06/14 05:57:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.20 2011/02/22 21:35:57 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Alarm.C,v 1.21 2011/06/14 05:57:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -750,7 +750,7 @@ int Alarm::count=0;
     ringing = false;
     timeStepRingingCount = 0;
 
-    if (clock->direction == ESMF_MODE_FORWARD) {
+    if (clock->direction == ESMF_DIRECTION_FORWARD) {
       // remember this time, so if we go in reverse, we will know when
       //   to turn the alarm back on.
       //   TODO:  Assumes constant ringInterval between successive ringEnds;
@@ -758,7 +758,7 @@ int Alarm::count=0;
       //          end times, which may vary (e.g. due to variable timeSteps).
       ringEnd = clock->currTime;
 
-    } else {      // ESMF_MODE_REVERSE
+    } else {      // ESMF_DIRECTION_REVERSE
       // for sticky alarms, step back ring times
       if (sticky && ringTime != firstRingTime) {
         ringTime     -= ringInterval;
@@ -1118,7 +1118,7 @@ int Alarm::count=0;
     bool positive = (clock->currAdvanceTimeStep.absValue() ==
                      clock->currAdvanceTimeStep) ? true : false;
 
-    if (clock->direction == ESMF_MODE_FORWARD) {
+    if (clock->direction == ESMF_DIRECTION_FORWARD) {
 
       // carry previous flag forward
       ringingOnPrevTimeStep = ringingOnCurrTimeStep;
@@ -1254,7 +1254,7 @@ int Alarm::count=0;
         //print("ringTime string");
       }
 
-    } else { // ESMF_MODE_REVERSE
+    } else { // ESMF_DIRECTION_REVERSE
 
       // TODO: Make more robust by removing the following simplifying
       //       assumptions:
@@ -1414,7 +1414,7 @@ int Alarm::count=0;
                   clock->prevTime <= ringTime && clock->prevTime > ringTimeEnd;
       }
 
-    }  // end if ESMF_MODE_REVERSE
+    }  // end if ESMF_DIRECTION_REVERSE
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -1978,7 +1978,7 @@ int Alarm::count=0;
 
 //-------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  Alarm::resetRingBegin - reset ringBegin during ESMF_MODE_REVERSE
+// !IROUTINE:  Alarm::resetRingBegin - reset ringBegin during ESMF_DIRECTION_REVERSE
 //
 // !INTERFACE:
       int Alarm::resetRingBegin(
@@ -1992,7 +1992,7 @@ int Alarm::count=0;
 //
 // !DESCRIPTION:
 //      Reconstructs ringBegin for an alarm event during
-//      {\tt ESMF\_MODE\_REVERSE}
+//      {\tt ESMF\_DIRECTION\_REVERSE}
 //
 //EOPI
 // !REQUIREMENTS:
