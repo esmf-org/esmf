@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.27 2011/05/28 00:08:56 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.28 2011/06/14 21:30:04 w6ws Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -822,10 +822,6 @@ module ESMF_ComplianceICMod
             write (tempString, *) item, " [ROUTEHANDLE] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
             write (tempString, *) item, " [STATE] name: "
-          else if (stateitemtypeList(item) == ESMF_STATEITEM_NAME) then
-            write (tempString, *) item, " [NAME] name: "
-          else if (stateitemtypeList(item) == ESMF_STATEITEM_INDIRECT) then
-            write (tempString, *) item, " [INDIRECT] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_UNKNOWN) then
             write (tempString, *) item, " [UNKNOWN] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_NOTFOUND) then
