@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.28 2011/06/14 21:30:04 w6ws Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.29 2011/06/14 23:32:47 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -466,14 +466,6 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
 
-    write(output,*) ">STOP RunPrologue for phase=", phase
-    call ESMF_LogWrite(trim(prefix)//trim(output), &
-      ESMF_LOG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-      
     ! compliance check internal Clock
     call checkInternalClock(prefix, comp=comp, clock=clock, &
       mustMatchCurr=.true., mustReachStop=.false., rc=rc)
@@ -482,6 +474,14 @@ module ESMF_ComplianceICMod
       file=__FILE__)) &
       return  ! bail out
     
+    write(output,*) ">STOP RunPrologue for phase=", phase
+    call ESMF_LogWrite(trim(prefix)//trim(output), &
+      ESMF_LOG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+      
     ! Stop Compliance Checking: RunPrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
