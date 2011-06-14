@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.220 2011/06/13 20:42:14 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.221 2011/06/14 17:20:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.220 2011/06/13 20:42:14 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.221 2011/06/14 17:20:38 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -20904,14 +20904,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !!
 ! !ARGUMENTS:
 
-       integer,               intent(in),  optional :: minIndex(:)
-       integer,               intent(in)            :: countsPerDEDim1(:)
-       integer,               intent(in)            :: countsPerDEDim2(:)
-       integer,               intent(in),  optional :: countsPerDEDim3(:)
-       integer,               intent(out)           :: dimCount
-       integer,               intent(out), pointer  :: minIndexOut(:)
-       integer,               intent(out), pointer  :: maxIndexOut(:)
-       integer,               intent(out), optional :: rc
+       integer,               intent(in),  optional   :: minIndex(:)
+       integer,               intent(in)              :: countsPerDEDim1(:)
+       integer,               intent(in)              :: countsPerDEDim2(:)
+       integer,               intent(in),  optional   :: countsPerDEDim3(:)
+       integer,               intent(inout)           :: dimCount
+       integer,               intent(inout), pointer  :: minIndexOut(:)
+       integer,               intent(inout), pointer  :: maxIndexOut(:)
+       integer,               intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
 !
@@ -21271,9 +21271,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
-       integer,               intent(out)           :: dimCount
-       integer,               intent(out), pointer  :: minIndexOut(:)
-       integer,               intent(out), pointer  :: maxIndexOut(:)
+       integer,               intent(inout)           :: dimCount
+       integer,               intent(inout), pointer  :: minIndexOut(:)
+       integer,               intent(inout), pointer  :: maxIndexOut(:)
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -21547,12 +21547,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
        integer,               intent(in),  optional :: distDim(:)
-       integer,               intent(out)           :: dimCount
-       integer,               intent(out)           :: distDimCount
-       logical,               intent(out), pointer  :: isDistOut(:)
-       integer,               intent(out), pointer  :: distDimOut(:)
-       integer,               intent(out), pointer  :: minIndexOut(:)
-       integer,               intent(out), pointer  :: maxIndexOut(:)
+       integer,               intent(inout)           :: dimCount
+       integer,               intent(inout)           :: distDimCount
+       logical,               intent(inout), pointer  :: isDistOut(:)
+       integer,               intent(inout), pointer  :: distDimOut(:)
+       integer,               intent(inout), pointer  :: minIndexOut(:)
+       integer,               intent(inout), pointer  :: maxIndexOut(:)
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -21940,7 +21940,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleType) ::   poleTypeLocal(2)
        integer :: periodicDimLocal
        integer :: poleDimLocal
-       integer :: connListCount
+       integer :: connListCount, connListPos,i 
        integer :: posVec(ESMF_MAXDIM)
        integer :: localrc
 
@@ -22033,6 +22033,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            positionVector=posVec(1:dimCount), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
            ESMF_CONTEXT, rcToReturn=rc)) return            
+
+
+      ! Fill in pole connections
+      connListPos=2
+ 
+      ! Lower end
+      if (poleTypeLocal(1) .ne. ESMF_POLETYPE_MONOPOLE) then
+         
+      else if (poleTypeLocal(1) .ne. ESMF_POLETYPE_BIPOLE) then
+         
+      endif
+      connListPos=connListPos+1
+
+      ! Upper end
+      if (poleTypeLocal(2) .ne. ESMF_POLETYPE_MONOPOLE) then
+         
+      else if (poleTypeLocal(2) .ne. ESMF_POLETYPE_BIPOLE) then
+         
+      endif
 
 
     end subroutine Setup1PeriodicConn
