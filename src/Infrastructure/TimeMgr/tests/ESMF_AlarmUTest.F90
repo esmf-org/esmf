@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.63 2011/06/14 05:57:54 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.64 2011/06/14 15:52:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.63 2011/06/14 05:57:54 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.64 2011/06/14 15:52:18 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2709,7 +2709,8 @@
       !EX_UTest
       ! Based on reproducer clocktester.F90 from Atanas. See bug #1531948.
       write(failMsg, *) " Did not ring enough times during forward/backward march"
-      write(name, *) "Test ESMF_DIRECTION_FORWARD to a non-sticky alarm point, ESMF_DIRECTION_REVERSE, ESMF_DIRECTION_FORWARD"
+      write(name, *) "Test ESMF_DIRECTION_FORWARD to a non-sticky alarm " // &
+                     "point, ESMF_DIRECTION_REVERSE, ESMF_DIRECTION_FORWARD"
       testPass = .true.
       call ESMF_TimeSet (startTime, yy=2009, mm=1, dd=1, &
           calendar=gregorianCalendar, rc=rc)
@@ -2836,7 +2837,9 @@
       !alarm ringing time step, and then ESMF_DIRECTION_REVERSE once more. 
       ! Count number of rings.  See bug #1531948.
       write(failMsg, *) " Did not ring enough times during forward/backward march"
-      write(name, *) "Test ESMF_DIRECTION_FORWARD to an alarm point, ESMF_DIRECTION_REVERSE, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE"
+      write(name, *) "Test ESMF_DIRECTION_FORWARD to an alarm point, " // &
+                     "ESMF_DIRECTION_REVERSE, ESMF_DIRECTION_FORWARD, " // &
+                     "ESMF_DIRECTION_REVERSE"
 
       testPass = .true.
       call ESMF_TimeSet (startTime, yy=2008, mm=1, dd=23, h=0,  &
