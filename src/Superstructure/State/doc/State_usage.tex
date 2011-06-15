@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.19 2011/01/21 00:11:47 rokuingh Exp $
+% $Id: State_usage.tex,v 1.20 2011/06/15 01:20:02 w6ws Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -21,15 +21,7 @@ by the parent component into the Gridded Component's initialize
 method.  This is where the States get prepared for use 
 and the import State is first filled with data.
 
-States can be created in a number of ways without the Fields, Arrays,
-FieldBundles, ArrayBundles, and other States they will eventually contain.
-They can be created with names as placeholders where 
-these data items will eventually be.  When the States are passed 
-into the Gridded Component's initialize method, Field,
-FieldBundle, Array, and ArrayBundle create calls can be made in that method
-to replace the name placeholders with real data objects.
-
-States can also be filled with data items that do not yet 
+States can be filled with data items that do not yet 
 have data allocated.  Fields, FieldBundles, Arrays, and ArrayBundles each have 
 methods that support their creation without actual data 
 allocation - the Grid and Attributes are set up but no
@@ -58,21 +50,6 @@ as that component's import State.
 While the above sounds complicated, the rule is simple:
 a State going into a component is an import State, and a 
 State leaving a component is an export State.
-
-Data items within a State can be marked needed or not needed,
-depending on whether they are required for a particular 
-application configuration.  If the item is marked not needed,
-the user can make the Gridded Component's initialize method 
-clever enough to not allocate the data for that item at all
-and not compute it within the Gridded Component code.
-For example, some diagnostics may not be desired for all 
-runs.
-
-Other flags will eventually be available for data items within 
-a State, such as data ready for reading or writing, data valid or 
-invalid, and data required for restart or not.  These are not
-yet fully implemented, so only the default value for each value 
-can be set at this time.
 
 Objects inside States are normally created in {\tt unison} where
 each PET executing a component makes the same object create call.
