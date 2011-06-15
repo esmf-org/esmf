@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.93 2011/06/15 00:17:40 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.94 2011/06/15 18:19:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,11 +35,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.93 2011/06/15 00:17:40 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.94 2011/06/15 18:19:45 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, rc, num, number,localrc
+      integer :: rc, num, number,localrc
       type(ESMF_VM) :: vm
       logical :: correct
       character(ESMF_MAXSTR) :: statename, bundlename, bname
@@ -612,10 +612,9 @@
       ! Test Creation of an export State with FieldBundle
       bundlename = "Humidity"
       statename = "Export State"
-      x = 1
       bundle2(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
-                                fieldbundleList=bundle2, itemcount=x, rc=rc)
+                                fieldbundleList=bundle2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a FieldBundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -706,30 +705,12 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Test Creation of an export State with the wrong number of Fields
-      statename = "Export State"
-      x = 4
-      fieldname = "Precipitation"
-      field3(1) = ESMF_FieldEmptyCreate(name=fieldname, rc=rc)
-      state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
-                                fieldList=field3, itemcount=x, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Creating an export State with a bad Field list"
-      print *, "itemcount mismatch, rc = ", rc
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                     name, failMsg, result, ESMF_SRCLINE)
-      call  ESMF_StatePrint(state2, rc=rc)
-      !------------------------------------------------------------------------
-
-
-      !EX_UTest
       ! Test Creation of an export State with a Field
       statename = "Export State"
-      x = 1
       fieldname = "Precipitation"
       field3(1) = ESMF_FieldEmptyCreate(name=fieldname, rc=rc)
       state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATE_EXPORT, &
-                                fieldList=field3(1:1), itemcount=x, rc=rc)
+                                fieldList=field3(1:1), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
