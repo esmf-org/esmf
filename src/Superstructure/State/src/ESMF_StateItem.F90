@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.8 2011/06/09 05:37:40 w6ws Exp $
+! $Id: ESMF_StateItem.F90,v 1.9 2011/06/15 17:33:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,11 +63,14 @@
                 ESMF_STATEITEM_ARRAYBUNDLE  = ESMF_StateItemType(104), &
                 ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItemType(105), &
                 ESMF_STATEITEM_STATE        = ESMF_StateItemType(106), &
+#if 0
                 ESMF_STATEITEM_NAME         = ESMF_StateItemType(107), &
                 ESMF_STATEITEM_INDIRECT     = ESMF_StateItemType(108), &
+#endif
                 ESMF_STATEITEM_UNKNOWN      = ESMF_StateItemType(109), &
                 ESMF_STATEITEM_NOTFOUND     = ESMF_StateItemType(110)
 
+#if 0
 !------------------------------------------------------------------------------
 !     ! ESMF_NeededFlag
 !     !   For an Export State if all data which can potentially be created is
@@ -126,7 +129,7 @@
                 ESMF_VALID = ESMF_ValidFlag(1), &
                 ESMF_INVALID= ESMF_ValidFlag(2), &
                 ESMF_VALIDITYUNKNOWN = ESMF_ValidFlag(3)
-
+#endif
 
 !------------------------------------------------------------------------------
 !     ! ESMF_DataHolder
@@ -164,11 +167,12 @@
       !private
         type(ESMF_DataHolder) :: datap
         type(ESMF_StateItemType) :: otype
+#if 0
         type(ESMF_NeededFlag) :: needed 
         type(ESMF_ReadyFlag) :: ready
         type(ESMF_ValidFlag) :: valid
         type(ESMF_ReqForRestartFlag) :: reqrestart
- 
+#endif
         ! VMId is currently needed for FieldBundles and their indirect Fields. 	 
         type(ESMF_VMId)      :: FldBundleVMId
         logical :: proxyFlag
@@ -220,13 +224,17 @@
         type(ESMF_Base) :: base
         type(ESMF_MethodTable) :: methodTable
         type(ESMF_StateType) :: st
+#if 0
         type(ESMF_NeededFlag) :: needed_default
         type(ESMF_ReadyFlag) :: ready_default
         type(ESMF_ValidFlag) :: stvalid_default
         type(ESMF_ReqForRestartFlag) :: reqrestart_default
+#endif
         integer :: datacount
         type(ESMF_MapPtr) :: nameMap
+#if 0
         type(ESMF_StateItem), pointer :: datalist(:)
+#endif
         type(ESMF_Container):: stateContainer
         integer :: alloccount
         logical :: reconcileneededflag
@@ -239,11 +247,15 @@
       public ESMF_StateItemType, &
         ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
-        ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, ESMF_STATEITEM_NAME, &
+        ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, &
+#if 0
+        ESMF_STATEITEM_NAME, &
+#endif
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateItemConstruct
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_UNSPECIFIED
+#if 0
       public ESMF_NeededFlag, ESMF_NEEDED, &
                                    ESMF_NOTNEEDED
       public ESMF_ReadyFlag,  ESMF_READYTOWRITE, &
@@ -254,11 +266,14 @@
       public ESMF_ValidFlag,  ESMF_VALID, &
                                    ESMF_INVALID, &
                                    ESMF_VALIDITYUNKNOWN
+#endif
 
       ! only public for other files in the state class (should be friend)
       public ESMF_StateClass, ESMF_StateItem, ESMF_StateItemWrap, ESMF_DataHolder
-      public ESMF_STATEITEM_INDIRECT, ESMF_STATEITEM_UNKNOWN
-      public ESMF_STATE_INVALID
+#if 0
+      public ESMF_STATEITEM_INDIRECT
+#endif
+      public ESMF_STATEITEM_UNKNOWN, ESMF_STATE_INVALID
 
   
 !------------------------------------------------------------------------------
@@ -476,7 +491,7 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    localunit = ESMF_UtilIOstdout
+    localunit = ESMF_UtilIOStdout
     if (present (unit)) then
       localunit = unit
     end if
@@ -498,10 +513,12 @@ contains
         outbuf = trim (outbuf) // " Route handle"
     case (ESMF_STATEITEM_STATE%ot)
         outbuf = trim (outbuf) // " State"
+#if 0
     case (ESMF_STATEITEM_NAME%ot)
         outbuf = trim (outbuf) // " Placeholder name"
     case (ESMF_STATEITEM_INDIRECT%ot)
         outbuf = trim (outbuf) // " Indirect Field inside a FieldBundle"
+#endif
     case (ESMF_STATEITEM_UNKNOWN%ot)
         outbuf = trim (outbuf) // " Unknown"
     case (ESMF_STATEITEM_NOTFOUND%ot)

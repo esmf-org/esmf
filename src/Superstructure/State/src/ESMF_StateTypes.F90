@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.46 2011/06/03 20:06:59 w6ws Exp $
+! $Id: ESMF_StateTypes.F90,v 1.47 2011/06/15 17:33:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,12 +72,16 @@
       public ESMF_StateItemType, &
         ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
-        ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, ESMF_STATEITEM_NAME, &
+        ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, &
+#if 0
+        ESMF_STATEITEM_NAME, &
+#endif
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateItemWrap
       public ESMF_StateItemConstruct
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_UNSPECIFIED
+#if ESMF_ENABLE_NEEDED
       public ESMF_NeededFlag, ESMF_NEEDED, &
                                    ESMF_NOTNEEDED
       public ESMF_ReadyFlag,  ESMF_READYTOWRITE, &
@@ -88,10 +92,14 @@
       public ESMF_ValidFlag,  ESMF_VALID, &
                                    ESMF_INVALID, &
                                    ESMF_VALIDITYUNKNOWN
+#endif
 
       ! only public for other files in the state class (should be friend)
       public ESMF_StateClass, ESMF_StateItem, ESMF_DataHolder
-      public ESMF_STATEITEM_INDIRECT, ESMF_STATEITEM_UNKNOWN
+#if 0
+      public ESMF_STATEITEM_INDIRECT
+#endif
+      public ESMF_STATEITEM_UNKNOWN
       public ESMF_STATE_INVALID
 
       ! Public Methods
@@ -116,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.46 2011/06/03 20:06:59 w6ws Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.47 2011/06/15 17:33:43 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -127,17 +135,21 @@
 interface operator (==)
  module procedure ESMF_oteq
  module procedure ESMF_imexeq
+#if ESMF_ENABLE_NEEDED
  module procedure ESMF_needeq
  module procedure ESMF_redyeq
  module procedure ESMF_valideq
+#endif
 end interface
 
 interface operator (/=)
  module procedure ESMF_otne
  module procedure ESMF_imexne
+#if ESMF_ENABLE_NEEDED
  module procedure ESMF_needne
  module procedure ESMF_redyne
  module procedure ESMF_validne
+#endif
 end interface
 
 
@@ -179,6 +191,7 @@ function ESMF_imexne(s1, s2)
 end function
 
 
+#if ESMF_ENABLE_NEEDED
 function ESMF_needeq(s1, s2)
  logical ESMF_needeq
  type(ESMF_NeededFlag), intent(in) :: s1, s2
@@ -222,7 +235,7 @@ function ESMF_validne(s1, s2)
 
  ESMF_validne = (s1%valid /= s2%valid)
 end function
-
+#endif
 
 
 ! -------------------------- ESMF-public method -------------------------------
