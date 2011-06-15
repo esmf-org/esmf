@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.11 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMCI_State_F.C,v 1.12 2011/06/15 17:38:39 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.11 2011/01/05 20:05:47 svasquez Exp $";
+             "$Id: ESMCI_State_F.C,v 1.12 2011/06/15 17:38:39 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -51,11 +51,6 @@ extern "C" {
 // non-method functions
 void FTN(c_esmc_stateserialize)(
                            int *st, 
-                           int *needed_default, 
-                           int *ready_default,
-                           int *stvalid_default, 
-                           int *reqrestart_default, 
-                           int *alloccount, 
                            int *datacount, 
                            char *buffer, int *length, int *offset,
                            ESMC_InquireFlag *inquireflag, int *localrc,
@@ -85,14 +80,9 @@ void FTN(c_esmc_stateserialize)(
     ip = (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = *st; 
-      *ip++ = *needed_default; 
-      *ip++ = *ready_default; 
-      *ip++ = *stvalid_default; 
-      *ip++ = *reqrestart_default; 
-      *ip++ = *alloccount; 
       *ip++ = *datacount; 
     } else
-      ip += 7;
+      ip += 2;
 
     *offset = (char *)ip - buffer;
 
@@ -104,11 +94,6 @@ void FTN(c_esmc_stateserialize)(
 
 void FTN(c_esmc_statedeserialize)(
                              int *st, 
-                             int *needed_default, 
-                             int *ready_default,
-                             int *stvalid_default, 
-                             int *reqrestart_default, 
-                             int *alloccount, 
                              int *datacount, 
                              char *buffer, int *offset, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l){
@@ -119,11 +104,6 @@ void FTN(c_esmc_statedeserialize)(
 
     ip = (int *)(buffer + *offset);
     *st = *ip++; 
-    *needed_default = *ip++; 
-    *ready_default = *ip++; 
-    *stvalid_default = *ip++; 
-    *reqrestart_default = *ip++; 
-    *alloccount = *ip++; 
     *datacount = *ip++; 
 
     *offset = (char *)ip - buffer;
@@ -154,11 +134,6 @@ void FTN(c_esmc_statedeserialize)(
 
 void FTN(c_esmc_stateitemserialize)(int *otype, 
                                char *namep, 
-                               int *indirect_index, 
-                               int *needed,
-                               int *ready, 
-                               int *valid, 
-                               int *reqrestart, 
                                char *buffer, int *length, int *offset,
                                ESMC_InquireFlag *inquireflag, int *localrc,
                                ESMCI_FortranStrLenArg clen,
@@ -182,16 +157,6 @@ void FTN(c_esmc_stateitemserialize)(int *otype,
       memcpy(cp, namep, clen);
     cp += clen;
 
-    ip = (int *)cp;
-    if (*inquireflag != ESMF_INQUIREONLY) {
-      *ip++ = *indirect_index; 
-      *ip++ = *needed; 
-      *ip++ = *ready; 
-      *ip++ = *valid; 
-      *ip++ = *reqrestart; 
-    } else
-      ip += 5;
-
     *offset = (char *)ip - buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
@@ -202,11 +167,6 @@ void FTN(c_esmc_stateitemserialize)(int *otype,
 
 void FTN(c_esmc_stateitemdeserialize)(int *otype, 
                                char *namep, 
-                               int *indirect_index, 
-                               int *needed,
-                               int *ready, 
-                               int *valid, 
-                               int *reqrestart, 
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg clen,
                                ESMCI_FortranStrLenArg buffer_l) {
@@ -222,11 +182,6 @@ void FTN(c_esmc_stateitemdeserialize)(int *otype,
     memcpy(namep, cp, clen);
     cp += clen;
     ip = (int *)cp;
-    *indirect_index = *ip++; 
-    *needed = *ip++; 
-    *ready = *ip++; 
-    *valid = *ip++; 
-    *reqrestart = *ip++; 
 
     *offset = (char *)ip - buffer;
 
