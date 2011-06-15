@@ -1,4 +1,4 @@
-% $Id: State_rest.tex,v 1.13 2011/01/05 20:05:47 svasquez Exp $
+% $Id: State_rest.tex,v 1.14 2011/06/15 01:20:43 w6ws Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -11,14 +11,6 @@
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
-\item{\bf Flags not fully implemented.}
-The flags for indicating various qualities associated with 
-data items in a State - validity, whether or not the item is
-required for restart, read/write status - are not fully implemented.
-Although their defaults can be set, the associated methods for 
-setting and getting these flags have not been implemented.
-(The {\tt needed} flag is fully supported.)
-
 \item{\bf No synchronization of object ids at object create time.}
 Object IDs are using during the reconcile process to identify objects
 which are unknown to some subset of the PETs in the currently running VM.
