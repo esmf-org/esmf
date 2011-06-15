@@ -1,4 +1,4 @@
-! $Id: ESMF_StateSet.F90,v 1.12 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_StateSet.F90,v 1.13 2011/06/15 17:27:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateSet.F90,v 1.12 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_StateSet.F90,v 1.13 2011/06/15 17:27:20 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetNeeded"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
 !
 ! !INTERFACE:
@@ -115,7 +115,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
 !
-!EOP
+!EOPI
 
       type(ESMF_StateItem), pointer :: dataitem
       logical :: exists
@@ -133,16 +133,16 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
-                                      dataitem=dataitem, rc=localrc)
-      if (.not. exists) then
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=itemName, &
-                                      ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-
-      dataitem%needed = neededflag
-
-      if (present(rc)) rc = ESMF_SUCCESS
+!      exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
+!                                      dataitem=dataitem, rc=localrc)
+!      if (.not. exists) then
+!          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=itemName, &
+!                                      ESMF_CONTEXT, rcToReturn=rc)) return
+!      endif
+!
+!      dataitem%needed = neededflag
+!
+!      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateSetNeeded
 !------------------------------------------------------------------------------
