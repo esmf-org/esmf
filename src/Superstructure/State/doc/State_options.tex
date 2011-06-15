@@ -1,4 +1,4 @@
-% $Id: State_options.tex,v 1.13 2008/04/02 20:42:59 cdeluca Exp $
+% $Id: State_options.tex,v 1.14 2011/06/15 01:18:34 w6ws Exp $
 
 \subsubsection{ESMF\_StateItemType}
 \label{opt:stateitemtype}
@@ -9,17 +9,16 @@ Specifies the type of object being added to or retrieved from an
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_STATEITEM\_BUNDLE] 
-         Refers to an {\tt ESMF\_FieldBundle} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_FIELD]
-         Refers to an {\tt ESMF\_Field} within an {\tt ESMF\_State}.
    \item [ESMF\_STATEITEM\_ARRAY]
          Refers to an {\tt ESMF\_Array} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_ARRAYBUNDLE]
+         Refers to an {\tt ESMF\_Array} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_FIELD]
+         Refers to a {\tt ESMF\_Field} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_FIELDBUNDLE] 
+         Refers to a {\tt ESMF\_FieldBundle} within an {\tt ESMF\_State}.
    \item [ESMF\_STATEITEM\_STATE]
-         Refers to an {\tt ESMF\_State} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_NAME]
-         Refers to a data name used as a placeholder within 
-         an {\tt ESMF\_State}.
+         Refers to a {\tt ESMF\_State} within an {\tt ESMF\_State}.
    \item [ESMF\_STATEITEM\_NOTFOUND]
          Only valid as a return object type from a query routine.  Indicates
          that no object with this name exists in the {\tt ESMF\_State}.
