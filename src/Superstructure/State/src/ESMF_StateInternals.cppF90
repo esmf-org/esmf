@@ -1,0 +1,1378 @@
+! $Id: ESMF_StateInternals.cppF90,v 1.1 2011/06/15 17:23:11 w6ws Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!==============================================================================
+!
+^define ESMF_FILENAME "ESMF_StateInternals.F90"
+!
+!     ESMF State module
+module ESMF_StateInternalsMod
+!
+!==============================================================================
+!
+! This file contains the State class definition and all State
+! class methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+!------------------------------------------------------------------------------
+^include "ESMF.h"
+
+! The following macro is used to get around the first pass preprocessing,
+! which treats the string concatenation operator // as an inline comment.
+^define CONCAT /
+!------------------------------------------------------------------------------
+!BOPI
+! !MODULE: ESMF_StateMod - Data exchange between components
+!
+! !DESCRIPTION:
+!
+! The code in this file implements the Fortran function and subroutine 
+!  interfaces to the {\tt State} class and associated data structures.
+!
+!
+! !USES:
+      use ESMF_UtilTypesMod
+      use ESMF_LogErrMod
+      use ESMF_BaseMod
+      use ESMF_ContainerMod
+      use ESMF_VMMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayBundleMod
+      use ESMF_FieldMod
+      use ESMF_FieldGetMod
+      use ESMF_FieldBundleMod
+      use ESMF_RHandleMod
+      use ESMF_StateTypesMod
+      use ESMF_StateContainerMod
+      use ESMF_StateVaMod
+      use ESMF_InitMacrosMod
+      
+      implicit none
+      
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+      private
+      
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+
+!------------------------------------------------------------------------------
+
+! !PUBLIC MEMBER FUNCTIONS:
+
+      public :: ESMF_StateConstruct, ESMF_StateConstructEmpty
+      public :: ESMF_StateDestruct
+
+      public :: ESMF_StateClsAdd
+
+      public :: ESMF_StateSerialize, ESMF_StateDeserialize
+      public :: ESMF_StateClassFindData
+      
+!EOPI
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_StateInternals.cppF90,v 1.1 2011/06/15 17:23:11 w6ws Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateAdd -- Add items to a State
+
+! !INTERFACE:
+  interface ESMF_StateClsAdd
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_StateClsAddRHandleList
+    module procedure ESMF_StateClsAddArrayList
+    module procedure ESMF_StateClsAddArrayBundleList
+    module procedure ESMF_StateClsAddFieldList
+    module procedure ESMF_StateClsAddFieldBundleList
+    module procedure ESMF_StateClsAddStateList
+
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateConstruct"
+!BOPI
+! !IROUTINE: ESMF_StateConstruct -- Construct a new State
+
+! !INTERFACE:
+      subroutine ESMF_StateConstruct(stypep, statename, statetype, & 
+                         arrays, arraybundles, &
+                         fields, fieldbundles, &
+                         routehandles, states, &
+                         itemCount, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_StateClass), pointer :: stypep
+      character(len=*),       intent(in),  optional :: statename 
+      type(ESMF_StateType),   intent(in),  optional :: statetype
+      type(ESMF_Array),       intent(in),  optional :: arrays(:)
+      type(ESMF_ArrayBundle), intent(in),  optional :: arraybundles(:)
+      type(ESMF_Field),       intent(in),  optional :: fields(:)
+      type(ESMF_FieldBundle), intent(in),  optional :: fieldbundles(:)
+      type(ESMF_RouteHandle), intent(in),  optional :: routehandles(:)
+      type(ESMF_State),       intent(in),  optional :: states(:)
+      integer,                intent(in),  optional :: itemCount
+      integer,                intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Construct a new State and set the decomposition characteristics.
+!  The return value is a new State.
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[stypep]
+!    Internal StateClass pointer.  Required.
+!   \item[{[statename]}]
+!    Name of this {\tt ESMF\_State} object. 
+!   \item[{[statetype]}]
+!    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATE\_IMPORT},
+!    {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.   
+!    {\tt ESMF\_STATE\_LIST} is the default if not specified.
+!   \item[{[arrays]}]
+!    An array of {\tt ESMF\_Arrays}.
+!   \item[{[arraybundles]}]
+!    An array of {\tt ESNF\_ArrayBundle}s.
+!   \item[{[fields]}]
+!    An array of {\tt ESMF\_Field}s.
+!   \item[{[fieldbundles]}]
+!    An array of {\tt ESMF\_FieldBundle}s.
+!   \item[{[states]}]
+!    An array of nested {\tt ESMF\_State}s.
+!   \item[{[routehandles]}]
+!    An array of {\tt ESMF\_RouteHandle}s.
+!   \item[{[itemCount]}]
+!    Initial size of the internal item array.  Must be at least the
+!    sum of sizes of the arrays, arraybundles, fields, fieldbundles, names,
+!    routehandles, and states arrays.  If it is set too small, the initial
+!    size will be set to the sum of sizes of the arrays.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+
+        ! Local vars
+        integer :: localitemcount
+        integer :: localrc                   ! local error status
+        character(ESMF_MAXSTR) :: errmsg
+        integer :: i
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        localrc = ESMF_RC_NOT_IMPL
+
+        ! check input variables
+        localitemcount = 0
+        if (present(arrays)) then
+           do i=1,size(arrays)
+              ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrays(i),rc)
+           enddo
+           localitemcount = localitemcount + size (arrays)
+        endif
+        if (present(arraybundles)) then
+           do i=1,size(arraybundles)
+              ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
+           enddo
+           localitemcount = localitemcount + size (arraybundles)
+        endif
+        if (present(fields)) then
+           do i=1,size(fields)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
+           localitemcount = localitemcount + size (fields)
+           enddo
+        endif
+        if (present(fieldbundles)) then
+           do i=1,size(fieldbundles)
+              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
+           localitemcount = localitemcount + size (fieldbundles)
+           enddo
+        endif
+        if (present(states)) then
+           do i=1,size(states)
+              ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
+           enddo
+           localitemcount = localitemcount + size (states)
+        endif
+        if (present(routehandles)) then
+           do i=1,size(routehandles)
+              ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
+           enddo
+           localitemcount = localitemcount + size (routehandles)
+        endif
+
+        if (present (itemCount)) then
+          if (itemCount < localitemcount) then
+            write (errmsg,*)  &
+               'itemCount', itemCount, ' too small.  Setting to', localitemcount
+            call ESMF_LogWrite (trim (errmsg), ESMF_LOG_INFO,  &
+                method=ESMF_METHOD, rc=rc)
+          end if
+          localitemcount = max (localitemcount, itemCount)
+        end if
+
+        ! Set initial values
+        call ESMF_StateConstructEmpty(stypep, statename, statetype, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      
+        ! For each item type, set the data values.  All the allocation 
+        !  has already been done.
+
+        if (present(arrays)) then
+          if (size (arrays) > 0) then
+            call ESMF_StateClsAddArrayList(stypep,  &
+              arrays, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+        if (present(arraybundles)) then
+          if (size(arraybundles) > 0) then
+            call ESMF_StateClsAddArrayBundleList(stypep,  &
+              arraybundles, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+        if (present(fields)) then
+          if (localitemcount > 0) then
+            call ESMF_StateClsAddFieldList(stypep,  &
+              fields, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+        if (present(fieldbundles)) then
+          if (size (fieldbundles) > 0) then
+            call ESMF_StateClsAddFieldBundleList(stypep,  &
+              fieldbundles, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+        if (present(routehandles)) then
+          if (size (routehandles) > 0) then
+            call ESMF_StateClsAddRHandleList(stypep,  &
+              routehandles, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+        if (present(states)) then
+          if (size (states) > 0) then
+            call ESMF_StateClsAddStateList(stypep,  &
+              states, addflag=.true., rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
+        endif
+
+
+        ! Set return values
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_StateConstruct
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateConstructEmpty"
+!BOPI
+! !IROUTINE: ESMF_StateConstructEmpty -- Create a new State specifying no data
+
+! !INTERFACE:
+      subroutine ESMF_StateConstructEmpty(stypep, statename, statetype, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_StateClass), pointer             :: stypep
+      character(len=*),     intent(in),  optional :: statename 
+      type(ESMF_StateType), intent(in),  optional :: statetype
+      integer,              intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Construct a new empty {\tt State}.  The return value is a new {\tt State}.
+!    
+!      The arguments are:
+!      \begin{description}
+!       \item[{[stypep]}]
+!       Internal StateClass pointer.  Required.
+!       \item[{[statetype]}]
+!        Import or Export {\tt State}.  One of {\tt ESMF\_STATE\_IMPORT},
+!        {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.  Default is 
+!        {\tt ESMF\_STATE\_LIST}.
+!       \item[{[statename]}]
+!        Name of this {\tt ESMF\_State} object.  Optional.  If a name is not
+!        specified one will be generated.
+!       \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!EOPI
+
+        ! Local vars
+        integer :: localrc                   ! local error status
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! Initialize the base object, set the name, etc.
+        call ESMF_BaseCreate(stypep%base, "State", statename, nattr=0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Fill in basic information
+        if (present(statetype)) then
+          stypep%st = statetype
+        else
+          stypep%st = ESMF_STATE_UNSPECIFIED
+        endif
+        stypep%reconcileneededflag = .false.
+
+        stypep%stateContainer = ESMF_ContainerCreate (rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! create methodTable object
+        call c_ESMC_MethodTableCreate(stypep%methodTable, localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! Set as created
+        ESMF_INIT_SET_CREATED(stypep)
+
+        ! set return values
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_StateConstructEmpty
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateDestruct"
+!BOPI
+! !IROUTINE: ESMF_StateDestruct -- Internal routine to deallocate space
+!
+! !INTERFACE:
+      recursive subroutine ESMF_StateDestruct(stypep, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateClass), pointer :: stypep
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Releases all resources associated with this {\tt State}. In particular
+!     all associated proxy objects are destroyed.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[stypep]
+!       Destroy contents of this {\tt ESMF\_StateClass}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+        ! Local vars
+        integer :: localrc
+        integer :: memstat      ! Stat from allocate/deallocate
+        type(ESMF_Status):: status
+        type(ESMF_StateItemWrap), pointer :: scwrap(:)
+        integer :: i
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        call ESMF_BaseGetStatus(stypep%base, status, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        
+        if (status .eq. ESMF_STATUS_READY) then
+        
+          ! mark object invalid, and free each of the blocks associated
+          ! with each entry.  note that we are not freeing the objects
+          ! themselves; they could be added to multiple states.  it is
+          ! the user|s responsibility to delete them when finished.
+          stypep%st = ESMF_STATE_INVALID
+
+          ! Remove StateItem entries, then the container itself.
+          scwrap => null ()
+          call ESMF_ContainerGet (stypep%stateContainer, itemList=scwrap,  &
+              rc=localrc)
+          if (ESMF_LogFoundError (localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+          do, i=1, size (scwrap)
+
+            ! TODO: Do we need to clean up attributes here?
+
+            deallocate (scwrap(i)%si, stat=memstat)
+            if (ESMF_LogFoundAllocError (memstat, &
+        	ESMF_ERR_PASSTHRU, &
+        	ESMF_CONTEXT, rcToReturn=rc)) return
+          end do
+
+          call ESMF_ContainerDestroy (stypep%stateContainer, rc=localrc)
+          if (ESMF_LogFoundError (localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! TODO: Do we need to clean up attributes here?
+
+          ! destroy the methodTable object
+          call c_ESMC_MethodTableDestroy(stypep%methodTable, localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        endif
+
+        ! Set as deleted
+        ESMF_INIT_SET_DELETED(stypep)
+
+        ! Set return code if user specified it
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_StateDestruct
+
+#define StateClsAddListDoc(mtype, mentryname, mname, mtypecomponent, mtypetext) \
+!------------------------------------------------------------------------------ @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateClsAddList" @\
+!BOPI @\
+! !IROUTINE: ESMF_StateClsAdd##mentryname##List - Add a list of RouteHandles to a StateClass @\
+! @\
+! !INTERFACE: @\
+      subroutine ESMF_StateClsAdd##mentryname##List(stypep, mname, & @\
+          addflag, replaceflag, relaxflag, proxyflag, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(ESMF_StateClass), pointer    :: stypep @\
+      type(mtype),           intent(in) :: mname(:) @\
+      logical,               intent(in),  optional :: addflag @\
+      logical,               intent(in),  optional :: replaceflag @\
+      logical,               intent(in),  optional :: relaxflag @\
+      logical,               intent(in),  optional :: proxyflag @\
+      integer,               intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+!      Add multiple mtype to an {\tt ESMF\_State}.  Internal routine only. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item[stypep] @\
+!       Pointer to {\tt ESMF\_StateClass}. @\
+!     \item[mname] @\
+!       The array of mtype##s to be added. @\
+!     \item[addflag] @\
+!       If set, indicates a add operation where there must be no @\
+!       pre-existing item with the same name.  If there is a pre-existing @\
+!       item, and the replaceflag is also not set, an error is returned. @\
+!     \item[{[replaceflag]}] @\
+!       If set, indicates a replacement operation where there must be an @\
+!       pre-existing item with the same name.  If there is no pre-existing @\
+!       item, an error is returned. @\
+!     \item[{[relaxedflag]}] @\
+!       If set, an operation which would otherwise cause an error is allowed @\
+!       to quietly finish attemping to add other items in the list. @\
+!     \item[{[proxyflag]}] @\
+!       Indicate whether this is a proxy object.  @\
+!     \item[{[rc]}] @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+!EOPI @\
+!------------------------------------------------------------------------------ @\
+
+#define StateClsAddListMacro(mtype, mentryname, mname, mtypecomponent, mtypetext) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateClsAddList" @\
+!BOPI @\
+! !IROUTINE: ESMF_StateClsAdd##mentryname##List - Add a list of items to a StateClass @\
+! @\
+! !INTERFACE: @\
+    subroutine ESMF_StateClsAdd##mentryname##List(stypep, mname, & @\
+        addflag, replaceflag, relaxflag, proxyflag, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(ESMF_StateClass), pointer    :: stypep @\
+      type(mtype), intent(in) :: mname(:) @\
+      logical, intent(in),  optional :: addflag @\
+      logical, intent(in),  optional :: replaceflag @\
+      logical, intent(in),  optional :: relaxflag @\
+      logical, intent(in),  optional :: proxyflag @\
+      integer, intent(out), optional :: rc @\
+!EOPI @\
+      integer :: localrc                  ! local error status @\
+      logical :: localaddflag             ! local add-only flag @\
+      logical :: localrepflag             ! local replace-only flag @\
+      logical :: localrelaxflag           ! local relaxed flag @\
+      type(ESMF_StateItem), pointer :: sip @\
+      type(ESMF_StateItemWrap)   :: siwrap(1) @\
+      character(len=ESMF_MAXSTR) :: itemname @\
+      character(len=ESMF_MAXSTR) :: errmsg @\
+      integer :: i @\
+      integer :: itemcount @\
+      logical :: exists @\
+      integer :: memstat @\
+ @\
+      ! Initialize return code.  Assume failure until success assured. @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc) @\
+      itemcount = size (mname) @\
+      do i=1, itemcount @\
+         ESMF_INIT_CHECK_DEEP_SHORT(mtype##GetInit,mname(i),rc) @\
+      end do @\
+ @\
+      localaddflag = .false. @\
+      if (present (addflag)) then @\
+        localaddflag = addflag @\
+      end if @\
+ @\
+      localrepflag = .false. @\
+      if (present (replaceflag)) then @\
+        localrepflag = replaceflag @\
+      end if @\
+ @\
+      localrelaxflag = .false. @\
+      if (present (relaxflag)) then @\
+        localrelaxflag = relaxflag @\
+      end if @\
+ @\
+      if (.not. localaddflag .and. .not. localrepflag) then @\
+        if (ESMF_LogFoundError(ESMF_RC_ARG_BAD,  & @\
+            msg="must specify either add or replace", & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
+      end if @\
+ @\
+      ! Add the items to the state, checking for name clashes @\
+ @\
+      ! For each item... @\
+      do i=1, itemcount @\
+ @\
+^if defined(stateversion) @\
+        ! Do a one-level check for adding a State to itself, but no deeper. @\
+        ! If a nested State is added to another State, and then the combined @\
+        ! State is added to the original State, this code is not going to  @\
+        ! detect that loop. @\
+        if (associated(stypep, mname(i)%statep)) then @\
+           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+              msg="Cannot add a State to itself", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
+          return @\
+        endif @\
+ @\
+        call ESMF_GetName (mname(i)%statep%base, name=itemname, rc=localrc) @\
+^else @\
+        call mtype##Get(mname(i), name=itemname, rc=localrc) @\
+^endif @\
+        if (ESMF_LogFoundError(localrc, & @\
+            ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+        ! See if this name is already in the state @\
+        exists = ESMF_StateClassFindData (stypep, itemname, expected=.false., & @\
+            dataitem=sip, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, & @\
+            ESMF_ERR_PASSTHRU, & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+        ! Decide whether to insert/replace the item depending on @\
+        ! caller preference. @\
+ @\
+        if (exists) then @\
+          ! can do addrep or replace.  Or add w/relaxed @\
+          if (localaddflag .and. .not. localrelaxflag) then @\
+            errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not replacable" @\
+            if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
+                msg = trim (errmsg), & @\
+                ESMF_CONTEXT, rcToReturn=rc)) return @\
+          end if @\
+          ! TODO - should check to make sure sip%otype @\
+          ! is compatible, or should be changed. @\
+        else @\
+          ! can do add or addrep.  Or replace w/relaxed @\
+          if (localrepflag .and. .not. localrelaxflag) then @\
+            errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not found" @\
+            if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
+                msg = trim (errmsg), & @\
+                ESMF_CONTEXT, rcToReturn=rc)) return @\
+          end if @\
+          sip => ESMF_StateItemConstruct (name=itemname,  & @\
+              itemtype=ESMF_STATEITEM_##mtypetext, proxyflag=proxyflag,  & @\
+              rc=localrc) @\
+          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, & @\
+              ESMF_CONTEXT, rcToReturn=rc)) return @\
+        end if @\
+ @\
+^if defined(stateversion) @\
+!        TODO: This needs to be verified... @\
+         sip%datap%spp => mname(i)%statep ! State version @\
+^else @\
+        sip%datap%mtypecomponent = mname(i) @\
+^endif @\
+ @\
+        siwrap(1)%si => sip @\
+        if (localaddflag .and. localrepflag) then @\
+          call ESMF_ContainerAddReplace (stypep%stateContainer,  & @\
+              itemList=siwrap, rc=localrc) @\
+        else if (localaddflag) then @\
+          call ESMF_ContainerAdd (stypep%stateContainer,  & @\
+              itemList=siwrap, rc=localrc) @\
+        else  @\
+          call ESMF_ContainerReplace (stypep%stateContainer,  & @\
+              itemList=siwrap, rc=localrc) @\
+        end if @\
+        if (ESMF_LogFoundError (localrc,  & @\
+            ESMF_ERR_PASSTHRU,  & @\
+            ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      end do @\
+ @\
+      stypep%reconcileneededFlag = .true. @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+    end subroutine ESMF_StateClsAdd##mentryname##List
+
+StateClsAddListMacro(ESMF_RouteHandle, RHandle, routehandles, rp, ROUTEHANDLE)
+StateClsAddListMacro(ESMF_Array, Array, arrays, ap, ARRAY)
+StateClsAddListMacro(ESMF_ArrayBundle, ArrayBundle, arraybundles, abp, ARRAYBUNDLE)
+StateClsAddListMacro(ESMF_Field, Field, fields, fp, FIELD)
+StateClsAddListMacro(ESMF_FieldBundle, FieldBundle, fieldbundles, fbp, FIELDBUNDLE)
+! ESMF_State version must use a different 'Get' call since we are below the API
+! call.
+^define stateversion
+StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
+^undef  stateversion
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateClassFindData"
+!BOPI
+! !IROUTINE: ESMF_StateClassFindData - internal routine to find data item by name
+!
+! !INTERFACE:
+      function ESMF_StateClassFindData(stypep, dataname, expected, nestedFlag, &
+                                      dataitem, dataState, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_StateClassFindData
+!
+! !ARGUMENTS:
+      type(ESMF_StateClass), pointer               :: stypep
+      character (len=*),     intent(in)            :: dataname
+      logical,               intent(in)            :: expected
+      logical,               intent(in),  optional :: nestedFlag
+      type(ESMF_StateItem),  pointer,     optional :: dataitem
+      type(ESMF_StateClass), pointer,     optional :: dataState
+      integer,               intent(out), optional :: rc             
+
+! !DESCRIPTION:
+!    Returns {\tt TRUE} if a data item with this name is found, and returns
+!    a pointer to it in the {\tt dataitem} argument.  Returns {\tt FALSE}
+!    if this name is not found.  If {\tt expected} is true and the name is
+!    not found, sets error code on return.  Otherwise does NOT set error code
+!    and the return value is simply the answer to a query.  Sets error code
+!    in either case if true error conditions are found.
+!
+!     The arguments are:
+!     \begin{description}     
+!     \item[stypep]
+!       {\tt ESMF\_StateClass} to query.
+!      \item[dataname]
+!       Name of the data item to query.
+!      \item[expected]
+!       Logical.  If set to {\tt true} the name must be found or an error code 
+!       is set. The default is {\tt false} and the error code is not set if 
+!       the name is not found.
+!      \item[{[nestedFlag]}]
+!       If set to {\tt .true.}, will search nested States for
+!       {\tt dataname}.
+!      \item[{[dataitem]}]
+!       Pointer to the corresponding {\tt ESMF\_StateItem} item if one is
+!       found with the right name.
+!      \item[{[dataState]}]
+!       Pointer to the State where the item was found.
+!      \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!EOPI
+
+      integer :: localrc                  ! local error status
+      integer :: memstat                  ! Stat from allocate/deallocate
+      logical :: itemfound
+      type(ESMF_StateClass), pointer  :: nested_sp
+      type(ESMF_StateItemWrap) :: siwrap
+      character(len=ESMF_MAXSTR) :: errmsg
+      logical :: usenested_lookup
+
+      ! Initialize return code.  Assume failure until success assured.
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      ESMF_StateClassFindData = .FALSE.
+  
+      ! This function is only called internally, so technicaly we do not need
+      ! to check the validity of the state - it has been checked before we
+      ! get here.  TODO: eliminate the check if it proves costly.
+
+      ESMF_INIT_CHECK_DEEP(ESMF_StateClassGetInit,stypep,rc)
+
+      usenested_lookup = .false.
+      if (present (nestedFlag)) then
+        usenested_lookup = nestedFlag
+      end if
+
+      if (usenested_lookup .and. index (dataname, '/') /= 0) then
+        if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  &
+            ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
+      if (.not. usenested_lookup) then
+        call find_pathed_item_worker (stypep, lpath=dataname,  &
+            lfound=itemfound, litem=dataitem, lstate=dataState)
+      else
+        call ESMF_ContainerGet (stypep%stateContainer, itemName=dataname,  &
+            isPresent=itemfound, rc=localrc)
+        if (ESMF_LogFoundError (localrc,  &
+            ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (itemfound) then
+          call ESMF_ContainerGet (stypep%stateContainer, itemName=dataname,  &
+              item=siwrap, rc=localrc)
+          if (ESMF_LogFoundError (localrc,  &
+              ESMF_ERR_PASSTHRU,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          dataitem => siwrap%si
+          if (present (dataState)) dataState => stypep
+        else
+          call find_nested_item_worker (stypep,  &
+              lfound=itemfound, litem=dataitem, lstate=dataState)
+        end if
+      end if
+
+      if (itemfound) then
+        ESMF_StateClassFindData = .TRUE.
+        localrc = ESMF_SUCCESS
+      else   ! item not found
+        ESMF_StateClassFindData = .FALSE.
+        if (expected) then 
+          localrc = ESMF_FAILURE
+        else
+          localrc = ESMF_SUCCESS
+        end if
+      end if
+
+      if (present(rc)) rc = localrc
+
+      contains
+
+        recursive subroutine find_nested_item_worker (sp,  &
+            lfound, litem, lstate)
+          type(ESMF_StateClass), pointer  :: sp
+          logical,               intent(out) :: lfound
+          type(ESMF_StateItem),  pointer, optional :: litem
+          type(ESMF_StateClass), pointer, optional :: lstate
+
+          ! Given a simple non-qualified name, search all nested
+          ! states for the the item.
+
+          type(ESMF_StateClass), pointer  :: sp_local
+          integer       :: i1
+          integer       :: localrc1
+          type(ESMF_StateItemWrap), pointer :: siwrap(:)
+          type(ESMF_StateItemWrap) :: siwrap1
+          type(ESMF_StateItem), pointer :: sip1
+          integer :: dcount1
+          integer :: memstat1
+
+!          print *, 'find_nested_item_worker: entered'
+
+          ! Scan this levels list of names
+
+          lfound = .false.
+
+          call ESMF_ContainerGet (sp%stateContainer,  &
+              itemname=dataname, isPresent=lfound, rc=localrc1)
+          if (ESMF_LogFoundError (localrc1,  &
+               ESMF_ERR_PASSTHRU,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          sip1 => null ()
+          if (lfound) then
+            call ESMF_ContainerGet (sp%stateContainer,  &
+                itemName=dataname,  &
+                item=siwrap1, rc=localrc1)
+            if (ESMF_LogFoundError (localrc1,  &
+                 ESMF_ERR_PASSTHRU,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+            if (present (litem))  litem  => siwrap1%si
+            if (present (lstate)) lstate => sp
+          else
+            ! Search this level for nested States and recurse on them
+            siwrap => null ()
+            call ESMF_ContainerGet (sp%stateContainer, itemCount=dcount1,  &
+                itemList=siwrap, rc=localrc1)
+
+            do, i1=1, dcount1
+              sip1 => siwrap(i1)%si
+              if (sip1%otype == ESMF_STATEITEM_STATE) then
+                sp_local => sip1%datap%spp
+                call find_nested_item_worker (sp_local, lfound, litem, lstate)
+                if (lfound) exit
+              end if
+            end do
+            if (associated (siwrap)) then
+              deallocate (siwrap, stat=memstat1)
+              if (ESMF_LogFoundDeallocError(memstat1, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+            end if
+          end if
+
+!          print *, 'find_nested_item_worker: exiting.  Found flag =', lfound
+
+
+        end subroutine find_nested_item_worker
+
+        recursive subroutine find_pathed_item_worker (sp, lpath,  &
+            lfound, litem, lstate)
+          type(ESMF_StateClass), pointer  :: sp
+          character(*), intent(in)  :: lpath
+          logical,      intent(out) :: lfound
+          type(ESMF_StateItem),  pointer, optional :: litem
+          type(ESMF_StateClass), pointer, optional :: lstate
+
+          type(ESMF_StateClass), pointer  :: sp_local
+          character(len (lpath)) :: itempath_local
+          integer :: slashpos
+          integer :: i1
+          integer :: localrc1
+          type(ESMF_StateItemWrap) :: siwrap
+          type(ESMF_StateItem), pointer :: nextitem1
+          integer :: dcount1
+
+          ! print *, 'find_pathed_item_worker: entered.'
+          ! print *, '  lpath = ', trim (lpath)
+
+        ! Strip leading slashes
+
+          do, i1=1, len (lpath)
+            if (lpath(i1:i1) /= '/') exit
+          end do
+          if (i1 > len (lpath)) then
+             itempath_local = lpath
+          else
+             itempath_local = lpath(i1:)
+          end if
+
+          slashpos = index (itempath_local, '/')
+
+        ! Look for the name for this level
+
+          lfound = .false.
+
+          if (slashpos > 0) then
+            ! Midway through the path, so only a State name is valid
+            call ESMF_ContainerGet (sp%stateContainer,  &
+        	itemname=itempath_local(:slashpos-1), isPresent=lfound,  &
+                rc=localrc1)
+            if (ESMF_LogFoundError (localrc1,  &
+        	 ESMF_ERR_PASSTHRU,  &
+        	 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (lfound) then
+              call ESMF_ContainerGet (sp%stateContainer,  &
+                  itemName=itempath_local(:slashpos-1),  &
+                  item=siwrap,  &
+                  rc=localrc1)
+              if (ESMF_LogFoundError (localrc1,  &
+                   ESMF_ERR_PASSTHRU,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              nextitem1 => siwrap%si
+              if (nextitem1%otype == ESMF_STATEITEM_STATE) then
+                sp_local => nextitem1%datap%spp
+                call find_pathed_item_worker (sp_local,  &
+                    itempath_local(slashpos+1:),  &
+                    lfound, litem, lstate)
+              else
+                lfound = .false.
+              end if
+            end if
+
+          else
+            ! End of path, so any item is OK
+            !print *, '  lpath = ', trim (itempath_local)
+            call ESMF_ContainerGet (sp%stateContainer,  &
+        	itemname=itempath_local, isPresent=lfound, rc=localrc1)
+            if (ESMF_LogFoundError (localrc1,  &
+        	 ESMF_ERR_PASSTHRU,  &
+        	 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (lfound) then
+              call ESMF_ContainerGet (sp%stateContainer,  &
+                  itemName=itempath_local,  &
+                  isPresent=lfound, item=siwrap,  &
+                  rc=localrc1)
+              if (ESMF_LogFoundError (localrc1,  &
+                  ESMF_ERR_PASSTHRU,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+              if (present (litem))  litem  => siwrap%si
+              if (present (lstate)) lstate => sp
+            end if
+          end if
+
+          ! print *, 'find_pathed_item_worker: exiting.  Found flag =', lfound
+
+
+        end subroutine find_pathed_item_worker
+
+      end function ESMF_StateClassFindData
+
+!------------------------------------------------------------------------------
+
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_StateSerialize - Serialize state info into a byte stream
+!
+! !INTERFACE:
+      recursive subroutine ESMF_StateSerialize(state, buffer, length, offset, &
+                                              attreconflag, inquireflag, rc) 
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state 
+      character, pointer     :: buffer(:)
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      type(ESMF_InquireFLag),      intent(in), optional :: inquireflag
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_State} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_StateWrite()} and {\tt ESMF\_StateRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!           {\tt ESMF\_State} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute serialization is to be done
+!     \item[{[inquireflag]}}
+!           Flag to tell if serialization is to be done (ESMF_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF_INQUIREONLY)
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                          ! Error status
+      integer :: memstat                          ! Stat from allocate/deallocate
+      integer :: i
+      type(ESMF_StateClass), pointer :: sp        ! internal pointer
+      type(ESMF_StateItemWrap), pointer :: siwrap(:)
+      type(ESMF_StateItem),  pointer :: sip       ! state item
+      type(ESMF_State) :: wrapper
+      type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_InquireFlag) :: linquireflag
+      integer :: datacount
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      ! deal with optional attreconflag and inquireflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
+
+      if (present (inquireflag)) then
+        linquireflag = inquireflag
+      else
+        linquireflag = ESMF_NOINQUIRE
+      end if
+
+      ! shortcut to internals
+      sp => state%statep
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call c_ESMC_BaseSerialize(sp%base, buffer, length, offset, lattreconflag,  &
+          linquireflag, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      siwrap => null ()
+      call ESMF_ContainerGet (sp%stateContainer,  &
+          itemCount=datacount, itemList=siwrap,  &
+          rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call c_ESMC_StateSerialize(sp%st, datacount, &
+                                 buffer, length, offset, linquireflag, &
+                                 localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) then
+        deallocate (siwrap, stat=memstat)
+	if (ESMF_LogFoundDeallocError(memstat, &
+        	 msg="space for serialization", &
+        	 ESMF_CONTEXT, rcToReturn=rc)) continue
+        return
+      end if
+
+      do i = 1, datacount
+          sip => siwrap(i)%si
+
+          call c_ESMC_StateItemSerialize(sip%otype, sip%namep, &
+                                         buffer, length, offset, &
+                                         linquireflag, localrc)
+
+          select case (sip%otype%ot)
+            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+             call ESMF_FieldBundleSerialize(sip%datap%fbp, buffer, length, &
+                                       offset, attreconflag=lattreconflag, &
+                                       inquireflag=linquireflag, rc=localrc)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_FIELD%ot)
+             call ESMF_FieldSerialize(sip%datap%fp, buffer, length, &
+                                       offset, attreconflag=lattreconflag, &
+                                       inquireflag=linquireflag, rc=localrc)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_ARRAY%ot)
+             call c_ESMC_ArraySerialize(sip%datap%ap, buffer(1), &
+                                       length, offset, lattreconflag, &
+                                       linquireflag, localrc)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+             call c_ESMC_ArrayBundleSerialize(sip%datap%abp, buffer(1), &
+                                       length, offset, lattreconflag, &
+                                       linquireflag, localrc)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_STATE%ot)
+             wrapper%statep => sip%datap%spp
+             ESMF_INIT_SET_CREATED(wrapper)             
+             call ESMF_StateSerialize(wrapper, buffer, length, offset, &
+                                       attreconflag=lattreconflag, &
+                                       inquireflag=linquireflag, rc=localrc)
+#if 0
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_NAME%ot)
+             call c_ESMC_StringSerialize(sip%namep, buffer(1), &
+                                         length, offset, linquireflag, localrc)
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_INDIRECT%ot)
+#endif
+              continue ! TODO: serialize
+            case (ESMF_STATEITEM_UNKNOWN%ot)
+              continue ! TODO: serialize
+          end select
+
+      enddo
+
+      if (associated (siwrap)) then
+        deallocate (siwrap, stat=memstat)
+	if (ESMF_LogFoundDeallocError(memstat, &
+        	 msg="space for serialization", &
+        	 ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateSerialize
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_StateDeserialize - Deserialize a byte stream into a State
+!
+! !INTERFACE:
+    recursive function ESMF_StateDeserialize(vm, buffer, offset, &
+                                            attreconflag, rc) &
+              result (substate)
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: substate   
+!
+! !ARGUMENTS:
+      type(ESMF_VM), intent(in)    :: vm
+      character,     pointer       :: buffer(:)
+      integer,       intent(inout) :: offset
+      type(ESMF_AttReconcileFlag), intent(in), optional :: attreconflag
+      integer,       intent(out),  optional :: rc 
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a State object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_StateWrite()} and {\tt ESMF\_StateRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [vm]
+!           Current VM in which this object should be created.
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item[{[attreconflag]}]
+!           Flag to tell if Attribute deserialization is to be done
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                  ! Error status
+      integer :: memstat                  ! Stat from allocate/deallocate
+      integer :: i
+      type(ESMF_StateClass), pointer :: sp     ! state type
+      type(ESMF_StateItem),  pointer :: sip    ! state item
+      type(ESMF_StateItemWrap), allocatable :: siwrap(:)
+      type(ESMF_State) :: subsubstate
+      type(ESMF_AttReconcileFlag) :: lattreconflag
+      type(ESMF_Logical) :: linkChange
+      integer :: datacount
+      character(ESMF_MAXSTR) :: localnamep
+      type(ESMF_StateItemType) :: localotype
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)
+
+      ! deal with optional attreconflag
+      if (present(attreconflag)) then
+        lattreconflag = attreconflag
+      else
+        lattreconflag = ESMF_ATTRECONCILE_OFF
+      endif
+      ! linkChanges is true for all but Component
+      linkChange = ESMF_TRUE
+
+      ! in case of error, make sure this is invalid.
+      !nullify(ESMF_StateDeserialize%statep)
+      nullify(substate%statep)
+
+      allocate(sp, stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat, &
+               msg="space for new State object", &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call c_ESMC_BaseDeserialize(sp%base, buffer, offset, lattreconflag, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_BaseSetInitCreated(sp%base, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call c_ESMC_StateDeserialize(sp%st, datacount, &
+          buffer, offset, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      sp%stateContainer = ESMF_ContainerCreate (rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      allocate (siwrap(datacount), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      do i = 1, datacount
+          ! Proxy items are owned by the State.
+          call c_ESMC_StateItemDeserialize(localotype, localnamep, &
+              buffer, offset, localrc)
+          if (ESMF_LogFoundError (localrc,  &
+              ESMF_ERR_PASSTHRU,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+          sip => ESMF_StateItemConstruct (name=localnamep,  &
+              itemtype=localotype, proxyflag=.true., rc=localrc)
+          if (ESMF_LogFoundAllocError (localrc,  &
+              ESMF_ERR_PASSTHRU,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+! print *, 'StateDeserialize: Adding name: ', trim (sip%namep), ' at location: ', i
+          select case (sip%otype%ot)
+            case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+              sip%datap%fbp = ESMF_FieldBundleDeserialize(buffer, offset, &
+                  attreconflag=lattreconflag, rc=localrc)
+              !  here we relink the State Attribute hierarchy to the FieldBundle
+              !  Attribute hierarchy, as they were linked before
+              if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%this%base, &
+                    linkChange, localrc)
+                if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) then
+                  call ESMF_ContainerDestroy (sp%stateContainer, rc=localrc)
+                  return
+                endif
+              endif
+
+            case (ESMF_STATEITEM_FIELD%ot)
+              sip%datap%fp = ESMF_FieldDeserialize(buffer, offset, &
+                attreconflag=lattreconflag, rc=localrc)
+              !  here we relink the State Attribute hierarchy to the Field
+              !  Attribute hierarchy, as they were linked before
+              if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+                call c_ESMC_AttributeLink(sp%base, sip%datap%fp%ftypep%base, &
+                    linkChange, localrc)
+                if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) then
+                  call ESMF_ContainerDestroy (sp%stateContainer, rc=localrc)
+                  return
+                endif
+              endif
+
+            case (ESMF_STATEITEM_ARRAY%ot)
+              call c_ESMC_ArrayDeserialize(sip%datap%ap, buffer, offset, &
+                  lattreconflag, localrc)
+
+            case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+              call c_ESMC_ArrayBundleDeserialize(sip%datap%abp, buffer, offset,&
+                  lattreconflag, localrc)
+
+            case (ESMF_STATEITEM_STATE%ot)
+              subsubstate = ESMF_StateDeserialize(vm, buffer, offset, &
+                                              attreconflag=lattreconflag, rc=localrc)
+              sip%datap%spp => subsubstate%statep
+              !  here we relink the State Attribute hierarchy to the subState
+              !  Attribute hierarchy, as they were linked before
+              if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+                call c_ESMC_AttributeLink(sp%base, sip%datap%spp%base, &
+                    linkChange, localrc)
+                if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) then
+                  call ESMF_ContainerDestroy (sp%stateContainer, rc=localrc)
+                  return
+                endif
+              endif
+
+#if 0
+            case (ESMF_STATEITEM_NAME%ot)
+              call c_ESMC_StringDeserialize(sip%namep, buffer(1), offset, localrc)
+
+            case (ESMF_STATEITEM_INDIRECT%ot)
+              continue ! TODO: deserialize
+#endif
+            case (ESMF_STATEITEM_UNKNOWN%ot)
+              continue ! TODO: deserialize
+          end select
+
+          siwrap(i)%si => sip
+
+      enddo
+
+      call ESMF_ContainerAdd (sp%stateContainer,  &
+          itemList=siwrap, rc=localrc)
+      if (ESMF_LogFoundError (localrc,  &
+          ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !TODO: in the long run the correct thing will be to serialize/deserialize
+      !      the methodTable object! For now just put an empty table into proxy.
+      ! create methodTable object
+      call c_ESMC_MethodTableCreate(sp%methodTable, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+                                  
+      ESMF_INIT_SET_CREATED(sp)
+
+      !ESMF_StateDeserialize%statep => sp
+      substate%statep => sp
+      
+      ! Add reference to this object into ESMF garbage collection table
+      call c_ESMC_VMAddFObject(substate, ESMF_ID_STATE%objectID)
+      
+      ESMF_INIT_SET_CREATED(substate)
+      
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_StateDeserialize
+!------------------------------------------------------------------------------
+
+end module ESMF_StateInternalsMod
