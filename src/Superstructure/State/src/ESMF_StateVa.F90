@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.17 2011/06/09 05:37:40 w6ws Exp $
+! $Id: ESMF_StateVa.F90,v 1.18 2011/06/15 17:34:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,6 +22,8 @@
 ! INCLUDES
 !------------------------------------------------------------------------------
 #include "ESMF.h"
+
+#define ESMF_ENABLEBIGNAMEMAP
 !------------------------------------------------------------------------------
 !BOPI
 ! !MODULE: ESMF_StateVaMod - State Va Module
@@ -39,6 +41,7 @@
       use ESMF_LogErrMod
       use ESMF_RHandleMod,     only: ESMF_RouteHandleValidate
       use ESMF_StateTypesMod
+      use ESMF_StateContainerMod
       use ESMF_InitMacrosMod
       use ESMF_UtilTypesMod
       use ESMF_UtilMod,        only: ESMF_StringLowerCase
@@ -63,7 +66,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.17 2011/06/09 05:37:40 w6ws Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.18 2011/06/15 17:34:38 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -159,43 +162,52 @@
 
           integer :: i1
           integer :: local1rc
-          type(ESMF_StateItem) , pointer :: dp
-
+          type(ESMF_StateItemWrap),  pointer :: ptrs(:)
+          type(ESMF_StateItem), pointer :: sip
+          integer :: memstat1
+          integer :: ptrcnt
 
           rc = ESMF_SUCCESS
 
           if (sp%st == ESMF_STATE_INVALID) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
-                                 msg="State uninitialized or already destroyed", &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+                msg="State uninitialized or already destroyed", &
+                ESMF_CONTEXT, rcToReturn=rc)) return
           end if
 
-          do, i1 = 1, sp%datacount
-            dp => sp%datalist(i1)
-            local1rc = ESMF_SUCCESS
+          ptrs => null ()
+          call ESMF_ContainerGet (sp%StateContainer, itemList=ptrs, rc=local1rc)
+          if (ESMF_LogFoundError(local1rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-            select case (dp%otype%ot)
+          do, i1 = 1, size (ptrs)
+            local1rc = ESMF_SUCCESS
+            sip => ptrs(i1)%si
+
+            select case (sip%otype%ot)
             case (ESMF_STATEITEM_ARRAY%ot)
-              call ESMF_ArrayValidate (dp%datap%ap, rc=local1rc)
+              call ESMF_ArrayValidate (sip%datap%ap, rc=local1rc)
 
             case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-              call ESMF_ArrayBundleValidate (dp%datap%abp, rc=local1rc)
+              call ESMF_ArrayBundleValidate (sip%datap%abp, rc=local1rc)
 
             case (ESMF_STATEITEM_FIELD%ot)
-              call ESMF_FieldValidate (dp%datap%fp, rc=local1rc)
+              call ESMF_FieldValidate (sip%datap%fp, rc=local1rc)
 
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-              call ESMF_FieldBundleValidate (dp%datap%fbp, rc=local1rc)
+              call ESMF_FieldBundleValidate (sip%datap%fbp, rc=local1rc)
 
             case (ESMF_STATEITEM_ROUTEHANDLE%ot)
-              call ESMF_RouteHandleValidate (dp%datap%rp, rc=local1rc)
+              call ESMF_RouteHandleValidate (sip%datap%rp, rc=local1rc)
 
             case (ESMF_STATEITEM_STATE%ot)
               if (localnestedflag)  &
-                call validateWorker (dp%datap%spp, rc=local1rc)
+                call validateWorker (sip%datap%spp, rc=local1rc)
 
+#if 0
             case (ESMF_STATEITEM_NAME%ot, ESMF_STATEITEM_INDIRECT%ot)
               continue
+#endif
 
             case (ESMF_STATEITEM_UNKNOWN%ot, ESMF_STATEITEM_NOTFOUND%ot)
               local1rc = ESMF_RC_OBJ_BAD
@@ -207,10 +219,17 @@
 
             if (local1rc /= ESMF_SUCCESS) then
               rc = ESMF_RC_OBJ_BAD
-              print *, 'ESMF_StateValidate: Invalid object: ', trim (dp%namep)
+              if (ESMF_LogFoundError(local1rc, ESMF_ERR_PASSTHRU, &
+        	  ESMF_CONTEXT, rcToReturn=rc)) exit
             end if
 
           end do
+
+          if (associated (ptrs)) then
+            deallocate (ptrs, stat=memstat1)
+            if (ESMF_LogFoundDeallocError(memstat1, msg= "deallocating pointers", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+          end if
 
         end subroutine validateWorker
 
