@@ -1,11 +1,12 @@
-% $Id: FieldBundle_desc.tex,v 1.4 2010/10/05 23:52:28 rokuingh Exp $
+% $Id: FieldBundle_desc.tex,v 1.5 2011/06/15 14:50:15 feiliu Exp $
 
 A FieldBundle functions mainly as a convenient container for storing
 similar Fields.  It represents ``bundles'' of Fields that are 
-discretized on the same Grid and distributed in the same manner.
+discretized on the same Grid, Mesh, LocStream, or XGrid and distributed in the same manner.
 The FieldBundle is an important data structure because it can be added to a State, 
 which is used for sending and receiving data between Components.
 
+In the common case where FieldBundle is built on top of a Grid,
 Fields within a FieldBundle may be located at different locations relative 
 to the vertices of their common Grid.  The Fields in a FieldBundle may
 be of different dimensions, as long as the Grid dimensions that 
@@ -15,7 +16,7 @@ dimension on the same distributed lat/lon Grid can be included
 in the same FieldBundle.
  
 FieldBundles can be created and destroyed, can have Attributes 
-added or retrieved, and can have Fields added or retrieved.
+added or retrieved, and can have Fields added, removed, replaced, or retrieved.
 Methods include queries that return information about the FieldBundle
 itself and about the Fields that it contains.  The Fortran 
 data pointer of a Field within a FieldBundle can be obtained 
@@ -24,6 +25,6 @@ and then using {\tt ESMF\_FieldGet()} to get the data.
 
 In the future FieldBundles will serve as a mechanism for performance
 optimization.  ESMF will take advantage of the similarities of the
-Fields within a FieldBundle to implement collective communication,
+Fields within a FieldBundle to optimize collective communication,
 IO, and regridding.  See Section \ref{sec:bundlerest} for a 
 description of features that are scheduled for future work.

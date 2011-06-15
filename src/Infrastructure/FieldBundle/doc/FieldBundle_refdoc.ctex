@@ -1,4 +1,4 @@
-% $Id: FieldBundle_refdoc.ctex,v 1.8 2011/05/27 21:49:15 feiliu Exp $
+% $Id: FieldBundle_refdoc.ctex,v 1.9 2011/06/15 14:50:15 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -42,12 +42,12 @@
 \input{../Infrastructure/FieldBundle/doc/FieldBundle_desc}
 #endif
 
-\subsection{FieldBundle Options}
-#ifdef STANDALONE
-\input{FieldBundle_options}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/FieldBundle/doc/FieldBundle_options}
-#endif
+%\subsection{FieldBundle Options}
+%#ifdef STANDALONE
+%\input{FieldBundle_options}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldBundle/doc/FieldBundle_options}
+%#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
