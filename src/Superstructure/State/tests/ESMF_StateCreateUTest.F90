@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.39 2011/05/23 19:40:52 theurich Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.40 2011/06/15 00:04:56 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.39 2011/05/23 19:40:52 theurich Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.40 2011/06/15 00:04:56 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -819,10 +819,6 @@ end module
               print *, 'ESMF_STATEITEM_ROUTEHANDLE: ', trim (names(i))
             case (ESMF_STATEITEM_STATE%ot)      
               print *, 'ESMF_STATEITEM_STATE:       ', trim (names(i))
-            case (ESMF_STATEITEM_NAME%ot)       
-              print *, 'ESMF_STATEITEM_NAME:        ', trim (names(i))
-            case (ESMF_STATEITEM_INDIRECT%ot)   
-              print *, 'ESMF_STATEITEM_INDIRECT:    ', trim (names(i))
             case (ESMF_STATEITEM_UNKNOWN%ot)    
               print *, 'ESMF_STATEITEM_UNKNOWN:     ', trim (names(i))
             case (ESMF_STATEITEM_NOTFOUND%ot)   
