@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.49 2011/05/25 20:04:21 rokuingh Exp $
+% $Id: Attribute_desc.tex,v 1.50 2011/06/16 05:59:21 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -19,14 +19,14 @@ name-value pairs by the Attribute class.  Attributes can be attached at any
 level of the ESMF object hierarchy, and in some cases the Attributes of 
 different ESMF objects can be linked together to form 
 a corresponding Attribute hierarchy.  Attribute hierarchies are linked up
-automatically for the most part, with the exception of links between a 
-Component and a State.  Attribute hierarchies can also be unlinked, copied, 
-and moved around as needed.
+automatically for the most part, with the exception of links between Components 
+and between a Component and a State.  Attribute hierarchies can also be 
+unlinked, copied, and moved around as needed.
 
 ESMF Attribute packages 
 are used to aggregate, store, and output model metadata.  They can be 
 nested inside each other to make larger organized packages, distributed across 
-processors and updated at runtime, and expanded to suite specific needs.  The
+processors and updated at runtime, and expanded to suit specific needs.  The
 ESMF-supplied  
 Attribute packages are designed around accepted metadata conventions, such as: 
 climate and forecast (CF) \cite{ref:cf}, ISO standards \cite{ref:iso}, and the METAFOR 
@@ -49,7 +49,7 @@ Installing the ESMF, Third Party Libraries, Xerces".
 ESMF's approach to Attributes can be summarized as follows:
 
 \begin{itemize}
-  \item Implement community standards where they exist
+  \item Implement community standards where they exist.
   \item Associate Attributes with the ESMF object they describe. Currently, the following ESMF objects can have Attributes:
   \begin{itemize}
      \item CplComp
