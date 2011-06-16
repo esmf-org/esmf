@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.97 2011/06/15 17:36:21 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.98 2011/06/16 14:06:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,8 +63,10 @@
 !     ! Simple descriptor block for objects in a State
 
       type ESMF_StateItemInfo
-      sequence
-      private
+#ifndef ESMF_SEQUENCE_BUG
+        sequence
+#endif
+        private
         type(ESMF_StateItemWrap), pointer :: siwrap(:)
         type(ESMF_StateItemInfo), dimension(:), pointer :: childList
         type(ESMF_StateItemInfo), dimension(:), pointer :: attrList
@@ -114,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.97 2011/06/15 17:36:21 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.98 2011/06/16 14:06:01 w6ws Exp $'
 
 !==============================================================================
 ! 
