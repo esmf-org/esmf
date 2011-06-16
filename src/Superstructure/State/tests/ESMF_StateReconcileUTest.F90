@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.39 2011/05/19 19:18:45 feiliu Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.40 2011/06/16 18:46:56 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -355,7 +355,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! Note that even though the top level State should have its reconcileneeded
-    ! flag cleared, two nested States still should have their flags set.
+    ! flag cleared, the two nested States still should have their flags set.
     recneeded_expected = localpet == 0 .or. localpet == 1
     write(failMsg, *) "Did not return correct result for reconciled State",  &
         localpet, reconcile_needed, recneeded_expected
