@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.94 2011/06/15 18:19:45 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.95 2011/06/16 18:46:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.94 2011/06/15 18:19:45 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.95 2011/06/16 18:46:19 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -659,7 +659,8 @@
 
       !EX_UTest
       ! Add a FieldBundle to the outer State which has the same name
-      ! as a FieldBundle in the nested State.
+      ! as a FieldBundle in the nested State.  Add should fail since it
+      ! has the same name as an existing name.
       bundlename = "Humidity"
       bundle2inner(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       call ESMF_StateAdd(state1, &
@@ -667,9 +668,21 @@
                          rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a FieldBundle to a outer State test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc /= ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      !call  ESMF_StatePrint(state2, nestedFlag=ESMF_NESTED_ON, rc=rc)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Replace a FieldBundle to the outer State which has the same name
+      ! as a FieldBundle in the nested State.
+      call ESMF_StateReplace(state1, &
+                         fieldBundle=bundle2inner(1),  &
+                         rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a FieldBundle to a outer State test"
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !call  ESMF_StatePrint(state2, nestedFlag=.true., rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
