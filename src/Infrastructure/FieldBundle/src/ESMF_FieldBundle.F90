@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.106 2011/06/15 23:36:11 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.107 2011/06/16 16:29:33 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.106 2011/06/15 23:36:11 w6ws Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.107 2011/06/16 16:29:33 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1076,7 +1076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Destroy all the internal Fields if this is a proxy fieldBundle
       if(this%is_proxy) then
-        flist => null ()
+        nullify(flist)
         call ESMF_ContainerGet(this%container, itemCount=fcount, itemList=flist, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
