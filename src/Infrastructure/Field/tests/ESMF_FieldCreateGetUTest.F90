@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.77 2011/05/19 14:17:06 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.78 2011/06/16 18:15:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1716,7 +1716,7 @@
             gridToFieldMap=(/1,4,0,7/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommit a 7D field from a 4D grid and 4D ungridded bounds " // &
+        write(name, *) "Complete a 7D field from a 4D grid and 4D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1734,7 +1734,7 @@
             gridToFieldMap=(/1,3,0,2/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommit a 3D field from a 4D grid " // &
+        write(name, *) "Complete a 3D field from a 4D grid " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1753,7 +1753,7 @@
             gridToFieldMap=(/1,0,0,2/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommit a 3D field from a 4D grid and 1D ungridded bounds " // &
+        write(name, *) "Complete a 3D field from a 4D grid and 1D ungridded bounds " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1771,7 +1771,7 @@
             gridToFieldMap=(/3,0,1,2/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommitptr a 3D field from a 4D grid " // &
+        write(name, *) "Complete a 3D field from a 4D grid " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "data copy, corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1789,7 +1789,7 @@
             gridToFieldMap=(/0,2,1/) &
             )
         write(failMsg, *) ""
-        write(name, *) "Setcommitptr a 2D field from a 3D grid " // &
+        write(name, *) "Complete a 2D field from a 3D grid " // &
             "using generic interface, irregular gridToFieldMap and distgridToGridMap " // &
             "corner stagger, replicated dimension"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -4537,7 +4537,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldSetCommit(field, grid, farray, &
+        call ESMF_FieldEmptyComplete(field, grid, farray, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
             copyflag=copyflag, &
@@ -5632,7 +5632,7 @@ contains
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3), &
             flb(4):fub(4), flb(5):fub(5), flb(6):fub(6), flb(7):fub(7)) )
-        call ESMF_FieldSetCommit(field, grid, farray_cr, &
+        call ESMF_FieldEmptyComplete(field, grid, farray_cr, &
             indexflag=ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -5882,7 +5882,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3)))
-        call ESMF_FieldSetCommit(field, grid, farray_cr, &
+        call ESMF_FieldEmptyComplete(field, grid, farray_cr, &
             indexflag=ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -6113,7 +6113,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2), flb(3):fub(3)))
-        call ESMF_FieldSetCommit(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
+        call ESMF_FieldEmptyComplete(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
@@ -6335,7 +6335,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
     
         allocate(farray_cr(flb(1):fub(1), flb(2):fub(2)))
-        call ESMF_FieldSetCommit(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
+        call ESMF_FieldEmptyComplete(field, grid, farray_cr, gridToFieldMap=gridToFieldMap, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
@@ -6995,7 +6995,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(fa(4))
-        call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+        call ESMF_FieldEmptyComplete(field, grid, fa, gridToFieldMap=(/0,0/), indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7059,7 +7059,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         allocate(fa(4))
-        call ESMF_FieldSetCommit(field, grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
+        call ESMF_FieldEmptyComplete(field, grid, fa, gridToFieldMap=(/0,0/), rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

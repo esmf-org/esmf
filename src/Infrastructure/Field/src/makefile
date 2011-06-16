@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.36 2011/05/19 14:17:05 feiliu Exp $ 
+# $Id: makefile,v 1.37 2011/06/16 18:14:53 feiliu Exp $ 
 
 ALL: build_here 
 
-AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldSet.F90 ESMF_FieldSetCo.F90 ESMF_FieldEmpty.F90 ESMF_FieldCreate.F90
+AUTOGEN   = ESMF_FieldGet.F90 ESMF_FieldEmpty.F90 ESMF_FieldCreate.F90
 SOURCEC	  = 
 SOURCEF	  = ESMF_Field.F90 ESMF_FieldPr.F90 $(AUTOGEN) ESMF_FieldRegrid.F90 ESMF_FieldWr.F90 
 SOURCEH	  = 

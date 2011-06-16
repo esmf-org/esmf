@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.6 2011/05/12 18:53:59 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.7 2011/06/16 18:15:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -485,7 +485,7 @@ contains
     xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
         sideAToXGridScheme=ESMF_REGRID_SCHEME_NATIVE, &
         sideBToXGridScheme=ESMF_REGRID_SCHEME_NATIVE, &
-        storeOverlay=.true.,&
+        storeOverlay=.false.,&
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

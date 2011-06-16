@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.105 2011/01/18 18:24:09 feiliu Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.106 2011/06/16 18:15:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -120,12 +120,12 @@
 !  to retrieve the exclusive counts.  Next the user calculates the shape
 !  of each Fortran array dimension according to rule 1. The Fortran data array is allocated
 !  and initialized based on the computed shape.  A Field can either be created in one shot
-!  created empty and finished using {\tt ESMF\_FieldSetCommit}.
+!  created empty and finished using {\tt ESMF\_FieldEmptyComplete}.
 !
 !  \begin{sloppypar}
-!  There are important details that can be skipped but are good to know for {\tt ESMF\_FieldSetCommit}
+!  There are important details that can be skipped but are good to know for {\tt ESMF\_FieldEmptyComplete}
 !  and {\tt ESMF\_FieldCreate} from a Fortran data array. 1) these methods require {\em each PET contains
-!  exactly one DE}. This implies that a code using FieldCreate from a data array or FieldSetCommit must
+!  exactly one DE}. This implies that a code using FieldCreate from a data array or FieldEmptyComplete must
 !  have the same number of DEs and PETs, formally $n_{DE} = n_{PET}$. Violation of this condition
 !  will cause run time failures. 2) the bounds and counts retrieved from GridGet are DE specific
 !  or equivalently PET specific, which means that {\em the Fortran array shape could be different from one

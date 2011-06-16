@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.35 2011/05/20 20:06:15 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.36 2011/06/16 18:15:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -400,7 +400,7 @@
 !BOE
 !\subsubsection{Create an empty Field and complete it in two more steps
 ! with FieldEmptySet and FieldEmptyComplete}
-!\label{sec:field:usage:create_empty}
+!\label{sec:field:usage:partial_creation}
 !
 !  A user can create an {\tt ESMF\_Field} in three steps: first create an empty 
 !  {\tt ESMF\_Field}; then set a {\tt ESMF\_Grid} on the empty {\tt ESMF\_Field};
@@ -486,8 +486,8 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create an empty Field and complete it with FieldSetCommit}
-!\label{sec:field:usage:create_empty_setcommit}
+!\subsubsection{Create an empty Field and complete it with FieldEmptyComplete}
+!\label{sec:field:usage:create_empty}
 !
 !  A user can create an empty {\tt ESMF\_Field}.
 !  Then the user can finalize the empty {\tt ESMF\_Field} from a {\tt ESMF\_Grid} 
@@ -516,7 +516,7 @@
 !
 !  This example introduces a helper method, part of the {\tt ESMF\_FieldGet}
 !  interface that facilitates the computation of Fortran data array bounds
-!  and shape to assist {\tt ESMF\_FieldSetCommit} finalizing a Field from a
+!  and shape to assist {\tt ESMF\_FieldEmptyComplete} finalizing a Field from a
 !  instrinsic Fortran data array and a Grid.
 !
 !EOE
@@ -535,7 +535,7 @@
     allocate(farray2d(ftc(1), ftc(2)))
 
     ! finalize the Field
-    call ESMF_FieldSetCommit(field3, grid2d, farray2d, rc=rc)
+    call ESMF_FieldEmptyComplete(field3, grid2d, farray2d, rc=rc)
 !EOC
     print *, "Complete a Field created by ESMF_FieldEmptyCreate returned"
     call ESMF_FieldDestroy(field3, rc=rc)

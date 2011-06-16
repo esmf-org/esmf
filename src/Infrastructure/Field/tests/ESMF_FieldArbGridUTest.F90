@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.20 2011/05/19 14:17:06 feiliu Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.21 2011/06/16 18:15:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -186,13 +186,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid2d, farray=fptr1d, &
+  call ESMF_FieldEmptyComplete(field2, grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -227,13 +227,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array pointer - empty/setcommit"
+  write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field3, grid2d, farrayPtr=fptr1d, &
+  call ESMF_FieldEmptyComplete(field3, grid2d, farrayPtr=fptr1d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -285,7 +285,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array) - empty/setcommit"
+  write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array) - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -301,7 +301,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array pointer) - empty/setcommit"
+  write(name, *) "Destroy a Field (created using a 2D arb. grid and 1D Fortran array pointer) - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -372,13 +372,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
+  call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -414,13 +414,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field3, grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
+  call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -472,7 +472,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -488,7 +488,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -553,13 +553,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
+  call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -595,13 +595,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array pointer - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field3, grid3d, farrayPtr=fptr2d, &
+  call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr2d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -653,7 +653,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -669,7 +669,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array pointer - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array pointer - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -736,13 +736,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 3D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 3D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr3d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr3d, &
+  call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr3d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -796,7 +796,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 3D Fortran array - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 3D Fortran array - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -860,13 +860,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
+  call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/1,2,0/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -922,7 +922,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -984,13 +984,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr1d, &
+  call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1028,13 +1028,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field3, grid3d, farrayPtr=fptr1d, &
+  call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
     copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
@@ -1088,7 +1088,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1104,7 +1104,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array pointer - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field3, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1168,13 +1168,13 @@
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/setcommit"
+  write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid3d, farray=fptr2d, &
+  call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/0,0,1/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
@@ -1230,7 +1230,7 @@
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/setcommit"
+  write(name, *) "Destroy a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldDestroy(field2, rc=localrc)
   call ESMF_LogSetError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1282,7 +1282,7 @@
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
-  call ESMF_FieldSetCommit(field2, grid2d, farray=fptr1d, &
+  call ESMF_FieldEmptyComplete(field2, grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
