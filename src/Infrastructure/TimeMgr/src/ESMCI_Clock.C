@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.24 2011/06/16 05:56:49 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.25 2011/06/16 21:42:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.24 2011/06/16 05:56:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.25 2011/06/16 21:42:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -389,25 +389,25 @@ int Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int                nameLen,          // in
-      int               *tempNameLen,      // out
-      char              *tempName,         // out
-      TimeInterval *timeStep,         // out
-      Time         *startTime,        // out
-      Time         *stopTime,         // out
-      TimeInterval *runDuration,      // out
-      ESMC_R8      *runTimeStepCount, // out
-      Time         *refTime,          // out
-      Time         *currTime,         // out
-      Time         *prevTime,         // out
-      TimeInterval *currSimTime,      // out
-      TimeInterval *prevSimTime,      // out
-      Calendar    **calendar,         // out
-      ESMC_CalKind_Flag *calkindflag,      // out
-      int               *timeZone,         // out
-      ESMC_I8      *advanceCount,     // out
-      int               *alarmCount,       // out
-      ESMC_Direction    *direction) {      // out
+      int             nameLen,          // in
+      int            *tempNameLen,      // out
+      char           *tempName,         // out
+      TimeInterval   *timeStep,         // out
+      Time           *startTime,        // out
+      Time           *stopTime,         // out
+      TimeInterval   *runDuration,      // out
+      ESMC_R8        *runTimeStepCount, // out
+      Time           *refTime,          // out
+      Time           *currTime,         // out
+      Time           *prevTime,         // out
+      TimeInterval   *currSimTime,      // out
+      TimeInterval   *prevSimTime,      // out
+      Calendar      **calendar,         // out
+      ESMC_CalKind_Flag *calkindflag,   // out
+      int            *timeZone,         // out
+      ESMC_I8        *advanceCount,     // out
+      int            *alarmCount,       // out
+      ESMC_Direction *direction) {      // out
 
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_Clock}'s property values
@@ -1050,7 +1050,7 @@ int Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_AlarmListType type,                   // in - list type to get
+      ESMC_AlarmList_Flag alarmlistflag,         // in - list flag to get
       char              *alarmList1stElementPtr, // out - array of alarms
       char              *alarmList2ndElementPtr, // in  - address of 2nd
                                                  //        element to calculate
@@ -1059,10 +1059,10 @@ int Clock::count=0;
       int                sizeofAlarmList,        // in  - size of given array
                                                  //       of alarms
       int               *alarmCount,             // out - number of alarms
-      TimeInterval *timeStep) {             // in  - optional time step to
+      TimeInterval *timeStep) {                  // in  - optional time step to
                                                  //         use instead of the
                                                  //         clock's (only use
-                                                 //         with alarm list type
+                                                 //         with alarm list flag
                                                  // ESMF_ALARMLIST_NEXTRINGING)
 //
 // !DESCRIPTION:
@@ -1105,9 +1105,9 @@ int Clock::count=0;
     for(int i=0, j=0; i < this->alarmCount; i++) {
       bool returnAlarm;
 
-      // based on requested list type, check if this (i'th) alarm is
+      // based on requested list flag, check if this (i'th) alarm is
       //   to be returned
-      switch (type)
+      switch (alarmlistflag)
       {
         case ESMF_ALARMLIST_ALL:
           // return all alarms!
@@ -1130,10 +1130,10 @@ int Clock::count=0;
           break;
 
         default :
-          // unknown alarm list type; return empty list
+          // unknown alarm list flag; return empty list
           char logMsg[ESMF_MAXSTR];
-          sprintf(logMsg, "For clock %s, unknown alarm list type %d.",
-                  this->name, type);
+          sprintf(logMsg, "For clock %s, unknown alarm list flag %d.",
+                  this->name, alarmlistflag);
           ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
           return(ESMF_FAILURE);
       }

@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmType.F90,v 1.25 2011/04/22 17:33:58 eschwab Exp $
+! $Id: ESMF_AlarmType.F90,v 1.26 2011/06/16 21:42:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,21 +49,21 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_AlarmListType
+!     ! ESMF_AlarmList_Flag
 !
-!     ! Fortran "enum" type to match C++ ESMC_AlarmListType enum
+!     ! Fortran "enum" type to match C++ ESMC_AlarmList_Flag enum
 
-      type ESMF_AlarmListType
+      type ESMF_AlarmList_Flag
       sequence
       private
-        integer :: alarmListType
+        integer :: alarmlistflag
       end type
 
-      type(ESMF_AlarmListType), parameter :: &
-                          ESMF_ALARMLIST_ALL         = ESMF_AlarmListType(1), &
-                          ESMF_ALARMLIST_RINGING     = ESMF_AlarmListType(2), &
-                          ESMF_ALARMLIST_NEXTRINGING = ESMF_AlarmListType(3), &
-                          ESMF_ALARMLIST_PREVRINGING = ESMF_AlarmListType(4)
+      type(ESMF_AlarmList_Flag), parameter :: &
+                          ESMF_ALARMLIST_ALL         = ESMF_AlarmList_Flag(1), &
+                          ESMF_ALARMLIST_RINGING     = ESMF_AlarmList_Flag(2), &
+                          ESMF_ALARMLIST_NEXTRINGING = ESMF_AlarmList_Flag(3), &
+                          ESMF_ALARMLIST_PREVRINGING = ESMF_AlarmList_Flag(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Alarm
@@ -80,7 +80,7 @@
 !     The types defined in this file are public and propagated up via
 !     ESMF_AlarmMod in ESMF_Alarm.F90
 
-      public ESMF_AlarmListType
+      public ESMF_AlarmList_Flag
       public ESMF_ALARMLIST_ALL, ESMF_ALARMLIST_RINGING, &
              ESMF_ALARMLIST_NEXTRINGING, ESMF_ALARMLIST_PREVRINGING
       public ESMF_Alarm
@@ -102,7 +102,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_AlarmType.F90,v 1.25 2011/04/22 17:33:58 eschwab Exp $'
+      '$Id: ESMF_AlarmType.F90,v 1.26 2011/06/16 21:42:18 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       contains

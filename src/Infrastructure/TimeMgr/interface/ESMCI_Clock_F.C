@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock_F.C,v 1.9 2011/06/16 05:56:47 eschwab Exp $
+// $Id: ESMCI_Clock_F.C,v 1.10 2011/06/16 21:42:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -276,13 +276,13 @@ extern "C" {
        }
 
        void FTN(c_esmc_clockgetalarmlist3)(Clock **ptr,
-                                           ESMC_AlarmListType *type,
+                                           ESMC_AlarmList_Flag *alarmlistflag,
                                            int *sizeofAlarmList,
                                            int *alarmCount,
                                            TimeInterval *timeStep,
                                            int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::getAlarmList(*type,
+          int rc = (*ptr)->Clock::getAlarmList(*alarmlistflag,
                                                   ESMC_NULL_POINTER,
                                                   ESMC_NULL_POINTER,
                                                  *sizeofAlarmList,
@@ -293,7 +293,7 @@ extern "C" {
 
        // for alarmList() size > 1
        void FTN(c_esmc_clockgetalarmlist2)(Clock **ptr,
-                                           ESMC_AlarmListType *type,
+                                           ESMC_AlarmList_Flag *alarmlistflag,
                                            char *AlarmList1stElementPtr,
                                            char *AlarmList2ndElementPtr,
                                            int *sizeofAlarmList,
@@ -303,7 +303,7 @@ extern "C" {
                                            ESMCI_FortranStrLenArg AlList1El_l,
                                            ESMCI_FortranStrLenArg AlList2El_l) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::getAlarmList(*type,
+          int rc = (*ptr)->Clock::getAlarmList(*alarmlistflag,
                                                   AlarmList1stElementPtr,
                                                   AlarmList2ndElementPtr,
                                                  *sizeofAlarmList,
@@ -314,7 +314,7 @@ extern "C" {
 
        // for alarmList() size == 1
        void FTN(c_esmc_clockgetalarmlist1)(Clock **ptr,
-                                           ESMC_AlarmListType *type,
+                                           ESMC_AlarmList_Flag *alarmlistflag,
                                            char *AlarmList1stElementPtr,
                                            int *sizeofAlarmList,
                                            int *alarmCount,
@@ -322,7 +322,7 @@ extern "C" {
                                            int *status,
                                            ESMCI_FortranStrLenArg AlListEl_l) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->Clock::getAlarmList(*type,
+          int rc = (*ptr)->Clock::getAlarmList(*alarmlistflag,
                                                   AlarmList1stElementPtr,
                                                   ESMC_NULL_POINTER,
                                                  *sizeofAlarmList,

@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.118 2011/06/16 05:56:47 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.119 2011/06/16 21:42:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.118 2011/06/16 05:56:47 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.119 2011/06/16 21:42:18 eschwab Exp $'
 
 !==============================================================================
 !
@@ -880,17 +880,17 @@
 ! !IROUTINE: ESMF_ClockGetAlarmList - Get a list of Alarms from a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
+      subroutine ESMF_ClockGetAlarmList(clock, alarmlistflag, &
         keywordEnforcer, timeStep, alarmList, alarmCount, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),         intent(in)            :: clock
-      type(ESMF_AlarmListType), intent(in)            :: alarmListType
+      type(ESMF_Clock),          intent(in)            :: clock
+      type(ESMF_AlarmList_Flag), intent(in)            :: alarmlistflag
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TimeInterval),  intent(in),  optional :: timeStep
-      type(ESMF_Alarm),         intent(out), optional :: alarmList(:)
-      integer,                  intent(out), optional :: alarmCount
-      integer,                  intent(out), optional :: rc
+      type(ESMF_TimeInterval),   intent(in),  optional :: timeStep
+      type(ESMF_Alarm),          intent(out), optional :: alarmList(:)
+      integer,                   intent(out), optional :: alarmCount
+      integer,                   intent(out), optional :: rc
 !   
 !
 ! !STATUS:
@@ -904,7 +904,7 @@
 !     \item[clock]
 !          The object instance from which to get an {\tt ESMF\_Alarm} list 
 !          and/or count of {\tt ESMF\_Alarm}s.
-!     \item[alarmListType]
+!     \item[alarmlistflag]
 !          The type of list to get:
 !
 !            {\tt ESMF\_ALARMLIST\_ALL} :
@@ -932,15 +932,15 @@
 !                single alarm.
 !     \item[{[timeStep]}]
 !          Optional time step to be used instead of the {\tt clock}'s.
-!          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmListType}
-!          (see above); ignored if specified with other {\tt alarmListTypes}.
+!          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmlistflag}
+!          (see above); ignored if specified with other {\tt alarmlistflags}.
 !     \item[{[alarmList]}]
 !          The array of returned alarms.  If given, the array must be large
 !          enough to hold the number of alarms of the specified 
-!          {\tt alarmListType} in the specified {\tt clock}.
+!          {\tt alarmlistflag} in the specified {\tt clock}.
 !     \item[{[alarmCount]}]
 !          If specified, returns the number of {\tt ESMF\_Alarm}s of the 
-!          specified {\tt alarmListType} in the specified {\tt clock}.  
+!          specified {\tt alarmlistflag} in the specified {\tt clock}.  
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -966,7 +966,7 @@
         ! only get alarmCount if specified
         sizeofAlarmList = 0
         ! invoke C to C++ entry point
-        call c_ESMC_ClockGetAlarmList3(clock, alarmListType, &
+        call c_ESMC_ClockGetAlarmList3(clock, alarmlistflag, &
                            sizeofAlarmList, alarmCount, timeStep, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -981,7 +981,7 @@
         ! invoke C to C++ entry point
         if (sizeofAlarmList > 1) then
           ! pass address of 2nd element for C++ to calculate array step size
-          call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
+          call c_ESMC_ClockGetAlarmList2(clock, alarmlistflag, &
                              alarmPtrList(1), alarmPtrList(2), &
                              sizeofAlarmList, alarmCount, timeStep, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -991,7 +991,7 @@
           endif
         else
           ! array has only one element
-          call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
+          call c_ESMC_ClockGetAlarmList1(clock, alarmlistflag, &
                              alarmPtrList(1), &
                              sizeofAlarmList, alarmCount, timeStep, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

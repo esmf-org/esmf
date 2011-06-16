@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.21 2011/06/16 05:56:45 eschwab Exp $
+// $Id: ESMCI_Clock.h,v 1.22 2011/06/16 21:42:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -187,7 +187,7 @@ namespace ESMCI{
 
     int getAlarm(int alarmnameLen, char *alarmname, Alarm **alarm);
 
-    int getAlarmList(ESMC_AlarmListType type,
+    int getAlarmList(ESMC_AlarmList_Flag alarmlistflag,
                                char *AlarmList1stElementPtr, 
                                char *AlarmList2ndElementPtr,
                                int  sizeofAlarmList, 

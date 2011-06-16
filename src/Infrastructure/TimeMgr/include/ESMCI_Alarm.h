@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm.h,v 1.19 2011/06/14 05:57:49 eschwab Exp $
+// $Id: ESMCI_Alarm.h,v 1.20 2011/06/16 21:42:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -78,12 +78,12 @@
 #include "ESMCI_TimeInterval.h"
 #include "ESMCI_Time.h"
 
- // alarm list types to query from clock
- enum ESMC_AlarmListType {ESMF_ALARMLIST_ALL = 1,
-                          ESMF_ALARMLIST_RINGING,   
-                          ESMF_ALARMLIST_NEXTRINGING,
-                          ESMF_ALARMLIST_PREVRINGING};
-
+ // alarm list flags to query from clock
+ enum ESMC_AlarmList_Flag {ESMF_ALARMLIST_ALL = 1,
+                           ESMF_ALARMLIST_RINGING,   
+                           ESMF_ALARMLIST_NEXTRINGING,
+                           ESMF_ALARMLIST_PREVRINGING};
+// type of Alarm list
 namespace ESMCI {
 
  class Clock;

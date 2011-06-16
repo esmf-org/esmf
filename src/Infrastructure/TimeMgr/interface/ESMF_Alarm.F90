@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.108 2011/06/14 05:57:51 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.109 2011/06/16 21:42:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@
 ! !PUBLIC TYPES:
 !     These types are defined in ESMF_AlarmTypeMod and propagated up from here.
 !
-      public ESMF_AlarmListType
+      public ESMF_AlarmList_Flag
       public ESMF_ALARMLIST_ALL, ESMF_ALARMLIST_RINGING, &
              ESMF_ALARMLIST_NEXTRINGING, ESMF_ALARMLIST_PREVRINGING
       public ESMF_Alarm
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.108 2011/06/14 05:57:51 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.109 2011/06/16 21:42:18 eschwab Exp $'
 
 !==============================================================================
 !
