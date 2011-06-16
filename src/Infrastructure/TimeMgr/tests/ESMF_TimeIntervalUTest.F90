@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.68 2011/02/25 23:20:47 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.69 2011/06/16 05:56:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.68 2011/02/25 23:20:47 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.69 2011/06/16 05:56:50 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -101,11 +101,16 @@
       ! Calendar Interval tests
       ! ----------------------------------------------------------------------------
       ! initialize calendars
-      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
-      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIAN, name="Julian", rc=rc)
-      noLeapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, name="No Leap", rc=rc)
-      day360Calendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, name="360 Day", rc=rc)
-      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="Julian Day", rc=rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
+        name="Gregorian", rc=rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIAN, &
+        name="Julian", rc=rc)
+      noLeapCalendar = ESMF_CalendarCreate(ESMF_CALKIND_NOLEAP, &
+        name="No Leap", rc=rc)
+      day360Calendar = ESMF_CalendarCreate(ESMF_CALKIND_360DAY, &
+        name="360 Day", rc=rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIANDAY, &
+        name="Julian Day", rc=rc)
 
       ! ----------------------------------------------------------------------------
       ! Gregorian Leap year 2004 tests
@@ -2807,10 +2812,10 @@
       ! ----------------------------------------------------------------------------
 
       ! can test with any of these types
-      call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc=rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc=rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc=rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc=rc)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_JULIANDAY, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CALKIND_GREGORIAN, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CALKIND_NOLEAP, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CALKIND_360DAY, rc=rc)
 
       !EX_UTest
       write(name, *) "Day Calendar Time Interval conversion with s=172800 (2 days) Test"
@@ -2851,7 +2856,7 @@
       !print *, " secs = ", secs
 
       ! ----------------------------------------------------------------------------
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc=rc)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_NOCALENDAR, rc=rc)
 
       !EX_UTest
       write(name, *) "No Calendar Time Interval conversion with yy=2, mm=30, d=720 Test"
@@ -3024,10 +3029,10 @@
       !print *, " Days = ", days
 
       ! ----------------------------------------------------------------------------
-      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc=rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc=rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc=rc)
-      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc=rc)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_GREGORIAN, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CALKIND_JULIANDAY, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CALKIND_NOLEAP, rc=rc)
+      !call ESMF_CalendarSetDefault(ESMF_CALKIND_360DAY, rc=rc)
 
       !EX_UTest
 
@@ -3074,7 +3079,7 @@
       !print *, " Hours = ", hours
 
       ! ----------------------------------------------------------------------------
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc=rc)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_NOCALENDAR, rc=rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

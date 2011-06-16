@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.70 2011/05/19 19:24:32 svasquez Exp $
+! $Id: ESMF_Init.F90,v 1.71 2011/06/16 05:57:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@
     type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer 
 					     ! must use keywords for the below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType
       integer,                 intent(in),  optional :: mpiCommunicator
@@ -158,7 +158,7 @@
 !           Name of the default configuration file for the entire application.
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
-!           See section \ref{opt:calendartype} for a list of valid options.
+!           See section \ref{opt:calkindflag} for a list of valid options.
 !           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
@@ -241,7 +241,7 @@
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar     
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       integer,                 intent(in),  optional :: mpiCommunicator
@@ -373,7 +373,7 @@
       endif
 
       ! Initialize the default time manager calendar
-      call ESMF_CalendarInitialize(calendartype=defaultCalendar, rc=status)
+      call ESMF_CalendarInitialize(calkindflag=defaultCalendar, rc=status)
       if (status .ne. ESMF_SUCCESS) then
          print *, "Error initializing the default time manager calendar"
       return

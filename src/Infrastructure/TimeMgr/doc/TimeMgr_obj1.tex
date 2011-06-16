@@ -1,4 +1,4 @@
-% $Id: TimeMgr_obj1.tex,v 1.4 2003/08/12 14:32:50 cdeluca Exp $
+% $Id: TimeMgr_obj1.tex,v 1.5 2011/06/16 05:56:42 eschwab Exp $
 
 \subsection{Object Model}
 
@@ -20,7 +20,7 @@ behavior of, Time Intervals, Time instants, Clocks, Alarms, and Calendars,
 as specified in the ESMF Time Manager Requirements document.
 {\tt ESMF\_TimeInterval} is independent of any calendar (except when used
 as a Calendar interval), whereas {\tt ESMF\_Time} is dependent on a calendar
-type, such as Gregorian or Julian.  Multiple objects of all these primary
+kind, such as Gregorian or Julian.  Multiple objects of all these primary
 classes can be instantiated within a single application.
 
 There is also one secondary supporting class, not intended for direct
@@ -28,18 +28,18 @@ use in model applications.  This is {\tt ESMF\_BaseTime}.  {\tt ESMF\_BaseTime}
 serves as the base class for both {\tt ESMF\_TimeInterval} and
 {\tt ESMF\_Time},capturing common core time representation and functionality.
 
-{\tt ESMF\_Calendar} encapsulates all the required calendar types and behavior,
+{\tt ESMF\_Calendar} encapsulates all the required calendar kinds and behavior,
 isolating them from Time instants.  Specific calendar-type objects (e.g.
 Gregorian, Julian, no-leap, etc.) can be instantiated from {\tt ESMF\_Calendar}.
 Ideally, for a given application, no more than one calendar
-object should be instantiated for each calendar type.  The idea is that
+object should be instantiated for each calendar kind.  The idea is that
 a calendar object is analogous to a "wall calendar," serving as a single
 point of reference throughout an application.  For example, a single
 Gregorian calendar can be instantiated within an application and shared
 among all the time instants.  However, the design does not preclude having
 multiple calendar instantiations.  For practical reasons of using SPMD or
 MPMD application execution models, there may be multiple instantiations
-of a calendar type; for example, one per component.
+of a calendar kind; for example, one per component.
 
 For object integrity, all class data members are private; access is via
 public member functions only. The entire {\tt ESMF\_BaseTime} base class

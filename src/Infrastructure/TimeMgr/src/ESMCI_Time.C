@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.17 2011/05/26 05:51:08 eschwab Exp $"
+// $Id: ESMCI_Time.C,v 1.18 2011/06/16 05:56:49 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.17 2011/05/26 05:51:08 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.18 2011/06/16 05:56:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -88,7 +88,7 @@ namespace ESMCI{
       ESMC_I8 *sD_i8,     // in - fractional seconds denominator
                           //                                 (large, >= 64-bit)
       Calendar **calendar, // in - associated calendar
-      ESMC_CalendarType *calendarType, // in - associated calendar type
+      ESMC_CalKind_Flag *calkindflag, // in - associated calendar kind
       int *timeZone) {         // in - timezone (hours offset from UTC,
                                //      e.g. EST = -5)
 //
@@ -140,7 +140,7 @@ namespace ESMCI{
       this->timeZone = 0;                 // default is UTC
 
     } else if (calendar     != ESMC_NULL_POINTER ||
-               calendarType != ESMC_NULL_POINTER ||
+               calkindflag  != ESMC_NULL_POINTER ||
                timeZone     != ESMC_NULL_POINTER) {
       // only calendar and/or timezone specified
 
@@ -154,19 +154,19 @@ namespace ESMCI{
       // Otherwise, need conversion method/offset value: See TODO: ? in
       // ESMCI_Calendar.C
 
-      // set calendar type
+      // set calendar kind
       if (calendar != ESMC_NULL_POINTER) {             // 1st choice
         this->calendar = *calendar;
         rc = Time::validate("calendar");
         if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
-      } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
+      } else if (calkindflag != ESMC_NULL_POINTER) {  // 2nd choice
         // set to specified built-in type; create if necessary
-        rc = ESMCI_CalendarCreate(*calendarType);
+        rc = ESMCI_CalendarCreate(*calkindflag);
         if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
-        this->calendar = Calendar::internalCalendar[*calendarType-1];
+        this->calendar = Calendar::internalCalendar[*calkindflag-1];
       }
 
       // set timezone
@@ -192,17 +192,17 @@ namespace ESMCI{
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // set calendar type
+    // set calendar kind
     if (calendar != ESMC_NULL_POINTER) {             // 1st choice
       // set to user's calendar
       this->calendar = *calendar;
 
-    } else if (calendarType != ESMC_NULL_POINTER) {  // 2nd choice
+    } else if (calkindflag != ESMC_NULL_POINTER) {  // 2nd choice
       // set to specified built-in type; create if necessary
-      rc = ESMCI_CalendarCreate(*calendarType);
+      rc = ESMCI_CalendarCreate(*calkindflag);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
-      this->calendar = Calendar::internalCalendar[*calendarType-1];
+      this->calendar = Calendar::internalCalendar[*calkindflag-1];
 
     } else if (Calendar::defaultCalendar != ESMC_NULL_POINTER) {
       // use default calendar                        // 3rd choice
@@ -210,7 +210,7 @@ namespace ESMCI{
 
     } else {                                         // 4th choice
       // create default calendar
-      rc = ESMCI_CalendarSetDefault((ESMC_CalendarType *)ESMC_NULL_POINTER);
+      rc = ESMCI_CalendarSetDefault((ESMC_CalKind_Flag *)ESMC_NULL_POINTER);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
       this->calendar = Calendar::defaultCalendar;
@@ -223,7 +223,7 @@ namespace ESMCI{
 
     // TODO: Timezone adjust
 
-    // convert date to base time according to calendar type
+    // convert date to base time according to calendar kind
     // TODO: create two calendar conversion method entry points ?
 
     // is a yy/mm/dd style date specified?
@@ -307,7 +307,7 @@ namespace ESMCI{
     } else {
       // no year, month or day specified; set defaults per calendar, if any
       if (this->calendar != ESMC_NULL_POINTER) {
-        if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
+        if (this->calendar->calkindflag != ESMC_CALKIND_NOCALENDAR) {
           // defaults:  yy=0, mm=1, dd=1 d=0
           rc = this->calendar->convertToTime(0, 1, 1, 0, 0.0, this);
           if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
@@ -366,7 +366,7 @@ namespace ESMCI{
       ESMC_I8 *sD_i8,        // out - fractional seconds denominator
                              //                              (large, >= 64-bit)
       Calendar **calendar,   // out - associated calendar
-      ESMC_CalendarType *calendarType, // out - associated calendar type
+      ESMC_CalKind_Flag *calkindflag, // out - associated calendar kind
       int     *timeZone,          // out - timezone (hours offset from UTC)
       int      timeStringLen,     // in  - F90 time string size
       int     *tempTimeStringLen, // out - temp F90 time string size
@@ -397,7 +397,7 @@ namespace ESMCI{
 
     Time timeToConvert = *this;
 
-    // convert base time to date according to calendar type
+    // convert base time to date according to calendar kind
     if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
         mm != ESMC_NULL_POINTER || dd  != ESMC_NULL_POINTER ||
         d  != ESMC_NULL_POINTER || d_i8  != ESMC_NULL_POINTER ||
@@ -464,12 +464,12 @@ namespace ESMCI{
     if (calendar != ESMC_NULL_POINTER) {
       *calendar = this->calendar;
     }
-    if (calendarType != ESMC_NULL_POINTER) {
+    if (calkindflag != ESMC_NULL_POINTER) {
       if (this->calendar == ESMC_NULL_POINTER) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-             ", calendarType requires a calendar to be set.", &rc); return(rc);
+             ", calkindflag requires a calendar to be set.", &rc); return(rc);
       }
-      *calendarType = this->calendar->calendarType;
+      *calkindflag = this->calendar->calkindflag;
     }
     if (timeZone != ESMC_NULL_POINTER) {
       *timeZone = this->timeZone;
@@ -543,7 +543,7 @@ namespace ESMCI{
 //EOP
 // !REQUIREMENTS:  
 //
-//    // set calendar type
+//    // set calendar kind
 //    if (calendar != ESMC_NULL_POINTER) {
 //      this->calendar = calendar;
 //    }
@@ -598,7 +598,7 @@ namespace ESMCI{
       ESMC_I8 sN,         // in - fractional seconds, numerator
       ESMC_I8 sD,         // in - fractional seconds, denominator
       Calendar *calendar, // in - associated calendar
-      ESMC_CalendarType calendarType, // in - associated calendar type
+      ESMC_CalKind_Flag calkindflag, // in - associated calendar kind
       int timeZone) {          // in - timezone
 //
 // !DESCRIPTION:
@@ -619,7 +619,7 @@ namespace ESMCI{
     if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
       return(rc);
 
-    // set calendar type
+    // set calendar kind
     this->calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
                                          // TODO: replace with ESMC_Base logic
 
@@ -627,12 +627,12 @@ namespace ESMCI{
       // set to user's calendar
       this->calendar = calendar;
 
-    } else if (calendarType != (ESMC_CalendarType)0) {  // 2nd choice
+    } else if (calkindflag != (ESMC_CalKind_Flag)0) {  // 2nd choice
       // set to specified built-in type; create if necessary
-      rc = ESMCI_CalendarCreate(calendarType);
+      rc = ESMCI_CalendarCreate(calkindflag);
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         return(rc);
-      this->calendar = Calendar::internalCalendar[calendarType-1];
+      this->calendar = Calendar::internalCalendar[calkindflag-1];
     } // otherwise leave NULL, TODO: implement ESMC_Base logic, then can
       // set default calendar
 
@@ -685,7 +685,7 @@ namespace ESMCI{
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  Time::isSameCalendar - Compares 2 Time's Calendar types
+// !IROUTINE:  Time::isSameCalendar - Compares 2 Time's Calendar kinds
 //
 // !INTERFACE:
       bool Time::isSameCalendar(
@@ -694,7 +694,7 @@ namespace ESMCI{
 //    bool true if same calendars, false if different calendars
 //
 // !ARGUMENTS:
-      const Time *time,    // in  - Time to compare Calendar types against
+      const Time *time,    // in  - Time to compare Calendar kinds against
       int *rc) const {          // out - return code
 //
 // !DESCRIPTION:
@@ -711,7 +711,7 @@ namespace ESMCI{
         time->calendar != ESMC_NULL_POINTER)
     {
       if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
-      return(this->calendar->calendarType == time->calendar->calendarType);
+      return(this->calendar->calkindflag == time->calendar->calkindflag);
     }
     else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
@@ -740,7 +740,7 @@ namespace ESMCI{
 //EOP
 // !REQUIREMENTS:  
 
-// TODO: Add optional calendar/calendarType arguments; default to 
+// TODO: Add optional calendar/calkindflag arguments; default to 
 //       Gregorian if not specified and no calendar within this given Time.
 
  #undef  ESMC_METHOD
@@ -748,18 +748,18 @@ namespace ESMCI{
 
     int rc = ESMF_SUCCESS;
 
-    // validate for calendar type
+    // validate for calendar kind
     if (this->calendar == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_INIT,
                                             "; calendar required.", &rc);
       return(rc);
     }
 
-    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+    if (this->calendar->calkindflag == ESMC_CALKIND_JULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_MODJULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                           "; calendarType is JULIANDAY, "
+                           "; calkindflag is JULIANDAY, "
                            "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1094,7 +1094,7 @@ namespace ESMCI{
 
     // earliest Gregorian date representable by the Fliegel algorithm
     //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
-    if (calendar->calendarType == ESMC_CAL_GREGORIAN &&
+    if (calendar->calkindflag == ESMC_CALKIND_GREGORIAN &&
         getw() < -2768601600LL) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Gregorian time is before -4800/3/1", &rc);
@@ -1103,7 +1103,7 @@ namespace ESMCI{
 
     // earliest Julian date representable by the Hatcher algorithm
     //  is -4712/3/1 == 60 Julian days == 5,184,000 core seconds
-    if (calendar->calendarType == ESMC_CAL_JULIAN &&
+    if (calendar->calkindflag == ESMC_CALKIND_JULIAN &&
         getw() < 5184000LL) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Julian time is before -4712/3/1", &rc);
@@ -1151,7 +1151,7 @@ namespace ESMCI{
       // default
       BaseTime::print(options);
       if (this->calendar != ESMC_NULL_POINTER) {
-        if (this->calendar->calendarType != ESMC_CAL_NOCALENDAR) {
+        if (this->calendar->calkindflag != ESMC_CALKIND_NOCALENDAR) {
           this->calendar->print(options, this);
         }
       }
@@ -1208,7 +1208,7 @@ namespace ESMCI{
       ESMC_I8 sN,          // in - fractional seconds, numerator
       ESMC_I8 sD,          // in - fractional seconds, denominator
       Calendar *calendar,  // in - associated calendar
-      ESMC_CalendarType calendarType,  // in - associated calendar type
+      ESMC_CalKind_Flag calkindflag,  // in - associated calendar kind
       int timeZone) :           // in - timezone
 //
 // !DESCRIPTION:
@@ -1219,7 +1219,7 @@ namespace ESMCI{
 
    BaseTime(s, sN, sD) {   // use base class constructor
 
-  // set calendar type
+  // set calendar kind
   this->calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
                                        // TODO: replace with ESMC_Base logic
 
@@ -1227,10 +1227,10 @@ namespace ESMCI{
     // set to user's calendar
     this->calendar = calendar;
 
-  } else if (calendarType != (ESMC_CalendarType)0) {  // 2nd choice
+  } else if (calkindflag != (ESMC_CalKind_Flag)0) {  // 2nd choice
     // set to specified built-in type; create if necessary
-    ESMCI_CalendarCreate(calendarType);
-    this->calendar = Calendar::internalCalendar[calendarType-1];
+    ESMCI_CalendarCreate(calkindflag);
+    this->calendar = Calendar::internalCalendar[calkindflag-1];
   } // otherwise leave NULL, TODO: implement ESMC_Base logic, then can
     // set default calendar
 
@@ -1305,11 +1305,11 @@ namespace ESMCI{
                                             "; calendar required", &rc);
       return(rc);
     }
-    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+    if (this->calendar->calkindflag == ESMC_CALKIND_JULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_MODJULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY, "
+                           "; calkindflag is JULIANDAY, "
                            "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1415,27 +1415,27 @@ namespace ESMCI{
     //  The reference date is any known Monday (day of the week = 1)
     //  This method is valid for any calendar which uses 7-day weeks.
 
-    switch (this->calendar->calendarType)
+    switch (this->calendar->calkindflag)
     {
-        case ESMC_CAL_GREGORIAN:
-        case ESMC_CAL_NOLEAP:    // TODO: ?
-        case ESMC_CAL_360DAY:    // TODO: ?
+        case ESMC_CALKIND_GREGORIAN:
+        case ESMC_CALKIND_NOLEAP:    // TODO: ?
+        case ESMC_CALKIND_360DAY:    // TODO: ?
           //  Can be any Monday after the Gregorian reformation of 10/15/1582
           yy_i8=1796; mm=7; dd=4;   // America's 20th birthday was a Monday !
           break;
 
-        case ESMC_CAL_JULIAN:
-        case ESMC_CAL_JULIANDAY:
-        case ESMC_CAL_MODJULIANDAY:
+        case ESMC_CALKIND_JULIAN:
+        case ESMC_CALKIND_JULIANDAY:
+        case ESMC_CALKIND_MODJULIANDAY:
           //  Can be any Monday before the Julian end of 10/4/1582
           yy_i8=1492; mm=10; dd=29;  // Columbus landed in Cuba on a Monday !
           break;
 
-        case ESMC_CAL_NOCALENDAR:
-        case ESMC_CAL_CUSTOM:
+        case ESMC_CALKIND_NOCALENDAR:
+        case ESMC_CALKIND_CUSTOM:
         default:
           ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                "; calendarType is NOCALENDAR, CUSTOM, or unrecognized.", &rc);
+                "; calkindflag is NOCALENDAR, CUSTOM, or unrecognized.", &rc);
           return(rc);
           break;
     }
@@ -1523,16 +1523,16 @@ namespace ESMCI{
                                             "; calendar required", &rc);
       return(rc);
     }
-    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+    if (this->calendar->calkindflag == ESMC_CALKIND_JULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_MODJULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY, "
+                           "; calkindflag is JULIANDAY, "
                            "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
 
-    // TODO: use table lookup per calendar type (14, 14.5, 15, 15.5 days) ?
+    // TODO: use table lookup per calendar kind (14, 14.5, 15, 15.5 days) ?
 
     // TODO: use native C++ Get()/Set() when ready
 
@@ -1641,11 +1641,11 @@ namespace ESMCI{
                                             "; calendar required", &rc);
       return(rc);
     }
-    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+    if (this->calendar->calkindflag == ESMC_CALKIND_JULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_MODJULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY, "
+                           "; calkindflag is JULIANDAY, "
                            "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1712,11 +1712,11 @@ namespace ESMCI{
                                             "; calendar required", &rc);
       return(rc);
     }
-    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+    if (this->calendar->calkindflag == ESMC_CALKIND_JULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_MODJULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY, "
+                           "; calkindflag is JULIANDAY, "
                            "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }
@@ -1784,11 +1784,11 @@ namespace ESMCI{
                                             "; calendar required", &rc);
       return(rc);
     }
-    if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_MODJULIANDAY ||
-        this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
+    if (this->calendar->calkindflag == ESMC_CALKIND_JULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_MODJULIANDAY ||
+        this->calendar->calkindflag == ESMC_CALKIND_NOCALENDAR) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-                           "; calendarType is JULIANDAY, "
+                           "; calkindflag is JULIANDAY, "
                            "MODJULIANDAY or NOCALENDAR.", &rc);
       return(rc);
     }

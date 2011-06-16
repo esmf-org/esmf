@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.112 2011/06/13 18:05:33 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.113 2011/06/16 05:56:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.112 2011/06/13 18:05:33 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.113 2011/06/16 05:56:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4820,7 +4820,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
-  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CAL_GREGORIAN, 0);
+  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CALKIND_GREGORIAN, 0);
   char dateTimeString[ESMF_MAXSTR];
   dateTime.syncToRealTime();
   dateTime.getString(dateTimeString);
@@ -5026,7 +5026,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
-  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CAL_GREGORIAN, 0);
+  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CALKIND_GREGORIAN, 0);
   char dateTimeString[ESMF_MAXSTR];
   dateTime.syncToRealTime();
   dateTime.getString(dateTimeString);
@@ -5275,7 +5275,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
-  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CAL_GREGORIAN, 0);
+  Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CALKIND_GREGORIAN, 0);
   char dateTimeString[ESMF_MAXSTR];
   dateTime.syncToRealTime();
   dateTime.getString(dateTimeString);

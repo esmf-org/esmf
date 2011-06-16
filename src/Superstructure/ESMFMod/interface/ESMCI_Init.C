@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.8 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMCI_Init.C,v 1.9 2011/06/16 05:56:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,8 +45,8 @@ char **globalargv;
 //
 // !ARGUMENTS:
       char *defaultConfigFilename,         // in - default config filename
-      ESMC_CalendarType defaultCalendar,   // in - optional time manager
-                                           //      default calendar type
+      ESMC_CalKind_Flag defaultCalendar,   // in - optional time manager
+                                           //      default calendar kind
       char *defaultLogFilename,            // in - default log filename
       ESMC_LogType defaultLogType) {       // in - default log type
 //  
@@ -81,8 +81,8 @@ char **globalargv;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType defaultCalendar) { // in - optional time manager
-                                           //      default calendar type
+      ESMC_CalKind_Flag defaultCalendar) { // in - optional time manager
+                                           //      default calendar kind
 //
 // !DESCRIPTION:
 //
@@ -114,8 +114,8 @@ char **globalargv;
 //
 // !ARGUMENTS:
       int argc, char **argv,       // in - the arguments to the program
-      ESMC_CalendarType defaultCalendar) {  // in - optional time manager
-                                            //      default calendar type
+      ESMC_CalKind_Flag defaultCalendar) {  // in - optional time manager
+                                            //      default calendar kind
 //
 // !DESCRIPTION:
 //

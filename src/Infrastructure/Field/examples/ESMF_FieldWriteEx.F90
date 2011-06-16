@@ -148,11 +148,11 @@
   endif
 
 !BOC
-  call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, rc=status)
+  call ESMF_TimeSet(timestamp, calkindflag=ESMF_CALKIND_GREGORIAN, rc=status)
 !EOC
   if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
-     print*, "'call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, status)' failed"
+     print*, "'call ESMF_TimeSet(timestamp, calkindflag=ESMF_CALKIND_GREGORIAN, status)' failed"
   endif
 
 !BOC

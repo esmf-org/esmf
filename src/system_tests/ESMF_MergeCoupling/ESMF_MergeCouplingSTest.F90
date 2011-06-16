@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.25 2011/02/23 14:45:08 eschwab Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.26 2011/06/16 05:57:34 eschwab Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -134,7 +134,7 @@
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                              ESMF_CAL_GREGORIAN, rc)
+                                              ESMF_CALKIND_GREGORIAN, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 4 hours

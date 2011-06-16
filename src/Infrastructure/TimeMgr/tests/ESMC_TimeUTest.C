@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeUTest.C,v 1.8 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMC_TimeUTest.C,v 1.9 2011/06/16 05:56:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,8 +43,8 @@ int main(void){
   ESMC_I4 yy1=2006;
   ESMC_I4 h;
   ESMC_I4 h1=0;
-  ESMC_CalendarType calType;
-  ESMC_CalendarType calType1=ESMC_CAL_GREGORIAN;
+  ESMC_CalKind_Flag calKind;
+  ESMC_CalKind_Flag calKind1=ESMC_CALKIND_GREGORIAN;
   int tZ;
   int tZ1=-6;
 
@@ -56,7 +56,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Calendar object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  calendar = ESMC_CalendarCreate("Gregorian", ESMC_CAL_GREGORIAN, &rc);
+  calendar = ESMC_CalendarCreate("Gregorian", ESMC_CALKIND_GREGORIAN, &rc);
   printf("After CalendarCreate rc = %d \n",rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Set a Time");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_TimeSet(&time1, yy1, h1, calendar, calType1, tZ1);
+  rc = ESMC_TimeSet(&time1, yy1, h1, calendar, calKind1, tZ1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Get a Time");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_TimeGet(time1, &yy, &h, &calendarOut, &calType, &tZ);
+  rc = ESMC_TimeGet(time1, &yy, &h, &calendarOut, &calKind, &tZ);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

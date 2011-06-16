@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.7 2011/06/09 20:36:14 eschwab Exp $
+! $Id: ESMF_ModUTest.F90,v 1.8 2011/06/16 05:57:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.7 2011/06/09 20:36:14 eschwab Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.8 2011/06/16 05:57:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -189,8 +189,8 @@ contains
   subroutine calendar_type (dummy)
     use ESMF_Mod, only: ESMF_Calendar
     type(ESMF_Calendar), intent(in), optional :: dummy
-    failMsg = "Calendar type fail"
-    name = "Calendar type"
+    failMsg = "Calendar kind fail"
+    name = "Calendar kind"
     call ESMF_Test (.true.,  &
       name, failMsg, result, ESMF_SRCLINE)
   end subroutine

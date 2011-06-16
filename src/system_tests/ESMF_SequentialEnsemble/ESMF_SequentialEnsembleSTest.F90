@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.20 2011/05/06 22:14:03 svasquez Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.21 2011/06/16 05:57:36 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -287,7 +287,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
   ! initialize calendar to be Gregorian type
-  gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+  gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
                                           name="Gregorian", rc=rc)
   if (rc .ne. ESMF_SUCCESS) goto 10
 

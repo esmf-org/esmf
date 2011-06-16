@@ -1,4 +1,4 @@
-% $Id: Clock_fex.tex,v 1.14 2010/11/03 22:48:43 theurich Exp $
+% $Id: Clock_fex.tex,v 1.15 2011/06/16 05:56:42 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -8,7 +8,7 @@ type(ESMF_Clock) :: modelTime
 
 ! Declare and set type of a Calendar
 type(ESMF_Calendar) :: gregorian
-gregorian = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN)
+gregorian = ESMF_CalendarCreate("Gregorian", ESMF_CALKIND_GREGORIAN)
 
 ! Declare and set Clock TimeIntervals and Time instants
 type(ESMF_TimeInterval) :: timeStep

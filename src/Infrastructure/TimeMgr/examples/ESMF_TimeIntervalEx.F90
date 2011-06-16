@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.39 2011/02/23 06:48:42 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.40 2011/06/16 05:56:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 
 !BOC
       ! initialize ESMF framework
-      call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, &
+      call ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN, &
         defaultlogfilename="TimeIntervalEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC

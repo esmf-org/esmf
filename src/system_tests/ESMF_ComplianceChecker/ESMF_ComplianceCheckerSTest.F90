@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.8 2011/05/06 22:13:41 svasquez Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.9 2011/06/16 05:57:09 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -70,7 +70,7 @@ program ESMF_ComplianceCheckerSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, &
+  call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CALKIND_GREGORIAN, &
     defaultlogfilename="ComplianceCheckerSTest.Log", &
     defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

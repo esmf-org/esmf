@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.11 2011/02/22 21:42:40 w6ws Exp $
+// $Id: ESMC_Time.C,v 1.12 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_Time.C,v 1.11 2011/02/22 21:42:40 w6ws Exp $";
+  "$Id: ESMC_Time.C,v 1.12 2011/06/16 05:56:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing
@@ -56,7 +56,7 @@ int ESMC_TimeSet(ESMC_Time *time,
                  ESMC_I4 yy,
                  ESMC_I4 h,
                  ESMC_Calendar calendar,
-                 ESMC_CalendarType calendartype,
+                 ESMC_CalKind_Flag calkindflag,
                  int timeZone) {
 
   // initialize return code; assume routine not implemented
@@ -83,7 +83,7 @@ int ESMC_TimeSet(ESMC_Time *time,
              (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
              (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
                   (ESMCI::Calendar **)&(calendar.ptr),
-                                       &calendartype,
+                                       &calkindflag,
                                        &timeZone);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
@@ -102,7 +102,7 @@ int ESMC_TimeGet(ESMC_Time time,
                  ESMC_I4 *yy,
                  ESMC_I4 *h,
                  ESMC_Calendar *calendar,
-                 ESMC_CalendarType *calendartype,
+                 ESMC_CalKind_Flag *calkindflag,
                  int *timeZone) {
 
   // initialize return code; assume routine not implemented
@@ -133,7 +133,7 @@ int ESMC_TimeGet(ESMC_Time time,
              (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
              (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
                   (ESMCI::Calendar **)&(calendar->ptr),
-                                        calendartype,
+                                        calkindflag,
                                         timeZone,
              (int)0, (int *)NULL, (char *)NULL, (int)0, 
              (int *)NULL, (char *)NULL, (int *)NULL, (ESMCI::Time *)NULL,

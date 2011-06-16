@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.117 2011/06/14 05:57:51 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.118 2011/06/16 05:56:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.117 2011/06/14 05:57:51 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.118 2011/06/16 05:56:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -665,7 +665,7 @@
       subroutine ESMF_ClockGet(clock, keywordEnforcer, &
         timeStep, startTime, stopTime, &
         runDuration, runTimeStepCount, refTime, currTime, prevTime, &
-        currSimTime, prevSimTime, calendar, calendarType, timeZone, &
+        currSimTime, prevSimTime, calendar, calkindflag, timeZone, &
         advanceCount, alarmCount, direction, name, rc)
 
 ! !ARGUMENTS:
@@ -682,7 +682,7 @@
       type(ESMF_TimeInterval), intent(out), optional :: currSimTime
       type(ESMF_TimeInterval), intent(out), optional :: prevSimTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
       integer,                 intent(out), optional :: timeZone
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
@@ -727,8 +727,8 @@
 !          the previous time step.
 !     \item[{[calendar]}]
 !          The {\tt Calendar} on which all the {\tt Clock}'s times are defined.
-!     \item[{[calendarType]}]
-!          The {\tt CalendarType} on which all the {\tt Clock}'s times are
+!     \item[{[calkindflag]}]
+!          The {\tt CalKind\_Flag} on which all the {\tt Clock}'s times are
 !          defined.
 !     \item[{[timeZone]}]
 !          The timezone within which all the {\tt Clock}'s times are defined.
@@ -781,7 +781,7 @@
                            timeStep, startTime, stopTime, &
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
-                           calendar, calendarType, timeZone, advanceCount, &
+                           calendar, calkindflag, timeZone, advanceCount, &
                            alarmCount, direction, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

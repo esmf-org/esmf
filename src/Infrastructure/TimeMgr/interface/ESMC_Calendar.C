@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.10 2011/02/22 21:42:40 w6ws Exp $
+// $Id: ESMC_Calendar.C,v 1.11 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_Calendar.C,v 1.10 2011/02/22 21:42:40 w6ws Exp $";
+  "$Id: ESMC_Calendar.C,v 1.11 2011/06/16 05:56:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing
@@ -57,7 +57,7 @@ extern "C" {
 
 ESMC_Calendar ESMC_CalendarCreate(
       const char        *name,         // in
-      ESMC_CalendarType  calendarType, // in
+      ESMC_CalKind_Flag  calkindflag,  // in
       int               *rc) {         // out - return code
 
   // initialize return code; assume routine not implemented
@@ -68,7 +68,7 @@ ESMC_Calendar ESMC_CalendarCreate(
 
   // call into ESMCI method
   calendar.ptr = (void *)
-     ESMCI::ESMCI_CalendarCreate(strlen(name), name, calendarType, &localrc);
+     ESMCI::ESMCI_CalendarCreate(strlen(name), name, calkindflag, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,                                       rc)) {
     calendar.ptr = NULL; // defensive; should already be set in CalendarCreate()
     return calendar;  // bail out

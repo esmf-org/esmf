@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time_F.C,v 1.7 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Time_F.C,v 1.8 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@ extern "C" {
                                 ESMC_I4 *sN, ESMC_I8 *sN_i8,
                                 ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                 Calendar **calendar,
-                                ESMC_CalendarType *calendarType,
+                                ESMC_CalKind_Flag *calkindflag,
                                 int *timeZone,
                                 int *status) {
           int rc = (ptr)->Time::set(
@@ -81,7 +81,7 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(calendar),
-                       ESMC_NOT_PRESENT_FILTER(calendarType),
+                       ESMC_NOT_PRESENT_FILTER(calkindflag),
                        ESMC_NOT_PRESENT_FILTER(timeZone) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -101,7 +101,7 @@ extern "C" {
                               ESMC_I4 *sN, ESMC_I8 *sN_i8,
                               ESMC_I4 *sD, ESMC_I8 *sD_i8,
                               Calendar **calendar, 
-                              ESMC_CalendarType *calendarType, 
+                              ESMC_CalKind_Flag *calkindflag, 
                               int *timeZone,
                               int *timeStringLen, int *tempTimeStringLen, 
                               char *tempTimeString,
@@ -142,7 +142,7 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(calendar),
-                       ESMC_NOT_PRESENT_FILTER(calendarType),
+                       ESMC_NOT_PRESENT_FILTER(calkindflag),
                        ESMC_NOT_PRESENT_FILTER(timeZone),
                                           // always present internal arguments
                                               *timeStringLen,

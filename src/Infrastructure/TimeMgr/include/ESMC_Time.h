@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.62 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMC_Time.h,v 1.63 2011/06/16 05:56:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@ int ESMC_TimeGet(
   ESMC_I4 *yy,                            // out
   ESMC_I4 *h,                             // out
   ESMC_Calendar *calendar,                // out
-  enum ESMC_CalendarType *calendartype,   // out
+  enum ESMC_CalKind_Flag *calkindflag,    // out
   int *timeZone                           // out
 );
 
@@ -84,8 +84,8 @@ int ESMC_TimeGet(
 //    Integer hours.
 //  \item[{[calendar]}]
 //    Associated {\tt ESMC\_Calendar}.
-//  \item[{[calendarType]}]
-//    Associated {\tt ESMC\_CalendarType}.
+//  \item[{[calkindflag]}]
+//    Associated {\tt ESMC\_CalKind\_Flag}.
 //  \end{description}
 //
 //EOP
@@ -126,7 +126,7 @@ int ESMC_TimeSet(
   ESMC_I4 yy,                            // in
   ESMC_I4 h,                             // in
   ESMC_Calendar calendar,                // in
-  enum ESMC_CalendarType calendartype,   // in
+  enum ESMC_CalKind_Flag calkindflag,    // in
   int timeZone                           // in
 );
 
@@ -149,10 +149,10 @@ int ESMC_TimeSet(
 //    Associated {\tt ESMC\_Calendar}.  If not created, defaults to calendar
 //    {\tt ESMC\_CAL\_NOCALENDAR} or default specified in
 //    {\tt ESMC\_Initialize()}.  If created, has precedence over
-//    calendarType below.
-//  \item[calendarType]
+//    calkindflag below.
+//  \item[calkindflag]
 //    Specifies associated {\tt ESMC\_Calendar} if calendar argument above
-//    not created.  More convenient way of specifying a built-in calendar type.
+//    not created.  More convenient way of specifying a built-in calendar kind.
 //  \end{description}
 //
 //EOP

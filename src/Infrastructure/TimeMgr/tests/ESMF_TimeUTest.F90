@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.42 2011/02/22 15:49:34 rokuingh Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.43 2011/06/16 05:56:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.42 2011/02/22 15:49:34 rokuingh Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.43 2011/06/16 05:56:51 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -80,7 +80,7 @@
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: stopTime
 
-      type(ESMF_CalendarType) :: calendarType
+      type(ESMF_CalKind_Flag) :: calkindflag
 #endif
 
 !-------------------------------------------------------------------------------
@@ -99,13 +99,19 @@
       ! Calendar Interval tests
       ! ----------------------------------------------------------------------------
       ! initialize calendars
-      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
-      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIAN, name="Julian", rc=rc)
-      noLeapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, name="No Leap", rc=rc)
-      day360Calendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, name="360 Day", rc=rc)
-      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="Julian Day", rc=rc)
-      modifiedJulianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_MODJULIANDAY, &
-                                                       name="ModifiedJulianDay", rc=rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
+        name="Gregorian", rc=rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIAN, &
+        name="Julian", rc=rc)
+      noLeapCalendar = ESMF_CalendarCreate(ESMF_CALKIND_NOLEAP, &
+        name="No Leap", rc=rc)
+      day360Calendar = ESMF_CalendarCreate(ESMF_CALKIND_360DAY, &
+        name="360 Day", rc=rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIANDAY, &
+        name="Julian Day", rc=rc)
+      modifiedJulianDayCalendar = &
+        ESMF_CalendarCreate(ESMF_CALKIND_MODJULIANDAY, &
+        name="ModifiedJulianDay", rc=rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -302,10 +308,10 @@
       write(failMsg, *) " Did not return time1=startTime2, 1/29/2004 12:17:59 or ESMF_SUCCESS"
       time1 = startTime2  ! exercise default F90 Time = assignment
       call ESMF_TimeGet(time1, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, &
-                        calendarType=calendarType, rc=rc)
+                        calkindflag=calkindflag, rc=rc)
       call ESMF_Test((time1==startTime2 .and. YY==2004 .and. MM==1 .and. &
                       DD==29 .and. H==12 .and. M==17 .and. S==59 .and. &
-                      calendarType==ESMF_CAL_GREGORIAN .and. &
+                      calkindflag==ESMF_CALKIND_GREGORIAN .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !print *, " yy/mm/d h:m:s = ", YY, "/", MM, "/", DD, " ", H, ":", M, ":", S
@@ -539,14 +545,14 @@
       !EX_UTest
       ! Test Setting Stop Time, relying on defaults 5
       write(failMsg, *) " Default NOLEAP Did not return 1/1/0 and ESMF_SUCCESS"
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_NOLEAP)
       call ESMF_TimeSet(stopTime, rc=rc)
       call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
       write(name, *) "Set Time Initialization Test w/Defaults 5"
       call ESMF_Test((YY.eq.0.and.mm.eq.1.and.dd.eq.1.and. &
                       rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_NOCALENDAR)
 
       ! ----------------------------------------------------------------------------
 
@@ -555,14 +561,14 @@
       !   by Giang Nong/GFDL
       ! Test Setting Stop Time, relying on defaults 6
       write(failMsg, *) " Default JULIAN Did not return 1/1/0 and ESMF_SUCCESS"
-      call ESMF_CalendarSetDefault(ESMF_CAL_JULIAN)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_JULIAN)
       call ESMF_TimeSet(stopTime, rc=rc)
       call ESMF_TimeGet(stopTime, yy=YY, mm=MM, dd=DD)
       write(name, *) "Set Time Initialization Test w/Defaults 6"
       call ESMF_Test((YY.eq.0.and.mm.eq.1.and.dd.eq.1.and. &
                       rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_NOCALENDAR)
 
       ! ----------------------------------------------------------------------------
       
@@ -570,11 +576,11 @@
       ! This test verifies the fix to support #1415439, reported
       !   by Tim Campbell/NRL
       ! Test Setting Time with No Calendar, just s, ms, ns
-      write(failMsg, *) " Did not set/get s=1, ms=2, ns=3 with ESMF_CAL_NOCALENDAR, and return ESMF_SUCCESS"
+      write(failMsg, *) " Did not set/get s=1, ms=2, ns=3 with ESMF_CALKIND_NOCALENDAR, and return ESMF_SUCCESS"
       call ESMF_TimeSet(stopTime, s=1, ms=2, ns=3, &
-                        calendarType=ESMF_CAL_NOCALENDAR, rc=rc)
+                        calkindflag=ESMF_CALKIND_NOCALENDAR, rc=rc)
       call ESMF_TimeGet(stopTime, s=S, ms=MS, ns=NS)
-      write(name, *) "Set Time Initialization Test w/ESMF_CAL_NOCALENDAR"
+      write(name, *) "Set Time Initialization Test w/ESMF_CALKIND_NOCALENDAR"
       call ESMF_Test(S.eq.1.and.MS.eq.2.and.NS.eq.3.and. &
                      rc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 

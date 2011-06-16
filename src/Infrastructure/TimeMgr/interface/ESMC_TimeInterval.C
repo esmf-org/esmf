@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.11 2011/02/22 21:42:40 w6ws Exp $
+// $Id: ESMC_TimeInterval.C,v 1.12 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_TimeInterval.C,v 1.11 2011/02/22 21:42:40 w6ws Exp $";
+  "$Id: ESMC_TimeInterval.C,v 1.12 2011/06/16 05:56:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing
@@ -84,7 +84,7 @@ int ESMC_TimeIntervalSet(ESMC_TimeInterval *timeInterval,
                                 (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
                                 (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
                                 (ESMCI::Calendar **)NULL,
-                                (ESMC_CalendarType *)NULL);
+                                (ESMC_CalKind_Flag *)NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                     &rc)) return rc;  // bail out
   // return successfully
@@ -129,10 +129,10 @@ int ESMC_TimeIntervalGet(ESMC_TimeInterval timeInterval,
                              (ESMC_I4 *)NULL, (ESMC_I8 *)NULL,
                              (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
                              (ESMCI::Calendar **)NULL,
-                             (ESMC_CalendarType *)NULL,
+                             (ESMC_CalKind_Flag *)NULL,
                              (ESMCI::Time *)NULL, (ESMCI::Time *)NULL,
                              (ESMCI::Calendar **)NULL,
-                             (ESMC_CalendarType *)NULL,
+                             (ESMC_CalKind_Flag *)NULL,
                              (int)0, (int *)NULL, (char *)NULL,
                              (int)0, (int *)NULL, (char *)NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval_F.C,v 1.9 2011/02/25 23:20:47 eschwab Exp $
+// $Id: ESMCI_TimeInterval_F.C,v 1.10 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -194,7 +194,7 @@ extern "C" {
                                  ESMC_R8 *ns_r8,
                                  ESMC_I4 *sN, ESMC_I8 *sN_i8,
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
-                                 ESMC_CalendarType *calendarType,
+                                 ESMC_CalKind_Flag *calkindflag,
                                  int *status) {
           int rc = (ptr)->TimeInterval::set(
                        ESMC_NOT_PRESENT_FILTER(yy),
@@ -224,7 +224,7 @@ extern "C" {
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
-                       ESMC_NOT_PRESENT_FILTER(calendarType) );
+                       ESMC_NOT_PRESENT_FILTER(calkindflag) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -244,7 +244,7 @@ extern "C" {
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
                                  Calendar **calendar,
-                                 ESMC_CalendarType *calendarType,
+                                 ESMC_CalKind_Flag *calkindflag,
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
                                  int *timeStringLenISOFrac,
@@ -280,7 +280,7 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
@@ -311,7 +311,7 @@ extern "C" {
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
                                  Calendar **calendar, 
-                                 ESMC_CalendarType *calendarType, 
+                                 ESMC_CalKind_Flag *calkindflag, 
                                  Time *startTimeIn,
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
@@ -348,7 +348,7 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
                        ESMC_NOT_PRESENT_FILTER(startTimeIn),
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
@@ -379,7 +379,7 @@ extern "C" {
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
                                  Calendar **calendar, 
-                                 ESMC_CalendarType *calendarType, 
+                                 ESMC_CalKind_Flag *calkindflag, 
                                  Calendar **calendarIn, 
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
@@ -416,7 +416,7 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendarIn),
@@ -447,8 +447,8 @@ extern "C" {
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
                                  Calendar **calendar, 
-                                 ESMC_CalendarType *calendarType, 
-                                 ESMC_CalendarType *calendarTypeIn, 
+                                 ESMC_CalKind_Flag *calkindflag, 
+                                 ESMC_CalKind_Flag *calkindflagIn, 
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
                                  int *timeStringLenISOFrac,
@@ -484,11 +484,11 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calendarType), 
+                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
-                       ESMC_NOT_PRESENT_FILTER(calendarTypeIn),
+                       ESMC_NOT_PRESENT_FILTER(calkindflagIn),
                                           // always present internal arguments
                                               *timeStringLen,
 	                                       tempTimeStringLen,

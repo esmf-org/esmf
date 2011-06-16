@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.129 2011/06/14 05:57:54 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.130 2011/06/16 05:56:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.129 2011/06/14 05:57:54 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.130 2011/06/16 05:56:50 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -93,7 +93,7 @@
 
 
       ! instantiate a calendar
-      type(ESMF_CalendarType) :: cal_type
+      type(ESMF_CalKind_Flag) :: cal_kind
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: stopTime, stopTime2, stopTime3, stopTime4, syncTime, &
@@ -113,22 +113,27 @@
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! set default calendar to Gregorian
-      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc=rc)
+      call ESMF_CalendarSetDefault(ESMF_CALKIND_GREGORIAN, rc=rc)
 
       ! initialize one calendar to be Gregorian type
-      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
+        name="Gregorian", rc=rc)
 
       ! initialize secand calendar to be Julian type
-      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="Julian", rc=rc)
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIANDAY, &
+        name="Julian", rc=rc)
 
       ! initialize third calendar to be No Leap type
-      no_leapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, name="NoLeap", rc=rc)
+      no_leapCalendar = ESMF_CalendarCreate(ESMF_CALKIND_NOLEAP, &
+        name="NoLeap", rc=rc)
 
       ! initialize third calendar to be 360 day type
-      esmf_360dayCalendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, name="360Day", rc=rc)
+      esmf_360dayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_360DAY, &
+        name="360Day", rc=rc)
 
-      ! initialize fourth calendar to be No Calendar type
-      noCalendar = ESMF_CalendarCreate(ESMF_CAL_NOCALENDAR, name="No Calendar", rc=rc)
+      ! initialize fourth calendar to be No calendar kind
+      noCalendar = ESMF_CalendarCreate(ESMF_CALKIND_NOCALENDAR, &
+        name="No Calendar", rc=rc)
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -160,7 +165,7 @@
       write(name, *) "Set Start Time Initialization Test"
       call ESMF_TimeSet(startTime, yy=2003, mm=3, dd=13, &
                              	   h=18, m=45, s=27, &
-                                   calendarType=ESMF_CAL_GREGORIAN, rc=rc)
+                                   calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -607,10 +612,11 @@
 
       !EX_UTest
       ! Verify the calendar is set correctly
-      write(name, *) "Get Calendar Type Test"
-      call ESMF_CalendarGet(gregorianCalendar, calendarType=cal_type, rc=rc)
+      write(name, *) "Get Calendar Kind Test"
+      call ESMF_CalendarGet(gregorianCalendar, calkindflag=cal_kind, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS and/or calendar not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(cal_type.eq.ESMF_CAL_GREGORIAN), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and. &
+        (cal_kind.eq.ESMF_CALKIND_GREGORIAN), &
                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -1237,7 +1243,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      write(name, *) "Time Initialization with seconds =  8 with no calendar type specified Test" 
+      write(name, *) "Time Initialization with seconds =  8 with no calendar kind specified Test" 
       call ESMF_TimeSet(startTime, s=8, calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -1246,7 +1252,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      write(name, *) "Time Initialization with seconds =  8 with calendar type specified Test" 
+      write(name, *) "Time Initialization with seconds =  8 with calendar kind specified Test" 
       call ESMF_TimeSet(startTime, s=8, calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -1446,8 +1452,9 @@
         	timeDiff =  currentTime - previousTime 
 
                 ! Note: this timeInterval comparison depends on
-                ! ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN) being set
-                ! so the timeIntervals' (timeStep) magnitude can be determined.
+                ! ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN) 
+                ! being set so the timeIntervals' (timeStep) magnitude can 
+                ! be determined.
         	if((timeDiff.ne.timeStep).and.(testResults.eq.0)) then	
 	     		testResults=1
              		!call ESMF_TimeIntervalPrint(timeStep, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.16 2011/02/22 21:35:57 w6ws Exp $
+// $Id: ESMCI_Calendar.C,v 1.17 2011/06/16 05:56:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,13 +41,13 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.16 2011/02/22 21:35:57 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Calendar.C,v 1.17 2011/06/16 05:56:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
 
-// initialize static array of calendar type names
-const char *const Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
+// initialize static array of calendar kind names
+const char *const Calendar::calkindflagName[CALENDAR_KIND_COUNT] =
                                                   { "Gregorian", "Julian",
                                                     "Julian Day", 
                                                     "Modified Julian Day", 
@@ -55,7 +55,7 @@ const char *const Calendar::calendarTypeName[CALENDAR_TYPE_COUNT] =
                                                     "Custom", "No Calendar" };
 
 // initialize static internal calendar pointer array
-Calendar *Calendar::internalCalendar[CALENDAR_TYPE_COUNT] =
+Calendar *Calendar::internalCalendar[CALENDAR_KIND_COUNT] =
                                       { ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -77,7 +77,7 @@ int Calendar::count=0;
 //
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMCI_CalendarInitialize - initialize the default Calendar type
+// !IROUTINE:  ESMCI_CalendarInitialize - initialize the default Calendar kind
 //
 // !INTERFACE:
       int ESMCI_CalendarInitialize(
@@ -86,8 +86,8 @@ int Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType *calendarType) {  // in - ESMC_CalendarType to be the
-                                          //      default
+      ESMC_CalKind_Flag *calkindflag) {  // in - ESMC_CalKind_Flag to be the
+                                         //      default
 //
 // !DESCRIPTION:
 //      Friend function which initializes the Time Manager default calendar.
@@ -97,7 +97,7 @@ int Calendar::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI_CalendarInitialize()"
 
-  int rc = ESMCI_CalendarSetDefault(calendarType);
+  int rc = ESMCI_CalendarSetDefault(calkindflag);
   ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
   return(rc);
 
@@ -121,7 +121,7 @@ int Calendar::count=0;
 //
 //EOPI
 
-  for (int i=0; i<CALENDAR_TYPE_COUNT; i++) {
+  for (int i=0; i<CALENDAR_KIND_COUNT; i++) {
     delete Calendar::internalCalendar[i];
     Calendar::internalCalendar[i] = ESMC_NULL_POINTER;
   }
@@ -144,7 +144,7 @@ int Calendar::count=0;
 // !ARGUMENTS:
       int                nameLen,      // in
       const char        *name,         // in
-      ESMC_CalendarType  calendarType, // in
+      ESMC_CalKind_Flag  calkindflag,  // in
       int               *rc) {         // out - return code
 
 // !DESCRIPTION:
@@ -162,11 +162,11 @@ int Calendar::count=0;
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
-    // make sure calendar type is valid
-    if (calendarType < 1 || calendarType > CALENDAR_TYPE_COUNT) {
+    // make sure calendar kind is valid
+    if (calkindflag < 1 || calkindflag > CALENDAR_KIND_COUNT) {
       char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "calendarType %d not in valid range of 1 to %d.",
-              calendarType, CALENDAR_TYPE_COUNT);
+      sprintf(logMsg, "calkindflag %d not in valid range of 1 to %d.",
+              calkindflag, CALENDAR_KIND_COUNT);
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMC_NULL_POINTER);
     }
@@ -203,7 +203,7 @@ int Calendar::count=0;
 
     returnCode = calendar->set(strlen(calendar->name), 
                                       calendar->name, 
-                                      calendarType);
+                                      calkindflag);
     if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
       delete calendar;
       return(ESMC_NULL_POINTER);
@@ -233,7 +233,7 @@ int Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType calendarType) { // in
+      ESMC_CalKind_Flag calkindflag) { // in
 
 // !DESCRIPTION:
 //      Allocates and Initializes an internal {\tt ESMC\_Calendar} of given type
@@ -247,16 +247,16 @@ int Calendar::count=0;
     int returnCode;
 
     // make sure it is valid
-    if (calendarType < 1 || calendarType > CALENDAR_TYPE_COUNT) {
+    if (calkindflag < 1 || calkindflag > CALENDAR_KIND_COUNT) {
       char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "calendarType %d not in valid range of 1 to %d.",
-              calendarType, CALENDAR_TYPE_COUNT);
+      sprintf(logMsg, "calkindflag %d not in valid range of 1 to %d.",
+              calkindflag, CALENDAR_KIND_COUNT);
       ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
       return(ESMF_FAILURE);
     }
 
     // select internal calendar static pointer based on specified cal type
-    Calendar **internalCal = &(Calendar::internalCalendar[calendarType-1]);
+    Calendar **internalCal = &(Calendar::internalCalendar[calkindflag-1]);
 
     // check if valid internal calendar already exists
     if (*internalCal != ESMC_NULL_POINTER) {
@@ -279,11 +279,11 @@ int Calendar::count=0;
 
     // create default internal name, e.g. "InternalGregorian001"
     sprintf((*internalCal)->name, "Internal%s%3.3d\0",
-                         Calendar::calendarTypeName[calendarType-1],
+                         Calendar::calkindflagName[calkindflag-1],
                                                     (*internalCal)->id);
 
     returnCode = (*internalCal)->set(strlen((*internalCal)->name), 
-                                            (*internalCal)->name, calendarType);
+                                            (*internalCal)->name, calkindflag);
     if (ESMC_LogDefault.MsgFoundError(returnCode,
                                       ESMCI_ERR_PASSTHRU, &returnCode)) {
       delete *internalCal;
@@ -523,7 +523,7 @@ int Calendar::count=0;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMCI_CalendarSetDefault - set the default Calendar type
+// !IROUTINE:  ESMCI_CalendarSetDefault - set the default Calendar kind
 //
 // !INTERFACE:
       int ESMCI_CalendarSetDefault(
@@ -532,7 +532,7 @@ int Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType *calendarType) {  // in - ESMC_CalendarType to be the
+      ESMC_CalKind_Flag *calkindflag) {  // in - ESMC_CalKind_Flag to be the
                                           //      default
 //
 // !DESCRIPTION:
@@ -541,24 +541,24 @@ int Calendar::count=0;
 //EOP
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI_CalendarSetDefault(calendarType)"
+ #define ESMC_METHOD "ESMCI_CalendarSetDefault(calkindflag)"
 
-  ESMC_CalendarType calType = (calendarType == ESMC_NULL_POINTER) ?
-                                            ESMC_CAL_NOCALENDAR : *calendarType;
+  ESMC_CalKind_Flag calKind = (calkindflag == ESMC_NULL_POINTER) ?
+                                        ESMC_CALKIND_NOCALENDAR : *calkindflag;
 
   // create internal calendar if necessary
-  int rc = ESMCI_CalendarCreate(calType);
+  int rc = ESMCI_CalendarCreate(calKind);
   if (rc != ESMF_SUCCESS) {
     char logMsg[ESMF_MAXSTR];
     sprintf(logMsg, "ESMCI_CalendarCreate(%s) failed.",
-            Calendar::calendarTypeName[calType]);
+            Calendar::calkindflagName[calKind]);
     ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
     return (rc);
   }
 
   // set the default calendar
   Calendar::defaultCalendar = 
-                             Calendar::internalCalendar[calType-1];
+                             Calendar::internalCalendar[calKind-1];
 
   return(ESMF_SUCCESS);
 
@@ -577,7 +577,7 @@ int Calendar::count=0;
 // !ARGUMENTS:
       int               nameLen,         // in
       const char       *name,            // in
-      ESMC_CalendarType calendarType) {  // in - set to be Calendar type
+      ESMC_CalKind_Flag calkindflag) {   // in - set to be Calendar kind
 //
 // !DESCRIPTION:
 //      Sets a {\tt EMSC\_Calendar} to be of a specific type
@@ -620,16 +620,16 @@ int Calendar::count=0;
       }
     }
 
-    this->calendarType = calendarType;
+    this->calkindflag = calkindflag;
 
-    switch (calendarType)
+    switch (calkindflag)
     {
-        case ESMC_CAL_GREGORIAN:
-        case ESMC_CAL_JULIAN:
-        case ESMC_CAL_NOLEAP:
+        case ESMC_CALKIND_GREGORIAN:
+        case ESMC_CALKIND_JULIAN:
+        case ESMC_CALKIND_NOLEAP:
             // specific leap year is property of a Time instant, not Calendar ??
             //    OR calculated on-the-fly during Time instant calculations ??
-            //    Calendar type only determines whether leap year is used
+            //    Calendar kind only determines whether leap year is used
             daysPerMonth[0]  = 31; daysPerMonth[1]  = 28;
             daysPerMonth[2]  = 31; daysPerMonth[3]  = 30;
             daysPerMonth[4]  = 31; daysPerMonth[5]  = 30;
@@ -644,8 +644,8 @@ int Calendar::count=0;
             rc = ESMF_SUCCESS;
             break;
 
-        case ESMC_CAL_JULIANDAY:
-        case ESMC_CAL_MODJULIANDAY:
+        case ESMC_CALKIND_JULIANDAY:
+        case ESMC_CALKIND_MODJULIANDAY:
             // Days is the highest resolution of time, i.e. there is no
             //   concept of months or years ??
             for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 0;
@@ -657,7 +657,7 @@ int Calendar::count=0;
             rc = ESMF_SUCCESS;
             break;
 
-        case ESMC_CAL_360DAY:
+        case ESMC_CALKIND_360DAY:
             // 12 months of 30 days each
             for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 30;
             secondsPerDay  = SECONDS_PER_DAY;
@@ -668,7 +668,7 @@ int Calendar::count=0;
             rc = ESMF_SUCCESS;
             break;
 
-        case ESMC_CAL_NOCALENDAR:
+        case ESMC_CALKIND_NOCALENDAR:
             // no calendar needed, convert base time up to days only
             for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 0;
             secondsPerDay  = 0;
@@ -679,7 +679,7 @@ int Calendar::count=0;
             rc = ESMF_SUCCESS;
             break;
 
-        case ESMC_CAL_CUSTOM:
+        case ESMC_CALKIND_CUSTOM:
             // user defined; need more info; user must call
             //   Set() (custom) instead
             // restore original calendar
@@ -689,10 +689,10 @@ int Calendar::count=0;
             break;
 
         default:
-            // unknown calendar type; restore original
+            // unknown calendar kind; restore original
             *this = saveCalendar; 
             char logMsg[ESMF_MAXSTR];
-            sprintf(logMsg, "; unknown calendar type %d.", calendarType);
+            sprintf(logMsg, "; unknown calendar kind %d.", calkindflag);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
                                                   &rc);
             break;
@@ -764,7 +764,7 @@ int Calendar::count=0;
       }
     }
 
-    this->calendarType = ESMC_CAL_CUSTOM;
+    this->calkindflag = ESMC_CALKIND_CUSTOM;
 
     // TODO: replace MONTHS_PER_YEAR with dynamic daysPerMonth[monthsPerYear]
     if (monthsPerYear <= MONTHS_PER_YEAR && monthsPerYear >= 0) {
@@ -827,7 +827,7 @@ int Calendar::count=0;
       int                nameLen,         // in
       int               *tempNameLen,     // out
       char              *tempName,        // out
-      ESMC_CalendarType *calendarType,    // out
+      ESMC_CalKind_Flag *calkindflag,     // out
       int               *daysPerMonth,    // out
       int                sizeofDaysPerMonth, // in
       int               *monthsPerYear,   // out
@@ -857,7 +857,7 @@ int Calendar::count=0;
     // TODO: replace MONTHS_PER_YEAR with monthsPerYear
 
     // must have at least one non-null pointer or a non-zero nameLen
-    if (calendarType   == ESMC_NULL_POINTER &&
+    if (calkindflag    == ESMC_NULL_POINTER &&
         daysPerMonth   == ESMC_NULL_POINTER && 
         monthsPerYear  == ESMC_NULL_POINTER && 
         secondsPerDay  == ESMC_NULL_POINTER &&
@@ -892,8 +892,8 @@ int Calendar::count=0;
       *tempNameLen = strlen(tempName);
     }
 
-    if (calendarType != ESMC_NULL_POINTER) {
-      *calendarType = this->calendarType;
+    if (calkindflag != ESMC_NULL_POINTER) {
+      *calkindflag = this->calkindflag;
     }
     if (daysPerMonth != ESMC_NULL_POINTER) {
       if (sizeofDaysPerMonth < this->monthsPerYear) return(ESMF_FAILURE);
@@ -988,10 +988,10 @@ int Calendar::count=0;
       return(rc);
     }
 
-    switch (this->calendarType)
+    switch (this->calkindflag)
     {
         // convert Gregorian Date => Time
-        case ESMC_CAL_GREGORIAN:
+        case ESMC_CALKIND_GREGORIAN:
         {
             //
             // Validate inputs 
@@ -1056,7 +1056,7 @@ int Calendar::count=0;
         }
 
         // convert Julian Date => Time
-        case ESMC_CAL_JULIAN:
+        case ESMC_CALKIND_JULIAN:
         {
             //
             // Validate inputs 
@@ -1122,7 +1122,7 @@ int Calendar::count=0;
         }
 
         // convert No Leap Date => Time
-        case ESMC_CAL_NOLEAP:
+        case ESMC_CALKIND_NOLEAP:
         {
             // Validate inputs. TODO: determine lowpoint year, month & day
             if (mm < 1 || mm > 12 || dd < 1) {
@@ -1156,7 +1156,7 @@ int Calendar::count=0;
             break;
         }
         // convert 360 Day Date => Time
-        case ESMC_CAL_360DAY:
+        case ESMC_CALKIND_360DAY:
         {
             // Validate inputs. TODO: determine lowpoint year, month & day
             if (mm < 1 || mm > 12 || dd < 1 || dd > 30) {
@@ -1178,7 +1178,7 @@ int Calendar::count=0;
             break;
         }
         // convert Julian Date => Time
-        case ESMC_CAL_JULIANDAY:
+        case ESMC_CALKIND_JULIANDAY:
         {
             // TODO: lower/upper bounds date range check dependent on machine
             //  word size
@@ -1200,7 +1200,7 @@ int Calendar::count=0;
 
             break;
         }
-        case ESMC_CAL_MODJULIANDAY:
+        case ESMC_CALKIND_MODJULIANDAY:
         {
             // MJD = JD - 2400000.5
 
@@ -1227,19 +1227,19 @@ int Calendar::count=0;
 
             break;
         }
-        case ESMC_CAL_CUSTOM:
+        case ESMC_CALKIND_CUSTOM:
             // TODO:
             break;
-        case ESMC_CAL_NOCALENDAR:
-            // need real calendar type
+        case ESMC_CALKIND_NOCALENDAR:
+            // need real calendar kind
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
                                                   ", need real calendar.", &rc);
             return(rc);
             break;
         default:
-            // unknown calendar type
+            // unknown calendar kind
             char logMsg[ESMF_MAXSTR];
-            sprintf(logMsg, "; unknown calendar type %d.", this->calendarType);
+            sprintf(logMsg, "; unknown calendar kind %d.", this->calkindflag);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
                                                   &rc);
             return(rc);
@@ -1318,10 +1318,10 @@ int Calendar::count=0;
       return(rc);
     }
 
-    switch (this->calendarType)
+    switch (this->calkindflag)
     {
         // convert Time => Gregorian Date
-        case ESMC_CAL_GREGORIAN:
+        case ESMC_CALKIND_GREGORIAN:
         {
             // Convert basetime portion of Time into date
             // Julian day (D) => Gregorian date (yy, mm, dd)
@@ -1413,7 +1413,7 @@ int Calendar::count=0;
               }
             }
 
-            // TODO: share this code with ESMC_CAL_JULIAN below
+            // TODO: share this code with ESMC_CALKIND_JULIAN below
             // remove smallest requested date unit from given time for
             // subsequent getting of remaining hours, minutes, seconds units
             if (dd   != ESMC_NULL_POINTER || d    != ESMC_NULL_POINTER ||
@@ -1457,7 +1457,7 @@ int Calendar::count=0;
             break;
         }
         // convert Time => Julian Date
-        case ESMC_CAL_JULIAN:
+        case ESMC_CALKIND_JULIAN:
         {
             // convert basetime seconds to Julian days
             ESMC_I8 jdays = t->getw() / secondsPerDay;
@@ -1538,7 +1538,7 @@ int Calendar::count=0;
               }
             }
 
-            // TODO: share this code with ESMC_CAL_GREGORIAN above
+            // TODO: share this code with ESMC_CALKIND_GREGORIAN above
             // remove smallest requested date unit from given time for
             // subsequent getting of remaining hours, minutes, seconds units
             if (dd   != ESMC_NULL_POINTER || d    != ESMC_NULL_POINTER ||
@@ -1581,7 +1581,7 @@ int Calendar::count=0;
             break;
         }
         // convert Time => No Leap Date
-        case ESMC_CAL_NOLEAP:
+        case ESMC_CALKIND_NOLEAP:
         {
             ESMC_I8 tmpS = t->getw();
  // TODO: ? ESMC_I8 tmpS = t->getw() - 148600915200LL;
@@ -1667,7 +1667,7 @@ int Calendar::count=0;
             break;
         }
         // convert Time => 360 Day Date
-        case ESMC_CAL_360DAY:
+        case ESMC_CALKIND_360DAY:
         {
             ESMC_I8 tmpS = t->getw();
  // TODO: ? ESMC_I8 tmpS = t->getw() - 146565244800LL;
@@ -1750,8 +1750,8 @@ int Calendar::count=0;
             break;
         }
         // convert Time => Julian Day or Modified Julian Day
-        case ESMC_CAL_JULIANDAY:
-        case ESMC_CAL_MODJULIANDAY:
+        case ESMC_CALKIND_JULIANDAY:
+        case ESMC_CALKIND_MODJULIANDAY:
         {
             // MJD = JD - 2400000.5
 
@@ -1761,7 +1761,8 @@ int Calendar::count=0;
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
               ESMC_I8 day = t->getw() / secondsPerDay;
-              if (this->calendarType == ESMC_CAL_MODJULIANDAY) day -= 2400001;
+              if (this->calkindflag == ESMC_CALKIND_MODJULIANDAY) 
+                day -= 2400001;
               if (day > INT_MIN && day <= INT_MAX) {
                 *d = (ESMC_I4) day;    // >= 32-bit
                 // adjust for negative time (reverse integer division)
@@ -1777,7 +1778,8 @@ int Calendar::count=0;
             }
             if (d_i8 != ESMC_NULL_POINTER) {
               *d_i8 = t->getw() / secondsPerDay;  // >= 64-bit
-              if (this->calendarType == ESMC_CAL_MODJULIANDAY) *d_i8 -= 2400001;
+              if (this->calkindflag == ESMC_CALKIND_MODJULIANDAY)
+                *d_i8 -= 2400001;
               // adjust for negative time (reverse integer division)
               if (t->getw() % secondsPerDay < 0) (*d_i8)--;
             }
@@ -1787,7 +1789,7 @@ int Calendar::count=0;
               // optional subraction, and finally converting to floating point.
               BaseTime rdays = *t;
               rdays /= secondsPerDay;
-              if (this->calendarType == ESMC_CAL_MODJULIANDAY) {
+              if (this->calkindflag == ESMC_CALKIND_MODJULIANDAY) {
                 BaseTime offset(2400001);
                 rdays -= offset;
               }
@@ -1803,18 +1805,18 @@ int Calendar::count=0;
 
             break;
         }
-        case ESMC_CAL_CUSTOM:
+        case ESMC_CALKIND_CUSTOM:
             // TODO:
             break;
-        case ESMC_CAL_NOCALENDAR:
-            // need real calendar type
+        case ESMC_CALKIND_NOCALENDAR:
+            // need real calendar kind
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
                                                   ", need real calendar.", &rc);
             break;
         default:
-            // unknown calendar type
+            // unknown calendar kind
             char logMsg[ESMF_MAXSTR];
-            sprintf(logMsg, "; unknown calendar type %d.", this->calendarType);
+            sprintf(logMsg, "; unknown calendar kind %d.", this->calkindflag);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
                                                   &rc);
     }
@@ -1870,12 +1872,12 @@ int Calendar::count=0;
     // prepare for increment with any non-calendar units (h,m,s)
     TimeInterval nonCalTi = timeinterval;
 
-    switch (calendarType)
+    switch (calkindflag)
     {
-        case ESMC_CAL_GREGORIAN:
-        case ESMC_CAL_JULIAN:
-        case ESMC_CAL_NOLEAP:
-        case ESMC_CAL_360DAY:
+        case ESMC_CALKIND_GREGORIAN:
+        case ESMC_CALKIND_JULIAN:
+        case ESMC_CALKIND_NOLEAP:
+        case ESMC_CALKIND_360DAY:
         {
             ESMC_I8 yy_i8;
             int mm, dd, timeZone;
@@ -2030,12 +2032,12 @@ int Calendar::count=0;
     // prepare for decrement with any non-calendar units (h,m,s)
     TimeInterval nonCalTi = timeinterval;
 
-    switch (calendarType)
+    switch (calkindflag)
     {
-        case ESMC_CAL_GREGORIAN:
-        case ESMC_CAL_JULIAN:
-        case ESMC_CAL_NOLEAP:
-        case ESMC_CAL_360DAY:
+        case ESMC_CALKIND_GREGORIAN:
+        case ESMC_CALKIND_JULIAN:
+        case ESMC_CALKIND_NOLEAP:
+        case ESMC_CALKIND_360DAY:
         {
             ESMC_I8 yy_i8;
             int mm, dd, timeZone;
@@ -2174,14 +2176,14 @@ int Calendar::count=0;
       return(false);
     }
 
-    switch (calendarType)
+    switch (calkindflag)
     {
-      case ESMC_CAL_GREGORIAN:
+      case ESMC_CALKIND_GREGORIAN:
         // leap year is divisable by 400 or divisable by 4 and not 100.
         return( (yy_i8 % 400 == 0) || ((yy_i8 % 4 == 0)&&(yy_i8 % 100 != 0)) );
         break;
       
-      case ESMC_CAL_JULIAN:
+      case ESMC_CALKIND_JULIAN:
         // leap year is divisable by 4.
         return(yy_i8 % 4 == 0);
         break;
@@ -2225,8 +2227,8 @@ int Calendar::count=0;
 
     // if custom calendars, check properties for equality;
     // return false as soon as inequality is known, otherwise return true ...
-    if (calendarType          == ESMC_CAL_CUSTOM && 
-        calendar.calendarType == ESMC_CAL_CUSTOM) {
+    if (calkindflag          == ESMC_CALKIND_CUSTOM && 
+        calendar.calkindflag == ESMC_CALKIND_CUSTOM) {
       if (monthsPerYear != calendar.monthsPerYear) return(false);
       for (int i=0; i<monthsPerYear; i++) {
         if (daysPerMonth[i] != calendar.daysPerMonth[i]) return(false);
@@ -2238,8 +2240,8 @@ int Calendar::count=0;
       if (daysPerYear.dD != calendar.daysPerYear.dD) return(false);
       return(true);  // custom calendars are equal
     } else {
-      // ... else just check calendar type
-      return(calendarType == calendar.calendarType);
+      // ... else just check calendar kind
+      return(calkindflag == calendar.calkindflag);
     }
 
 }  // end Calendar::operator==
@@ -2255,17 +2257,17 @@ int Calendar::count=0;
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_CalendarType &calendarType) const {   // in - ESMC_CalendarType to compare
+      const ESMC_CalKind_Flag &calkindflag) const {   // in - ESMC_CalKind_Flag to compare
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Calendar}
-//      type with given {\tt ESMC\_CalendarType}, return result.
+//      type with given {\tt ESMC\_CalKind\_Flag}, return result.
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::Calendar::operator==(calendarType)"
+ #define ESMC_METHOD "ESMCI::Calendar::operator==(calkindflag)"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -2273,7 +2275,7 @@ int Calendar::count=0;
       return(false);
     }
 
-    return(this->calendarType == calendarType);
+    return(this->calkindflag == calkindflag);
 
 }  // end Calendar::operator==
 
@@ -2308,8 +2310,8 @@ int Calendar::count=0;
 
     // if custom calendars, check properties for equality;
     // return true as soon as inequality is known, otherwise return false ...
-    if (calendarType          == ESMC_CAL_CUSTOM && 
-        calendar.calendarType == ESMC_CAL_CUSTOM) {
+    if (calkindflag          == ESMC_CALKIND_CUSTOM && 
+        calendar.calkindflag == ESMC_CALKIND_CUSTOM) {
       if (monthsPerYear != calendar.monthsPerYear) return(true);
       for (int i=0; i<monthsPerYear; i++) {
         if (daysPerMonth[i] != calendar.daysPerMonth[i]) return(true);
@@ -2321,8 +2323,8 @@ int Calendar::count=0;
       if (daysPerYear.dD != calendar.daysPerYear.dD) return(true);
       return(false);  // custom calendars are equal
     } else {
-      // ... else just check calendar type
-      return(calendarType != calendar.calendarType);
+      // ... else just check calendar kind
+      return(calkindflag != calendar.calkindflag);
     }
 
 }  // end Calendar::operator!=
@@ -2338,17 +2340,17 @@ int Calendar::count=0;
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_CalendarType &calendarType) const {   // in - ESMC_CalendarType to compare
+      const ESMC_CalKind_Flag &calkindflag) const {   // in - ESMC_CalKind_Flag to compare
 //
 // !DESCRIPTION:
 //      Compare for inequality the current object's (this) {\tt ESMC\_Calendar}
-//      type with given {\tt ESMC\_CalendarType}, return result.
+//      type with given {\tt ESMC\_CalKind\_Flag}, return result.
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::Calendar::operator!=(calendarType)"
+ #define ESMC_METHOD "ESMCI::Calendar::operator!=(calkindflag)"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -2356,7 +2358,7 @@ int Calendar::count=0;
       return(false);
     }
 
-    return(this->calendarType != calendarType);
+    return(this->calkindflag != calkindflag);
 
 }  // end Calendar::operator!=
 
@@ -2460,11 +2462,11 @@ int Calendar::count=0;
       return(rc);
     }
 
-    if (this->calendarType < 1 ||
-        this->calendarType > CALENDAR_TYPE_COUNT) {
+    if (this->calkindflag < 1 ||
+        this->calkindflag > CALENDAR_KIND_COUNT) {
       char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "; calendarType %d (1-%d).", this->calendarType,
-              CALENDAR_TYPE_COUNT);
+      sprintf(logMsg, "; calkindflag %d (1-%d).", this->calkindflag,
+              CALENDAR_KIND_COUNT);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                             logMsg, &rc);
     }
@@ -2581,9 +2583,9 @@ int Calendar::count=0;
       if (strncmp(opts, "name", 4) == 0) {
         printf("name = %s\n", name);
       }
-      else if (strncmp(opts, "calendartype", 12) == 0) {
+      else if (strncmp(opts, "calkindflag", 11) == 0) {
         // TODO:  make lookup table: int -> string
-        printf("calendarType = %s\n", calendarTypeName[calendarType-1]);
+        printf("calkindflag = %s\n", calkindflagName[calkindflag-1]);
       }
       else if (strncmp(opts, "dayspermonth", 12) == 0) {
         printf("daysPerMonth = ");
@@ -2614,7 +2616,7 @@ int Calendar::count=0;
       // default:  print out all properties
 
       printf("name = %s\n", name);
-      printf("calendarType = %s\n", calendarTypeName[calendarType-1]);
+      printf("calkindflag = %s\n", calkindflagName[calkindflag-1]);
 
       printf("daysPerMonth = "); 
       for (int i=0; i<this->monthsPerYear; i++) {
@@ -2664,7 +2666,7 @@ int Calendar::count=0;
     id = ++count;  // TODO: inherit from ESMC_Base class
     // copy = false;  // TODO: see notes in constructors and destructor below
 
-    calendarType   = ESMC_CAL_NOCALENDAR;
+    calkindflag    = ESMC_CALKIND_NOCALENDAR;
     // TODO: make daysPerMonth[] dynamically allocatable with monthsPerYear
     //       daysPerMonth = ESMC_NULL_POINTER;
     monthsPerYear  = MONTHS_PER_YEAR;
@@ -2689,7 +2691,7 @@ int Calendar::count=0;
 //
 // !ARGUMENTS:
       const char       *name,            // in
-      ESMC_CalendarType calendarType) {  // in
+      ESMC_CalKind_Flag calkindflag) {  // in
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInstant} to be of a specific type via
@@ -2704,7 +2706,7 @@ int Calendar::count=0;
     int rc = ESMF_SUCCESS;
 
     Calendar();  // invoke default constructor
-    rc = Calendar::set(strlen(name), name, calendarType);
+    rc = Calendar::set(strlen(name), name, calkindflag);
     ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU,
                                           ESMC_NULL_POINTER);
 

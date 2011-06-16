@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.119 2011/04/22 17:33:58 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.120 2011/06/16 05:56:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.119 2011/04/22 17:33:58 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.120 2011/06/16 05:56:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -995,7 +995,7 @@
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
-        startTime, calendar, calendarType, &
+        startTime, calendar, calkindflag, &
         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
@@ -1027,7 +1027,7 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1121,8 +1121,8 @@
 !          (yy, mm, and/or d).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}, if any.
-!     \item[{[calendarType]}]
-!          Associated {\tt CalendarType}, if any.
+!     \item[{[calkindflag]}]
+!          Associated {\tt CalKind\_Flag}, if any.
 !     \item[{[timeString]}]
 !          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
@@ -1176,7 +1176,7 @@
                                      d, d_i8, h, m, s, s_i8, ms, &
                                      us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                      us_r8, ns_r8, sN, sN_i8, sD, sD_i8, &
-                                     startTime, calendar, calendarType, &
+                                     startTime, calendar, calkindflag, &
                                      timeStringLen, tempTimeStringLen, &
                                      tempTimeString, &
                                      timeStringLenISOFrac, &
@@ -1222,7 +1222,7 @@
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
         startTime, &
-        calendar, calendarType, &
+        calendar, calkindflag, &
         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
@@ -1255,7 +1255,7 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1354,8 +1354,8 @@
 !          (yy, mm, and/or d).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}, if any.
-!     \item[{[calendarType]}]
-!          Associated {\tt CalendarType}, if any.
+!     \item[{[calkindflag]}]
+!          Associated {\tt CalKind\_Flag}, if any.
 !     \item[{[timeString]}]
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
@@ -1409,7 +1409,7 @@
                                        us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                        us_r8, ns_r8, sN, sN_i8, sD, sD_i8, &
                                        startTime, &
-                                       calendar, calendarType, &
+                                       calendar, calkindflag, &
                                        startTimeIn, &
                                        timeStringLen, tempTimeStringLen, &
                                        tempTimeString, &
@@ -1456,7 +1456,7 @@
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
         startTime, &
-        calendar, calendarType, &
+        calendar, calkindflag, &
         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
@@ -1489,7 +1489,7 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1533,8 +1533,8 @@
 !          to allow conversion between relative units (yy, mm, d) and
 !          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
 !          and endTimeIn since they contain a calendar.  Alternate to, and
-!          mutually exclusive with, calendarTypeIn below.  Primarily for
-!          specifying a custom calendar type.
+!          mutually exclusive with, calkindflagIn below.  Primarily for
+!          specifying a custom calendar kind.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).
 !     \item[{[yy\_i8]}]
@@ -1590,8 +1590,8 @@
 !          (yy, mm, and/or d).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}, if any.
-!     \item[{[calendarType]}]
-!          Associated {\tt CalendarType}, if any.
+!     \item[{[calkindflag]}]
+!          Associated {\tt CalKind\_Flag}, if any.
 !     \item[[{timeString]}]
 !          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
@@ -1646,7 +1646,7 @@
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sN_i8, sD, sD_i8, &
-                                  startTime, calendar, calendarType, &
+                                  startTime, calendar, calkindflag, &
                                   calendarIn, &
                                   timeStringLen, tempTimeStringLen, &
                                   tempTimeString, &
@@ -1681,7 +1681,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalGet()
-      subroutine ESMF_TimeIntervalGetDurCalTyp(timeinterval, calendarTypeIn, &
+      subroutine ESMF_TimeIntervalGetDurCalTyp(timeinterval, calkindflagIn, &
         keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
@@ -1693,13 +1693,13 @@
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
         startTime, &
-        calendar, calendarType, &
+        calendar, calkindflag, &
         timeString, &
         timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
-      type(ESMF_CalendarType), intent(in)            :: calendarTypeIn ! Input
+      type(ESMF_CalKind_Flag), intent(in)            :: calkindflagIn ! Input
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
@@ -1727,7 +1727,7 @@
       integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
@@ -1766,10 +1766,10 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query.
-!     \item[calendarTypeIn]
+!     \item[calkindflagIn]
 !          INPUT argument:  Alternate to, and mutually exclusive with,
 !          calendarIn above.  More convenient way of specifying a built-in
-!          calendar type.
+!          calendar kind.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).
 !     \item[{[yy\_i8]}]
@@ -1825,8 +1825,8 @@
 !          (yy, mm, and/or d).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}, if any.
-!     \item[{[calendarType]}]
-!          Associated {\tt CalendarType}, if any.
+!     \item[{[calkindflag]}]
+!          Associated {\tt CalKind\_Flag}, if any.
 !     \item[[{timeString]}]
 !          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
@@ -1881,8 +1881,8 @@
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sN_i8, sD, sD_i8, &
-                                  startTime, calendar, calendarType, &
-                                  calendarTypeIn, &
+                                  startTime, calendar, calkindflag, &
+                                  calkindflagIn, &
                                   timeStringLen, tempTimeStringLen, &
                                   tempTimeString, &
                                   timeStringLenISOFrac, &
@@ -2481,7 +2481,7 @@
 !          if startTime also not specified, calendar interval "floats" across 
 !          all calendars and times.  Mutually exclusive with startTime since 
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
-!          calendarType below.  Primarily for specifying a custom calendar type.
+!          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
@@ -2579,7 +2579,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_TimeIntervalSet()
-      subroutine ESMF_TimeIntervalSetDurCalTyp(timeinterval, calendarType, &
+      subroutine ESMF_TimeIntervalSetDurCalTyp(timeinterval, calkindflag, &
         keywordEnforcer, &
         yy, yy_i8, &
         mm, mm_i8, &
@@ -2594,7 +2594,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
-      type(ESMF_CalendarType), intent(in)            :: calendarType
+      type(ESMF_CalKind_Flag), intent(in)            :: calkindflag
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
@@ -2641,10 +2641,10 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to initialize.
-!     \item[calendarType]
+!     \item[calkindflag]
 !          Alternate to, and mutually exclusive with, 
 !          calendar above.  More convenient way of specifying a built-in 
-!          calendar type.
+!          calendar kind.
 !     \item[{[yy]}]
 !          Integer years (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
@@ -2720,7 +2720,7 @@
                                            us, ns, d_r8, h_r8, m_r8, s_r8, &
                                            ms_r8, us_r8, ns_r8, &
                                            sN, sN_i8, sD, sD_i8, &
-                                           calendarType, localrc)
+                                           calkindflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

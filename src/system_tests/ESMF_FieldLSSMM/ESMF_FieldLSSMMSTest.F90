@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.17 2011/05/06 22:13:49 svasquez Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.18 2011/06/16 05:57:18 eschwab Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -166,7 +166,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+    gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
                                             name="Gregorian", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.26 2011/02/23 23:37:42 theurich Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.27 2011/06/16 05:57:08 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -106,7 +106,7 @@ program ESMF_CompFortranAndC
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, &
+  call ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN, &
     defaultlogfilename="CompFortranAndCSTest.Log", &
     defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

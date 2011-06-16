@@ -73,7 +73,7 @@
 !  Initialize ESMF.  Note that an output Log is created by default.
 !---------------------------------------------------------------------------
 
-    call ESMF_Initialize(defaultCalendar=ESMF_CAL_GREGORIAN, rc=localrc)
+    call ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)

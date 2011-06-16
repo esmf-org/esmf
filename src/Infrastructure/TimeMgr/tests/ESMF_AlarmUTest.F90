@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.64 2011/06/14 15:52:18 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.65 2011/06/16 05:56:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.64 2011/06/14 15:52:18 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.65 2011/06/16 05:56:50 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -97,16 +97,20 @@
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! initialize one calendar to be Gregorian type
-      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
+        name="Gregorian", rc=rc)
 
       ! initialize secand calendar to be Julian type
-      julianCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, name="Julian", rc=rc)
+      julianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIANDAY, &
+        name="Julian", rc=rc)
 
       ! initialize third calendar to be No Leap type
-      no_leapCalendar = ESMF_CalendarCreate(ESMF_CAL_NOLEAP, name="NoLeap", rc=rc)
+      no_leapCalendar = ESMF_CalendarCreate(ESMF_CALKIND_NOLEAP, &
+        name="NoLeap", rc=rc)
 
       ! initialize third calendar to be 360 day type
-      esmf_360dayCalendar = ESMF_CalendarCreate(ESMF_CAL_360DAY, name="360Day", rc=rc)
+      esmf_360dayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_360DAY, &
+        name="360Day", rc=rc)
 
 !-------------------------------------------------------------------------------
 !    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -947,7 +951,7 @@
       write(name, *) "Set Start Time Initialization Test"
       call ESMF_TimeSet(startTime, yy=2003, mm=3, dd=13, &
                                    h=1, m=45, s=27, &
-                                   calendarType=ESMF_CAL_GREGORIAN, rc=rc)
+                                   calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -959,7 +963,7 @@
       write(name, *) "Set Stop Time Initialization Test"
       call ESMF_TimeSet(stopTime, yy=2003, mm=3, dd=13, &
                                    h=18, m=45, s=27, &
-                                   calendarType=ESMF_CAL_GREGORIAN, rc=rc)
+                                   calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -970,7 +974,7 @@
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Alarm Time Initialization Test"
       call ESMF_TimeSet(alarmTime, yy=2003, mm=3, dd=13, h=5, &
-                                   calendarType=ESMF_CAL_GREGORIAN, rc=rc)
+                                   calkindflag=ESMF_CALKIND_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 

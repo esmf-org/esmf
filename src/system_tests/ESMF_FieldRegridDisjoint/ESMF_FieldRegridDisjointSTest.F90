@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridDisjointSTest.F90,v 1.14 2011/05/06 22:13:54 svasquez Exp $
+! $Id: ESMF_FieldRegridDisjointSTest.F90,v 1.15 2011/06/16 05:57:25 eschwab Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -171,7 +171,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+    gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
                                             name="Gregorian", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &

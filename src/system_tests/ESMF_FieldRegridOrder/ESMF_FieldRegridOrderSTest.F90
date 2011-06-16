@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.29 2011/02/23 14:45:08 eschwab Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.30 2011/06/16 05:57:31 eschwab Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -134,7 +134,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
-    gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, name="Gregorian", rc=rc)
+    gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, name="Gregorian", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize time interval to 6 hours

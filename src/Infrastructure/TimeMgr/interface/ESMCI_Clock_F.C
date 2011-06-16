@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock_F.C,v 1.8 2011/04/13 19:03:35 eschwab Exp $
+// $Id: ESMCI_Clock_F.C,v 1.9 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ extern "C" {
                                  TimeInterval *currSimTime,
                                  TimeInterval *prevSimTime,
                                  Calendar **calendar, 
-                                 ESMC_CalendarType *calendarType, 
+                                 ESMC_CalKind_Flag *calkindflag, 
                                  int *timeZone,
                                  ESMC_I8 *advanceCount,
                                  int *alarmCount,
@@ -143,7 +143,7 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(currSimTime),
                     ESMC_NOT_PRESENT_FILTER(prevSimTime),
                     ESMC_NOT_PRESENT_FILTER(calendar),
-                    ESMC_NOT_PRESENT_FILTER(calendarType),
+                    ESMC_NOT_PRESENT_FILTER(calkindflag),
                     ESMC_NOT_PRESENT_FILTER(timeZone),
                     ESMC_NOT_PRESENT_FILTER(advanceCount),
                     ESMC_NOT_PRESENT_FILTER(alarmCount),

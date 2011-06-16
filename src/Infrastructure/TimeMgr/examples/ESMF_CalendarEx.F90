@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.43 2011/02/23 06:48:42 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.44 2011/06/16 05:56:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@
 !
 ! !DESCRIPTION:
 !
-! This program shows examples of how to create different calendar types
+! This program shows examples of how to create different calendar kinds
 !-----------------------------------------------------------------------------
 
       ! ESMF Framework module
@@ -59,7 +59,7 @@
 
 !BOC
       ! create a Gregorian calendar
-      gregorianCalendar = ESMF_CalendarCreate(ESMF_CAL_GREGORIAN, &
+      gregorianCalendar = ESMF_CalendarCreate(ESMF_CALKIND_GREGORIAN, &
                                               name="Gregorian", rc=rc)
 !EOC
 
@@ -67,7 +67,7 @@
 
 !BOC
       ! create a Julian Day calendar
-      julianDayCalendar = ESMF_CalendarCreate(ESMF_CAL_JULIANDAY, &
+      julianDayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIANDAY, &
                                               name="JulianDay", rc=rc)
 !EOC
 
@@ -77,15 +77,15 @@
 !\subsubsection{Calendar comparison}
 
 ! This example shows how to compare an {\tt ESMF\_Calendar} with a known
-! calendar type.
+! calendar kind.
 !EOE
 
 !BOC
-      ! compare calendar type against a known type
-      if (gregorianCalendar == ESMF_CAL_GREGORIAN) then
-        print *, "gregorianCalendar is of type ESMF_CAL_GREGORIAN."
+      ! compare calendar kind against a known type
+      if (gregorianCalendar == ESMF_CALKIND_GREGORIAN) then
+        print *, "gregorianCalendar is of type ESMF_CALKIND_GREGORIAN."
       else
-        print *, "gregorianCalendar is not of type ESMF_CAL_GREGORIAN."
+        print *, "gregorianCalendar is not of type ESMF_CALKIND_GREGORIAN."
       end if
 !EOC
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.126 2011/04/22 17:33:58 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.127 2011/06/16 05:56:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.126 2011/04/22 17:33:58 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.127 2011/06/16 05:56:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -556,7 +556,7 @@
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
-        calendar, calendarType, timeZone, &
+        calendar, calkindflag, timeZone, &
         timeString, timeStringISOFrac, &
         dayOfWeek, midMonth, &
         dayOfYear,  dayOfYear_r8, &
@@ -590,7 +590,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: sD
       integer(ESMF_KIND_I8),   intent(out), optional :: sD_i8
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
       integer,                 intent(out), optional :: timeZone ! not imp
       character (len=*),       intent(out), optional :: timeString
       character (len=*),       intent(out), optional :: timeStringISOFrac
@@ -729,8 +729,8 @@
 !                                                           (large, >= 64-bit).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}.
-!     \item[{[calendarType]}]
-!          Associated {\tt CalendarType}.
+!     \item[{[calkindflag]}]
+!          Associated {\tt CalKind\_Flag}.
 !     \item[{[timeZone]}]
 !          Associated timezone (hours offset from UCT, e.g. EST = -5).
 !          (Not implemented yet).
@@ -804,7 +804,7 @@
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sN_i8, sD, sD_i8, &
-                          calendar, calendarType, timeZone, &
+                          calendar, calkindflag, timeZone, &
                           timeStringLen, tempTimeStringLen, tempTimeString, &
                           timeStringLenISOFrac, tempTimeStringLenISOFrac, &
                           tempTimeStringISOFrac, &
@@ -1098,7 +1098,7 @@
         d_r8, h_r8, m_r8, s_r8, &
         ms_r8, us_r8, ns_r8, &
         sN, sN_i8, sD, sD_i8, &
-        calendar, calendarType, &
+        calendar, calkindflag, &
         timeZone, rc)
 
 ! !ARGUMENTS:
@@ -1129,7 +1129,7 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       integer(ESMF_KIND_I8),   intent(in),  optional :: sD_i8
       type(ESMF_Calendar),     intent(in),  optional :: calendar
-      type(ESMF_CalendarType), intent(in),  optional :: calendarType
+      type(ESMF_CalKind_Flag), intent(in),  optional :: calkindflag
       integer,                 intent(in),  optional :: timeZone ! not imp
       integer,                 intent(out), optional :: rc
 
@@ -1255,12 +1255,12 @@
 !          Associated {\tt Calendar}.  Defaults to calendar
 !          {\tt ESMF\_CAL\_NOCALENDAR} or default specified in
 !          {\tt ESMF\_Initialize()} or {\tt ESMF\_CalendarSetDefault()}.
-!          Alternate to, and mutually exclusive with, calendarType
-!          below.  Primarily for specifying a custom calendar type.
+!          Alternate to, and mutually exclusive with, calkindflag
+!          below.  Primarily for specifying a custom calendar kind.
 !          \end{sloppypar}
-!     \item[{[calendarType]}]
+!     \item[{[calkindflag]}]
 !          Alternate to, and mutually exclusive with, calendar above.  More
-!          convenient way of specifying a built-in calendar type.
+!          convenient way of specifying a built-in calendar kind.
 !     \item[{[timeZone]}]
 !          Associated timezone (hours offset from UTC, e.g. EST = -5).
 !          Default = 0 (UTC).  (Not implemented yet).
@@ -1285,7 +1285,7 @@
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sN_i8, sD, sD_i8, &
-                          calendar, calendarType, timeZone, localrc)
+                          calendar, calkindflag, timeZone, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

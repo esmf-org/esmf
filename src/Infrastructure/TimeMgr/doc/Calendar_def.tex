@@ -1,28 +1,28 @@
-% $Id: Calendar_def.tex,v 1.2 2003/02/11 18:58:54 eschwab Exp $
+% $Id: Calendar_def.tex,v 1.3 2011/06/16 05:56:42 eschwab Exp $
 \begin{verbatim}
       #define MONTHSPERYEAR 12
 
-      type ESMF_CalendarType
+      type ESMF_CalKind_Flag
       sequence
       private
         integer :: caltype
       end type
 
-      type(ESMF_CalendarType), parameter :: &
-                               ESMF_CAL_GREGORIAN =  ESMF_CalendarType(1), &
-                               ESMF_CAL_JULIAN =     ESMF_CalendarType(2), &
+      type(ESMF_CalKind_Flag), parameter :: &
+                              ESMF_CALKIND_GREGORIAN =  ESMF_CalKind_Flag(1), &
+                              ESMF_CALKIND_JULIAN =     ESMF_CalKind_Flag(2), &
 
-                               ! like Gregorian, except Feb always has 28 days
-                               ESMF_CAL_NOLEAP =     ESMF_CalendarType(3), &
+                              ! like Gregorian, except Feb always has 28 days
+                              ESMF_CALKIND_NOLEAP =     ESMF_CalKind_Flag(3), &
 
-                               ! 12 months, 30 days each
-                               ESMF_CAL_360DAY =     ESMF_CalendarType(4), &
+                              ! 12 months, 30 days each
+                              ESMF_CALKIND_360DAY =     ESMF_CalKind_Flag(4), &
 
-                               ! user defined
-                               ESMF_CAL_GENERIC =    ESMF_CalendarType(5), &
+                              ! user defined
+                              ESMF_CALKIND_GENERIC =    ESMF_CalKind_Flag(5), &
 
-                               ! track base time seconds only
-                               ESMF_CAL_NOCALENDAR = ESMF_CalendarType(6)
+                              ! track base time seconds only
+                              ESMF_CALKIND_NOCALENDAR = ESMF_CalKind_Flag(6)
 
       type ESMF_DaysPerYear
       sequence

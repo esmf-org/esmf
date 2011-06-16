@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.12 2011/02/22 21:42:40 w6ws Exp $
+// $Id: ESMC_Clock.C,v 1.13 2011/06/16 05:56:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_Clock.C,v 1.12 2011/02/22 21:42:40 w6ws Exp $";
+  "$Id: ESMC_Clock.C,v 1.13 2011/06/16 05:56:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing
@@ -155,7 +155,7 @@ int ESMC_ClockGet(ESMC_Clock clock, ESMC_TimeInterval *currSimTime,
                              (ESMCI::TimeInterval *)currSimTime,
                              (ESMCI::TimeInterval *)NULL,
                              (ESMCI::Calendar **)NULL,
-                             (ESMC_CalendarType *)NULL,
+                             (ESMC_CalKind_Flag *)NULL,
                              (int *)NULL,
                                                     advanceCount,
                              (int *)NULL,

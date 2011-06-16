@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.h,v 1.19 2011/05/26 05:51:06 eschwab Exp $
+// $Id: ESMCI_Time.h,v 1.20 2011/06/16 05:56:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 //
 // A {\tt Time} inherits from the {\tt BaseTime} base class and is designed
 // to represent a specific point in time which is dependent upon a calendar
-// type.
+// kind.
 //
 // {\tt Time} inherits from the base class {\tt BaseTime}.  As such, it gains
 // the core representation of time as well as its associated methods.
@@ -102,7 +102,7 @@
                      ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
                      ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                      Calendar **calendar=0, 
-                     ESMC_CalendarType *calendarType=0, 
+                     ESMC_CalKind_Flag *calkindflag=0, 
                      int *timeZone=0);
 
     int get(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
@@ -119,7 +119,7 @@
                      ESMC_I4 *sN=0, ESMC_I8 *sN_i8=0,
                      ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                      Calendar **calendar=0, 
-                     ESMC_CalendarType *calendarType=0, 
+                     ESMC_CalKind_Flag *calkindflag=0, 
                      int *timeZone=0,
                      int timeStringLen=0, int *tempTimeStringLen=0,
                      char *tempTimeString=0,
@@ -180,11 +180,11 @@
     // native C++ constructors/destructors
     Time(void);
     Time(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1, Calendar *calendar=0,
-              ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
+              ESMC_CalKind_Flag calkindflag=(ESMC_CalKind_Flag)0,
               int timeZone=0);
     int set(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1,
                      Calendar *calendar=0,
-                     ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
+                     ESMC_CalKind_Flag calkindflag=(ESMC_CalKind_Flag)0,
                      int timeZone=0);
                                    // used internally instead of constructor
                                    // to cover case of initial entry from F90,

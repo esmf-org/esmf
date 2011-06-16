@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.23 2011/06/14 05:57:53 eschwab Exp $
+// $Id: ESMCI_Clock.C,v 1.24 2011/06/16 05:56:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.23 2011/06/14 05:57:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Clock.C,v 1.24 2011/06/16 05:56:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -403,7 +403,7 @@ int Clock::count=0;
       TimeInterval *currSimTime,      // out
       TimeInterval *prevSimTime,      // out
       Calendar    **calendar,         // out
-      ESMC_CalendarType *calendarType,     // out
+      ESMC_CalKind_Flag *calkindflag,      // out
       int               *timeZone,         // out
       ESMC_I8      *advanceCount,     // out
       int               *alarmCount,       // out
@@ -486,8 +486,8 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, calendar);
       ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calendar) failed.", &rc);
     }
-    if (calendarType != ESMC_NULL_POINTER) {
-      // get calendar type from currTime, but could get from any other clock
+    if (calkindflag != ESMC_NULL_POINTER) {
+      // get calendar kind from currTime, but could get from any other clock
       // Time, since they all use the same calendar
       // TODO: use native C++ Get, not F90 entry point, when ready
       rc = this->currTime.Time::get((ESMC_I4 *)ESMC_NULL_POINTER,
@@ -499,8 +499,8 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                      calendarType);
-      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calendarType) failed.",
+                      calkindflag);
+      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calkindflag) failed.",
                                     &rc);
     }
     if (timeZone != ESMC_NULL_POINTER) {

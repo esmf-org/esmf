@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.h,v 1.22 2011/02/25 23:20:47 eschwab Exp $
+// $Id: ESMCI_TimeInterval.h,v 1.23 2011/06/16 05:56:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -117,7 +117,7 @@ class TimeInterval : public BaseTime {
                              ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                              Time *startTime=0, Time *endTime=0,
                              Calendar **calendar=0,
-                             ESMC_CalendarType *calendarType=0);
+                             ESMC_CalKind_Flag *calkindflag=0);
 
     int get(ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
                              ESMC_I4 *mm=0, ESMC_I8 *mm_i8=0,
@@ -134,10 +134,10 @@ class TimeInterval : public BaseTime {
                              ESMC_I4 *sD=0, ESMC_I8 *sD_i8=0,
                              Time *startTime=0, Time *endTime=0,
                              Calendar **calendar=0,
-                             ESMC_CalendarType *calendarType=0,
+                             ESMC_CalKind_Flag *calkindflag=0,
                              Time *startTimeIn=0, Time *endTimeIn=0,
                              Calendar **calendarIn=0,
-                             ESMC_CalendarType *calendarTypeIn=0,
+                             ESMC_CalKind_Flag *calkindflagIn=0,
                              int timeStringLen=0, int *tempTimeStringLen=0,
                              char *tempTimeString=0,
                              int timeStringLenISOFrac=0,
@@ -220,12 +220,12 @@ class TimeInterval : public BaseTime {
                  ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0, ESMC_R8 d_r8=0.0,
                  Time *startTime=0, Time *endTime=0,
                  Calendar *calendar=0,
-                 ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
+                 ESMC_CalKind_Flag calkindflag=(ESMC_CalKind_Flag)0);
     int set(ESMC_I8 s, ESMC_I8 sN=0, ESMC_I8 sD=1,
             ESMC_I8 yy=0, ESMC_I8 mm=0, ESMC_I8 d=0, ESMC_R8 d_r8=0.0,
             Time *startTime=0, Time *endTime=0,
             Calendar *calendar=0,
-            ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
+            ESMC_CalKind_Flag calkindflag=(ESMC_CalKind_Flag)0);
                                    // used internally instead of constructor
                                    // to cover case of initial entry from F90,
                                    // to avoid automatic destructor invocation

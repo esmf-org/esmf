@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.78 2011/01/24 23:36:14 svasquez Exp $
+// $Id: ESMC_Calendar.h,v 1.79 2011/06/16 05:56:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,19 +32,19 @@
 //-----------------------------------------------------------------------------
 
 // TODO: these definitions need different home (shared with ESMCI_Calendar)
-#define CALENDAR_TYPE_COUNT 8
-enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
-                        ESMC_CAL_JULIAN,
-                        ESMC_CAL_JULIANDAY,   
-                        ESMC_CAL_MODJULIANDAY,   
-                        ESMC_CAL_NOLEAP,      // like Gregorian, except
-                                              //   Feb always has 28 days
-                        ESMC_CAL_360DAY,      // 12 months, 30 days each
-                        ESMC_CAL_CUSTOM,      // user defined
-                        ESMC_CAL_NOCALENDAR}; // track base time seconds
-                                              //   only
-                        // Note: add new calendars between ESMC_CAL_GREGORIAN
-                        // and ESMC_CAL_NOCALENDAR so
+#define CALENDAR_KIND_COUNT 8
+enum ESMC_CalKind_Flag {ESMC_CALKIND_GREGORIAN=1,
+                        ESMC_CALKIND_JULIAN,
+                        ESMC_CALKIND_JULIANDAY,   
+                        ESMC_CALKIND_MODJULIANDAY,   
+                        ESMC_CALKIND_NOLEAP,      // like Gregorian, except
+                                                  //   Feb always has 28 days
+                        ESMC_CALKIND_360DAY,      // 12 months, 30 days each
+                        ESMC_CALKIND_CUSTOM,      // user defined
+                        ESMC_CALKIND_NOCALENDAR}; // track base time seconds
+                                                  //   only
+                        // Note: add new calendars between 
+                        // ESMC_CALKIND_GREGORIAN and ESMC_CALKIND_NOCALENDAR so
                         // ESMCI::Calendar::validate() does not need
                         // to change.  Also add to static intializers at top
                         // of ESMCI_Calendar.C
@@ -71,7 +71,7 @@ typedef struct {
 // !INTERFACE:
 ESMC_Calendar ESMC_CalendarCreate(
   const char *name,                      // in
-  enum ESMC_CalendarType calendartype,   // in
+  enum ESMC_CalKind_Flag calkindflag,    // in
   int *rc                                // out
 );
 
@@ -81,7 +81,7 @@ ESMC_Calendar ESMC_CalendarCreate(
 // !DESCRIPTION:
 //
 //  Creates and sets a {\tt ESMC\_Calendar} object to the given built-in
-//  {\tt ESMC\_CalendarType}. 
+//  {\tt ESMC\_CalKind\_Flag}. 
 //
 //  The arguments are:
 //  \begin{description}
@@ -89,8 +89,8 @@ ESMC_Calendar ESMC_CalendarCreate(
 //    The name for the newly created Calendar.  If not specified, i.e. NULL,
 //    a default unique name will be generated: "CalendarNNN" where NNN
 //    is a unique sequence number from 001 to 999.
-//  \item[calendartype]
-//    The built-in {\tt ESMC\_CalendarType}.  Valid values are:
+//  \item[calkindflag]
+//    The built-in {\tt ESMC\_CalKind\_Flag}.  Valid values are:
 //    \newline
 //    {\tt ESMC\_CAL\_360DAY}, 
 //    \newline
@@ -107,7 +107,7 @@ ESMC_Calendar ESMC_CalendarCreate(
 //    and {\tt ESMC\_CAL\_NOLEAP}.
 //    \newline
 //    See Section ~\ref{subsec:Calendar_options} for a description of each
-//    calendar type.
+//    calendar kind.
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}

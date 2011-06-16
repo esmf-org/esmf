@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.h,v 1.20 2011/02/24 04:46:25 eschwab Exp $
+// $Id: ESMCI_Clock.h,v 1.21 2011/06/16 05:56:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -159,7 +159,7 @@ namespace ESMCI{
                       TimeInterval *currSimTime=0, 
                       TimeInterval *prevSimTime=0, 
                       Calendar    **calendar=0,
-                      ESMC_CalendarType *calendarType=0,
+                      ESMC_CalKind_Flag *calkindflag=0,
                       int               *timeZone=0,
                       ESMC_I8      *advanceCount=0, 
                       int               *alarmCount=0,
