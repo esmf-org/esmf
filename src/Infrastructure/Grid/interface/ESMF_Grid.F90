@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.221 2011/06/14 17:20:38 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.222 2011/06/16 14:19:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.221 2011/06/14 17:20:38 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.222 2011/06/16 14:19:22 w6ws Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -20909,8 +20909,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)              :: countsPerDEDim2(:)
        integer,               intent(in),  optional   :: countsPerDEDim3(:)
        integer,               intent(inout)           :: dimCount
-       integer,               intent(inout), pointer  :: minIndexOut(:)
-       integer,               intent(inout), pointer  :: maxIndexOut(:)
+       integer,               pointer                 :: minIndexOut(:)
+       integer,               pointer                 :: maxIndexOut(:)
        integer,               intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
@@ -21271,9 +21271,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
-       integer,               intent(inout)           :: dimCount
-       integer,               intent(inout), pointer  :: minIndexOut(:)
-       integer,               intent(inout), pointer  :: maxIndexOut(:)
+       integer,               intent(inout)         :: dimCount
+       integer,               pointer               :: minIndexOut(:)
+       integer,               pointer               :: maxIndexOut(:)
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -21547,12 +21547,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
        integer,               intent(in),  optional :: distDim(:)
-       integer,               intent(inout)           :: dimCount
-       integer,               intent(inout)           :: distDimCount
-       logical,               intent(inout), pointer  :: isDistOut(:)
-       integer,               intent(inout), pointer  :: distDimOut(:)
-       integer,               intent(inout), pointer  :: minIndexOut(:)
-       integer,               intent(inout), pointer  :: maxIndexOut(:)
+       integer,               intent(inout)         :: dimCount
+       integer,               intent(inout)         :: distDimCount
+       logical,               pointer               :: isDistOut(:)
+       integer,               pointer               :: distDimOut(:)
+       integer,               pointer               :: minIndexOut(:)
+       integer,               pointer               :: maxIndexOut(:)
        integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
