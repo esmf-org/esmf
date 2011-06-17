@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.8 2011/06/17 15:47:05 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.9 2011/06/17 20:18:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.8 2011/06/17 15:47:05 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.9 2011/06/17 20:18:55 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -894,12 +894,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
+! \begin{sloppypar}
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array} based on typekind. 
 ! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase}
 ! stored internally before calling this method and has a status of 
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field}
 ! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+! \end{sloppypar}
 !
 ! For an example and
 ! associated documentation using this method see Section
@@ -909,10 +911,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[field]
+! \begin{sloppypar}
 !      The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase}
 !      stored internally before calling this method and has a status of 
 !      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. The returned {\tt ESMF\_Field}
 !      has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+! \end{sloppypar}
 ! \item[typekind]
 !      Data type and kind specification. 
 ! \item[{[indexflag]}]
@@ -1926,12 +1930,14 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
+! \begin{sloppypar} @\
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an @\
 ! {\tt ESMF\_Array} based on typekind.  @\
 ! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase} @\
 ! stored internally before calling this method and has a status of  @\
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field} @\
 ! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
+! \end{sloppypar} @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
 ! the retrieved data pointer is not allowed. @\
@@ -2144,12 +2150,14 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
+! \begin{sloppypar} @\
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an @\
 ! {\tt ESMF\_Array} based on typekind.  @\
 ! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase} @\
 ! stored internally before calling this method and has a status of  @\
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field} @\
 ! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
+! \end{sloppypar} @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
