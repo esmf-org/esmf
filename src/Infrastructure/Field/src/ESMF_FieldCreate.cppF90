@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.102 2011/06/06 15:57:10 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.103 2011/06/17 15:14:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.102 2011/06/06 15:57:10 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.103 2011/06/17 15:14:52 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1402,7 +1402,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    call ESMF_FieldSetCommit( & @\
+    call ESMF_FieldEmptyComplete( & @\
         ESMF_FieldCreateGBData##mrank##D##mtypekind, & @\
         geombase, farray, indexflag=indexflag, copyflag=copyflag, & @\
         gridToFieldMap=gridToFieldMap, & @\
@@ -1552,7 +1552,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
         ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-    call ESMF_FieldSetCommit( & @\
+    call ESMF_FieldEmptyComplete( & @\
         ESMF_FieldCreateGBDataPtr##mrank##D##mtypekind, & @\
         geombase, farrayPtr, copyflag=copyflag, & @\
         gridToFieldMap=gridToFieldMap, & @\
