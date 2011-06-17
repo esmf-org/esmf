@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.7 2011/06/17 14:31:26 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.8 2011/06/17 15:47:05 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.7 2011/06/17 14:31:26 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.8 2011/06/17 15:47:05 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -2312,10 +2312,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 #define FieldEmptyCompGridDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from Grid started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from Grid started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGrid<rank><type><kind>(field, grid, & @\
 !   farray, indexflag, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
@@ -2522,10 +2522,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 #define FieldEmptyCompGridPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from Grid started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from Grid started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGridPtr<rank><type><kind>(field, grid, & @\
 !   farrayPtr, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
@@ -2707,10 +2707,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 #define FieldEmptyCompLSDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from LocStream started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from LocStream started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompLS<rank><type><kind>(field, locstream, & @\
 !   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, rc) @\
@@ -2853,10 +2853,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 #define FieldEmptyCompLSPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from LocStream started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from LocStream started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompLSPtr<rank><type><kind>(field, locstream, & @\
 !   farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
 ! @\
@@ -2970,10 +2970,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 #define FieldEmptyCompMeshDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from Mesh started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from Mesh started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompMesh<rank><type><kind>(field, mesh, & @\
 !   farray, location, indexflag, keywordEnforcer, copyflag, & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, rc) @\
@@ -3124,10 +3124,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 #define FieldEmptyCompMeshPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from Mesh started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from Mesh started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompMeshPtr<rank><type><kind>(field, mesh, & @\
 !   farrayPtr, keywordEnforcer, location, copyflag, gridToFieldMap, rc) @\
 ! @\
@@ -3248,10 +3248,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 #define FieldEmptyCompXGDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from XGrid started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from XGrid started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompXG<rank><type><kind>(field, xgrid, & @\
 !   xgridSide, gridIndex, & @\
 !   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
@@ -3407,10 +3407,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 #define FieldEmptyCompXGPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field from XGrid started with FieldEmptyCreate. @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field from XGrid started with FieldEmptyCreate. @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompXGPtr<rank><type><kind>(field, xgrid, & @\
 !   xgridSide, gridIndex, & @\
 !   farrayPtr, indexflag, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
@@ -3536,10 +3536,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 #define FieldEmptyCompGBDoc() \
 !---------------------------------------------------------------------------- @\
 !BOPI @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field started with FieldEmptyCreate @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field started with FieldEmptyCreate @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGB<rank><type><kind>(field, geombase, & @\
 !   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
@@ -4082,10 +4082,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 #define FieldEmptyCompGBPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOPI @\
-! !IROUTINE: ESMF_FieldEmptyComp - Complete a Field started with FieldEmptyCreate @\
+! !IROUTINE: ESMF_FieldEmptyComplete - Complete a Field started with FieldEmptyCreate @\
 ! @\
 ! !INTERFACE: @\
-! ! Private name; call using ESMF_FieldEmptyComp() @\
+! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGBPtr<rank><type><kind>(field, geombase, & @\
 !   farrayPtr, copyflag, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
