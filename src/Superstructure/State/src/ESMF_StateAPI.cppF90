@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.1 2011/06/15 17:23:11 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.2 2011/06/17 20:18:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.1 2011/06/15 17:23:11 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.2 2011/06/17 20:18:39 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1029,32 +1029,32 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
         ! check input variables
         if (present(arrayList)) then
            do i=1,size(arrayList)
-              ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrayList(i),rc)
            enddo
         endif
         if (present(arraybundleList)) then
            do i=1,size(arraybundleList)
-              ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundleList(i),rc)
            enddo
         endif
         if (present(fieldbundleList)) then
            do i=1,size(fieldbundleList)
-              ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundleList(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundleList(i),rc)
            enddo
         endif
         if (present(fieldList)) then
            do i=1,size(fieldList)
-              ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fieldList(i),rc)
            enddo
         endif
         if (present(nestedStateList)) then
            do i=1,size(nestedStateList)
-              ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,nestedStateList(i),rc)
            enddo
         endif
         if (present(routehandleList)) then
            do i=1,size(routehandleList)
-              ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
            enddo
         endif
 

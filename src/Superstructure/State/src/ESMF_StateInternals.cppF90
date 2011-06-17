@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.2 2011/06/17 19:02:14 w6ws Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.3 2011/06/17 20:18:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.2 2011/06/17 19:02:14 w6ws Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.3 2011/06/17 20:18:39 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -193,37 +193,37 @@ contains
         localitemcount = 0
         if (present(arrays)) then
            do i=1,size(arrays)
-              ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit,arrays(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,arrays(i),rc)
            enddo
            localitemcount = localitemcount + size (arrays)
         endif
         if (present(arraybundles)) then
            do i=1,size(arraybundles)
-              ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_ArrayBundleGetInit,arraybundles(i),rc)
            enddo
            localitemcount = localitemcount + size (arraybundles)
         endif
         if (present(fields)) then
            do i=1,size(fields)
-              ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,fields(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,fields(i),rc)
            localitemcount = localitemcount + size (fields)
            enddo
         endif
         if (present(fieldbundles)) then
            do i=1,size(fieldbundles)
-              ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_FieldBundleGetInit,fieldbundles(i),rc)
            localitemcount = localitemcount + size (fieldbundles)
            enddo
         endif
         if (present(states)) then
            do i=1,size(states)
-              ESMF_INIT_CHECK_DEEP_SHORT(ESMF_StateGetInit,states(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,states(i),rc)
            enddo
            localitemcount = localitemcount + size (states)
         endif
         if (present(routehandles)) then
            do i=1,size(routehandles)
-              ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandles(i),rc)
+ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
            enddo
            localitemcount = localitemcount + size (routehandles)
         endif
