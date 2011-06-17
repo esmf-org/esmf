@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.39 2011/05/25 16:17:30 feiliu Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.40 2011/06/17 19:04:59 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.39 2011/05/25 16:17:30 feiliu Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.40 2011/06/17 19:04:59 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -423,8 +423,8 @@
 ! Perform the redistribution from source Field to destination Field.
 !EOE
 !BOC
-     call ESMF_FieldRedistStore(srcField, dstField, routehandle=routehandle, &
-             rc=rc)
+     call ESMF_FieldRedistStore(srcField, dstField, &
+             routehandle=routehandle, rc=rc)
      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
      call ESMF_FieldRedist(srcField, dstField, routehandle=routehandle, rc=rc)
      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -480,7 +480,8 @@
 ! that has only data allocation on rootPet.
 !EOE
 !BOC
-    call ESMF_FieldRedistStore(dstField, srcField, routehandle=routehandle, rc=rc)
+    call ESMF_FieldRedistStore(dstField, srcField, routehandle=routehandle, &
+         rc=rc)
 !EOC
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
