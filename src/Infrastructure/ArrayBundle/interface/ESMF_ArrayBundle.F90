@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.67 2011/06/07 16:13:32 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.68 2011/06/17 20:25:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.67 2011/06/07 16:13:32 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.68 2011/06/17 20:25:53 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1221,7 +1221,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArrayBundle), intent(inout)                :: arraybundle
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_HaloStartRegionFlag), intent(in), optional :: halostartregionflag
+    type(ESMF_HaloStartRegionFlag),intent(in),optional::halostartregionflag
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
