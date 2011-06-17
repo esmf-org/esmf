@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.36 2011/06/16 18:15:58 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.37 2011/06/17 18:59:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -295,7 +295,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! create a Field from the Grid and arrayspec
-    field1 = ESMF_FieldCreate(grid, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
+    field1 = ESMF_FieldCreate(grid, arrayspec, &
+         indexflag=ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -346,7 +347,8 @@
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(grid2d, arrayspec, indexflag=ESMF_INDEX_DELOCAL, &
+    field1 = ESMF_FieldCreate(grid2d, arrayspec, &
+         indexflag=ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, &
          gridToFieldMap=(/1,2/), &
          ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
@@ -437,7 +439,8 @@
 !EOE
 !BOC
     ! Set a grid on the Field
-    call ESMF_FieldEmptySet(field3, grid2d, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
+    call ESMF_FieldEmptySet(field3, grid2d, &
+             staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
