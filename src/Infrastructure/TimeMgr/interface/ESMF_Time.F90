@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.127 2011/06/16 05:56:47 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.128 2011/06/18 04:49:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.127 2011/06/16 05:56:47 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.128 2011/06/18 04:49:18 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1253,7 +1253,7 @@
 !     \item[calendar]
 !          \begin{sloppypar}
 !          Associated {\tt Calendar}.  Defaults to calendar
-!          {\tt ESMF\_CAL\_NOCALENDAR} or default specified in
+!          {\tt ESMF\_CALKIND\_NOCALENDAR} or default specified in
 !          {\tt ESMF\_Initialize()} or {\tt ESMF\_CalendarSetDefault()}.
 !          Alternate to, and mutually exclusive with, calkindflag
 !          below.  Primarily for specifying a custom calendar kind.

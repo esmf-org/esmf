@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.136 2011/06/16 05:56:47 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.137 2011/06/18 04:49:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -146,7 +146,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.136 2011/06/16 05:56:47 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.137 2011/06/18 04:49:18 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -218,8 +218,8 @@
 !     calendar kind, which is a property of a calendar object.
 !
 !     If both arguments are {\tt ESMF\_Calendar} objects, and both are of  
-!     type {\tt ESMF\_CAL\_CUSTOM}, then all the calendar's properties, except
-!     name, are compared.
+!     type {\tt ESMF\_CALKIND\_CUSTOM}, then all the calendar's properties, 
+!     except name, are compared.
 !
 !     If both arguments are {\tt ESMF\_Calendar} objects, and either of them
 !     is not in the {\tt ESMF\_INIT\_CREATED} status, an error will be logged.
@@ -288,8 +288,8 @@
 !     on calendar kind, which is a property of a calendar object.
 !
 !     If both arguments are {\tt ESMF\_Calendar} objects, and both are of  
-!     type {\tt ESMF\_CAL\_CUSTOM}, then all the calendar's properties, except
-!     name, are compared.
+!     type {\tt ESMF\_CALKIND\_CUSTOM}, then all the calendar's properties,
+!     except name, are compared.
 !
 !     If both arguments are {\tt ESMF\_Calendar} objects, and either of them
 !     is not in the {\tt ESMF\_INIT\_CREATED} status, an error will be logged.
@@ -530,19 +530,19 @@
 !     \item[calkindflag]
 !          The built-in {\tt ESMF\_CalKind\_Flag}.  Valid values are:
 !            \newline
-!            {\tt ESMF\_CAL\_360DAY}, 
+!            {\tt ESMF\_CALKIND\_360DAY}, 
 !            \newline
-!            {\tt ESMF\_CAL\_GREGORIAN},
+!            {\tt ESMF\_CALKIND\_GREGORIAN},
 !            \newline
-!            {\tt ESMF\_CAL\_JULIAN}, 
+!            {\tt ESMF\_CALKIND\_JULIAN}, 
 !            \newline
-!            {\tt ESMF\_CAL\_JULIANDAY},
+!            {\tt ESMF\_CALKIND\_JULIANDAY},
 !            \newline
-!            {\tt ESMF\_CAL\_MODJULIANDAY}, 
+!            {\tt ESMF\_CALKIND\_MODJULIANDAY}, 
 !            \newline
-!            {\tt ESMF\_CAL\_NOCALENDAR},
+!            {\tt ESMF\_CALKIND\_NOCALENDAR},
 !            \newline
-!            and {\tt ESMF\_CAL\_NOLEAP}.
+!            and {\tt ESMF\_CALKIND\_NOLEAP}.
 !            \newline
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar kind.
@@ -885,8 +885,8 @@
 !     \item[calendar]
 !          The object instance to query.
 !     \item[{[calkindflag]}]
-!          The {\tt CalKind\_Flag} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN,
-!          etc.
+!          The {\tt CalKind\_Flag} ESMF\_CALKIND\_GREGORIAN, 
+!          ESMF\_CALKIND\_JULIAN, etc.
 !     \item[{[daysPerMonth]}]
 !          Integer array of days per month, for each month of the year.
 !     \item[{[monthsPerYear]}]
@@ -1004,7 +1004,7 @@
 !     \begin{description}
 !     \item[{[calkindflag]}]
 !          The calendar kind to initialize the default to.  If not specified,
-!          the default is set to {\tt ESMF\_CAL\_NOCALENDAR}.
+!          the default is set to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1229,7 +1229,7 @@
 !          Print options. If none specified, prints all calendar property
 !                             values. \\
 !          "calkindflag"    - print the calendar's type 
-!                               (e.g. ESMF\_CAL\_GREGORIAN). \\
+!                               (e.g. ESMF\_CALKIND\_GREGORIAN). \\
 !          "daysPerMonth"   - print the array of number of days for
 !                               each month. \\
 !          "daysPerYear"    - print the number of days per year
@@ -1345,19 +1345,19 @@
 !     \item[calkindflag]
 !          The built-in {\tt CalKind\_Flag}.  Valid values are:
 !            \newline
-!            {\tt ESMF\_CAL\_360DAY}, 
+!            {\tt ESMF\_CALKIND\_360DAY}, 
 !            \newline
-!            {\tt ESMF\_CAL\_GREGORIAN},
+!            {\tt ESMF\_CALKIND\_GREGORIAN},
 !            \newline
-!            {\tt ESMF\_CAL\_JULIAN}, 
+!            {\tt ESMF\_CALKIND\_JULIAN}, 
 !            \newline
-!            {\tt ESMF\_CAL\_JULIANDAY},
+!            {\tt ESMF\_CALKIND\_JULIANDAY},
 !            \newline
-!            {\tt ESMF\_CAL\_MODJULIANDAY}, 
+!            {\tt ESMF\_CALKIND\_MODJULIANDAY}, 
 !            \newline
-!            {\tt ESMF\_CAL\_NOCALENDAR},
+!            {\tt ESMF\_CALKIND\_NOCALENDAR},
 !            \newline
-!            and {\tt ESMF\_CAL\_NOLEAP}.
+!            and {\tt ESMF\_CALKIND\_NOLEAP}.
 !            \newline
 !          See Section ~\ref{subsec:Calendar_options} for a description of each
 !          calendar kind.

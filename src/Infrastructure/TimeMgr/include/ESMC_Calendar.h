@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.79 2011/06/16 05:56:45 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.80 2011/06/18 04:49:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,19 +92,19 @@ ESMC_Calendar ESMC_CalendarCreate(
 //  \item[calkindflag]
 //    The built-in {\tt ESMC\_CalKind\_Flag}.  Valid values are:
 //    \newline
-//    {\tt ESMC\_CAL\_360DAY}, 
+//    {\tt ESMC\_CALKIND\_360DAY}, 
 //    \newline
-//    {\tt ESMC\_CAL\_GREGORIAN},
+//    {\tt ESMC\_CALKIND\_GREGORIAN},
 //    \newline
-//    {\tt ESMC\_CAL\_JULIAN}, 
+//    {\tt ESMC\_CALKIND\_JULIAN}, 
 //    \newline
-//    {\tt ESMC\_CAL\_JULIANDAY},
+//    {\tt ESMC\_CALKIND\_JULIANDAY},
 //    \newline
-//    {\tt ESMC\_CAL\_MODJULIANDAY}, 
+//    {\tt ESMC\_CALKIND\_MODJULIANDAY}, 
 //    \newline
-//    {\tt ESMC\_CAL\_NOCALENDAR},
+//    {\tt ESMC\_CALKIND\_NOCALENDAR},
 //    \newline
-//    and {\tt ESMC\_CAL\_NOLEAP}.
+//    and {\tt ESMC\_CALKIND\_NOLEAP}.
 //    \newline
 //    See Section ~\ref{subsec:Calendar_options} for a description of each
 //    calendar kind.

@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.71 2011/06/16 05:57:00 eschwab Exp $
+! $Id: ESMF_Init.F90,v 1.72 2011/06/18 04:50:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           See section \ref{opt:calkindflag} for a list of valid options.
-!           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
+!           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
@@ -262,7 +262,7 @@
 !           Name of the default config file for the entire application.
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
-!           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
+!           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to "ESMF_ErrorLog".

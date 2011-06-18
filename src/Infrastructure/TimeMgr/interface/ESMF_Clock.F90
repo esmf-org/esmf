@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.119 2011/06/16 21:42:18 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.120 2011/06/18 04:49:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.119 2011/06/16 21:42:18 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.120 2011/06/18 04:49:18 eschwab Exp $'
 
 !==============================================================================
 !
@@ -905,7 +905,7 @@
 !          The object instance from which to get an {\tt ESMF\_Alarm} list 
 !          and/or count of {\tt ESMF\_Alarm}s.
 !     \item[alarmlistflag]
-!          The type of list to get:
+!          The kind of list to get:
 !
 !            {\tt ESMF\_ALARMLIST\_ALL} :
 !                Returns the {\tt ESMF\_Clock}'s entire list of alarms.

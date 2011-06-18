@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.63 2011/06/16 05:56:45 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.64 2011/06/18 04:49:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@ int ESMC_TimeSet(
 //    Integer hours.
 //  \item[calendar]
 //    Associated {\tt ESMC\_Calendar}.  If not created, defaults to calendar
-//    {\tt ESMC\_CAL\_NOCALENDAR} or default specified in
+//    {\tt ESMC\_CALKIND\_NOCALENDAR} or default specified in
 //    {\tt ESMC\_Initialize()}.  If created, has precedence over
 //    calkindflag below.
 //  \item[calkindflag]

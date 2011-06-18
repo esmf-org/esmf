@@ -1,4 +1,4 @@
-% $Id: Calendar_coptions.tex,v 1.3 2011/06/16 05:56:42 eschwab Exp $
+% $Id: Calendar_coptions.tex,v 1.4 2011/06/18 04:49:14 eschwab Exp $
 
 \label{subsec:Calendar_options}
 
@@ -12,13 +12,13 @@ Supported calendar kinds.
 Valid values are:
 \begin{description}
       
-\item [ESMC\_CAL\_360DAY] 
+\item [ESMC\_CALKIND\_360DAY] 
 {\it Valid range: machine limits} 
 \newline In the 360-day calendar, there are 12 months, each of which has 30 days.  
 Like the no-leap calendar, this is a simple approximation to the Gregorian
 calendar sometimes used by modelers.
 
-\item [ESMC\_CAL\_GREGORIAN] 
+\item [ESMC\_CALKIND\_GREGORIAN] 
 {\it Valid range: 3/1/4801 BC to 10/29/292,277,019,914 }
 \newline The Gregorian calendar is the calendar currently in use 
 throughout Western countries.  Named after Pope Gregory XIII, it is a minor 
@@ -27,7 +27,7 @@ fourth year is a leap year in which February has 29 and not 28 days;
 however, years divisible by 100 are not leap years unless they are also 
 divisible  by 400.  As in the Julian calendar, days begin at midnight.
 
-\item [ESMC\_CAL\_JULIAN]
+\item [ESMC\_CALKIND\_JULIAN]
 {\it Valid range: 3/1/4713 BC to 4/24/292,271,018,333 } 
 \newline The Julian calendar was introduced by Julius Caesar in 46 B.C., and 
 reached its final form in 4 A.D.  The Julian calendar differs from the 
@@ -36,14 +36,14 @@ for years divisible by 100 and 400 in the Gregorian calendar.  In the Julian
 calendar, any year is a leap year if divisible by 4.  Days are considered to 
 begin at midnight.
 
-\item [ESMC\_CAL\_JULIANDAY] 
+\item [ESMC\_CALKIND\_JULIANDAY] 
 {\it Valid range:  +/- 1x10$^{14}$} 
 \newline Julian days simply enumerate the days and fraction of a day which 
 have elapsed since the start of the Julian era, defined as beginning at noon 
 on Monday, 1st January of year 4713 B.C. in the Julian calendar.  Julian days, 
 unlike the dates in the Julian and Gregorian calendars, begin at noon.
 
-\item [ESMC\_CAL\_MODJULIANDAY]
+\item [ESMC\_CALKIND\_MODJULIANDAY]
 {\it Valid range:  +/- 1x10$^{14}$}
 \newline The Modified Julian Day (MJD) was introduced by space scientists in
  the late 1950's.  It is defined as an offset from the Julian Day (JD):
@@ -52,11 +52,11 @@ MJD = JD - 2400000.5
 
 The half day is subtracted so that the day starts at midnight.
 
-\item [ESMC\_CAL\_NOCALENDAR] 
+\item [ESMC\_CALKIND\_NOCALENDAR] 
 {\it Valid range: machine limits}
 \newline The no-calendar option simply tracks the elapsed model time in seconds.
 
-\item [ESMC\_CAL\_NOLEAP]
+\item [ESMC\_CALKIND\_NOLEAP]
 {\it Valid range: machine limits} 
 \newline The no-leap calendar is the Gregorian calendar with no leap years - 
 February is always assumed to have 28 days.  Modelers sometimes use this 
