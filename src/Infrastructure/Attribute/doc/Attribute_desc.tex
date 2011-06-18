@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.50 2011/06/16 05:59:21 eschwab Exp $
+% $Id: Attribute_desc.tex,v 1.51 2011/06/18 04:45:27 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,12 +104,12 @@ but {\it must} use a reference copy for all Attributes which the object can
 access (through links) but does NOT own. See section \ref{sec:Att:Copy} for more
 details on this concept.
 
-The most common use for this capability is for linking the Attributes of a 
-Field to the FieldBundle which holds it, which is then linked to the State that 
-is used to transport all of the data for a Component.  All of these links, with 
-the exception of the link between the Component and the State, are 
-automatically handled by ESMF. Additionally, the State will automatically set 
-the {\tt VariableIntent} Attribute that is part of the ESMF supplied standard 
-Attribute package for Field when that Field is added to the State.  {\tt 
-VariableIntent} will be set to either {\tt Export} or {\tt Import}.
+The most common use for this hierarchy capability is for linking the Attributes 
+of a Field to the FieldBundle which holds it, which is then linked to the 
+State that is used to transport all of the data for a Component.  All of 
+these links, with the exception of the link between the Component and the 
+State, are automatically handled by ESMF. Additionally, the State will 
+automatically set a {\tt VariableIntent} Attribute for Field when that Field 
+is added to the State.  {\tt VariableIntent} will be set to either 
+{\tt Export} or {\tt Import}.
 
