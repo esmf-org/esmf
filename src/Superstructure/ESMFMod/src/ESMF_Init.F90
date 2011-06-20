@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.73 2011/06/20 19:45:11 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.74 2011/06/20 19:47:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -110,6 +110,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_VM),           intent(out), optional :: vm
       integer,                 intent(out), optional :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     This method must be called once on each PET before
@@ -429,6 +432,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TerminationFlag), intent(in), optional  :: terminationflag
       integer, intent(out), optional                    :: rc
 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     This must be called once on each PET before the application exits
