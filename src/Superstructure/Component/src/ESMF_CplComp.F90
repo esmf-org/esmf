@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.140 2011/06/02 21:54:56 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.141 2011/06/20 20:14:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.140 2011/06/02 21:54:56 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.141 2011/06/20 20:14:13 theurich Exp $'
 
 !==============================================================================
 !
@@ -861,7 +861,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Call the associated user initialization code for a CplComp.
+! Call the associated user initialization routine for 
+! an {\tt ESMF\_CplComp}.
 !    
 ! The arguments are: 
 ! \begin{description} 
@@ -1121,7 +1122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Call the associated user read restart code for an {\tt ESMF\_CplComp}.
+! Call the associated user read restart routine for 
+! an {\tt ESMF\_CplComp}.
 !    
 ! The arguments are:
 ! \begin{description}
@@ -1215,7 +1217,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Call the associated user run code for an {\tt ESMF\_CplComp}.
+! Call the associated user run routine for 
+! an {\tt ESMF\_CplComp}.
 !    
 ! The arguments are: 
 ! \begin{description} 
@@ -2254,7 +2257,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Call the associated user write restart code for an {\tt ESMF\_CplComp}.
+! Call the associated user write restart routine for 
+! an {\tt ESMF\_CplComp}.
 !    
 ! The arguments are:
 ! \begin{description}
