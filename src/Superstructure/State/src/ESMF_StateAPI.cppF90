@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.3 2011/06/17 22:47:40 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.4 2011/06/20 17:15:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
 !
-^define ESMF_FILENAME "ESMF_StateAPI.cppF90"
+^define ESMF_FILENAME "ESMF_StateAPI.F90"
 !
 !     ESMF StateAPI module
 module ESMF_StateAPIMod
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.3 2011/06/17 22:47:40 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.4 2011/06/20 17:15:05 theurich Exp $'
 
 !==============================================================================
 ! 
