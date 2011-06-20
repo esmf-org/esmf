@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.74 2011/06/20 19:47:49 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.75 2011/06/20 19:53:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -422,7 +422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Finalize"
 !BOP
-! !IROUTINE:  ESMF_Finalize - Clean up and close ESMF
+! !IROUTINE:  ESMF_Finalize - Clean up and shut down ESMF
 !
 ! !INTERFACE:
       subroutine ESMF_Finalize(keywordEnforcer, terminationflag, rc)
