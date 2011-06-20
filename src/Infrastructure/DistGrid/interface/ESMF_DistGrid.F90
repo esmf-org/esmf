@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.84 2011/06/07 00:57:56 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.85 2011/06/20 23:06:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.84 2011/06/07 00:57:56 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.85 2011/06/20 23:06:52 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -638,16 +638,17 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDG(distgrid, keywordEnforcer, &
-    firstExtra, lastExtra, indexflag, connectionList, rc)
+    firstExtra, &
+    lastExtra, indexflag, connectionList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),           intent(in)            :: distgrid
+    type(ESMF_DistGrid),        intent(in)            :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, target,               intent(in),  optional :: firstExtra(:)
-    integer, target,               intent(in),  optional :: lastExtra(:)
-    type(ESMF_IndexFlag),          intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    integer,                       intent(out), optional :: rc
+    integer, target,            intent(in),  optional :: firstExtra(:)
+    integer, target,            intent(in),  optional :: lastExtra(:)
+    type(ESMF_IndexFlag),       intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection),intent(in),optional::connectionList(:)
+    integer,                    intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
@@ -880,19 +881,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:)
-    integer,                       intent(in)            :: maxIndex(:)
+    integer,              intent(in)            :: minIndex(:)
+    integer,              intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,               target, intent(in),  optional :: regDecomp(:)
+    integer,      target, intent(in),  optional :: regDecomp(:)
     type(ESMF_DecompFlag), target, intent(in),  optional :: decompflag(:)
-    integer,               target, intent(in),  optional :: regDecompFirstExtra(:)
-    integer,               target, intent(in),  optional :: regDecompLastExtra(:)
-    integer,               target, intent(in),  optional :: deLabelList(:)
-    type(ESMF_IndexFlag),          intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout),           intent(in),  optional :: delayout
-    type(ESMF_VM),                 intent(in),  optional :: vm
-    integer,                       intent(out), optional :: rc
+    integer,      target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,      target, intent(in),  optional :: regDecompLastExtra(:)
+    integer,      target, intent(in),  optional :: deLabelList(:)
+    type(ESMF_IndexFlag), intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection),intent(in),optional::connectionList(:)
+    type(ESMF_DELayout),  intent(in),  optional :: delayout
+    type(ESMF_VM),        intent(in),  optional :: vm
+    integer,              intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
@@ -1069,13 +1070,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:)
-    integer,                       intent(in)            :: maxIndex(:)
-    integer,                       intent(in)            :: deBlockList(:,:,:)
+    integer,                      intent(in)        :: minIndex(:)
+    integer,                      intent(in)        :: maxIndex(:)
+    integer,                      intent(in)        :: deBlockList(:,:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(in),  optional :: deLabelList(:)
-    type(ESMF_IndexFlag),          intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    integer,                      intent(in),optional :: deLabelList(:)
+    type(ESMF_IndexFlag),         intent(in),optional :: indexflag
+    type(ESMF_DistGridConnection),intent(in),optional::connectionList(:)
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
@@ -1547,23 +1548,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRDP(minIndexPTile, maxIndexPTile, &
     keywordEnforcer, regDecompPTile, decompflagPTile, regDecompFirstExtraPTile,&
-    regDecompLastExtraPTile, deLabelList, indexflag, connectionList, delayout, &
-    vm, rc)
+    regDecompLastExtraPTile, deLabelList, indexflag, connectionList, &
+    delayout, vm, rc)
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndexPTile(:,:)
-    integer,                       intent(in)            :: maxIndexPTile(:,:)
+    integer,                  intent(in)            :: minIndexPTile(:,:)
+    integer,                  intent(in)            :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(in),  optional :: regDecompPTile(:,:)
-    type(ESMF_DecompFlag), target, intent(in),  optional :: decompflagPTile(:,:)
-    integer,               target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
-    integer,               target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
-    integer,                       intent(in),  optional :: deLabelList(:)
-    type(ESMF_IndexFlag),          intent(in),  optional :: indexflag
+    integer,                  intent(in),  optional :: regDecompPTile(:,:)
+    type(ESMF_DecompFlag),target,intent(in),optional::decompflagPTile(:,:)
+    integer,target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
+    integer,target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
+    integer,                  intent(in),  optional :: deLabelList(:)
+    type(ESMF_IndexFlag),     intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout),           intent(in),  optional :: delayout
-    type(ESMF_VM),                 intent(in),  optional :: vm
-    integer,                       intent(out), optional :: rc
+    type(ESMF_DELayout),      intent(in),  optional :: delayout
+    type(ESMF_VM),            intent(in),  optional :: vm
+    integer,                  intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
@@ -2578,6 +2579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[tileCount]}]
 !     Number of tiles in {\tt distgrid}.
 !   \item[{[minIndexPTile]}]
+!     \begin{sloppypar}
 !     Lower index space corner per {\tt dim}, per {\tt tile}, with
 !     {\tt size(minIndexPTile) == (/dimCount, tileCount/)}.
 !   \item[{[maxIndexPTile]}]
@@ -2587,38 +2589,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Number of elements in exclusive region per tile, with
 !     {\tt size(elementCountPTile) == (/tileCount/)}
 !   \item[{[minIndexPDe]}]
-!     \begin{sloppypar}
 !     Lower index space corner per {\tt dim}, per {\tt De}, with
 !     {\tt size(minIndexPDe) == (/dimCount, deCount/)}.
-!     \end{sloppypar}
 !   \item[{[maxIndexPDe]}]
-!     \begin{sloppypar}
 !     Upper index space corner per {\tt dim}, per {\tt de}, with
 !     {\tt size(minIndexPDe) == (/dimCount, deCount/)}.
-!     \end{sloppypar}
 !   \item[{[elementCountPDe]}]
-!     \begin{sloppypar}
 !     Number of elements in exclusive region per DE, with
 !     {\tt size(elementCountPDe) == (/deCount/)}
-!     \end{sloppypar}
 !   \item[{[deToTileMap]}]
 !     List of tile id numbers, one for each DE, with
 !     {\tt size(deToTileMap) == (/deCount/)}
 !   \item[{[indexCountPDe]}]
-!     \begin{sloppypar}
 !     Array of extents per {\tt dim}, per {\tt de}, with
 !     {\tt size(indexCountPDe) == (/dimCount, deCount/)}.
-!     \end{sloppypar}
 !   \item[{[collocation]}]
-!     \begin{sloppypar}
 !     List of collocation id numbers, one for each dim, with
 !     {\tt size(collocation) == (/dimCount/)}
-!     \end{sloppypar}
 !   \item[{[regDecompFlag]}]
 !     Flag equal to {\tt ESMF\_TRUE} for regular decompositions
 !     and equal to {\tt ESMF\_FALSE} otherwise.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{sloppypar}
 !   \end{description}
 !
 !EOP
