@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.41 2011/06/07 00:32:44 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.42 2011/06/20 21:26:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -708,8 +708,8 @@ program ESMF_DistGridEx
 ! Finally the DistGrid can be created by calling
 !EOE
 !BOC
-  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, maxIndexPTile=maxIndex, &
-    regDecompPTile=regDecomp, rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, &
+    maxIndexPTile=maxIndex, regDecompPTile=regDecomp, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
@@ -738,8 +738,8 @@ program ESMF_DistGridEx
   regDecomp(:,2) = (/1,3/)    ! 3 DEs
   regDecomp(:,3) = (/2,1/)    ! 2 DEs
   
-  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, maxIndexPTile=maxIndex, &
-    regDecompPTile=regDecomp, rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndex, &
+    maxIndexPTile=maxIndex, regDecompPTile=regDecomp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
 
