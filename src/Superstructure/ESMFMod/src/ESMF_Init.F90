@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.72 2011/06/18 04:50:03 eschwab Exp $
+! $Id: ESMF_Init.F90,v 1.73 2011/06/20 19:45:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -99,8 +99,7 @@
         ioUnitLBound, ioUnitUBound, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer 
-					     ! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar
       character(len=*),        intent(in),  optional :: defaultLogFileName
@@ -426,8 +425,7 @@
       subroutine ESMF_Finalize(keywordEnforcer, terminationflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer 
-		! must use keywords for the below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TerminationFlag), intent(in), optional  :: terminationflag
       integer, intent(out), optional                    :: rc
 
