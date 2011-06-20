@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.25 2011/01/18 18:26:09 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.26 2011/06/20 17:14:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.25 2011/01/18 18:26:09 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.26 2011/06/20 17:14:35 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -114,7 +114,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     grid = ESMF_GridCreate(distgrid=distgrid, &
-        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -254,7 +253,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     grid = ESMF_GridCreate(distgrid=distgrid, &
-        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
         indexflag=ESMF_INDEX_GLOBAL, &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -309,7 +307,6 @@
 
     ! Create the destination Grid
     dstGrid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/3,4/), &
-      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       indexflag = ESMF_INDEX_GLOBAL, &
       regDecomp = (/1,4/), &
       rc=rc)

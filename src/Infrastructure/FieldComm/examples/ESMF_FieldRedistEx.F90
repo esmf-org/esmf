@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.40 2011/06/17 19:04:59 svasquez Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.41 2011/06/20 17:14:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.40 2011/06/17 19:04:59 svasquez Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.41 2011/06/20 17:14:35 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -96,12 +96,11 @@
 
     ! create grid
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
-        regDecomp=(/4/), &
-        rc=rc)
+            regDecomp=(/4/), &
+            rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     grid = ESMF_GridCreate(distgrid=distgrid, &
-        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -203,8 +202,6 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    call ESMF_DistGridDestroy(distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{FieldRedist as a form of scatter involving arbitrary distribution}
@@ -231,14 +228,10 @@
         rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     grid = ESMF_GridCreate(distgrid=distgrid, &
-        gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
         indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    srcField = ESMF_FieldCreate(grid, arrayspec, rc=rc)
+    srcField = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! initialize the source data
@@ -412,10 +405,7 @@
 ! all the PETs.
 !EOE
 !BOC
-      call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
-      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-      dstField = ESMF_FieldCreate(mesh, arrayspec, rc=rc)
+      dstField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_I4, rc=rc)
       if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !EOC
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.44 2011/05/25 16:01:19 feiliu Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.45 2011/06/20 17:14:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.44 2011/05/25 16:01:19 feiliu Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.45 2011/06/20 17:14:35 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -103,19 +103,15 @@
     ! farray is the Fortran data array that contains data on each PET.
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
         regDecomp=(/2,2/), &
-        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, rc=localrc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! allocate the Fortran data array on PET 0 to store gathered data
-    if(lpe .eq. 0) allocate(farrayDst(10,20))
-    call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=rc)
+    call ESMF_FieldGet(field, farrayPtr=fptr, rc=localrc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    ! check that the values gathered on rootPet are correct
+    !---------Initialize pet specific field data----------------
     !    1        5         10
     ! 1  +--------+---------+
     !    |        |         |
@@ -126,6 +122,14 @@
     !    |   2    |    3    |
     !    |        |         |
     ! 20 +--------+---------+
+    fptr = lpe
+
+    ! allocate the Fortran data array on PET 0 to store gathered data
+    if(lpe .eq. 0) allocate(farrayDst(10,20))
+    call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=rc)
+    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! check that the values gathered on rootPet are correct
     if(lpe .eq. 0) then
        do i = 1, 2
           do j = 1, 2
@@ -160,7 +164,6 @@
     ! farray is the Fortran data array that contains data on each PET.
     grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
         regDecomp=(/2,2/), &
-        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
