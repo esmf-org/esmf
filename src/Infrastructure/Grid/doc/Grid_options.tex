@@ -1,6 +1,6 @@
-% $Id: Grid_options.tex,v 1.38 2011/06/13 18:44:19 oehmke Exp $
+% $Id: Grid_options.tex,v 1.39 2011/06/21 00:04:07 rokuingh Exp $
 
-\subsubsection{ESMF\_CoordSys}
+\subsubsection{ESMF\_COORDSYS}
 \label{sec:opt:coordsys}
 {\sf DESCRIPTION:\\}
  A set of values which indicates in which system the coordinates in the Grid are. This value is useful both to indicate to 
@@ -25,7 +25,7 @@ A constant value which is used to indicate that a particular dimension is arbitr
 
 
 
-\subsubsection{ESMF\_GridConn}
+\subsubsection{ESMF\_GRIDCONN}
 \label{sec:opt:gridconn}
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
@@ -54,10 +54,15 @@ that the edge is n elements long, element i is connected to element n-i-1.
 
 \end{description}
 
+<<<<<<< Grid_options.tex
+\subsubsection{ESMF\_POLETYPE}
+\label{sec:opt:poletype}
+=======
 
 \subsubsection{ESMF\_GridItem}
 \label{sec:opt:griditem}
 
+>>>>>>> 1.38
 {\sf DESCRIPTION:\\}
 The ESMF Grid can contain other kinds of data besides coordinates. 
 This data is referred to as Grid ``items''. Some items may be used
@@ -94,7 +99,7 @@ Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\
 
 
 
-\subsubsection{ESMF\_GridStatus}
+\subsubsection{ESMF\_GRIDSTATUS}
 \label{sec:opt:gridstatus}
 
 {\sf DESCRIPTION:\\}
@@ -116,6 +121,11 @@ are the valid values of ESMF\_GRIDSTATUS.
       via {\tt ESMF\_GridCoordAdd()} to allow other functionality. 
 \end{description}
 
+<<<<<<< Grid_options.tex
+\subsubsection{ESMF\_GRIDMATCH}
+\label{sec:opt:gridmatchtype}
+=======
+>>>>>>> 1.38
 
 
 \subsubsection{ESMF\_PoleType}
@@ -132,14 +142,19 @@ created with {\tt ESMF\_GridCreate1PeriodicDim()}.
 that the edge is n elements long, then element i is connected to
 element i+n/2.
 
+<<<<<<< Grid_options.tex
+\subsubsection{ESMF\_GRIDITEM}
+\label{sec:opt:griditem}
+=======
 \item [ESMF\_POLETYPE\_BIPOLE] This edge is connected to itself. Given
 that the edge is n elements long, element i is connected to element n-i-1.
+>>>>>>> 1.38
 
 \end{description}
 
 
 
-\subsubsection{ESMF\_StaggerLoc}\label{sec:opt:staggerloc}
+\subsubsection{ESMF\_STAGGERLOC}\label{sec:opt:staggerloc}
 
  {\sf DESCRIPTION:\\}
  In the ESMF Grid class, data can be located at different positions in a
