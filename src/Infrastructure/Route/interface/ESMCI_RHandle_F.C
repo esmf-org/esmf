@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.12 2011/02/22 23:08:41 w6ws Exp $
+// $Id: ESMCI_RHandle_F.C,v 1.13 2011/06/21 04:04:53 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -177,6 +177,7 @@ extern "C" {
     localrc = (*ptr)->print(opts);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+    fflush (stdout);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

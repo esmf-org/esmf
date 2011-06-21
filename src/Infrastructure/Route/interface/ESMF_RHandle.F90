@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.52 2011/02/23 19:54:43 w6ws Exp $
+! $Id: ESMF_RHandle.F90,v 1.53 2011/06/21 04:04:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@ module ESMF_RHandleMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOUtilMod
   
   implicit none
 
@@ -95,7 +96,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.52 2011/02/23 19:54:43 w6ws Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.53 2011/06/21 04:04:53 w6ws Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -666,6 +667,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
     defaultopts = "brief"
+
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(options)) then
       call c_ESMC_RouteHandlePrint(rhandle, options, localrc)   
