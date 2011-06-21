@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.47 2011/06/08 21:32:39 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.48 2011/06/21 03:49:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,6 +49,8 @@ module ESMF_LocalArrayCreateMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOUtilMod
+
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayWrapperTypeMod ! contains the LAWrapper derived type
 
@@ -137,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.47 2011/06/08 21:32:39 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.48 2011/06/21 03:49:53 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2557,6 +2559,10 @@ TypeKindRankDeclarationMacro(LocalArrayAdjust)
     endif
 
     defaultopts = "brief"
+
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(options)) then
         call c_ESMC_LocalArrayPrint(array, options, localrc) 
