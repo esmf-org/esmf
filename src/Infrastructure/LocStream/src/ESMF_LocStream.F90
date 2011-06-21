@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.54 2011/06/21 03:52:41 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.55 2011/06/21 14:17:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.54 2011/06/21 03:52:41 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.55 2011/06/21 14:17:53 w6ws Exp $'
 
 !==============================================================================
 !
@@ -3261,7 +3261,9 @@ end subroutine ESMF_LocStreamGetBounds
         write(ESMF_UtilIOStdout,*)  "KeyCount =",lstypep%keyCount
         write(ESMF_UtilIOStdout,*) "Keys:"
         do i=1,lstypep%keyCount
-           write(ESMF_UtilIOStdout,*) "   ",trim(lstypep%keyNames(i))," - ",trim(lstypep%keyLongNames(i)),"    ",trim(lstypep%keyUnits(i))
+           write(ESMF_UtilIOStdout,*) "   ",trim(lstypep%keyNames(i)),     &
+                                      " - ",trim(lstypep%keyLongNames(i)), &
+                                      "    ",trim(lstypep%keyUnits(i))
         enddo
 
         write(ESMF_UtilIOStdout,*) "LocStream Print Ends   ====>"
