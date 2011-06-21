@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.22 2011/06/08 22:37:33 theurich Exp $
+! $Id: ESMF_Container.F90,v 1.23 2011/06/21 01:51:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -37,6 +37,8 @@ module ESMF_ContainerMod
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOUtilMod
+
   use ESMF_FieldMod         ! ESMF Fortran-C++ interface helper
   use ESMF_FieldGetMod      ! ESMF FieldGet interfaces
   
@@ -93,7 +95,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.22 2011/06/08 22:37:33 theurich Exp $'
+    '$Id: ESMF_Container.F90,v 1.23 2011/06/21 01:51:22 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1060,6 +1062,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
     
     ! Call into the C++ interface layer
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_ESMC_ContainerPrint(container, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

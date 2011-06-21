@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.18 2011/06/08 18:50:59 theurich Exp $
+// $Id: ESMCI_Container_F.C,v 1.19 2011/06/21 01:51:22 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -896,6 +896,9 @@ extern "C" {
         ESMC_CONTEXT, rc);
       return;
     }
+
+    fflush (stdout);
+
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
