@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.86 2011/06/09 21:35:27 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.87 2011/06/21 22:29:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1632,10 +1632,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
 !      \item [{[trace]}]
+!	     \begin{sloppypar}
 !            If set to true, calls such as {\tt ESMF\_LogFoundError},
 !            {\tt ESMF\_LogFoundAllocError}, and {\tt ESMF\_LogFoundDeallocError}
 !            will be logged as a tool for program flow tracing.  This may generate
 !            voluminous output in the log.
+!	     \end{sloppypar}
+!            If set to true, calls such as {\tt ESMF\_LogFoundError},
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}

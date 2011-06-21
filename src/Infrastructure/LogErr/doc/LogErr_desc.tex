@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.31 2011/06/09 21:51:31 w6ws Exp $
+% $Id: LogErr_desc.tex,v 1.32 2011/06/21 22:25:19 svasquez Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,12 +49,14 @@ processors.  For that reason, {\tt ESMF\_LOG\_NONE} is provided to
 switch off the Log capability.  All the Log methods have no effect
 in the {\tt ESMF\_LOG\_NONE} mode.
 
+\begin{sloppypar}
 A tracing capability may be enabled by setting the {\tt trace} flag
 using the {\tt ESMF\_LogSet()} method.  When tracing is enabled, calls to
 methods such as {\tt ESMF\_LogFoundError}, {\tt ESMF\_LogFoundAllocError},
 and {\tt ESMF\_LogFoundDeallocError} are logged in the default log file.
 This can result in voluminous output.  It is typically used only around areas
 of code which are being debugged.
+\end{sloppypar}
    
 Other options that are planned for Log are to adjust the verbosity of output, and to optionally write to {\tt stdout} instead of file(s).
 
