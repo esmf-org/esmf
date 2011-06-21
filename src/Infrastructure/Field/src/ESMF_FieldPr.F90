@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.44 2011/06/06 15:57:10 rokuingh Exp $
+! $Id: ESMF_FieldPr.F90,v 1.45 2011/06/21 01:12:32 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@ module ESMF_FieldPrMod
   use ESMF_ArrayGetMod
   use ESMF_TimeMod
   use ESMF_InitMacrosMod
+  use ESMF_IOUtilMod
 
   use ESMF_FieldMod
   use ESMF_FieldGetMod
@@ -98,12 +99,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     This subroutine goes through the internal data members of a field
 !     data type and prints information of each data member. \\
 !
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
@@ -139,25 +134,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
         !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
-        write(*,*) "Field Print Starts ====>"
+        write(ESMF_UtilIOStdout,*) "Field Print Starts ====>"
 
         call ESMF_StatusString(fieldstatus, str, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-        write(*, *)  "Field base status = ", trim(str)
+        write(ESMF_UtilIOStdout,*)  "Field base status = ", trim(str)
 
         if (fieldstatus .ne. ESMF_STATUS_READY) then
-          write(*,*) "Empty or Uninitialized Field"
-          write(*,*) "Field Print Ends   ====>"
+          write(ESMF_UtilIOStdout,*) "Empty or Uninitialized Field"
+          write(ESMF_UtilIOStdout,*) "Field Print Ends   ====>"
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
         
         if (.not. associated(field%ftypep)) then
         !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
-          write(*,*) "Empty or Uninitialized Field"
-          write(*,*) "Field Print Ends   ====>"
+          write(ESMF_UtilIOStdout,*) "Empty or Uninitialized Field"
+          write(ESMF_UtilIOStdout,*) "Field Print Ends   ====>"
           if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
@@ -168,7 +163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_CONTEXT, rcToReturn=rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-        write(*, *)  "  Name = '",  trim(name), "'"
+        write(ESMF_UtilIOStdout,*)  "  Name = '",  trim(name), "'"
 
         call ESMF_BasePrint(fp%base, defaultopts, localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -176,7 +171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-        write(*, *)  "Field status = ", fp%status
+        write(ESMF_UtilIOStdout,*)  "Field status = ", fp%status
         if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
             fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then 
 !           call ESMF_GeomBasePrint(fp%geombase, "", localrc)
@@ -187,7 +182,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-          write(*, *) "gridrank = ", gridrank
+          write(ESMF_UtilIOStdout,*) "gridrank = ", gridrank
         endif
 
         if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then 
@@ -199,16 +194,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-          write(*, *) "arrayrank = ", arrayrank
+          write(ESMF_UtilIOStdout,*) "arrayrank = ", arrayrank
         endif
 
-        write(*, *) "gridToFieldMap ungriddedLBound ungriddedUBound totalLWidth", &
+        write(ESMF_UtilIOStdout,*) "gridToFieldMap ungriddedLBound ungriddedUBound totalLWidth", &
             " totalUWidth"
         do i = 1, ESMF_MAXDIM
-            write(*, *) fp%gridToFieldMap(i), fp%ungriddedLBound(i), fp%ungriddedUBound(i), &
+            write(ESMF_UtilIOStdout,*) fp%gridToFieldMap(i), fp%ungriddedLBound(i), fp%ungriddedUBound(i), &
                 "    ", fp%totalLWidth(i), fp%totalUWidth(i)
         enddo
-        write(*,*) "Field Print Ends   ====>"
+        write(ESMF_UtilIOStdout,*) "Field Print Ends   ====>"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
