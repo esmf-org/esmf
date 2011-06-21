@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.121 2011/06/21 04:19:19 w6ws Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.122 2011/06/21 21:25:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.121 2011/06/21 04:19:19 w6ws Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.122 2011/06/21 21:25:20 svasquez Exp $'
 
 !==============================================================================
 !
@@ -1358,10 +1358,12 @@
 !     \item[{[calkindflag]}]
 !          Associated {\tt CalKind\_Flag}, if any.
 !     \item[{[timeString]}]
+!          \begin{sloppypar}
 !          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
 !          where n/d is numerator/denominator of any fractional seconds and
 !          all other units are in ISO 8601 format.  See ~\cite{ISO} and
 !          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
+!          \end{sloppypar}
 !     \item[{[timeStringISOFrac]}]
 !          Convert time interval value to strict ISO 8601 format string
 !          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
