@@ -1,8 +1,9 @@
-% $Id: Clock_options.tex,v 1.5 2011/06/14 05:57:46 eschwab Exp $
+% $Id: Clock_options.tex,v 1.6 2011/06/21 21:30:27 svasquez Exp $
 
 \subsubsection{ESMF\_Direction}
 
 {\sf DESCRIPTION:\\}
+\begin{sloppypar}
 Specifies the time-stepping direction of a clock.  Use with "direction"
 argument to methods {\tt ESMF\_ClockSet()} and {\tt ESMF\_ClockGet()}.
 Cannot be used with method {\tt ESMF\_ClockCreate()}, since it only
@@ -12,6 +13,7 @@ initializes a clock in the default forward mode; a clock must be advanced
 which are initialized (created) with stopTime < startTime, since "forward"
 means timestepping from startTime towards stopTime
 (see {\tt ESMF\_DIRECTION\_FORWARD} below).
+\end{sloppypar}
 
 "Forward" and "reverse" directions are distinct from postive and negative
 timesteps.  "Forward" means timestepping in the direction established at
