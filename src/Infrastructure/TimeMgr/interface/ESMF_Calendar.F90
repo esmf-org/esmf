@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.138 2011/06/21 04:19:19 w6ws Exp $
+! $Id: ESMF_Calendar.F90,v 1.139 2011/06/21 20:00:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.138 2011/06/21 04:19:19 w6ws Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.139 2011/06/21 20:00:44 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -212,11 +212,13 @@
 !     <calendar argument 2>, see below for supported values
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
 !     Compare an {\tt ESMF\_Calendar} object or {\tt ESMF\_CalKind\_Flag} with
 !     another calendar object or calendar kind for equality.  Return
 !     {\tt .true.} if equal, {\tt .false.} otherwise.  Comparison is based on
 !     calendar kind, which is a property of a calendar object.
+!     \end{sloppypar}
 !
 !     If both arguments are {\tt ESMF\_Calendar} objects, and both are of  
 !     type {\tt ESMF\_CALKIND\_CUSTOM}, then all the calendar's properties, 
@@ -282,11 +284,13 @@
 !     <calendar argument 2>, see below for supported values
 !
 ! !DESCRIPTION:
+!     \begin{sloppypar}
 !     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
 !     Compare a {\tt ESMF\_Calendar} object or {\tt ESMF\_CalKind\_Flag} with
 !     another calendar object or calendar kind for inequality.  Return
 !     {\tt .true.} if not equal, {\tt .false.} otherwise.  Comparison is based
 !     on calendar kind, which is a property of a calendar object.
+!     \end{sloppypar}
 !
 !     If both arguments are {\tt ESMF\_Calendar} objects, and both are of  
 !     type {\tt ESMF\_CALKIND\_CUSTOM}, then all the calendar's properties,
@@ -863,16 +867,16 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(in)            :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_CalKind_Flag), intent(out), optional :: calkindflag
-      integer,                 intent(out), optional :: daysPerMonth(:)
-      integer,                 intent(out), optional :: monthsPerYear
-      integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerDay
-      integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerYear
-      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYear   ! not imp
-      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDn ! not imp
-      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDd ! not imp
-      character (len=*),       intent(out), optional :: name
-      integer,                 intent(out), optional :: rc
+      type(ESMF_CalKind_Flag),intent(out), optional :: calkindflag
+      integer,                intent(out), optional :: daysPerMonth(:)
+      integer,                intent(out), optional :: monthsPerYear
+      integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerDay
+      integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerYear
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYear   !not imp
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDn !not imp
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDd !not imp
+      character (len=*),      intent(out), optional :: name
+      integer,                intent(out), optional :: rc
 
 !
 ! !STATUS:
@@ -1415,13 +1419,13 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,               intent(in),  optional :: daysPerMonth(:)
-      integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not imp
-      character (len=*),     intent(in),  optional :: name
-      integer,               intent(out), optional :: rc
+      integer,              intent(in),  optional :: daysPerMonth(:)
+      integer(ESMF_KIND_I4),intent(in),  optional :: secondsPerDay
+      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYear   !not imp
+      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYearDn !not imp
+      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYearDd !not imp
+      character (len=*),    intent(in),  optional :: name
+      integer,              intent(out), optional :: rc
 
 !
 ! !STATUS:
