@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.50 2011/04/22 20:52:57 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.51 2011/06/21 01:33:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,6 +46,7 @@ module ESMF_ArraySpecMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_IOUtilMod
 
   implicit none
 
@@ -91,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.50 2011/04/22 20:52:57 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.51 2011/06/21 01:33:45 w6ws Exp $'
 
 !==============================================================================
 
@@ -394,10 +395,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
-    write(*, *) "ArraySpec Print Begins =====>"
-    write(*, *) "   rank = ", arrayspec%rank    
-    write(*, *) "   typekind = ", arrayspec%typekind
-    write(*, *) "ArraySpec Print Ends   =====>"
+    write(ESMF_UtilIOStdout, *) "ArraySpec Print Begins =====>"
+    write(ESMF_UtilIOStdout, *) "   rank = ", arrayspec%rank    
+    write(ESMF_UtilIOStdout, *) "   typekind = ", arrayspec%typekind
+    write(ESMF_UtilIOStdout, *) "ArraySpec Print Ends   =====>"
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
