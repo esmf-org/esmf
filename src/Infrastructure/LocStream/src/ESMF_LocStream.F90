@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.53 2011/04/01 23:06:47 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.54 2011/06/21 03:52:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,6 +44,8 @@ module ESMF_LocStreamMod
   use ESMF_BaseMod
   use ESMF_VMMod
   use ESMF_LogErrMod
+  use ESMF_IOUtilMod
+
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayMod
   use ESMF_DELayoutMod
@@ -134,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.53 2011/04/01 23:06:47 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.54 2011/06/21 03:52:41 w6ws Exp $'
 
 !==============================================================================
 !
@@ -3242,7 +3244,7 @@ end subroutine ESMF_LocStreamGetBounds
         !TODO: Remove the following dummy test when dummy argument actually used
         if (present (options)) continue
 
-        write(*,*) "LocStream Print Starts ====>"
+        write(ESMF_UtilIOStdout,*) "LocStream Print Starts ====>"
 
         ! Get internal pointer to locstream
         lstypep => locstream%lstypep
@@ -3255,14 +3257,14 @@ end subroutine ESMF_LocStreamGetBounds
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-        write(*, *)  "Name =     '",  trim(name), "'" 
-        write(*, *)  "KeyCount =",lstypep%keyCount
-        write(*,*) "Keys:"
+        write(ESMF_UtilIOStdout,*)  "Name =     '",  trim(name), "'" 
+        write(ESMF_UtilIOStdout,*)  "KeyCount =",lstypep%keyCount
+        write(ESMF_UtilIOStdout,*) "Keys:"
         do i=1,lstypep%keyCount
-           write(*,*) "   ",trim(lstypep%keyNames(i))," - ",trim(lstypep%keyLongNames(i)),"    ",trim(lstypep%keyUnits(i))
+           write(ESMF_UtilIOStdout,*) "   ",trim(lstypep%keyNames(i))," - ",trim(lstypep%keyLongNames(i)),"    ",trim(lstypep%keyUnits(i))
         enddo
 
-        write(*,*) "LocStream Print Ends   ====>"
+        write(ESMF_UtilIOStdout,*) "LocStream Print Ends   ====>"
 
         if (present(rc)) rc = ESMF_SUCCESS
 
