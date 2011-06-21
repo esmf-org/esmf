@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.32 2011/06/03 05:18:35 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.33 2011/06/21 02:01:34 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -576,6 +576,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
+    fflush (stdout);
   }
   
   void FTN(c_esmc_distgridvalidate)(ESMCI::DistGrid **ptr, int *rc){

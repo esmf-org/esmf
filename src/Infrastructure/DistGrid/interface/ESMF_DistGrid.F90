@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.85 2011/06/20 23:06:52 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.86 2011/06/21 02:01:34 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,6 +41,8 @@ module ESMF_DistGridMod
   use ESMF_VMMod                  ! ESMF VM
   use ESMF_DELayoutMod            ! ESMF DELayout
   use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
+  use ESMF_IOUtilMod
+
   use ESMF_DistGridConnectionMod  ! ESMF DistGrid connections
   
   implicit none
@@ -146,7 +148,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.85 2011/06/20 23:06:52 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.86 2011/06/21 02:01:34 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -3043,12 +3045,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Prints internal information about the specified {\tt ESMF\_DistGrid} 
 !     object to {\tt stdout}. \\
 !
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
@@ -3069,6 +3065,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_ESMC_DistGridPrint(distgrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
