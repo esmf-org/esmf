@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.113 2011/06/16 05:56:35 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.114 2011/06/21 01:43:54 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.113 2011/06/16 05:56:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.114 2011/06/21 01:43:54 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -6826,6 +6826,8 @@ if (attrRoot == ESMF_TRUE) {
 //  for (i=0; i<linkList.size(); i++) {
 //    linkList.at(i)->ESMC_Print();
 //  }
+
+  fflush (stdout);
 
   return ESMF_SUCCESS;
 
