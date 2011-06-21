@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.121 2011/06/21 04:19:19 w6ws Exp $
+! $Id: ESMF_Clock.F90,v 1.122 2011/06/21 21:39:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.121 2011/06/21 04:19:19 w6ws Exp $'
+      '$Id: ESMF_Clock.F90,v 1.122 2011/06/21 21:39:10 svasquez Exp $'
 
 !==============================================================================
 !
@@ -734,10 +734,12 @@
 !     \item[{[timeZone]}]
 !          The timezone within which all the {\tt Clock}'s times are defined.
 !     \item[{[advanceCount]}]
+!	   \begin{sloppypar}
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
 !          Increments in {\tt ESMF\_DIRECTION\_FORWARD} and decrements in
 !          {\tt ESMF\_DIRECTION\_REVERSE}; see "direction" argument below and 
 !          in {\tt ESMF\_ClockSet()}.
+!	   \end{sloppypar}
 !     \item[{[alarmCount]}]
 !          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
 !          {\tt ESMF\_Alarm} list.
@@ -932,9 +934,11 @@
 !                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
 !                single alarm.
 !     \item[{[timeStep]}]
+!	   \begin{sloppypar}
 !          Optional time step to be used instead of the {\tt clock}'s.
 !          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmlistflag}
 !          (see above); ignored if specified with other {\tt alarmlistflags}.
+!	   \end{sloppypar}
 !     \item[{[alarmList]}]
 !          The array of returned alarms.  If given, the array must be large
 !          enough to hold the number of alarms of the specified 

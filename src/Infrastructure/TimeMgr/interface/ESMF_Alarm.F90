@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.110 2011/06/21 04:19:19 w6ws Exp $
+! $Id: ESMF_Alarm.F90,v 1.111 2011/06/21 21:44:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.110 2011/06/21 04:19:19 w6ws Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.111 2011/06/21 21:44:05 svasquez Exp $'
 
 !==============================================================================
 !
@@ -648,8 +648,8 @@
 ! !INTERFACE:
       subroutine ESMF_AlarmGet(alarm, keywordEnforcer, &
         clock, ringTime, prevRingTime, ringInterval, stopTime, ringDuration, &
-        ringTimeStepCount, timeStepRingingCount, ringBegin, ringEnd, refTime, &
-        ringing, ringingOnPrevTimeStep, enabled, sticky, name, rc)
+        ringTimeStepCount, timeStepRingingCount, ringBegin, ringEnd, &
+        refTime, ringing, ringingOnPrevTimeStep, enabled, sticky, name, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),        intent(in)            :: alarm
@@ -711,8 +711,10 @@
 !          ringDuration (see above).  Mutually exclusive with
 !          timeStepRingingCount (see above).
 !     \item[{[ringEnd]}]
+!	   \begin{sloppypar}
 !          The time when the alarm ended ringing.  Used internally for
 !          re-ringing alarm in {\tt ESMF\_DIRECTION\_REVERSE}.
+!	   \end{sloppypar}
 !     \item[{[refTime]}]
 !          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
