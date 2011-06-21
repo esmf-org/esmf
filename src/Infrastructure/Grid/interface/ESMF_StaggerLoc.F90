@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.23 2011/02/26 00:20:35 rokuingh Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.24 2011/06/21 02:06:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@
 ! !USES:
       use ESMF_UtilTypesMod    ! ESMF base class
       use ESMF_LogErrMod
+      use ESMF_IOUtilMod
 
       implicit none
 
@@ -103,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.23 2011/02/26 00:20:35 rokuingh Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.24 2011/06/21 02:06:24 w6ws Exp $'
 
 
 !==============================================================================
@@ -633,12 +634,6 @@ end interface
 ! !DESCRIPTION:
 !     Print the internal data members of an {\tt ESMF\_StaggerLoc} object. \\
 !
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[staggerloc]
@@ -652,9 +647,9 @@ end interface
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-      write(*, *) "StaggerLoc Print Begins =====>"
-      write(*, *) "   staggerloc = ", staggerloc%staggerloc
-      write(*, *) "StaggerLoc Print Ends   =====>"
+      write(ESMF_UtilIOStdout, *) "StaggerLoc Print Begins =====>"
+      write(ESMF_UtilIOStdout, *) "   staggerloc = ", staggerloc%staggerloc
+      write(ESMF_UtilIOStdout, *) "StaggerLoc Print Ends   =====>"
 
       rc = ESMF_SUCCESS
 
