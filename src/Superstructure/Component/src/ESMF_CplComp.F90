@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.141 2011/06/20 20:14:13 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.142 2011/06/21 01:05:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@ module ESMF_CplCompMod
   use ESMF_StateMod
   use ESMF_CompMod
   use ESMF_InitMacrosMod
+  use ESMF_IOUtilMod
 
   implicit none
 
@@ -91,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.141 2011/06/20 20:14:13 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.142 2011/06/21 01:05:28 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1060,12 +1061,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Prints information about an {\tt ESMF\_CplComp} to {\tt stdout}. \\
 !
-! Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-! On some platforms/compilers there is a potential issue with interleaving
-! Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-! the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-! may be used on unit 6 to get coherent output.  \\
-!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
@@ -1084,7 +1079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    print *, "Coupler Component:"
+    write (ESMF_UtilIOStdout,*) "Coupler Component:"
     ! call Comp method
     call ESMF_CompPrint(cplcomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

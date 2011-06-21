@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.209 2011/03/24 15:28:04 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.210 2011/06/21 01:05:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -51,6 +51,7 @@ module ESMF_CompMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_InitMacrosMod
+  use ESMF_IOUtilMod
   
   implicit none
 
@@ -252,7 +253,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.209 2011/03/24 15:28:04 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.210 2011/06/21 01:05:28 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1326,7 +1327,7 @@ contains
     if (.not.associated(compp)) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
       !nsc                      ESMF_LOG_INFO)
-      write (*,*)  "Invalid or uninitialized Component"
+      write (ESMF_UtilIOStdout,*)  "Invalid or uninitialized Component"
       return
     endif
 
@@ -1342,7 +1343,7 @@ contains
     if (status /= ESMF_STATUS_READY) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
       !nsc                      ESMF_LOG_INFO)
-      write (*,*)  "Invalid or uninitialized Component"
+      write (ESMF_UtilIOStdout,*)  "Invalid or uninitialized Component"
       return
     endif
 
@@ -1350,7 +1351,7 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
        
-    write (*,*) " Component name = ", trim(cname)
+    write (ESMF_UtilIOStdout,*) " Component name = ", trim(cname)
     
     ! TODO: add more info here
 
