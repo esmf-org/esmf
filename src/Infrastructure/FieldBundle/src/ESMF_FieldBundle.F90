@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.107 2011/06/16 16:29:33 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.108 2011/06/21 20:25:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.107 2011/06/16 16:29:33 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.108 2011/06/21 20:25:19 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -478,7 +478,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddList()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAddList - Add Fields to an fieldbundle
+! !IROUTINE: ESMF_FieldBundleAdd - Add Fields to a FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleAdd()   
@@ -498,9 +498,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Add field(s) to an fieldbundle. It is an error if {\tt fieldList} contains
-!   Fields that match by name Fields already contained in {\tt fieldbundle} when multiflag
-!   is set to {\tt .false.} and relaxedflag is set to {\tt .false.} by default.
+!   Add Field(s) to a FieldBundle. It is an error if {\tt fieldList} contains
+!   Fields that match by name Fields already contained in 
+!   {\tt fieldbundle} when multiflag
+!   is set to {\tt .false.} and relaxedflag is set to {\tt .false.}.
 !
 !   \begin{description}
 !   \item [fieldbundle]
@@ -509,13 +510,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     List of {\tt ESMF\_Field} objects to be added.
 !   \item [{[multiflag]}]
 !     A setting of {\tt .true.} allows multiple items with the same name
-!     to be added to {\tt fieldbundle}. For {\tt .false.} added items must
+!     to be added to {\tt ESMF\_FieldBundle}. For {\tt .false.} added items must
 !     have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
 !     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
 !     {\tt fieldList} contains items with names that are also found in 
-!     {\tt fieldbundle}. The {\tt fieldbundle} is left unchanged for these items.
+!     {\tt ESMF\_FieldBundle}. The {\tt ESMF\_FieldBundle} is left unchanged for these items.
 !     For {\tt .false.} this is treated as an error condition. 
 !     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
@@ -661,7 +662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddItem()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAddItem - Add one Field to an fieldbundle
+! !IROUTINE: ESMF_FieldBundleAdd - Add one Field to a FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleAdd()   
@@ -681,7 +682,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Add a single field to an fieldbundle. It is an error if {\tt field} 
+!   Add a single field to a FieldBundle. It is an error if {\tt field} 
 !   match by name to what is already contained in {\tt fieldbundle} when multiflag
 !   is set to {\tt .false.} and relaxedflag is set to {\tt .false.} by default.
 !
@@ -692,13 +693,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Field} object to be added.
 !   \item [{[multiflag]}]
 !     A setting of {\tt .true.} allows multiple items with the same name
-!     to be added to {\tt fieldbundle}. For {\tt .false.} added items must
+!     to be added to {\tt ESMF\_FieldBundle}. For {\tt .false.} added items must
 !     have unique names. The default setting is {\tt .false.}.
 !   \item [{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "add"
 !     under {\tt multiflag=.false.} mode, where it is {\em not} an error if 
 !     {\tt fieldList} contains items with names that are also found in 
-!     {\tt fieldbundle}. The {\tt fieldbundle} is left unchanged for these items.
+!     {\tt ESMF\_FieldBundle}. The {\tt ESMF\_FieldBundle} is left unchanged for these items.
 !     For {\tt .false.} this is treated as an error condition. 
 !     The default setting is {\tt .false.}.
 !   \item [{[rc]}]
@@ -729,7 +730,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddReplace()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleAddReplace - Conditionally add or replace Fields in an fieldbundle
+! !IROUTINE: ESMF_FieldBundleAddReplace - Conditionally add or replace Fields in a FieldBundle
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleAddReplace(fieldbundle, fieldList, keywordEnforcer, rc)
@@ -746,8 +747,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Fields in {\tt fieldList} that do not match any Fields by name in 
-!   {\tt fieldbundle} are added to the fieldbundle. Fields in {\tt fieldbundle}
-!   that match by name Fields in {\tt fieldList} are replaced by those Fields.
+!   {\tt fieldbundle} are added to the FieldBundle. Fields in {\tt fieldList}
+!   that match any Fields by name in {\tt fieldbundle} replace those Fields.
 !
 !   \begin{description}
 !   \item [fieldbundle]
@@ -833,7 +834,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleCreate()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreate - Create an fieldbundle from a list of Fields
+! !IROUTINE: ESMF_FieldBundleCreate - Create a FieldBundle from a list of Fields
 !
 ! !INTERFACE:
   function ESMF_FieldBundleCreate(keywordEnforcer, fieldList, &
@@ -849,15 +850,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_FieldBundle) :: ESMF_FieldBundleCreate
+!         
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Create an {\tt ESMF\_FieldBundle} object from a list of existing Fields.
 !
-!   The creation of an fieldbundle leaves the bundled Fields unchanged, they
-!   remain valid individual objects. An fieldbundle is a light weight container
-!   of field references. The actual data remains in place, there are no
+!   The creation of a FieldBundle leaves the bundled Fields unchanged, they
+!   remain valid individual objects. a FieldBundle is a light weight container
+!   of Field references. The actual data remains in place, there are no
 !   data movements or duplications associated with the creation of an 
-!   fieldbundle.
+!   FieldBundle.
 !
 !   \begin{description}
 !   \item [{[fieldList]}]
@@ -962,7 +966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleDestroy()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleDestroy - Destroy an fieldbundle
+! !IROUTINE: ESMF_FieldBundleDestroy - Destroy a FieldBundle
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundleDestroy(fieldbundle, keywordEnforcer, rc)
@@ -1114,7 +1118,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetItem()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGet - Query scalar information about a specific fieldName
+! !IROUTINE: ESMF_FieldBundleGet - Get information about a Field by name
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -1135,7 +1139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get information about items that match {\tt fieldName} in fieldbundle.
+!   Get information about items that match {\tt fieldName} in FieldBundle.
 !
 !   \begin{description}
 !   \item [fieldbundle]
@@ -1145,12 +1149,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[field]}]
 !     Upon return holds the requested field item. It is an error if this
 !     argument was specified and there is not exactly one field item in 
-!     {\tt fieldbundle} that matches {\tt fieldName}.
+!     {\tt ESMF\_FieldBundle} that matches {\tt fieldName}.
 !   \item [{[fieldCount]}]
-!     Number of Fields with {\tt fieldName} in {\tt fieldbundle}.
+!     Number of Fields with {\tt fieldName} in {\tt ESMF\_FieldBundle}.
 !   \item [{[isPresent]}]
 !     Upon return indicates whether field(s) with {\tt fieldName} exist
-!     in {\tt fieldbundle}.
+!     in {\tt ESMF\_FieldBundle}.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1209,7 +1213,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetList()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGet - Access a list of Fields matching fieldName
+! !IROUTINE: ESMF_FieldBundleGet - Get a list of Fields by name
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -1236,7 +1240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [fieldName]
 !     Specified name.
 !   \item [{[fieldList]}]
-!     List of Fields in {\tt fieldbundle} that match {\tt fieldName}. The
+!     List of Fields in {\tt ESMF\_FieldBundle} that match {\tt fieldName}. The
 !     argument must be allocated to be at least of size {\tt fieldCount}
 !     returned for this {\tt fieldName}.
 !   \item [{[rc]}]
@@ -1298,7 +1302,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetListAll()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGet - Access a list of all Fields
+! !IROUTINE: ESMF_FieldBundleGet - Get information of the FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -1309,7 +1313,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_GeomType),    intent(out), optional :: geomType
+    type(ESMF_GeomType),    intent(out), optional :: geomtype
     type(ESMF_Grid),        intent(out), optional :: grid
     type(ESMF_LocStream),   intent(out), optional :: locstream
     type(ESMF_Mesh),        intent(out), optional :: mesh
@@ -1325,13 +1329,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get the list of all Fields and field names bundled in an fieldbundle.
+!   Get the list of all Fields and field names bundled in a FieldBundle.
 !
 !   \begin{description}
 !   \item [fieldbundle]
 !         {\tt ESMF\_FieldBundle} to be queried.
-!   \item[{[geomType]}]
-!      Flag that indicates what type of GeomBase this FieldBundle object holds. 
+!   \item[{[geomtype]}]
+!      Flag that indicates what type of geometry this FieldBundle object holds. 
 !      Can be {\tt ESMF\_GEOMTYPE\_GRID}, {\tt ESMF\_GEOMTYPE\_MESH}, {\tt ESMF\_GEOMTYPE\_LOCSTREAM},
 !      {\tt ESMF\_GEOMTYPE\_XGRID}
 !   \item[{[grid]}]
@@ -1345,11 +1349,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[fieldCount]}]
 !         Upon return holds the number of Fields bundled in the fieldbundle.
 !   \item [{[fieldList]}]
-!         Upon return holds a list of Fields bundled in {\tt fieldbundle}. The
+!         Upon return holds a list of Fields bundled in {\tt ESMF\_FieldBundle}. The
 !         argument must be allocated to be at least of size {\tt fieldCount}.
 !   \item [{[fieldNameList]}]
 !         Upon return holds a list of the names of the field bundled in 
-!         {\tt fieldbundle}. The argument must be allocated to be at least of
+!         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
@@ -1525,9 +1529,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
 !
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 !   Get the fieldIndex-th Field in FieldBundle. The order of the Field in FieldBundle
 !   is not guranteed. If this call is used iteratively, then any Add, Replace, Remove
@@ -1608,8 +1609,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(inout)           :: fieldbundle
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
-        type(ESMF_KeywordEnforcer),           optional  :: keywordEnforcer 
-				! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
@@ -1619,7 +1619,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   Execute a precomputed FieldBundle halo operation for the Fields in fieldbundle.
+!   Execute a precomputed FieldBundle halo operation for the Fields in FieldBundle.
 !   See {\tt ESMF\_FieldBundleStore()} on how to compute routehandle.
 !   \end{sloppypar}
 !
@@ -1777,8 +1777,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. By 
-!   definition, all elements in the total Field regions that lie
+!   Store a FieldBundle halo operation over the data in {\tt fieldbundle}. 
+!   By definition, all elements in the total Field regions that lie
 !   outside the exclusive regions will be considered potential destination
 !   elements for halo. However, only those elements that have a corresponding
 !   halo source element, i.e. an exclusive element on one of the DEs, will be
@@ -1869,7 +1869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundlePrint()"
 !BOP
-! !IROUTINE: ESMF_FieldBundlePrint - Print fieldbundle internals
+! !IROUTINE: ESMF_FieldBundlePrint - Print FieldBundle internals
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundlePrint(fieldbundle, keywordEnforcer, rc)
@@ -1885,7 +1885,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Print internal information of the specified {\tt ESMF\_FieldBundle} object. \\
+!   Print internal information of the specified {\tt fieldbundle} object. \\
 !
 !   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
 !   On some platforms/compilers there is a potential issue with interleaving
@@ -1953,7 +1953,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRead()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRead - Read Fields to an fieldbundle from file(s)
+! !IROUTINE: ESMF_FieldBundleRead - Read Fields to a FieldBundle from file(s)
 ! \label{api:FieldBundleRead}
 
 ! !INTERFACE:
@@ -1970,7 +1970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !DESCRIPTION:
-!   Read field data to an fieldbundle object from file(s).
+!   Read field data to a FieldBundle object from file(s).
 !   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
 !   should be set to "internal" when the ESMF library is built.
 !   Please see the section on Data I/O,~\ref{io:dataio}.
@@ -2270,7 +2270,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldBundleRedistStore() 
 ! subroutine ESMF_FieldBundleRedistStore<type><kind>(srcFieldBundle, &
-!   dstFieldBundle, & routehandle, factor, keywordEnforcer, &
+!   dstFieldBundle, routehandle, factor, keywordEnforcer, &
 !   srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
@@ -2316,10 +2316,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
 ! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
 ! every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
+! undistributed dimensions, that vary faster with memory than the first distributed 
+! dimension, are permitted to be different. This means that the same {\tt routehandle} 
+! can be applied to a large class of similar Fields that differ in the number of 
+! elements in the left most undistributed dimensions. 
 
 !
 ! This method is overloaded for:\newline
@@ -2342,7 +2342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
 ! \item [factor]
-!       FActor by which to multiply source data. Default is 1.
+!       Factor by which to multiply source data.
 ! \item [{[srcToDstTransposeMap]}] 
 !       List with as many entries as there are dimensions in {\tt srcFieldBundle}. Each 
 ! entry maps the corresponding {\tt srcFieldBundle} dimension 
@@ -3303,7 +3303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleRemove()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleRemove - Remove Fields from fieldbundle
+! !IROUTINE: ESMF_FieldBundleRemove - Remove Fields from FieldBundle
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleRemove(fieldbundle, fieldNameList, &
@@ -3322,7 +3322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Remove field(s) by name from fieldbundle. In the relaxed setting it is 
+!   Remove field(s) by name from FieldBundle. In the relaxed setting it is 
 !   {\em not} an error if {\tt fieldNameList} contains names that are not 
 !   found in {\tt fieldbundle}.
 !
@@ -3417,7 +3417,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleReplace()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleReplace - Replace Fields in fieldbundle
+! !IROUTINE: ESMF_FieldBundleReplace - Replace Fields in FieldBundle
 !
 ! !INTERFACE:
     subroutine ESMF_FieldBundleReplace(fieldbundle, fieldList, &
@@ -3436,7 +3436,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Replace field(s) by name in fieldbundle. In the relaxed setting it is not
+!   Replace field(s) by name in FieldBundle. In the relaxed setting it is not
 !   an error if {\tt fieldList} contains Fields that do not match by name any
 !   item in {\tt fieldbundle}. These Fields are simply ignored in this case.
 !
