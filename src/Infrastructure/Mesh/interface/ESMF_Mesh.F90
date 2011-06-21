@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.64 2011/06/13 18:44:35 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.65 2011/06/21 03:58:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.64 2011/06/13 18:44:35 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.65 2011/06/21 03:58:59 w6ws Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.64 2011/06/13 18:44:35 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.65 2011/06/21 03:58:59 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1365,7 +1365,8 @@ end function ESMF_MeshCreateFromFile
     end do
     
     if (ElemNo /= TotalElements+1) then
-	print *, PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
+	write (ESMF_UtilIOStdout,*)  &
+            PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
     end if
 
     ! Add elements
