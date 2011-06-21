@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock_F.C,v 1.10 2011/06/16 21:42:18 eschwab Exp $
+// $Id: ESMCI_Clock_F.C,v 1.11 2011/06/21 04:19:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,6 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <cstdio>
+
 #include <ESMCI_F90Interface.h>
 #include <ESMCI_Clock.h>
 //------------------------------------------------------------------------------
@@ -382,6 +384,7 @@ extern "C" {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->Clock::print(
                    ESMC_NOT_PRESENT_FILTER(options) );
+          fflush (stdout);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 };

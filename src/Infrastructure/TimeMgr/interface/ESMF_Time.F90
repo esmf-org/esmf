@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.128 2011/06/18 04:49:18 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.129 2011/06/21 04:19:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
       use ESMF_UtilTypesMod
       use ESMF_InitMacrosMod
       use ESMF_LogErrMod
+      use ESMF_IOUtilMod
 
       ! associated derived types
       use ESMF_TimeIntervalTypeMod
@@ -106,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.128 2011/06/18 04:49:18 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.129 2011/06/21 04:19:19 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1019,6 +1020,10 @@
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
 
       ! invoke C to C++ entry point
+      call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
       call c_ESMC_TimePrint(time, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

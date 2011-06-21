@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval_F.C,v 1.10 2011/06/16 05:56:47 eschwab Exp $
+// $Id: ESMCI_TimeInterval_F.C,v 1.11 2011/06/21 04:19:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,6 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <cstdio>
+
 #include <ESMCI_F90Interface.h>
 #include <ESMCI_TimeInterval.h>
 #include <ESMCI_Fraction.h>
@@ -669,6 +671,7 @@ extern "C" {
           int rc = (ptr)->TimeInterval::print(
                          ESMC_NOT_PRESENT_FILTER(options) );
 
+          fflush (stdout);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 };

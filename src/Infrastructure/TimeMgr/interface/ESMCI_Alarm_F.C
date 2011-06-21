@@ -1,4 +1,4 @@
-// $Id: ESMCI_Alarm_F.C,v 1.6 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Alarm_F.C,v 1.7 2011/06/21 04:19:19 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,6 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <cstdio>
+
 #include <ESMCI_F90Interface.h>
 #include <ESMCI_Alarm.h>
 //------------------------------------------------------------------------------
@@ -256,6 +258,7 @@ extern "C" {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->Alarm::print(
                    ESMC_NOT_PRESENT_FILTER(options) );
+          fflush (stdout);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 };
