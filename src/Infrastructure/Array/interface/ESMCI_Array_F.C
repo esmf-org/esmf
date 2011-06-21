@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.49 2011/05/31 17:10:54 samsoncheung Exp $
+// $Id: ESMCI_Array_F.C,v 1.50 2011/06/21 01:22:49 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -608,6 +608,7 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
+    fflush (stdout);
   }
 
   void FTN(c_esmc_arrayvalidate)(ESMCI::Array **ptr, int *rc){

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.28 2011/05/19 21:55:41 svasquez Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.29 2011/06/21 01:22:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,6 +45,7 @@ module ESMF_ArrayHaMod
   use ESMF_DistGridMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
+  use ESMF_IOUtilMod
   
   ! class sub modules
   use ESMF_ArrayCreateMod   ! contains the ESMF_Array derived type definition
@@ -77,7 +78,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.28 2011/05/19 21:55:41 svasquez Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.29 2011/06/21 01:22:50 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -442,12 +443,6 @@ contains
 !
 ! !DESCRIPTION:
 !   Print internal information of the specified {\tt ESMF\_Array} object. \\
-!
-!   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!   On some platforms/compilers there is a potential issue with interleaving
-!   Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!   the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!   may be used on unit 6 to get coherent output.  \\
 
 !   The arguments are:
 !   \begin{description}
@@ -469,6 +464,10 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Call into the C++ interface, which will sort out optional arguments.
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_ESMC_ArrayPrint(array, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
