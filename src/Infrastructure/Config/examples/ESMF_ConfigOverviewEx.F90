@@ -45,15 +45,15 @@
 !EOE
 
 !BOC
-      character(ESMF_MAXSTR) :: fname    ! config file name
+      character(ESMF_MAXSTR) :: fname ! config file name
       character*20  :: fn1, fn2, fn3, input_file ! strings to be read in
-      integer       :: rc                ! error return code (0 is OK)
-      integer       :: i_n               ! the first constant in the RF
-      real          :: param_1           ! the second constant in the RF
-      real          :: radius            ! radius of the earth
-      real          :: table(7,3)        ! an array to hold the table in the RF
+      integer       :: rc            ! error return code (0 is OK)
+      integer       :: i_n           ! the first constant in the RF
+      real          :: param_1       ! the second constant in the RF
+      real          :: radius        ! radius of the earth
+      real          :: table(7,3)    ! an array to hold the table in the RF
 
-      type(ESMF_Config)   :: cf          ! the Config itself
+      type(ESMF_Config)   :: cf      ! the Config itself
 !EOC
 
 !--------------------------------------------------------
@@ -94,7 +94,7 @@
 !EOE
 
 !BOC
-      cf = ESMF_ConfigCreate(rc=rc)                    ! Create the empty Config
+      cf = ESMF_ConfigCreate(rc=rc)             ! Create the empty Config
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) then
