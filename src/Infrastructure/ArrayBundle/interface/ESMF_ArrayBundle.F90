@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.68 2011/06/17 20:25:53 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.69 2011/06/21 01:29:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@ module ESMF_ArrayBundleMod
   use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
+  use ESMF_IOUtilMod
   use ESMF_RHandleMod
   use ESMF_ArrayMod
   
@@ -108,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.68 2011/06/17 20:25:53 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.69 2011/06/21 01:29:50 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1365,12 +1366,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
 !
-!   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!   On some platforms/compilers there is a potential issue with interleaving
-!   Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!   the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!   may be used on unit 6 to get coherent output.  \\
-!
 !   The arguments are:
 !   \begin{description}
 !   \item[arraybundle] 
@@ -1391,6 +1386,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Call into the C++ interface layer
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_ESMC_ArrayBundlePrint(arraybundle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
