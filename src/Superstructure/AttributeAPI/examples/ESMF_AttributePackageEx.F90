@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.26 2011/05/19 19:13:48 feiliu Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.27 2011/06/22 17:41:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -455,16 +455,16 @@ program ESMF_AttributePackageEx
 !EOE
 
 !BOC
-      call ESMF_FieldBundleAdd(fbundle, DPEDT, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, DTDT, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, DUDT, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, DVDT, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, PHIS, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, QTR, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, CNV, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, CONVCPT, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, CONVKE, rc=rc)
-      call ESMF_FieldBundleAdd(fbundle, CONVPHI, rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/DPEDT/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/DTDT/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/DUDT/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/DVDT/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/PHIS/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/QTR/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/CNV/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/CONVCPT/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/CONVKE/), rc=rc)
+      call ESMF_FieldBundleAdd(fbundle, (/CONVPHI/), rc=rc)
       
       call ESMF_StateAdd(exportState, fieldbundle=fbundle, rc=rc)
 !EOC

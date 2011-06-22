@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.32 2011/05/27 19:48:46 feiliu Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.33 2011/06/22 17:41:04 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -478,16 +478,16 @@ module ESMF_AttributeUpdateMod
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
     call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=status)
       
-    call ESMF_FieldBundleAdd(fieldbundle, DPEDT, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, DTDT, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, DUDT, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, DVDT, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, PHIS, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, QTR, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, CNV, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, CONVCPT, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, CONVKE, rc=status)
-    call ESMF_FieldBundleAdd(fieldbundle, CONVPHI, rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DPEDT/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DTDT/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DUDT/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DVDT/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/PHIS/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/QTR/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CNV/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CONVCPT/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CONVKE/), rc=status)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CONVPHI/), rc=status)
 
     call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=status)
 !EOC
