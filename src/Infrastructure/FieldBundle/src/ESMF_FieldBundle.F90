@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.108 2011/06/21 20:25:19 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.109 2011/06/22 16:37:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.108 2011/06/21 20:25:19 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.109 2011/06/22 16:37:29 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -173,7 +173,6 @@ module ESMF_FieldBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_FieldBundleAddItem
     module procedure ESMF_FieldBundleAddList
 !EOPI
 
@@ -661,7 +660,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleAddItem()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldBundleAdd - Add one Field to a FieldBundle
 !
 ! !INTERFACE:
@@ -706,7 +705,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
 

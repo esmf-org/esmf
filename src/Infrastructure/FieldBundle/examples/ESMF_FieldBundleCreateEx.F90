@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.13 2011/05/27 18:07:09 feiliu Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.14 2011/06/22 16:37:30 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -108,7 +108,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 !BOC
-    call ESMF_FieldBundleAdd(bundle2, simplefield, rc=rc)
+    call ESMF_FieldBundleAdd(bundle2, (/simplefield/), rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
