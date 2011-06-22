@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.5 2011/06/22 00:38:22 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.6 2011/06/22 21:47:58 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.5 2011/06/22 00:38:22 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.6 2011/06/22 21:47:58 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1543,7 +1543,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       integer :: localrc @\
       character(len=ESMF_MAXSTR) :: errmsg @\
  @\
-print *, 'ESMF_StateGet', #mentry, ': getting ', trim (itemName) @\
+      ! print *, 'ESMF_StateGet', #mentry, ': getting ', trim (itemName) @\
       localrc = ESMF_RC_NOT_IMPL @\
  @\
       ! check input variables @\
