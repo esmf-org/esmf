@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.4 2011/06/20 17:15:05 theurich Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.5 2011/06/22 00:38:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.4 2011/06/20 17:15:05 theurich Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.5 2011/06/22 00:38:22 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -566,7 +566,7 @@ contains
 ! !INTERFACE: @\
   ! Private name; call using ESMF_StateAdd()  @\
   subroutine ESMF_StateAdd##mentryname##X (state, mname,  & @\
-                                    proxyflag, addflag, replaceflag, rc) @\
+                                    proxyflag, addflag, replaceflag, relaxflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
     type(ESMF_State), intent(inout)          :: state @\
@@ -574,6 +574,7 @@ contains
     logical,          intent(in)             :: proxyflag @\
     logical,          intent(in),   optional :: addflag @\
     logical,          intent(in),   optional :: replaceflag @\
+    logical,          intent(in),   optional :: relaxflag @\
     integer,          intent(out),  optional :: rc @\
 !EOPI @\
 !------------------------------------------------------------------------------ @\
@@ -598,7 +599,7 @@ contains
       temp_list(1) = mname @\
  @\
       call ESMF_StateClsAdd (state%statep, temp_list, & @\
-        addflag=addflag, replaceflag=replaceflag,  & @\
+        addflag=addflag, replaceflag=replaceflag, relaxflag=relaxflag,  & @\
         proxyflag=proxyflag, rc=localrc)  @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
@@ -1568,8 +1569,8 @@ print *, 'ESMF_StateGet', #mentry, ': getting ', trim (itemName) @\
                      dataname=nestedStateName, expected=.true., & @\
                      dataitem=dataitem, rc=localrc) @\
           if (.not. exists) then @\
-              write(errmsg, *) "no nested state found named ", trim(nestedStateName) @\
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, & @\
+              write(errmsg, *) "no nested State found named ", trim(nestedStateName) @\
+              if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, & @\
                     ESMF_CONTEXT, rcToReturn=rc)) return @\
           endif @\
  @\
@@ -1588,8 +1589,8 @@ print *, 'ESMF_StateGet', #mentry, ': getting ', trim (itemName) @\
                  dataitem=dataitem,  & @\
                  rc=localrc) @\
       if (.not. exists) then @\
-          write(errmsg, *) "no ", #mtype, " found named ", trim(itemName) @\
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, & @\
+          write(errmsg, *) "no ", #mtype, " found named: ", trim(itemName) @\
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, & @\
               ESMF_CONTEXT, rcToReturn=rc)) return @\
       endif @\
  @\
@@ -1796,7 +1797,7 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
                                            dataitem=dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+              if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
           endif
     
@@ -1818,7 +1819,7 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
                                        rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no RouteHandle found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
+          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
