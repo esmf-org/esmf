@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.17 2011/05/12 15:28:09 feiliu Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.18 2011/06/22 20:53:22 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.17 2011/05/12 15:28:09 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.18 2011/06/22 20:53:22 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -213,7 +213,11 @@ namespace ESMCI
     numPETs = globalVM->getPetCount();
 //printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
 //fflush(stdout);
-    if (mypet != 0) return rc; 
+#ifdef ESMF_NETCDF
+    if (mypet != 0) return rc;
+#else
+    if (mypet != 0) return ESMF_RC_LIB_NOT_PRESENT;
+#endif
 
     if (fileName != ESMC_NULL_POINTER) 
     {
@@ -396,7 +400,11 @@ namespace ESMCI
     numPETs = globalVM->getPetCount();
 //printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
 //fflush(stdout);
-    if (mypet != 0) return rc; 
+#ifdef ESMF_NETCDF
+    if (mypet != 0) return rc;
+#else
+    if (mypet != 0) return ESMF_RC_LIB_NOT_PRESENT;
+#endif
 
 #ifdef ESMF_NETCDF
     // check only when netCDF present
