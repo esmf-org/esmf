@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.134 2011/05/25 23:56:52 samsoncheung Exp $
+// $Id: ESMCI_Array.C,v 1.135 2011/06/22 18:44:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.134 2011/05/25 23:56:52 samsoncheung Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.135 2011/06/22 18:44:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -10239,7 +10239,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   int de;
   for (int i=0; i<localDeCount; i++){
     de = localDeList[i];
-    if (delayout->serviceOffer(de, NULL) == ESMCI::DELAYOUT_SERVICE_ACCEPT){
+    if (delayout->serviceOffer(de, NULL) == ESMCI::SERVICEREPLY_ACCEPT){
       for (int j=0; j<rank; j++)
         temp_counts[j] = localFullUBound[de][j] - localFullLBound[de][j] + 1;
       localArrays[i] =
@@ -10407,7 +10407,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     // loop over local DEs
     for (int ide=0; ide<localDeCount; ide++){
       int de = localDeList[ide];
-      if (delayout->serviceOffer(de, NULL) == ESMCI::DELAYOUT_SERVICE_ACCEPT){
+      if (delayout->serviceOffer(de, NULL) == ESMCI::SERVICEREPLY_ACCEPT){
         // the localPet's offer was accepted by DELayout
         // check whether this DE's fullBox intersects the current block...
         int ii;
@@ -10894,7 +10894,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   int primeFlag = 1;
   for (int localDe=0; localDe<localDeCount; localDe++){
     int de = localDeList[localDe];
-    if (delayout->serviceOffer(de, NULL) == ESMCI::DELAYOUT_SERVICE_ACCEPT){
+    if (delayout->serviceOffer(de, NULL) == ESMCI::SERVICEREPLY_ACCEPT){
       // the localPet's offer was accepted by DELayout
       // get info out of the associated localArray
       ESMC_LocalArray *localDeArray = localArrays[localDe];

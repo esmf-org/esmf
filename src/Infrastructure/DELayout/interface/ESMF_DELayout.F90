@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.92 2011/06/21 01:55:50 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.93 2011/06/22 18:44:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,14 +64,14 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 
   ! type for service routines
-  type ESMF_DELayoutServiceReply
+  type ESMF_ServiceReply_Flag
   private
     integer :: value
   end type
 
-  type(ESMF_DELayoutServiceReply), parameter:: &
-    ESMF_DELAYOUT_SERVICE_ACCEPT  = ESMF_DELayoutServiceReply(1), &
-    ESMF_DELAYOUT_SERVICE_DENY    = ESMF_DELayoutServiceReply(2)
+  type(ESMF_ServiceReply_Flag), parameter:: &
+    ESMF_SERVICEREPLY_ACCEPT  = ESMF_ServiceReply_Flag(1), &
+    ESMF_SERVICEREPLY_DENY    = ESMF_ServiceReply_Flag(2)
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -81,8 +81,8 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_DELayout
-  public ESMF_DELayoutServiceReply, ESMF_DELAYOUT_SERVICE_ACCEPT, &
-    ESMF_DELAYOUT_SERVICE_DENY
+  public ESMF_ServiceReply_Flag, ESMF_SERVICEREPLY_ACCEPT, &
+    ESMF_SERVICEREPLY_DENY
   
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.92 2011/06/21 01:55:50 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.93 2011/06/22 18:44:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -183,18 +183,18 @@ contains
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_DELayoutServiceReply to see if they're the same 
+! function to compare two ESMF_ServiceReply_Flag args to see if they're the same
 
   function ESMF_sreq(sr1, sr2)
     logical ESMF_sreq
-    type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
+    type(ESMF_ServiceReply_Flag), intent(in) :: sr1, sr2
 
     ESMF_sreq = (sr1%value == sr2%value)    
   end function
 
   function ESMF_srne(sr1, sr2)
     logical ESMF_srne
-    type(ESMF_DELayoutServiceReply), intent(in) :: sr1, sr2
+    type(ESMF_ServiceReply_Flag), intent(in) :: sr1, sr2
 
     ESMF_srne = (sr1%value /= sr2%value)
   end function
@@ -1476,7 +1476,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional  :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DELayoutServiceReply) :: ESMF_DELayoutServiceOffer
+    type(ESMF_ServiceReply_Flag)                  :: ESMF_DELayoutServiceOffer
 !
 !
 ! !STATUS:
@@ -1488,14 +1488,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     together with {\tt ESMF\_DELayoutServiceComplete()} provides the
 !     synchronization primitives between the PETs of an ESMF multi-threaded VM
 !     necessary for dynamic load balancing via a work queue approach.
-!     The calling PET will
-!     either receive {\tt ESMF\_DELAYOUT\_SERVICE\_ACCEPT} if the service offer
-!     has been accepted by DELayout or {\tt ESMF\_DELAYOUT\_SERVICE\_DENY} if 
-!     the service offer was denied. The service offer paradigm is different 
-!     from a simple mutex approach in that DELayout keeps track of the number of
-!     service offers issued for each DE by each PET and accepts only one PET's 
-!     offer for each offer increment. This requires that all PETs use
-!     {\tt ESMF\_DELayoutServiceOffer()} in unison.
+!     The calling PET will either receive {\tt ESMF\_SERVICEREPLY\_ACCEPT} if
+!     the service offer has been accepted by DELayout or 
+!     {\tt ESMF\_SERVICEREPLY\_DENY} if the service offer was denied. The 
+!     service offer paradigm is different from a simple mutex approach in that
+!     the DELayout keeps track of the number of service offers issued for each
+!     DE by each PET and accepts only one PET's offer for each offer increment.
+!     This requires that all PETs use {\tt ESMF\_DELayoutServiceOffer()} in 
+!     unison.
 !     \end{sloppypar}
 !
 !     The arguments are:
@@ -1510,8 +1510,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DELayoutServiceReply) :: reply
+    integer                       :: localrc      ! local return code
+    type(ESMF_ServiceReply_Flag)  :: reply
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

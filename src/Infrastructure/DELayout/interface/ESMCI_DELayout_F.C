@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.14 2011/06/21 01:54:57 w6ws Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.15 2011/06/22 18:44:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -322,7 +322,7 @@ extern "C" {
   }
   
   void FTN(c_esmc_delayoutserviceoffer)(ESMCI::DELayout **ptr, int *de,
-    ESMCI::DELayoutServiceReply *reply, int *rc){
+    ESMCI::ServiceReply *reply, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutserviceoffer()"
     // Initialize return code; assume routine not implemented

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.34 2011/04/28 18:53:32 rokuingh Exp $
+// $Id: ESMCI_DELayout.h,v 1.35 2011/06/22 18:44:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ namespace ESMCI {
 
 const int DELAYOUT_CWGHT_NORMAL = 50;
 
-enum DELayoutServiceReply {DELAYOUT_SERVICE_ACCEPT=1, DELAYOUT_SERVICE_DENY};
+enum ServiceReply {SERVICEREPLY_ACCEPT=1, SERVICEREPLY_DENY};
 
 
 // classes
@@ -147,7 +147,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_InquireFlag inquireflag) const;
     static DELayout *deserialize(char *buffer, int *offset);
     // work queue synchronization methods
-    DELayoutServiceReply serviceOffer(int de, int *rc);
+    ServiceReply serviceOffer(int de, int *rc);
     int serviceComplete(int de);
     
     // ---------------- DEPRECATED section -------------------

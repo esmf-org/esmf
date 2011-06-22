@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.43 2011/02/22 21:46:02 w6ws Exp $
+// $Id: ESMCI_DELayout.C,v 1.44 2011/06/22 18:44:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.43 2011/02/22 21:46:02 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.44 2011/06/22 18:44:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1668,7 +1668,7 @@ DELayout *DELayout::deserialize(
 // !IROUTINE:  ESMCI::DELayout::serviceOffer
 //
 // !INTERFACE:
-DELayoutServiceReply DELayout::serviceOffer(
+ServiceReply DELayout::serviceOffer(
 //
 // !RETURN VALUE:
 //    ServiceReply reply to serviceOffer.
@@ -1688,7 +1688,7 @@ DELayoutServiceReply DELayout::serviceOffer(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   // initialize the reply
-  DELayoutServiceReply reply = DELAYOUT_SERVICE_DENY; // reset
+  ServiceReply reply = SERVICEREPLY_DENY; // reset
 
   int localPet = vm->getMypet();
   int localVas = vm->getVas(localPet);
@@ -1723,17 +1723,17 @@ DELayoutServiceReply DELayout::serviceOffer(
   ++localServiceOfferCount[ii];
   vm->ipmutexlock(serviceOfferMutex[ii]);   // lock mutex
   if (localServiceOfferCount[ii] > maxServiceOfferCount[4*ii]){
-    reply = DELAYOUT_SERVICE_ACCEPT; // accept this PET's service offer
+    reply = SERVICEREPLY_ACCEPT; // accept this PET's service offer
     ++maxServiceOfferCount[4*ii];
   }
   vm->ipmutexunlock(serviceOfferMutex[ii]); // unlock mutex
   
-  if (reply==DELAYOUT_SERVICE_ACCEPT){
+  if (reply==SERVICEREPLY_ACCEPT){
     vm->ipmutexlock(serviceMutex[ii]);  // lock service mutex
     serviceMutexFlag[ii] = 1;               // set
   }
     
-//  if (reply==ESMC_DELAYOUT_SERVICE_ACCEPT)
+//  if (reply==SERVICEREPLY_ACCEPT)
 //    printf("PET %d localServiceOfferCount for DE %d is %d: ACCEPT\n", 
 //      localPet, de, localServiceOfferCount[ii]);
 //  else
