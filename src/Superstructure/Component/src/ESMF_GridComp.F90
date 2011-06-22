@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.165 2011/06/21 01:05:28 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.166 2011/06/22 22:12:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.165 2011/06/21 01:05:28 w6ws Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.166 2011/06/22 22:12:45 theurich Exp $'
 
 !==============================================================================
 !
@@ -202,9 +202,9 @@ module ESMF_GridCompMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (gridcomp1 == gridcomp2) then ... endif
+!   if (gridcomp1 /= gridcomp2) then ... endif
 !             OR
-!   result = (gridcomp1 == gridcomp2)
+!   result = (gridcomp1 /= gridcomp2)
 ! !RETURN VALUE:
 !   logical :: result
 !

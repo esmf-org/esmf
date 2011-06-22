@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.142 2011/06/21 01:05:28 w6ws Exp $
+! $Id: ESMF_CplComp.F90,v 1.143 2011/06/22 22:12:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.142 2011/06/21 01:05:28 w6ws Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.143 2011/06/22 22:12:45 theurich Exp $'
 
 !==============================================================================
 !
@@ -200,9 +200,9 @@ module ESMF_CplCompMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (cplcomp1 == cplcomp2) then ... endif
+!   if (cplcomp1 /= cplcomp2) then ... endif
 !             OR
-!   result = (cplcomp1 == cplcomp2)
+!   result = (cplcomp1 /= cplcomp2)
 ! !RETURN VALUE:
 !   logical :: result
 !
