@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.10 2011/06/22 16:33:36 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.11 2011/06/22 17:27:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.10 2011/06/22 16:33:36 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.11 2011/06/22 17:27:18 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -208,7 +208,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptySetGrid"
 !BOP
-! !IROUTINE: ESMF_FieldEmptySetGrid - Set a Grid in an empty Field
+! !IROUTINE: ESMF_FieldEmptySet - Set a Grid in an empty Field
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
@@ -312,7 +312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptySetMesh"
 !BOP
-! !IROUTINE: ESMF_FieldEmptySetMesh - Set a Mesh in an empty Field
+! !IROUTINE: ESMF_FieldEmptySet - Set a Mesh in an empty Field
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
@@ -406,7 +406,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptySetLocStream"
 !BOP
-! !IROUTINE: ESMF_FieldEmptySetLocStream - Set a LocStream in an empty Field
+! !IROUTINE: ESMF_FieldEmptySet - Set a LocStream in an empty Field
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
@@ -488,7 +488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldEmptySetXGrid"
 !BOP
-! !IROUTINE: ESMF_FieldEmptySetXGrid - Set an XGrid in an empty Field
+! !IROUTINE: ESMF_FieldEmptySet - Set an XGrid in an empty Field
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldEmptySet()
