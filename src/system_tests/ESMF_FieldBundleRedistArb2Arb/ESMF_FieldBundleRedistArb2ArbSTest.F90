@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.17 2011/05/27 18:07:14 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistArb2ArbSTest.F90,v 1.18 2011/06/22 17:08:33 feiliu Exp $
 !
 ! System test FieldBundleRedistArb2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -185,17 +185,17 @@ program Arb2ArbBunReDist
      ! and add the Fields to the FieldBundle corresponding to the grid.
      humidity1 = ESMF_FieldCreate(grid1, arrayspec1, &
                                   name="humidity1", rc=status)
-     call ESMF_FieldBundleAdd(bundle1, humidity1, rc=status)
+     call ESMF_FieldBundleAdd(bundle1, (/humidity1/), rc=status)
 
      if (status .ne. ESMF_SUCCESS) goto 20
      humidity2 = ESMF_FieldCreate(grid2, arrayspec2, &
                                   name="humidity2", rc=status)
-     call ESMF_FieldBundleAdd(bundle2, humidity2, rc=status)
+     call ESMF_FieldBundleAdd(bundle2, (/humidity2/), rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      humidity3 = ESMF_FieldCreate(grid1, arrayspec1, &
                                   name="humidity3", rc=status)
-     call ESMF_FieldBundleAdd(bundle3, humidity3, rc=status)
+     call ESMF_FieldBundleAdd(bundle3, (/humidity3/), rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
 
      ! precompute communication patterns, the first from the 1st arbitrarily

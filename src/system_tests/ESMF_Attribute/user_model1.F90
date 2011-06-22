@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.62 2011/05/27 18:07:13 feiliu Exp $
+! $Id: user_model1.F90,v 1.63 2011/06/22 17:08:28 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -305,20 +305,22 @@ module user_model1
 
     ! Create a FieldBundle for Fields
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
     call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
       
     ! Add the Fields to the FieldBundle (this will connect the Attribute hierarchies)
-    call ESMF_FieldBundleAdd(fieldbundle, DPEDT, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, DTDT, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, DUDT, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, DVDT, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, PHIS, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, QTR, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, CNV, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, CONVCPT, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, CONVKE, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, CONVPHI, rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DPEDT/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DTDT/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DUDT/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DVDT/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/PHIS/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/QTR/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CNV/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CONVCPT/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CONVKE/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/CONVPHI/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Connect the Attributes from the FieldBundle to the export State
@@ -413,8 +415,8 @@ module user_model1
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
     
     ! Get the Grid
-    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    !call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
+    !if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Process the Fields
     do k = 1, 10
@@ -465,8 +467,8 @@ module user_model1
     
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    !call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
+    !if (rc/=ESMF_SUCCESS) return ! bail out
     do k = 1, 10
         call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
@@ -476,8 +478,8 @@ module user_model1
     call ESMF_FieldBundleDestroy(fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_GridDestroy(grid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    !call ESMF_GridDestroy(grid, rc=rc)
+    !if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine user_final
 

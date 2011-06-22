@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2011/05/19 19:13:58 feiliu Exp $
+! $Id: user_model2.F90,v 1.9 2011/06/22 17:08:32 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -147,13 +147,13 @@ module user_model2
     field = ESMF_FieldEmptyCreate(name="myTestField 1 in Bundle", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
-    call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     field = ESMF_FieldEmptyCreate(name="myTestField 2 in Bundle", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_FieldBundleAdd(fieldbundle, field, rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     clockInternal = ESMF_ClockCreate(clock, rc=rc)  ! make a copy of incoming

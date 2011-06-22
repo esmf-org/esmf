@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.16 2011/06/08 05:46:18 eschwab Exp $
+! $Id: user_model1.F90,v 1.17 2011/06/22 17:08:30 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -225,8 +225,8 @@ module user_model1
       
     ! Add the Fields to the FieldBundle (this will link the Attribute
     ! hierarchies of the FieldBundle and Fields)
-    call ESMF_FieldBundleAdd(fieldbundle, DMS_emi, rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, UM, rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/DMS_emi/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/UM/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Link the Attributes from the FieldBundle to the export State
