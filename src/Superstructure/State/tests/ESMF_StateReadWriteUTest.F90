@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteUTest.F90,v 1.10 2011/04/27 02:09:18 w6ws Exp $
+! $Id: ESMF_StateReadWriteUTest.F90,v 1.11 2011/06/22 18:28:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateReadWriteUTest.F90,v 1.10 2011/04/27 02:09:18 w6ws Exp $'
+      '$Id: ESMF_StateReadWriteUTest.F90,v 1.11 2011/06/22 18:28:17 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -44,6 +44,7 @@
                         tempArray, pArray, rhArray
     type(ESMF_VM) :: vm
     integer :: rc
+    logical :: have_netcdf
 
     ! individual test failure messages
     character(ESMF_MAXSTR) :: failMsg
@@ -82,6 +83,8 @@
       write(name, *) "Reading a netCDF file into Arrays in a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_LIB_NOT_PRESENT), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      have_netcdf = rc == ESMF_SUCCESS
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test reconciling Arrays across all PETs in a VM
@@ -106,56 +109,91 @@
       call ESMF_StateGet(state, "lat", latArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'lat' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test getting an Array from a State
       call ESMF_StateGet(state, "lon", lonArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'lon' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test getting an Array from a State
       call ESMF_StateGet(state, "time", timeArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'time' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test getting an Array from a State
       call ESMF_StateGet(state, "Q", humidArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'Q' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test getting an Array from a State
       call ESMF_StateGet(state, "TEMP", tempArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'TEMP' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test getting an Array from a State
       call ESMF_StateGet(state, "p", pArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'p' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test getting an Array from a State
       call ESMF_StateGet(state, "rh", rhArray, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Array named 'rh' from a State"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_ARG_INCOMP), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      if (have_netcdf) then
+        call ESMF_Test(rc == ESMF_SUCCESS, &
+            name, failMsg, result, ESMF_SRCLINE)
+      else
+        call ESMF_Test(rc == ESMF_RC_NOT_FOUND, &
+            name, failMsg, result, ESMF_SRCLINE)
+      end if
       !------------------------------------------------------------------------
       ! Destroy the State
       !------------------------------------------------------------------------
