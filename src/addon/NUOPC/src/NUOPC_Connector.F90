@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.5 2011/04/28 15:12:17 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.6 2011/06/22 17:17:23 feiliu Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -295,12 +295,12 @@ module NUOPC_Connector
           return  ! bail out
         
         ! add the import and export Fields to FieldBundles
-        call ESMF_FieldBundleAdd(is%wrap%srcFields, field=iField, rc=rc)
+        call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        call ESMF_FieldBundleAdd(is%wrap%dstFields, field=eField, rc=rc)
+        call ESMF_FieldBundleAdd(is%wrap%dstFields, (/eField/), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, &
           file=FILENAME)) &
