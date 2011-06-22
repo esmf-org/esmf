@@ -1,24 +1,24 @@
-% $Id: AppDriver_options.tex,v 1.6 2010/12/15 22:24:42 svasquez Exp $
+% $Id: AppDriver_options.tex,v 1.7 2011/06/22 15:07:53 rokuingh Exp $
 
-\subsubsection{ESMF\_TerminationFlag}
-\label{app:terminationflag}
+\subsubsection{ESMF\_End\_Flag}
+\label{app:endflag}
 
 {\sf DESCRIPTION:\\}
-The {\tt ESMF\_TerminationFlag} determines how an ESMF application is shut down.
+The {\tt ESMF\_End\_Flag} determines how an ESMF application is shut down.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_ABORT] 
+   \item [ESMF\_END\_ABORT] 
          Global abort of the ESMF application. There is no guarantee 
          that all PETs will shut down cleanly during an abort. However, all
          attempts are made to prevent the application from hanging and the
          LogErr of at least one PET will be completely flushed during the abort.
          This option should only be used if a condition is detected that
          prevents normal continuation or termination of the application.
-         Typical conditions that warrant the use of {\tt ESMF\_ABORT} are those
+         Typical conditions that warrant the use of {\tt ESMF\_END\_ABORT} are those
          that occur on a per PET basis where other PETs may be blocked in 
          communication calls, unable to reach the normal termination point.
-   \item [ESMF\_FINAL]
+   \item [ESMF\_END\_NORMAL]
          \begin{sloppypar}
          Normal termination of the ESMF application. Wait for all PETs of the
          global VM to reach 
@@ -26,8 +26,8 @@ Valid values are:
          the clean way of terminating an application. {\tt MPI\_Finalize()} will
          be called in case of MPI applications.
          \end{sloppypar}
-   \item [ESMF\_KEEPMPI]
-         Same as {\tt ESMF\_FINAL} but {\tt MPI\_Finalize()} will {\em not}
+   \item [ESMF\_END\_KEEPMPI]
+         Same as {\tt ESMF\_END\_NORMAL} but {\tt MPI\_Finalize()} will {\em not}
          be called. It is the user code's responsibility to shut down MPI
          cleanly if necessary.
 \end{description}

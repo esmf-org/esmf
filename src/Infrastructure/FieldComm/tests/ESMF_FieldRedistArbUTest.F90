@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.13 2011/02/24 23:58:13 oehmke Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.14 2011/06/22 15:07:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -74,9 +74,9 @@
   ! an optional undistributed 3rd dimenison of size 4
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! grid dimension: xdim and ydim are arbitrarily distributed
   xdim = 100
@@ -148,11 +148,11 @@
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
     arbIndexList=localIndices, arbIndexCount=localCount, &
     name="srcgrid2D", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   srcfield2D = ESMF_FieldCreate(srcgrid2D, arrayspec1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc = ESMF_FAILURE
@@ -184,11 +184,11 @@
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
     arbIndexList=localIndices, arbIndexCount=localCount, &
     name="srcgrid", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   srcfield = ESMF_FieldCreate(srcgrid, arrayspec2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -283,7 +283,7 @@
 
 !  call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &
 !       rc=localrc)
-!  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   dstfield = ESMF_FieldCreate(dstgrid, arrayspec2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbHaloEx.F90,v 1.9 2011/01/06 23:59:29 svasquez Exp $
+! $Id: ESMF_ArrayArbHaloEx.F90,v 1.10 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,9 +39,9 @@ program ESMF_ArrayArbHaloEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayArbHaloEx.Log", &
     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -90,7 +90,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The resulting DistGrid is one-dimensional, although the user code may
 ! interpret the sequence indices as a 1D map into a problem of higher
@@ -128,22 +128,22 @@ program ESMF_ArrayArbHaloEx
   if (localPet==0) then
     array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
       haloSeqIndexList=(/1/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
       haloSeqIndexList=(/1,2/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
       haloSeqIndexList=(/1,2,3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
       haloSeqIndexList=(/1,2,3,4/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
 !BOE
@@ -199,7 +199,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHaloStore(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Executing this halo operation will update the local halo elements according
 ! to the associated sequence indices.
@@ -207,21 +207,21 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHalo(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! As always it is good practice to release the RouteHandle when done with it.
 !EOE
 !BOC
   call ESMF_ArrayHaloRelease(haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Also the Array object should be destroyed when no longer needed.
 !EOE
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Further, since the memory allocation was done explicitly using the Fortran
 ! {\tt allocate()} statement, it is necessary to explicitly deallocate in order
@@ -241,22 +241,22 @@ program ESMF_ArrayArbHaloEx
   if (localPet==0) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1,2/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1,2,3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1,2,3,4/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
 !BOE
@@ -265,7 +265,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr1d, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The returned Fortran pointer can now be used to initialize the exclusive
 ! elements on each DE as in the previous case.
@@ -282,24 +282,24 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHaloStore(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOC
   call ESMF_ArrayHalo(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOC
   call ESMF_ArrayHaloRelease(haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !call ESMF_ArrayPrint(array)
 
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 ! ------------------------------------------------------------------------------
 
@@ -317,25 +317,25 @@ program ESMF_ArrayArbHaloEx
   if (localPet==0) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1,2/), undistLBound=(/1/), undistUBound=(/3/), &
       rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1,2,3/), undistLBound=(/1/), undistUBound=(/3/), &
       rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       haloSeqIndexList=(/1,2,3,4/), undistLBound=(/1/), undistUBound=(/3/), &
       rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
 !BOE
@@ -348,7 +348,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2d, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   do j=1, 3
     do i=1, 5
@@ -366,22 +366,22 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHaloStore(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_ArrayHalo(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   call ESMF_ArrayHaloRelease(haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !call ESMF_ArrayPrint(array)
 
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 ! ------------------------------------------------------------------------------
 
@@ -397,25 +397,25 @@ program ESMF_ArrayArbHaloEx
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3,4/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
 !BOE
@@ -425,7 +425,7 @@ program ESMF_ArrayArbHaloEx
 !BOC  
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2d, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   do j=1, 3
     do i=1, 5
@@ -439,18 +439,18 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHaloStore(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_ArrayHalo(array, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !call ESMF_ArrayPrint(array)
 
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 ! ------------------------------------------------------------------------------
 
@@ -472,25 +472,25 @@ program ESMF_ArrayArbHaloEx
     array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
     array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
     array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
     array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3,4/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
 !EOC
 !BOE
@@ -499,7 +499,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayGet(array2, farrayPtr=farrayPtr2d, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   do j=1, 6
     do i=1, 5
@@ -514,7 +514,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHalo(array2, routehandle=haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Release the RouteHandle after its last use and clean up the remaining
 ! Array and DistGrid objects.
@@ -522,21 +522,21 @@ program ESMF_ArrayArbHaloEx
 !BOC
   call ESMF_ArrayHaloRelease(haloHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !call ESMF_ArrayPrint(array2)
 
 !BOC
   call ESMF_ArrayDestroy(array2, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 ! ------------------------------------------------------------------------------
 
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------

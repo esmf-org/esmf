@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.17 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.18 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,9 +36,9 @@ program ESMF_ArrayScatterGatherEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm,defaultlogfilename="ArrayScatterGatherEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -73,15 +73,15 @@ program ESMF_ArrayScatterGatherEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/10,20,30/), &
     rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=3, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The {\tt ESMF\_ArrayScatter()} method provides a convenient way of scattering
 ! array data from a single root PET across the DEs of an ESMF Array object.
@@ -89,7 +89,7 @@ program ESMF_ArrayScatterGatherEx
 !BOC
   call ESMF_ArrayScatter(array, farray=farray, rootPet=0, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   if (localPet == 0) then
     deallocate(farray)
@@ -112,7 +112,7 @@ program ESMF_ArrayScatterGatherEx
   
   call ESMF_ArrayGather(array, farray=farray, rootPet=3, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   if (localPet == 3) then
     deallocate(farray)
@@ -125,9 +125,9 @@ program ESMF_ArrayScatterGatherEx
 ! tile in the ESMF Array.
 !EOE
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the Array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc) ! destroy the DistGrid object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! The {\tt ESMF\_ArrayScatter()} operation allows to fill entire replicated
@@ -137,17 +137,17 @@ program ESMF_ArrayScatterGatherEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), &
     undistUBound=(/14,22/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The shape of the Fortran source array used in the Scatter() call must be
 ! that of the contracted Array, i.e. contracted DistGrid dimensions do not
@@ -166,7 +166,7 @@ program ESMF_ArrayScatterGatherEx
   
   call ESMF_ArrayScatter(array, farray=myFarray2D, rootPet=0, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   if (localPet == 0) then
     deallocate(myFarray2D)
@@ -177,15 +177,15 @@ program ESMF_ArrayScatterGatherEx
 ! data of {\tt myFarray2D}.
 !EOE
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   
 !!!!!!!!!!  
@@ -198,12 +198,12 @@ program ESMF_ArrayScatterGatherEx
   allocate(myFarray2D(3,10))
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   array = ESMF_ArrayCreate(farray=myFarray2D, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, distgridToArrayMap=(/0,2/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The {\tt array} object associates the 2nd DistGrid dimension with the 2nd
 ! Array dimension. The first DistGrid dimension is not associated with any
@@ -216,7 +216,7 @@ program ESMF_ArrayScatterGatherEx
   myFarray2D = localPet ! initialize
 !EOC
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! However, the notion of replication becomes visible when an array of shape
 ! 3 x 10 on root PET 0 is scattered across the Array object.
@@ -234,7 +234,7 @@ program ESMF_ArrayScatterGatherEx
   
   call ESMF_ArrayScatter(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   if (localPet == 0) then
     deallocate(myFarray2D2)
@@ -245,7 +245,7 @@ program ESMF_ArrayScatterGatherEx
 ! in a replication of data along DistGrid dimension 1.
 !EOE
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! When the inverse operation, i.e. {\tt ESMF\_ArrayGather()}, is applied to
 ! a replicated Array an intrinsic ambiguity needs to be considered. ESMF 
@@ -264,13 +264,13 @@ program ESMF_ArrayScatterGatherEx
 ! will {\em not} affect the result of
 !EOE
   call ESMF_ArrayPrint(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   allocate(myFarray2D2(3,10))
   myFarray2D2 = 0.d0    ! initialize to a known value
   call ESMF_ArrayGather(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   print *, "localPet = ", localPet, "myFarray2D2: ", myFarray2D2
   
 !BOE
@@ -284,14 +284,14 @@ program ESMF_ArrayScatterGatherEx
   endif
 !EOC
   call ESMF_ArrayPrint(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! will change the outcome of
 !EOE
 !BOC
   call ESMF_ArrayGather(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! as expected.
 !EOE
@@ -301,11 +301,11 @@ program ESMF_ArrayScatterGatherEx
 
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   deallocate(myFarray2D)
   
   

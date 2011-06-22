@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.7 2011/01/21 00:11:47 rokuingh Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.8 2011/06/22 15:09:23 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -89,13 +89,13 @@ program ESMF_XGridConcurrentSTest
                         defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! Get number of PETs we are running with
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! Create the 3 model components and coupler
   cname1 = "land"
@@ -104,7 +104,7 @@ program ESMF_XGridConcurrentSTest
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   cname2 = "ocean"
   ! use petList to define ocean on 4 PETs
@@ -112,7 +112,7 @@ program ESMF_XGridConcurrentSTest
   print *, "Created component ", trim(cname2), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   cname3 = "atmosphere"
   ! use petList to define atmosphere on 4 PETs
@@ -120,7 +120,7 @@ program ESMF_XGridConcurrentSTest
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   cplname = "user one-way coupler"
   ! no petList means that coupler component runs on all PETs
@@ -128,7 +128,7 @@ program ESMF_XGridConcurrentSTest
   print *, "Created component ", trim(cplname), ", rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   print *, "Comp Creates finished"
 
@@ -142,69 +142,69 @@ program ESMF_XGridConcurrentSTest
   print *, "atmos SetVM finished, rc= ", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompSetServices(atmos, userRoutine=atmos_register, userRc=userrc, rc=localrc)
   print *, "atmos SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompSetVM(land, userRoutine=land_setvm, userRc=userrc, rc=localrc)
   print *, "land SetVM finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompSetServices(land, userRoutine=land_register, userRc=userrc, rc=localrc)
   print *, "land SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompSetVM(ocean, userRoutine=ocean_setvm, userRc=userrc, rc=localrc)
   print *, "ocean SetVM finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompSetServices(ocean, userRoutine=ocean_register, userRc=userrc, rc=localrc)
   print *, "ocean SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_CplCompSetVM(cpl, userRoutine=usercpl_setvm, userRc=userrc, rc=localrc)
   print *, "Cpl SetVM finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_CplCompSetServices(cpl, userRoutine=usercpl_register, userRc=userrc, rc=localrc)
   print *, "Cpl SetServices finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -217,62 +217,62 @@ program ESMF_XGridConcurrentSTest
                                  stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompInitialize(land, exportState=land_export, userRc=userrc, rc=localrc)
   print *, "Land Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! ocean export state
   ocean_export = ESMF_StateCreate(name="ocean export",  &
                                   stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompInitialize(ocean, exportState=ocean_export, userRc=userrc, rc=localrc)
   print *, "Ocean Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! nestted state with land and ocean attached inside
   landocn_export = ESMF_StateCreate(name="landocn export",  &
                                     stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_StateAdd(landocn_export, land_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_StateAdd(landocn_export, ocean_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! atmosphere import state
   atmos_import = ESMF_StateCreate(name="atmos import",  &
                                   stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompInitialize(atmos, importState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Atmosphere Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! note that the coupler's import is atmos's export state
   ! and coupler's export is land's import state
@@ -280,10 +280,10 @@ program ESMF_XGridConcurrentSTest
   print *, "Coupler Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -296,40 +296,40 @@ program ESMF_XGridConcurrentSTest
   print *, "Land Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! ocean run
   call ESMF_GridCompRun(ocean, exportState=ocean_export, userRc=userrc, rc=localrc)
   print *, "Ocean Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! coupler run
   call ESMF_CplCompRun(cpl, landocn_export, atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! atmosphere run
   call ESMF_GridCompRun(atmos, importState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Atmosphere Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -341,37 +341,37 @@ program ESMF_XGridConcurrentSTest
   print *, "Coupler Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompFinalize(land, exportState=land_export, userRc=userrc, rc=localrc)
   print *, "Land Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompFinalize(ocean, exportState=ocean_export, userRc=userrc, rc=localrc)
   print *, "Ocean Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompFinalize(atmos, importState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Atmosphere Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -382,36 +382,36 @@ program ESMF_XGridConcurrentSTest
   call ESMF_GridCompDestroy(atmos, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompDestroy(land, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_GridCompDestroy(ocean, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_CplCompDestroy(cpl, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_StateDestroy(land_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_StateDestroy(ocean_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_StateDestroy(landocn_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_StateDestroy(atmos_import, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   print *, "All Destroy routines done"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.18 2011/05/06 22:14:01 svasquez Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.19 2011/06/22 15:09:18 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -87,20 +87,20 @@ program ESMF_RecursiveComponentSTest
                         defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Get number of PETs and local PET this driver is running on
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Check for correct number of PETs
   if ( petCount < 6 ) then
      call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
          msg="This system test does not run on fewer than 6 PETs.",&
          ESMF_CONTEXT, rcToReturn=rc)
-     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
    endif
 
 
@@ -114,7 +114,7 @@ program ESMF_RecursiveComponentSTest
   component = ESMF_GridCompCreate(name="component012345", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -126,18 +126,18 @@ program ESMF_RecursiveComponentSTest
     userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_GridCompSetServices(component, userRoutine=componentReg, &
     userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -149,20 +149,20 @@ program ESMF_RecursiveComponentSTest
                             stateType=ESMF_STATE_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   export = ESMF_StateCreate(name="export",  &
                             stateType=ESMF_STATE_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_GridCompInitialize(component, importState=import, &
     exportState=export, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -174,10 +174,10 @@ program ESMF_RecursiveComponentSTest
     exportState=export, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -189,10 +189,10 @@ program ESMF_RecursiveComponentSTest
     exportState=export, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -203,17 +203,17 @@ program ESMF_RecursiveComponentSTest
   call ESMF_GridCompDestroy(component, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_StateDestroy(import, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_StateDestroy(export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.18 2011/05/29 05:03:14 oehmke Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.19 2011/06/22 15:07:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,14 +69,14 @@ program ESMF_AttReadGridEx
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
-      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Create a grid
       grid = ESMF_GridEmptyCreate(rc=rc)
 !EOC
 
-      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Read an XML file to populate the GridSpec Attribute package of a Grid.
@@ -255,7 +255,7 @@ program ESMF_AttReadGridEx
       call ESMF_GridDestroy(grid, rc=rc)
 !EOC
 
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! finalize ESMF framework

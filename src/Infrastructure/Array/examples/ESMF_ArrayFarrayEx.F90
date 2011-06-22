@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.23 2011/03/21 21:43:11 w6ws Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.24 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,12 +113,12 @@ program ESMF_ArrayFarrayEx
 !BOC
   call ESMF_Initialize(defaultlogfilename="ArrayFarrayEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -141,7 +141,7 @@ program ESMF_ArrayFarrayEx
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! This example is assumed to run on 4 PETs. The default 2D decomposition will 
 ! then be into 4 x 1 DEs as to ensure 1 DE per PET. 
@@ -153,7 +153,7 @@ program ESMF_ArrayFarrayEx
   array = ESMF_ArrayCreate(farray=farrayE, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !call ESMF_ArrayPrint(array)
 !BOE
 ! The 40 x 10 index space defined by the {\tt minIndex} and {\tt maxIndex} 
@@ -205,7 +205,7 @@ program ESMF_ArrayFarrayEx
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   print *, farrayPtr
 !EOC
@@ -217,7 +217,7 @@ program ESMF_ArrayFarrayEx
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Since the memory allocation for each {\tt farrayE} is automatic there is
 ! nothing more to do.
@@ -232,7 +232,7 @@ program ESMF_ArrayFarrayEx
   array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   print *, farrayA            ! print PET-local farrayA directly
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)! obtain array pointer
@@ -249,7 +249,7 @@ program ESMF_ArrayFarrayEx
   array = ESMF_ArrayCreate(farray=farrayP, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   print *, farrayP            ! print PET-local farrayA directly
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)! obtain array pointer

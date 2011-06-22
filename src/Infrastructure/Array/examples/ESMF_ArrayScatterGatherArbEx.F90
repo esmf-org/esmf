@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.10 2011/01/08 16:22:38 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.11 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,9 +36,9 @@ program ESMF_ArrayScatterGatherArbEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayScatterGatherArbEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -82,17 +82,17 @@ program ESMF_ArrayScatterGatherArbEx
   
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=arbSeqIndexList, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   deallocate(arbSeqIndexList)
   
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=1, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! This {\tt array} object holds 10 elements on each DE, and there is one DE
@@ -174,7 +174,7 @@ program ESMF_ArrayScatterGatherArbEx
     maxIndex=(/petCount,10/), &
     regDecomp=(/1,1/), rc=rc) ! DistGrid with only 1 DE
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! The first step is to create a DistGrid object with only a single DE. This
@@ -192,7 +192,7 @@ program ESMF_ArrayScatterGatherArbEx
   arrayAux = ESMF_ArrayCreate(farray=farray, distgrid=distgridAux, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! At this point all of the pieces are in place to use {\tt ESMF\_ArrayRedist()}
@@ -204,13 +204,13 @@ program ESMF_ArrayScatterGatherArbEx
   call ESMF_ArrayRedistStore(srcArray=arrayAux, dstArray=array, &
     routehandle=scatterHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 !BOC
   call ESMF_ArrayRedist(srcArray=arrayAux, dstArray=array, &
     routehandle=scatterHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! In this example, after {\tt ESMF\_ArrayRedist()} was called, the content
@@ -230,7 +230,7 @@ program ESMF_ArrayScatterGatherArbEx
 !BOC
   call ESMF_ArrayRedistRelease(routehandle=scatterHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! The opposite operation, i.e. {\em gathering} of the {\tt array} data
@@ -245,13 +245,13 @@ program ESMF_ArrayScatterGatherArbEx
   call ESMF_ArrayRedistStore(srcArray=array, dstArray=arrayAux, &
     routehandle=gatherHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 !BOC
   call ESMF_ArrayRedist(srcArray=array, dstArray=arrayAux, &
     routehandle=gatherHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Just as for the scatter case, the {\tt gatherHandle} can be used repeatedly
@@ -262,7 +262,7 @@ program ESMF_ArrayScatterGatherArbEx
 !BOC
   call ESMF_ArrayRedistRelease(routehandle=gatherHandle, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! Finally the wrapper Array {\tt arrayAux} and the associated DistGrid object
@@ -272,11 +272,11 @@ program ESMF_ArrayScatterGatherArbEx
 !BOC
   call ESMF_ArrayDestroy(arrayAux, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgridAux, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! Further, the primary data objects of this example must be deallocated
@@ -288,11 +288,11 @@ program ESMF_ArrayScatterGatherArbEx
   
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.21 2011/06/16 18:15:40 feiliu Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.22 2011/06/22 15:07:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -74,9 +74,9 @@
   ! an optional undistributed 3rd dimenison of size 4
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! grid dimension: xdim and ydim are arbitrarily distributed
   xdim = 100
@@ -144,16 +144,16 @@
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
     arbIndexList=localIndices,arbIndexCount=localCount, &
     name="arbgrid", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -169,10 +169,10 @@
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Array"
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid2d, array1d, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -188,13 +188,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -209,11 +209,11 @@
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -229,13 +229,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid2d, farrayPtr=fptr1d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -251,11 +251,11 @@
   !NEX_UTest
   write(name, *) "Create a Field using a 2D arb. grid and 1D Fortran array pointer"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid2d, farrayPtr=fptr1d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -328,16 +328,16 @@
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
     arbIndexList=localIndices,arbIndexCount=localCount, &
     name="arb3dgrid", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field = ESMF_FieldCreate(grid3d, arrayspec1D, gridToFieldMap =(/1,2,0/),rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -354,11 +354,11 @@
   write(name, *) "Create a 2D Field on a 3D arb grid with one replicated dim and 1d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid3d, array1d, copyflag=ESMF_DATA_COPY, &
         gridToFieldMap=(/1,2,0/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -374,13 +374,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -396,11 +396,11 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -416,13 +416,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
       copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -438,11 +438,11 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
       copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -515,12 +515,12 @@
 
   call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -536,10 +536,10 @@
   write(name, *) "Create a 3D Field on a 3D arb. grid with 2d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldGet(field, array=array2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -555,13 +555,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -577,11 +577,11 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -597,13 +597,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr2d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -619,11 +619,11 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array pointer"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr2d, &
       copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -695,13 +695,13 @@
 
   call ESMF_ArraySpecSet(arrayspec3D, rank=3, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field = ESMF_FieldCreate(grid3d, arrayspec3D, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -718,11 +718,11 @@
   write(name, *) "Create a 4D Field on a 3D arb grid with one ungridded dimension and 3d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldGet(field, array=array3d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid3d, array3d, copyflag=ESMF_DATA_COPY, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -738,14 +738,14 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 3D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr3d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr3d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -761,12 +761,12 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 3D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr3d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr3d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -825,7 +825,7 @@
     ungriddedUBound=(/10/), gridToFieldMap=(/1,2,0/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -842,11 +842,11 @@
   write(name, *) "Create a 3D Field on a 3D arb grid with one ungridded dim. and one rep. dim and 2d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldGet(field, array=array2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), gridToFieldMap=(/1,2,0/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -862,15 +862,15 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/1,2,0/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -886,13 +886,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/1,2,0/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -950,7 +950,7 @@
   field = ESMF_FieldCreate(grid3d, arrayspec1D,gridToFieldMap=(/0,0,1/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -967,10 +967,10 @@
   write(name, *) "Create a 1D Field on a 3D arb grid with the arb. dims as the replicated dim and 1d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid3d, array1d, copyflag=ESMF_DATA_COPY, gridToFieldMap=(/0,0,1/), rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -986,14 +986,14 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1009,12 +1009,12 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1030,14 +1030,14 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
     copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1053,12 +1053,12 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 1D Fortran array pointer"
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
     copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1133,7 +1133,7 @@
           ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1150,11 +1150,11 @@
   write(name, *) "Create a 2D Field on a 3D arb grid with the arb.dims as the replicated dim and one ungridded dim and 2d Array"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_FieldGet(field, array=array2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, gridToFieldMap=(/0,0,1/), &
           ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1170,15 +1170,15 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array - empty/complete"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/0,0,1/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1194,13 +1194,13 @@
   !NEX_UTest
   write(name, *) "Create a Field using an 3D arb. grid and 2D Fortran array"
   call ESMF_FieldGet(field, farrayPtr=fptr2d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/0,0,1/), &
     indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount
@@ -1266,25 +1266,25 @@
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
     arbIndexList=localIndices,arbIndexCount=localCount, &
     name="arbgrid", rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R4, &
        rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field = ESMF_FieldCreate(grid2d, arrayspec1D, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
-            rcToReturn=rc)) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+            rcToReturn=rc)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field, farrayPtr=fptr1d, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid2d, farray=fptr1d, &
       indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
   if (myPet .eq. 0) print *, 'Field rank, dimCount', rank, dimCount

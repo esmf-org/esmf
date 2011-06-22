@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.34 2011/06/16 05:57:03 eschwab Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.35 2011/06/22 15:08:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -83,14 +83,14 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('--help', argindex=index)
          if (index /= -1) then
 	   call PrintUsage()
-	   call ESMF_Finalize(terminationflag=ESMF_ABORT)
+	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
          endif
          call ESMF_UtilGetArgIndex('-s', argindex=index)
          if (index == -1) call ESMF_UtilGetArgIndex('--source', argindex=index, rc=rc)
          if (index == -1) then
            write(*,*)
            print *, 'ERROR: The required argument [-s|--source] is missing.'
-           call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
            call ESMF_UtilGetArg(index+1, argvalue=srcfile)
          endif
@@ -100,7 +100,7 @@ program ESMF_RegridWeightGen
          if (index == -1) then
            write(*,*)
            print *, 'ERROR: The required argument [-w|--weight] is missing.'
-           call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
            call ESMF_UtilGetArg(index+1, argvalue=dstfile)
          endif
@@ -110,7 +110,7 @@ program ESMF_RegridWeightGen
          if (index == -1) then
            write(*,*)
            print *, 'ERROR: The required argument [-w|--weight] is missing.'
-           call ESMF_Finalize(terminationflag=ESMF_ABORT)
+           call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else	
            call ESMF_UtilGetArg(index+1, argvalue=wgtfile)
          endif
@@ -154,7 +154,7 @@ program ESMF_RegridWeightGen
 	       (pole .ne. ESMF_REGRIDPOLE_NONE)) then
              write(*,*)
 	     print *, 'ERROR: Conserve method only works with no pole.'
-             call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
          endif
 
@@ -174,7 +174,7 @@ program ESMF_RegridWeightGen
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown -t: must be either ESMF or SCRIP.'
-             call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif 
            typeSetFlag = .true.
          endif
@@ -188,7 +188,7 @@ program ESMF_RegridWeightGen
 	        (trim(flag) .eq. 'SCRIP' .and. .not. srcIsScrip)) then
                 write(*,*)
 	        print *, 'ERROR: Source file type conflict: --src_type and -t.' 
-                call ESMF_Finalize(terminationflag=ESMF_ABORT)
+                call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	        srcIsScrip = .false.
 	     end if
            endif
@@ -197,7 +197,7 @@ program ESMF_RegridWeightGen
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown --src_type: must be either ESMF or SCRIP.'
-             call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
          endif
 
@@ -210,7 +210,7 @@ program ESMF_RegridWeightGen
 	        (trim(flag) .eq. 'SCRIP' .and. .not. dstIsScrip)) then
                 write(*,*)
 	        print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
-                call ESMF_Finalize(terminationflag=ESMF_ABORT)
+                call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	        dstIsScrip = .false.
 	     end if
            endif
@@ -219,7 +219,7 @@ program ESMF_RegridWeightGen
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown --dst_type: must be either ESMF or SCRIP.'
-             call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
          endif
 
@@ -259,7 +259,7 @@ program ESMF_RegridWeightGen
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', srcfile, &
                       'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message.' 
-	     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
            if (srcrank == 2) then
 	     srcIsReg = .true.
@@ -275,7 +275,7 @@ program ESMF_RegridWeightGen
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', dstfile, &
                       'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message' 
-	     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
            if (dstrank == 2) then
 	     dstIsReg = .true.
@@ -669,7 +669,7 @@ program ESMF_RegridWeightGen
             methodStr = "Conservative remapping"
       else ! nothing recognizable so report error
 	     print *, 'ERROR: The -method is not a recognized interpolation method.'
-             call ESMF_Finalize(terminationflag=ESMF_ABORT)
+             call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
 
 
@@ -1466,7 +1466,7 @@ subroutine ErrorMsgAndAbort(localPet)
   endif
 
 
-  call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 end subroutine ErrorMsgAndAbort
 

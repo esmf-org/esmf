@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.15 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.16 2011/06/22 15:07:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -83,7 +83,7 @@ program ESMF_VMUserMpiCommEx
     print *, "ESMF application on MPI rank:", rank
     ! user code finalizes ESMF
 !BOC
-    call ESMF_Finalize(terminationflag=ESMF_KEEPMPI, rc=rc)
+    call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
     ! Finalize ESMF without finalizing MPI. The user application will call
     ! MPI_Finalize() on all ranks.
 !EOC

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.33 2011/06/09 20:36:02 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.34 2011/06/22 15:07:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.33 2011/06/09 20:36:02 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.34 2011/06/22 15:07:27 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -89,9 +89,9 @@
 
      ! get global VM
      call ESMF_VMGetGlobal(vm, rc=rc)
-     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
      call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       !NEX_UTest
       !  Verify that an empty FieldBundle can be created

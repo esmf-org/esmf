@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.26 2011/02/23 23:37:42 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.27 2011/06/22 15:07:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -74,10 +74,10 @@
 
 ! - construct petList according to petCount
     call ESMF_VMGetGlobal(vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
     allocate(petList((petCount+1)/2))
     petList=(/(2*i, i=0,(petCount+1)/2-1)/)

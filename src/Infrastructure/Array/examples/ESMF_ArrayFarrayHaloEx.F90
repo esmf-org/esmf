@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.25 2011/01/06 23:59:29 svasquez Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.26 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -56,13 +56,13 @@ program ESMF_ArrayFarrayHaloEx
 !BOC
   call ESMF_Initialize(defaultlogfilename="ArrayFarrayHaloEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !EOC
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -79,7 +79,7 @@ program ESMF_ArrayFarrayHaloEx
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! This DistGrid describes a 40 x 10 index space that will be decomposed into 
 ! 4 DEs when executed on 4 PETs, associating 1 DE per PET. Each DE-local 
@@ -112,7 +112,7 @@ program ESMF_ArrayFarrayHaloEx
   array = ESMF_ArrayCreate(farray=farrayA, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 call ESMF_ArrayPrint(array)
 !BOE
 ! The exclusive Array region on each PET can be accessed through a suitable
@@ -122,7 +122,7 @@ call ESMF_ArrayPrint(array)
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Following Array bounds convention, which by default puts the beginning of 
 ! the exclusive region at (1, 1, ...), the following loop will add up the 

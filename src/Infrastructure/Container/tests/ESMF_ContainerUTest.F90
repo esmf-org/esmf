@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.22 2011/05/20 10:06:29 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.23 2011/06/22 15:07:08 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.22 2011/05/20 10:06:29 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.23 2011/06/22 15:07:08 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -103,7 +103,7 @@ program ESMF_ContainerUTest
     write(iString, *) i
     fieldList(i) = ESMF_FieldEmptyCreate(name="testField"//&
       trim(adjustl(iString)), rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   enddo
 
   !------------------------------------------------------------------------
@@ -167,7 +167,7 @@ program ESMF_ContainerUTest
   print *, "size of fieldGarbageList: ", size(fieldGarbageList)  
   do i=1, size(fieldGarbageList)
     call ESMF_FieldGet(fieldGarbageList(i), name=fieldName, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     print *, "fieldGarbageList(",i,")=",fieldName
   enddo
   
@@ -204,7 +204,7 @@ program ESMF_ContainerUTest
   !------------------------------------------------------------------------
   !- get name out of queried Field object in preparation of verify test
   call ESMF_FieldGet(field, name=fieldName, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -228,9 +228,9 @@ program ESMF_ContainerUTest
 
   !------------------------------------------------------------------------
   call ESMF_ContainerGarbageOn(container, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ContainerGarbageClear(container, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -256,7 +256,7 @@ program ESMF_ContainerUTest
   print *, "size of fieldGarbageList: ", size(fieldGarbageList)  
   do i=1, size(fieldGarbageList)
     call ESMF_FieldGet(fieldGarbageList(i), name=fieldName, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     print *, "fieldGarbageList(",i,")=",fieldName
   enddo
   
@@ -264,9 +264,9 @@ program ESMF_ContainerUTest
 
   !------------------------------------------------------------------------
   call ESMF_ContainerGarbageOff(container, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ContainerGarbageClear(container, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -387,7 +387,7 @@ program ESMF_ContainerUTest
   ! final garbage collection
   do i=1, size(fieldListOut)
     call ESMF_FieldDestroy(fieldListOut(i), rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   enddo
 
   if (allocated(fieldList)) deallocate(fieldList)
@@ -413,7 +413,7 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   field = ESMF_FieldEmptyCreate(name="testField1", rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -514,16 +514,16 @@ program ESMF_ContainerUTest
   !------------------------------------------------------------------------
   allocate(fieldList(1))
   fieldList(1) = ESMF_FieldEmptyCreate(name="testField2", rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ContainerAdd(container, itemList=fieldList, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Verify Container itemCount Test"
   write(failMsg, *) "fieldCountOut incorrect"
   call ESMF_ContainerGet(container, itemCount=fieldCountOut, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_Test(fieldCountOut==4, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -532,7 +532,7 @@ program ESMF_ContainerUTest
   write(failMsg, *) "fieldCountOut incorrect"
   call ESMF_ContainerGet(container, itemName="testField1", &
     itemCount=fieldCountOut, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_Test(fieldCountOut==3, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -586,7 +586,7 @@ program ESMF_ContainerUTest
   write(name, *) "Verify Container itemCount Test"
   write(failMsg, *) "fieldCountOut incorrect"
   call ESMF_ContainerGet(container, itemCount=fieldCountOut, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_Test(fieldCountOut==2, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
@@ -598,11 +598,11 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   call ESMF_FieldDestroy(field, rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (allocated(fieldList)) then
     do i=1, size(fieldList)
       call ESMF_FieldDestroy(fieldList(i), rc=rc)
-      if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
     deallocate(fieldList)
   endif
@@ -627,11 +627,11 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   allocate(tt%wrap,stat=stat)
-  if (stat/=0) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (stat/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   tt%wrap%string = "string in myUDT1"
   tt%wrap%index = 1
   tt%wrap%field = ESMF_FieldEmptyCreate(name="field in myUDT1", rc=rc)
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -642,12 +642,12 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   allocate(tt%wrap,stat=stat)
-  if (stat/=0) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (stat/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   tt%wrap%string = "string in myUDT2"
   tt%wrap%index = 2
   field = ESMF_FieldEmptyCreate(name="field in myUDT2", rc=rc)
   tt%wrap%field = field
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -691,12 +691,12 @@ program ESMF_ContainerUTest
   
   !------------------------------------------------------------------------
   allocate(tt%wrap,stat=stat)
-  if (stat/=0) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (stat/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   tt%wrap%string = "string in myUDT2 replacement"
   tt%wrap%index = 20
   field = ESMF_FieldEmptyCreate(name="field in myUDT2 replacement", rc=rc)
   tt%wrap%field = field
-  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only

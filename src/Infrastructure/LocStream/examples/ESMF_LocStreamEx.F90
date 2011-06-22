@@ -51,7 +51,7 @@ program ESMF_LocStreamEx
   call ESMF_Initialize(vm=vm,  defaultlogfilename="LocStreamEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 #if 1
 !BOE
@@ -129,10 +129,10 @@ program ESMF_LocStreamEx
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_FieldDestroy(field_temperature, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    call ESMF_LocStreamDestroy(locstream, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    deallocate(lon)
    deallocate(lat)
@@ -225,10 +225,10 @@ program ESMF_LocStreamEx
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_FieldDestroy(field_temperature, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    call ESMF_LocStreamDestroy(locstream, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    deallocate(temperature)
 
@@ -363,13 +363,13 @@ program ESMF_LocStreamEx
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_LocStreamDestroy(locstream, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    call ESMF_LocStreamDestroy(newLocstream, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    call ESMF_GridDestroy(grid, rc=rc)
-   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 #endif
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.39 2011/05/05 23:13:44 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.40 2011/06/22 15:07:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@ program ESMF_MeshEx
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   write(name, *) "Test GridToMesh"
 

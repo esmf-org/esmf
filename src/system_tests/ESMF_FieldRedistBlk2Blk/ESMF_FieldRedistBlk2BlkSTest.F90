@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.24 2011/05/05 14:13:11 feiliu Exp $
+! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.25 2011/06/22 15:09:07 rokuingh Exp $
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -81,13 +81,13 @@
                         defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! Get the PET count and our PET number
     call ESMF_VMGet(vm, localPet=my_pet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     miscount = 0
 
@@ -96,7 +96,7 @@
      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
          msg="This test must run on an even number of processes",&
          ESMF_CONTEXT, rcToReturn=rc)
-     call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     endif
 
     print *, "Create section finished"
@@ -119,7 +119,7 @@
                            typekind=ESMF_TYPEKIND_R8, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     
     ! create src and dst grids
     grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
@@ -127,53 +127,53 @@
         regDecomp=(/2, npets/2/), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     grid2 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
         coordDep1=(/1/), coordDep2=(/2/), &
         regDecomp=(/npets/2, 2/), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_GridAddCoord(grid1, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_GridAddCoord(grid2, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! create src and dst fields
     field1 = ESMF_FieldCreate(grid1, arrayspec, totalLWidth=(/2,2/), &
         totalUWidth=(/0,0/), rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     field3 = ESMF_FieldCreate(grid1, arrayspec, totalLWidth=(/2,2/), &
         totalUWidth=(/0,0/), rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     field2 = ESMF_FieldCreate(grid2, arrayspec, totalLWidth=(/2,2/), &
         totalUWidth=(/0,0/), rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! precompute communication patterns
     call ESMF_FieldRedistStore(field1, field2, routehandle=rh12, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_FieldRedistStore(field2, field3, routehandle=rh23, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! get coordinate arrays available for setting the source data array
     call ESMF_GridGetCoord(grid1, localDe=0, coordDim=1, &
@@ -181,14 +181,14 @@
         farrayPtr=coordX, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_GridGetCoord(grid1, localDe=0, coordDim=2, &
         computationalLBound=gclby, computationalUBound=gcuby, &
         farrayPtr=coordY, rc=localrc)
         !farrayPtr=coordY, totalCount=localCounts, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     
     ! Get pointers to the data and set it up
     call ESMF_FieldGet(field1, localDe=0, farrayPtr=srcdata, &
@@ -196,13 +196,13 @@
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_FieldGet(field3, localDe=0, farrayPtr=resdata, &
         computationalLBound=res_fclb, computationalUBound=res_fcub, & 
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     ! initialize data arrays
     srcdata = 0.0
@@ -242,7 +242,7 @@
     call ESMF_FieldRedist(field1, field2, rh12, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     print *, "Array contents after Transpose:"
 
@@ -251,7 +251,7 @@
     call ESMF_FieldRedist(field2, field3, rh23, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     print *, "Array contents after second Transpose, should match original:"
 
@@ -308,37 +308,37 @@
     call ESMF_FieldRedistRelease(rh12, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_FieldRedistRelease(rh23, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_FieldDestroy(field1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_FieldDestroy(field2, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_FieldDestroy(field3, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_GridDestroy(grid1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_GridDestroy(grid2, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     print *, "All Destroy routines done"
 

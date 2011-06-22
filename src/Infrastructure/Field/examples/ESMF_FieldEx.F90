@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.37 2011/06/17 18:59:19 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.38 2011/06/22 15:07:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,10 +81,10 @@
 
     call ESMF_Initialize(defaultlogfilename="FieldEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
-        call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------

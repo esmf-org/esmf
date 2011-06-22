@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloEx.F90,v 1.9 2011/06/07 00:32:41 theurich Exp $
+! $Id: ESMF_ArrayHaloEx.F90,v 1.10 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,9 +43,9 @@ program ESMF_ArrayHaloEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayHaloEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -74,14 +74,14 @@ program ESMF_ArrayHaloEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The Array holds 2D double precision float data.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The {\tt totalLWidth} and {\tt totalUWidth} arguments are used during Array
 ! creation to allocate 2 extra elements along every direction outside the 
@@ -95,7 +95,7 @@ program ESMF_ArrayHaloEx
     totalLWidth=(/2,2/), totalUWidth=(/2,2/), indexflag=ESMF_INDEX_GLOBAL, &
     rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !BOE
 ! Without the explicit definition of boundary conditions in the DistGrid
@@ -158,12 +158,12 @@ program ESMF_ArrayHaloEx
   
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   
   call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   
   do j=eLB(2,1), eUB(2,1)
@@ -188,7 +188,7 @@ program ESMF_ArrayHaloEx
 !BOC
   call ESMF_ArrayHaloStore(array=array, routehandle=haloHandle, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The {\tt haloHandle} now holds the default halo operation for {\tt array}, 
 ! which matches as many elements as possible outside the exclusive region to 
@@ -201,14 +201,14 @@ program ESMF_ArrayHaloEx
 !BOC
   call ESMF_ArrayHalo(array=array, routehandle=haloHandle, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Finally the resources held by {\tt haloHandle} need to be released.
 !EOE
 !BOC
   call ESMF_ArrayHaloRelease(routehandle=haloHandle, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! The {\tt array} object created above defines a 2 element wide rim around the
@@ -227,7 +227,7 @@ program ESMF_ArrayHaloEx
   call ESMF_ArrayHaloStore(array=array, routehandle=haloHandle, &
     haloLDepth=(/1,1/), haloUDepth=(/1,1/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! This halo operation with a depth of 1 is sufficient to support a simple
@@ -239,7 +239,7 @@ program ESMF_ArrayHaloEx
   do step=1, 4
     call ESMF_ArrayHalo(array=array, routehandle=haloHandle, rc=rc)
 !EOC    
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     do j=eLB(2,1), eUB(2,1)
       do i=eLB(1,1), eUB(1,1)
@@ -263,7 +263,7 @@ program ESMF_ArrayHaloEx
 
   call ESMF_ArrayHaloRelease(routehandle=haloHandle, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! The special treatment of the global edges in the above kernel is due to the 
@@ -279,11 +279,11 @@ program ESMF_ArrayHaloEx
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Create a DistGrid with periodic boundary condition along the first dimension.
@@ -293,19 +293,19 @@ program ESMF_ArrayHaloEx
   call ESMF_DistGridConnectionSet(connection=connectionList(1), &
      tileIndexA=1, tileIndexB=1, positionVector=(/10, 0/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), connectionList=connectionList, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   deallocate(connectionList)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/2,2/), totalUWidth=(/2,2/), indexflag=ESMF_INDEX_GLOBAL, &
     rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! Initialize the exclusive elements to the same geometric function as before.
@@ -313,12 +313,12 @@ program ESMF_ArrayHaloEx
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   
   call ESMF_ArrayGet(array, exclusiveLBound=eLB, exclusiveUBound=eUB, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   
   do j=eLB(2,1), eUB(2,1)
@@ -335,7 +335,7 @@ program ESMF_ArrayHaloEx
   call ESMF_ArrayHaloStore(array=array, routehandle=haloHandle, &
     haloLDepth=(/1,0/), haloUDepth=(/1,0/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 ! Now the same numerical kernel can be used without special treatment of
@@ -348,7 +348,7 @@ program ESMF_ArrayHaloEx
   do step=1, 4
     call ESMF_ArrayHalo(array=array, routehandle=haloHandle, rc=rc)
 !EOC    
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     do j=eLB(2,1), eUB(2,1)
       do i=eLB(1,1), eUB(1,1)
@@ -377,14 +377,14 @@ program ESMF_ArrayHaloEx
   call ESMF_ArrayHaloStore(array=array, routehandle=haloHandle2, &
     haloLDepth=(/2,0/), haloUDepth=(/2,0/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC  
 
   do step=1, 4
     call ESMF_ArrayHalo(array=array, routehandle=haloHandle2, rc=rc)
 !EOC    
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     do j=eLB(2,1), eUB(2,1)
       do i=eLB(1,1), eUB(1,1)
@@ -411,12 +411,12 @@ program ESMF_ArrayHaloEx
 
   call ESMF_ArrayHaloRelease(routehandle=haloHandle, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
   call ESMF_ArrayHaloRelease(routehandle=haloHandle2, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !--- gather and output for plotting
   call ESMF_ArrayGather(array, farray=farrayGather, rootPet=0, rc=rc)
@@ -436,11 +436,11 @@ program ESMF_ArrayHaloEx
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   
 ! ------------------------------------------------------------------------------

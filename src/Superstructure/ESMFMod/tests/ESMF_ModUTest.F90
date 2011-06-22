@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.8 2011/06/16 05:57:02 eschwab Exp $
+! $Id: ESMF_ModUTest.F90,v 1.9 2011/06/22 15:08:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.8 2011/06/16 05:57:02 eschwab Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.9 2011/06/22 15:08:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -124,7 +124,7 @@ contains
     type(ESMF_RouteHandle) :: routehandle
     type(ESMF_StaggerLoc) :: staggerloc
     type(ESMF_State) :: state
-    type(ESMF_TerminationFlag) :: terminationflag
+    type(ESMF_End_Flag) :: endflag
     type(ESMF_Time) :: time
     type(ESMF_TimeInterval) :: timeinterval
     type(ESMF_VM) :: vm
@@ -450,10 +450,10 @@ contains
 ! NEX_noUTest
 
   subroutine term_type (dummy)
-    use ESMF_Mod, only: ESMF_TerminationFlag
-    type(ESMF_TerminationFlag), intent(in), optional :: dummy
-    failMsg = "TerminationFlag type fail"  
-    name = "TerminationFlag type"  
+    use ESMF_Mod, only: ESMF_End_Flag
+    type(ESMF_End_Flag), intent(in), optional :: dummy
+    failMsg = "EndFlag type fail"  
+    name = "EndFlag type"  
     call ESMF_Test (.true.,  &  
       name, failMsg, result, ESMF_SRCLINE)  
   end subroutine

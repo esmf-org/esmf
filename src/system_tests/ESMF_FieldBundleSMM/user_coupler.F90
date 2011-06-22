@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.10 2011/04/27 02:27:15 w6ws Exp $
+! $Id: user_coupler.F90,v 1.11 2011/06/22 15:08:58 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -71,13 +71,13 @@ module user_coupler
     ! Register the callback routines.
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=user_init, &
       rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=user_run, &
       rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=user_final, &
       rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     print *, "Registered Initialize, Run, and Finalize routines"
     print *, "User Coupler Register returning"
@@ -107,28 +107,28 @@ module user_coupler
     print *, "User Coupler Init starting"
 
     call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     print *, "Import State contains ", itemcount, " items."
 
     ! Need to reconcile import and export states
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     call ESMF_StateReconcile(importState, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     ! Get source FieldBundle out of import State
     call ESMF_StateGet(importState, "fieldbundle data", srcFieldBundle, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     ! Get destination FieldBundle out of export State
     call ESMF_StateGet(exportState, "fieldbundle data", dstFieldBundle, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     ! get localPet
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     ! Setup identity sparse matrix as a combination of PET 0 and PET 4
     ! there are 15000 elements on the diagonal, defined as two overlapping
@@ -167,7 +167,7 @@ module user_coupler
     else
       call ESMF_FieldBundleSMMStore(srcFieldBundle=srcFieldBundle, dstFieldBundle=dstFieldBundle, &
         routehandle=routehandle, rc=rc)
-      if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+      if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     endif
     deallocate(factorIndexList)
     deallocate(factorList)
@@ -197,16 +197,16 @@ module user_coupler
 
     ! Get source FieldBundle out of import State
     call ESMF_StateGet(importState, "fieldbundle data", srcFieldBundle, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     ! Get destination FieldBundle out of export State
     call ESMF_StateGet(exportState, "fieldbundle data", dstFieldBundle, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     ! Use FieldBundleSMM() to take data from srcFieldBundle to dstFieldBundle
     call ESMF_FieldBundleSMM(srcFieldBundle=srcFieldBundle, dstFieldBundle=dstFieldBundle, &
       routehandle=routehandle, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
     print *, "User Coupler Run returning"
 
@@ -230,7 +230,7 @@ module user_coupler
   
     ! Release resources stored for the FieldBundleSMM.
     call ESMF_FieldBundleSMMRelease(routehandle=routehandle, rc=rc)
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, terminationflag=ESMF_ABORT)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
     print *, "User Coupler Final returning"
   

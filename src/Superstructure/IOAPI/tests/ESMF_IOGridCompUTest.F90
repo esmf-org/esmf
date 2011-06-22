@@ -1,4 +1,4 @@
-! $Id: ESMF_IOGridCompUTest.F90,v 1.9 2011/06/10 22:28:15 eschwab Exp $
+! $Id: ESMF_IOGridCompUTest.F90,v 1.10 2011/06/22 15:08:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_IOGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_IOGridCompUTest.F90,v 1.9 2011/06/10 22:28:15 eschwab Exp $'
+      '$Id: ESMF_IOGridCompUTest.F90,v 1.10 2011/06/22 15:08:04 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -87,7 +87,7 @@ print *, "this print statement prevents mpi abort!"
       ! io for gridded component
       io = ESMF_IOCreate(name="io", gridComp=gridComp, rc=rc)
       
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! assume Xerces XML C++ API library present until proven otherwise
       xercesNotPresent = .false.
@@ -299,7 +299,7 @@ print *, 'outChar = ', outChar
       call ESMF_IODestroy(io, rc=rc)
       call ESMF_GridCompDestroy(gridcomp, rc=rc)
 
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)

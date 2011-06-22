@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.25 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.26 2011/06/22 15:07:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -336,7 +336,7 @@ endif
   
 99 continue   ! Abort
   print *, "FAIL: ESMF_DELayoutEx.F90"
-  call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 100 continue  
 end program

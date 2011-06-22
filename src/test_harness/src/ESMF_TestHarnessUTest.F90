@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.46 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.47 2011/06/22 15:09:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -77,11 +77,11 @@
   ! get global vm information
   call ESMF_VMGetGlobal(vm, rc=rc)
   if (rc /= ESMF_SUCCESS)                                                      &
-                          call ESMF_Finalize(terminationflag=ESMF_ABORT)
+                          call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS)                                                      &
-                          call ESMF_Finalize(terminationflag=ESMF_ABORT)
+                          call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! -----------------------------------------
   ! command arg processing
@@ -199,7 +199,7 @@
   call Read_TestHarness_Config(srcPath(1), configFname(1), rc)
   if (rc /= ESMF_SUCCESS)  then
      print '("Error reading file ", A, " - see log file")', trim(configFname(1))
-     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     call ESMF_Finalize(endflag=ESMF_END_ABORT)
      stop
   endif
 
@@ -224,7 +224,7 @@
   call Read_TestHarness_Specifier(SrcPath(1), rc)
   if (rc /= ESMF_SUCCESS)  then
      print*,"Error reading descriptor and specifier files - see log"
-     call ESMF_Finalize(terminationflag=ESMF_ABORT)
+     call ESMF_Finalize(endflag=ESMF_END_ABORT)
      stop
   endif
 
@@ -242,7 +242,7 @@
     if (rc /= ESMF_SUCCESS) then
        print*,'FAIL - one or more test harness tests have failed - see stdout ', &
             'for complete details'
-       call ESMF_Finalize(terminationflag=ESMF_ABORT)
+       call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
   else
     ! no tests were run

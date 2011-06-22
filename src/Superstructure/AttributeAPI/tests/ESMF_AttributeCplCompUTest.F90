@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.34 2011/06/13 18:05:49 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.35 2011/06/22 15:07:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.34 2011/06/13 18:05:49 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.35 2011/06/22 15:07:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -123,7 +123,7 @@ program ESMF_AttributeCplCompUTest
       ! gridded components
       gfc = ESMF_GridCompCreate(name="gridcompforcplcomp", petList=(/0/), rc=rc)
       
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
 !-------------------------------------------------------------------------
 !  CPLCOMP
@@ -1402,7 +1402,7 @@ program ESMF_AttributeCplCompUTest
 
       call ESMF_StateDestroy(sfc, rc=rc)
       
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.16 2011/05/19 19:18:43 feiliu Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.17 2011/06/22 15:07:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -67,14 +67,14 @@ program ESMF_AttReadFieldEx
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
 !EOC
 
-      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Create a field
       field = ESMF_FieldEmptyCreate(name="field", rc=rc)
 !EOC
 
-      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Read an XML file to populate the CF Attribute package of a Field.
@@ -140,7 +140,7 @@ program ESMF_AttReadFieldEx
       call ESMF_FieldDestroy(field, rc=rc)
 !EOC
 
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! finalize ESMF framework

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldUTest.F90,v 1.11 2011/05/19 19:13:50 feiliu Exp $
+! $Id: ESMF_AttReadFieldUTest.F90,v 1.12 2011/06/22 15:07:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_AttReadFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttReadFieldUTest.F90,v 1.11 2011/05/19 19:13:50 feiliu Exp $'
+      '$Id: ESMF_AttReadFieldUTest.F90,v 1.12 2011/06/22 15:07:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -82,7 +82,7 @@ program ESMF_AttReadFieldUTest
 ! TODO:  resolve
 print *, "this print statement prevents mpi abort!"
 
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! assume Xerces XML C++ API library present until proven otherwise
       xercesNotPresent = .false.
@@ -193,7 +193,7 @@ print *, 'outChar = ', outChar
       !------------------------------------------------------------------------
       call ESMF_FieldDestroy(field, rc=rc)
 
-      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+      if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(result, ESMF_SRCLINE)

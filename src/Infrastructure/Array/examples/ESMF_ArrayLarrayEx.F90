@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.28 2011/05/19 20:44:24 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.29 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -65,9 +65,9 @@ program ESMF_ArrayLarrayEx
 !BOC
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayLarrayEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -82,7 +82,7 @@ program ESMF_ArrayLarrayEx
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   allocate(farrayP(14,14))    ! allocate Fortran array on each PET with halo
 !EOC
@@ -93,7 +93,7 @@ program ESMF_ArrayLarrayEx
 !BOC
   larray = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The Array object can now be created from {\tt larray}. The Array 
 ! creation method checks for each PET that the LocalArray can 
@@ -102,7 +102,7 @@ program ESMF_ArrayLarrayEx
 !BOC
   array = ESMF_ArrayCreate(localarrayList=(/larray/), distgrid=distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Once created there is no difference in how the Array object can be used.
 ! The exclusive Array region on each PET can be accessed through a suitable
@@ -111,7 +111,7 @@ program ESMF_ArrayLarrayEx
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   farrayPtr = 123.456d0 ! initialize
 !call ESMF_ArrayPrint(array, rc=rc)
 !print *, "farrayPtr:", lbound(farrayPtr), ubound(farrayPtr)
@@ -124,11 +124,11 @@ program ESMF_ArrayLarrayEx
 !BOC
   call ESMF_ArrayGet(array, localarray=larrayRef, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_LocalArrayGet(larrayRef, farrayPtr, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !call ESMF_ArrayPrint(array, rc=rc)
 !print *, "farrayPtr:", lbound(farrayPtr), ubound(farrayPtr)
 !BOE
@@ -168,7 +168,7 @@ program ESMF_ArrayLarrayEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/8,8/), &
     regDecomp=(/2,4/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !
 ! The {\tt distgrid} object created in this manner will contain 8 DEs no 
@@ -236,7 +236,7 @@ program ESMF_ArrayLarrayEx
 !BOC
   array = ESMF_ArrayCreate(localarrayList=larrayList, distgrid=distgrid, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Usage of a LocalArray list is the only way to provide a list of variable 
 ! length of Fortran array allocations to ArrayCreate() for each PET. The 
@@ -252,7 +252,7 @@ program ESMF_ArrayLarrayEx
   allocate(larrayRefList(2))
   call ESMF_ArrayGet(array, localarrayList=larrayRefList, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Finally, access to the actual Fortran pointers is done on a per DE basis.
 ! Generally each PET will loop over its DEs.

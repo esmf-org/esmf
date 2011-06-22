@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.122 2011/06/14 05:57:57 eschwab Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.123 2011/06/22 15:07:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -369,16 +369,16 @@
 !
 !     ! Typed termination flag
 
-      type ESMF_TerminationFlag
+      type ESMF_End_Flag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_TerminationFlag), parameter:: &
-        ESMF_FINAL        = ESMF_TerminationFlag(1), &
-        ESMF_KEEPMPI      = ESMF_TerminationFlag(2), &
-        ESMF_ABORT        = ESMF_TerminationFlag(3)
+      type(ESMF_End_Flag), parameter:: &
+        ESMF_END_NORMAL        = ESMF_End_Flag(1), &
+        ESMF_END_KEEPMPI      = ESMF_End_Flag(2), &
+        ESMF_END_ABORT        = ESMF_End_Flag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -695,7 +695,7 @@
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
              ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
-      public ESMF_TerminationFlag, ESMF_FINAL, ESMF_KEEPMPI, ESMF_ABORT
+      public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
       public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
       public ESMF_AttCopyFlag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
                                ESMF_ATTCOPY_VALUE
@@ -1016,18 +1016,18 @@ function ESMF_ctfne(ctf1, ctf2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_TerminationFlags
+! function to compare two ESMF_End_Flags
 
 function ESMF_tnfeq(tnf1, tnf2)
  logical ESMF_tnfeq
- type(ESMF_TerminationFlag), intent(in) :: tnf1, tnf2
+ type(ESMF_End_Flag), intent(in) :: tnf1, tnf2
 
  ESMF_tnfeq = (tnf1%value == tnf2%value)
 end function
 
 function ESMF_tnfne(tnf1, tnf2)
  logical ESMF_tnfne
- type(ESMF_TerminationFlag), intent(in) :: tnf1, tnf2
+ type(ESMF_End_Flag), intent(in) :: tnf1, tnf2
 
  ESMF_tnfne = (tnf1%value /= tnf2%value)
 end function

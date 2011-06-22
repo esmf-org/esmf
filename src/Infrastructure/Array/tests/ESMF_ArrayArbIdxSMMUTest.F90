@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.26 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.27 2011/06/22 15:07:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.26 2011/01/05 20:05:40 svasquez Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.27 2011/06/22 15:07:00 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -87,10 +87,10 @@ program ESMF_ArrayArbIdxSMMUTest
   !------------------------------------------------------------------------
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 6) then
     print *, "This system test needs to run on exactly 6 PETs, petCount = ", &
@@ -117,7 +117,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !  call ESMF_DistGridPrint(srcDistgrid, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! The srcDistgrid has 1 DE per PET, i.e. 6 DEs. Each DE has a different
   ! number of local elements in the DistGrid. The arbitrary sequence indices are

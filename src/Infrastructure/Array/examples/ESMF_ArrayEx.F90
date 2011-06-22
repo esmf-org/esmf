@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.72 2011/05/19 20:56:13 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.73 2011/06/22 15:06:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -54,9 +54,9 @@ program ESMF_ArrayEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   if (petCount /= 4) then
     finalrc = ESMF_FAILURE
@@ -83,7 +83,7 @@ program ESMF_ArrayEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The following is a representation of the index space and its decompositon into
 ! DEs. Each asterix (*) represents a single element.
@@ -129,7 +129,7 @@ program ESMF_ArrayEx
 !BOC
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The different methods on how an Array object is created have no effect on
 ! the use of {\tt ESMF\_ArrayDestroy()}.
@@ -137,7 +137,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Alternatively the same Array can be created specifying the "tkr" information
 ! in form of an ArraySpec variable. The ArraySpec explicitly contains the 
@@ -148,14 +148,14 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! The Array object created by the above call is an ESMF distributed 
@@ -181,12 +181,12 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   do de=0, localDeCount-1
     call ESMF_ArrayGet(array, farrayPtr=myFarray, localDe=de, rc=rc)
 !EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     ! use myFarray to access local DE data
   enddo
@@ -211,13 +211,13 @@ program ESMF_ArrayEx
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
        rc=rc)
 !EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     ! use myFarray to access local DE data
   enddo
@@ -445,7 +445,7 @@ program ESMF_ArrayEx
   endif
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy the array object
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Obviously the second branch of this simple code will work for either case, 
@@ -487,9 +487,9 @@ program ESMF_ArrayEx
     totalLWidth=(/1,4/), totalUWidth=(/3,1/), &
     indexflag=ESMF_INDEX_GLOBAL, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Obtain the {\tt larrayList} on every PET.
 !EOE
@@ -498,7 +498,7 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, localarrayList=larrayList, &
     localDeList=localDeList, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The bounds of DE 1 for {\tt array} are shown in the following 
 ! diagram to illustrate the situation. Notice that the {\tt totalLWidth} and
@@ -544,7 +544,7 @@ program ESMF_ArrayEx
     totalLBound=totalLBound, &
     totalUBound=totalUBound, rc=rc)
 !EOC  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! or for the relative {\em widths}.
 !EOE
@@ -604,7 +604,7 @@ program ESMF_ArrayEx
   deallocate(larrayList)
   deallocate(localDeList)
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -804,7 +804,7 @@ program ESMF_ArrayEx
   call ESMF_RouteHandleRelease(routehandle=haloHandle2, rc=rc)
   call ESMF_ArrayDestroy(array, rc=rc) ! destroy array object
 !EOCI  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOEI
 ! 
 !
@@ -827,7 +827,7 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/3,3/), totalUWidth=(/3,3/), rc=rc)
 !EOCI  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOEI
 ! This {\tt array} has DE-local total regions that are three elements wider in 
 ! each direction than the corresponding exclusive region. The default
@@ -856,7 +856,7 @@ program ESMF_ArrayEx
 !BOCI
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
 !EOCI  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOEI
 !EOCI
 !BOEI
@@ -876,7 +876,7 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/5,5/), totalUWidth=(/5,5/), rc=rc)
 !EOCI  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOCI
   do j=1, 10
     call ESMF_ArrayHalo(array, haloLDepth=(/3,3/), haloUDepth=(/3,3/), rc=rc)
@@ -892,15 +892,15 @@ program ESMF_ArrayEx
 !EOEI
 !BOCI  
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOCI  
 
 #else
   ! need to clean up distgrid that was created several sections ago
   call ESMF_DistGridDestroy(distgrid, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 #endif
@@ -938,9 +938,9 @@ program ESMF_ArrayEx
   array1D = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid1D, rc=rc)
 !EOC
   call ESMF_ArrayDestroy(array1D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid1D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! 
 ! The creation of a 3D Array proceeds analogous to the 1D case. The rank of the
@@ -1037,13 +1037,13 @@ program ESMF_ArrayEx
 !call ESMF_ArrayPrint(array3D)
 !call ESMF_ArrayPrint(array2D)
   call ESMF_ArrayDestroy(array2D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid2D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ArrayDestroy(array3D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid3D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !
@@ -1095,7 +1095,7 @@ program ESMF_ArrayEx
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
     regDecomp=(/2,3/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The rank in the {\tt arrayspec} argument, however, must change from 2 to 3 in
 ! order to provide for the extra Array dimension.
@@ -1103,7 +1103,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! During Array creation with extra dimension(s) it is necessary to specify the
 ! bounds of these undistributed dimension(s). This requires two additional
@@ -1116,11 +1116,11 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/0,1/), totalUWidth=(/0,1/), &
     undistLBound=(/1/), undistUBound=(/2/), rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
     
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
 !BOE
 ! This will create {\tt array} with 2+1 dimensions. The 2D DistGrid is used
@@ -1164,7 +1164,7 @@ program ESMF_ArrayEx
   deallocate(larrayList)
 !EOC
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! For some applications the default association rules between DistGrid and Array
 ! dimensions may not satisfy the user's needs. The optional {\tt distgridToArrayMap} 
@@ -1238,7 +1238,7 @@ program ESMF_ArrayEx
   deallocate(arrayToDistGridMap)
   deallocate(larrayList)
   call ESMF_ArrayDestroy(array, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
 !BOE
@@ -1274,16 +1274,16 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=1, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! is created on the 2D DistGrid used during the previous section.
 !EOE
 !BOC
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Here the default DistGrid to Array dimension mapping is used which assigns
 ! the Array dimensions in sequence to the DistGrid dimensions starting with
@@ -1301,14 +1301,14 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   allocate(larrayList(localDeCount))
   allocate(localDeList(localDeCount))
   call ESMF_ArrayGet(array, localarrayList=larrayList, &
     localDeList=localDeList, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The {\tt array} object was created without additional padding which means
 ! that the bounds of the Fortran array pointer correspond to the bounds of
@@ -1332,7 +1332,7 @@ program ESMF_ArrayEx
     call ESMF_LocalArrayGet(larrayList(de), myFarray1D, &
       docopy=ESMF_DATA_REF, rc=rc)
 !EOC
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     print *, "DE ",localDeList(de)," [", lbound(myFarray1D), &
       ubound(myFarray1D),"]"
@@ -1341,7 +1341,7 @@ program ESMF_ArrayEx
   deallocate(localDeList)
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The Fortran array pointer in the above loop was of rank 1 because the
 ! Array object was of rank 1. However, the {\tt distgrid} object associated
@@ -1356,7 +1356,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! on the previously used 2D DistGrid. By default, i.e. without the
 ! {\tt distgridToArrayMap}
@@ -1372,13 +1372,13 @@ program ESMF_ArrayEx
     distgridToArrayMap=(/0,1/), undistLBound=(/11/), &
     undistUBound=(/14/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  call ESMF_ArrayPrint(array, rc=rc)
-!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+!  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! Finally, the same {\tt arrayspec} and {\tt distgrid} arguments are used to
 ! create a 2D Array that is fully replicated in both dimensions of the DistGrid.
@@ -1390,18 +1390,18 @@ program ESMF_ArrayEx
     distgridToArrayMap=(/0,0/), undistLBound=(/11,21/), &
     undistUBound=(/14,22/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The result will be an Array with local lower bound (/11,21/) and upper bound
 ! (/14,22/) on all 6 DEs of the DistGrid.
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Replicated Arrays can also be created from existing local Fortran arrays.
@@ -1418,7 +1418,7 @@ program ESMF_ArrayEx
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The following call creates an Array object on the above distgrid using
 ! the locally existing {\tt myFarray2D} Fortran arrays. The difference 
@@ -1432,7 +1432,7 @@ program ESMF_ArrayEx
   array = ESMF_ArrayCreate(farray=myFarray2D, distgrid=distgrid, &
     indexflag=ESMF_INDEX_DELOCAL, distgridToArrayMap=(/0,2/), rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The {\tt array} object associates the 2nd DistGrid dimension with the 2nd
 ! Array dimension. The first DistGrid dimension is not associated with any
@@ -1442,11 +1442,11 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   deallocate(myFarray2D)
 
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1500,7 +1500,7 @@ program ESMF_ArrayEx
   distgrid = ESMF_DistGridCreate(minIndex=minIndex, maxIndex=maxIndex, &
     regDecomp=regDecomp, connectionList=connectionList, rc=rc)
 !EOCI  
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOEI
 ! The decomposition described by {\tt regDecomp} assumes that there is an even 
 ! number of PETs available in the current Component. The decomposition will be 
@@ -1513,7 +1513,7 @@ program ESMF_ArrayEx
 !BOCI
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R4, rank=2, rc=rc)
 !EOCI
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOEI
 ! Finally the Array objects can be created for this {\tt arrayspec} and {\tt 
 ! distgrid}. A scalar tracer Array will be created without halo padding.
@@ -1521,7 +1521,7 @@ program ESMF_ArrayEx
 !BOCI
   arrayTracer = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, rc=rc)
 !EOCI
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOEI
 ! Next an Array is created for a scalar with space for a halo width of one 
 ! element in each direction.
@@ -1530,13 +1530,13 @@ program ESMF_ArrayEx
   arrayScalar = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
 !EOCI
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArrayDestroy(arrayTracer, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArrayDestroy(arrayScalar, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 

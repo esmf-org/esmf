@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.24 2011/02/10 05:19:22 samson.cheung Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.25 2011/06/22 15:07:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,10 +69,10 @@ program ESMF_FieldIOUTest
   ! Set up
   ! *******
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
 !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.23 2011/01/05 20:05:41 svasquez Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.24 2011/06/22 15:07:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -180,14 +180,14 @@ program ESMF_DELayoutWQUTest
   integer :: result = 0
 
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
-  !if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  !if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   call ESMF_VMGet(vm, localPet=localPet, pthreadsEnabledFlag=pthreadsEnabled, &
     rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
   !----------------- test without threads ----------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.76 2011/06/22 01:04:10 w6ws Exp $
+! $Id: ESMF_Init.F90,v 1.77 2011/06/22 15:08:01 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -435,11 +435,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_Finalize - Clean up and shut down ESMF
 !
 ! !INTERFACE:
-      subroutine ESMF_Finalize(keywordEnforcer, terminationflag, rc)
+      subroutine ESMF_Finalize(keywordEnforcer, endflag, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TerminationFlag), intent(in), optional  :: terminationflag
+      type(ESMF_End_Flag), intent(in), optional  :: endflag
       integer, intent(out), optional                    :: rc
 
 !
@@ -450,19 +450,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     This must be called once on each PET before the application exits
 !     to allow ESMF to flush buffers, close open connections, and 
 !     release internal resources cleanly. The optional argument 
-!     {\tt terminationflag} may be used to indicate the mode of termination.  
+!     {\tt endflag} may be used to indicate the mode of termination.  
 !     Note that this call must be issued only once per PET with 
-!     {\tt terminationflag=ESMF\_FINAL}, and that this call may not be followed
+!     {\tt endflag=ESMF\_END\_NORMAL}, and that this call may not be followed
 !     by {\tt ESMF\_Initialize()}.  This last restriction means that it is not
 !     possible to restart ESMF within the same execution.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [{[terminationflag]}]
-!           Specify mode of termination. The default is {\tt ESMF\_FINAL}
+!     \item [{[endflag]}]
+!           Specify mode of termination. The default is {\tt ESMF\_END\_NORMAL}
 !           which waits for all PETs of the global VM to reach 
 !           {\tt ESMF\_Finalize()} before termination. See section 
-!           \ref{app:terminationflag} for a complete list and description of
+!           \ref{app:endflag} for a complete list and description of
 !           valid flags.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -513,9 +513,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       abortFlag = .false.
       keepMpiFlag = ESMF_FALSE
-      if (present(terminationflag)) then
-        if (terminationflag==ESMF_ABORT) abortFlag = .true.
-        if (terminationflag==ESMF_KEEPMPI) keepMpiFlag = ESMF_TRUE
+      if (present(endflag)) then
+        if (endflag==ESMF_END_ABORT) abortFlag = .true.
+        if (endflag==ESMF_END_KEEPMPI) keepMpiFlag = ESMF_TRUE
       endif
       
       if (abortFlag) then

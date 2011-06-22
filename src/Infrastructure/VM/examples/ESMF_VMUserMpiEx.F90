@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.17 2011/01/19 02:13:18 svasquez Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.18 2011/06/22 15:07:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -63,8 +63,8 @@ program ESMF_VMUserMpiEx
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-  call ESMF_Finalize(terminationflag=ESMF_KEEPMPI, rc=rc)
-  ! Calling with terminationflag=ESMF_KEEPMPI instructs ESMF_Finalize() to keep
+  call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
+  ! Calling with endflag=ESMF_END_KEEPMPI instructs ESMF_Finalize() to keep
   ! MPI active.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

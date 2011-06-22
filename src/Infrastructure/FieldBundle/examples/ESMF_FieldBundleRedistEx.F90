@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistEx.F90,v 1.15 2011/03/04 19:00:34 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistEx.F90,v 1.16 2011/06/22 15:07:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.15 2011/03/04 19:00:34 feiliu Exp $'
+    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.16 2011/06/22 15:07:25 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -55,10 +55,10 @@
 !------------------------------------------------------------------------------
     call ESMF_Initialize(defaultlogfilename="FieldBundleRedistEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &
-        call ESMF_Finalize(terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !------------------------------------------------------------------------------
 !BOE
 ! \subsubsection{Redistribute data from a source FieldBundle to a destination FieldBundle}

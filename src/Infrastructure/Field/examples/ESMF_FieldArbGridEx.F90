@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.18 2011/02/24 23:32:04 oehmke Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.19 2011/06/22 15:07:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,15 +45,15 @@
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="FieldArbGridEx.Log", &
                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Calculate localArbIndex and localArbIndexCount for a 100x200 2D arbitrary grid with 
     ! an optional undistributed 3rd dimenison of size 4
     ! get global VM
     call ESMF_VMGetGlobal(vm, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_VMGet(vm, petCount=petCount, localPet=myPet, rc=rc)
-    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(terminationflag=ESMF_ABORT)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
     ! grid dimension: xdim and ydim are arbitrarily distributed
     xdim = 100

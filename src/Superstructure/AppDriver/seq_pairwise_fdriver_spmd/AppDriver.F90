@@ -76,7 +76,7 @@
     call ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_LogWrite("ESMF AppDriver start", ESMF_LOG_INFO)
 
@@ -90,12 +90,12 @@
     config = ESMF_ConfigCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_ConfigLoadFile(config, USER_CONFIG_FILE, rc = localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !---------------------------------------------------------------------------
 !  Get configuration information.
@@ -110,12 +110,12 @@
       default=10, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_ConfigGetAttribute(config, j_max, label='J Counts:', &
       default=40, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !---------------------------------------------------------------------------
 !  Create the top Gridded Component.
@@ -125,7 +125,7 @@
 	rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
@@ -135,7 +135,7 @@
 
     call ESMF_GridCompSetServices(compGridded, SetServices, rc=rc)
     if (ESMF_LogFoundError(rc, msg="Registration failed", rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !----------------------------------------------------------------------------
 !  Create and initialize a Clock.
@@ -144,23 +144,23 @@
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       call ESMF_TimeSet(startTime, yy=2004, mm=9, dd=25, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       call ESMF_TimeSet(stopTime, yy=2004, mm=9, dd=26, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       clock = ESMF_ClockCreate(timeStep, startTime, stopTime=stopTime, &
                 name="Application Clock", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !----------------------------------------------------------------------------
 !  Create and initialize a Grid.
@@ -177,13 +177,13 @@
                              name="source grid", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       ! Attach the grid to the Component
       call ESMF_GridCompSet(compGridded, grid=grid, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !----------------------------------------------------------------------------
 !  Create and initialize a State to use for both import and export.
@@ -194,7 +194,7 @@
       defaultstate = ESMF_StateCreate(name="Default State", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
-            call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
      
 !----------------------------------------------------------------------------
 !  Call the initialize, run, and finalize methods of the top component.
@@ -207,17 +207,17 @@
       call ESMF_GridCompInitialize(compGridded, importState=defaultstate, &
         exportState=defaultstate, clock=clock, rc=localrc)
       if (ESMF_LogFoundError(rc, msg="Initialize failed", rcToReturn=rc)) &
-          call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
  
       call ESMF_GridCompRun(compGridded, importState=defaultstate, &
         exportState=defaultstate, clock=clock, rc=localrc)
       if (ESMF_LogFoundError(rc, msg="Run failed", rcToReturn=rc)) &
-          call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       call ESMF_GridCompFinalize(compGridded, importState=defaultstate, &
         exportState=defaultstate, clock=clock, rc=localrc)
       if (ESMF_LogFoundError(rc, msg="Finalize failed", rcToReturn=rc)) &
-          call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
  
  
 !----------------------------------------------------------------------------
@@ -227,17 +227,17 @@
       call ESMF_ClockDestroy(clock, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       call ESMF_StateDestroy(defaultstate, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       call ESMF_GridCompDestroy(compGridded, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !----------------------------------------------------------------------------
 !  Finalize and clean up.
