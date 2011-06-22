@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.75 2011/06/20 19:53:11 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.76 2011/06/22 01:04:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -292,6 +292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
       type(ESMF_LogType) :: defaultLogTypeUse
+      logical :: openflag
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -316,6 +317,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return
           end if
       end if
+
+      ! Some compiler RTLs have a problem with flushing the unit used by
+      ! various ESMF Print routines when nothing has been written on the unit.
+      ! Intel 10.1.021 is an example, though the problem is fixed in later
+      ! releases.  Doing an inquire up front avoids the problem.
+
+      inquire (ESMF_UtilIOStdin,  opened=openflag)
+      inquire (ESMF_UtilIOStdout, opened=openflag)
+      inquire (ESMF_UtilIOStderr, opened=openflag)
 
       ! Initialize the VM. This creates the GlobalVM.
       ! Note that if VMKernel threading is to be used ESMF_VMInitialize() _must_
