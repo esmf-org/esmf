@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.98 2011/06/16 14:06:01 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.99 2011/06/22 04:57:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.98 2011/06/16 14:06:01 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.99 2011/06/22 04:57:46 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -820,12 +820,25 @@
                    ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
 
-    myOrigCount = si%mycount  ! my original count on entering this routine
+!TODO: gjt: commented this out as a temp. work-around after container integration
+!    myOrigCount = si%mycount  ! my original count on entering this routine
 
 petloop:  &
     do, j = 0, pets-1
 !!DEBUG "Outer loop, j = ", j
 
+       !TODO: gjt: This moved down here as a temporary work-around after the
+       !TODO: gjt: container integration into State. The issue is that with 
+       !TODO: gjt: the container underpinning new elements are inserted
+       !TODO: gjt: alphabetically rather than appended at the end. This means
+       !TODO: gjt: that when ESMF_StateInfoBuild() is called (below) it will
+       !TODO: gjt: potentially mess up what is in the first myOrigCount
+       !TODO: gjt: elements. The long term solution is to _not_ call 
+       !TODO: gjt: ESMF_StateInfoBuild() over and over while receiving, but
+       !TODO: gjt: instead use StateAdd() with relaxedflag when adding received
+       !TODO: gjt: objects to the State.
+       myOrigCount = si%mycount  ! current count on send side
+       
        ! each PET takes turns broadcasting to all
 
        i_send = mypet == j
