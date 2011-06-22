@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.95 2011/06/16 18:46:19 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.96 2011/06/22 01:01:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.95 2011/06/16 18:46:19 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.96 2011/06/22 01:01:31 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -163,10 +163,10 @@
       !EX_UTest 
       ! Get  uncreated array from State 
       arrayname = "Test Array"
-      write(failMsg, *) "Did not return ESMF_RC_ARG_INCOMP"
+      write(failMsg, *) "Did not return ESMF_RC_NOT_FOUND"
       write(name, *) "Get uncreated array from a State Test"
       call ESMF_StateGet(state4, arrayname, testarray, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_RC_ARG_INCOMP), &
+      call ESMF_Test((rc.eq.ESMF_RC_NOT_FOUND), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
