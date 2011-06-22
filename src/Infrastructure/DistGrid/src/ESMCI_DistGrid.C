@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.58 2011/06/03 05:18:36 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.59 2011/06/22 21:55:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.58 2011/06/03 05:18:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.59 2011/06/22 21:55:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -230,7 +230,7 @@ DistGrid *DistGrid::create(
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
               }
-            }else{
+            }else if (positionVector[j] > 0){
               if (firstExtra->array[dg->dimCount*(tileB-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
@@ -240,7 +240,7 @@ DistGrid *DistGrid::create(
           }
         }
         if (lastExtra){
-          // there are possible modifications on the lower edge
+          // there are possible modifications on the upper edge
           for (int j=0; j<dg->dimCount; j++){
             if (positionVector[j] < 0){
               if (lastExtra->array[dg->dimCount*(tileB-1)+j] != 0){
@@ -248,7 +248,7 @@ DistGrid *DistGrid::create(
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
               }
-            }else{
+            }else if (positionVector[j] > 0){
               if (lastExtra->array[dg->dimCount*(tileA-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
