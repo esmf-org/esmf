@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.24 2011/06/22 15:07:14 rokuingh Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.25 2011/06/22 19:51:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@ module ESMF_DELayoutWQUTest_mod
     type(ESMF_DELayout):: delayout
     integer:: petCount, localPet, localDeCount, i, workDe, k, deCount
     integer, allocatable:: localDeList(:)
-    type(ESMF_DELayoutServiceReply):: reply
+    type(ESMF_ServiceReply_Flag):: reply
     real:: x
     
     rc = ESMF_SUCCESS
@@ -95,7 +95,7 @@ module ESMF_DELayoutWQUTest_mod
 !        print *, "I am PET", localPET, " and I am offering service for DE ", workDe
         reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-        if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
+        if (reply == ESMF_SERVICEREPLY_ACCEPT) then
 !          print *, "I am PET", localPET, ", service offer for DE ", workDe, &
 !            " was accepted."
           call work(x, workDe, petCount)  ! work for workDe

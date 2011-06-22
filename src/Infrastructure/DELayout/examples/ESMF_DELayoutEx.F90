@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.26 2011/06/22 15:07:13 rokuingh Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.27 2011/06/22 19:51:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ program ESMF_DELayoutEx
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   logical:: oneToOneFlag
-  type(ESMF_DELayoutServiceReply):: reply
+  type(ESMF_ServiceReply_Flag):: reply
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
@@ -311,7 +311,7 @@ endif
              " and I am offering service for DE ", workDe
     reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
     if (rc /= ESMF_SUCCESS) finalrc=rc
-    if (reply == ESMF_DELAYOUT_SERVICE_ACCEPT) then
+    if (reply == ESMF_SERVICEREPLY_ACCEPT) then
       ! process work associated with workDe
       print *, "I am PET", localPET, ", service offer for DE ", workDe, &
         " was accepted."
