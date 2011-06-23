@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.8 2011/06/23 21:51:09 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.9 2011/06/23 21:55:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -333,19 +333,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_DistGridConnectionGetInit(connection) 
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_DistGridConnectionGetInit   
+    ESMF_INIT_TYPE :: ESMF_DistGridConnectionGetInit   
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridConnection), intent(in), optional :: connection
+    type(ESMF_DistGridConnection), intent(in), optional :: connection
 !
 ! !DESCRIPTION:
-!      Access deep object init code.
+!   Access init code.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [connection]
-!           DistGridConnection object.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [connection]
+!     DistGridConnection object.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------

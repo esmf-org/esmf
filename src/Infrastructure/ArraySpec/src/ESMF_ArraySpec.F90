@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.51 2011/06/21 01:33:45 w6ws Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.52 2011/06/23 21:54:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.51 2011/06/21 01:33:45 w6ws Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.52 2011/06/23 21:54:11 theurich Exp $'
 
 !==============================================================================
 
@@ -556,19 +556,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_ArraySpecGetInit(arrayspec) 
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_ArraySpecGetInit   
+    ESMF_INIT_TYPE :: ESMF_ArraySpecGetInit   
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in), optional :: arrayspec
+    type(ESMF_ArraySpec), intent(in), optional :: arrayspec
 !
 ! !DESCRIPTION:
-!      Access deep object init code.
+!   Access init code.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [arrayspec]
-!           ArraySpec object.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [arrayspec]
+!     ArraySpec object.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
