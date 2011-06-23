@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.17 2011/06/22 17:08:36 feiliu Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.18 2011/06/23 00:04:58 rokuingh Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -191,7 +191,7 @@ program Blk2BlkBunRedist
     fieldbundle3 = ESMF_FieldBundleCreate(name="fieldbundle3", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, terminationflag=ESMF_ABORT)
+        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_FieldBundleAdd(fieldbundle3, (/field3/), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
