@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.39 2011/06/18 04:45:27 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.40 2011/06/23 21:33:18 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -127,9 +127,11 @@ There are many attributes that are used to describe components. There are curren
      {\tt Version} & Version number of the component. & N/A \\
      \hline\hline
 \end{tabular}
-* Attribute required to be set to produce valid CIM XML output. \\
-** If PreviousVersionDescription is set, PreviousVersion must also be set, to produce valid CIM XML output. \\
-*** If not set, defaults to 1.0
+\begin{description}
+ \item[*] Attribute required to be set to produce valid CIM XML output. \\
+ \item[**] If PreviousVersionDescription is set, PreviousVersion must also be set, to produce valid CIM XML output. \\
+ \item[***] If not set, defaults to 1.0
+\end{description}
 
 \vspace{.20in}
 
@@ -164,9 +166,10 @@ There are many attributes that are used to describe components. There are curren
      {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
      \hline\hline
 \end{tabular}
-* Attribute required to be set to produce valid CIM XML output. \\
-** Both CompilerName and CompilerVersion are required to be set, or else neither one, to produce valid CIM XML output; setting one without the other will produce invalid CIM XML output. \\
-
+\begin{description}
+  \item[*] Attribute required to be set to produce valid CIM XML output. \\
+  \item[**] Both CompilerName and CompilerVersion are required to be set, or else neither one, to produce valid CIM XML output; setting one without the other will produce invalid CIM XML output. \\
+\end{description}
 
 \vspace{.20in}
 {\bf 2.2. ISO Responsible Party Attribute Package}
@@ -196,8 +199,9 @@ There are many attributes that are used to describe components. There are curren
      {\tt URL} & A URL of an individual or organization. & N/A \\
      \hline\hline
 \end{tabular}
-* Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Responsible Party package instance, although there may be other populated instances, which, because they have attributes set, will appear in the output. \\
-
+\begin{description}
+  \item[*] Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Responsible Party package instance, although there may be other populated instances, which, because they have attributes set, will appear in the output. \\
+\end{description}
 
 \vspace{.20in}
 {\bf 2.3. ISO Citation Attribute Package}
@@ -224,8 +228,9 @@ There are many attributes that are used to describe components. There are curren
      {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
      \hline\hline
 \end{tabular}
-* Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Citation package instance, although there may be other populated instances, which, because they have attributes set, will appear in the output. \\
-
+\begin{description}
+ \item[*] Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Citation package instance, although there may be other populated instances, which, because they have attributes set, will appear in the output. \\
+\end{description}
 
 
 \vspace{.20in}
@@ -338,8 +343,11 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time Accumulation, Time Average, Time Interpolation\\ 
     \hline\hline
 \end{tabular}
-* Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Inputs package. \\
-** If SpatialRegriddingMethod is set, SpatialRegriddingDimension must also be set, to produce valid CIM XML output. \\
+\begin{description}
+ \item[*] Attribute required to be set, when any other attributes in this package are set, to produce valid CIM XML output. It is valid to set none of the attributes in this package. In that case, no corresponding CIM XML output will appear for that Inputs package. \\
+ \item[**] If SpatialRegriddingMethod is set, SpatialRegriddingDimension must also be set, to produce valid CIM XML output. \\
+\end{description}
+
 
 
 \vspace{.20in}
@@ -424,7 +432,9 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package & N/A\\
     \hline\hline
 \end{tabular}
-* Attribute required to be set, if any attributes are set within this package, the CF/Extended, or ESMF/General package, to produce valid CIM XML output. It is valid to set none of the attributes in this package, the CF/Extended, or ESMF/General package, in which case no field CIM output will be produced. \\
+\begin{description}
+ \item[*] Attribute required to be set, if any attributes are set within this package, the CF/Extended, or ESMF/General package, to produce valid CIM XML output. It is valid to set none of the attributes in this package, the CF/Extended, or ESMF/General package, in which case no field CIM output will be produced. \\
+\end{description}
 
 
 \vspace{.20in}
