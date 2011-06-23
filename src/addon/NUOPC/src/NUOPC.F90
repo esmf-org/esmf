@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.12 2011/06/14 05:57:59 eschwab Exp $
+! $Id: NUOPC.F90,v 1.13 2011/06/23 15:54:42 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -946,7 +946,7 @@ module NUOPC
     integer           :: item, itemCount, fieldCount, stat
     type(ESMF_Field)  :: field
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
-    type(ESMF_StateItemType), allocatable :: stateitemtypeList(:)
+    type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
     
     if (present(rc)) rc = ESMF_SUCCESS
     

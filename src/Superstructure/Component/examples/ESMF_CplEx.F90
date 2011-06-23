@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.51 2011/06/16 05:56:54 eschwab Exp $
+! $Id: ESMF_CplEx.F90,v 1.52 2011/06/23 15:54:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -309,14 +309,14 @@
     !  between components.
 
     exportState = ESMF_StateCreate(name=cname,  &
-                                   stateType=ESMF_STATE_EXPORT, rc=rc)
+                                   stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if    
 
     importState = ESMF_StateCreate(name=cname,  &
-                                   stateType=ESMF_STATE_IMPORT, rc=rc)
+                                   stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE

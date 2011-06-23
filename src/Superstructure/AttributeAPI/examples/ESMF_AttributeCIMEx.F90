@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.36 2011/06/08 05:47:34 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.37 2011/06/23 15:54:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@ program ESMF_AttributeCIMEx
 
       ! Create State
       exportState = ESMF_StateCreate(name="exportState",  &
-        stateType=ESMF_STATE_EXPORT, rc=rc)
+        stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
 
       ! Create Field
       ozone = ESMF_FieldEmptyCreate(name='ozone', rc=rc)

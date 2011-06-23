@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.95 2011/06/09 19:42:28 eschwab Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.96 2011/06/23 15:54:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.95 2011/06/09 19:42:28 eschwab Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.96 2011/06/23 15:54:27 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -4076,14 +4076,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! set the import and export Attributes on any Field connected to this State @\
       lvalue1 = .true. @\
       lvalue2 = .false. @\
-      if (mthis1%mthisfield3 == ESMF_STATE_IMPORT) then @\
+      if (mthis1%mthisfield3 == ESMF_STATEINTENT_IMPORT) then @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue1, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname2, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
-      else if (mthis1%mthisfield3 == ESMF_STATE_EXPORT) then @\
+      else if (mthis1%mthisfield3 == ESMF_STATEINTENT_EXPORT) then @\
         call c_ESMC_AttributeSetObjsInTree(mthisfield1, lobject, lname1, & @\
           ESMF_TYPEKIND_LOGICAL, 1, lvalue2, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\

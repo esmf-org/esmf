@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.6 2011/06/22 17:17:23 feiliu Exp $
+! $Id: NUOPC_Connector.F90,v 1.7 2011/06/23 15:54:42 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -88,7 +88,7 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateType)                  :: isType, esType
+    type(ESMF_StateIntent_Flag)                  :: isType, esType
     integer                               :: isItemCount, esItemCount
     type(ESMF_VM)                         :: vm
     
@@ -128,7 +128,7 @@ module NUOPC_Connector
       file=FILENAME)) &
       return  ! bail out
     
-    if (.not.((isType==ESMF_STATE_EXPORT).and.(esType==ESMF_STATE_IMPORT))) then
+    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
       ! not ES -> IS ==> should indicate problem???
     endif
     
@@ -150,7 +150,7 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateType)                  :: isType, esType
+    type(ESMF_StateIntent_Flag)                  :: isType, esType
     integer                               :: isItemCount, esItemCount
     character(ESMF_MAXSTR)                :: cplList(100) !TODO make dynamic
     integer                               :: cplListSize, i, j
@@ -216,7 +216,7 @@ module NUOPC_Connector
       file=FILENAME)) &
       return  ! bail out
     
-    if (.not.((isType==ESMF_STATE_EXPORT).and.(esType==ESMF_STATE_IMPORT))) then
+    if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
       ! not ES -> IS ==> should indicate problem???
     endif
     

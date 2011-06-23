@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.20 2011/06/22 15:08:53 rokuingh Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.21 2011/06/23 15:55:12 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -257,12 +257,12 @@ program ESMF_DirectCouplingSTest
 
   ! ioComp
   ioImp = ESMF_StateCreate(name="ioComp import",  &
-                           stateType=ESMF_STATE_IMPORT, rc=localrc)
+                           stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   ioExp = ESMF_StateCreate(name="ioComp export",  &
-                           stateType=ESMF_STATE_EXPORT, rc=localrc)
+                           stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -277,12 +277,12 @@ program ESMF_DirectCouplingSTest
 
   ! modelComp
   modelImp = ESMF_StateCreate(name="modelComp import",  &
-                              stateType=ESMF_STATE_IMPORT, rc=localrc)
+                              stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   modelExp = ESMF_StateCreate(name="modelComp export",  &
-                              stateType=ESMF_STATE_EXPORT, rc=localrc)
+                              stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

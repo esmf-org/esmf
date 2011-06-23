@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.27 2011/06/22 17:41:04 feiliu Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.28 2011/06/23 15:54:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,9 +87,9 @@ program ESMF_AttributePackageEx
           petList=(/0,1,2,3/), rc=rc)
       endif
       importState = ESMF_StateCreate(name="importState",  &
-                                     stateType=ESMF_STATE_IMPORT, rc=rc)
+                                     stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
       exportState = ESMF_StateCreate(name="exportState",  &
-                                     stateType=ESMF_STATE_EXPORT, rc=rc)
+                                     stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
         
       DPEDT = ESMF_FieldEmptyCreate(name='DPEDT', rc=rc)
       DTDT = ESMF_FieldEmptyCreate(name='DTDT', rc=rc)

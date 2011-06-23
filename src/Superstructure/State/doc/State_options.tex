@@ -1,6 +1,6 @@
-% $Id: State_options.tex,v 1.14 2011/06/15 01:18:34 w6ws Exp $
+% $Id: State_options.tex,v 1.15 2011/06/23 15:54:32 rokuingh Exp $
 
-\subsubsection{ESMF\_StateItemType}
+\subsubsection{ESMF\_STATEITEM}
 \label{opt:stateitemtype}
 
 {\sf DESCRIPTION:\\}
@@ -26,7 +26,7 @@ Valid values are:
          Object type within an {\tt ESMF\_State} is unknown.
 \end{description}
 
-\subsubsection{ESMF\_StateType}
+\subsubsection{ESMF\_STATEINTENT}
 \label{opt:statetype}
 {\sf DESCRIPTION:\\}
 Specifies whether an {\tt ESMF\_State} contains data to be imported
@@ -34,11 +34,11 @@ into a component or exported from a component.
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_STATE\_IMPORT] 
+   \item [ESMF\_STATEINTENT\_IMPORT] 
          Contains data to be imported into a component.
-   \item [ESMF\_STATE\_EXPORT]
+   \item [ESMF\_STATEINTENT\_EXPORT]
          Contains data to be exported out of a component.
-   \item [ESMF\_STATE\_INVALID]
+   \item [ESMF\_STATEINTENT\_INVALID]
          Does not contain valid data.
 \end{description}
 

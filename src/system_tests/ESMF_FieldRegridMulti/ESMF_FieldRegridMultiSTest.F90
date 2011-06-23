@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.34 2011/06/16 05:57:30 eschwab Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.35 2011/06/23 15:55:33 rokuingh Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -165,14 +165,14 @@
 !-------------------------------------------------------------------------
 
     c1exp = ESMF_StateCreate(name="comp1 export",  &
-                             stateType=ESMF_STATE_EXPORT, rc=rc)
+                             stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1 Initialize finished, rc =", rc
 
     c2imp = ESMF_StateCreate(name="comp2 import",  &
-                             stateType=ESMF_STATE_IMPORT, rc=rc)
+                             stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10

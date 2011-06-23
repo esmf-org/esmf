@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.4 2011/06/23 04:30:21 w6ws Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.5 2011/06/23 15:54:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.4 2011/06/23 04:30:21 w6ws Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.5 2011/06/23 15:54:37 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -132,7 +132,7 @@ contains
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
       character(len=*),       intent(in),  optional :: statename 
-      type(ESMF_StateType),   intent(in),  optional :: statetype
+      type(ESMF_StateIntent_Flag),   intent(in),  optional :: statetype
       type(ESMF_Array),       intent(in),  optional :: arrays(:)
       type(ESMF_ArrayBundle), intent(in),  optional :: arraybundles(:)
       type(ESMF_Field),       intent(in),  optional :: fields(:)
@@ -153,9 +153,9 @@ contains
 !   \item[{[statename]}]
 !    Name of this {\tt ESMF\_State} object. 
 !   \item[{[statetype]}]
-!    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATE\_IMPORT},
-!    {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.   
-!    {\tt ESMF\_STATE\_LIST} is the default if not specified.
+!    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATEINTENT\_IMPORT},
+!    {\tt ESMF\_STATEINTENT\_EXPORT}, or {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.   
+!    {\tt ESMF\_STATEINTENT\_UNSPECIFIED} is the default if not specified.
 !   \item[{[arrays]}]
 !    An array of {\tt ESMF\_Arrays}.
 !   \item[{[arraybundles]}]
@@ -325,7 +325,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer             :: stypep
       character(len=*),     intent(in),  optional :: statename 
-      type(ESMF_StateType), intent(in),  optional :: statetype
+      type(ESMF_StateIntent_Flag), intent(in),  optional :: statetype
       integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -336,9 +336,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 !       \item[{[stypep]}]
 !       Internal StateClass pointer.  Required.
 !       \item[{[statetype]}]
-!        Import or Export {\tt State}.  One of {\tt ESMF\_STATE\_IMPORT},
-!        {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.  Default is 
-!        {\tt ESMF\_STATE\_LIST}.
+!        Import or Export {\tt State}.  One of {\tt ESMF\_STATEINTENT\_IMPORT},
+!        {\tt ESMF\_STATEINTENT\_EXPORT}, or {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.  Default is 
+!        {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
 !       \item[{[statename]}]
 !        Name of this {\tt ESMF\_State} object.  Optional.  If a name is not
 !        specified one will be generated.
@@ -364,7 +364,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         if (present(statetype)) then
           stypep%st = statetype
         else
-          stypep%st = ESMF_STATE_UNSPECIFIED
+          stypep%st = ESMF_STATEINTENT_UNSPECIFIED
         endif
         stypep%reconcileneededflag = .false.
 
@@ -435,7 +435,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           ! with each entry.  note that we are not freeing the objects
           ! themselves; they could be added to multiple states.  it is
           ! the user|s responsibility to delete them when finished.
-          stypep%st = ESMF_STATE_INVALID
+          stypep%st = ESMF_STATEINTENT_INVALID
 
           ! Remove StateItem entries, then the container itself.
           scwrap => null ()
@@ -1211,7 +1211,7 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
       type(ESMF_Logical) :: linkChange
       integer :: datacount
       character(ESMF_MAXSTR) :: localnamep
-      type(ESMF_StateItemType) :: localotype
+      type(ESMF_StateItem_Flag) :: localotype
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit,vm,rc)

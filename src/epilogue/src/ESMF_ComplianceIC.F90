@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.29 2011/06/14 23:32:47 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.30 2011/06/23 15:54:45 rokuingh Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -728,10 +728,10 @@ module ESMF_ComplianceICMod
     integer                               :: itemCount, item
     integer                               :: fieldCount, fitem
     character(ESMF_MAXSTR)                :: name
-    type(ESMF_StateType)                  :: statetype
+    type(ESMF_StateIntent_Flag)                  :: statetype
     character(ESMF_MAXSTR)                :: tempString
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
-    type(ESMF_StateItemType), allocatable :: stateitemtypeList(:)
+    type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
     type(ESMF_Field)                      :: field
     type(ESMF_FieldBundle)                :: fieldbundle
 
@@ -764,14 +764,14 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      if (statetype==ESMF_STATE_IMPORT) then
-        tempString = "ESMF_STATE_IMPORT"
-      else if (statetype==ESMF_STATE_EXPORT) then
-        tempString = "ESMF_STATE_EXPORT"
-      else if (statetype==ESMF_STATE_UNSPECIFIED) then
-        tempString = "ESMF_STATE_UNSPECIFIED"
+      if (statetype==ESMF_STATEINTENT_IMPORT) then
+        tempString = "ESMF_STATEINTENT_IMPORT"
+      else if (statetype==ESMF_STATEINTENT_EXPORT) then
+        tempString = "ESMF_STATEINTENT_EXPORT"
+      else if (statetype==ESMF_STATEINTENT_UNSPECIFIED) then
+        tempString = "ESMF_STATEINTENT_UNSPECIFIED"
       else
-        tempString = "ESMF_STATE_INVALID"
+        tempString = "ESMF_STATEINTENT_INVALID"
       endif
       call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" statetype: "// &
         trim(tempString), ESMF_LOG_INFO, rc=rc)

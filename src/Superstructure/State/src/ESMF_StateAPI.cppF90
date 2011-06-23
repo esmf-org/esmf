@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.6 2011/06/22 21:47:58 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.7 2011/06/23 15:54:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.6 2011/06/22 21:47:58 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.7 2011/06/23 15:54:37 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -616,13 +616,13 @@ contains
       lvalue1 = 'Import'  @\
       lvalue2 = 'Export' @\
       lname  = 'VariableIntent' @\
-      if (state%statep%st == ESMF_STATE_IMPORT) then @\
+      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
            trim (lobject), trim (lname), trim (lvalue1), localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
            ESMF_ERR_PASSTHRU, & @\
            ESMF_CONTEXT, rcToReturn=rc)) return @\
-      else if (state%statep%st == ESMF_STATE_EXPORT) then @\
+      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
            trim (lobject), trim (lname), trim (lvalue2), localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
@@ -839,14 +839,14 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
       lvalue1 = 'Import'  @\
       lvalue2 = 'Export' @\
       lname  = 'VariableIntent' @\
-      if (state%statep%st == ESMF_STATE_IMPORT) then @\
+      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
           trim (lobject), trim (lname), trim (lvalue1), localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
           ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, & @\
           rcToReturn=rc)) return @\
-      else if (state%statep%st == ESMF_STATE_EXPORT) then @\
+      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
         call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
           trim (lobject), trim (lname), trim (lvalue2), localrc) @\
         if (ESMF_LogFoundError(localrc, & @\
@@ -975,7 +975,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 !
 ! !ARGUMENTS:
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_StateType),   intent(in),  optional :: statetype
+      type(ESMF_StateIntent_Flag),   intent(in),  optional :: statetype
       type(ESMF_Array),       intent(in),  optional :: arrayList(:)
       type(ESMF_ArrayBundle), intent(in),  optional :: arraybundleList(:)
       type(ESMF_Field),       intent(in),  optional :: fieldList(:)
@@ -993,9 +993,9 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 !  \begin{description}
 !   \item[{[statetype]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are 
-!    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
-!    or {\tt ESMF\_STATE\_UNSPECIFIED} The default 
-!    is {\tt ESMF\_STATE\_UNSPECIFIED}.
+!    {\tt ESMF\_STATEINTENT\_IMPORT}, {\tt ESMF\_STATEINTENT\_EXPORT}, 
+!    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED} The default 
+!    is {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
 !   \item[{[arrayList]}]
 !    A list (Fortran array) of {\tt ESMF\_Array}s.
 !   \item[{[arraybundleList]}]
@@ -1182,10 +1182,10 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),        intent(in),  optional :: itemSearch
       logical,                  intent(in),  optional :: nestedFlag
-      type(ESMF_StateType),     intent(out), optional :: stateType
+      type(ESMF_StateIntent_Flag),     intent(out), optional :: stateType
       integer,                  intent(out), optional :: itemCount
       character (len=*),        intent(out), optional :: itemNameList(:)
-      type(ESMF_StateItemType), intent(out), optional :: itemTypeList(:)
+      type(ESMF_StateItem_Flag), intent(out), optional :: itemTypeList(:)
       character (len=*),        intent(out), optional :: name
       integer,                  intent(out), optional :: rc             
 
@@ -1625,7 +1625,7 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
 ! !ARGUMENTS:
       type(ESMF_State),         intent(in)  :: state
       character (len=*),        intent(in)  :: itemName
-      type(ESMF_StateItemType), intent(out) :: itemType
+      type(ESMF_StateItem_Flag), intent(out) :: itemType
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                  intent(out), optional :: rc             
 
@@ -2148,7 +2148,7 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
 	 if (present (rc)) rc = ESMF_SUCCESS
 	 return
        end if
-       if (state%statep%st .eq. ESMF_STATE_INVALID) then
+       if (state%statep%st .eq. ESMF_STATEINTENT_INVALID) then
 	 write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
 	 if (present (rc)) rc = ESMF_SUCCESS
 	 return
@@ -2187,13 +2187,13 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
        write (ESMF_UtilIOStdout,*) nestr, "State name: ", trim(name)
 
        select case (sp1%st%state)
-       case (ESMF_STATE_IMPORT%state)
+       case (ESMF_STATEINTENT_IMPORT%state)
          msgbuf = "Import State"
-       case (ESMF_STATE_EXPORT%state)
+       case (ESMF_STATEINTENT_EXPORT%state)
          msgbuf = "Export State"
-       case (ESMF_STATE_UNSPECIFIED%state)
+       case (ESMF_STATEINTENT_UNSPECIFIED%state)
          msgbuf = "Unspecified direction"
-       case (ESMF_STATE_INVALID%state)
+       case (ESMF_STATEINTENT_INVALID%state)
          call ESMF_LogWrite(msg="Uninitialized or already destroyed State", &
              msgtype=ESMF_LOG_INFO)
          if (present (rc1)) rc1 = ESMF_SUCCESS

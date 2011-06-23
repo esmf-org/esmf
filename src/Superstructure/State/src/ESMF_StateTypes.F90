@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.47 2011/06/15 17:33:43 w6ws Exp $
+! $Id: ESMF_StateTypes.F90,v 1.48 2011/06/23 15:54:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_State
-      public ESMF_StateItemType, &
+      public ESMF_StateItem_Flag, &
         ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
         ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, &
@@ -79,8 +79,8 @@
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateItemWrap
       public ESMF_StateItemConstruct
-      public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
-                                   ESMF_STATE_UNSPECIFIED
+      public ESMF_StateIntent_Flag, ESMF_STATEINTENT_IMPORT, ESMF_STATEINTENT_EXPORT, &
+                                   ESMF_STATEINTENT_UNSPECIFIED
 #if ESMF_ENABLE_NEEDED
       public ESMF_NeededFlag, ESMF_NEEDED, &
                                    ESMF_NOTNEEDED
@@ -100,7 +100,7 @@
       public ESMF_STATEITEM_INDIRECT
 #endif
       public ESMF_STATEITEM_UNKNOWN
-      public ESMF_STATE_INVALID
+      public ESMF_STATEINTENT_INVALID
 
       ! Public Methods
       public ESMF_DataHolderValidate
@@ -124,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.47 2011/06/15 17:33:43 w6ws Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.48 2011/06/23 15:54:37 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -163,14 +163,14 @@ end interface
 
 function ESMF_oteq(s1, s2)
  logical ESMF_oteq
- type(ESMF_StateItemType), intent(in) :: s1, s2
+ type(ESMF_StateItem_Flag), intent(in) :: s1, s2
 
  ESMF_oteq = (s1%ot == s2%ot)
 end function
 
 function ESMF_otne(s1, s2)
  logical ESMF_otne
- type(ESMF_StateItemType), intent(in) :: s1, s2
+ type(ESMF_StateItem_Flag), intent(in) :: s1, s2
 
  ESMF_otne = (s1%ot /= s2%ot)
 end function
@@ -178,14 +178,14 @@ end function
 
 function ESMF_imexeq(s1, s2)
  logical ESMF_imexeq
- type(ESMF_StateType), intent(in) :: s1, s2
+ type(ESMF_StateIntent_Flag), intent(in) :: s1, s2
 
  ESMF_imexeq = (s1%state == s2%state)
 end function
 
 function ESMF_imexne(s1, s2)
  logical ESMF_imexne
- type(ESMF_StateType), intent(in) :: s1, s2
+ type(ESMF_StateIntent_Flag), intent(in) :: s1, s2
 
  ESMF_imexne = (s1%state /= s2%state)
 end function

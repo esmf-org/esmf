@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.13 2011/05/11 22:38:06 rokuingh Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.14 2011/06/23 15:54:24 rokuingh Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -93,19 +93,19 @@
 
       ! Now create Import and Export State objects in order to pass data
       ! between the Coupler and the Gridded Components
-      G1imp = ESMF_StateCreate(statetype=ESMF_STATE_IMPORT, &
+      G1imp = ESMF_StateCreate(statetype=ESMF_STATEINTENT_IMPORT, &
         name="GComp1 Import")
-      G1exp = ESMF_StateCreate(statetype=ESMF_STATE_EXPORT, &
+      G1exp = ESMF_StateCreate(statetype=ESMF_STATEINTENT_EXPORT, &
         name="GComp1 Export")
 
-      G2imp = ESMF_StateCreate(statetype=ESMF_STATE_IMPORT, &
+      G2imp = ESMF_StateCreate(statetype=ESMF_STATEINTENT_IMPORT, &
         name="GComp2 Import")
-      G2exp = ESMF_StateCreate(statetype=ESMF_STATE_EXPORT, &
+      G2exp = ESMF_StateCreate(statetype=ESMF_STATEINTENT_EXPORT, &
         name="GComp2 Export")
 
-      Cplimp = ESMF_StateCreate(statetype=ESMF_STATE_IMPORT, &
+      Cplimp = ESMF_StateCreate(statetype=ESMF_STATEINTENT_IMPORT, &
         name="Coupler Import")
-      Cplexp = ESMF_StateCreate(statetype=ESMF_STATE_EXPORT, &
+      Cplexp = ESMF_StateCreate(statetype=ESMF_STATEINTENT_EXPORT, &
         name="Coupler Export")
       call ESMF_StateAdd(Cplimp, G1imp, rc=rc)
       call ESMF_StateAdd(Cplimp, G2imp, rc=rc)

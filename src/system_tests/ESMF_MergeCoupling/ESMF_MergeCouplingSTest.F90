@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.26 2011/06/16 05:57:34 eschwab Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.27 2011/06/23 15:55:39 rokuingh Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -165,28 +165,28 @@
 !-------------------------------------------------------------------------
 
       c1exp = ESMF_StateCreate(name="comp1 export",  &
-                               stateType=ESMF_STATE_EXPORT, rc=rc)
+                               stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
 
       c2exp = ESMF_StateCreate(name="comp2 export",  &
-                               stateType=ESMF_STATE_EXPORT, rc=rc)
+                               stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp2, exportState=c2exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
 
       c3imp = ESMF_StateCreate(name="comp3 import",  &
-                               stateType=ESMF_STATE_IMPORT, rc=rc)
+                               stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp3, importState=c3imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1a Initialize finished, rc =", rc
 
       bothexp = ESMF_StateCreate(name="coupler import",  &
-                                 stateType=ESMF_STATE_IMPORT, rc=rc)
+                                 stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
       call ESMF_StateAddState(bothexp, c1exp, rc=rc)
       call ESMF_StateAddState(bothexp, c2exp, rc=rc)
 

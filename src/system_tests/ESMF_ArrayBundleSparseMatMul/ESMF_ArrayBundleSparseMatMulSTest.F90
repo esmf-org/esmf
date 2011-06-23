@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.22 2011/06/22 15:08:18 rokuingh Exp $
+! $Id: ESMF_ArrayBundleSparseMatMulSTest.F90,v 1.23 2011/06/23 15:54:48 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -214,7 +214,7 @@ program ESMF_ArrayBundleSparseMMSTest
 !-------------------------------------------------------------------------
 
   c1exp = ESMF_StateCreate(name="comp1 export",  &
-                           stateType=ESMF_STATE_EXPORT, rc=localrc)
+                           stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -229,7 +229,7 @@ program ESMF_ArrayBundleSparseMMSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   c2imp = ESMF_StateCreate(name="comp2 import",  &
-                           stateType=ESMF_STATE_IMPORT, rc=localrc)
+                           stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

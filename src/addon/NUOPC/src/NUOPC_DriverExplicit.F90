@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.6 2011/04/28 15:13:35 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.7 2011/06/23 15:54:42 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -135,13 +135,13 @@ module NUOPC_DriverExplicit
 
       is%wrap%modelIS(i) = ESMF_StateCreate(name="modelComp "// &
         trim(adjustl(iString))//" Import State", &
-        statetype=ESMF_STATE_IMPORT, rc=rc)
+        statetype=ESMF_STATEINTENT_IMPORT, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
       is%wrap%modelES(i) = ESMF_StateCreate(name="modelComp "// &
         trim(adjustl(iString))//" Export State", &
-        statetype=ESMF_STATE_EXPORT, rc=rc)
+        statetype=ESMF_STATEINTENT_EXPORT, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         

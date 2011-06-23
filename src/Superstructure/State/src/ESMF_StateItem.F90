@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.9 2011/06/15 17:33:43 w6ws Exp $
+! $Id: ESMF_StateItem.F90,v 1.10 2011/06/23 15:54:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,30 +45,30 @@
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateItemType
+!     ! ESMF_StateItem_Flag
 !     !   Each entry in the list of states is either simply a name placeholder
 !     !   or an actual data item - FieldBundle, Field, Array, or State. 
 !
-      type ESMF_StateItemType
+      type ESMF_StateItem_Flag
       sequence
       !private
          integer :: ot
       end type
 
       ! keep these numbers distinct from the 30 or so esmf object types.
-      type(ESMF_StateItemType), parameter :: &
-                ESMF_STATEITEM_FIELD        = ESMF_StateItemType(101), &
-                ESMF_STATEITEM_FIELDBUNDLE  = ESMF_StateItemType(102), &
-                ESMF_STATEITEM_ARRAY        = ESMF_StateItemType(103), &
-                ESMF_STATEITEM_ARRAYBUNDLE  = ESMF_StateItemType(104), &
-                ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItemType(105), &
-                ESMF_STATEITEM_STATE        = ESMF_StateItemType(106), &
+      type(ESMF_StateItem_Flag), parameter :: &
+                ESMF_STATEITEM_FIELD        = ESMF_StateItem_Flag(101), &
+                ESMF_STATEITEM_FIELDBUNDLE  = ESMF_StateItem_Flag(102), &
+                ESMF_STATEITEM_ARRAY        = ESMF_StateItem_Flag(103), &
+                ESMF_STATEITEM_ARRAYBUNDLE  = ESMF_StateItem_Flag(104), &
+                ESMF_STATEITEM_ROUTEHANDLE  = ESMF_StateItem_Flag(105), &
+                ESMF_STATEITEM_STATE        = ESMF_StateItem_Flag(106), &
 #if 0
-                ESMF_STATEITEM_NAME         = ESMF_StateItemType(107), &
-                ESMF_STATEITEM_INDIRECT     = ESMF_StateItemType(108), &
+                ESMF_STATEITEM_NAME         = ESMF_StateItem_Flag(107), &
+                ESMF_STATEITEM_INDIRECT     = ESMF_StateItem_Flag(108), &
 #endif
-                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItemType(109), &
-                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItemType(110)
+                ESMF_STATEITEM_UNKNOWN      = ESMF_StateItem_Flag(109), &
+                ESMF_STATEITEM_NOTFOUND     = ESMF_StateItem_Flag(110)
 
 #if 0
 !------------------------------------------------------------------------------
@@ -166,7 +166,7 @@
 #endif
       !private
         type(ESMF_DataHolder) :: datap
-        type(ESMF_StateItemType) :: otype
+        type(ESMF_StateItem_Flag) :: otype
 #if 0
         type(ESMF_NeededFlag) :: needed 
         type(ESMF_ReadyFlag) :: ready
@@ -196,20 +196,20 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateType
+!     ! ESMF_StateIntent_Flag
 !     !   Enumerated value for storing Import or Export State type.
 !
-      type ESMF_StateType
+      type ESMF_StateIntent_Flag
       sequence
       !private
          integer :: state
       end type
 
-      type(ESMF_StateType), parameter :: &
-                ESMF_STATE_IMPORT   = ESMF_StateType(1), &
-                ESMF_STATE_EXPORT   = ESMF_StateType(2), &
-                ESMF_STATE_UNSPECIFIED = ESMF_StateType(3), &
-                ESMF_STATE_INVALID  = ESMF_StateType(4)
+      type(ESMF_StateIntent_Flag), parameter :: &
+                ESMF_STATEINTENT_IMPORT   = ESMF_StateIntent_Flag(1), &
+                ESMF_STATEINTENT_EXPORT   = ESMF_StateIntent_Flag(2), &
+                ESMF_STATEINTENT_UNSPECIFIED = ESMF_StateIntent_Flag(3), &
+                ESMF_STATEINTENT_INVALID  = ESMF_StateIntent_Flag(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateClass
@@ -223,7 +223,7 @@
       !private
         type(ESMF_Base) :: base
         type(ESMF_MethodTable) :: methodTable
-        type(ESMF_StateType) :: st
+        type(ESMF_StateIntent_Flag) :: st
 #if 0
         type(ESMF_NeededFlag) :: needed_default
         type(ESMF_ReadyFlag) :: ready_default
@@ -244,7 +244,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 
-      public ESMF_StateItemType, &
+      public ESMF_StateItem_Flag, &
         ESMF_STATEITEM_FIELD, ESMF_STATEITEM_FIELDBUNDLE, &
         ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_ARRAYBUNDLE, &
         ESMF_STATEITEM_ROUTEHANDLE, ESMF_STATEITEM_STATE, &
@@ -253,8 +253,8 @@
 #endif
         ESMF_STATEITEM_NOTFOUND
       public ESMF_StateItemConstruct
-      public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
-                                   ESMF_STATE_UNSPECIFIED
+      public ESMF_StateIntent_Flag, ESMF_STATEINTENT_IMPORT, ESMF_STATEINTENT_EXPORT, &
+                                   ESMF_STATEINTENT_UNSPECIFIED
 #if 0
       public ESMF_NeededFlag, ESMF_NEEDED, &
                                    ESMF_NOTNEEDED
@@ -273,7 +273,7 @@
 #if 0
       public ESMF_STATEITEM_INDIRECT
 #endif
-      public ESMF_STATEITEM_UNKNOWN, ESMF_STATE_INVALID
+      public ESMF_STATEITEM_UNKNOWN, ESMF_STATEINTENT_INVALID
 
   
 !------------------------------------------------------------------------------
@@ -308,7 +308,7 @@ contains
 !
 ! !ARGUMENTS:
     character(*),             intent(in) :: name
-    type(ESMF_StateItemType), intent(in) :: itemtype
+    type(ESMF_StateItem_Flag), intent(in) :: itemtype
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                  intent(in),  optional :: proxyflag
     integer,                  intent(out), optional :: rc

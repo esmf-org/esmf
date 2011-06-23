@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.19 2011/05/23 21:00:04 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.20 2011/06/23 15:54:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -594,14 +594,14 @@ contains
 
        ! create and initialize data members 
        importState = ESMF_StateCreate(name="Import", &
-                                      statetype=ESMF_STATE_IMPORT, rc=localrc)
+                                      statetype=ESMF_STATEINTENT_IMPORT, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, &
          rcToReturn=rc)) &
           return
 
        exportState = ESMF_StateCreate(name="Export", &
-                                      statetype=ESMF_STATE_EXPORT, rc=localrc)
+                                      statetype=ESMF_STATEINTENT_EXPORT, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, &
          rcToReturn=rc)) &

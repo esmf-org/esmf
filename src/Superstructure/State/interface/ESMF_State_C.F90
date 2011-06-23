@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.33 2011/02/23 20:15:50 w6ws Exp $
+! $Id: ESMF_State_C.F90,v 1.34 2011/06/23 15:54:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.33 2011/02/23 20:15:50 w6ws Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.34 2011/06/23 15:54:35 rokuingh Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -331,13 +331,13 @@
        type(ESMF_State), intent(in)              :: state                  !in
        integer, intent(in)                       :: numItems               !in
        character(len=*), intent(inout)           :: itemNameList(numItems) !out
-       type(ESMF_StateItemType), intent(inout)   :: itemTypeList(numItems) !out
+       type(ESMF_StateItem_Flag), intent(inout)   :: itemTypeList(numItems) !out
        integer, intent(out)                      :: rc                     !out
 
        ! local variable
        integer                    :: itemCount
        character(len=ESMF_MAXSTR) :: localNameList(numItems)
-       type(ESMF_StateItemType)   :: localTypeList(numItems)
+       type(ESMF_StateItem_Flag)   :: localTypeList(numItems)
 
        integer                    :: i
 

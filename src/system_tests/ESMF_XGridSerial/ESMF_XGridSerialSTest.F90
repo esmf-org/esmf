@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.14 2011/06/22 15:09:24 rokuingh Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.15 2011/06/23 15:55:46 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_diable_SYSTEM_TEST        String used by test script to count system tests.
@@ -214,7 +214,7 @@ program ESMF_XGridSerialSTest
 
   ! land export state
   land_export = ESMF_StateCreate(name="land export",  &
-                                 stateType=ESMF_STATE_EXPORT, rc=localrc)
+                                 stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -229,7 +229,7 @@ program ESMF_XGridSerialSTest
 
   ! ocean export state
   ocean_export = ESMF_StateCreate(name="ocean export",  &
-                                  stateType=ESMF_STATE_EXPORT, rc=localrc)
+                                  stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -244,7 +244,7 @@ program ESMF_XGridSerialSTest
 
   ! nestted state with land and ocean attached inside
   landocn_export = ESMF_StateCreate(name="landocn export",  &
-                                    stateType=ESMF_STATE_EXPORT, rc=localrc)
+                                    stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -261,7 +261,7 @@ program ESMF_XGridSerialSTest
 
   ! atmosphere import state
   atmos_import = ESMF_StateCreate(name="atmos import",  &
-                                  stateType=ESMF_STATE_IMPORT, rc=localrc)
+                                  stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
