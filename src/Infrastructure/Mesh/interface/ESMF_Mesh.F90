@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.65 2011/06/21 03:58:59 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.66 2011/06/23 19:46:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.65 2011/06/21 03:58:59 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.66 2011/06/23 19:46:43 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -120,17 +120,17 @@ module ESMF_MeshMod
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2)
 
-  type ESMF_FileFormatType
+  type ESMF_FileFormat_Flag
   sequence
  ! private
     integer :: fileformat
   end type
 
-  type(ESMF_FileFormatType), parameter :: &
-        ESMF_FILEFORMAT_VTK = ESMF_FileFormatType(1), &
-        ESMF_FILEFORMAT_SCRIP = ESMF_FileFormatType(2), &
-        ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormatType(3), &
-        ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormatType(4)
+  type(ESMF_FileFormat_Flag), parameter :: &
+        ESMF_FILEFORMAT_VTK = ESMF_FileFormat_Flag(1), &
+        ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
+        ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
+        ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
@@ -143,7 +143,7 @@ module ESMF_MeshMod
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
   
-  public ESMF_FileFormatType, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
+  public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
 	 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID
     
   public ESMF_MeshLoc
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.65 2011/06/21 03:58:59 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.66 2011/06/23 19:46:43 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -206,7 +206,7 @@ module ESMF_MeshMod
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_FileFormatTypeEqual
+         module procedure ESMF_FileFormatEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
@@ -222,7 +222,7 @@ module ESMF_MeshMod
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_FileFormatTypeNotEqual
+         module procedure ESMF_FileFormatNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -1000,7 +1000,7 @@ contains
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
-    type(ESMF_FileFormatType), intent(in)     :: filetype
+    type(ESMF_FileFormat_Flag), intent(in)     :: filetype
     logical, intent(in), optional             :: convert3D
     logical, intent(in), optional             :: convertToDual
     integer, intent(out), optional            :: rc
@@ -2988,72 +2988,72 @@ end subroutine ESMF_MeshMergeSplitDstInd
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FileFormatTypeEqual"
+#define ESMF_METHOD "ESMF_FileFormatEqual"
 !BOPI
-! !IROUTINE: ESMF_FileFormatTypeEqual - Equality of FileFormatTypes
+! !IROUTINE: ESMF_FileFormatEqual - Equality of FileFormats
 !
 ! !INTERFACE:
-      function ESMF_FileFormatTypeEqual(FileFormatType1, FileFormatType2)
+      function ESMF_FileFormatEqual(FileFormat1, FileFormat2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_FileFormatTypeEqual
+      logical :: ESMF_FileFormatEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_FileFormatType), intent(in) :: &
-         FileFormatType1,      &! Two igrid statuses to compare for
-         FileFormatType2        ! equality
+      type (ESMF_FileFormat_Flag), intent(in) :: &
+         FileFormat1,      &! Two igrid statuses to compare for
+         FileFormat2        ! equality
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF_FileFormatTypeType statuses to see if
+!     This routine compares two ESMF_FileFormat_Flag statuses to see if
 !     they are equivalent.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[FileFormatType1, FileFormatType2]
+!     \item[FileFormat1, FileFormat2]
 !          Two igrid statuses to compare for equality
 !     \end{description}
 !
 !EOPI
 
-      ESMF_FileFormatTypeEqual = (FileFormatType1%fileformat == &
-                              FileFormatType2%fileformat)
+      ESMF_FileFormatEqual = (FileFormat1%fileformat == &
+                              FileFormat2%fileformat)
 
-      end function ESMF_FileFormatTypeEqual
+      end function ESMF_FileFormatEqual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FileFormatTypeNotEqual"
+#define ESMF_METHOD "ESMF_FileFormatNotEqual"
 !BOPI
-! !IROUTINE: ESMF_FileFormatTypeNotEqual - Non-equality of FileFormatTypes
+! !IROUTINE: ESMF_FileFormatNotEqual - Non-equality of FileFormats
 !
 ! !INTERFACE:
-      function ESMF_FileFormatTypeNotEqual(FileFormatType1, FileFormatType2)
+      function ESMF_FileFormatNotEqual(FileFormat1, FileFormat2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_FileFormatTypeNotEqual
+      logical :: ESMF_FileFormatNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_FileFormatType), intent(in) :: &
-         FileFormatType1,      &! Two FileFormatType Statuses to compare for
-         FileFormatType2        ! inequality
+      type (ESMF_FileFormat_Flag), intent(in) :: &
+         FileFormat1,      &! Two FileFormatType Statuses to compare for
+         FileFormat2        ! inequality
 
 ! !DESCRIPTION:
-!     This routine compares two ESMF_FileFormatTypeType statuses to see if
+!     This routine compares two ESMF_FileFormat_Flag statuses to see if
 !     they are unequal.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[FileFormatType1, FileFormatType2]
-!          Two statuses of FileFormatTypes to compare for inequality
+!     \item[FileFormat1, FileFormat2]
+!          Two statuses of FileFormats to compare for inequality
 !     \end{description}
 !
 !EOPI
 
-      ESMF_FileFormatTypeNotEqual = (FileFormatType1%fileformat /= &
-                                 FileFormatType2%fileformat)
+      ESMF_FileFormatNotEqual = (FileFormat1%fileformat /= &
+                                 FileFormat2%fileformat)
 
-      end function ESMF_FileFormatTypeNotEqual
+      end function ESMF_FileFormatNotEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
