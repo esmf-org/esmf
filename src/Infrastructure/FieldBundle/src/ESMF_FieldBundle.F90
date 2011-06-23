@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.110 2011/06/22 23:37:23 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.111 2011/06/23 00:39:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.110 2011/06/22 23:37:23 w6ws Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.111 2011/06/23 00:39:20 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -894,7 +894,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_XGrid)        :: xgrid
     type(ESMF_Mesh)         :: mesh
     type(ESMF_LocStream)    :: locstream
-    type(ESMF_FieldStatus)  :: fstatus
+    type(ESMF_FieldStatus_Flag)  :: fstatus
 
     ! Initialize return code
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -5161,7 +5161,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_XGrid)                                  :: xgrid
     type(ESMF_Mesh)                                   :: mesh
     type(ESMF_LocStream)                              :: locstream
-    type(ESMF_FieldStatus)                            :: fstatus
+    type(ESMF_FieldStatus_Flag)                            :: fstatus
 
     localrc = ESMF_RC_NOT_IMPL
     if(present(rc)) rc = ESMF_RC_NOT_IMPL

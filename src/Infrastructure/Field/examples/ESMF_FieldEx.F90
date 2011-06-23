@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.38 2011/06/22 15:07:22 rokuingh Exp $
+! $Id: ESMF_FieldEx.F90,v 1.39 2011/06/23 00:39:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -72,7 +72,7 @@
     type(ESMF_DistGrid) :: distgrid5d
     integer             :: fsize(7)
     integer             :: flbound(7), fubound(7)
-    type(ESMF_FieldStatus) :: fstatus
+    type(ESMF_FieldStatus_Flag) :: fstatus
 
     real(4) :: PI=3.14159265
     integer :: finalrc, i, j, k

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.11 2011/06/22 17:27:18 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.12 2011/06/23 00:39:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.11 2011/06/22 17:27:18 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.12 2011/06/23 00:39:17 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -266,7 +266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   type(ESMF_STAGGERLOC)                 :: l_staggerloc
   type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus)                :: status
+  type(ESMF_FieldStatus_Flag)                :: status
   integer                               :: localrc
   type(ESMF_Logical)                    :: linkChange
 
@@ -367,7 +367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   type(ESMF_MeshLoc)                    :: l_meshloc
   type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus)                :: status
+  type(ESMF_FieldStatus_Flag)                :: status
   integer                               :: localrc
 
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -452,7 +452,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
   type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus)                :: status
+  type(ESMF_FieldStatus_Flag)                :: status
   integer                               :: localrc
 
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -546,7 +546,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   type(ESMF_XGridSide)                  :: l_xgridside
   type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus)                :: status
+  type(ESMF_FieldStatus_Flag)                :: status
   integer                               :: localrc, l_gridindex
 
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -760,7 +760,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_GeomType)       :: geomtype
     type(ESMF_Grid)           :: grid
-    type(ESMF_FieldStatus)    :: status
+    type(ESMF_FieldStatus_Flag)    :: status
 
 
     ! Initialize
@@ -998,7 +998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase)       :: geombase
     type(ESMF_GeomType)       :: geomtype
     type(ESMF_Grid)           :: grid
-    type(ESMF_FieldStatus)    :: status
+    type(ESMF_FieldStatus_Flag)    :: status
     type(ESMF_GridDecompType) :: decompType
 
 
@@ -2051,7 +2051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase)   :: geombase @\
     type(ESMF_GeomType)   :: geomtype @\
     type(ESMF_Grid)       :: grid @\
-    type(ESMF_FieldStatus):: status @\
+    type(ESMF_FieldStatus_Flag):: status @\
     type(ESMF_GridDecompType) :: decompType @\
 @\
     if (present(rc)) then @\
@@ -2243,7 +2243,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase)            :: geombase @\
     type(ESMF_GeomType)            :: geomtype @\
     type(ESMF_Grid)                :: grid @\
-    type(ESMF_FieldStatus)         :: status @\
+    type(ESMF_FieldStatus_Flag)         :: status @\
     type(ESMF_GridDecompType)      :: decompType @\
 @\
     if (present(rc)) then @\

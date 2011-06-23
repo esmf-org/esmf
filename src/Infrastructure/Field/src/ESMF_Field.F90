@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.362 2011/06/03 05:18:40 theurich Exp $
+! $Id: ESMF_Field.F90,v 1.363 2011/06/23 00:39:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,18 +66,18 @@ module ESMF_FieldMod
   private
 
 !------------------------------------------------------------------------------
-! ! ESMF_FieldStatus
+! ! ESMF_FieldStatus_Flag
 
-  type ESMF_FieldStatus
+  type ESMF_FieldStatus_Flag
     sequence
     !private
     integer :: status
   end type
 
-  type(ESMF_FieldStatus), parameter :: ESMF_FIELDSTATUS_UNINIT = ESMF_FieldStatus(1), &
-                                  ESMF_FIELDSTATUS_EMPTY = ESMF_FieldStatus(2), &
-                                  ESMF_FIELDSTATUS_GRIDSET = ESMF_FieldStatus(3), &
-                                  ESMF_FIELDSTATUS_COMPLETE = ESMF_FieldStatus(4)
+  type(ESMF_FieldStatus_Flag), parameter :: ESMF_FIELDSTATUS_UNINIT = ESMF_FieldStatus_Flag(1), &
+                                  ESMF_FIELDSTATUS_EMPTY = ESMF_FieldStatus_Flag(2), &
+                                  ESMF_FIELDSTATUS_GRIDSET = ESMF_FieldStatus_Flag(3), &
+                                  ESMF_FIELDSTATUS_COMPLETE = ESMF_FieldStatus_Flag(4)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_FieldType
@@ -89,7 +89,7 @@ module ESMF_FieldMod
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
     type (ESMF_GeomBase)          :: geombase
-    type (ESMF_FieldStatus)       :: status
+    type (ESMF_FieldStatus_Flag)       :: status
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
@@ -118,7 +118,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_Field
-  public ESMF_FieldStatus
+  public ESMF_FieldStatus_Flag
   public ESMF_FieldType ! For internal use only
 
   public ESMF_FIELDSTATUS_UNINIT, ESMF_FIELDSTATUS_EMPTY, &
@@ -145,7 +145,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.362 2011/06/03 05:18:40 theurich Exp $'
+    '$Id: ESMF_Field.F90,v 1.363 2011/06/23 00:39:15 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -715,14 +715,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 function ESMF_sfeq(sf1, sf2)
  logical ESMF_sfeq
- type(ESMF_FieldStatus), intent(in) :: sf1, sf2
+ type(ESMF_FieldStatus_Flag), intent(in) :: sf1, sf2
 
  ESMF_sfeq = (sf1%status == sf2%status)
 end function
 
 function ESMF_sfne(sf1, sf2)
  logical ESMF_sfne
- type(ESMF_FieldStatus), intent(in) :: sf1, sf2
+ type(ESMF_FieldStatus_Flag), intent(in) :: sf1, sf2
 
  ESMF_sfne = (sf1%status /= sf2%status)
 end function
