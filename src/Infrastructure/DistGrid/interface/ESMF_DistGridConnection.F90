@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.6 2011/06/09 22:27:26 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.7 2011/06/23 21:49:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -292,6 +292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT)) &
         return  ! bail out
       do i=1, size(connectionList)
+        ESMF_INIT_CHECK_SHALLOW(ESMF_DistGridConnectionGetInit, connectionList(i), rc)
         if (connectionList(i)%elementCount /= elementCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="elementCount mismatch between DistGridConnection elements.", &
@@ -319,6 +320,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_InterfaceIntCreateDGConn
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridConnectionGetInit"
+!BOPI
+! !IROUTINE: ESMF_DistGridConnectionGetInit - Internal access routine for init code
+!
+! !INTERFACE:
+  function ESMF_DistGridConnectionGetInit(connection) 
+!
+! !RETURN VALUE:
+      ESMF_INIT_TYPE :: ESMF_DistGridConnectionGetInit   
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridConnection), intent(in), optional :: connection
+!
+! !DESCRIPTION:
+!      Access deep object init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [connection]
+!           DistGridConnection object.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    if (present(connection)) then
+      ESMF_DistGridConnectionGetInit = ESMF_INIT_GET(connection)
+    else
+      ESMF_DistGridConnectionGetInit = ESMF_INIT_DEFINED
+    endif
+
+  end function ESMF_DistGridConnectionGetInit
 !------------------------------------------------------------------------------
 
 
