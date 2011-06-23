@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.97 2011/06/23 18:14:08 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.98 2011/06/23 20:35:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.97 2011/06/23 18:14:08 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.98 2011/06/23 20:35:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -864,13 +864,13 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy() 
-!     subroutine ESMF_AttributeCopy(<object1>, <object2>, attdatacopyflag, &
+!     subroutine ESMF_AttributeCopy(<object1>, <object2>, copyflag, &
 !                 atttreeflag, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values  
 !     <object2>, see below for supported values 
-!     type(ESMF_AttCopyFlag), intent(in) :: attdatacopyflag
+!     type(ESMF_Copy_Flag), intent(in) :: copyflag
 !     type(ESMF_AttTreeFlag), intent(in) :: atttreeflag
 !     integer, intent(out), optional :: rc   
 !
@@ -897,7 +897,7 @@ contains
 !           An {\tt ESMF} object
 !     \item [<object2>]
 !           An {\tt ESMF} object
-!     \item [attdatacopyflag]
+!     \item [copyflag]
 !           A flag to determine if the copy is to be by reference, value,
 !           or both
 !     \item [atttreeflag]
@@ -910,12 +910,12 @@ contains
 !     NOTE:  Not all combinations of copy flags are enabled at this time.  See
 !            the reference manual for an overview of the options available for 
 !            {\tt ESMF\_AttributeCopy()}.
-!            The options for {\tt attdatacopyflag} include:
+!            The options for {\tt copyflag} include:
 !            \begin{enumerate}
-!              \item ESMF\_ATTCOPY\_HYBRID will copy the top base level
+!              \item ESMF\_COPY\_ALIAS will copy the top base level
 !		     Attributes by value, and all others by reference
-!              \item ESMF\_ATTCOPY\_REFERENCE will copy all Attributes by reference
-!              \item ESMF\_ATTCOPY\_VALUE will copy all Attributes by value
+!              \item ESMF\_COPY\_REFERENCE will copy all Attributes by reference
+!              \item ESMF\_COPY\_VALUE will copy all Attributes by value
 !            \end{enumerate}
 !            The options for {\tt atttreeflag} include:
 !            \begin{enumerate}
@@ -2647,12 +2647,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeCopy() @\
-      subroutine mclass1##AttCopy(mthis1, mthis2, attdatacopyflag, atttreeflag, rc) @\
+      subroutine mclass1##AttCopy(mthis1, mthis2, copyflag, atttreeflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1   @\
       type(mclass2), intent(inout) :: mthis2 @\
-      type(ESMF_AttCopyFlag), intent(in) :: attdatacopyflag @\
+      type(ESMF_Copy_Flag), intent(in) :: copyflag @\
       type(ESMF_AttTreeFlag), intent(in) :: atttreeflag @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -2666,7 +2666,7 @@ contains
 !      An {\tt mclass1} object. @\
 !     \item [mthis2] @\
 !      An {\tt mclass2} object. @\
-!     \item [attdatacopyflag] @\
+!     \item [copyflag] @\
 !      A flag to determine if the copy is to be by reference, value, or both @\
 !     \item [atttreeflag] @\
 !      A flag to determine if the copy is supposed to descend the Attribute @\
@@ -2691,7 +2691,7 @@ contains
       ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
  @\
       call c_ESMC_AttributeCopy(mthisfield1, mthisfield2, & @\
-                                attdatacopyflag, atttreeflag, localrc) @\
+                                copyflag, atttreeflag, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\

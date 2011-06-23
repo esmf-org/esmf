@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.33 2011/06/22 17:41:04 feiliu Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.34 2011/06/23 20:35:37 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -697,7 +697,7 @@ module ESMF_AttributeUpdateMod
     call ESMF_AttributeUpdate(importState, vm, rootList=rootList, rc=rc)
    
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
+      ESMF_COPY_ALIAS, ESMF_ATTTREE_ON, rc=rc)
 !EOC
 
 

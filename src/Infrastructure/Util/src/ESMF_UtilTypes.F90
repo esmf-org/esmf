@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.123 2011/06/22 15:07:45 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.124 2011/06/23 20:35:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -520,20 +520,20 @@
         ESMF_ATTRECONCILE_ON = ESMF_AttReconcileFlag(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_AttCopyFlag
+!     ! ESMF_Copy_Flag
 !
 !     ! Interface flag for Attribute copy
 
-      type ESMF_AttCopyFlag
+      type ESMF_Copy_Flag
       sequence
       !private
         integer :: value
       end type
 
-      type(ESMF_AttCopyFlag), parameter ::  &
-        ESMF_ATTCOPY_HYBRID = ESMF_AttCopyFlag(0), &
-        ESMF_ATTCOPY_REFERENCE = ESMF_AttCopyFlag(1), &
-        ESMF_ATTCOPY_VALUE = ESMF_AttCopyFlag(2)
+      type(ESMF_Copy_Flag), parameter ::  &
+        ESMF_COPY_ALIAS = ESMF_Copy_Flag(0), &
+        ESMF_COPY_REFERENCE = ESMF_Copy_Flag(1), &
+        ESMF_COPY_VALUE = ESMF_Copy_Flag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttGetCountFlag
@@ -697,8 +697,8 @@
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
       public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
-      public ESMF_AttCopyFlag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
-                               ESMF_ATTCOPY_VALUE
+      public ESMF_Copy_Flag, ESMF_COPY_ALIAS, ESMF_COPY_REFERENCE, &
+                               ESMF_COPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
                                    ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
       public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.37 2011/06/23 18:14:10 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.38 2011/06/23 20:35:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.37 2011/06/23 18:14:10 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.38 2011/06/23 20:35:40 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1199,7 +1199,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Copy a CplComp Attribute hierarchy VALUE ONE LEVEL Test
       call ESMF_AttributeCopy(cplcomp, cplcompValue, &
-        attdatacopyflag=ESMF_ATTCOPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
+        copyflag=ESMF_COPY_VALUE, atttreeflag=ESMF_ATTTREE_OFF, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copying a CplComp Attribute hierarchy VALUE ONE LEVEL Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1208,7 +1208,7 @@ program ESMF_AttributeCplCompUTest
       !EX_UTest
       ! Copy a CplComp Attribute hierarchy HYBRID Test
       call ESMF_AttributeCopy(cplcomp, cplcompHybrid, &
-        attdatacopyflag=ESMF_ATTCOPY_HYBRID, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
+        copyflag=ESMF_COPY_ALIAS, atttreeflag=ESMF_ATTTREE_ON, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Copying a CplComp Attribute hierarchy HYBRID Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

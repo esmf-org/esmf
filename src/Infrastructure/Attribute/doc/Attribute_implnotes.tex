@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.28 2011/05/20 16:57:37 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.29 2011/06/23 20:35:33 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -55,10 +55,10 @@ The {\tt ESMF\_AttributeWrite()} interface is in limited form at the present tim
 The ability to copy an Attribute hierarchy is limited at this time.  The {\tt ESMF\_AttributeCopy()} routine can be used to {\it locally} copy an Attribute hierarchy between two States or Components.  It is important to note that this is a local copy, and no inter-PET communication is carried out.  Another thing to note is that when this functionality is based on a reference copy any further changes made to some portions of the original Attribute hierarchy will also affect the new Attribute hierarchy.
 
 \begin{sloppypar}
-There are two flags in the {\tt ESMF\_AttributeCopy()} routine which specify which type of copy is desired.  At this point there are only two different varieties of Attribute hierarchy copies available.  One of the requires the {\tt ESMF\_AttCopyFlag} to be set to {\tt ESMF\_ATTCOPY\_VALUE} and the {\tt ESMF\_AttTreeFlag} to be set to {\tt ESMF\_ATTTREE\_OFF}.  This does a copy of only the first level of an Attribute hierarchy, by value.
+There are two flags in the {\tt ESMF\_AttributeCopy()} routine which specify which type of copy is desired.  At this point there are only two different varieties of Attribute hierarchy copies available.  One of the requires the {\tt ESMF\_Copy\_Flag} to be set to {\tt ESMF\_COPY\_VALUE} and the {\tt ESMF\_AttTreeFlag} to be set to {\tt ESMF\_ATTTREE\_OFF}.  This does a copy of only the first level of an Attribute hierarchy, by value.
 \end{sloppypar}
 
-The second available copy can be applied by setting the {\tt ESMF\_AttCopyFlag} to {\tt ESMF\_ATTCOPY\_HYBRID} and the {\tt ESMF\_AttTreeFlag} to {\tt ESMF\_ATTTREE\_ON}.  This copy is more of a hybrid approach of reference and value copies.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full (by value), while the Attributes which are linked to the object being copied are referenced by a pointer (by reference).  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B with this approach, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
+The second available copy can be applied by setting the {\tt ESMF\_Copy\_Flag} to {\tt ESMF\_COPY\_ALIAS} and the {\tt ESMF\_AttTreeFlag} to {\tt ESMF\_ATTTREE\_ON}.  This copy is more of a hybrid approach of reference and value copies.  In this case the Attributes which {\it belong} to the object being copied are actually copied in full (by value), while the Attributes which are linked to the object being copied are referenced by a pointer (by reference).  This means that after copying an Attribute hierarchy from ESMF object A to ESMF object B with this approach, the changes made to the lower portion of either A or B's Attribute hierarchy will be reflected on {\it both} object A and object B.
 
 \subsubsection{Reading and writing Attributes from XML files}
 \label{Att:Xerces}

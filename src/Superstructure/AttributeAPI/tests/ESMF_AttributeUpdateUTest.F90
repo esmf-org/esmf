@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.16 2011/06/23 15:54:29 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.17 2011/06/23 20:35:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -400,7 +400,7 @@ module ESMF_AttributeUpdateUTestMod
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
+      ESMF_COPY_ALIAS, ESMF_ATTTREE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine usercpl_run
@@ -531,7 +531,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.16 2011/06/23 15:54:29 rokuingh Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.17 2011/06/23 20:35:40 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 

@@ -254,7 +254,7 @@ program ESMF_AttributeSTest
   ! you must call AttributeUpdate to make this data
   ! available VM wide (above)
 !  call ESMF_AttributeCopy(comp1, comp2, &
-!      ESMF_ATTCOPY_HYBRID, ESMF_ATTTREE_ON, rc=rc)
+!      ESMF_COPY_ALIAS, ESMF_ATTTREE_ON, rc=rc)
 !  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
 !    ESMF_CONTEXT, rcToReturn=rc)) &
 !    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
