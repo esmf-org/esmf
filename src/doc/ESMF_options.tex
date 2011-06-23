@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.46 2011/06/23 18:14:15 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.47 2011/06/23 23:38:17 w6ws Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -290,35 +290,6 @@ Valid values are:
       
 \end{description}
 
-\subsubsection{ESMF\_NeededFlag}
-\label{opt:neededflag}
-{\sf DESCRIPTION:\\}
-Specifies whether or not a data item is needed for a 
-particular application configuration.  Used in {\tt ESMF\_State}.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_NEEDED] 
-         Data is needed.
-   \item [ESMF\_NOTNEEDED]
-         Data is not needed.
-\end{description}
-
-\subsubsection{ESMF\_ReadyFlag}
-\label{opt:readyflag}
-{\sf DESCRIPTION:\\}
-Specifies whether a data item is ready to read or write.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_READYTOREAD] 
-         Data is ready to read.
-   \item [ESMF\_READYTOWRITE]
-         Data is ready to write.
-   \item [ESMF\_NOTREADY]
-         Data is not ready.
-\end{description}
-
 \subsubsection{ESMF\_ReduceFlag}
 \label{opt:reduceflag}
 {\sf DESCRIPTION:\\}
@@ -362,19 +333,6 @@ Valid values are:
       The empty region contains no elements.
 \end{description}
 
-\subsubsection{ESMF\_ReqForRestartFlag}
-\label{opt:reqforrestartflag}
-{\sf DESCRIPTION:\\}
-Specifies whether a data item is necessary for restart.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_REQUIRED\_FOR\_RESTART] 
-         Data is required for restart.
-   \item [ESMF\_NOTREQUIRED\_FOR\_RESTART]
-         Data is not required for restart.
-\end{description}
-
 \subsubsection{ESMF\_Status}
 \label{opt:status}
 {\sf DESCRIPTION:\\}
@@ -395,22 +353,6 @@ Valid values are:
          Object is not able to respond.
    \item [ESMF\_STATUS\_INVALID]
          Object is invalid.
-\end{description}
-
-
-\subsubsection{ESMF\_ValidFlag}
-\label{opt:validflag}
-{\sf DESCRIPTION:\\}
-Specifies whether a data item contains valid data.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_VALID] 
-         Data is ready to read.
-   \item [ESMF\_INVALID]
-         Data is ready to write.
-   \item [ESMF\_NOTREADY]
-         Data is not ready.
 \end{description}
 
 
