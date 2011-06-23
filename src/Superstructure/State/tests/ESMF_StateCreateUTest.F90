@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.42 2011/06/23 15:54:39 rokuingh Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.43 2011/06/23 17:39:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.42 2011/06/23 15:54:39 rokuingh Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.43 2011/06/23 17:39:51 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -592,8 +592,8 @@ end module
       !EX_UTest      
       ! Test getting a nested State object
       call ESMF_StateGet(state=state5,  &
-         itemname="Temperature",  &
-         nestedStatename="Atmosphere Import", FieldBundle=bundle3, rc=rc)
+         itemname="Atmosphere Import/Temperature",  &
+         FieldBundle=bundle3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a FieldBundle from a nested State"
       print *,"testName: ", trim (testName)
