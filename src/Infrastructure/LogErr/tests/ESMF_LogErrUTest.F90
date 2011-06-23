@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.73 2011/06/16 05:56:40 eschwab Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.74 2011/06/23 15:55:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.73 2011/06/16 05:56:40 eschwab Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.74 2011/06/23 15:55:48 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -129,10 +129,10 @@
       !NEX_UTest
       ! Test Log Open
       logtype = ESMF_LOG_NONE
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_RC_FILE_OPEN"
       call ESMF_LogOpen(log5, "None_Log_File", logtype=logtype,  rc=rc)
       write(name, *) "Open ESMF_LOG_NONE Log of opened file Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_FILE_OPEN), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
@@ -484,10 +484,10 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Log reopenOpen 
-      write(failMsg, *) "Did not return ESMF_FAILURE"
+      write(failMsg, *) "Did not return ESMF_RC_FILE_OPEN"
       call ESMF_LogOpen(log2, "Log_Test_File_3", rc=rc)
       write(name, *) "Open Already Open Log Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_RC_FILE_OPEN), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
