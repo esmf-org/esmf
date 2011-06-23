@@ -17,7 +17,7 @@
 %\end{description}
 
 
-\subsubsection{ESMF\_RegridMethod}
+\subsubsection{ESMF\_REGRIDMETHOD}
 
 {\sf DESCRIPTION:\\}
 General Regrid methods supported by ESMF.
@@ -28,14 +28,14 @@ Valid values are:
 %        Create adjoint of existing regrid
 %  \item[ESMF\_REGRID\_METHOD\_BICUBIC ]
 
-\item [ESMF\_REGRID\_METHOD\_BILINEAR]
+\item [ESMF\_REGRIDMETHOD\_BILINEAR]
      Bilinear regridding using a local bilinear approximation to interpolate
      to a point in a quadrilateral grid.  For more details, please see
      Section~\ref{sec:BilinearRegrid}.  NOTE: This is applicable only for
      logically-rectangular or block-structured logically-rectangular grids.
 
 %\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
-\item[ESMF\_REGRID\_METHOD\_CONSERV1]
+\item[ESMF\_REGRIDMETHOD\_CONSERV1]
      First-order conservative remapping.  For algorithm details, please see
      Section~\ref{sec:ConserveRegrid}.
 
@@ -47,13 +47,13 @@ Valid values are:
 %        Index-space regrid (shift, stencil).
 %  \item [ESMF\_REGRID\_METHOD\_LEGENDRE]
 %        Legendre transform.
-\item[ESMF\_REGRID\_METHOD\_LINEAR  ]
+\item[ESMF\_REGRIDMETHOD\_LINEAR  ]
      This is a standard linear regridding algorithm for 1-d grids only.  In ESMF,
      it is used to regrid between vertical grids.
 
 %  \item [ESMF\_REGRID\_METHOD\_NEARNBR]
 %        Nearest-neighbor dist-weighted avg
-\item [ESMF\_REGRID\_METHOD\_NONE]
+\item [ESMF\_REGRIDMETHOD\_NONE]
      No regridding or undefined regrid.
 %  \item [ESMF\_REGRID\_METHOD\_RASTER]
 %        Regrid by rasterizing domain.

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.163 2011/06/23 21:06:23 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.164 2011/06/23 22:54:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.163 2011/06/23 21:06:23 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.164 2011/06/23 22:54:46 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -178,7 +178,7 @@ end function my_xor
 
 ! !ARGUMENTS:
 
-      type (ESMF_RegridMethod), intent(in) :: &
+      type (ESMF_RegridMethod_Flag), intent(in) :: &
          RegridMethod1,      &! Two igrid statuses to compare for
          RegridMethod2        ! equality
 
@@ -212,7 +212,7 @@ end function my_xor
 
 ! !ARGUMENTS:
 
-      type (ESMF_RegridMethod), intent(in) :: &
+      type (ESMF_RegridMethod_Flag), intent(in) :: &
          RegridMethod1,      &! Two RegridMethod Statuses to compare for
          RegridMethod2        ! inequality
 
@@ -243,8 +243,8 @@ end function my_xor
 ! !INTERFACE:
       subroutine ESMF_RegridStore(srcMesh, srcArray, &
                  dstMesh, dstArray, &
-                 regridMethod, &
-                 regridPoleType, regridPoleNPnts, &
+                 regridmethod, &
+                 polemethod, regridPoleNPnts, &
                  regridScheme, &
                  unmappedaction, routehandle, &
                  indices, weights, &
@@ -255,8 +255,8 @@ end function my_xor
       type(ESMF_Array), intent(inout)        :: srcArray
       type(ESMF_Mesh), intent(inout)         :: dstMesh
       type(ESMF_Array), intent(inout)        :: dstArray
-      type(ESMF_RegridMethod), intent(in)    :: regridMethod
-      type(ESMF_RegridPole), intent(in)      :: regridPoleType
+      type(ESMF_RegridMethod_Flag), intent(in)    :: regridmethod
+      type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
       type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
@@ -276,7 +276,7 @@ end function my_xor
 !          The destination grid.
 !     \item[dstArray]
 !          The destination array.
-!     \item[regridMethod]
+!     \item[regridmethod]
 !          The interpolation method to use.
 !     \item[regridScheme]
 !          Whether to use 3d or native coordinates
@@ -373,8 +373,8 @@ end function my_xor
        ! Call through to the C++ object that does the work
        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, &
                    dstMesh%this, dstArray, &
-                   regridMethod,  &
-                   regridPoleType, regridPoleNPnts, &    
+                   regridmethod,  &
+                   polemethod, regridPoleNPnts, &    
                    regridScheme, localunmappedaction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &

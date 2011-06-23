@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.19 2011/06/23 21:06:13 rokuingh Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.20 2011/06/23 22:54:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -597,7 +597,7 @@ contains
   call ESMF_FieldRegridStore(srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -1318,7 +1318,7 @@ contains
           dstFracField=dstFracField, &
           srcFracField=srcFracField, &
           unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
-          regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -2090,7 +2090,7 @@ contains
           dstFracField=dstFracField, &
           srcFracField=srcFracField, &
           unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
-          regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
           regridScheme=ESMF_REGRID_SCHEME_NATIVE, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE

@@ -1,24 +1,24 @@
-% $Id: Field_options.tex,v 1.8 2011/06/23 00:39:12 rokuingh Exp $
+% $Id: Field_options.tex,v 1.9 2011/06/23 22:54:33 rokuingh Exp $
 
 
 
-\subsubsection{ESMF\_RegridMethod}
+\subsubsection{ESMF\_REGRIDMETHOD}
 \label{opt:regridmethod}
 {\sf DESCRIPTION:\\}  
 Specify which interpolation method to use during regridding. 
 
 Valid values are:
 \begin{description}
-\item [ESMF\_REGRID\_METHOD\_BILINEAR]
+\item [ESMF\_REGRIDMETHOD\_BILINEAR]
       Bilinear interpolation. Destination value is a linear combination of the source values in the cell which contains the destination point. The weights for the linear combination are based on the distance of destination point from each source value. 
-\item [ESMF\_REGRID\_METHOD\_PATCH]
+\item [ESMF\_REGRIDMETHOD\_PATCH]
       Higher-order patch recovery interpolation. Destination value is a weighted average of 2D polynomial patches constructed from cells surrounding the source cell which contains the destination point. This method typically results in better approximations to values and derivatives than bilinear. However, because of its larger stencil, it also results in a much larger interpolation matrix (and thus routeHandle) than the bilinear. 
-\item [ESMF\_REGRID\_METHOD\_CONSERVE]
+\item [ESMF\_REGRIDMETHOD\_CONSERVE]
       First order conservative interpolation. Value of a destination cell is the weighted sum of the values of the source cells that it overlaps. The weights are determined by the amount the source cell overlaps the destination cell. Will typically give less accurate approximations to values than the other interpolation methods, however, will do a much better job preserving the integral of the value between the source and destination.  Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger (or the Mesh element location). 
 \end{description}
 
-\subsubsection{ESMF\_RegridPole}
-\label{opt:regridpole}
+\subsubsection{ESMF\_POLEMETHOD}
+\label{opt:polemethod}
 {\sf DESCRIPTION:\\}  
 \begin{sloppypar}
 When interpolating between two Grids which have been mapped to a sphere (using the {\tt ESMF\_REGRID\_SCHEME\_FULL3D} option to {\tt ESMF\_FieldRegridStore()}) these can be used to specify the type of artificial pole to create on the source Grid during interpolation. Creating the pole allows destination points above the top row or below the bottom row of the source Grid to still be mapped.
@@ -26,12 +26,12 @@ When interpolating between two Grids which have been mapped to a sphere (using t
 
 Valid values are:
 \begin{description}
-\item [ESMF\_REGRIDPOLE\_NONE]
+\item [ESMF\_POLEMETHOD\_NONE]
       No pole. Destination points which lie above the top or below the bottom row of the source Grid won't be mapped. 
-\item [ESMF\_REGRIDPOLE\_ALLAVG]
+\item [ESMF\_POLEMETHOD\_ALLAVG]
       Construct an artificial pole placed in the center of the top (or bottom) row of nodes, but projected onto the sphere formed by the rest of the grid. The value at this pole is the average of all the source values surrounding the pole.
-\item [ESMF\_REGRIDPOLE\_NPNTAVG] Construct an artificial pole placed in the center of the top (or bottom) row of nodes, but projected onto the sphere formed by the rest of the grid. The value at this pole is the average of the N source nodes next to the pole and surrounding the destination point (i.e. the value may differ for each destination point). Here N is set by using the {\tt regridPoleNPnts} parameter and ranges from 1 to the number of nodes around the pole. This option is useful for interpolating values which may be zeroed out by averaging around the entire pole (e.g. vector components). 
-\item [ESMF\_REGRIDPOLE\_TEETH]
+\item [ESMF\_POLEMETHOD\_NPNTAVG] Construct an artificial pole placed in the center of the top (or bottom) row of nodes, but projected onto the sphere formed by the rest of the grid. The value at this pole is the average of the N source nodes next to the pole and surrounding the destination point (i.e. the value may differ for each destination point). Here N is set by using the {\tt regridPoleNPnts} parameter and ranges from 1 to the number of nodes around the pole. This option is useful for interpolating values which may be zeroed out by averaging around the entire pole (e.g. vector components). 
+\item [ESMF\_POLEMETHOD\_TEETH]
     No new pole point is constructed, instead the holes at the poles are filled by constructing triangles across the top and bottom row of the source Grid. This can be useful because no averaging occurs, however, because the top and bottom of the sphere are now flat, for a big enough mismatch between the size of the destination and source pole holes, some destination points may still not be able to be mapped to the source Grid. 
 
 \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.112 2011/06/23 21:06:15 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.113 2011/06/23 22:54:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.112 2011/06/23 21:06:15 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.113 2011/06/23 22:54:39 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3007,7 +3007,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
     subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
                                            srcMaskValues, dstMaskValues, &
-                                           regridMethod, regridPoleType, &
+                                           regridmethod, polemethod, &
                                            regridPoleNPnts, regridScheme, &
                                            unmappedaction, routehandle, rc)
 !
@@ -3016,8 +3016,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_FieldBundle),    intent(inout)           :: dstFieldBundle
     integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
     integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
-    type(ESMF_RegridMethod),   intent(in),    optional :: regridMethod
-    type(ESMF_RegridPole),     intent(in),    optional :: regridPoleType
+    type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
+    type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
     integer,                   intent(in),    optional :: regridPoleNPnts
     integer,                   intent(in),    optional :: regridScheme
     type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
@@ -3064,18 +3064,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !    to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
-!   \item [{[regridMethod]}]
+!   \item [{[regridmethod]}]
 !     The type of interpolation. Please see Section~\ref{opt:regridmethod} for a list of
-!     valid options. If not specified, defaults to {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
-!   \item [{[regridPoleType]}]
+!     valid options. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[polemethod]}]
 !    Which type of artificial pole
 !    to construct on the source Grid for regridding. Only valid when {\tt regridScheme} is set to 
-!    {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see Section~\ref{opt:regridpole} for a list of
+!    {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see Section~\ref{opt:polemethod} for a list of
 !    valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
 !   \item [{[regridPoleNPnts]}]
-!    If {\tt regridPoleType} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
+!    If {\tt polemethod} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !    This parameter indicates how many points should be averaged
-!    over. Must be specified if {\tt regridPoleType} is 
+!    over. Must be specified if {\tt polemethod} is 
 !    {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !   \item [{[regridScheme]}]
 !     Whether to convert to spherical coordinates (ESMF\_REGRID\_SCHEME\_FULL3D), 
@@ -3228,8 +3228,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ! Get routeHandle as well as matrix info
                 call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
                      srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-                     regridMethod=regridMethod, &
-                     regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
+                     regridmethod=regridmethod, &
+                     polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
                      regridScheme=regridScheme, &
                      unmappedaction=unmappedaction, &
                      routehandle=rh, &
@@ -3248,8 +3248,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           else ! If not a grid pair no optimization at this point         
              call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
                   srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
-                  regridMethod=regridMethod, &
-                  regridPoleType=regridPoleType, regridPoleNPnts=regridPoleNPnts, &
+                  regridmethod=regridmethod, &
+                  polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
                   regridScheme=regridScheme, &
                   unmappedaction=unmappedaction, &
                   routehandle=rh,rc=localrc)

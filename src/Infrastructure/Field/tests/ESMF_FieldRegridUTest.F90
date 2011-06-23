@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.30 2011/06/23 21:06:13 rokuingh Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.31 2011/06/23 22:54:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding Sphere with ESMF_REGRIDPOLE_NONE"
+      write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_NONE"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -241,7 +241,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding Sphere with ESMF_REGRIDPOLE_ALLAVG"
+      write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_ALLAVG"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -257,7 +257,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding Sphere with ESMF_REGRIDPOLE_NPNTAVG"
+      write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_NPNTAVG"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -273,7 +273,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding Sphere with ESMF_REGRIDPOLE_TEETH"
+      write(name, *) "Test regridding Sphere with ESMF_POLEMETHOD_TEETH"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -648,7 +648,7 @@ contains
   ! Regrid store
   call ESMF_FieldRegridStore(srcField360, dstField=field180, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -673,7 +673,7 @@ contains
   ! Regrid store
   call ESMF_FieldRegridStore(field180, dstField=dstField360, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -1119,7 +1119,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   call ESMF_FieldRegridStore(srcFieldA, dstField=fieldB, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -1144,7 +1144,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   call ESMF_FieldRegridStore(fieldB, dstField=dstFieldA, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -1579,7 +1579,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, dstMaskValues=(/1,2,3,4/), &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -2006,7 +2006,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -2034,7 +2034,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldBPatch, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
-          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -2456,7 +2456,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -2484,7 +2484,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldBPatch, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
-          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -2909,7 +2909,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, dstMaskValues=(/2/), &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -2936,7 +2936,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldBPatch, dstMaskValues=(/2/), &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
-          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -3323,7 +3323,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcFieldA, &
           dstField=fieldB, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -3690,7 +3690,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcFieldA, &
           dstField=fieldB, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -4275,7 +4275,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -4838,7 +4838,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -5580,7 +5580,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -6211,7 +6211,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -6595,8 +6595,8 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
-          regridPoleType=ESMF_REGRIDPOLE_NONE, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          polemethod=ESMF_POLEMETHOD_NONE, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -6950,8 +6950,8 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
-          regridPoleType=ESMF_REGRIDPOLE_ALLAVG, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          polemethod=ESMF_POLEMETHOD_ALLAVG, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -7311,8 +7311,8 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
-          regridPoleType=ESMF_REGRIDPOLE_NPNTAVG, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          polemethod=ESMF_POLEMETHOD_NPNTAVG, &
           regridPoleNPnts=4, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
@@ -7673,8 +7673,8 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
-          regridPoleType=ESMF_REGRIDPOLE_TEETH, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          polemethod=ESMF_POLEMETHOD_TEETH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -8104,7 +8104,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=dstField, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_DCON3DWPOLE, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -8487,7 +8487,7 @@ write(*,*) "LOCALRC=",localrc
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           indices=indices, weights=weights, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then

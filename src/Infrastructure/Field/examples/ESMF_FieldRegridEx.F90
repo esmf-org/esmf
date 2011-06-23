@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.45 2011/06/22 15:07:22 rokuingh Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.46 2011/06/23 22:54:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.45 2011/06/22 15:07:22 rokuingh Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.46 2011/06/23 22:54:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -349,7 +349,7 @@ program ESMF_FieldRegridEx
 !\subsubsection{Precompute a regridding operation between two Fields}
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldRegridStore()} routine.  In this example we
-! choose the {\tt ESMF\_REGRID\_METHOD\_BILINEAR} regridding method.  Other
+! choose the {\tt ESMF\_REGRIDMETHOD\_BILINEAR} regridding method.  Other
 ! methods are available and more we will be added in the future.
 ! This method creates two meshes, and a Rendezvous decomposition of these
 ! meshes is computed.  An octree search is performed, followed by a determination
@@ -365,7 +365,7 @@ program ESMF_FieldRegridEx
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
                   routeHandle=routeHandle, &
                   indices=indices, weights=weights, &
-                  regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
+                  regridmethod=ESMF_REGRIDMETHOD_BILINEAR, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 

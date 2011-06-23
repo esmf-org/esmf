@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.63 2011/06/23 18:14:31 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.64 2011/06/23 22:55:08 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -587,7 +587,7 @@ logical                       :: checkpoint = .FALSE.
           select case( PDS%process%tag )
              case( Harness_BilinearRegrid )
                 call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
-                        regridMethod=ESMF_REGRID_METHOD_BILINEAR, rc=localrc)
+                        regridmethod=ESMF_REGRIDMETHOD_BILINEAR, rc=localrc)
                 if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Bilinear Regrid " //  &
                         "store failed", rcToReturn=rc)) return
 
@@ -597,7 +597,7 @@ logical                       :: checkpoint = .FALSE.
 #ifdef ESMF_LAPACK
                 libflag = 1  ! 
                 call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
-                        regridMethod=ESMF_REGRID_METHOD_PATCH, rc=localrc)
+                        regridmethod=ESMF_REGRIDMETHOD_PATCH, rc=localrc)
                 if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Patch Regrid " // &
                         "store failed", rcToReturn=rc)) return
 #endif

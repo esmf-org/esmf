@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCommUTest.F90,v 1.11 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleCommUTest.F90,v 1.12 2011/06/23 22:54:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleCommUTest.F90,v 1.11 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleCommUTest.F90,v 1.12 2011/06/23 22:54:41 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -689,7 +689,7 @@
       !EX_removeUTest
       ! regrid data from bundle1 to bundle2
       call ESMF_FieldBundleRegridStore(bundle1, bundle2, vm, rh, &
-                                  ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+                                  ESMF_REGRIDMETHOD_BILINEAR, rc=rc)
       write(name, *) "Precompute Regrid Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -831,7 +831,7 @@
       !EX_removeUTest
       ! regrid data from bundle1 to bundle2
       call ESMF_FieldBundleRegridStore(bundle1, bundle2, vm, rh, &
-                                  ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+                                  ESMF_REGRIDMETHOD_BILINEAR, rc=rc)
                                   !ESMF_REGRID_METHOD_CONSERV1, rc=rc)
       write(name, *) "Precompute Regrid Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -970,7 +970,7 @@
       !EX_removeUTest
       ! regrid data from bundle1 to bundle2
       call ESMF_FieldBundleRegridStore(bundle1, bundle2, vm, rh, &
-                                  ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+                                  ESMF_REGRIDMETHOD_BILINEAR, rc=rc)
                                   !ESMF_REGRID_METHOD_CONSERV1, rc=rc)
       write(name, *) "Precompute Regrid Communication"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.15 2011/06/23 21:06:16 rokuingh Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.16 2011/06/23 22:54:41 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.15 2011/06/23 21:06:16 rokuingh Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.16 2011/06/23 22:54:41 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -397,7 +397,7 @@ contains
         ! Regrid store
         call ESMF_FieldBundleRegridStore(srcFieldBundle360, dstFieldBundle=fieldBundle180, &
                 routeHandle=routeHandle, &
-                regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+                regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
                 regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
             rc=ESMF_FAILURE
@@ -422,7 +422,7 @@ contains
         ! Regrid store
         call ESMF_FieldBundleRegridStore(fieldBundle180, dstFieldBundle=dstFieldBundle360, &
                 routeHandle=routeHandle, &
-                regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+                regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
                 regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
             rc=ESMF_FAILURE
@@ -855,7 +855,7 @@ contains
           dstFieldBundle=fieldBundleB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then

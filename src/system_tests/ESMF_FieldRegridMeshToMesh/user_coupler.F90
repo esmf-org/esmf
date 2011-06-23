@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2011/04/27 02:27:25 w6ws Exp $
+! $Id: user_coupler.F90,v 1.6 2011/06/23 22:55:00 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -100,7 +100,7 @@
       ! up the Regrid structure
       call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
                                  routeHandle=routehandle, &
-                                 regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+                                 regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
                                  rc=rc)
       if(rc/=ESMF_SUCCESS) return
 

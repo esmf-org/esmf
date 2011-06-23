@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.125 2011/06/23 21:06:25 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.126 2011/06/23 22:54:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -583,32 +583,32 @@
            ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction(1)
 
 !------------------------------------------------------------------------------
-      type ESMF_RegridMethod
+      type ESMF_RegridMethod_Flag
       sequence
 !  private
          integer :: regridmethod
       end type
 
 
-      type(ESMF_RegridMethod), parameter :: &
-           ESMF_REGRID_METHOD_BILINEAR    = ESMF_RegridMethod(0), &
-           ESMF_REGRID_METHOD_PATCH       = ESMF_RegridMethod(1), &
-           ESMF_REGRID_METHOD_CONSERVE    = ESMF_RegridMethod(2)
+      type(ESMF_RegridMethod_Flag), parameter :: &
+           ESMF_REGRIDMETHOD_BILINEAR    = ESMF_RegridMethod_Flag(0), &
+           ESMF_REGRIDMETHOD_PATCH       = ESMF_RegridMethod_Flag(1), &
+           ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2)
 
 !------------------------------------------------------------------------------
 
-      type ESMF_RegridPole
+      type ESMF_PoleMethod_Flag
       sequence
 !  private
-         integer :: regridpole
+         integer :: polemethod
       end type
 
 
-      type(ESMF_RegridPole), parameter :: &
-           ESMF_REGRIDPOLE_NONE    =  ESMF_RegridPole(0), &
-           ESMF_REGRIDPOLE_ALLAVG  =  ESMF_RegridPole(1), &
-           ESMF_REGRIDPOLE_NPNTAVG =  ESMF_RegridPole(2), &
-           ESMF_REGRIDPOLE_TEETH   =  ESMF_RegridPole(3)
+      type(ESMF_PoleMethod_Flag), parameter :: &
+           ESMF_POLEMETHOD_NONE    =  ESMF_PoleMethod_Flag(0), &
+           ESMF_POLEMETHOD_ALLAVG  =  ESMF_PoleMethod_Flag(1), &
+           ESMF_POLEMETHOD_NPNTAVG =  ESMF_PoleMethod_Flag(2), &
+           ESMF_POLEMETHOD_TEETH   =  ESMF_PoleMethod_Flag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -705,14 +705,14 @@
       public ESMF_AttTreeFlag, ESMF_ATTTREE_OFF, ESMF_ATTTREE_ON
       public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
 
-       public ESMF_RegridMethod,   ESMF_REGRID_METHOD_BILINEAR, &
-                                   ESMF_REGRID_METHOD_PATCH, &
-                                   ESMF_REGRID_METHOD_CONSERVE
+       public ESMF_RegridMethod_Flag,   ESMF_REGRIDMETHOD_BILINEAR, &
+                                   ESMF_REGRIDMETHOD_PATCH, &
+                                   ESMF_REGRIDMETHOD_CONSERVE
 
-       public ESMF_RegridPole,  ESMF_REGRIDPOLE_NONE, &
-                                ESMF_REGRIDPOLE_ALLAVG, &
-                                ESMF_REGRIDPOLE_NPNTAVG, &
-                                ESMF_REGRIDPOLE_TEETH
+       public ESMF_PoleMethod_Flag,  ESMF_POLEMETHOD_NONE, &
+                                ESMF_POLEMETHOD_ALLAVG, &
+                                ESMF_POLEMETHOD_NPNTAVG, &
+                                ESMF_POLEMETHOD_TEETH
 
        public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
                                    ESMF_REGRID_CONSERVE_ON
@@ -1193,20 +1193,20 @@ end function
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_RegridPole types
+! function to compare two ESMF_PoleMethod types
 
 function ESMF_RegridPoleEq(rp1, rp2)
  logical ESMF_RegridPoleEq
- type(ESMF_RegridPole), intent(in) :: rp1, rp2
+ type(ESMF_PoleMethod_Flag), intent(in) :: rp1, rp2
 
- ESMF_RegridPoleEq = (rp1%regridpole == rp2%regridpole)
+ ESMF_RegridPoleEq = (rp1%polemethod == rp2%polemethod)
 end function
 
 function ESMF_RegridPoleNe(rp1, rp2)
  logical ESMF_RegridPoleNe
- type(ESMF_RegridPole), intent(in) :: rp1, rp2
+ type(ESMF_PoleMethod_Flag), intent(in) :: rp1, rp2
 
- ESMF_RegridPoleNe = (rp1%regridpole /= rp2%regridpole)
+ ESMF_RegridPoleNe = (rp1%polemethod /= rp2%polemethod)
 end function
 
       end module ESMF_UtilTypesMod

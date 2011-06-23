@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.65 2011/06/23 21:06:11 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.66 2011/06/23 22:54:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.65 2011/06/23 21:06:11 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.66 2011/06/23 22:54:36 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -280,8 +280,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreNX(srcField, dstField, keywordEnforcer, &
                                        srcMaskValues, dstMaskValues, &
-                                       regridMethod, &
-                                       regridPoleType, regridPoleNPnts, & 
+                                       regridmethod, &
+                                       polemethod, regridPoleNPnts, & 
                                        regridScheme,unmappedaction, &
                                        routehandle, indices, weights, & 
                                        srcFracField, dstFracField, rc)
@@ -294,8 +294,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
       integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
-      type(ESMF_RegridMethod),   intent(in),    optional :: regridMethod
-      type(ESMF_RegridPole),     intent(in),    optional :: regridPoleType
+      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
+      type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
       integer,                   intent(in),    optional :: regridPoleNPnts
       integer,                   intent(in),    optional :: regridScheme
       type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
@@ -357,29 +357,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The weights for the sparse matrix.
 !     \item [{[srcFracField]}] 
 !           The fraction of each source cell participating in the regridding. Only 
-!           valid when regridMethod is {\tt ESMF\_REGRID\_METHOD\_CONSERVE}.
+!           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !           This Field needs to be created on the same location (e.g staggerloc) 
 !           as the srcField.
 !     \item [{[dstFracField]}] 
 !           The fraction of each destination cell participating in the regridding. Only 
-!           valid when regridMethod is {\tt ESMF\_REGRID\_METHOD\_CONSERVE}.
+!           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !           This Field needs to be created on the same location (e.g staggerloc) 
 !           as the dstField.
-!     \item [{[regridMethod]}]
+!     \item [{[regridmethod]}]
 !           The type of interpolation. Please see Section~\ref{opt:regridmethod} 
 !           for a list of valid options. If not specified, defaults to 
-!           {\tt ESMF\_REGRID\_METHOD\_BILINEAR}.
-!     \item [{[regridPoleType]}]
+!           {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!     \item [{[polemethod]}]
 !           Which type of artificial pole
 !           to construct on the source Grid for regridding. Only valid when 
 !           {\tt regridScheme} is set to 
 !           {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see 
-!           Section~\ref{opt:regridpole} for a list of
+!           Section~\ref{opt:polemethod} for a list of
 !           valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
 !     \item [{[regridPoleNPnts]}]
-!           If {\tt regridPoleType} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
+!           If {\tt polemethod} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !           This parameter indicates how many points should be averaged
-!           over. Must be specified if {\tt regridPoleType} is 
+!           over. Must be specified if {\tt polemethod} is 
 !           {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
 !     \item [{[regridScheme]}]
 !           Whether to convert to spherical coordinates 
@@ -393,7 +393,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
         integer :: localrc
         integer              :: lregridScheme
-        type(ESMF_RegridMethod) :: lregridMethod
+        type(ESMF_RegridMethod_Flag) :: lregridmethod
         type(ESMF_GeomType)  :: srcgeomtype
         type(ESMF_GeomType)  :: dstgeomtype
         type(ESMF_Grid)      :: srcGrid
@@ -409,7 +409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
         type(ESMF_StaggerLoc) :: fracStaggerLoc
         integer              :: gridDimCount
-        type(ESMF_RegridPole):: localRegridPoleType
+        type(ESMF_PoleMethod_Flag):: localpolemethod
         integer              :: localRegridPoleNPnts
         logical              :: srcIsLatLonDeg, dstIsLatLonDeg
         integer              :: srcIsSphere, dstIsSphere
@@ -459,10 +459,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
         ! Handle optional method argument
-        if (present(regridMethod)) then
-           lregridMethod=regridMethod
+        if (present(regridmethod)) then
+           lregridmethod=regridmethod
         else     
-           lregridMethod=ESMF_REGRID_METHOD_BILINEAR
+           lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
         endif
 
 
@@ -470,41 +470,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if ((lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) .and. &
              (lregridScheme .ne. ESMF_REGRID_SCHEME_DCON3DWPOLE) .and. &
              (lregridScheme .ne. ESMF_REGRID_SCHEME_FULLTOREG3D)) then           
-           if (present(regridPoleType)) then
-              if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
+           if (present(polemethod)) then
+              if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-                 msg="- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for NON-ESMF_REGRID_SCHEME_FULL3D", & 
+                 msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for NON-ESMF_REGRID_SCHEME_FULL3D", & 
                   ESMF_CONTEXT, rcToReturn=rc) 
                  return
               endif
            else     
-               localRegridPoleType=ESMF_REGRIDPOLE_NONE
+               localpolemethod=ESMF_POLEMETHOD_NONE
            endif
         else
-           if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
-              if (present(regridPoleType)) then
-                 if (regridPoleType .ne. ESMF_REGRIDPOLE_NONE) then
+           if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
+              if (present(polemethod)) then
+                 if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
                     call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-                    msg="- Only ESMF_REGRIDPOLE_NONE regridPoleType supported for ESMF_REGRID_METHOD_CONSERVE", & 
+                    msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
                    return
                  endif
               else    
-                 localRegridPoleType=ESMF_REGRIDPOLE_NONE
+                 localpolemethod=ESMF_POLEMETHOD_NONE
               endif
            else 
-              if (present(regridPoleType)) then
-                 localRegridPoleType=regridPoleType
+              if (present(polemethod)) then
+                 localpolemethod=polemethod
               else    
-                 localRegridPoleType=ESMF_REGRIDPOLE_ALLAVG
+                 localpolemethod=ESMF_POLEMETHOD_ALLAVG
               endif
            endif
         endif
 
-        if (localRegridPoleType .eq. ESMF_REGRIDPOLE_NPNTAVG) then
+        if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
            if (.not. present(regridPoleNPnts)) then
                        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
-              msg="- RegridPoleNPnts must be specified if regridPoleType is ESMF_REGRIDPOLE_NPNTAVG", & 
+              msg="- RegridPoleNPnts must be specified if polemethod is ESMF_POLEMETHOD_NPNTAVG", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
            else 
@@ -563,7 +563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! Set conserve flag for GridToMesh
-        if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
            regridConserveG2M=ESMF_REGRID_CONSERVE_ON
         else
            regridConserveG2M=ESMF_REGRID_CONSERVE_OFF
@@ -579,7 +579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	  ! if we're doing conservative then do some checking and
           ! change staggerloc
-          if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+          if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
 	    if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
@@ -627,7 +627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
-          if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
+          if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
               if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on a mesh built on elements", & 
@@ -652,7 +652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	  ! if we're doing conservative then do some checking and
           ! change staggerloc
-          if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+          if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
 	    if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
@@ -699,7 +699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
-          if ((lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE)) then
+          if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
               if (dstMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on a mesh built on elements", & 
@@ -721,8 +721,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! call into the Regrid mesh interface
         call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              lregridMethod, &
-              localRegridPoleType, localRegridPoleNPnts, &
+              lregridmethod, &
+              localpolemethod, localRegridPoleNPnts, &
               lregridScheme, &
               unmappedaction, routehandle, &
               indices, weights, localrc)
@@ -731,7 +731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Get Fraction info
-        if (lregridMethod .eq. ESMF_REGRID_METHOD_CONSERVE) then
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
            if (present(srcFracField)) then
               if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
                  call ESMF_FieldGet(srcFracField, array=fracArray, staggerloc=fracStaggerloc, &

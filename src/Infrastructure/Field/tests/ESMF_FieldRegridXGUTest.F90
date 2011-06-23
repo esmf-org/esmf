@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.39 2011/06/23 21:06:13 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.40 2011/06/23 22:54:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1257,7 +1257,7 @@ contains
 
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
-      regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+      regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1559,7 +1559,7 @@ contains
 
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
-      regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+      regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1857,7 +1857,7 @@ contains
 
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
-      regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+      regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2167,7 +2167,7 @@ contains
 
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
-      regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+      regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2490,7 +2490,7 @@ contains
 
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
-      regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
+      regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       regridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       indices=indices, weights=weights, rc=localrc)

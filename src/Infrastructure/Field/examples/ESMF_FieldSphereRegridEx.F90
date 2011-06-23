@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.31 2011/06/22 15:07:22 rokuingh Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.32 2011/06/23 22:54:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.31 2011/06/22 15:07:22 rokuingh Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.32 2011/06/23 22:54:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -297,7 +297,7 @@ program ESMF_FieldSphereRegridEx
 ! To create the sparse matrix regrid operator we call the
 ! {\tt ESMF\_FieldSphereRegridStore()} routine.  In this example we
 ! choose the {\tt ESMF_REGRID_METHOD_BILIONEAR} regridding method for
-! our first example, and {\tt ESMF_REGRID_METHOD_PATCH} for our
+! our first example, and {\tt ESMF_REGRIDMETHOD_PATCH} for our
 ! second example (The underlying C++ code process both matrices
 ! simultaneously, but we do not yet have fortran interfaces for this).
 ! This method creates two meshes, and a Rendezvous decomposition of these
@@ -315,7 +315,7 @@ program ESMF_FieldSphereRegridEx
 !BOC
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
           routeHandle=routeHandle, &
-          regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -323,7 +323,7 @@ program ESMF_FieldSphereRegridEx
 #ifdef ESMF_LAPACK
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField1, &
           routeHandle=routeHandle1, &
-          regridMethod=ESMF_REGRID_METHOD_PATCH, &
+          regridmethod=ESMF_REGRIDMETHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

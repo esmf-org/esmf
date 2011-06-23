@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.31 2011/05/19 22:39:27 svasquez Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.32 2011/06/23 22:54:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.31 2011/05/19 22:39:27 svasquez Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.32 2011/06/23 22:54:49 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -619,7 +619,7 @@ integer, intent(out), optional              :: rc
     compute_midmesh = 1
     call c_esmc_xgridregrid_create(vm, meshA, meshB, &
       meshp, compute_midmesh, &
-      ESMF_REGRID_METHOD_CONSERVE, &
+      ESMF_REGRIDMETHOD_CONSERVE, &
       l_SideAToSideBScheme, &
       ESMF_UNMAPPEDACTION_IGNORE, &
       nentries, tweights, &
@@ -662,7 +662,7 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       call c_esmc_xgridregrid_create(vm, meshAt, mesh, &
         tmpmesh, compute_midmesh, &
-        ESMF_REGRID_METHOD_CONSERVE, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
         l_sideAToXGridScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
@@ -726,7 +726,7 @@ integer, intent(out), optional              :: rc
       !enddo
       call c_esmc_xgridregrid_create(vm, mesh, meshAt, &
         tmpmesh, compute_midmesh, &
-        ESMF_REGRID_METHOD_CONSERVE, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
         l_XGridToSideAScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
@@ -761,7 +761,7 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       call c_esmc_xgridregrid_create(vm, meshBt, mesh, &
         tmpmesh, compute_midmesh, &
-        ESMF_REGRID_METHOD_CONSERVE, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
         l_sideBToXGridScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
@@ -786,7 +786,7 @@ integer, intent(out), optional              :: rc
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(vm, mesh, meshBt, &
         tmpmesh, compute_midmesh, &
-        ESMF_REGRID_METHOD_CONSERVE, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
         l_sideBToXGridScheme, &
         ESMF_UNMAPPEDACTION_IGNORE, &
         nentries, tweights, &
