@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.56 2011/06/23 18:14:01 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.57 2011/06/23 21:06:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.56 2011/06/23 18:14:01 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.57 2011/06/23 21:06:18 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1025,7 +1025,7 @@ contains
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgGrid(locstream, name, &
                  coordKeyNames, background, maskValues, &
-                 unmappedAction, rc)
+                 unmappedaction, rc)
 
 !
 ! !RETURN VALUE:
@@ -1038,7 +1038,7 @@ contains
       character (len=*),    intent(in)                :: coordKeyNames
       type(ESMF_Grid),      intent(in)                :: background
       integer(ESMF_KIND_I4), intent(in), optional     :: maskValues(:)
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedAction
+      type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
       integer,              intent(out), optional     :: rc
 !
 ! !DESCRIPTION:
@@ -1075,7 +1075,7 @@ contains
 !     \item [{[maskValues]}]
 !           List of values that indicate a background grid point should be masked out. 
 !           If not specified, no masking will occur. 
-!      \item [{[unmappedAction]}]
+!      \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
@@ -1087,7 +1087,7 @@ contains
 !
 !EOP
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
-      type(ESMF_UnmappedAction) :: localunmappedAction
+      type(ESMF_UnmappedAction) :: localunmappedaction
       type(ESMF_Mesh) :: mesh
       type(ESMF_TypeKind) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
@@ -1133,7 +1133,7 @@ contains
 
      ! Create new locstream from Background Mesh
      ESMF_LocStreamCreateByBkgGrid=ESMF_LocStreamCreate(locstream, name, coordKeyNames, &
-                 mesh, unmappedAction, rc=localrc)
+                 mesh, unmappedaction, rc=localrc)
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1153,7 +1153,7 @@ contains
 ! !INTERFACE:
       ! Private name; call using ESMF_LocStreamCreate()
       function ESMF_LocStreamCreateByBkgMesh(locstream, name, &
-                 coordKeyNames, background, unmappedAction, rc)
+                 coordKeyNames, background, unmappedaction, rc)
 
 !
 ! !RETURN VALUE:
@@ -1165,7 +1165,7 @@ contains
       character (len=*),    intent(in), optional      :: name
       character (len=*),    intent(in)                :: coordKeyNames
       type(ESMF_Mesh),      intent(in)                :: background
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedAction
+      type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
       integer,              intent(out), optional     :: rc
 !
 ! !DESCRIPTION:
@@ -1193,7 +1193,7 @@ contains
 !          Background Mesh which determines the distribution of entries in the new locatiion stream.
 !          The Mesh must have the same spatial dimension as the number of keys in
 !          {\tt coordKeyNames}. 
-!      \item [{[unmappedAction]}]
+!      \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
@@ -1205,7 +1205,7 @@ contains
 !
 !EOP
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
-      type(ESMF_UnmappedAction) :: localunmappedAction
+      type(ESMF_UnmappedAction) :: localunmappedaction
       type(ESMF_DistGrid) :: newDistGrid
       type(ESMF_TypeKind) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
@@ -1224,15 +1224,15 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,background,rc)
 
 
-      ! Set default vale for unmappedAction
-      if (present(unmappedAction)) then
-         localunmappedAction=unmappedAction
+      ! Set default vale for unmappedaction
+      if (present(unmappedaction)) then
+         localunmappedaction=unmappedaction
       else
-         localunmappedAction=ESMF_UNMAPPEDACTION_ERROR
+         localunmappedaction=ESMF_UNMAPPEDACTION_ERROR
       endif
 
       ! Currently ESMF_UNMAPPEDACTION_IGNORE not implemented here
-      if (localunmappedAction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
+      if (localunmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
         if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, &
            msg=" - ESMF_UNMAPPEDACTION_IGNORE option currently not implemented ", &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1277,7 +1277,7 @@ contains
 
 
       ! Find out where points lie on Mesh
-      call ESMF_MeshFindPnt(background, localunmappedAction, &
+      call ESMF_MeshFindPnt(background, localunmappedaction, &
                                 pntDim, pntCount, pntList, &
                                 petList, rc=localrc)
 

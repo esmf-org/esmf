@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.66 2011/06/23 19:46:43 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.67 2011/06/23 21:06:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.66 2011/06/23 19:46:43 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.67 2011/06/23 21:06:20 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.66 2011/06/23 19:46:43 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.67 2011/06/23 21:06:20 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2194,7 +2194,7 @@ end function ESMF_MeshCreateFromScrip
 ! !IROUTINE: ESMF_MeshFindPnt - Find points in a mesh
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshFindPnt(mesh, unmappedAction, &
+    subroutine ESMF_MeshFindPnt(mesh, unmappedaction, &
                                 pntDim, pntCount, pntList, &
                                 petList, rc)
 
@@ -2202,7 +2202,7 @@ end function ESMF_MeshCreateFromScrip
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)                     :: mesh
-    type(ESMF_UnmappedAction), intent(in), optional :: unmappedAction
+    type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
     integer, intent(in)                             :: pntDim
     integer, intent(in)                             :: pntCount
     real(ESMF_KIND_R8), pointer                     :: pntList(:)
@@ -2215,7 +2215,7 @@ end function ESMF_MeshCreateFromScrip
 !   \begin{description}
 !   \item [mesh]
 !         The mesh.
-!   \item [{[unmappedDstAction]}]
+!   \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
@@ -2234,7 +2234,7 @@ end function ESMF_MeshCreateFromScrip
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_UnmappedAction) :: localunmappedAction
+    type(ESMF_UnmappedAction) :: localunmappedaction
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2259,16 +2259,16 @@ end function ESMF_MeshCreateFromScrip
        return 
     endif    
 
-   ! Set default vale for unmappedAction
-   if (present(unmappedAction)) then
-      localunmappedAction=unmappedAction
+   ! Set default vale for unmappedaction
+   if (present(unmappedaction)) then
+      localunmappedaction=unmappedaction
    else
-      localunmappedAction=ESMF_UNMAPPEDACTION_ERROR
+      localunmappedaction=ESMF_UNMAPPEDACTION_ERROR
    endif
 
    ! Call into mesh find point subroutine
    ! TODO: ADD GIDS TO THIS INTERFACE AS THEY'RE AVAILABLE FROM C++ METHOD
-    call C_ESMC_MeshFindPnt(mesh%this, localunmappedAction, pntDim, pntCount, &
+    call C_ESMC_MeshFindPnt(mesh%this, localunmappedaction, pntDim, pntCount, &
 			    pntList, petList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

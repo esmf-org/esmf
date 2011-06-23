@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.64 2011/04/27 17:31:39 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.65 2011/06/23 21:06:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.64 2011/04/27 17:31:39 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.65 2011/06/23 21:06:11 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -282,7 +282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        srcMaskValues, dstMaskValues, &
                                        regridMethod, &
                                        regridPoleType, regridPoleNPnts, & 
-                                       regridScheme,unmappedDstAction, &
+                                       regridScheme,unmappedaction, &
                                        routehandle, indices, weights, & 
                                        srcFracField, dstFracField, rc)
 !
@@ -298,7 +298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegridPole),     intent(in),    optional :: regridPoleType
       integer,                   intent(in),    optional :: regridPoleNPnts
       integer,                   intent(in),    optional :: regridScheme
-      type(ESMF_UnmappedAction), intent(in),    optional :: unmappedDstAction
+      type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
       type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4),     pointer,       optional :: indices(:,:)
       real(ESMF_KIND_R8),        pointer,       optional :: weights(:)
@@ -342,7 +342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[dstMaskValues]}]
 !           List of values that indicate a destination point should be masked out. 
 !           If not specified, no masking will occur.
-!     \item [{[unmappedDstAction]}]
+!     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
@@ -724,7 +724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               lregridMethod, &
               localRegridPoleType, localRegridPoleNPnts, &
               lregridScheme, &
-              unmappedDstAction, routehandle, &
+              unmappedaction, routehandle, &
               indices, weights, localrc)
         if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &

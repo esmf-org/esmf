@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.7 2011/06/16 18:15:40 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.8 2011/06/23 21:06:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -451,7 +451,7 @@ contains
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       routehandle=rh_a2o, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       srcFracField=srcFrac, dstFracField=dstFrac, & 
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -467,7 +467,7 @@ contains
     call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
       routehandle=rh_o2a, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1157,7 +1157,7 @@ contains
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       routehandle=rh_a2o, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       regridScheme=l_scheme, &
       srcFracField=srcFrac, dstFracField=dstFrac, & 
       indices=indices, weights=weights, rc=localrc)
@@ -1174,7 +1174,7 @@ contains
     call ESMF_FieldRegridStore(srcField=f_ocn, dstField=f_atm, &
       routehandle=rh_o2a, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       regridScheme=l_scheme, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

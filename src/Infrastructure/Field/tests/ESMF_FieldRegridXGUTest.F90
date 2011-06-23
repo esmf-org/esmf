@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.38 2011/06/07 17:30:06 oehmke Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.39 2011/06/23 21:06:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1258,7 +1258,7 @@ contains
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1560,7 +1560,7 @@ contains
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1858,7 +1858,7 @@ contains
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2168,7 +2168,7 @@ contains
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2491,7 +2491,7 @@ contains
     ! Call RegridStore here to compute SMM weights and indices
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridMethod=ESMF_REGRID_METHOD_CONSERVE, &
-      unmappedDstAction = ESMF_UNMAPPEDACTION_IGNORE, &
+      unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       regridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

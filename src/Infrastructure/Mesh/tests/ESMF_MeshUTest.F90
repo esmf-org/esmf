@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.29 2011/06/22 15:07:43 rokuingh Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.30 2011/06/23 21:06:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.29 2011/06/22 15:07:43 rokuingh Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.30 2011/06/23 21:06:21 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -867,7 +867,7 @@ else if (localPet .eq. 3) then
 endif
 
   ! Get points
-  call ESMF_MeshFindPnt(mesh, unmappedAction=ESMF_UNMAPPEDACTION_IGNORE, &
+  call ESMF_MeshFindPnt(mesh, unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
                         pntDim=2, pntCount=pntCount, pntList=pntList, &
                         petList=petList, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE

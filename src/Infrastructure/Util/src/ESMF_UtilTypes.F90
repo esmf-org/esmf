@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.124 2011/06/23 20:35:35 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.125 2011/06/23 21:06:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -786,7 +786,7 @@ interface operator (==)
   module procedure ESMF_freq
   module procedure ESMF_ifeq
   module procedure ESMF_rfeq
-  module procedure ESMF_unmappedActioneq
+  module procedure ESMF_unmappedactioneq
   module procedure ESMF_ioeq
   module procedure ESMF_RegridPoleEq
 end interface
@@ -800,7 +800,7 @@ interface operator (/=)
   module procedure ESMF_ctfne
   module procedure ESMF_tnfne
   module procedure ESMF_frne
-  module procedure ESMF_unmappedActionne
+  module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
 end interface
 
@@ -1177,18 +1177,18 @@ end subroutine
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_UNMAPPEDACTION types
 
-function ESMF_unmappedActioneq(uma1, uma2)
- logical ESMF_unmappedActioneq
+function ESMF_unmappedactioneq(uma1, uma2)
+ logical ESMF_unmappedactioneq
  type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
 
- ESMF_unmappedActioneq = (uma1%unmappedaction == uma2%unmappedaction)
+ ESMF_unmappedactioneq = (uma1%unmappedaction == uma2%unmappedaction)
 end function
 
-function ESMF_unmappedActionne(uma1, uma2)
- logical ESMF_unmappedActionne
+function ESMF_unmappedactionne(uma1, uma2)
+ logical ESMF_unmappedactionne
  type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
 
- ESMF_unmappedActionne = (uma1%unmappedaction /= uma2%unmappedaction)
+ ESMF_unmappedactionne = (uma1%unmappedaction /= uma2%unmappedaction)
 end function
 
 

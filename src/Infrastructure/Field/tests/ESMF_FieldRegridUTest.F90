@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.29 2011/06/07 00:32:46 theurich Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.30 2011/06/23 21:06:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2004,7 +2004,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           rc=localrc)
@@ -2032,7 +2032,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldBPatch, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
           regridMethod=ESMF_REGRID_METHOD_PATCH, &
           rc=localrc)
@@ -2454,7 +2454,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
@@ -2482,7 +2482,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, srcMaskValues=(/1,2/), &
           dstField=fieldBPatch, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
           regridMethod=ESMF_REGRID_METHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
@@ -2907,7 +2907,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   call ESMF_FieldRegridStore(srcFieldA, &
           dstField=fieldB, dstMaskValues=(/2/), &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
@@ -2934,7 +2934,7 @@ write(*,*) "LOCALRC=",localrc
   ! Regrid store
   call ESMF_FieldRegridStore(srcFieldA, &
           dstField=fieldBPatch, dstMaskValues=(/2/), &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandlePatch, &
           regridMethod=ESMF_REGRID_METHOD_PATCH, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
@@ -6593,7 +6593,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridPoleType=ESMF_REGRIDPOLE_NONE, &
@@ -6948,7 +6948,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridPoleType=ESMF_REGRIDPOLE_ALLAVG, &
@@ -7309,7 +7309,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridPoleType=ESMF_REGRIDPOLE_NPNTAVG, &
@@ -7671,7 +7671,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridPoleType=ESMF_REGRIDPOLE_TEETH, &
@@ -8102,7 +8102,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcField, &
           dstField=dstField, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_DCON3DWPOLE, &
@@ -8485,7 +8485,7 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_FieldRegridStore( &
 	  srcFieldA, &
           dstField=fieldB, &
-	  unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           indices=indices, weights=weights, &
           regridMethod=ESMF_REGRID_METHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, &

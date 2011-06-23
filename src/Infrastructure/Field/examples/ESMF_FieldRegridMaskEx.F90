@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.18 2011/06/22 15:07:22 rokuingh Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.19 2011/06/23 21:06:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.18 2011/06/22 15:07:22 rokuingh Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.19 2011/06/23 21:06:10 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -288,7 +288,7 @@ program ESMF_FieldRegridEx
 ! that a destination location should be masked out. The absence of 
 ! one of these parameters indicates that no masking should be used
 ! for that Field (e.g no {\tt srcMaskValue} parameter indicates that source
-! masking shouldn't occur). The {\tt unmappedDstAction} flag may be
+! masking shouldn't occur). The {\tt unmappedaction} flag may be
 ! used with or without masking and indicates what should occur
 ! if destination points can not be mapped to a source cell. 
 ! Here the {\tt ESMF\_UNMAPPEDACTION\_IGNORE} value indicates that unmapped
@@ -299,7 +299,7 @@ program ESMF_FieldRegridEx
 !BOC
   call ESMF_FieldRegridStore(srcField=srcField, srcMaskValues=(/1/),       &
                              dstField=dstField, dstMaskValues=(/1/),       &
-                             unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+                             unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
                              routeHandle=routeHandle,                      &
                              indices=indices, weights=weights,           &
                              regridMethod=ESMF_REGRID_METHOD_BILINEAR,     &

@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.35 2011/06/22 15:08:12 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.36 2011/06/23 21:06:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_RegridWeightGen
       integer(ESMF_KIND_I4), pointer:: compactedIndices(:,:)
       real(ESMF_KIND_R8), pointer :: compactedWeights(:)
       logical :: ignoreUnmapped
-      type(ESMF_UnmappedAction) :: unmappedAction
+      type(ESMF_UnmappedAction) :: unmappedaction
 
       !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
@@ -488,9 +488,9 @@ program ESMF_RegridWeightGen
      endif
 
      ! Set unmapped flag
-     unmappedAction=ESMF_UNMAPPEDACTION_ERROR
+     unmappedaction=ESMF_UNMAPPEDACTION_ERROR
      if (ignoreUnmapped) then
-        unmappedAction=ESMF_UNMAPPEDACTION_IGNORE
+        unmappedaction=ESMF_UNMAPPEDACTION_IGNORE
      endif
 
      ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
@@ -639,7 +639,7 @@ program ESMF_RegridWeightGen
       if (trim(method) .eq. 'bilinear') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=unmappedAction, &
+	    unmappedaction=unmappedaction, &
 	    indices=indices, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_BILINEAR, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
@@ -649,7 +649,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'patch') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=unmappedAction, &
+	    unmappedaction=unmappedaction, &
 	    indices=indices, weights=weights, &
             regridMethod = ESMF_REGRID_METHOD_PATCH, &
             regridPoleType = pole, regridPoleNPnts = poleptrs, &
@@ -659,7 +659,7 @@ program ESMF_RegridWeightGen
       else if (trim(method) .eq. 'conserve') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedDstAction=unmappedAction, &
+	    unmappedaction=unmappedaction, &
 	    indices=indices, weights=weights, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridMethod = ESMF_REGRID_METHOD_CONSERVE, &

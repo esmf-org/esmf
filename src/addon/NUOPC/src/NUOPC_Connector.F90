@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.7 2011/06/23 15:54:42 rokuingh Exp $
+! $Id: NUOPC_Connector.F90,v 1.8 2011/06/23 21:06:26 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -347,7 +347,7 @@ module NUOPC_Connector
       ! if not specialized -> use default method to:
       ! precompute the regrid for all src to dst Fields
       call ESMF_FieldBundleRegridStore(is%wrap%srcFields, is%wrap%dstFields, &
-        unmappedDstAction=ESMF_UNMAPPEDACTION_IGNORE, &
+        unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
         routehandle=is%wrap%rh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, &

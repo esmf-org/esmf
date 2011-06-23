@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.162 2011/06/06 20:32:15 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.163 2011/06/23 21:06:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.162 2011/06/06 20:32:15 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.163 2011/06/23 21:06:23 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -246,7 +246,7 @@ end function my_xor
                  regridMethod, &
                  regridPoleType, regridPoleNPnts, &
                  regridScheme, &
-                 unmappedDstAction, routehandle, &
+                 unmappedaction, routehandle, &
                  indices, weights, &
                  rc)
 !
@@ -259,7 +259,7 @@ end function my_xor
       type(ESMF_RegridPole), intent(in)      :: regridPoleType
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedDstAction
+      type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
@@ -286,7 +286,7 @@ end function my_xor
 !           {\tt ESMF\_REGRID_CONSERVE\_OFF} or 
 !           {\tt ESMF\_REGRID_CONSERVE\_ON}. If not specified, defaults 
 !           to {\tt ESMF\_REGRID_CONSERVE\_OFF}. 
-!     \item [{[unmappedDstAction]}]
+!     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
@@ -303,7 +303,7 @@ end function my_xor
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
        type(ESMF_RegridConserve) :: localregridConserve
-       type(ESMF_UnmappedAction) :: localunmappedDstAction
+       type(ESMF_UnmappedAction) :: localunmappedaction
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  
@@ -339,10 +339,10 @@ end function my_xor
        if (present(routehandle)) has_rh = 1
        if (present(indices)) has_iw = 1
 
-       if (present(unmappedDstAction)) then
-          localunmappedDstAction=unmappedDstAction
+       if (present(unmappedaction)) then
+          localunmappedaction=unmappedaction
        else
-          localunmappedDstAction=ESMF_UNMAPPEDACTION_ERROR
+          localunmappedaction=ESMF_UNMAPPEDACTION_ERROR
        endif
 
 
@@ -375,7 +375,7 @@ end function my_xor
                    dstMesh%this, dstArray, &
                    regridMethod,  &
                    regridPoleType, regridPoleNPnts, &    
-                   regridScheme, localunmappedDstAction%unmappedaction, &
+                   regridScheme, localunmappedaction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
                    localrc)
