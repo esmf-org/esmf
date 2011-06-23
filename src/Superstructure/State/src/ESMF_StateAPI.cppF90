@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.8 2011/06/23 17:40:51 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.9 2011/06/23 17:55:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.8 2011/06/23 17:40:51 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.9 2011/06/23 17:55:41 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -318,9 +318,9 @@ module ESMF_StateAPIMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (state1 == state2) then ... endif
+!   if (state1 /= state2) then ... endif
 !             OR
-!   result = (state1 == state2)
+!   result = (state1 /= state2)
 ! !RETURN VALUE:
 !   logical :: result
 !
