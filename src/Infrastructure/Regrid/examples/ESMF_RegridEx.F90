@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.22 2011/01/05 20:05:45 svasquez Exp $
+! $Id: ESMF_RegridEx.F90,v 1.23 2011/06/23 18:14:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
     ! get a fortran pointer to the data spacd
-    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
+    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATACOPY_REFERENCE, rc=rc)
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     

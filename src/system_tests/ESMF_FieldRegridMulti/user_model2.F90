@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.40 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_model2.F90,v 1.41 2011/06/23 18:14:21 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -292,7 +292,7 @@
 
       ! update field values here
       ! Get a pointer to the start of the data
-      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATA_REF, rc=rc)
+      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATACOPY_REFERENCE, rc=rc)
 
       ! allocate array for computed results and fill it
       allocate(calc(counts(1), counts(2)))

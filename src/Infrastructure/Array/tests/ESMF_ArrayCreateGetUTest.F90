@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.41 2011/06/22 15:07:00 rokuingh Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.42 2011/06/23 18:13:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.41 2011/06/22 15:07:00 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.42 2011/06/23 18:13:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -323,11 +323,11 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate with 3D farray on 2D DistGrid w/ ESMF_DATA_COPY Test"
+  write(name, *) "ArrayCreate with 3D farray on 2D DistGrid w/ ESMF_DATACOPY_VALUE Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(farrayPtr3D(8,12,10))
   array = ESMF_ArrayCreate(farray=farrayPtr3D, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", copyflag=ESMF_DATA_COPY, rc=rc)
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
@@ -341,11 +341,11 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayCreate with 3D farrayPtr on 2D DistGrid w/ ESMF_DATA_COPY Test"
+  write(name, *) "ArrayCreate with 3D farrayPtr on 2D DistGrid w/ ESMF_DATACOPY_VALUE Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   allocate(farrayPtr3D(8,12,10))
   array = ESMF_ArrayCreate(farrayPtr=farrayPtr3D, distgrid=distgrid, &
-    name="MyArray", copyflag=ESMF_DATA_COPY, rc=rc)
+    name="MyArray", datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------

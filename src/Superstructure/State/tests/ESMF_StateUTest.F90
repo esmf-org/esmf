@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.98 2011/06/23 15:54:39 rokuingh Exp $
+! $Id: ESMF_StateUTest.F90,v 1.99 2011/06/23 18:14:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.98 2011/06/23 15:54:39 rokuingh Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.99 2011/06/23 18:14:13 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -1126,7 +1126,7 @@
 
       ! Get Array Data Pointer From State
       call ESMF_StateGetDataPointer(state=stateGDP, itemName="arrayGDP", &
-                                    dataPointer=ptrGDP1, copyflag=ESMF_DATA_REF, rc=localrc) 
+                                    dataPointer=ptrGDP1, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       ! Get Array Data Pointer From Array

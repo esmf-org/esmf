@@ -141,10 +141,10 @@
      finalrc = ESMF_FAILURE
   endif
 
-  call ESMF_FieldGetDataPointer(field_u2, u2, ESMF_DATA_REF, rc=status)
+  call ESMF_FieldGetDataPointer(field_u2, u2, ESMF_DATACOPY_REFERENCE, rc=status)
   if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
-     print*, "'call ESMF_FieldGetDataPointer(field_u2, array_temp, ESMF_DATA_REF, rc=status)' failed"
+     print*, "'call ESMF_FieldGetDataPointer(field_u2, array_temp, ESMF_DATACOPY_REFERENCE, rc=status)' failed"
   endif
 
 !BOC

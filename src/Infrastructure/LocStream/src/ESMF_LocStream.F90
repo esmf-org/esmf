@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.55 2011/06/21 14:17:53 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.56 2011/06/23 18:14:01 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.55 2011/06/21 14:17:53 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.56 2011/06/23 18:14:01 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -696,13 +696,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
 !  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, &
-!               copyflag, keyUnits, keyLongName, rc)
+!               datacopyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_Locstream), intent(in) :: locstream
 !    character (len=*), intent(in) :: keyName
 !    <farray>
-!    type(ESMF_CopyFlag), intent(in), optional :: copyflag
+!    type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
 !    character (len=*), intent(in), optional :: keyUnits
 !    character (len=*), intent(in), optional :: keyLongName
 !    integer, intent(out), optional :: rc
@@ -728,12 +728,12 @@ contains
 !    Valid native Fortran array, i.e. memory must be associated with the 
 !    actual argument. The type/kind/rank information of {\tt farray} will be 
 !    used to set the key Array's properties accordingly. 
-!    \item[{[copyflag]}] 
+!    \item[{[datacopyflag]}] 
 !    Specifies whether the Array object will reference the memory allocation 
 !    provided by {\tt farray} directly or will copy the data from 
 !    {\tt farray} into a new memory allocation. Valid options are 
-!    {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
-!    Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+!    {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. 
+!    Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option 
 !    may be unsafe when specifying an array slice for {\tt farray}. 
 !    \item [{[keyUnits]}]
 !    The units of the key data. 
@@ -753,14 +753,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, copyflag, &
+  subroutine ESMF_LocStreamAddKeyI4(locstream, keyName, farray, datacopyflag, &
                keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)                   :: locstream
     character (len=*),         intent(in)                    :: keyName
     integer(ESMF_KIND_I4), dimension(:), intent(in)  :: farray
-    type(ESMF_CopyFlag), intent(in), optional       :: copyflag
+    type(ESMF_DataCopy_Flag), intent(in), optional       :: datacopyflag
     character (len=*),    intent(in), optional          :: keyUnits 
     character (len=*),    intent(in), optional   :: keyLongName 
     integer, intent(out), optional :: rc
@@ -779,12 +779,12 @@ contains
 ! Valid native Fortran array, i.e. memory must be associated with the 
 ! actual argument. The type/kind/rank information of {\tt farray} will be 
 ! used to set the key Array's properties accordingly. 
-! \item[{[copyflag]}] 
+! \item[{[datacopyflag]}] 
 ! Specifies whether the Array object will reference the memory allocation 
 ! provided by {\tt farray} directly or will copy the data from 
 ! {\tt farray} into a new memory allocation. Valid options are 
-! {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
-! Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+! {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. 
+! Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option 
 ! may be unsafe when specifying an array slice for {\tt farray}. 
 ! \item [{[keyUnits]}]
 ! The units of the key data. 
@@ -813,7 +813,7 @@ contains
 
    ! Create Array
    array=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
-                           copyflag=copyflag, indexflag=lstypep%indexflag,  &
+                           datacopyflag=datacopyflag, indexflag=lstypep%indexflag,  &
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
@@ -844,13 +844,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
   subroutine ESMF_LocStreamAddKeyR4(locstream, keyName, farray, &
-               copyflag, keyUnits, keyLongName, rc)
+               datacopyflag, keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)                   :: locstream
     character (len=*),   intent(in)                    :: keyName
     real(ESMF_KIND_R4),  dimension(:), intent(in)      :: farray
-    type(ESMF_CopyFlag), intent(in), optional          :: copyflag
+    type(ESMF_DataCopy_Flag), intent(in), optional          :: datacopyflag
     character (len=*),    intent(in), optional         :: keyUnits 
     character (len=*),    intent(in), optional         :: keyLongName 
     integer, intent(out), optional :: rc
@@ -869,12 +869,12 @@ contains
 ! Valid native Fortran array, i.e. memory must be associated with the 
 ! actual argument. The type/kind/rank information of {\tt farray} will be 
 ! used to set the key Array's properties accordingly. 
-! \item[{[copyflag]}] 
+! \item[{[datacopyflag]}] 
 ! Specifies whether the Array object will reference the memory allocation 
 ! provided by {\tt farray} directly or will copy the data from 
 ! {\tt farray} into a new memory allocation. Valid options are 
-! {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
-! Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+! {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. 
+! Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option 
 ! may be unsafe when specifying an array slice for {\tt farray}. 
 ! \item [{[keyUnits]}]
 ! The units of the key data. 
@@ -903,7 +903,7 @@ contains
 
    ! Create Array
    array=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
-                           copyflag=copyflag, indexflag=lstypep%indexflag,  &
+                           datacopyflag=datacopyflag, indexflag=lstypep%indexflag,  &
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
@@ -933,14 +933,14 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamAddKey()
-  subroutine ESMF_LocStreamAddKeyR8(locstream, keyName, farray, copyflag, &
+  subroutine ESMF_LocStreamAddKeyR8(locstream, keyName, farray, datacopyflag, &
                keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)                   :: locstream
     character (len=*),   intent(in)                    :: keyName
     real(ESMF_KIND_R8),  dimension(:), intent(in)      :: farray
-    type(ESMF_CopyFlag), intent(in), optional          :: copyflag
+    type(ESMF_DataCopy_Flag), intent(in), optional          :: datacopyflag
     character (len=*),    intent(in), optional         :: keyUnits 
     character (len=*),    intent(in), optional         :: keyLongName 
     integer, intent(out), optional :: rc
@@ -959,12 +959,12 @@ contains
 ! Valid native Fortran array, i.e. memory must be associated with the 
 ! actual argument. The type/kind/rank information of {\tt farray} will be 
 ! used to set the key Array's properties accordingly. 
-! \item[{[copyflag]}] 
+! \item[{[datacopyflag]}] 
 ! Specifies whether the Array object will reference the memory allocation 
 ! provided by {\tt farray} directly or will copy the data from 
 ! {\tt farray} into a new memory allocation. Valid options are 
-! {\tt ESMF\_DATA\_REF} (default) or {\tt ESMF\_DATA\_COPY}. 
-! Depending on the specific situation the {\tt ESMF\_DATA\_REF} option 
+! {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. 
+! Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option 
 ! may be unsafe when specifying an array slice for {\tt farray}. 
 ! \item [{[keyUnits]}]
 ! The units of the key data. 
@@ -993,7 +993,7 @@ contains
 
    ! Create Array
    array=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
-                           copyflag=copyflag, indexflag=lstypep%indexflag,  &
+                           datacopyflag=datacopyflag, indexflag=lstypep%indexflag,  &
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
@@ -2394,7 +2394,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !          exclusiveLBound, exclusiveUBound, exclusiveCount,             &
 !          computationalLBound, computationalUBound, computationalCount, &
 !          totalLBound, totalUBound, totalCount,                         &
-!          farray, doCopy, rc)
+!          farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF_LocStream), intent(in) :: locstream
@@ -2410,7 +2410,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !      integer,                intent(out), optional :: totalUBound
 !      integer,                intent(out), optional :: totalCount
 !      <farray>
-!      type(ESMF_CopyFlag), intent(in), optional :: docopy
+!      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
 !      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2458,10 +2458,10 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !          (i.e. {\tt totalUBound-totalLBound+1}). 
 !     \item[{farray}]
 !          The pointer to the coordinate data.
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2481,7 +2481,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
           exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
-          farray, doCopy, rc)
+          farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
@@ -2497,7 +2497,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
       integer,                intent(out), optional :: totalUBound
       integer,                intent(out), optional :: totalCount
       integer(ESMF_KIND_I4), pointer :: farray(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2537,10 +2537,10 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !          (i.e. {\tt totalUBound-totalLBound+1}). 
 !     \item[{farray}]
 !          The pointer to the coordinate data.
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2553,7 +2553,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray 
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: localDECount
 
  ! Initialize return code 
@@ -2565,10 +2565,10 @@ end subroutine ESMF_LocStreamGetKeyBounds
 
  
  ! Set Defaults
- if (present(docopy)) then
-    docopyInt=docopy
+ if (present(datacopyflag)) then
+    datacopyflagInt=datacopyflag
  else
-    docopyInt=ESMF_DATA_REF
+    datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
 
  ! Get localDECount
@@ -2616,7 +2616,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, docopy=doCopy, rc=localrc) 
+ call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -2647,7 +2647,7 @@ end subroutine ESMF_LocStreamGetKeyI4
           exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
-          farray, doCopy, rc)
+          farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
@@ -2663,7 +2663,7 @@ end subroutine ESMF_LocStreamGetKeyI4
       integer,                intent(out), optional :: totalUBound
       integer,                intent(out), optional :: totalCount 
       real(ESMF_KIND_R4), pointer :: farray(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2703,10 +2703,10 @@ end subroutine ESMF_LocStreamGetKeyI4
 !          (i.e. {\tt totalUBound-totalLBound+1}). 
 !     \item[{farray}]
 !          The pointer to the coordinate data.
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2719,7 +2719,7 @@ end subroutine ESMF_LocStreamGetKeyI4
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: localDECount
 
  ! Initialize return code 
@@ -2731,10 +2731,10 @@ end subroutine ESMF_LocStreamGetKeyI4
 
  
  ! Set Defaults
- if (present(docopy)) then
-    docopyInt=docopy
+ if (present(datacopyflag)) then
+    datacopyflagInt=datacopyflag
  else
-    docopyInt=ESMF_DATA_REF
+    datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
 
  ! Get localDECount
@@ -2782,7 +2782,7 @@ end subroutine ESMF_LocStreamGetKeyI4
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, docopy=doCopy, rc=localrc) 
+ call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -2814,7 +2814,7 @@ end subroutine ESMF_LocStreamGetKeyR4
           exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
-          farray, doCopy, rc)
+          farray, datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(in) :: locstream
@@ -2830,7 +2830,7 @@ end subroutine ESMF_LocStreamGetKeyR4
       integer,                intent(out), optional :: totalUBound
       integer,                intent(out), optional :: totalCount
       real(ESMF_KIND_R8), pointer :: farray(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2870,10 +2870,10 @@ end subroutine ESMF_LocStreamGetKeyR4
 !          (i.e. {\tt totalUBound-totalLBound+1}). 
 !     \item[{farray}]
 !          The pointer to the coordinate data.
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2886,7 +2886,7 @@ end subroutine ESMF_LocStreamGetKeyR4
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  type(ESMF_LocalArray) :: larray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: localDECount
 
  ! Initialize return code 
@@ -2898,10 +2898,10 @@ end subroutine ESMF_LocStreamGetKeyR4
 
  
  ! Set Defaults
- if (present(docopy)) then
-    docopyInt=docopy
+ if (present(datacopyflag)) then
+    datacopyflagInt=datacopyflag
  else
-    docopyInt=ESMF_DATA_REF
+    datacopyflagInt=ESMF_DATACOPY_REFERENCE
  endif
 
  ! Get localDECount
@@ -2948,7 +2948,7 @@ end subroutine ESMF_LocStreamGetKeyR4
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
- call ESMF_LocalArrayGet(larray, farray, docopy=doCopy, rc=localrc) 
+ call ESMF_LocalArrayGet(larray, farray, datacopyflag=datacopyflag, rc=localrc) 
  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -3950,8 +3950,8 @@ end subroutine ESMF_LocStreamGetBounds
 !     allocate( ranges(2), values(2) )
 !     allocate( i4Array(3), r4Array(2) )
 !     i4Array=(/1,7,5/); r4Array=(/150.,250./)
-!     ranges(1) = ESMF_LocalArrayCreate( i4Array, ESMF_DATA_COPY )
-!     values(2) = ESMF_LocalArrayCreate( r4Array, ESMF_DATA_COPY )
+!     ranges(1) = ESMF_LocalArrayCreate( i4Array, ESMF_DATACOPY_VALUE )
+!     values(2) = ESMF_LocalArrayCreate( r4Array, ESMF_DATACOPY_VALUE )
 !     deallocate( i4Array, r4Array )
 !     lsnew = ESMF_LocStreamCreateLocStream( ls, "middle atmosphere", &
 !                                       key = 'ks:lev', ranges=ranges,  &
@@ -3986,7 +3986,7 @@ end subroutine ESMF_LocStreamGetBounds
 !      example, use
 !\begin{verbatim}
 !     r4Array=(/500.-epsilon(1.),500.+epsilon(1.)/)
-!     ranges(2) = ESMF_LocalArrayCreate( r4Array, ESMF_DATA_COPY )
+!     ranges(2) = ESMF_LocalArrayCreate( r4Array, ESMF_DATACOPY_VALUE )
 !\end{verbatim}
 !\item There is no check for inconsistent conditions; the result will
 !      be \verb|nsel=0, rc=0|
@@ -4426,7 +4426,7 @@ end subroutine ESMF_LocStreamGetBounds
               count = 0
               do j=1, size(igridsIn)
                 call ESMF_LocalArrayGetData( lsIn%keys(k), intPtr,   &
-                                             ESMF_DATA_REF, localrc )
+                                             ESMF_DATACOPY_REFERENCE, localrc )
                 if (ESMF_LogFoundError(localrc, &
                                           ESMF_ERR_PASSTHRU, &
                                           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4436,7 +4436,7 @@ end subroutine ESMF_LocStreamGetBounds
                 enddo
               enddo
               ls%keys(k) = ESMF_LocalArrayCreate( intArrayNew, &
-                                                  ESMF_DATA_COPY, localrc )
+                                                  ESMF_DATACOPY_VALUE, localrc )
               if (ESMF_LogFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rc )) return
@@ -4447,7 +4447,7 @@ end subroutine ESMF_LocStreamGetBounds
               count = 0
               do j=1, size(igridsIn)
                 call ESMF_LocalArrayGetData( lsIn%keys(k), realPtr,  &
-                                             ESMF_DATA_REF, localrc )
+                                             ESMF_DATACOPY_REFERENCE, localrc )
                 if (ESMF_LogFoundError(localrc, &
                                           ESMF_ERR_PASSTHRU, &
                                           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4458,7 +4458,7 @@ end subroutine ESMF_LocStreamGetBounds
                 enddo
               enddo
               ls%keys(k) = ESMF_LocalArrayCreate(RealArrayNew, &
-                                                 ESMF_DATA_COPY, localrc)
+                                                 ESMF_DATACOPY_VALUE, localrc)
               if (ESMF_LogFoundError(localrc, &
                                         ESMF_ERR_PASSTHRU, &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4826,7 +4826,7 @@ end subroutine ESMF_LocStreamGetBounds
         select case (localkind)
           case (ESMF_TYPEKIND_I4%dkind)
             call ESMF_LocalArrayGetData( lArray, i4ptr,          &
-                                         ESMF_DATA_REF, localrc )
+                                         ESMF_DATACOPY_REFERENCE, localrc )
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4860,7 +4860,7 @@ end subroutine ESMF_LocStreamGetBounds
 
           case (ESMF_TYPEKIND_R4%dkind)
             call ESMF_LocalArrayGetData( lArray, r4ptr,          &
-                                         ESMF_DATA_REF, localrc )
+                                         ESMF_DATACOPY_REFERENCE, localrc )
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4894,7 +4894,7 @@ end subroutine ESMF_LocStreamGetBounds
 
           case (ESMF_TYPEKIND_R8%dkind)
             call ESMF_LocalArrayGetData( lArray, r8ptr,          &
-                                     ESMF_DATA_REF, localrc )
+                                     ESMF_DATACOPY_REFERENCE, localrc )
             if (ESMF_LogFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rcToReturn=rc)) return

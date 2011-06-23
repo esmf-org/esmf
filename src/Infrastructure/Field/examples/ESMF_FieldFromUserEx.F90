@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.18 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.19 2011/06/23 18:13:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 
     call UserGetPointer2D(f90ptr1, myLocation(1), myLocation(2))
     call UserGetHalo(halo)
-    field1 = ESMF_FieldCreate(igrid, f90ptr1, ESMF_DATA_REF, &
+    field1 = ESMF_FieldCreate(igrid, f90ptr1, ESMF_DATACOPY_REFERENCE, &
                               horzrelloc=ESMF_CELL_CENTER, &
                               haloWidth=halo, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -146,7 +146,7 @@
     dataIndexList(3) = 2
     call ESMF_FieldDataMapSetDefault(datamap, dataRank=3, &
                                      dataIndexList=dataIndexList, rc=rc)
-    field2 = ESMF_FieldCreate(igrid, f90ptr2, ESMF_DATA_REF, &
+    field2 = ESMF_FieldCreate(igrid, f90ptr2, ESMF_DATACOPY_REFERENCE, &
                               horzRelloc=ESMF_CELL_CENTER, &
                               datamap=datamap, name="concentration", &
                               haloWidth=halo, rc=rc)

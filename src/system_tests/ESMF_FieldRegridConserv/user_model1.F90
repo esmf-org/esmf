@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.18 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_model1.F90,v 1.19 2011/06/23 18:14:20 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -218,7 +218,7 @@
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
         ! Get a pointer to the start of the data
-        call ESMF_FieldGetDataPointer(humidity, idata, ESMF_DATA_REF, rc=rc)
+        call ESMF_FieldGetDataPointer(humidity, idata, ESMF_DATACOPY_REFERENCE, rc=rc)
 
         ! increment data values in place
     !    idata = idata + 10.0

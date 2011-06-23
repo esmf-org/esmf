@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.92 2011/06/22 15:07:33 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.93 2011/06/23 18:13:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2052,7 +2052,7 @@ endif
 !BOCI
    call ESMF_GridSetCoord(grid3D, tile=2,  &
           staggerLoc=ESMF_STAGGERLOC_CORNER,        &
-          coordDim=1, farrayPtr, doCopy=ESMF_DATA_REF, rc=rc)
+          coordDim=1, farrayPtr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOCI
 #endif
 

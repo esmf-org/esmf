@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.29 2011/06/22 15:06:58 rokuingh Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.30 2011/06/23 18:13:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -91,7 +91,7 @@ program ESMF_ArrayLarrayEx
 ! {\tt farrayP}s an {\tt ESMF\_LocalArray} object will be created on each PET.
 !EOE
 !BOC
-  larray = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, rc=rc)
+  larray = ESMF_LocalArrayCreate(farrayP, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -216,11 +216,11 @@ program ESMF_ArrayLarrayEx
   allocate(larrayList(2))   ! 2 DEs per PET
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 123.456d0
-  larrayList(1) = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, &
+  larrayList(1) = ESMF_LocalArrayCreate(farrayP, datacopyflag=ESMF_DATACOPY_REFERENCE, &
     rc=rc) !1st DE
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 456.789d0
-  larrayList(2) = ESMF_LocalArrayCreate(farrayP, docopy=ESMF_DATA_REF, &
+  larrayList(2) = ESMF_LocalArrayCreate(farrayP, datacopyflag=ESMF_DATACOPY_REFERENCE, &
     rc=rc) !2nd DE  
 !EOC
 !BOE

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateGet.cppF90,v 1.13 2011/02/26 00:49:00 rokuingh Exp $
+! $Id: ESMF_StateGet.cppF90,v 1.14 2011/06/23 18:14:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ module ESMF_StateGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateGet.cppF90,v 1.13 2011/02/26 00:49:00 rokuingh Exp $'
+    '$Id: ESMF_StateGet.cppF90,v 1.14 2011/06/23 18:14:11 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -100,13 +100,13 @@ contains
 ! !INTERFACE: @\
 !   ! Private name; call using ESMF_StateGetDataPointer() @\
 !   subroutine ESMF_StateGetDataPointer<rank><type><kind>(state, itemName, @\
-!                                 dataPointer, copyflag, nestedStateName, rc) @\
+!                                 dataPointer, datacopyflag, nestedStateName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_State), intent(in) :: state @\
 !      character(len=*), intent(in) :: itemName @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: dataPointer @\
-!      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
+!      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
 !      character(len=*), intent(in), optional :: nestedStateName @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
@@ -132,8 +132,8 @@ contains
 !   in the State.  When this call returns successfully, the pointer will now reference @\
 !   the data in the State.  This is either a reference or a copy, depending on the @\
 !   setting of the following argument.  The default is to return a reference. @\
-!  \item[{[copyflag]}] @\
-!   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
+!  \item[{[datacopyflag]}] @\
+!   Defaults to {\tt ESMF\_DATACOPY\_REFERENCE}.  If set to {\tt ESMF\_DATACOPY\_VALUE}, a separate @\
 !   copy of the data will be made and the pointer will point at the copy. @\
 !  \item[{[nestedStateName]}] @\
 !   Optional.  If multiple states are present, a specific state name must be given. @\
@@ -152,14 +152,14 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_StateGetDataPointer" @\
       subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind(state, & @\
-                     itemName, dataPointer, keywordEnforcer, copyflag, & @\
+                     itemName, dataPointer, keywordEnforcer, datacopyflag, & @\
                      nestedStateName, fieldName, rc) @\
  @\
       type(ESMF_State), intent(in) :: state @\
       character(len=*), intent(in) :: itemName @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
       type(ESMF_KeywordEnforcer),      optional :: keywordEnforcer ! must use keywords for the below @\
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
       character(len=*), intent(in), optional :: nestedStateName @\
       character(len=*), intent(in), optional :: fieldName @\
       integer, intent(out), optional :: rc   @\
@@ -251,25 +251,25 @@ contains
            ! get the fieldbundle data @\
 ! TODO:FIELDINTEGRATION uncomment the next line, and erase the next after that @\
 !           call ESMF_FieldBundleGetDataPointer(dataitem%datap%bp, & @\
-!                 fieldName, dataPointer, copyflag, status) @\
+!                 fieldName, dataPointer, datacopyflag, status) @\
            status=ESMF_RC_NOT_IMPL @\
            if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
         else if (dataitem%otype .eq. ESMF_STATEITEM_FIELD) then @\
 ! TODO:FIELDINTEGRATION uncomment the next line, and erase the next after that @\
-!         call ESMF_FieldGetDataPointer(dataitem%datap%fp, dataPointer, copyflag, status)@\
+!         call ESMF_FieldGetDataPointer(dataitem%datap%fp, dataPointer, datacopyflag, status)@\
            status=ESMF_RC_NOT_IMPL @\
          if (ESMF_LogFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
         else if (dataitem%otype .eq. ESMF_STATEITEM_ARRAY) then @\
           ! data copy not currently supported by array                @\
-          ! TODO: remove this when array supports ESMF_DATA_COPY      @\
-          if (present(copyflag)) then   @\
-             if (copyflag .ne. ESMF_DATA_REF) then                        @\
+          ! TODO: remove this when array supports ESMF_DATACOPY_VALUE      @\
+          if (present(datacopyflag)) then   @\
+             if (datacopyflag .ne. ESMF_DATACOPY_REFERENCE) then                        @\
                 if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, &                       @\
-                    " must currently use ESMF_DATA_REF when getting data from an Array",& @\
+                    " must currently use ESMF_DATACOPY_REFERENCE when getting data from an Array",& @\
                                       ESMF_CONTEXT, rc)) return              @\
              endif   @\
           endif   @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayDataUTest.F90,v 1.12 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_LocalArrayDataUTest.F90,v 1.13 2011/06/23 18:14:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_LocalArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.12 2011/02/10 04:18:46 ESRL\ryan.okuinghttons Exp $'
+    '$Id: ESMF_LocalArrayDataUTest.F90,v 1.13 2011/06/23 18:14:05 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -86,7 +86,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating a LocalArray from an allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  la = ESMF_LocalArrayCreate(data, docopy=ESMF_DATA_COPY, rc=rc)
+  la = ESMF_LocalArrayCreate(data, datacopyflag=ESMF_DATACOPY_VALUE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -128,7 +128,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -182,7 +182,7 @@ program ESMF_LocalArrayDataUTest
   write(name, *) "Creating a LocalArray from an allocated F90 Pointer within ",&
     "derived type"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  la = ESMF_LocalArrayCreate(sizetest1I%data, docopy=ESMF_DATA_REF, rc=rc)
+  la = ESMF_LocalArrayCreate(sizetest1I%data, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -199,7 +199,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -225,7 +225,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -280,7 +280,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating a LocalArray from an allocated F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  la = ESMF_LocalArrayCreate(data2d, docopy=ESMF_DATA_REF, rc=rc)
+  la = ESMF_LocalArrayCreate(data2d, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -296,7 +296,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -326,7 +326,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d2, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -391,7 +391,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating a LocalArray from an allocated F90 array pointer slice (:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  la = ESMF_LocalArrayCreate(fptr2dslice, docopy=ESMF_DATA_REF, rc=rc)
+  la = ESMF_LocalArrayCreate(fptr2dslice, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -407,7 +407,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -437,7 +437,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d2, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -486,7 +486,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating a LocalArray from an allocated F90 array pointer slice (:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  la = ESMF_LocalArrayCreate(fptr2dslice, docopy=ESMF_DATA_REF, rc=rc)
+  la = ESMF_LocalArrayCreate(fptr2dslice, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -502,7 +502,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -532,7 +532,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d2, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -580,7 +580,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Creating a LocalArray from an allocated F90 array pointer slice (:,:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  la = ESMF_LocalArrayCreate(fptr2dslice, docopy=ESMF_DATA_REF, rc=rc)
+  la = ESMF_LocalArrayCreate(fptr2dslice, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -596,7 +596,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
@@ -626,7 +626,7 @@ program ESMF_LocalArrayDataUTest
   !NEX_UTest
   write(name, *) "Obtaining access to data in LocalArray via F90 array pointer"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_LocalArrayGet(la, fptr2d2, docopy=ESMF_DATA_REF, rc=rc)
+  call ESMF_LocalArrayGet(la, fptr2d2, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 

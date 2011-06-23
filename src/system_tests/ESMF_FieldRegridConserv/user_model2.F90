@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.21 2010/11/03 22:48:52 theurich Exp $
+! $Id: user_model2.F90,v 1.22 2011/06/23 18:14:20 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -291,7 +291,7 @@
 
       ! update field values here
       ! Get a pointer to the start of the data
-      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGetDataPointer(humidity, data, ESMF_DATACOPY_REFERENCE, rc=status)
       print *, "rc from array get data = ", status
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"

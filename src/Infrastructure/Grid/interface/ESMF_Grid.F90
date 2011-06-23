@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.222 2011/06/16 14:19:22 w6ws Exp $
+! $Id: ESMF_Grid.F90,v 1.223 2011/06/23 18:13:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.222 2011/06/16 14:19:22 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.223 2011/06/23 18:13:58 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1337,14 +1337,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddCoord()
       subroutine ESMF_GridAddCoordArrayList(grid, staggerloc, &
-                   arrayList, doCopy, staggerEdgeLWidth,   &
+                   arrayList, datacopyflag, staggerEdgeLWidth,   &
                    staggerEdgeUWidth, staggerAlign, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       type(ESMF_Array),       intent(in)            :: arrayList(:)
-      type(ESMF_CopyFlag),    intent(in), optional  :: docopy ! NOT IMPLEMENTED
+      type(ESMF_DataCopy_Flag),    intent(in), optional  :: datacopyflag ! NOT IMPLEMENTED
       integer,                intent(in),optional   :: staggerEdgeLWidth(:)
       integer,                intent(in),optional   :: staggerEdgeUWidth(:)
       integer,                intent(in),optional   :: staggerAlign(:)
@@ -1364,12 +1364,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{arrayList}]
 !    An array to set the grid coordinate information from.
-!\item[{[doCopy]}]
-!    If not specified, default to {\tt ESMF\_DATA\_REF}, in this case the Grid 
+!\item[{[datacopyflag]}]
+!    If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case the Grid 
 !    coordinate Array will be set to a reference to {\tt array}. Please see 
-!    Section~\ref{opt:copyflag} for further description and a list of
+!    Section~\ref{opt:datacopyflag} for further description and a list of
 !    valid values. 
-!    [THE ESMF\_DATA\_COPY OPTION IS CURRENTLY NOT IMPLEMENTED] 
+!    [THE ESMF\_DATACOPY\_VALUE OPTION IS CURRENTLY NOT IMPLEMENTED] 
 ! \item[{[staggerEdgeLWidth]}] 
 !      This array should be the same rank as the grid. It specifies the lower corner of the stagger
 !      region with respect to the lower corner of the exclusive region.
@@ -1453,7 +1453,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridaddcoordarraylist(grid%this,tmp_staggerloc, &
-      arrayCount, arrayPointerList, docopy, staggerEdgeLWidthArg,     &
+      arrayCount, arrayPointerList, datacopyflag, staggerEdgeLWidthArg,     &
       staggerEdgeUWidthArg, staggerAlignArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -11347,7 +11347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        exclusiveLBound, exclusiveUBound, exclusiveCount,              &
 !        computationalLBound, computationalUBound, computationalCount,  &
 !        totalLBound, totalUBound, totalCount,                          &
-!        doCopy, rc)
+!        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in)            :: grid
@@ -11365,7 +11365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,                intent(out), optional :: totalLBound(:)
 !     integer,                intent(out), optional :: totalUBound(:)
 !     integer,                intent(out), optional :: totalCount(:)
-!     type(ESMF_CopyFlag),    intent(in),  optional :: docopy
+!     type(ESMF_DataCopy_Flag),    intent(in),  optional :: datacopyflag
 !     integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -11454,10 +11454,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -11477,7 +11477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, &
           exclusiveCount, computationalLBound, computationalUBound, &
           computationalCount, totalLBound, totalUBound, totalCount, &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -11495,7 +11495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -11568,10 +11568,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -11585,7 +11585,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localarray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -11641,10 +11641,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -11677,7 +11677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -11767,7 +11767,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -11785,7 +11785,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -11858,10 +11858,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -11876,7 +11876,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localarray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -11932,10 +11932,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet(), so don't do it here !!
@@ -11967,7 +11967,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -12056,7 +12056,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &      
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12074,7 +12074,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -12147,10 +12147,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -12165,7 +12165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer :: dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray) :: localArray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -12222,10 +12222,10 @@ if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  endif 
 
 ! Set Defaults
-if (present(docopy)) then
-   docopyInt=docopy
+if (present(datacopyflag)) then
+   datacopyflagInt=datacopyflag
 else
-  docopyInt=ESMF_DATA_REF
+  datacopyflagInt=ESMF_DATACOPY_REFERENCE
 endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -12258,7 +12258,7 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -12353,7 +12353,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12371,7 +12371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -12444,10 +12444,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -12462,7 +12462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localArray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -12519,10 +12519,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-       docopyInt=docopy
+    if (present(datacopyflag)) then
+       datacopyflagInt=datacopyflag
     else
-       docopyInt=ESMF_DATA_REF
+       datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -12553,7 +12553,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -12644,7 +12644,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,                             &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12662,7 +12662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -12735,10 +12735,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -12753,7 +12753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer :: dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray) :: localarray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -12810,10 +12810,10 @@ if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  endif 
 
 ! Set Defaults
-if (present(docopy)) then
-   docopyInt=docopy
+if (present(datacopyflag)) then
+   datacopyflagInt=datacopyflag
 else
-  docopyInt=ESMF_DATA_REF
+  datacopyflagInt=ESMF_DATACOPY_REFERENCE
 endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -12844,7 +12844,7 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -12933,7 +12933,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -12951,7 +12951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -13024,10 +13024,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13042,7 +13042,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer :: dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray) :: localarray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -13099,10 +13099,10 @@ if ((coordDim .lt. 1) .or. (coordDim > dimCount)) then
  endif 
 
 ! Set Defaults
-if (present(docopy)) then
-   docopyInt=docopy
+if (present(datacopyflag)) then
+   datacopyflagInt=datacopyflag
 else
-  docopyInt=ESMF_DATA_REF
+  datacopyflagInt=ESMF_DATACOPY_REFERENCE
 endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -13133,7 +13133,7 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -13258,7 +13258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_CopyFlag) :: docopy
+    type(ESMF_DataCopy_Flag) :: datacopyflag
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -13286,12 +13286,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
   
-    ! Init docopy
-    docopy=ESMF_DATA_REF
+    ! Init datacopyflag
+    datacopyflag=ESMF_DATACOPY_REFERENCE
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridgetcoordintoarray(grid%this,tmp_staggerloc, coordDim, &
-      array, docopy, localrc)
+      array, datacopyflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13693,7 +13693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        exclusiveLBound, exclusiveUBound, exclusiveCount, &
 !        computationalLBound, computationalUBound, computationalCount,  &
 !        totalLBound, totalUBound, totalCount,                          &
-!        doCopy, rc)
+!        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in)            :: grid
@@ -13711,7 +13711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,                intent(out), optional :: totalLBound(:)
 !     integer,                intent(out), optional :: totalUBound(:)
 !     integer,                intent(out), optional :: totalCount(:)
-!     type(ESMF_CopyFlag),    intent(in),  optional :: docopy
+!     type(ESMF_DataCopy_Flag),    intent(in),  optional :: datacopyflag
 !     integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -13804,10 +13804,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13827,7 +13827,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -13845,7 +13845,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag),    intent(in), optional  :: docopy
+      type(ESMF_DataCopy_Flag),    intent(in), optional  :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -13917,10 +13917,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13934,7 +13934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localArray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -13969,10 +13969,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -13996,7 +13996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -14085,7 +14085,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -14103,7 +14103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14176,10 +14176,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14194,7 +14194,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localArray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -14230,10 +14230,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -14256,7 +14256,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -14345,7 +14345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &      
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -14363,7 +14363,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14436,10 +14436,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14454,7 +14454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer :: dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray) :: localArray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -14489,10 +14489,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  endif 
 
 ! Set Defaults
-if (present(docopy)) then
-   docopyInt=docopy
+if (present(datacopyflag)) then
+   datacopyflagInt=datacopyflag
 else
-  docopyInt=ESMF_DATA_REF
+  datacopyflagInt=ESMF_DATACOPY_REFERENCE
 endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -14516,7 +14516,7 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -14604,7 +14604,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -14622,7 +14622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14694,10 +14694,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14711,7 +14711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer ::  dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray):: localarray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -14746,10 +14746,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -14772,7 +14772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -14861,7 +14861,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -14879,7 +14879,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14952,10 +14952,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14970,7 +14970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localDeCount, dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localarray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -15006,10 +15006,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -15032,7 +15032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -15121,7 +15121,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &      
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -15139,7 +15139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -15212,10 +15212,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15230,7 +15230,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer :: dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray) :: localArray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -15265,10 +15265,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  endif 
 
 ! Set Defaults
-if (present(docopy)) then
-   docopyInt=docopy
+if (present(datacopyflag)) then
+   datacopyflagInt=datacopyflag
 else
-  docopyInt=ESMF_DATA_REF
+  datacopyflagInt=ESMF_DATACOPY_REFERENCE
 endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -15292,7 +15292,7 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -15381,7 +15381,7 @@ endif
           exclusiveLBound, exclusiveUBound, exclusiveCount,              &
           computationalLBound, computationalUBound, computationalCount,  &
           totalLBound, totalUBound, totalCount,                          &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -15399,7 +15399,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag),    intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -15471,10 +15471,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of the regions and their associated bounds and counts. 
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15488,7 +15488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localArray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -15523,10 +15523,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -15549,7 +15549,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
       ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -15638,7 +15638,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -15656,7 +15656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -15729,10 +15729,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15747,7 +15747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: dimCount 
     type(ESMF_TypeKind) :: typekind 
     type(ESMF_LocalArray) :: localarray
-    type(ESMF_CopyFlag) :: docopyInt
+    type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
     type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
     type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -15783,10 +15783,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     ! Set Defaults
-    if (present(docopy)) then
-      docopyInt=docopy
+    if (present(datacopyflag)) then
+      datacopyflagInt=datacopyflag
     else
-      docopyInt=ESMF_DATA_REF
+      datacopyflagInt=ESMF_DATACOPY_REFERENCE
     endif
 
 
@@ -15811,7 +15811,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -15900,7 +15900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
           totalLBound, totalUBound, totalCount,                         &      
-          doCopy, rc)
+          datacopyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -15918,7 +15918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_CopyFlag), intent(in), optional :: docopy
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -15991,10 +15991,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[doCopy]}]
-!          If not specified, default to {\tt ESMF\_DATA\_REF}, in this case
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:copyflag} for further description and a
+!          Please see Section~\ref{opt:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -16009,7 +16009,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer :: dimCount 
  type(ESMF_TypeKind) :: typekind 
  type(ESMF_LocalArray) :: localarray
- type(ESMF_CopyFlag) :: docopyInt
+ type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
  type(ESMF_InterfaceInt) :: exclusiveLBoundArg ! helper variable
  type(ESMF_InterfaceInt) :: exclusiveUBoundArg ! helper variable
@@ -16044,10 +16044,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  endif 
 
 ! Set Defaults
-if (present(docopy)) then
-   docopyInt=docopy
+if (present(datacopyflag)) then
+   datacopyflagInt=datacopyflag
 else
-  docopyInt=ESMF_DATA_REF
+  datacopyflagInt=ESMF_DATACOPY_REFERENCE
 endif
 
     !! localDE is error checked inside ESMF_ArrayGet() and GetCoordBounds(), so don't do it here !!
@@ -16071,7 +16071,7 @@ endif
                               ESMF_CONTEXT, rcToReturn=rc)) return
  
     call ESMF_LocalArrayGet(localarray, farrayPtr, &
-      docopy=doCopy, rc=localrc) 
+      datacopyflag=datacopyflag, rc=localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return 
 
@@ -16197,7 +16197,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
-    type(ESMF_CopyFlag) :: docopy
+    type(ESMF_DataCopy_Flag) :: datacopyflag
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -16213,12 +16213,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        tmp_staggerloc=ESMF_STAGGERLOC_CENTER%staggerloc
     endif
 
-    ! Init docopy
-    docopy=ESMF_DATA_REF
+    ! Init datacopyflag
+    datacopyflag=ESMF_DATACOPY_REFERENCE
 
     ! Call C++ Subroutine
     call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, item, &
-      array, docopy, localrc)
+      array, datacopyflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -16970,7 +16970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_CopyFlag) :: docopy
+    type(ESMF_DataCopy_Flag) :: datacopyflag
 
 
     ! Initialize return code; assume failure until success is certain
@@ -17001,11 +17001,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
  
     ! Use reference
-    docopy=ESMF_DATA_REF
+    datacopyflag=ESMF_DATACOPY_REFERENCE
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridsetcoordfromarray(grid%this,tmp_staggerloc, coordDim, &
-      array, docopy, localrc)
+      array, datacopyflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -19591,7 +19591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: tmp_staggerloc
     integer :: localrc ! local error status
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_CopyFlag) :: docopy 
+    type(ESMF_DataCopy_Flag) :: datacopyflag 
 
 
     ! Initialize return code; assume failure until success is certain
@@ -19622,11 +19622,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Use reference
-    docopy=ESMF_DATA_REF
+    datacopyflag=ESMF_DATACOPY_REFERENCE
 
     ! Call C++ Subroutine 
     call c_ESMC_gridsetitemfromarray(grid%this,tmp_staggerloc, item, &
-      array, docopy, localrc)
+      array, datacopyflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

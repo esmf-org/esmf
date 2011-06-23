@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.14 2011/02/23 17:08:09 w6ws Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.15 2011/06/23 18:13:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            field = ESMF_FieldCreate(grid, array, copyflag=ESMF_DATA_COPY, rc=localrc)
+            field = ESMF_FieldCreate(grid, array, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.73 2011/06/22 15:06:58 rokuingh Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.74 2011/06/23 18:13:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, datacopyflag=ESMF_DATACOPY_REFERENCE, &
        rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -373,7 +373,7 @@ program ESMF_ArrayEx
 !
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, datacopyflag=ESMF_DATACOPY_REFERENCE, &
        rc=rc)
     do i=1, size(myFarray, 1)
       do j=1, size(myFarray, 2)
@@ -420,7 +420,7 @@ program ESMF_ArrayEx
     ! this is the default
 !    print *, "DE-local exclusive regions start at (1,1)"
     do de=1, localDeCount
-      call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+      call ESMF_LocalArrayGet(larrayList(de), myFarray, datacopyflag=ESMF_DATACOPY_REFERENCE, &
           rc=rc)
       do i=1, exclusiveUBound(1, de)
         do j=1, exclusiveUBound(2, de)
@@ -433,7 +433,7 @@ program ESMF_ArrayEx
     ! only if set during ESMF_ArrayCreate()
 !    print *, "DE-local exclusive regions of this Array have global bounds"
     do de=1, localDeCount
-      call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+      call ESMF_LocalArrayGet(larrayList(de), myFarray, datacopyflag=ESMF_DATACOPY_REFERENCE, &
          rc=rc)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
         do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
@@ -563,7 +563,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray, datacopyflag=ESMF_DATACOPY_REFERENCE, &
        rc=rc)
     ! initialize the DE-local array
     myFarray = 0.1d0 * localDeList(de)
@@ -1015,10 +1015,10 @@ program ESMF_ArrayEx
   allocate(larrayList2(localDeCount))
   call ESMF_ArrayGet(array2D, localarrayList=larrayList2, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList1(de), myFarray3D, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList1(de), myFarray3D, datacopyflag=ESMF_DATACOPY_REFERENCE, &
       rc=rc)
     myFarray3D = 0.1d0 * de ! initialize
-    call ESMF_LocalArrayGet(larrayList2(de), myFarray2D, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList2(de), myFarray2D, datacopyflag=ESMF_DATACOPY_REFERENCE, &
       rc=rc)
     myFarray2D = 0.5d0 * de ! initialize
     do k=1, 4
@@ -1153,7 +1153,7 @@ program ESMF_ArrayEx
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, datacopyflag=ESMF_DATACOPY_REFERENCE, &
        rc=rc)
     myFarray3D = 0.0 ! initialize
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
@@ -1227,7 +1227,7 @@ program ESMF_ArrayEx
   allocate(larrayList(localDeCount))
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
   do de=1, localDeCount
-    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, docopy=ESMF_DATA_REF, &
+    call ESMF_LocalArrayGet(larrayList(de), myFarray3D, datacopyflag=ESMF_DATACOPY_REFERENCE, &
        rc=rc)
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
       1, exclusiveLBound(2,de):exclusiveUBound(2,de)) = 10.5 !dummy assignment
@@ -1330,7 +1330,7 @@ program ESMF_ArrayEx
 !BOC
   do de=1, localDeCount
     call ESMF_LocalArrayGet(larrayList(de), myFarray1D, &
-      docopy=ESMF_DATA_REF, rc=rc)
+      datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC

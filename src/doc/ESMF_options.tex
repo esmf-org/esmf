@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.45 2010/12/15 22:13:52 svasquez Exp $
+% $Id: ESMF_options.tex,v 1.46 2011/06/23 18:14:15 rokuingh Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -211,16 +211,16 @@ Valid values are:
 
 \end{description}
 
-\subsubsection{ESMF\_CopyFlag}
-\label{opt:copyflag}
+\subsubsection{ESMF\_DATACOPY}
+\label{opt:datacopyflag}
 {\sf DESCRIPTION:\\}
 Indicates whether to reference a data item or make a copy of it.
 
 Valid values are:
 \begin{description}
-\item [ESMF\_DATA\_COPY]
+\item [ESMF\_DATACOPY\_VALUE]
       Copy the data item to another buffer.
-\item [ESMF\_DATA\_REF]
+\item [ESMF\_DATACOPY\_REFERENCE]
       Reference the data item.
 \end{description}
 

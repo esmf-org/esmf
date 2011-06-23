@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.47 2011/01/05 20:05:48 svasquez Exp $
+% $Id: ESMF_api.tex,v 1.48 2011/06/23 18:14:15 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -341,7 +341,7 @@ whoever allocates it is responsible for deallocating it.
 ESMF methods that allocate their own space for data will
 deallocate that space when the object is destroyed. 
 Methods which accept a user-allocated buffer, for example
-{\tt ESMF\_FieldCreate()} with the {\tt ESMF\_DATA\_REF} flag,
+{\tt ESMF\_FieldCreate()} with the {\tt ESMF\_DATACOPY\_REFERENCE} flag,
 will not deallocate that buffer at the time the object is
 destroyed.  The user must deallocate the buffer
 when all use of it is complete.

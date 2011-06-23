@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $
+! $Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.13 2011/06/23 18:13:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.12 2011/01/05 20:05:43 svasquez Exp $'
+      '$Id: ESMF_FieldBundleCommOptionsUTest.F90,v 1.13 2011/06/23 18:13:54 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -483,9 +483,9 @@ contains
   
       ! Get the allocated array back as an F90 array pointer
       if (do2d) then
-          call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATA_REF, rc=status)
+          call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATACOPY_REFERENCE, rc=status)
       else
-          call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, rc=status)
+          call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATACOPY_REFERENCE, rc=status)
       endif
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -610,9 +610,9 @@ contains
 
       ! Get the allocated array back as an F90 array pointer
       if (do2d) then
-        call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATACOPY_REFERENCE, rc=status)
       else
-        call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, rc=status)
+        call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATACOPY_REFERENCE, rc=status)
       endif
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -736,7 +736,7 @@ contains
                                 ESMF_CONTEXT, rc)) goto 10
   
       ! Get the allocated array back as an F90 array pointer
-      call ESMF_FieldGetDataPointer(userfield, idata, ESMF_DATA_REF, rc=status)
+      call ESMF_FieldGetDataPointer(userfield, idata, ESMF_DATACOPY_REFERENCE, rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
 
@@ -794,10 +794,10 @@ contains
 
       ! get a pointer to the start of the local data block
       if (ranksize .eq. 2) then
-          call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATA_REF, &
+          call ESMF_FieldGetDataPointer(userfield, idata2, ESMF_DATACOPY_REFERENCE, &
                                         counts=counts, rc=status) 
       else if (ranksize .eq. 3) then
-          call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATA_REF, &
+          call ESMF_FieldGetDataPointer(userfield, idata3, ESMF_DATACOPY_REFERENCE, &
                                         counts=counts, rc=status) 
       else
          print *, "Unexpected rank", ranksize
@@ -885,10 +885,10 @@ contains
 
       ! Get a pointer to the start of the data
       if (ranksize .eq. 2) then
-        call ESMF_FieldGetDataPointer(userfield, data2, ESMF_DATA_REF, &
+        call ESMF_FieldGetDataPointer(userfield, data2, ESMF_DATACOPY_REFERENCE, &
                                       counts=acounts, rc=status)
       else if (ranksize .eq. 3) then
-        call ESMF_FieldGetDataPointer(userfield, data3, ESMF_DATA_REF, &
+        call ESMF_FieldGetDataPointer(userfield, data3, ESMF_DATACOPY_REFERENCE, &
                                       counts=acounts, rc=status)
       else
         print *, "unexpected rank", ranksize

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.22 2011/06/22 15:07:24 rokuingh Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.23 2011/06/23 18:13:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -171,7 +171,7 @@
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid2d, array1d, copyflag=ESMF_DATA_COPY, rc=localrc)
+  field1 = ESMF_FieldCreate(grid2d, array1d, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
@@ -193,7 +193,7 @@
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid2d, farray=fptr1d, &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -212,7 +212,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid2d, farray=fptr1d, &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -234,7 +234,7 @@
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid2d, farrayPtr=fptr1d, &
-      copyflag=ESMF_DATA_COPY, rc=localrc)
+      datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
@@ -254,7 +254,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid2d, farrayPtr=fptr1d, &
-      copyflag=ESMF_DATA_COPY, rc=localrc)
+      datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
@@ -356,7 +356,7 @@
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid3d, array1d, copyflag=ESMF_DATA_COPY, &
+  field1 = ESMF_FieldCreate(grid3d, array1d, datacopyflag=ESMF_DATACOPY_VALUE, &
         gridToFieldMap=(/1,2,0/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -379,7 +379,7 @@
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -399,7 +399,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr1d, gridToFieldMap=(/1,2,0/), &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -421,7 +421,7 @@
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
-      copyflag=ESMF_DATA_COPY, rc=localrc)
+      datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
@@ -441,7 +441,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr1d, gridToFieldMap=(/1,2,0/), &
-      copyflag=ESMF_DATA_COPY, rc=localrc)
+      datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
@@ -538,7 +538,7 @@
   call ESMF_FieldGet(field, array=array2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, rc=localrc)
+  field1 = ESMF_FieldCreate(grid3d, array2d, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
@@ -560,7 +560,7 @@
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -580,7 +580,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -602,7 +602,7 @@
   field3 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr2d, &
-      copyflag=ESMF_DATA_COPY, rc=localrc)
+      datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
@@ -622,7 +622,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr2d, &
-      copyflag=ESMF_DATA_COPY, rc=localrc)
+      datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
@@ -720,7 +720,7 @@
   call ESMF_FieldGet(field, array=array3d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid3d, array3d, copyflag=ESMF_DATA_COPY, ungriddedLBound=(/1/), &
+  field1 = ESMF_FieldCreate(grid3d, array3d, datacopyflag=ESMF_DATACOPY_VALUE, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -744,7 +744,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr3d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -765,7 +765,7 @@
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr3d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -844,7 +844,7 @@
   call ESMF_FieldGet(field, array=array2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, ungriddedLBound=(/1/), &
+  field1 = ESMF_FieldCreate(grid3d, array2d, datacopyflag=ESMF_DATACOPY_VALUE, ungriddedLBound=(/1/), &
     ungriddedUBound=(/10/), gridToFieldMap=(/1,2,0/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -869,7 +869,7 @@
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/1,2,0/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -891,7 +891,7 @@
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/1,2,0/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -969,7 +969,7 @@
   call ESMF_FieldGet(field, array=array1d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid3d, array1d, copyflag=ESMF_DATA_COPY, gridToFieldMap=(/0,0,1/), rc=localrc)
+  field1 = ESMF_FieldCreate(grid3d, array1d, datacopyflag=ESMF_DATACOPY_VALUE, gridToFieldMap=(/0,0,1/), rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field1, rank=rank, dimCount=dimCount, rc=localrc)
@@ -992,7 +992,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -1013,7 +1013,7 @@
 
   field4 = ESMF_FieldCreate(grid3d, farray=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -1036,7 +1036,7 @@
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field3, grid3d, farrayPtr=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
-    copyflag=ESMF_DATA_COPY, rc=localrc)
+    datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field3, rank=rank, dimCount=dimCount, rc=localrc)
@@ -1057,7 +1057,7 @@
 
   field5 = ESMF_FieldCreate(grid3d, farrayPtr=fptr1d, &
     gridToFieldMap=(/0,0,1/), &
-    copyflag=ESMF_DATA_COPY, rc=localrc)
+    datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field5, rank=rank, dimCount=dimCount, rc=localrc)
@@ -1152,7 +1152,7 @@
   call ESMF_FieldGet(field, array=array2d, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  field1 = ESMF_FieldCreate(grid3d, array2d, copyflag=ESMF_DATA_COPY, gridToFieldMap=(/0,0,1/), &
+  field1 = ESMF_FieldCreate(grid3d, array2d, datacopyflag=ESMF_DATACOPY_VALUE, gridToFieldMap=(/0,0,1/), &
           ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1177,7 +1177,7 @@
   call ESMF_FieldEmptyComplete(field2, grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/0,0,1/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)
@@ -1199,7 +1199,7 @@
   field4 = ESMF_FieldCreate(grid3d, farray=fptr2d, &
     ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
     gridToFieldMap=(/0,0,1/), &
-    indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+    indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field4, rank=rank, dimCount=dimCount, rc=localrc)
@@ -1283,7 +1283,7 @@
   field2 = ESMF_FieldEmptyCreate(rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_FieldEmptyComplete(field2, grid2d, farray=fptr1d, &
-      indexflag=ESMF_INDEX_DELOCAL, copyflag=ESMF_DATA_COPY, rc=localrc)
+      indexflag=ESMF_INDEX_DELOCAL, datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_FieldGet(field2, rank=rank, dimCount=dimCount, rc=localrc)

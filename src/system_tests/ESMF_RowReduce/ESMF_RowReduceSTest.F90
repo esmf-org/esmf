@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.41 2010/11/03 22:48:53 theurich Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.42 2011/06/23 18:14:28 rokuingh Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -159,7 +159,7 @@
 
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
-    array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
+    array1 = ESMF_ArrayCreate(idata, ESMF_DATACOPY_REFERENCE, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! We did the allocate outside the framework, so at the end after
@@ -200,7 +200,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get a pointer to the start of the result data
-    call ESMF_ArrayGetData(array2, rdata, ESMF_DATA_REF, rc)
+    call ESMF_ArrayGetData(array2, rdata, ESMF_DATACOPY_REFERENCE, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the mapping between local and global indices for this DE

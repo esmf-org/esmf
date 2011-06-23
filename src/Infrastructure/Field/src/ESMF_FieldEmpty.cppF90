@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.12 2011/06/23 00:39:17 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.13 2011/06/23 18:13:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.12 2011/06/23 00:39:17 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.13 2011/06/23 18:13:51 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -1684,7 +1684,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !IROUTINE: ESMF_FieldConstructIANewArray - Construct the internals of a Field.
 
 ! !INTERFACE:
-  subroutine ESMF_FieldConstructIANewArray(ftype, geombase, array, copyflag, &
+  subroutine ESMF_FieldConstructIANewArray(ftype, geombase, array, datacopyflag, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, name, rc)
 !
@@ -1692,7 +1692,7 @@ end subroutine ESMF_FieldEmptyCompTK
     type(ESMF_FieldType), pointer :: ftype 
     type(ESMF_GeomBase) :: geombase 
     type(ESMF_Array), intent(in) :: array     
-    type(ESMF_CopyFlag), intent(in) :: copyflag
+    type(ESMF_DataCopy_Flag), intent(in) :: datacopyflag
     integer, intent(in) :: gridToFieldMap(:)
     integer, intent(in),optional :: ungriddedLBound(:)
     integer, intent(in),optional :: ungriddedUBound(:)      
@@ -1713,9 +1713,9 @@ end subroutine ESMF_FieldEmptyCompTK
 !       {\tt ESMF\_GeomBase} object. 
 ! \item [array]
 !       Data. 
-! \item [copyflag]
+! \item [datacopyflag]
 !       Whether to copy the existing data space or reference directly. Valid
-!       values are {\tt ESMF\_DATA\_COPY} or {\tt ESMF\_DATA\_REF} (default).
+!       values are {\tt ESMF\_DATACOPY\_VALUE} or {\tt ESMF\_DATACOPY\_REFERENCE} (default).
 ! \item [staggerloc] 
 !       Stagger location of data in grid cells.  For valid 
 !       predefined values see Section \ref{sec:opt:staggerloc}.
@@ -1874,9 +1874,9 @@ end subroutine ESMF_FieldEmptyCompTK
     endif  
     ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
 
-    ! default copyflag value is ESMF_DATA_REF
+    ! default datacopyflag value is ESMF_DATACOPY_REFERENCE
     ftype%array_internal = .false.
-    if(copyflag == ESMF_DATA_REF) then
+    if(datacopyflag == ESMF_DATACOPY_REFERENCE) then
         ftype%array = array
     else
         newarray = ESMF_ArrayCreate(array, rc=localrc)
@@ -1909,7 +1909,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyComp<rank><type><kind>(field, & @\
-!   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+!   farray, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -1917,7 +1917,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
 !   integer,               intent(in),  optional :: ungriddedUBound(:) @\
@@ -1963,10 +1963,10 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
@@ -2031,7 +2031,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyComp" @\
   subroutine ESMF_FieldEmptyComp##mrank##D##mtypekind(field, farray, & @\
-    indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+    indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
     ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
@@ -2039,7 +2039,7 @@ end subroutine ESMF_FieldEmptyCompTK
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -2111,7 +2111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComplete @\
   call ESMF_FieldEmptyComplete(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -2132,14 +2132,14 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompPtr<rank><type><kind>(field, & @\
-!   farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, & @\
+!   farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: totalLWidth(:) @\
 !   integer,               intent(in),  optional :: totalUWidth(:) @\
@@ -2160,7 +2160,7 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! \end{sloppypar} @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
@@ -2176,10 +2176,10 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
@@ -2226,14 +2226,14 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompPtr" @\
   subroutine ESMF_FieldEmptyCompPtr##mrank##D##mtypekind(field, farrayPtr, & @\
-    keywordEnforcer, copyflag, gridToFieldMap, & @\
+    keywordEnforcer, datacopyflag, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: totalLWidth(:) @\
     integer, intent(in), optional :: totalUWidth(:) @\
@@ -2303,7 +2303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComplete @\
   call ESMF_FieldEmptyComplete(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    datacopyflag, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -2325,7 +2325,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGrid<rank><type><kind>(field, grid, & @\
-!   farray, indexflag, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
+!   farray, indexflag, keywordEnforcer, datacopyflag, staggerloc, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -2334,7 +2334,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   type(ESMF_STAGGERLOC), intent(in),  optional :: staggerloc @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
@@ -2365,10 +2365,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
 !       predefined values see Section \ref{sec:opt:staggerloc}. @\
@@ -2439,7 +2439,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompGrid" @\
   subroutine ESMF_FieldEmptyCompGrid##mrank##D##mtypekind(field, grid, farray, & @\
-    indexflag, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
+    indexflag, keywordEnforcer, datacopyflag, staggerloc, gridToFieldMap, & @\
     ungriddedLBound, ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
@@ -2448,7 +2448,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag), intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -2508,7 +2508,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -2535,7 +2535,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGridPtr<rank><type><kind>(field, grid, & @\
-!   farrayPtr, keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
+!   farrayPtr, keywordEnforcer, datacopyflag, staggerloc, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -2543,7 +2543,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 !   type(ESMF_Grid),       intent(in)            :: grid @\
 !   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   type(ESMF_STAGGERLOC), intent(in),  optional :: staggerloc @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: totalLWidth(:) @\
@@ -2555,7 +2555,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
@@ -2570,10 +2570,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
 !       predefined values see Section \ref{sec:opt:staggerloc}. @\
@@ -2626,7 +2626,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompGridPtr" @\
   subroutine ESMF_FieldEmptyCompGridPtr##mrank##D##mtypekind(field, grid, farrayPtr, & @\
-    keywordEnforcer, copyflag, staggerloc, gridToFieldMap, & @\
+    keywordEnforcer, datacopyflag, staggerloc, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
@@ -2634,7 +2634,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
     type(ESMF_Grid) :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: totalLWidth(:) @\
@@ -2692,7 +2692,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    datacopyflag, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -2720,7 +2720,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompLS<rank><type><kind>(field, locstream, & @\
-!   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+!   farray, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -2729,7 +2729,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
 !   integer,               intent(in),  optional :: ungriddedUBound(:) @\
@@ -2757,10 +2757,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt locstream}|s dimCount.  The list elements map each dimension @\
@@ -2809,7 +2809,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompLS" @\
   subroutine ESMF_FieldEmptyCompLS##mrank##D##mtypekind(field, locstream, farray, & @\
-    indexflag, keywordEnforcer, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
     ! input arguments @\
@@ -2818,7 +2818,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -2843,7 +2843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag=indexflag, copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    indexflag=indexflag, datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     ungriddedLBound=ungriddedLBound, & @\
     ungriddedUBound=ungriddedUBound, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2866,14 +2866,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompLSPtr<rank><type><kind>(field, locstream, & @\
-!   farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
+!   farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_LocStream),  intent(in)            :: locstream @\
 !   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
@@ -2882,7 +2882,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
@@ -2897,10 +2897,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt locstream}|s dimCount.  The list elements map each dimension @\
@@ -2931,14 +2931,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompLSPtr" @\
   subroutine ESMF_FieldEmptyCompLSPtr##mrank##D##mtypekind(field, & @\
-    locstream, farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
+    locstream, farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_LocStream) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
@@ -2961,7 +2961,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -2983,7 +2983,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompMesh<rank><type><kind>(field, mesh, & @\
-!   farray, location, indexflag, keywordEnforcer, copyflag, & @\
+!   farray, location, indexflag, keywordEnforcer, datacopyflag, & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -2993,7 +2993,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 !   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
 !   integer,               intent(in),  optional :: ungriddedUBound(:) @\
@@ -3027,10 +3027,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt mesh}|s dimCount.  The list elements map each dimension @\
@@ -3079,7 +3079,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompMesh" @\
   subroutine ESMF_FieldEmptyCompMesh##mrank##D##mtypekind(field, mesh, farray, & @\
-    location, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+    location, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
     ungriddedLBound, ungriddedUBound, rc) @\
 @\
     ! input arguments @\
@@ -3089,7 +3089,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
     type(ESMF_MeshLoc), intent(in), optional    :: location @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -3114,7 +3114,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag=indexflag, copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    indexflag=indexflag, datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     ungriddedLBound=ungriddedLBound, & @\
     ungriddedUBound=ungriddedUBound, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -3137,7 +3137,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompMeshPtr<rank><type><kind>(field, mesh, & @\
-!   farrayPtr, keywordEnforcer, location, copyflag, gridToFieldMap, rc) @\
+!   farrayPtr, keywordEnforcer, location, datacopyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
@@ -3145,7 +3145,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 !   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
@@ -3154,7 +3154,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
@@ -3175,10 +3175,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 !       \end{sloppypar} @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt mesh}|s dimCount.  The list elements map each dimension @\
@@ -3209,7 +3209,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompMeshPtr" @\
   subroutine ESMF_FieldEmptyCompMeshPtr##mrank##D##mtypekind(field, mesh, & @\
-    farrayPtr, keywordEnforcer, location, copyflag, gridToFieldMap, rc) @\
+    farrayPtr, keywordEnforcer, location, datacopyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -3217,7 +3217,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_MeshLoc), intent(in), optional   :: location @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
@@ -3240,7 +3240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -3262,7 +3262,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompXG<rank><type><kind>(field, xgrid, & @\
 !   xgridSide, gridIndex, & @\
-!   farray, indexflag, keywordEnforcer, copyflag, gridToFieldMap, & @\
+!   farray, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -3273,7 +3273,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
 !   integer,               intent(in),  optional :: ungriddedUBound(:) @\
@@ -3308,10 +3308,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
@@ -3361,7 +3361,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ^define ESMF_METHOD "ESMF_FieldEmptyCompXG" @\
   subroutine ESMF_FieldEmptyCompXG##mrank##D##mtypekind(field, xgrid, & @\
     xgridSide, gridIndex, farray, & @\
-    indexflag, keywordEnforcer, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
     ! input arguments @\
@@ -3372,7 +3372,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -3397,7 +3397,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag=indexflag, copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    indexflag=indexflag, datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     ungriddedLBound=ungriddedLBound, & @\
     ungriddedUBound=ungriddedUBound, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -3421,7 +3421,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompXGPtr<rank><type><kind>(field, xgrid, & @\
 !   xgridSide, gridIndex, & @\
-!   farrayPtr, indexflag, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
+!   farrayPtr, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
@@ -3430,7 +3430,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 !   integer,               intent(in),  optional :: gridIndex @\
 !   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag),   intent(in),  optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,               intent(out), optional :: rc @\
 ! @\
@@ -3439,7 +3439,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
@@ -3461,10 +3461,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
@@ -3496,7 +3496,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ^define ESMF_METHOD "ESMF_FieldEmptyCompXGPtr" @\
   subroutine ESMF_FieldEmptyCompXGPtr##mrank##D##mtypekind(field, xgrid, & @\
     xgridSide, gridIndex, & @\
-    farrayPtr, keywordEnforcer, copyflag, gridToFieldMap, rc) @\
+    farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
@@ -3505,7 +3505,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
     integer,              intent(in), optional  :: gridIndex @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(out), optional :: rc                @\
     ! local variables @\
@@ -3528,7 +3528,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
   ! Do General GeomBase EmptyComp @\
   call ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag=copyflag, gridToFieldMap=gridToFieldMap, & @\
+    datacopyflag=datacopyflag, gridToFieldMap=gridToFieldMap, & @\
     rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
         ESMF_ERR_PASSTHRU, & @\
@@ -3549,7 +3549,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGB<rank><type><kind>(field, geombase, & @\
-!   farray, indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+!   farray, indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -3557,7 +3557,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !   type(ESMF_GeomBase),   intent(in)           :: geombase @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
 !   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in), optional :: datacopyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
 !   integer,               intent(in), optional :: ungriddedUBound(:) @\
@@ -3589,10 +3589,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{opt:indexflag} for a list of valid indexflag options. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt geombase}|s dimCount.  The list elements map each dimension @\
@@ -3657,7 +3657,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompGB" @\
   subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, & @\
-    indexflag, copyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
@@ -3665,7 +3665,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     type(ESMF_GeomBase) :: geombase            @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_IndexFlag),   intent(in)           :: indexflag @\
-    type(ESMF_CopyFlag),    intent(in), optional :: copyflag @\
+    type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -4027,7 +4027,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     ! Create Array with undistributed dimensions                                @\
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then @\
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
-                indexflag=indexflag, copyflag=copyflag, & @\
+                indexflag=indexflag, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 undistLBound=undistLBound(1:fieldUndistDimCount), & @\
                 undistUBound=undistUBound(1:fieldUndistDimCount), & @\
@@ -4039,7 +4039,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
                ESMF_CONTEXT, rcToReturn=rc)) return @\
     else @\
         array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
-                indexflag=indexflag, copyflag=copyflag, & @\
+                indexflag=indexflag, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 undistLBound=undistLBound(1:fieldUndistDimCount), & @\
                 undistUBound=undistUBound(1:fieldUndistDimCount), & @\
@@ -4095,14 +4095,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompGBPtr<rank><type><kind>(field, geombase, & @\
-!   farrayPtr, copyflag, gridToFieldMap, & @\
+!   farrayPtr, datacopyflag, gridToFieldMap, & @\
 !   totalLWidth, totalUWidth, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inou)         :: field @\
 !   type(ESMF_GeomBase),   intent(in)           :: geombase @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer  :: farrayPtr @\
-!   type(ESMF_CopyFlag),   intent(in), optional :: copyflag @\
+!   type(ESMF_DataCopy_Flag),   intent(in), optional :: datacopyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: totalLWidth(:) @\
 !   integer,               intent(in), optional :: totalUWidth(:) @\
@@ -4115,7 +4115,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 ! \ref{sec:field:usage:partial_creation}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
-! copyflag is {\tt ESMF\_DATA\_REF}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
+! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
 ! @\
 ! The arguments are: @\
@@ -4131,10 +4131,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[copyflag]}] @\
+! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:copyflag}.  The default is @\
-!       {\tt ESMF\_DATA\_REF}. @\
+!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt geombase}|s dimCount.  The list elements map each dimension @\
@@ -4181,14 +4181,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompGBPtr" @\
   subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farrayPtr, & @\
-    copyflag, gridToFieldMap, & @\
+    datacopyflag, gridToFieldMap, & @\
     totalLWidth, totalUWidth, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field) :: field @\
     type(ESMF_GeomBase) :: geombase            @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-    type(ESMF_CopyFlag), intent(in), optional   :: copyflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: totalLWidth(:) @\
     integer, intent(in), optional :: totalUWidth(:) @\
@@ -4443,7 +4443,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 @\
     ! Create Array with undistributed dimensions                                @\
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then @\
-        array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, copyflag=copyflag, & @\
+        array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
                 totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
@@ -4452,7 +4452,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
                ESMF_ERR_PASSTHRU, & @\
                ESMF_CONTEXT, rcToReturn=rc)) return @\
     else @\
-        array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, copyflag=copyflag, & @\
+        array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 rc=localrc) @\
         if (ESMF_LogFoundError(localrc, & @\

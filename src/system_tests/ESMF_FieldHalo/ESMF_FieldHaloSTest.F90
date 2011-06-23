@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.64 2011/06/23 15:55:19 rokuingh Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.65 2011/06/23 18:14:16 rokuingh Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -294,7 +294,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get pointer to the actual data
-      call ESMF_FieldGetDataPointer(field1, ldata, ESMF_DATA_REF, rc=rc)
+      call ESMF_FieldGetDataPointer(field1, ldata, ESMF_DATACOPY_REFERENCE, rc=rc)
 
       ! Set initial data values over whole field to -1
       lowerindex = lbound(ldata)
@@ -421,7 +421,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data in the Field
-      call ESMF_FieldGetDataPointer(field1, ldata, ESMF_DATA_REF, rc=rc)
+      call ESMF_FieldGetDataPointer(field1, ldata, ESMF_DATACOPY_REFERENCE, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get size of local array

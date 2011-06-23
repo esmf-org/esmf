@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.48 2011/06/21 03:49:53 w6ws Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.49 2011/06/23 18:14:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,23 +60,23 @@ module ESMF_LocalArrayCreateMod
 ! !PRIVATE TYPES:
   private
 !------------------------------------------------------------------------------
-  ! ESMF_CopyFlag
+  ! ESMF_DataCopy_Flag
 
   ! Indicates whether a data array should be copied or referenced. 
   !  This matches an enum on the C++ side and the values must match.
   !  Update ../include/ESMCI_LocalArray.h if you change these values.
 
-  type ESMF_CopyFlag
+  type ESMF_DataCopy_Flag
   sequence
   private
-    integer :: doCopy
+    integer :: datacopyflag
   end type
 
-  type(ESMF_CopyFlag), parameter :: & 
-    ESMF_DATA_COPY  = ESMF_CopyFlag(1), &
-    ESMF_DATA_REF   = ESMF_CopyFlag(2), &
-    ESMF_DATA_DEFER = ESMF_CopyFlag(3), &
-    ESMF_DATA_SPACE = ESMF_CopyFlag(4)
+  type(ESMF_DataCopy_Flag), parameter :: & 
+    ESMF_DATACOPY_VALUE  = ESMF_DataCopy_Flag(1), &
+    ESMF_DATACOPY_REFERENCE   = ESMF_DataCopy_Flag(2), &
+    ESMF_DATA_DEFER = ESMF_DataCopy_Flag(3), &
+    ESMF_DATA_SPACE = ESMF_DataCopy_Flag(4)
 
 !------------------------------------------------------------------------------
   ! ESMF_LocalArrayOrigin
@@ -110,7 +110,7 @@ module ESMF_LocalArrayCreateMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
+  public ESMF_DataCopy_Flag, ESMF_DATACOPY_VALUE, ESMF_DATACOPY_REFERENCE, ESMF_DATA_SPACE
   public ESMF_LocalArray
 !------------------------------------------------------------------------------
 
@@ -139,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.48 2011/06/21 03:49:53 w6ws Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.49 2011/06/23 18:14:03 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -438,20 +438,20 @@ contains
   end function ESMF_LocalArrayNE
 !-------------------------------------------------------------------------------
 
-! functions to compare two ESMF_CopyFlags to see if they are the same or not
+! functions to compare two ESMF_DataCopy_Flags to see if they are the same or not
 
 function ESMF_cfeq(cf1, cf2)
  logical ESMF_cfeq
- type(ESMF_CopyFlag), intent(in) :: cf1, cf2
+ type(ESMF_DataCopy_Flag), intent(in) :: cf1, cf2
 
- ESMF_cfeq = (cf1%doCopy .eq. cf2%doCopy) 
+ ESMF_cfeq = (cf1%datacopyflag .eq. cf2%datacopyflag) 
 end function
 
 function ESMF_cfne(cf1, cf2)
  logical ESMF_cfne
- type(ESMF_CopyFlag), intent(in) :: cf1, cf2
+ type(ESMF_DataCopy_Flag), intent(in) :: cf1, cf2
 
- ESMF_cfne = (cf1%doCopy .ne. cf2%doCopy) 
+ ESMF_cfne = (cf1%datacopyflag .ne. cf2%datacopyflag) 
 end function
 
 
@@ -772,7 +772,7 @@ end function
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayCreate() @\
 ! function ESMF_LocalArrCreateByPtr<rank><type><kind>(farrayPtr, & @\
-!   keywordEnforcer, doCopy, totalCount, totalLBound, totalUBound, rc) @\
+!   keywordEnforcer, datacopyflag, totalCount, totalLBound, totalUBound, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_LocalArray) :: ESMF_LocalArrCreateByPtr<rank><type><kind> @\
@@ -780,7 +780,7 @@ end function
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in),  optional :: doCopy @\
+!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
 !   integer,             intent(in),  optional :: totalCount(:) @\
 !   integer,             intent(in),  optional :: totalLBound(:) @\
 !   integer,             intent(in),  optional :: totalUBound(:) @\
@@ -791,13 +791,13 @@ end function
 ! Two cases must be distinguished. @\
 ! @\
 ! First, if {\tt farrayPtr} is associated @\
-! the optional {\tt doCopy} argument may be used to indicate whether the @\
+! the optional {\tt datacopyflag} argument may be used to indicate whether the @\
 ! associated data is to be copied or referenced. For associated {\tt farrayPtr} @\
 ! the optional {\tt totalCount}, {\tt totalLBound} and {\tt totalUBound} arguments need @\
 ! not be specified. However, all present arguments will be checked against @\
 ! {\tt farrayPtr} for consistency. @\
 ! @\
-! Second, if {\tt farrayPtr} is unassociated the optional argument {\tt doCopy} @\
+! Second, if {\tt farrayPtr} is unassociated the optional argument {\tt datacopyflag} @\
 ! must not be specified. However, in this case a complete set of totalCount and @\
 ! bounds information must be provided. Any combination of present {\tt totalCount} @\
 ! {\tt totalLBound} and {\tt totalUBound} arguments that provides a complete @\
@@ -808,11 +808,11 @@ end function
 ! \begin{description} @\
 ! \item[farrayPtr] @\
 !   A Fortran array pointer (associated or unassociated). @\
-! \item[{[doCopy]}] @\
+! \item[{[datacopyflag]}] @\
 !   Indicate copy vs. reference behavior in case of associated {\tt farrayPtr}. @\
 !   This argument must {\em not} be present for unassociated {\tt farrayPtr}. @\
-!   Default to {\tt ESMF\_DATA\_REF}, makes the {\tt ESMF\_LocalArray} @\
-!   reference the associated data array. If set to {\tt ESMF\_DATA\_COPY} this @\
+!   Default to {\tt ESMF\_DATACOPY\_REFERENCE}, makes the {\tt ESMF\_LocalArray} @\
+!   reference the associated data array. If set to {\tt ESMF\_DATACOPY\_VALUE} this @\
 !   routine allocates new memory and copies the data from the pointer into @\
 !   the new LocalArray allocation. @\
 ! \item[{[totalCount]}] @\
@@ -836,13 +836,13 @@ end function
 !define ESMF_METHOD "ESMF_LocalArrCreateByPtr##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrCreateByPtr" @\
   function ESMF_LocalArrCreateByPtr##mrank##D##mtypekind(farrayPtr, & @\
-    keywordEnforcer, doCopy, totalCount, totalLBound, totalUBound, rc) @\
+    keywordEnforcer, datacopyflag, totalCount, totalLBound, totalUBound, rc) @\
  @\
     type(ESMF_LocalArray) :: ESMF_LocalArrCreateByPtr##mrank##D##mtypekind @\
  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
+    type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
     integer, dimension(:), intent(in), optional :: totalCount @\
     integer, dimension(:), intent(in), optional :: totalLBound @\
     integer, dimension(:), intent(in), optional :: totalUBound @\
@@ -851,7 +851,7 @@ end function
     ! Local variables @\
     type (ESMF_LocalArray)          :: array    ! new array object @\
     integer                         :: localrc  ! local return code @\
-    type (ESMF_CopyFlag)            :: copy     ! do we copy or ref? @\
+    type (ESMF_DataCopy_Flag)            :: copy     ! do we copy or ref? @\
     integer, dimension(mrank)       :: cnts     ! local totalCount @\
     integer, dimension(mrank)       :: lb, ub   ! local bounds @\
     integer:: i @\
@@ -867,16 +867,16 @@ end function
       cnts = shape(farrayPtr) @\
       lb = lbound(farrayPtr) @\
       ub = ubound(farrayPtr) @\
-      ! Set default for copyflag @\
-      if (present(doCopy)) then @\
-        copy = doCopy @\
+      ! Set default for datacopyflag @\
+      if (present(datacopyflag)) then @\
+        copy = datacopyflag @\
       else @\
-        copy = ESMF_DATA_REF @\
+        copy = ESMF_DATACOPY_REFERENCE @\
       endif @\
     else @\
-      if (present(doCopy)) then @\
+      if (present(datacopyflag)) then @\
         call ESMF_LogSetError(ESMF_RC_ARG_OPT, & @\
-          msg="- doCopy argument is only allowed with associated farrayPtr argument", & @\
+          msg="- datacopyflag argument is only allowed with associated farrayPtr argument", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -1058,7 +1058,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     ESMF_INIT_CHECK_DEEP(ESMF_LocalArrayGetInit, localarray, rc)
 
     ! TODO: document the current rule - if we do the allocate in
-    !   the case of ESMF_DATA_COPY at create time then we delete the
+    !   the case of ESMF_DATACOPY_VALUE at create time then we delete the
     !   space.  otherwise, the user needs to destroy the array 
     !   (we will ignore the data) and call deallocate themselves.
 
@@ -1376,13 +1376,13 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr<rank><type><kind> - Create a Fortran Ptr of the proper T/K/R @\
 ! @\
 ! !INTERFACE: @\
-!      subroutine ESMF_LocalArrConstrF90Ptr<rank><type><kind>(array, totalCount, farrayPtr, doCopy, totalLBound, totalUBound, rc) @\
+!      subroutine ESMF_LocalArrConstrF90Ptr<rank><type><kind>(array, totalCount, farrayPtr, datacopyflag, totalLBound, totalUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_LocalArray), intent(inout) :: array @\
 !      integer, dimension(:), intent(in) :: totalCount @\
 !      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer, optional :: farrayPtr  @\
-!      type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
+!      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
 !      integer, dimension(:), intent(in), optional :: totalLBound @\
 !      integer, dimension(:), intent(in), optional :: totalUBound @\
 !      integer, intent(out), optional :: rc   @\
@@ -1398,7 +1398,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! and type integer of kind *1, *2, *4, or *8. @\
 ! @\
 !  Optional args are an existing Fortran pointer which if given is used @\
-!  instead of a new one, and a doCopy flag which if set to copy will @\
+!  instead of a new one, and a datacopyflag flag which if set to copy will @\
 !  do a contents copy or reference. @\
 ! @\
 ! The arguments are: @\
@@ -1410,8 +1410,8 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 !  \item[{[farrayPtr]}] @\
 !   An optional existing Fortran pointer.  Will be used instead of an @\
 !   internally generated Fortran pointer if given.  Must be given if the @\
-!   {\tt doCopy} is specified. @\
-!  \item[{[doCopy]}] @\
+!   {\tt datacopyflag} is specified. @\
+!  \item[{[datacopyflag]}] @\
 !   An optional copy flag which can be specified if a Fortran pointer is also @\
 !   given.  Can either make a new copy of the data or ref existing data. @\
 !  \item[{[totalLBound]}] @\
@@ -1433,12 +1433,12 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ^define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr" @\
  @\
   subroutine ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, totalCount, & @\
-    farrayPtr, doCopy, totalLBound, totalUBound, rc) @\
+    farrayPtr, datacopyflag, totalLBound, totalUBound, rc) @\
  @\
     type(ESMF_LocalArray), intent(inout) :: array @\
     integer, dimension(:), intent(in) :: totalCount @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer, optional :: farrayPtr  @\
-    type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
+    type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
     integer, dimension(:), intent(in), optional :: totalLBound @\
     integer, dimension(:), intent(in), optional :: totalUBound @\
     integer, intent(out), optional :: rc   @\
@@ -1470,20 +1470,20 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
        willcopy = .false. @\
        do_dealloc = ESMF_TRUE @\
     else @\
-      if (present(doCopy)) then @\
-       if (doCopy .eq. ESMF_DATA_SPACE) then @\
+      if (present(datacopyflag)) then @\
+       if (datacopyflag .eq. ESMF_DATA_SPACE) then @\
            newp => farrayPtr    ! ptr alias, important this be =>  @\
            lb(1:size(totalCount)) = lbound(farrayPtr) @\
            ub(1:size(totalCount)) = ubound(farrayPtr) @\
            willalloc = .true. @\
            willcopy = .false. @\
            do_dealloc = ESMF_TRUE @\
-       else if (doCopy .eq. ESMF_DATA_COPY) then @\
+       else if (datacopyflag .eq. ESMF_DATACOPY_VALUE) then @\
            nullify(newp) @\
            willalloc = .true. @\
            willcopy = .true. @\
            do_dealloc = ESMF_TRUE @\
-       else       ! ESMF_DATA_REF @\
+       else       ! ESMF_DATACOPY_REFERENCE @\
            newp => farrayPtr    ! ptr alias, important this be =>  @\
            lb(1:size(totalCount)) = lbound(farrayPtr) @\
            ub(1:size(totalCount)) = ubound(farrayPtr) @\
@@ -2012,7 +2012,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 ! !ARGUMENTS: @\
 !     type(ESMF_LocalArray), intent(in) :: arrayIn @\
 !     type(ESMF_LocalArray), intent(inout) :: arrayOut @\
-!     type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
+!     type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
 !     integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
@@ -2028,7 +2028,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 !   The {\tt ESMF\_LocalArray} to copy. @\
 !  \item[arrayOut] @\
 !   The copied array. @\
-!  \item[{[doCopy]}] @\
+!  \item[{[datacopyflag]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
 !  \item[{[rc]}] @\

@@ -96,20 +96,20 @@ program ESMF_LocStreamEx
 
    !-------------------------------------------------------------------
    ! Add key data, referencing a user data pointer. By changing the 
-   ! copyFlag to ESMF_DATA_COPY an internally allocated copy of the 
+   ! datacopyflag to ESMF_DATACOPY_VALUE an internally allocated copy of the 
    ! user data may also be set.  
    !-------------------------------------------------------------------
    call ESMF_LocStreamAddKey(locstream,              &
                              keyName="Lat",          &
                              farray=lat,             &
-                             copyFlag=ESMF_DATA_REF, &
+                             datacopyflag=ESMF_DATACOPY_REFERENCE, &
                              keyUnits="Degrees",     &
                              keyLongName="Latitude", rc=rc)
 
    call ESMF_LocStreamAddKey(locstream,              &
                              keyName="Lon",          &
                              farray=lon,             &
-                             copyFlag=ESMF_DATA_REF, &
+                             datacopyflag=ESMF_DATACOPY_REFERENCE, &
                              keyUnits="Degrees",     &
                              keyLongName="Longitude", rc=rc)
 

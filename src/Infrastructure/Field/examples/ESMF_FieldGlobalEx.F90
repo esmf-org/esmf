@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.21 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.22 2011/06/23 18:13:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
                      lbounds(3):ubounds(3)))
 
     ! create the array from the F90 pointer and haloWidth
-    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=haloWidth, rc=rc)
+    iarray1 = ESMF_InternArrayCreate(f90ptr1, ESMF_DATACOPY_REFERENCE, haloWidth=haloWidth, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_InternArrayPrint(iarray1, rc=rc)

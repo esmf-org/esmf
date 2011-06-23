@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.62 2011/06/07 00:32:47 theurich Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.63 2011/06/23 18:14:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2436,7 +2436,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr1, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2450,7 +2450,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr2, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2466,7 +2466,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr3, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2485,7 +2485,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr4, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2506,7 +2506,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr5, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2529,7 +2529,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr6, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2555,7 +2555,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr7, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2718,7 +2718,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr1, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2732,7 +2732,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr2, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2748,7 +2748,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr3, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2766,7 +2766,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr4, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2786,7 +2786,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr5, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2808,7 +2808,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr6, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2832,7 +2832,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr7, &
-                                   docopy=ESMF_DATA_REF, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -3100,13 +3100,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray1D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray1D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
@@ -3125,13 +3125,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray2D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray2D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
@@ -3152,13 +3152,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray3D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray3D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
@@ -3181,13 +3181,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray4D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray4D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
@@ -3212,13 +3212,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray5D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray5D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
@@ -3247,13 +3247,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray6D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray6D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return
@@ -3284,13 +3284,13 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount1
            call ESMF_LocalArrayGet(larrayList1(de), farrayPtr=farray7D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                   "array1 list", rcToReturn=rc)) return
 
            call ESMF_LocalArrayGet(larrayList2(de), farrayPtr=rarray7D,             &
-                    docopy=ESMF_DATA_REF, rc=localrc)
+                    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
 
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array2 list", rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.28 2011/05/27 15:21:31 feiliu Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.29 2011/06/23 18:13:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -57,48 +57,48 @@
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-    call bundle_test1_generic(rc, ESMF_DATA_REF)
-    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATA_REF"
+    call bundle_test1_generic(rc, ESMF_DATACOPY_REFERENCE)
+    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATACOPY_REFERENCE"
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-    call bundle_test1_generic(rc, ESMF_DATA_COPY)
-    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATA_COPY"
+    call bundle_test1_generic(rc, ESMF_DATACOPY_VALUE)
+    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATACOPY_VALUE"
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-    call bundle_test1_generic(rc, ESMF_DATA_REF, do_slicing=.true.)
-    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATA_REF, slicing"
+    call bundle_test1_generic(rc, ESMF_DATACOPY_REFERENCE, do_slicing=.true.)
+    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATACOPY_REFERENCE, slicing"
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-    call bundle_test1_generic(rc, ESMF_DATA_COPY, do_slicing=.true.)
-    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATA_COPY, slicing"
+    call bundle_test1_generic(rc, ESMF_DATACOPY_VALUE, do_slicing=.true.)
+    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATACOPY_VALUE, slicing"
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-    call bundle_test1_generic(rc, ESMF_DATA_REF, do_slicing=.true., do_slicing1=.true.)
-    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATA_REF, slicing type 0 and 1"
+    call bundle_test1_generic(rc, ESMF_DATACOPY_REFERENCE, do_slicing=.true., do_slicing1=.true.)
+    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATACOPY_REFERENCE, slicing type 0 and 1"
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest_Multi_Proc_Only
     ! Create a bundle, add some fields and then retrieve the data pointers from the bundle
-    call bundle_test1_generic(rc, ESMF_DATA_COPY, do_slicing=.true., do_slicing1=.true.)
-    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATA_COPY, slicing type 0 and 1"
+    call bundle_test1_generic(rc, ESMF_DATACOPY_VALUE, do_slicing=.true., do_slicing1=.true.)
+    write(name, *) "Creating FieldBundle, add Fields, retrieve data pointers, ESMF_DATACOPY_VALUE, slicing type 0 and 1"
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
@@ -108,9 +108,9 @@ contains
 
 #define ESMF_METHOD "ESMF_TESTS"
 
-    subroutine bundle_test1_generic(rc, copyflag, do_slicing, do_slicing1)
+    subroutine bundle_test1_generic(rc, datacopyflag, do_slicing, do_slicing1)
         integer             :: rc
-        type(ESMF_CopyFlag), optional, intent(in)   :: copyflag
+        type(ESMF_DataCopy_Flag), optional, intent(in)   :: datacopyflag
         logical, optional, intent(in)               :: do_slicing
         logical, optional, intent(in)               :: do_slicing1
 
@@ -141,12 +141,12 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call assemble_bundle(bundle, grid, copyflag, farray1, farray2, farray3, farray4, do_slicing, do_slicing1, rc=localrc)
+        call assemble_bundle(bundle, grid, datacopyflag, farray1, farray2, farray3, farray4, do_slicing, do_slicing1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call retrieve_bundle_dataptr(bundle, copyflag, do_slicing, do_slicing1, rc=localrc)
+        call retrieve_bundle_dataptr(bundle, datacopyflag, do_slicing, do_slicing1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -189,11 +189,11 @@ contains
 
     end subroutine bundle_test1_generic
 
-    subroutine assemble_bundle(bundle, grid, copyflag, farray1, farray2, farray3, farray4, do_slicing, do_slicing1, rc)
+    subroutine assemble_bundle(bundle, grid, datacopyflag, farray1, farray2, farray3, farray4, do_slicing, do_slicing1, rc)
 
         type(ESMF_FieldBundle)   :: bundle
         type(ESMF_Grid)     :: grid
-        type(ESMF_CopyFlag), optional, intent(in)   :: copyflag
+        type(ESMF_DataCopy_Flag), optional, intent(in)   :: datacopyflag
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray1
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray2
         real(ESMF_KIND_R4), dimension(:,:), pointer :: farray3
@@ -239,7 +239,7 @@ contains
         enddo
 
         f1 = ESMF_FieldCreate(grid, farray1, ESMF_INDEX_DELOCAL, &
-               copyflag=copyflag, name='field1', rc=localrc)
+               datacopyflag=datacopyflag, name='field1', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -250,7 +250,7 @@ contains
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
         f2 = ESMF_FieldCreate(grid, farray2(:,:), ESMF_INDEX_DELOCAL, &
-               copyflag=copyflag, name='field2', rc=localrc)
+               datacopyflag=datacopyflag, name='field2', rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -263,7 +263,7 @@ contains
         if(ldo_slicing) then
 
             f3 = ESMF_FieldCreate(grid, farray3(:, 4:13), ESMF_INDEX_DELOCAL, &
-                   copyflag=copyflag, name='field3', rc=localrc)
+                   datacopyflag=datacopyflag, name='field3', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -276,7 +276,7 @@ contains
 
         if(ldo_slicing1) then
             f4 = ESMF_FieldCreate(grid, farray4(3:7, 4:13), ESMF_INDEX_DELOCAL, &
-                   copyflag=copyflag, name='field4', rc=localrc)
+                   datacopyflag=datacopyflag, name='field4', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -287,7 +287,7 @@ contains
                     ESMF_CONTEXT, rcToReturn=rc)) return
 
             f5 = ESMF_FieldCreate(grid, farray4(3:7, ::2), ESMF_INDEX_DELOCAL, &
-                   copyflag=copyflag, name='field5', rc=localrc)
+                   datacopyflag=datacopyflag, name='field5', rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -300,9 +300,9 @@ contains
         
     end subroutine assemble_bundle
 
-    subroutine retrieve_bundle_dataptr(bundle, copyflag, do_slicing, do_slicing1, rc)
+    subroutine retrieve_bundle_dataptr(bundle, datacopyflag, do_slicing, do_slicing1, rc)
         type(ESMF_FieldBundle)   :: bundle
-        type(ESMF_CopyFlag), optional, intent(in)   :: copyflag
+        type(ESMF_DataCopy_Flag), optional, intent(in)   :: datacopyflag
         logical, optional, intent(in)               :: do_slicing
         logical, optional, intent(in)               :: do_slicing1
         integer, optional   :: rc
@@ -399,7 +399,7 @@ contains
                     if( farray4(i, j) .ne. i + 2 + (j+3) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
-            if (present(copyflag) .and. copyflag.eq.ESMF_DATA_COPY) then
+            if (present(datacopyflag) .and. datacopyflag.eq.ESMF_DATACOPY_VALUE) then
               ! only DATA_COPY is expected to work correctly
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -427,7 +427,7 @@ contains
                     if( farray5(i, j) .ne. i + 2 + (j*2-1) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
-            if (present(copyflag) .and. copyflag.eq.ESMF_DATA_COPY) then
+            if (present(datacopyflag) .and. datacopyflag.eq.ESMF_DATACOPY_VALUE) then
               ! only DATA_COPY is expected to work correctly
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &

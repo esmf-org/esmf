@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.27 2011/05/13 20:22:29 rokuingh Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.28 2011/06/23 18:14:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,13 +35,13 @@ module ESMF_LocalArrayGetMod
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayGet() @\
 ! subroutine ESMF_LocalArrayGetData<rank><type><kind>(localarray, farrayPtr, & @\
-!   keywordEnforcer, doCopy, rc) @\
+!   keywordEnforcer, datacopyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_LocalArray)                      :: localarray @\
 !   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_CopyFlag), intent(in),  optional :: doCopy @\
+!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
 !   integer,             intent(out), optional :: rc @\
 ! @\
 ! @\
@@ -58,10 +58,10 @@ module ESMF_LocalArrayGetMod
 !   The {\tt ESMF\_LocalArray} to get the value from. @\
 ! \item[farrayPtr] @\
 !   An unassociated or associated Fortran pointer correctly allocated.@\
-! \item[{[doCopy]}] @\
+! \item[{[datacopyflag]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
-!   See section \ref{opt:copyflag} for a list of possible values. @\
+!   See section \ref{opt:datacopyflag} for a list of possible values. @\
 ! \item[{[rc]}] @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -76,12 +76,12 @@ module ESMF_LocalArrayGetMod
 !define ESMF_METHOD "ESMF_LocalArrayGetData##mrank##D##mtypekind" @\
 ^define ESMF_METHOD "ESMF_LocalArrayGetData" @\
     subroutine ESMF_LocalArrayGetData##mrank##D##mtypekind(localarray, & @\
-      farrayPtr, keywordEnforcer, doCopy, rc) @\
+      farrayPtr, keywordEnforcer, datacopyflag, rc) @\
  @\
       type(ESMF_LocalArray) :: localarray @\
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-      type(ESMF_CopyFlag), intent(in), optional :: doCopy @\
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag @\
       integer, intent(out), optional :: rc @\
  @\
       ! Local variables @\
@@ -98,10 +98,10 @@ module ESMF_LocalArrayGetMod
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
-      ! Check doCopy argument and set copyreq @\
+      ! Check datacopyflag argument and set copyreq @\
       copyreq = .FALSE. ! default do not copy but return by reference @\
-      if (present(doCopy)) then @\
-        if (doCopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
+      if (present(datacopyflag)) then @\
+        if (datacopyflag .eq. ESMF_DATACOPY_VALUE) copyreq = .TRUE. @\
       endif @\
  @\
       ! Check tkr matching between localarray and farrayPtr @\
@@ -211,7 +211,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.27 2011/05/13 20:22:29 rokuingh Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.28 2011/06/23 18:14:03 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
