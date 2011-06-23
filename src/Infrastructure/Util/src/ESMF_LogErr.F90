@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.87 2011/06/21 22:29:02 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.88 2011/06/23 14:15:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -792,7 +792,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%FileIsOpen /= ESMF_TRUE) then
-        print *, "ESMF_Log not open -- cannot ESMF_LogFlush()."
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ": ESMF_Log not open -- cannot ESMF_LogFlush()."
         return
       endif
       if ((alog%FileIsOpen == ESMF_TRUE) .AND. &
@@ -1448,8 +1449,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Test if it is open or closed
     if (alog%FileIsOpen == ESMF_TRUE) then
-       	print *, "This ESMF_Log is already open with file '", &
+       	write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ": This ESMF_Log is already open with file '", &
       		 trim(ESMF_LogTable(log%logTableIndex)%nameLogErrFile), "'"
+	if (present(rc)) then
+            rc=ESMF_RC_FILE_OPEN
+	endif
 	return
     endif
 
@@ -1488,9 +1493,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%nameLogErrFile=fname
     endif
     if (len_trim (fname) > ESMF_MAXPATHLEN) then
-        print *, "ESMF_LogOpen: Filename exceeded", ESMF_MAXPATHLEN, " characters."
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ": Filename exceeded", ESMF_MAXPATHLEN, " characters."
         if (present(rc)) then
-            rc = ESMF_FAILURE
+            rc = ESMF_RC_LONG_STR
         endif
         return
     endif
@@ -1499,7 +1505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_UtilIOUnitGet (alog%unitNumber, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         if (present(rc)) then
-            rc=ESMF_FAILURE
+            rc=ESMF_RC_CANNOT_GET
         endif
         return
     endif
@@ -1528,9 +1534,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! if unable to open file then error out
     if (alog%FileIsOpen /= ESMF_TRUE) then
         if (present(rc)) then
-            rc=ESMF_FAILURE
+            rc=ESMF_RC_FILE_UNEXPECTED
         endif
-        print *, ESMF_METHOD,  &
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
             ': error opening file: ', trim (alog%nameLogErrFile),  &
             ', iostat =', iostat
         return
@@ -1542,9 +1548,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     allocate(localbuf(alog%maxElements), stat=memstat)
     if (memstat /= 0) then
-      print *, "ESMF_LogOpen: Allocation of buffer failed."
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ": Allocation of buffer failed."
       if (present(rc)) then
-          rc = ESMF_FAILURE
+          rc = ESMF_RC_MEM_ALLOCATE
       endif
       return
     endif
@@ -1671,7 +1678,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%FileIsOpen /= ESMF_TRUE) then
-        print *, "ESMF_Log not open -- cannot ESMF_LogSet()."
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ": ESMF_Log not open -- cannot ESMF_LogSet()."
+        if (present (rc)) rc = ESMF_RC_CANNOT_SET
         return
       endif
     
@@ -1960,7 +1969,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (alog%logtype /= ESMF_LOG_NONE) then
 
         if (alog%FileIsOpen /= ESMF_TRUE) then
-          print *, "ESMF_Log not open -- cannot ESMF_LogWrite()."
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": ESMF_Log not open -- cannot ESMF_LogWrite()."
           if (present(rc)) rc=ESMF_FAILURE
           return
         endif
