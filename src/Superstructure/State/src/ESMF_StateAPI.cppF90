@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.7 2011/06/23 15:54:37 rokuingh Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.8 2011/06/23 17:40:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.7 2011/06/23 15:54:37 rokuingh Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.8 2011/06/23 17:40:51 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -472,17 +472,8 @@ contains
 !
 ! !DESCRIPTION:
 !      Add a reference to a single <item> to an existing 
-!      {\tt state}.  Any of the supported <item>s can
-!      be marked needed for a particular run using the
-!      {\tt ESMF\_StateSetNeeded()} call.  The name of the
-!      <item> must be unique within the {\tt state}.  
-!
-!      One of the supported options below is to add only the name of the
-!      item to the {\tt state} during a first pass.  The name can be
-!      replaced with the actual <item> in a later call.
-!      When doing this, the name of the <item> provided to the
-!      {\tt state} during the first pass must match the name stored
-!      in the <item> itself.
+!      {\tt state}.  The name of the <item> must be unique within
+!      the {\tt state}.
 !
 !      Supported values for <item> are:
 !      \begin{description}
@@ -509,6 +500,9 @@ contains
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
+!
+! When replacing an existing <item>, the {\tt ESMF\_StateReplace} method
+! should be used.
 !EOP
 !------------------------------------------------------------------------------
 
@@ -970,9 +964,6 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
 !
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !ARGUMENTS:
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_StateIntent_Flag),   intent(in),  optional :: statetype
@@ -984,6 +975,9 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
       type(ESMF_RouteHandle), intent(in),  optional :: routehandleList(:)
       character(len=*),       intent(in),  optional :: name 
       integer,                intent(out), optional :: rc 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_State}, set default characteristics for
@@ -1216,21 +1210,21 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       Returns the type, e.g., Import or Export, of this {\tt ESMF\_State}.
 !       Possible values are listed in Section~\ref{opt:statetype}.
 !     \item[{[itemCount]}]
-!       Count of items in this {\tt ESMF\_State}, including all objects
-!       as well as placeholder names.  When the {\tt nestedFlag} option is
+!       Count of items in this {\tt ESMF\_State}.
+!       When the {\tt nestedFlag} option is
 !       set to {\tt .true.}, the count will include items present in nested
 !       States.  When using {\tt itemSearch}, it will count the number of
 !       items matching the specified name.
 !     \item[{[itemNameList]}]
-!       Array of item names in this {\tt ESMF\_State}, including placeholder
-!       names.  When the {\tt nestedFlag} option is
+!       Array of item names in this {\tt ESMF\_State}.
+!       When the {\tt nestedFlag} option is
 !       set to {\tt .true.}, the list will include items present in nested
 !       States.  When using {\tt itemSearch}, it will return the names of
 !       items matching the specified name.  {\tt itemNameList} must be at least
 !       {\tt itemCount} long.
 !     \item[{[itemTypeList]}]  
-!       Array of possible item object types in this {\tt ESMF\_State}, including
-!       placeholder names.  When the {\tt nestedFlag} option is
+!       Array of possible item object types in this {\tt ESMF\_State}.
+!       When the {\tt nestedFlag} option is
 !       set to {\tt .true.}, the list will include items present in nested
 !       States.  When using {\tt itemSearch}, it will return the types of
 !       items matching the specified name. Must be at least {\tt itemCount}
@@ -1444,15 +1438,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !IROUTINE: ESMF_StateGet - Retrieve an item from a State
 !
 ! !INTERFACE:
-!      subroutine ESMF_StateGet(state, itemName, <item>,
-!      nestedStateName, rc)
+!      subroutine ESMF_StateGet(state, itemName, <item>, rc)
 !
 ! !ARGUMENTS:
 !      type(ESMF_State),      intent(in)            :: state
 !      character (len=*),     intent(in)            :: itemName
 !      <item>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!      character (len=*),     intent(in),  optional :: nestedStateName
 !      integer,               intent(out), optional :: rc             
 !
 !
@@ -1473,15 +1465,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !      State names leading to the desired item.  (E.g.,
 !      {\tt itemName=``state1/state12/item''}).
 !
-!      An alternative, and deprecated, technique for accessing a nested item
-!      which is only one level down, is to specify the nested State with the
-!      {\tt nestedStateName} argument.  While States can be nested to any
-!      depth, this option only searches immediate descendents.
-!      It is an error to specify a {\tt nestedStateName} if the
-!      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\tt nestedStateName} and
-!      a fully qualified, nested State itemName.
-!
 !      Supported values for <item> are:
 !      \begin{description}
 !      \item type(ESMF\_Array),  intent(out)           :: array
@@ -1501,14 +1484,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     qualified in order to access nested State items.
 !     \item[<item>]
 !     Returned reference to the <item>.
-!     \item[{[nestedStateName]}]
-!     Optional.  Deprecated.  Used when the {\tt state} contains 
-!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
-!     one level down in one of the nested {\tt ESMF\_State}.
-!     An error if specified when the {\tt state} argument contains
-!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
-!     with a fully qualified {\tt itemName}.  This option is retained for
-!     compatibility with earlier versions of ESMF.
 !     \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1525,14 +1500,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !INTERFACE: @\
       ! Private name; call using ESMF_StateGet()  @\
       subroutine ESMF_StateGet##mentry(state, itemName, mname,  & @\
-          keywordEnforcer, nestedStateName, rc) @\
+          keywordEnforcer, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_State),  intent(in)	       :: state @\
       character (len=*), intent(in)	       :: itemName @\
       type(mtype),       intent(out)	       :: mname @\
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-      character (len=*), intent(in),  optional :: nestedStateName @\
       integer,           intent(out), optional :: rc @\
  @\
 !EOPI @\
@@ -1558,31 +1532,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       if (present(rc)) rc=ESMF_RC_NOT_IMPL @\
       ! TODO: do we need an empty (or invalid) item to mark failure? @\
  @\
-      if (present (nestedStateName) .and. index (itemName, '/') > 0) then @\
-          errmsg = "both nestedStateName and fully qualified itemName were specified" @\
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  & @\
-               ESMF_CONTEXT, rcToReturn=rc)) return @\
-      end if @\
- @\
-      if (present(nestedStateName)) then @\
-          exists = ESMF_StateClassFindData(state%statep,  & @\
-                     dataname=nestedStateName, expected=.true., & @\
-                     dataitem=dataitem, rc=localrc) @\
-          if (.not. exists) then @\
-              write(errmsg, *) "no nested State found named ", trim(nestedStateName) @\
-              if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, & @\
-                    ESMF_CONTEXT, rcToReturn=rc)) return @\
-          endif @\
- @\
-          if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then @\
-              write(errmsg,*) trim(nestedStateName), " found but not type State" @\
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, & @\
-                    ESMF_CONTEXT, rcToReturn=rc)) return @\
-          endif @\
-          top%statep => dataitem%datap%spp @\
-      else @\
-          top%statep => state%statep @\
-      endif @\
+      top%statep => state%statep @\
  @\
       exists = ESMF_StateClassFindData(top%statep,   & @\
                  dataname=itemName, expected=.true., & @\
@@ -2071,12 +2021,6 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
 ! !DESCRIPTION:
 !     Prints information about the {\tt state} to {\tt stdout}.
 !
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it does not appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit {\tt ESMF\_UtilIOstdout} to get coherent output.
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
@@ -2097,9 +2041,6 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
 
 !EOP
 
-!
-! TODO: this needs more code added to be complete
-!
        character (len=8) :: localopts
        logical :: localnestedflag            ! Print nested states flag
        logical :: longflag                   ! Extended output
