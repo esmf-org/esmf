@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.12 2011/06/24 15:04:58 rokuingh Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.13 2011/06/24 15:38:53 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -323,7 +323,7 @@ program ESMF_ComplianceCheckerSTest
 10 continue
 
   ! Normal ESMF Test output
-  print *, testname, " complete."
+  print *, trim(testname), " complete."
 
   if (rc .eq. ESMF_SUCCESS) then
     ! Separate message to console, for quick confirmation of success/failure
