@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.229 2011/06/24 16:52:03 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.230 2011/06/24 19:15:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.229 2011/06/24 16:52:03 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.230 2011/06/24 19:15:13 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2992,7 +2992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Grid),       intent(in)              :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),   optional  :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),   optional  :: decompflag(:)
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
@@ -3019,7 +3019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[name]}]
@@ -3038,7 +3038,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer              :: localrc
     integer              :: dimCount,i
     integer, pointer     :: regDecompLocal(:)
-    type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
+    type(ESMF_Decomp_Flag), pointer :: decompflagLocal(:)
     integer              :: deCount
     integer              :: i1,i2,i3,k, tileCount
     integer,pointer      :: minIndexPDimPTile(:,:)
@@ -3170,7 +3170,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+        decompFlagLocal(:)=ESMF_DECOMP_BALANCED
     endif
 
 
@@ -3579,7 +3579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
        integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -3618,7 +3618,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
@@ -5337,7 +5337,7 @@ end subroutine convert_corner_arrays_to_1D
     character(len=*),      intent(in)             :: filename
     integer,               intent(in)             :: regDecomp(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_DecompFlag), intent(in),  optional  :: decompflag(:)
+    type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,               intent(in),  optional  :: isSphere
     logical,               intent(in),  optional  :: addCornerStagger
     integer,               intent(out), optional  :: rc
@@ -5364,7 +5364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[isSphere]}]
@@ -5395,7 +5395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM) :: vm
     integer :: numDim, minInd(2,1), maxInd(2,1), buf(1), msgbuf(4)
     type(ESMF_DistGrid) :: distgrid
-    type(ESMF_DecompFlag):: decompflagLocal(2)
+    type(ESMF_Decomp_Flag):: decompflagLocal(2)
     integer :: localrc
     integer :: PetNo, PetCnt
     logical :: localAddCornerStagger
@@ -5423,7 +5423,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+        decompFlagLocal(:)=ESMF_DECOMP_BALANCED
     endif
 
     if (present(addCornerStagger)) then
@@ -5964,7 +5964,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
        integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6003,7 +6003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
@@ -6704,7 +6704,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
        integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -6740,7 +6740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
@@ -7410,7 +7410,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
        integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -7446,7 +7446,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
@@ -8877,7 +8877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8923,7 +8923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
@@ -9072,7 +9072,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer              :: localrc
     integer              :: dimCount,i
     integer, pointer     :: regDecompLocal(:)
-    type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
+    type(ESMF_Decomp_Flag), pointer :: decompflagLocal(:)
     integer, pointer     :: distgridToGridMap(:)
     integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
@@ -9581,7 +9581,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+        decompFlagLocal(:)=ESMF_DECOMP_BALANCED
     endif
 
 
@@ -18058,7 +18058,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        character (len=*),     intent(in), optional :: name 
        type(ESMF_TypeKind_Flag),   intent(in), optional :: coordTypeKind
        integer,               intent(in), optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in), optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in), optional :: decompflag(:)
        integer,               intent(in), optional :: minIndex(:)
        integer,               intent(in)           :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -18113,7 +18113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
@@ -18266,9 +18266,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer              :: localrc
     integer              :: dimCount,i,maxSizeDEDim
     integer, pointer     :: regDecompDG(:)
-    type(ESMF_DecompFlag), pointer :: decompflagDG(:)
+    type(ESMF_Decomp_Flag), pointer :: decompflagDG(:)
     integer, pointer     :: regDecompLocal(:)
-    type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
+    type(ESMF_Decomp_Flag), pointer :: decompflagLocal(:)
     integer, pointer     :: distgridToGridMap(:), deDimCount(:)
     integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
     integer, pointer     :: gridEdgeLWidthLocal(:)
@@ -18755,7 +18755,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+        decompFlagLocal(:)=ESMF_DECOMP_BALANCED
     endif
 
 
@@ -21045,7 +21045,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
        integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
+       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
        type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        type(ESMF_DistgridConnection), intent(in), optional :: connList(:)
@@ -21069,7 +21069,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[decompflag]}]
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
-!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
 !      Section~\ref{opt:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{minIndex}] 
@@ -21096,7 +21096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer              :: localrc
     integer              :: i
     integer, pointer     :: regDecompLocal(:)
-    type(ESMF_DecompFlag), pointer :: decompflagLocal(:)
+    type(ESMF_Decomp_Flag), pointer :: decompflagLocal(:)
     integer, pointer     :: minIndexLocal(:), maxIndexLocal(:)
     integer              :: deCount
     integer              :: i1,i2,i3,k
@@ -21181,7 +21181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(decompFlag)) then
         decompFlagLocal(:)=decompFlag(:)
     else
-        decompFlagLocal(:)=ESMF_DECOMP_HOMOGEN
+        decompFlagLocal(:)=ESMF_DECOMP_BALANCED
     endif
 
 

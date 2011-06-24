@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.60 2011/06/24 16:52:08 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.61 2011/06/24 19:15:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.60 2011/06/24 16:52:08 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.61 2011/06/24 19:15:15 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1718,7 +1718,7 @@ contains
 ! !ARGUMENTS:
       character (len=*),     intent(in),  optional  :: name
       integer,               intent(in),  optional  :: regDecomp
-      type(ESMF_DecompFlag), intent(in),  optional  :: decompflag
+      type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag
       integer,               intent(in),  optional  :: minIndex
       integer,               intent(in)             :: maxIndex
       type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
@@ -1740,7 +1740,7 @@ contains
 !     \item[{[decompFlag]}]
 !          \begin{sloppypar}
 !          Specify what to do with leftover locations after division.
-!          If not specified, defaults to {\tt ESMF\_DECOMP\_HOMOGEN}. Please
+!          If not specified, defaults to {\tt ESMF\_DECOMP\_BALANCED}. Please
 !          see Section~\ref{opt:decompflag} for a full description of the 
 !          possible options. 
 !          \end{sloppypar}
@@ -1762,7 +1762,7 @@ contains
       integer               :: localrc  ! Error status
       type(ESMF_DistGrid)   :: distgrid
       integer               :: minIndexLocal,regDecompLocal
-      type(ESMF_DecompFlag) :: decompFlagLocal
+      type(ESMF_Decomp_Flag) :: decompFlagLocal
       type(ESMF_Index_Flag)  :: indexflagLocal
       type(ESMF_VM)         :: vm 
 
@@ -1773,7 +1773,7 @@ contains
       if (present(decompflag)) then
          decompFlagLocal=decompflag
       else
-         decompFlagLocal=ESMF_DECOMP_HOMOGEN
+         decompFlagLocal=ESMF_DECOMP_BALANCED
       endif
 
       if (present(indexflag)) then

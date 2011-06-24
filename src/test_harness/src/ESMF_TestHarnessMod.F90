@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.65 2011/06/24 16:52:25 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.66 2011/06/24 19:15:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1063,7 +1063,7 @@ logical                       :: checkpoint = .FALSE.
   integer :: k, nconnect
   integer, allocatable :: BIndx(:), EIndx(:)
   integer, allocatable :: decompOrder(:)
-  type(ESMF_DecompFlag), allocatable :: decompType(:)
+  type(ESMF_Decomp_Flag), allocatable :: decompType(:)
   type(ESMF_DistGridConnection), allocatable :: connectionList(:)
   integer, allocatable :: positionVector(:),orientationVector(:)
 

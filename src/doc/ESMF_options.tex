@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.52 2011/06/24 18:24:17 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.53 2011/06/24 19:15:16 rokuingh Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -237,7 +237,7 @@ Valid values are:
       Don't use any default values.
 \end{description}
 
-\subsubsection{ESMF\_DecompFlag}
+\subsubsection{ESMF\_Decomp\_Flag}
 \label{opt:decompflag}
 {\sf DESCRIPTION:\\}
 Indicates how DistGrid elements are decomposed over DEs.
@@ -248,8 +248,8 @@ Valid values are:
       Decompose elements cyclically across DEs.
 \item [ESMF\_DECOMP\_DEFAULT]
       Use default decomposition behavior. Currently equal to 
-      {\tt ESMF\_DECOMP\_HOMOGEN}.
-\item [ESMF\_DECOMP\_HOMOGEN]
+      {\tt ESMF\_DECOMP\_BALANCED}.
+\item [ESMF\_DECOMP\_BALANCED]
       Decompose elements as homogenously as possible across DEs. The maximum 
       difference in number of elements per DE is 1, with the extra elements on
       the lower DEs.

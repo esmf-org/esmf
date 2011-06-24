@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.88 2011/06/24 16:51:58 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.89 2011/06/24 19:15:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 
   ! DecompFlag
-  type ESMF_DecompFlag
+  type ESMF_Decomp_Flag
   private
 #ifdef ESMF_NO_INITIALIZERS
     integer :: value
@@ -76,13 +76,12 @@ module ESMF_DistGridMod
 #endif
   end type
 
-  type(ESMF_DecompFlag), parameter:: &
-    ESMF_DECOMP_INVALID   = ESMF_DecompFlag(0), &
-    ESMF_DECOMP_DEFAULT   = ESMF_DecompFlag(1), &
-    ESMF_DECOMP_HOMOGEN   = ESMF_DecompFlag(2), &
-    ESMF_DECOMP_RESTFIRST = ESMF_DecompFlag(3), &
-    ESMF_DECOMP_RESTLAST  = ESMF_DecompFlag(4), &
-    ESMF_DECOMP_CYCLIC    = ESMF_DecompFlag(5)
+  type(ESMF_Decomp_Flag), parameter:: &
+    ESMF_DECOMP_DEFAULT   = ESMF_Decomp_Flag(1), &
+    ESMF_DECOMP_BALANCED   = ESMF_Decomp_Flag(2), &
+    ESMF_DECOMP_RESTFIRST = ESMF_Decomp_Flag(3), &
+    ESMF_DECOMP_RESTLAST  = ESMF_Decomp_Flag(4), &
+    ESMF_DECOMP_CYCLIC    = ESMF_Decomp_Flag(5)
     
 !------------------------------------------------------------------------------
 
@@ -107,8 +106,8 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_DistGrid
-  public ESMF_DecompFlag, ESMF_DECOMP_INVALID, ESMF_DECOMP_DEFAULT, &
-    ESMF_DECOMP_HOMOGEN, ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, &
+  public ESMF_Decomp_Flag, ESMF_DECOMP_DEFAULT, &
+    ESMF_DECOMP_BALANCED, ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, &
     ESMF_DECOMP_CYCLIC
   public ESMF_DistGridMatchType, ESMF_DISTGRIDMATCH_INVALID, &
     ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
@@ -148,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.88 2011/06/24 16:51:58 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.89 2011/06/24 19:15:11 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -887,7 +886,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,      target,          intent(in),  optional :: regDecomp(:)
-    type(ESMF_DecompFlag), target, intent(in),  optional :: decompflag(:)
+    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
     integer,      target,          intent(in),  optional :: regDecompFirstExtra(:)
     integer,      target,          intent(in),  optional :: regDecompLastExtra(:)
     integer,      target,          intent(in),  optional :: deLabelList(:)
@@ -925,7 +924,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
 !          \ref{opt:decompflag} for a list of valid decomposition flag options.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
@@ -964,8 +963,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
     type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
-    type(ESMF_DecompFlag), target   :: dummyDf(0)  ! satisfy C interface
-    type(ESMF_DecompFlag), pointer  ::  opt_decompflag(:) ! optional arg helper
+    type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
+    type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
     type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
@@ -1235,7 +1234,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: minIndex(:)
     integer,                       intent(in)            :: maxIndex(:)
     integer,                       intent(in),  optional :: regDecomp(:)
-    type(ESMF_DecompFlag), target, intent(in),  optional :: decompflag(:)
+    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
     integer, target,               intent(in),  optional :: regDecompFirstExtra(:)
     integer, target,               intent(in),  optional :: regDecompLastExtra(:)
     integer,                       intent(in),  optional :: deLabelList(:)
@@ -1271,7 +1270,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. See section
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
 !          \ref{opt:decompflag} for a list of valid decomposition flag options.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
@@ -1308,8 +1307,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
     type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
-    type(ESMF_DecompFlag), target   :: dummyDf(0)  ! satisfy C interface
-    type(ESMF_DecompFlag), pointer  ::  opt_decompflag(:) ! optional arg helper
+    type(ESMF_Decomp_Flag), target   :: dummyDf(0)  ! satisfy C interface
+    type(ESMF_Decomp_Flag), pointer  ::  opt_decompflag(:) ! optional arg helper
     integer                 :: len_decompflag ! helper variable
     type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
     type(ESMF_InterfaceInt) :: regDecompLastExtraArg ! helper variable
@@ -1558,7 +1557,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),  optional :: regDecompPTile(:,:)
-    type(ESMF_DecompFlag),target, intent(in),   optional ::decompflagPTile(:,:)
+    type(ESMF_Decomp_Flag),target, intent(in),   optional ::decompflagPTile(:,:)
     integer,target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
     integer,target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
@@ -1602,7 +1601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[decompflagPTile]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tiles. 
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[regDecompFirstExtraPTile]}]
@@ -1644,8 +1643,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterfaceInt) :: minIndexArg  ! helper variable
     type(ESMF_InterfaceInt) :: maxIndexArg  ! helper variable
     type(ESMF_InterfaceInt) :: regDecompArg ! helper variable
-    type(ESMF_DecompFlag), target :: dummyDf(0,0)  ! satisfy C interface
-    type(ESMF_DecompFlag), pointer::  opt_decompflag(:,:) ! optional arg helper
+    type(ESMF_Decomp_Flag), target :: dummyDf(0,0)  ! satisfy C interface
+    type(ESMF_Decomp_Flag), pointer::  opt_decompflag(:,:) ! optional arg helper
     integer                 :: len1_decompflag ! helper variable
     integer                 :: len2_decompflag ! helper variable
     type(ESMF_InterfaceInt) :: regDecompFirstExtraArg ! helper variable
@@ -1903,7 +1902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: minIndex(:,:)
     integer,                       intent(in)            :: maxIndex(:,:)
     integer,                       intent(in),  optional :: regDecomp(:,:)
-    type(ESMF_DecompFlag),target,  intent(in),  optional :: decompflag(:,:)
+    type(ESMF_Decomp_Flag),target,  intent(in),  optional :: decompflag(:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
@@ -1942,7 +1941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[decompflag]}]
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
-!          is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions for all tiles. 
+!          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
 !          See section \ref{opt:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[deLabelList]}]
