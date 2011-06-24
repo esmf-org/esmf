@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.223 2011/06/23 18:13:58 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.224 2011/06/24 03:37:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -71,20 +71,20 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_GridStatus
+! ! ESMF_GridStatus_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_GridStatus
+  type ESMF_GridStatus_Flag
   sequence
 !  private
      integer :: gridstatus
   end type
 
-  type(ESMF_GridStatus), parameter :: &
-                      ESMF_GRIDSTATUS_INVALID=ESMF_GridStatus(-1), &
-                      ESMF_GRIDSTATUS_UNINIT=ESMF_GridStatus(0), &
-                      ESMF_GRIDSTATUS_EMPTY=ESMF_GridStatus(1), &
-		      ESMF_GRIDSTATUS_COMPLETE=ESMF_GridStatus(2)
+  type(ESMF_GridStatus_Flag), parameter :: &
+                      ESMF_GRIDSTATUS_INVALID=ESMF_GridStatus_Flag(-1), &
+                      ESMF_GRIDSTATUS_UNINIT=ESMF_GridStatus_Flag(0), &
+                      ESMF_GRIDSTATUS_EMPTY=ESMF_GridStatus_Flag(1), &
+		      ESMF_GRIDSTATUS_COMPLETE=ESMF_GridStatus_Flag(2)
 
 
 !------------------------------------------------------------------------------
@@ -189,7 +189,7 @@
 integer,parameter :: ESMF_GRID_ARBDIM = -1
 
 !------------------------------------------------------------------------------
-! ! ESMF_GridStatus
+! ! ESMF_GridStatus_Flag
 !
 !------------------------------------------------------------------------------
   type ESMF_GridMatchType
@@ -212,7 +212,7 @@ public ESMF_Grid
 public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
                         ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
 
-public  ESMF_GridStatus,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
+public ESMF_GridStatus_Flag,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
                       ESMF_GRIDSTATUS_EMPTY,  ESMF_GRIDSTATUS_COMPLETE
 
 public  ESMF_GridMatchType,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.223 2011/06/23 18:13:58 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.224 2011/06/24 03:37:16 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1695,7 +1695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout)     :: grid
-      type(ESMF_GridStatus),optional     :: status      ! NOT IMPLEMENTED
+      type(ESMF_GridStatus_Flag),optional     :: status      ! NOT IMPLEMENTED
       type(ESMF_DefaultFlag), optional   :: defaultflag ! NOT IMPLEMENTED
       integer, intent(out), optional     :: rc
 !
@@ -10524,7 +10524,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,       target, intent(out), optional :: gridEdgeUWidth(:)
       integer,       target, intent(out), optional :: gridAlign(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
-      type(ESMF_GridStatus), intent(out), optional :: status
+      type(ESMF_GridStatus_Flag), intent(out), optional :: status
       character (len=*),     intent(out), optional :: name
       integer,               intent(out), optional :: rc
 !
@@ -20125,7 +20125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridStatus), intent(in) :: &
+      type (ESMF_GridStatus_Flag), intent(in) :: &
          GridStatus1,      &! Two igrid statuses to compare for
          GridStatus2        ! equality
 
@@ -20159,7 +20159,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridStatus), intent(in) :: &
+      type (ESMF_GridStatus_Flag), intent(in) :: &
          GridStatus1,      &! Two GridStatus Statuses to compare for
          GridStatus2        ! inequality
 
@@ -20195,7 +20195,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridStatus), intent(in) :: &
+      type (ESMF_GridStatus_Flag), intent(in) :: &
          GridStatus1,      &! Two igrid statuses to compare for
          GridStatus2        ! equality
 
@@ -20229,7 +20229,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridStatus), intent(in) :: &
+      type (ESMF_GridStatus_Flag), intent(in) :: &
          GridStatus1,      &! Two GridStatus Statuses to compare for
          GridStatus2        ! inequality
 
@@ -20264,7 +20264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridStatus), intent(in) :: &
+      type (ESMF_GridStatus_Flag), intent(in) :: &
          GridStatus1,      &! Two igrid statuses to compare for
          GridStatus2        ! equality
 
@@ -20298,7 +20298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridStatus), intent(in) :: &
+      type (ESMF_GridStatus_Flag), intent(in) :: &
          GridStatus1,      &! Two GridStatus Statuses to compare for
          GridStatus2        ! inequality
 
