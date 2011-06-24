@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.20 2011/06/23 15:54:40 rokuingh Exp $
+! $Id: ESMF_WebServ.F90,v 1.21 2011/06/24 23:34:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -164,7 +164,7 @@ contains
 !
 ! !INTERFACE:
 !  subroutine ESMF_WebServWaitForRequest(comp, exportState, rc)
-  subroutine ESMF_WebServWaitForRequest(comp, importState, exportState, clock, blockingFlag, phase, rc)
+  subroutine ESMF_WebServWaitForRequest(comp, importState, exportState, clock, syncflag, phase, rc)
 
 !
 ! !ARGUMENTS:
@@ -173,7 +173,7 @@ contains
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: rc
 !
@@ -219,7 +219,7 @@ contains
        inmsg(1) = 'A'
 
        call ESMF_VMRecv(vm, recvData=inmsg, count=count, srcPet=0, &
-                        blockingflag=ESMF_BLOCKING, rc=localrc)
+                        syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
        if (localrc /= ESMF_SUCCESS) then
            call ESMF_LogSetError( &
                    ESMF_RC_NOT_VALID, &
@@ -435,7 +435,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_WebServSvcLoop(comp, portNum, importState, exportState, &
-                                 clock, blockingFlag, phase, rc)
+                                 clock, syncflag, phase, rc)
 
 !
 ! !ARGUMENTS:
@@ -444,7 +444,7 @@ contains
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: rc
 !
@@ -474,7 +474,7 @@ contains
     localrc = ESMF_SUCCESS
 
     call c_ESMC_ComponentSvcLoop(comp, importState, exportState, clock, &
-                                 blockingFlag, phase, 27060, localrc)
+                                 syncflag, phase, 27060, localrc)
 
     rc = localrc
 
@@ -572,7 +572,7 @@ contains
     type(ESMF_State)        :: importState
     type(ESMF_State)        :: exportState
     type(ESMF_Clock)        :: clock
-    type(ESMF_BlockingFlag) :: blockingFlag
+    type(ESMF_Sync_Flag) :: syncflag
     integer                 :: phase
 
 
@@ -612,7 +612,7 @@ contains
        ! it with some values using ClockCreate?
        !clock = ESMF_ClockCreate("App Clock", rc=localrc)
 
-       blockingFlag = ESMF_BLOCKING
+       syncflag = ESMF_SYNC_BLOCKING
        phase = 1
 
        if (portNum <= 0) then
@@ -632,7 +632,7 @@ contains
 
        call ESMF_WebServSvcLoop(comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
-             blockingFlag=blockingFlag, phase=phase, rc=localrc)
+             syncflag=syncflag, phase=phase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -654,7 +654,7 @@ contains
     else
 
        call ESMF_WebServWaitForRequest(comp, importState=importState, &
-             exportState=exportState, clock=clock, blockingFlag=blockingFlag, &
+             exportState=exportState, clock=clock, syncflag=syncflag, &
              phase=phase, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &

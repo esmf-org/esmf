@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.138 2011/06/24 21:46:00 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.139 2011/06/24 23:34:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.138 2011/06/24 21:46:00 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.139 2011/06/24 23:34:20 rokuingh Exp $"
 
 !==============================================================================
 
@@ -730,7 +730,7 @@ contains
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMAllFullReduce(vm, sendData, recvData, &
-!    count, reduceflag,  blockingflag, commhandle, rc)
+!    count, reduceflag,  syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -739,7 +739,7 @@ contains
 !    integer,                          intent(in)            :: count
 !    type(ESMF_Reduce_Flag),            intent(in)            :: reduceflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -760,7 +760,7 @@ contains
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !   \newline
@@ -780,17 +780,17 @@ contains
 !   \item[reduceflag] 
 !        Reduction operation. See section \ref{opt:reduceflag} for a list of 
 !        valid reduce operations.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -813,7 +813,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllFullReduce()
   subroutine ESMF_VMAllFullReduceI4(vm, sendData, recvData, count, &
-    reduceflag, keywordEnforcer, blockingflag, commhandle, rc)
+    reduceflag, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -822,7 +822,7 @@ contains
     integer,                       intent(in)            :: count
     type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -841,8 +841,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -874,7 +874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllFullReduce()
   subroutine ESMF_VMAllFullReduceR4(vm, sendData, recvData, count, &
-    reduceflag, keywordEnforcer, blockingflag, commhandle, rc)
+    reduceflag, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -883,7 +883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -902,8 +902,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -935,7 +935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllFullReduce()
   subroutine ESMF_VMAllFullReduceR8(vm, sendData, recvData, count, &
-    reduceflag, keywordEnforcer, blockingflag, commhandle, rc)
+    reduceflag, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -944,7 +944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -963,8 +963,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -993,7 +993,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMAllGather(vm, sendData, recvData, count, &
-!    blockingflag, commhandle, rc)
+!    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -1001,7 +1001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
 !    integer,                          intent(in)            :: count
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -1034,17 +1034,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[count] 
 !        Number of elements to be gathered from each PET. Must be the
 !        same on all PETs.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -1067,7 +1067,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherI4(vm, sendData, recvData, count, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -1075,7 +1075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -1098,8 +1098,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -1137,7 +1137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherR4(vm, sendData, recvData, count, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1145,7 +1145,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1168,8 +1168,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -1207,7 +1207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherR8(vm, sendData, recvData, count, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1215,7 +1215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1238,8 +1238,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 8 ! 8 bytes
@@ -1277,7 +1277,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGather()
   subroutine ESMF_VMAllGatherLogical(vm, sendData, recvData, count, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1285,7 +1285,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1308,8 +1308,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -1344,7 +1344,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMAllGatherV(vm, sendData, sendCount, &
-!    recvData, recvCounts, recvOffsets, blockingflag, commhandle, rc)
+!    recvData, recvCounts, recvOffsets, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -1354,7 +1354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: recvCounts(:)
 !    integer,                          intent(in)            :: recvOffsets(:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -1373,7 +1373,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !   \newline
@@ -1397,17 +1397,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking the start of
 !        element sequence to be received from source PET.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -1430,7 +1430,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVI4(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -1440,7 +1440,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: recvCounts(:)
     integer,                       intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -1459,8 +1459,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1490,7 +1490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVR4(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1500,7 +1500,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1519,8 +1519,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1550,7 +1550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGatherV()
   subroutine ESMF_VMAllGatherVR8(vm, sendData, sendCount, recvData, &
-    recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
+    recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1560,7 +1560,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1579,8 +1579,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1607,7 +1607,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMAllReduce(vm, sendData, recvData, count, &
-!    reduceflag, blockingflag, commhandle, rc)
+!    reduceflag, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -1616,7 +1616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    type(ESMF_Reduce_Flag),            intent(in)            :: reduceflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !         
@@ -1637,7 +1637,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.\newline
 !
@@ -1657,17 +1657,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[reduceflag] 
 !        Reduction operation. See section \ref{opt:reduceflag} for a list of 
 !        valid reduce operations.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -1690,7 +1690,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceflag, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -1699,7 +1699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -1718,8 +1718,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1751,7 +1751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceI4S(vm, sendData, recvData, reduceflag, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -1759,7 +1759,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData
     type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !
@@ -1778,8 +1778,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1808,7 +1808,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceR4(vm, sendData, recvData, count, reduceflag, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1817,7 +1817,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1836,8 +1836,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1869,7 +1869,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
   subroutine ESMF_VMAllReduceR8(vm, sendData, recvData, count, reduceflag, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -1878,7 +1878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1897,8 +1897,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -1927,7 +1927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMAllToAllV(vm, sendData, sendCounts, &
-!    sendOffsets, recvData, recvCounts, recvOffsets, blockingflag, &
+!    sendOffsets, recvData, recvCounts, recvOffsets, syncflag, &
 !    commhandle, rc)
 !
 ! !ARGUMENTS:
@@ -1939,7 +1939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: recvCounts(:)
 !    integer,                          intent(in)            :: recvOffsets(:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -1959,7 +1959,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.\newline
 !
@@ -1985,17 +1985,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking to start of
 !        element sequence to be received by local PET from source PET.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -2018,7 +2018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllToAllV()
   subroutine ESMF_VMAllToAllVI4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -2029,7 +2029,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: recvCounts(:)
     integer,                       intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -2048,8 +2048,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -2079,7 +2079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllToAllV()
   subroutine ESMF_VMAllToAllVR4(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -2090,7 +2090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2109,8 +2109,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -2140,7 +2140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllToAllV()
   subroutine ESMF_VMAllToAllVR8(vm, sendData, sendCounts, sendOffsets, &
-    recvData, recvCounts, recvOffsets, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -2151,7 +2151,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2170,8 +2170,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -2251,7 +2251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMBroadcast(vm, bcstData, count, rootPet, &
-!    blockingflag, commhandle, rc)
+!    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -2259,7 +2259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -2295,17 +2295,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being broadcast.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -2328,7 +2328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastI4(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -2336,7 +2336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -2359,8 +2359,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2400,7 +2400,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastR4(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -2408,7 +2408,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2431,8 +2431,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2473,7 +2473,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastR8(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -2481,7 +2481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2503,8 +2503,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2544,7 +2544,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastLogical(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -2552,7 +2552,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2575,8 +2575,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2616,7 +2616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastChar(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)             :: vm
@@ -2624,7 +2624,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)             :: count
     integer,                 intent(in)             :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !         
@@ -2647,8 +2647,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2687,7 +2687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastCharArray(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)             :: vm
@@ -2695,7 +2695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)             :: count
     integer,                 intent(in)             :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !         
@@ -2718,8 +2718,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2758,7 +2758,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
   subroutine ESMF_VMBroadcastCharArray2D(vm, bcstData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)             :: vm
@@ -2766,7 +2766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)             :: count
     integer,                 intent(in)             :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !         
@@ -2789,8 +2789,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -2938,7 +2938,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMGather(vm, sendData, recvData, count, rootPet, &
-!    blockingflag, commhandle, rc)
+!    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -2947,7 +2947,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -2983,17 +2983,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        the same on all PETs.
 !   \item[rootPet] 
 !        PET on which data is gathereds.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -3016,7 +3016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherI4(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -3025,7 +3025,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -3048,8 +3048,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -3087,7 +3087,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR4(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -3096,7 +3096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -3119,8 +3119,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -3158,7 +3158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR8(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -3167,7 +3167,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -3190,8 +3190,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 8 ! 8 bytes
@@ -3229,7 +3229,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherLogical(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -3238,7 +3238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -3261,8 +3261,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -3325,7 +3325,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.\newline
 !
@@ -3960,7 +3960,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMRecv(vm, recvData, count, srcPet, &
-!    blockingflag, commhandle, rc)
+!    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                 intent(in)            :: vm
@@ -3968,7 +3968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                       intent(in)            :: count
 !    integer,                       intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),         intent(out), optional :: commhandle
 !    integer,                       intent(out), optional :: rc           
 !
@@ -4000,17 +4000,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements to be received.
 !   \item[srcPet] 
 !        Sending PET.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -4033,7 +4033,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvI4(vm, recvData, count, srcPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)             :: vm
@@ -4041,7 +4041,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)             :: count
     integer,                       intent(in)             :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc           
 !
@@ -4064,8 +4064,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -4105,7 +4105,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvR4(vm, recvData, count, srcPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)             :: vm
@@ -4113,7 +4113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)             :: count
     integer,                    intent(in)             :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -4136,8 +4136,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -4177,7 +4177,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvR8(vm, recvData, count, srcPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -4185,7 +4185,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -4208,8 +4208,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -4249,7 +4249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvLogical(vm, recvData, count, srcPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -4257,7 +4257,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -4280,8 +4280,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -4321,7 +4321,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvChar(vm, recvData, count, srcPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)            :: vm
@@ -4329,7 +4329,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc           
 !
@@ -4352,8 +4352,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -4393,7 +4393,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvCharArray(vm, recvData, count, srcPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)            :: vm
@@ -4401,7 +4401,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !
@@ -4424,8 +4424,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
 
     if (count > 0) then
@@ -4462,7 +4462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMReduce(vm, sendData, recvData, count, &
-!    reduceflag, rootPet, blockingflag, commhandle, rc)
+!    reduceflag, rootPet, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)             :: vm
@@ -4472,7 +4472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Reduce_Flag),            intent(in)             :: reduceflag
 !    integer,                          intent(in)             :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -4493,7 +4493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt blockingflag = ESMF\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.\newline
 !
@@ -4515,17 +4515,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        valid reduce operations.
 !   \item[rootPet] 
 !        PET on which reduced data is returned.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -4548,7 +4548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMReduce()
   subroutine ESMF_VMReduceI4(vm, sendData, recvData, count, reduceflag, &
-    rootPet, keywordEnforcer, blockingflag, commhandle, rc)
+    rootPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -4558,7 +4558,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -4577,8 +4577,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -4610,7 +4610,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMReduce()
   subroutine ESMF_VMReduceR4(vm, sendData, recvData, count, reduceflag, &
-    rootPet, keywordEnforcer, blockingflag, commhandle, rc)
+    rootPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)             :: vm
@@ -4620,7 +4620,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Reduce_Flag),      intent(in)             :: reduceflag
     integer,                    intent(in)             :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4639,8 +4639,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -4672,7 +4672,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMReduce()
   subroutine ESMF_VMReduceR8(vm, sendData, recvData, count, reduceflag, &
-    rootPet, keywordEnforcer, blockingflag, commhandle, rc)
+    rootPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -4682,7 +4682,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4701,8 +4701,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
     ! Not implemented features
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="- non-blocking mode not yet implemented", &
           ESMF_CONTEXT, rcToReturn=rc)
@@ -4731,7 +4731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMScatter(vm, sendData, recvData, count, &
-!    rootPet, blockingflag, commhandle, rc)
+!    rootPet, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -4740,7 +4740,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -4776,17 +4776,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Must be the same on all PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being scattered.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -4809,7 +4809,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterI4(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -4818,7 +4818,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -4841,8 +4841,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -4880,7 +4880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR4(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -4889,7 +4889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4912,8 +4912,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -4951,7 +4951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR8(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -4960,7 +4960,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4983,8 +4983,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 8 ! 8 bytes
@@ -5022,7 +5022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterLogical(vm, sendData, recvData, count, rootPet, &
-    keywordEnforcer, blockingflag, commhandle, rc)
+    keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -5031,7 +5031,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -5054,8 +5054,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     size = count * 4 ! 4 bytes
@@ -5290,7 +5290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMSend(vm, sendData, count, dstPet, &
-!    blockingflag, commhandle, rc)
+!    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -5298,7 +5298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: dstPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
 !
@@ -5320,17 +5320,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements to be send.
 !   \item[dstPet] 
 !        Receiving PET.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -5353,7 +5353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendI4(vm, sendData, count, dstPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -5361,7 +5361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc           
 !EOPI
@@ -5383,8 +5383,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -5424,7 +5424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendR4(vm, sendData, count, dstPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -5432,7 +5432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5455,8 +5455,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -5496,7 +5496,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendR8(vm, sendData, count, dstPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -5504,7 +5504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5527,8 +5527,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -5568,7 +5568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendLogical(vm, sendData, count, dstPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -5576,7 +5576,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5599,8 +5599,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -5640,7 +5640,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendChar(vm, sendData, count, dstPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)            :: vm
@@ -5648,7 +5648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc           
 !
@@ -5671,8 +5671,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     if (count > 0) then
@@ -5712,7 +5712,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendCharArray(vm, sendData, count, dstPet, keywordEnforcer, &
-    blockingflag, commhandle, rc)
+    syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)            :: vm
@@ -5720,7 +5720,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !
@@ -5743,8 +5743,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
 
     if (count > 0) then
@@ -5781,7 +5781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMSendRecv(vm, sendData, sendCount, dstPet, &
-!    recvData, recvCount, srcPet, blockingflag, commhandle, rc)
+!    recvData, recvCount, srcPet, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
@@ -5792,7 +5792,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: recvCount
 !    integer,                          intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
 !
@@ -5831,17 +5831,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements to be received.
 !   \item[srcPet] 
 !        PET that holds {\tt sendData}.
-!   \item[{[blockingflag]}] 
+!   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
 !             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_NONBLOCKING}]
+!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
-!        non-blocking request (see argument {\tt blockingflag}). The
+!        non-blocking request (see argument {\tt syncflag}). The
 !        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
 !        calling PET until the communication call has finished PET-locally. If
 !        no {\tt commhandle} was supplied to a non-blocking call the VM method
@@ -5864,7 +5864,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvI4(vm, sendData, sendCount, dstPet, &
-    recvData, recvCount, srcPet, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCount, srcPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),                 intent(in)            :: vm
@@ -5875,7 +5875,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: recvCount
     integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc           
 !
@@ -5899,8 +5899,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     sendSize = sendCount * 4 ! 4 bytes
@@ -5940,7 +5940,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvR4(vm, sendData, sendCount, dstPet, &
-    recvData, recvCount, srcPet, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCount, srcPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -5951,7 +5951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5975,8 +5975,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     sendSize = sendCount * 4 ! 4 bytes
@@ -6016,7 +6016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvR8(vm, sendData, sendCount, dstPet, &
-    recvData, recvCount, srcPet, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCount, srcPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -6027,7 +6027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -6051,8 +6051,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     sendSize = sendCount * 8 ! 8 bytes
@@ -6092,7 +6092,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvLogical(vm, sendData, sendCount, dstPet, &
-    recvData, recvCount, srcPet, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCount, srcPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)            :: vm
@@ -6103,7 +6103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -6127,8 +6127,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     sendSize = sendCount * 4 ! 4 bytes
@@ -6168,7 +6168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvChar(vm, sendData, sendCount, dstPet, &
-    recvData, recvCount, srcPet, keywordEnforcer, blockingflag, commhandle, rc)
+    recvData, recvCount, srcPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),           intent(in)            :: vm
@@ -6179,7 +6179,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: recvCount
     integer,                 intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc           
 !
@@ -6203,8 +6203,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     sendSize = sendCount ! 1 byte
@@ -7522,7 +7522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMBcastVMId - Broadcast ESMF_VMId array
 
 ! !INTERFACE:
-  subroutine ESMF_VMBcastVMId(vm, bcstData, count, rootPet, blockingflag, &
+  subroutine ESMF_VMBcastVMId(vm, bcstData, count, rootPet, syncflag, &
     commhandle, rc)
 !
 ! !ARGUMENTS:
@@ -7530,7 +7530,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VMId), target,  intent(inout)           :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: rootPet
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_Sync_Flag),  intent(in),   optional  :: syncflag
     type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
@@ -7553,8 +7553,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
-    if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
     endif
     
     ! Not implemented features

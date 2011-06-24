@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.132 2011/06/24 21:45:58 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.133 2011/06/24 23:34:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -340,16 +340,16 @@
 !
 !     ! Typed blocking/non-blocking flag
 
-      type ESMF_BlockingFlag
+      type ESMF_Sync_Flag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_BlockingFlag), parameter:: &
-        ESMF_BLOCKING     = ESMF_BlockingFlag(1), &
-        ESMF_VASBLOCKING  = ESMF_BlockingFlag(2), &
-        ESMF_NONBLOCKING  = ESMF_BlockingFlag(3)
+      type(ESMF_Sync_Flag), parameter:: &
+        ESMF_SYNC_BLOCKING     = ESMF_Sync_Flag(1), &
+        ESMF_SYNC_VASBLOCKING  = ESMF_Sync_Flag(2), &
+        ESMF_SYNC_NONBLOCKING  = ESMF_Sync_Flag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -692,8 +692,8 @@
              ESMF_ROUTESYNC_NBTESTFINISH, ESMF_ROUTESYNC_NBWAITFINISH, ESMF_ROUTESYNC_CANCEL
 
       public ESMF_Reduce_Flag, ESMF_REDUCE_SUM, ESMF_REDUCE_MIN, ESMF_REDUCE_MAX
-      public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
-             ESMF_NONBLOCKING
+      public ESMF_Sync_Flag, ESMF_SYNC_BLOCKING, ESMF_SYNC_VASBLOCKING, &
+             ESMF_SYNC_NONBLOCKING
       public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
       public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
@@ -975,25 +975,25 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_BlockingFlags
+! function to compare two ESMF_Sync_Flags
 
 subroutine ESMF_bfas(bf1, bf2)
- type(ESMF_BlockingFlag), intent(out) :: bf1
- type(ESMF_BlockingFlag), intent(in)  :: bf2
+ type(ESMF_Sync_Flag), intent(out) :: bf1
+ type(ESMF_Sync_Flag), intent(in)  :: bf2
 
  bf1%value = bf2%value
 end subroutine
 
 function ESMF_bfeq(bf1, bf2)
  logical ESMF_bfeq
- type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
+ type(ESMF_Sync_Flag), intent(in) :: bf1, bf2
 
  ESMF_bfeq = (bf1%value == bf2%value)
 end function
 
 function ESMF_bfne(bf1, bf2)
  logical ESMF_bfne
- type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
+ type(ESMF_Sync_Flag), intent(in) :: bf1, bf2
 
  ESMF_bfne = (bf1%value /= bf2%value)
 end function

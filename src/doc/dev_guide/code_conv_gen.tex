@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.26 2011/03/18 18:18:08 w6ws Exp $
+% CVS $Id: code_conv_gen.tex,v 1.27 2011/06/24 23:34:30 rokuingh Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -162,13 +162,13 @@ A standard template for examples has not yet been created.
 \item All flags and options (hereafter referred to as options) 
 shall be broken out into separate sections called {\it <Class> Options}.  
 Options shall each have their own derived type, 
-e.g. {\tt ESMF\_BlockingFlag}, and valid values will be all capitals
-with underscore separators, e.g. {\tt ESMF\_NONBLOCKING}.
+e.g. {\tt ESMF\_Sync\_Flag}, and valid values will be all capitals
+with underscore separators, e.g. {\tt ESMF\_SYNC\_NONBLOCKING}.
 
 \item When possible, call options <Class>Type or <Something>Flag and
 name the argument in the argument list the same thing.  For example,
-the option {\tt ESMF\_BlockingFlag} has associated arguments 
-called {\tt blockingFlag}.
+the option {\tt ESMF\_Sync\_Flag} has associated arguments 
+called {\tt syncflag}.
 
 \item The purpose of options shall be fully described along with all 
 valid values in the options sections of the document.  See the
@@ -177,7 +177,7 @@ standard format in {\it Calendar Options} or {\it Grid Options}.
 \item In the sections describing the usage and values for options, 
 only use the full class name, e.g. {\tt ESMF\_Field}, method names such
 as {\tt ESMF\_FieldWrite}, or particular argument names, such as {\tt
-blockingFlag}. Do not use the more informal form of the short class
+syncflag}. Do not use the more informal form of the short class
 name in a regular font, e.g. Field.  The rationale is that here we 
 are carefully specifying interface behavior and are referring only 
 to particular ESMF types, values, and methods.  It is a pain in 
@@ -221,7 +221,7 @@ shall not be used - use {\tt bundleType} instead.
 \item As with descriptions of flags and options:  in the sections describing
 methods, only use the full class name, e.g. {\tt ESMF\_Field}, method names such
 as {\tt ESMF\_FieldWrite}, or particular argument names, such as {\tt
-blockingFlag}. Do not use the more informal short form in regular 
+syncflag}. Do not use the more informal short form in regular 
 font, e.g. Field.
 
 \end{enumerate}
@@ -347,7 +347,7 @@ as {\tt delayout} or {\tt srcDelayout}.
 \subsubsection{Variables Associated with Options}
 Variables associated with flags or option shall have the same name as
 the option (as long as it is not too awkward); for example, an option 
-{\tt ESMF\_BlockingFlag} has an associated argument {\tt blockingFlag}.
+{\tt ESMF\_Sync\_Flag} has an associated argument {\tt syncflag}.
 
 \subsubsection{Variables Having Logical Data Type}
 Variables associated with flags or other boolean values shall use
@@ -380,14 +380,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX\ 
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.26 2011/03/18 18:18:08 w6ws Exp $ 
+% $Id: code_conv_gen.tex,v 1.27 2011/06/24 23:34:30 rokuingh Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.26 2011/03/18 18:18:08 w6ws Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.27 2011/06/24 23:34:30 rokuingh Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}

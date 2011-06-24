@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.16 2011/06/24 14:26:02 rokuingh Exp $
+! $Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.17 2011/06/24 23:34:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.16 2011/06/24 14:26:02 rokuingh Exp $'
+      '$Id: ESMF_VMSendNbVMRecvNbUTest.F90,v 1.17 2011/06/24 23:34:21 rokuingh Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -166,7 +166,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local I4 data Test"
       call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleI4s, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleI4s, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -177,7 +177,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local I4 data Test"
       call ESMF_VMRecv(vm, recvData=i_recvData, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleI4r, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleI4r, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with REAL_KIND_R4 arguments
@@ -188,7 +188,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local R4 data Test"
       call ESMF_VMSend(vm, sendData=r4_localData, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleR4s, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR4s, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -199,7 +199,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local R4 data Test"
       call ESMF_VMRecv(vm, recvData=r4_recvData, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleR4r, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR4r, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with ESMF_KIND_R8 arguments
@@ -210,7 +210,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local R8 data Test"
       call ESMF_VMSend(vm, sendData=r8_localData, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleR8s, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR8s, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -221,7 +221,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local R8 data Test"
       call ESMF_VMRecv(vm, recvData=r8_recvData, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleR8r, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR8r, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with logical arguments
@@ -232,7 +232,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local LOGICAL data Test"
       call ESMF_VMSend(vm, sendData=local_logical, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleLOGICALs, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleLOGICALs, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -246,7 +246,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local LOGICAL data Test"
       call ESMF_VMRecv(vm, recvData=recv_logical, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleLOGICALr, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleLOGICALr, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -382,7 +382,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local I4 data Test"
       call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -393,7 +393,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local I4 data Test"
       call ESMF_VMRecv(vm, recvData=i_recvData, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with REAL_KIND_R4 arguments
@@ -404,7 +404,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local R4 data Test"
       call ESMF_VMSend(vm, sendData=r4_localData, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -415,7 +415,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local R4 data Test"
       call ESMF_VMRecv(vm, recvData=r4_recvData, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with ESMF_KIND_R8 arguments
@@ -426,7 +426,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local R8 data Test"
       call ESMF_VMSend(vm, sendData=r8_localData, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -437,7 +437,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local R8 data Test"
       call ESMF_VMRecv(vm, recvData=r8_recvData, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with logical arguments
@@ -448,7 +448,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local LOGICAL data Test"
       call ESMF_VMSend(vm, sendData=local_logical, count=count, dstPet=dst, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -462,7 +462,7 @@
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Receiving local LOGICAL data Test"
       call ESMF_VMRecv(vm, recvData=recv_logical, count=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

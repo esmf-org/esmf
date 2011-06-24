@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.171 2011/06/24 22:31:09 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.172 2011/06/24 23:34:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.171 2011/06/24 22:31:09 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.172 2011/06/24 23:34:25 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -563,7 +563,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompFinalize(gridcomp, keywordEnforcer, &
-    importState, exportState, clock, blockingflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
@@ -571,7 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -602,10 +602,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]  
 !   Component providers must document whether their each of their
@@ -639,7 +639,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINALIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -658,14 +658,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompFinalizeAct(gridcomp, importState, &
-    exportState, clock, blockingflag, phase, userRc, rc)
+    exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -687,7 +687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -957,7 +957,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompInitialize(gridcomp, keywordEnforcer, &
-    importState, exportState, clock, blockingflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
@@ -965,7 +965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -996,10 +996,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
-! \item[{[blockingflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]
 !   Component providers must document whether each of their
@@ -1032,7 +1032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1051,14 +1051,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompInitializeAct(gridcomp, importState, &
-    exportState, clock, blockingflag, phase, userRc, rc)
+    exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -1079,7 +1079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1211,7 +1211,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompReadRestart(gridcomp, keywordEnforcer, &
-    importState, exportState, clock, blockingflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
@@ -1219,7 +1219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -1250,10 +1250,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
 !   Component providers must document whether their each of their
@@ -1287,7 +1287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1307,7 +1307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompRun(gridcomp, keywordEnforcer, &
     importState, exportState,&
-    clock, blockingflag, phase, userRc, rc)
+    clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
@@ -1315,7 +1315,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -1346,10 +1346,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
 !   Component providers must document whether their each of their
@@ -1382,7 +1382,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1401,14 +1401,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompRunAct(gridcomp, importState, exportState,&
-    clock, blockingflag, phase, userRc, rc)
+    clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -1429,7 +1429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2292,12 +2292,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompWait - Wait for a GridComp to return
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompWait(gridcomp, keywordEnforcer, blockingflag, userRc, rc)
+  subroutine ESMF_GridCompWait(gridcomp, keywordEnforcer, syncflag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
 !
@@ -2311,10 +2311,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[gridcomp] 
 !   {\tt ESMF\_GridComp} to wait for.
-! \item[{[blockingflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -2333,7 +2333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompWait(gridcomp%compp, blockingflag=blockingflag, &
+    call ESMF_CompWait(gridcomp%compp, syncflag=syncflag, &
       userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -2353,7 +2353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompWriteRestart(gridcomp, keywordEnforcer, &
-    importState, exportState, clock, blockingflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)           :: gridcomp
@@ -2361,7 +2361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -2392,10 +2392,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   a private clock for its own internal time computations. If not present, a dummy
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
-! \item[{[blockingflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]  
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]   
 !   Component providers must document whether their each of their
@@ -2429,7 +2429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      blockingflag=blockingflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

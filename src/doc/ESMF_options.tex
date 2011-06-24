@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.56 2011/06/24 23:33:48 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.57 2011/06/24 23:34:28 rokuingh Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -39,14 +39,14 @@ Valid values are:
       Do not allocate data at this time. 
 \end{description}
 
-\subsubsection{ESMF\_BlockingFlag}
-\label{opt:blockingflag}
+\subsubsection{ESMF\_Sync\_Flag}
+\label{opt:syncflag}
 {\sf DESCRIPTION:\\}  
 Indicates method blocking behavior and PET synchronization for VM communication
 methods, as well as for standard Component methods, such as Initialize(), Run() 
 and Finalize().
 
-For VM communication calls the {\tt ESMF\_BLOCKING} and {\tt ESMF\_NONBLOCKING}
+For VM communication calls the {\tt ESMF\_SYNC\_BLOCKING} and {\tt ESMF\_SYNC\_NONBLOCKING}
 modes provide behavior that is practically identical to the blocking and
 non-blocking communication calls familiar from MPI.
 
@@ -63,7 +63,7 @@ descriptions.
 Valid values are:
 \begin{description}
 
-\item [ESMF\_BLOCKING]
+\item [ESMF\_SYNC\_BLOCKING]
          {\em Communication calls:} The called method will block until all
          (PET-)local operations are complete. After the return of a blocking
          communication method it is safe to modify or use all participating
@@ -81,14 +81,14 @@ Valid values are:
          threads in shared memory, i.e. in a single VAS, strict synchronization
          of all PETs is required to prevent race conditions.
 
-\item [ESMF\_VASBLOCKING]
+\item [ESMF\_SYNC\_VASBLOCKING]
          {\em Communication calls:} Not available for communication calls.
          
          {\em Component calls:} The called method will block each PET until
          all operations in the PET-local VAS have completed. 
          
-         This mode is a combination of {\tt ESMF\_BLOCKING} and
-         {\tt ESMF\_NONBLOCKING} modes. It provides a default setting 
+         This mode is a combination of {\tt ESMF\_SYNC\_BLOCKING} and
+         {\tt ESMF\_SYNC\_NONBLOCKING} modes. It provides a default setting 
          that leads to the typically desirable behavior for pure MPI 
          components as well as those that share address spaces between PETs.
          
@@ -99,12 +99,12 @@ Valid values are:
          synchronization between the processes.
          
          In the case where some PETs of the component are running as
-         threads in shared memory {\tt ESMF\_VASBLOCKING} becomes identical
-         to {\tt ESMF\_BLOCKING} within thread groups, to prevent race
+         threads in shared memory {\tt ESMF\_SYNC\_VASBLOCKING} becomes identical
+         to {\tt ESMF\_SYNC\_BLOCKING} within thread groups, to prevent race
          conditions, while there is no synchronization between the thread
          groups.
          
-\item [ESMF\_NONBLOCKING]
+\item [ESMF\_SYNC\_NONBLOCKING]
          {\em Communication calls:} The called method will not block but 
          returns immediately after initiating the requested operation. It is
          unsafe to modify or use participating local data before all local
@@ -115,17 +115,17 @@ Valid values are:
          {\em Component calls:} The behavior of this mode is fundamentally
          different for threaded and non-threaded components,
          independent on whether the components use shared memory or not.
-         The {\tt ESMF\_NONBLOCKING} mode is the most complex mode for
+         The {\tt ESMF\_SYNC\_NONBLOCKING} mode is the most complex mode for
          calling component methods and should only be used if the extra
          control, described below, is absolutely necessary.
          
          For non-threaded components (the ESMF default)
-         calling a component method with {\tt ESMF\_NONBLOCKING}
-         is identical to calling it with {\tt ESMF\_VASBLOCKING}. However,
-         different than for {\tt ESMF\_VASBLOCKING}, a call to
+         calling a component method with {\tt ESMF\_SYNC\_NONBLOCKING}
+         is identical to calling it with {\tt ESMF\_SYNC\_VASBLOCKING}. However,
+         different than for {\tt ESMF\_SYNC\_VASBLOCKING}, a call to
          {\tt ESMF\_GridCompWait()} or {\tt ESMF\_CplCompWait()} is
          required in order to deallocate memory internally allocated for the
-         {\tt ESMF\_NONBLOCKING} mode.
+         {\tt ESMF\_SYNC\_NONBLOCKING} mode.
          
          For threaded components the calling PETs
          of the parent component will not be blocked and return immediately

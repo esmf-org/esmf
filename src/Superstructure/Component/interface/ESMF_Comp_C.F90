@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.72 2011/06/24 22:31:07 rokuingh Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.73 2011/06/24 23:34:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.72 2011/06/24 22:31:07 rokuingh Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.73 2011/06/24 23:34:23 rokuingh Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -380,7 +380,7 @@ end subroutine f_esmf_gridcompdestroy
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcompinitialize"
 subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
-  blockingFlag, phase, userRc, rc)
+  syncflag, phase, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -396,7 +396,7 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
   type(ESMF_State)        :: importState
   type(ESMF_State)        :: exportState
   type(ESMF_Clock)        :: clock
-  type(ESMF_BlockingFlag) :: blockingFlag
+  type(ESMF_Sync_Flag) :: syncflag
   integer                 :: phase
   integer                 :: userRc
   integer                 :: rc
@@ -414,13 +414,13 @@ subroutine f_esmf_gridcompinitialize(comp, importState, exportState, clock, &
 
   call ESMF_GridCompInitialize(comp, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_gridcompinitialize
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcomprun"
 subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, &
-  blockingFlag, phase, userRc, rc)
+  syncflag, phase, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -436,7 +436,7 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, &
   type(ESMF_State)        :: importState
   type(ESMF_State)        :: exportState
   type(ESMF_Clock)        :: clock
-  type(ESMF_BlockingFlag) :: blockingFlag
+  type(ESMF_Sync_Flag) :: syncflag
   integer                 :: phase
   integer                 :: userRc
   integer                 :: rc
@@ -454,13 +454,13 @@ subroutine f_esmf_gridcomprun(comp, importState, exportState, clock, &
 
   call ESMF_GridCompRun(comp, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_gridcomprun
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcompfinalize"
 subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
-  blockingFlag, phase, userRc, rc)
+  syncflag, phase, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -476,7 +476,7 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
   type(ESMF_State)        :: importState
   type(ESMF_State)        :: exportState
   type(ESMF_Clock)        :: clock
-  type(ESMF_BlockingFlag) :: blockingFlag
+  type(ESMF_Sync_Flag) :: syncflag
   integer                 :: phase
   integer                 :: userRc
   integer                 :: rc
@@ -494,7 +494,7 @@ subroutine f_esmf_gridcompfinalize(comp, importState, exportState, clock, &
 
   call ESMF_GridCompFinalize(comp, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_gridcompfinalize
 
 #undef  ESMF_METHOD
@@ -639,7 +639,7 @@ end subroutine f_esmf_cplcompdestroy
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcompinitialize"
 subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
-  blockingFlag, phase, userRc, rc)
+  syncflag, phase, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -655,7 +655,7 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
   type(ESMF_State)        :: importState
   type(ESMF_State)        :: exportState
   type(ESMF_Clock)        :: clock
-  type(ESMF_BlockingFlag) :: blockingFlag
+  type(ESMF_Sync_Flag) :: syncflag
   integer                 :: phase
   integer                 :: userRc     
   integer                 :: rc     
@@ -673,13 +673,13 @@ subroutine f_esmf_cplcompinitialize(comp, importState, exportState, clock, &
 
   call ESMF_CplCompInitialize(comp, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_cplcompinitialize
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcomprun"
 subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, &
-  blockingFlag, phase, userRc, rc)
+  syncflag, phase, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -695,7 +695,7 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, &
   type(ESMF_State)        :: importState
   type(ESMF_State)        :: exportState
   type(ESMF_Clock)        :: clock
-  type(ESMF_BlockingFlag) :: blockingFlag
+  type(ESMF_Sync_Flag) :: syncflag
   integer                 :: phase
   integer                 :: userRc     
   integer                 :: rc     
@@ -713,13 +713,13 @@ subroutine f_esmf_cplcomprun(comp, importState, exportState, clock, &
 
   call ESMF_CplCompRun(comp, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_cplcomprun
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_cplcompfinalize"
 subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
-  blockingFlag, phase, userRc, rc)
+  syncflag, phase, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -735,7 +735,7 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
   type(ESMF_State)        :: importState
   type(ESMF_State)        :: exportState
   type(ESMF_Clock)        :: clock
-  type(ESMF_BlockingFlag) :: blockingFlag
+  type(ESMF_Sync_Flag) :: syncflag
   integer                 :: phase
   integer                 :: userRc
   integer                 :: rc
@@ -753,7 +753,7 @@ subroutine f_esmf_cplcompfinalize(comp, importState, exportState, clock, &
 
   call ESMF_CplCompFinalize(comp, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    blockingFlag=blockingFlag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
 end subroutine f_esmf_cplcompfinalize
 
 #undef  ESMF_METHOD

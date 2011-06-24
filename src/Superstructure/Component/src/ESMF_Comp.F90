@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.214 2011/06/24 22:31:09 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.215 2011/06/24 23:34:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.214 2011/06/24 22:31:09 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.215 2011/06/24 23:34:24 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -848,7 +848,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompExecute(compp, method, &
-    importState, exportState, clock, blockingflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -857,7 +857,7 @@ contains
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(in),    optional :: clock
-    type(ESMF_BlockingFlag), intent(in),    optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -886,10 +886,10 @@ contains
 !   Export data for component method.
 ! \item[{[clock]}]  
 !   External clock for passing in time information.
-! \item[{[blockingflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:blockingflag} 
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS.
 ! \item[{[phase]}]
 !   If multiple-phase methods, which phase number this is. Default is 1.
@@ -903,7 +903,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: localUserRc  ! return code from user code
-    type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
+    type(ESMF_Sync_Flag) :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     integer                 :: phaseArg
         
@@ -939,11 +939,11 @@ contains
       return
     endif
 
-    ! set the default mode to ESMF_VASBLOCKING
-    if (present(blockingflag)) then
-      blocking = blockingflag
+    ! set the default mode to ESMF_SYNC_VASBLOCKING
+    if (present(syncflag)) then
+      blocking = syncflag
     else
-      blocking = ESMF_VASBLOCKING
+      blocking = ESMF_SYNC_VASBLOCKING
     endif
     
     ! supply default objects if unspecified by the caller
@@ -1005,7 +1005,7 @@ contains
     compp%vm_released = .true.
 
     ! sync PETs according to blocking mode
-    if (blocking == ESMF_VASBLOCKING .or. blocking == ESMF_BLOCKING) then
+    if (blocking == ESMF_SYNC_VASBLOCKING .or. blocking == ESMF_SYNC_BLOCKING) then
       ! wait for all child PETs that run in this parent's PET VAS to finish
       call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
         compp%vm_cargo, localUserRc, localrc)
@@ -1015,8 +1015,8 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
       compp%vm_released = .false.       ! indicate child VM has been caught
-      ! for ESMF_BLOCKING _all_ parent PETs will be synced on exit
-      if (blocking == ESMF_BLOCKING) then
+      ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
+      if (blocking == ESMF_SYNC_BLOCKING) then
         ! the current context _is_ the parent context...
         call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
         if (ESMF_LogFoundError(localrc, &
@@ -1840,11 +1840,11 @@ contains
 ! !IROUTINE: ESMF_CompWait - Wait for component to return
 
 ! !INTERFACE:
-  subroutine ESMF_CompWait(compp, blockingflag, userRc, rc)
+  subroutine ESMF_CompWait(compp, syncflag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
-    type(ESMF_BlockingFlag), intent(in),  optional :: blockingflag
+    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     integer,                 intent(out), optional :: userRc
     integer,                 intent(out), optional :: rc
 !
@@ -1855,10 +1855,10 @@ contains
 ! \begin{description}
 ! \item[compp] 
 !   component object
-! \item[{[blockingflag]}]
+! \item[{[syncflag]}]
 !   The blocking behavior determines exactly what this call waits for. The
-!   default is {\tt ESMF\_VASBLOCKING} which blocks PETs across each VAS.
-!   See section \ref{opt:blockingflag} for a list of valid blocking options.
+!   default is {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs across each VAS.
+!   See section \ref{opt:syncflag} for a list of valid blocking options.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}] 
@@ -1869,7 +1869,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: localUserRc  ! return code from user code
-    type(ESMF_BlockingFlag) :: blocking     ! local blocking flag
+    type(ESMF_Sync_Flag) :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     type(ESMF_Status)       :: baseStatus
 
@@ -1912,14 +1912,14 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
       compp%vm_released = .false.       ! indicate child VM has been caught
-      ! set the default mode to ESMF_VASBLOCKING
-      if (present(blockingflag)) then
-        blocking = blockingflag
+      ! set the default mode to ESMF_SYNC_VASBLOCKING
+      if (present(syncflag)) then
+        blocking = syncflag
       else
-        blocking = ESMF_VASBLOCKING
+        blocking = ESMF_SYNC_VASBLOCKING
       endif
-      ! for ESMF_BLOCKING _all_ parent PETs will be synced on exit
-      if (blocking == ESMF_BLOCKING) then
+      ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
+      if (blocking == ESMF_SYNC_BLOCKING) then
         ! the current context _is_ the parent context...
         call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
         if (ESMF_LogFoundError(localrc, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.16 2011/06/24 14:26:02 rokuingh Exp $
+! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.17 2011/06/24 23:34:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.16 2011/06/24 14:26:02 rokuingh Exp $'
+      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.17 2011/06/24 23:34:21 rokuingh Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -164,7 +164,7 @@
       write(name, *) "SendRecvNb local I4 data Test"
       call ESMF_VMSendRecv(vm, sendData=localData, sendCount=count, dstPet=dst, &
         recvData=i_recvData, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleI4, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleI4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with REAL_KIND_R4 arguments
@@ -175,7 +175,7 @@
       write(name, *) "SendRecvNb local R4 data Test"
       call ESMF_VMSendRecv(vm, sendData=r4_localData, sendCount=count,  &
         dstPet=dst, recvData=r4_recvData, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleR4, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with ESMF_KIND_R8 arguments
@@ -186,7 +186,7 @@
       write(name, *) "SendRecvNb local R8 data Test"
       call ESMF_VMSendRecv(vm, sendData=r8_localData, sendCount=count, &
         dstPet=dst, recvData=r8_recvData, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleR8, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleR8, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with logical arguments
@@ -197,7 +197,7 @@
       write(name, *) "SendRecvNb local LOGICAL data Test"
       call ESMF_VMSendRecv(vm, sendData=local_logical, sendCount=count,  &
         dstPet=dst, recvData=recv_logical, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, commhandle=commhandleLOGICAL, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, commhandle=commhandleLOGICAL, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -337,7 +337,7 @@
       write(name, *) "SendRecvNb local I4 data Test"
       call ESMF_VMSendRecv(vm, sendData=localData, sendCount=count, dstPet=dst, &
         recvData=i_recvData, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with REAL_KIND_R4 arguments
@@ -348,7 +348,7 @@
       write(name, *) "SendRecvNb local R4 data Test"
       call ESMF_VMSendRecv(vm, sendData=r4_localData, sendCount=count,  &
         dstPet=dst, recvData=r4_recvData, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with ESMF_KIND_R8 arguments
@@ -359,7 +359,7 @@
       write(name, *) "SendRecvNb local R8 data Test"
       call ESMF_VMSendRecv(vm, sendData=r8_localData, sendCount=count, &
         dstPet=dst, recvData=r8_recvData, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !Test with logical arguments
@@ -370,7 +370,7 @@
       write(name, *) "SendRecvNb local LOGICAL data Test"
       call ESMF_VMSendRecv(vm, sendData=local_logical, sendCount=count,  &
         dstPet=dst, recvData=recv_logical, recvCount=count, srcPet=src, &
-        blockingflag=ESMF_NONBLOCKING, rc=rc)
+        syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

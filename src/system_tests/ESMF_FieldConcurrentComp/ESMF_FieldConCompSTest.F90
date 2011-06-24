@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.26 2011/06/24 15:05:15 rokuingh Exp $
+! $Id: ESMF_FieldConCompSTest.F90,v 1.27 2011/06/24 23:34:34 rokuingh Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -307,7 +307,7 @@
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
       ! all PETs until comp2 has returned. Consequently comp1 will not be
       ! run until comp2 has returned.
-      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=localrc)
+      !call ESMF_GridCompWait(comp2, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 2 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
@@ -333,12 +333,12 @@
       ! will block all PETs until comp1 and comp2 have returned. Consequently
       ! the coupler component will not be run until comp1 and comp2 have
       ! returned.
-      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
+      !call ESMF_GridCompWait(comp1, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
       !  call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_GridCompWait(comp2, blockingflag=ESMF_BLOCKING, rc=localrc)
+      !call ESMF_GridCompWait(comp2, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 2 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
@@ -367,7 +367,7 @@
       ! comp1 and comp2. The following ESMF_GridCompWait() call will block
       ! all PETs until comp1 has returned. Consequently comp2 will not be
       ! run until comp2 has returned.
-      !call ESMF_GridCompWait(comp1, blockingflag=ESMF_BLOCKING, rc=localrc)
+      !call ESMF_GridCompWait(comp1, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
