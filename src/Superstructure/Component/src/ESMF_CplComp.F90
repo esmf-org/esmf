@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.145 2011/06/24 16:53:09 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.146 2011/06/24 17:30:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.145 2011/06/24 16:53:09 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.146 2011/06/24 17:30:30 theurich Exp $'
 
 !==============================================================================
 !
@@ -356,9 +356,6 @@ contains
 ! !RETURN VALUE:
     type(ESMF_CplComp) :: ESMF_CplCompCreate
 !
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Config),      intent(in),  optional :: config
@@ -368,6 +365,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ContextFlag), intent(in),  optional :: contextflag
     character(len=*),       intent(in),  optional :: name
     integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! This interface creates an {\tt ESMF\_CplComp} object. By default, a
@@ -491,9 +491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Releases all resources associated with this {\tt ESMF\_CplComp}.  This
-! includes any States, Clocks, or Attributes that are associated with
-! this CplComp that may not have been appropriately deallocated.
+! Releases all resources associated with this {\tt ESMF\_CplComp}.
 !
 ! The arguments are:
 ! \begin{description}
@@ -2154,7 +2152,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Currently all this method does is to check that the {\tt cplcomp} exists.
+! Currently all this method does is to check that the {\tt cplcomp}
+! was created.
 !
 ! The arguments are:
 ! \begin{description}

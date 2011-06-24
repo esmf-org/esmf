@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.168 2011/06/24 16:53:09 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.169 2011/06/24 17:30:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.168 2011/06/24 16:53:09 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.169 2011/06/24 17:30:30 theurich Exp $'
 
 !==============================================================================
 !
@@ -504,9 +504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Releases all resources associated with this {\tt ESMF\_GridComp}.  This
-! includes any States, Clocks, or Attributes that are associated with
-! this GridComp that may not have been appropriately deallocated.
+! Releases all resources associated with this {\tt ESMF\_GridComp}.
 !
 ! The arguments are:
 ! \begin{description}
@@ -2254,7 +2252,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Currently all this method does is to check that the {\tt gridcomp} exists.
+! Currently all this method does is to check that the {\tt gridcomp}
+! was created.
 !
 ! The arguments are:
 ! \begin{description}
