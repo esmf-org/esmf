@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.31 2011/06/24 14:26:13 rokuingh Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.32 2011/06/24 15:43:07 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1467,6 +1467,7 @@ module ESMF_ComplianceICMod
     logical                                 :: clockInternalValid
     type(ESMF_Clock)                        :: clockInternal
     logical                                 :: clockMatch
+    logical                                 :: clockIsPresent
     
     character (ESMF_MAXSTR) :: name, nameInt
     type(ESMF_TimeInterval) :: timeStep, timeStepInt
@@ -1478,29 +1479,61 @@ module ESMF_ComplianceICMod
     type(ESMF_Time)         :: currTime, currTimeInt
     integer(ESMF_KIND_I8)   :: advanceCount, advanceCountInt
     type(ESMF_Direction)    :: direction, directionInt
+    type(ESMF_GridCompStatus) :: compStatus
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+    call ESMF_GridCompGet(comp, gridCompStatus=compStatus, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+
+    call ESMF_GridCompStatusGet(compStatus, clockIsPresent=clockIsPresent, &
+      rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
     
-    clockInternalValid = .true.
-    ! Ensure that the internalClock is a valid object
-    if (ESMF_ClockGetInit(clockInternal) /= ESMF_INIT_CREATED) &
-      clockInternalValid = .false.
+    if (.not.clockIsPresent) then
 
-    if (.not.clockInternalValid) then
-      call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
+      call ESMF_LogWrite(trim(prefix)// &
+        " ==> The internal Clock is not present!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
       return
+      
+    else
+    
+      call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        return  ! bail out
+    
+      clockInternalValid = .true.
+      ! Ensure that the internalClock is a valid object
+      if (ESMF_ClockGetInit(clockInternal) /= ESMF_INIT_CREATED) &
+        clockInternalValid = .false.
+
+      if (.not.clockInternalValid) then
+        call ESMF_LogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
+          ESMF_LOGMSG_WARNING, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=__FILE__)) &
+          return  ! bail out
+        return
+      endif
+      
     endif
+    
+    ! making it to hear means that the internal Clock is present and valid
+    ! -> go and try to compare it to the passed in Clock object
     
     clockValid = .true.
     ! Ensure that the Clock is a valid object
