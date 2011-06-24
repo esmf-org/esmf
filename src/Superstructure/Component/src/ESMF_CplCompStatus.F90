@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompStatus.F90,v 1.1 2011/06/24 05:48:15 theurich Exp $
+! $Id: ESMF_CplCompStatus.F90,v 1.2 2011/06/24 16:04:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -95,16 +95,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[cplCompStatus]
 !     CplCompStatus object.
 !   \item[{[clockIsPresent]}]
-!     {\tt .true.} if {\tt clock} was set in GridComp object,
+!     {\tt .true.} if {\tt clock} was set in CplComp object,
 !     {\tt .false.} otherwise.
 !   \item[{[clockIsPresent]}]
-!     {\tt .true.} if {\tt clock} was set in GridComp object,
+!     {\tt .true.} if {\tt clock} was set in CplComp object,
 !     {\tt .false.} otherwise.
 !   \item[{[configFileIsPresent]}]
-!     {\tt .true.} if {\tt configFile} was set in GridComp object,
+!     {\tt .true.} if {\tt configFile} was set in CplComp object,
 !     {\tt .false.} otherwise.
 !   \item[{[vmIsPresent]}]
-!     {\tt .true.} if {\tt vm} was set in GridComp object,
+!     {\tt .true.} if {\tt vm} was set in CplComp object,
 !     {\tt .false.} otherwise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
