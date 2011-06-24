@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.57 2011/06/13 19:41:13 oehmke Exp $
+% $Id: Grid_desc.tex,v 1.58 2011/06/24 04:48:37 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ More detailed information can be found in the API description of each.
 
 \begin{sloppypar}
 The second set of shortcut methods is a set of methods overloaded under the name {\tt ESMF\_GridCreate()}. These methods
-allow the user to specify the connectivites at the end of each dimension, by using the ESMF\_GridConn flag. The table below shows the ESMF\_GridConn settings used to create 
+allow the user to specify the connectivites at the end of each dimension, by using the ESMF\_GridConn\_Flag flag. The table below shows the ESMF\_GridConn\_Flag settings used to create 
 standard shapes in 2D using the ESMF\_GridCreate() call.  Two values
 are specified for each dimension, one for the low end and one for 
 the high end of the dimension's index values. 
@@ -138,7 +138,7 @@ the high end of the dimension's index values.
 \medskip
 \begin{tabular}{|l|c|c||c|c||}
 \hline
-2D Shape & {\bf connDim1(1)} & {\bf connDim1(2)}  & {\bf connDim2(1)} & {\bf connDim2(2)}  \\
+2D Shape & {\bf connflagDim1(1)} & {\bf connflagDim1(2)}  & {\bf connflagDim2(1)} & {\bf connflagDim2(2)}  \\
 \hline
 {\bf Rectangle}  & NONE & NONE & NONE & NONE \\
 {\bf Bipole Sphere} & POLE & POLE & PERIODIC & PERIODIC \\

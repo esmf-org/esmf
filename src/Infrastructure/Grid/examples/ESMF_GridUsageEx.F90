@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.93 2011/06/23 18:13:56 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.94 2011/06/24 04:48:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -319,11 +319,11 @@ endif
 ! \label{example:TileEdgeConn}
 !
 ! The {\tt ESMF\_GridCreateNoPeriDim} command has three arguments 
-! {\tt connDim1}, {\tt connDim2}, and {\tt connDim3} which specify the
+! {\tt connflagDim1}, {\tt connflagDim2}, and {\tt connflagDim3} which specify the
 ! tile connectivitay. Each of these consists of a two element array of 
-! type {\tt ESMF\_GridConn}. The two elements specify the connectivity using 
+! type {\tt ESMF\_GridConn\_Flag}. The two elements specify the connectivity using 
 ! predefined tags. See section \ref{sec:opt:gridconn} for a list of valid
-! values for {\tt ESMF\_GridConn}. The first entry specifies the low end of 
+! values for {\tt ESMF\_GridConn\_Flag}. The first entry specifies the low end of 
 ! the dimension, while the second specifies the high end.
 !
 ! The following example constructs a curvilinear longitude-latitude spherical grid
@@ -336,8 +336,8 @@ endif
 !BOCI
    grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
                        countsPerDEDim2=(/7,7,6/), &
-                       connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
-                       connDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
+                       connflagDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
+                       connflagDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
                        rc=rc)   
 !EOCI
 
@@ -359,8 +359,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOCI
    grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
                        countsPerDEDim2=(/7,7,6/), &
-                       connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
-                       connDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
+                       connflagDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
+                       connflagDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
                        poleStaggerLoc2=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CENTER/), &
                        rc=rc)   
 !EOCI
@@ -386,8 +386,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 !BOCI
    grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/5,5/), &
            countsPerDEDim2=(/7,7,6/), &
-           connDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
-           connDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
+           connflagDim1=(/ESMF_GRIDCONN_PERIODIC, ESMF_GRIDCONN_PERIODIC/), &
+           connflagDim2=(/ESMF_GRIDCONN_BIPOLE, ESMF_GRIDCONN_BIPOLE/), &
            bipolePos2=(/1,1/), &
            rc=rc)   
 !EOCI

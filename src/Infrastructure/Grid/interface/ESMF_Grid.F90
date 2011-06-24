@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.225 2011/06/24 04:15:55 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.226 2011/06/24 04:48:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,20 +107,20 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_GridConn
+! ! ESMF_GridConn_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_GridConn
+  type ESMF_GridConn_Flag
   sequence
 !  private
      integer :: gridconn
   end type
 
-  type(ESMF_GridConn), parameter :: &
-    ESMF_GRIDCONN_NONE = ESMF_GridConn(0), &
-    ESMF_GRIDCONN_PERIODIC = ESMF_GridConn(1), &
-    ESMF_GRIDCONN_POLE = ESMF_GridConn(2), &
-    ESMF_GRIDCONN_BIPOLE = ESMF_GridConn(3)
+  type(ESMF_GridConn_Flag), parameter :: &
+    ESMF_GRIDCONN_NONE = ESMF_GridConn_Flag(0), &
+    ESMF_GRIDCONN_PERIODIC = ESMF_GridConn_Flag(1), &
+    ESMF_GRIDCONN_POLE = ESMF_GridConn_Flag(2), &
+    ESMF_GRIDCONN_BIPOLE = ESMF_GridConn_Flag(3)
 
 
 !------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ integer,parameter :: ESMF_GRID_ARBDIM = -1
 ! !PUBLIC TYPES:
 !
 public ESMF_Grid
-public  ESMF_GridConn,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
+public ESMF_GridConn_Flag,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
                         ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_BIPOLE
 
 public ESMF_GridStatus_Flag,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.225 2011/06/24 04:15:55 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.226 2011/06/24 04:48:40 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3282,7 +3282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       function ESMF_GridCreateEdgeConnI(minIndex,         &
         countsPerDEDim1,countsPerDeDim2, keywordEnforcer,                  &
         countsPerDEDim3,                                  &
-        connDim1, connDim2, connDim3,                     &
+        connflagDim1, connflagDim2, connflagDim3,                     &
         coordSys, coordTypeKind,                          &
         coordDep1, coordDep2, coordDep3,                  &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign,        &
@@ -3297,9 +3297,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
@@ -3347,7 +3347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     This array specifies the number of cells per DE for index dimension 3
 !     for the exclusive region (center stagger location).  
 !     If not specified  then grid is 2D. 
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -3355,7 +3355,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -3363,7 +3363,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -3466,7 +3466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Build connection list
     call SetupTileConn(dimCount, minIndexLocal, maxIndexLocal, &
-                 connDim1, connDim2, connDim3, connList, rc=localrc)
+                 connflagDim1, connflagDim2, connflagDim3, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3567,7 +3567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateEdgeConnR(regDecomp, decompFlag, &
         minIndex, maxIndex, keywordEnforcer,                                    &
-        connDim1, connDim2, connDim3,                       &
+        connflagDim1, connflagDim2, connflagDim3,                       &
         coordSys, coordTypeKind,                            &
         coordDep1, coordDep2, coordDep3,                    &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign,          &
@@ -3583,9 +3583,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
@@ -3626,7 +3626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !      The upper extent of the grid array.
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -3634,7 +3634,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -3642,7 +3642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -3742,7 +3742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Build connection list
     call SetupTileConn(dimCount, minIndexLocal, maxIndexLocal, &
-                 connDim1, connDim2, connDim3, connList, rc=localrc)
+                 connflagDim1, connflagDim2, connflagDim3, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3839,7 +3839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateEdgeConnA(minIndex, maxIndex,  &
         arbIndexCount, arbIndexList, keywordEnforcer,                         &
-        connDim1, connDim2, connDim3,                     &
+        connflagDim1, connflagDim2, connflagDim3,                     &
         coordSys, coordTypeKind,                          &
         coordDep1, coordDep2, coordDep3,                  &
         distDim, name, rc)
@@ -3853,9 +3853,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
@@ -3892,7 +3892,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -3900,7 +3900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -3908,7 +3908,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for both the minimum and maximum end. 
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -3997,7 +3997,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Build connection list
     call SetupTileConn(dimCount, minIndexLocal, maxIndexLocal, &
-                 connDim1, connDim2, connDim3, connList, rc=localrc)
+                 connflagDim1, connflagDim2, connflagDim3, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7839,7 +7839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       function ESMF_GridCreateShapeTileIrreg(coordTypeKind, minIndex,  &
         countsPerDEDim1,countsPerDeDim2, keywordEnforcer, &
         countsPerDEDim3, &
-        connDim1, connDim2, connDim3, &
+        connflagDim1, connflagDim2, connflagDim3, &
         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
         bipolePos1, bipolePos2, bipolePos3, &
         coordDep1, coordDep2, coordDep3, &
@@ -7856,9 +7856,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)  !N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
@@ -7913,7 +7913,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     This array specifies the number of cells per DE for index dimension 3
 !     for the exclusive region (center stagger location).  
 !     If not specified  then grid is 2D. 
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -7922,7 +7922,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -7931,7 +7931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -8067,9 +8067,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer     :: deBlockList(:,:,:),minPerDEDim(:,:),maxPerDEDim(:,:)
     integer              :: deCount
     integer              :: d,i1,i2,i3,k
-    type(ESMF_GridConn)  :: connDim1Local(2)
-    type(ESMF_GridConn)  :: connDim2Local(2)
-    type(ESMF_GridConn)  :: connDim3Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim1Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim2Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim3Local(2)
     integer              :: top
 
     ! Initialize return code; assume failure until success is certain
@@ -8134,9 +8134,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
     endif
 
-    if ((dimCount .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connflagDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
@@ -8253,9 +8253,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim1)) then
-      if (size(connDim1) == 1) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim1)) then
+      if (size(connflagDim1) == 1) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8273,8 +8273,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim1) == 2) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim1) == 2) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8284,7 +8284,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8298,9 +8298,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    endif
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim2)) then
-      if (size(connDim2) == 1) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim2)) then
+      if (size(connflagDim2) == 1) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8318,8 +8318,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim2) == 2) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim2) == 2) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8329,7 +8329,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8344,9 +8344,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim3)) then
-      if (size(connDim3) == 1) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim3)) then
+      if (size(connflagDim3) == 1) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8364,8 +8364,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim3) == 2) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim3) == 2) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8375,7 +8375,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -8454,65 +8454,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
-    if (present(connDim1)) then
-       if (size(connDim1) == 1) then
-          connDim1Local(1)=connDim1(1)     
-          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) >= 2) then
-          connDim1Local(1)=connDim1(1)
-          connDim1Local(2)=connDim1(2)
+    if (present(connflagDim1)) then
+       if (size(connflagDim1) == 1) then
+          connflagDim1Local(1)=connflagDim1(1)     
+          connflagDim1Local(2)=connflagDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim1) >= 2) then
+          connflagDim1Local(1)=connflagDim1(1)
+          connflagDim1Local(2)=connflagDim1(2)
        endif
     else
-       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim2)) then
-       if (size(connDim2) == 1) then
-          connDim2Local(1)=connDim2(1)     
-          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) >= 2) then
-          connDim2Local(1)=connDim2(1)
-          connDim2Local(2)=connDim2(2)
+    if (present(connflagDim2)) then
+       if (size(connflagDim2) == 1) then
+          connflagDim2Local(1)=connflagDim2(1)     
+          connflagDim2Local(2)=connflagDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim2) >= 2) then
+          connflagDim2Local(1)=connflagDim2(1)
+          connflagDim2Local(2)=connflagDim2(2)
        endif
     else
-       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim3)) then
-       if (size(connDim3) == 1) then
-          connDim3Local(1)=connDim3(1)     
-          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) >= 2) then
-          connDim3Local(1)=connDim3(1)
-          connDim3Local(2)=connDim3(2)
+    if (present(connflagDim3)) then
+       if (size(connflagDim3) == 1) then
+          connflagDim3Local(1)=connflagDim3(1)     
+          connflagDim3Local(2)=connflagDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim3) >= 2) then
+          connflagDim3Local(1)=connflagDim3(1)
+          connflagDim3Local(2)=connflagDim3(2)
        endif
     else
-       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -8862,7 +8862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreateShapeTile()
       function ESMF_GridCreateShapeTileReg(coordTypeKind, &
         regDecomp, decompFlag, minIndex, maxIndex, &
-        keywordEnforcer, connDim1, connDim2, connDim3, &
+        keywordEnforcer, connflagDim1, connflagDim2, connflagDim3, &
         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
         bipolePos1, bipolePos2, bipolePos3, &
         coordDep1, coordDep2, coordDep3, &
@@ -8881,9 +8881,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)  !N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
@@ -8931,7 +8931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !      The upper extent of the grid array.
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -8940,7 +8940,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -8949,7 +8949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -9080,9 +9080,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer     :: gridAlignLocal(:)
     integer              :: deCount
     integer              :: i1,i2,i3,k
-    type(ESMF_GridConn)  :: connDim1Local(2)
-    type(ESMF_GridConn)  :: connDim2Local(2)
-    type(ESMF_GridConn)  :: connDim3Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim1Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim2Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim3Local(2)
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -9143,9 +9143,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
 
-    if ((dimCount .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connflagDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
@@ -9238,9 +9238,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim1)) then
-      if (size(connDim1) == 1) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim1)) then
+      if (size(connflagDim1) == 1) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9258,8 +9258,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim1) == 2) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim1) == 2) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9269,7 +9269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9283,9 +9283,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    endif
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim2)) then
-      if (size(connDim2) == 1) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim2)) then
+      if (size(connflagDim2) == 1) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9303,8 +9303,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim2) == 2) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim2) == 2) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9314,7 +9314,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9329,9 +9329,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim3)) then
-      if (size(connDim3) == 1) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim3)) then
+      if (size(connflagDim3) == 1) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9349,8 +9349,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim3) == 2) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim3) == 2) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9360,7 +9360,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -9449,66 +9449,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
-    if (present(connDim1)) then
-       if (size(connDim1) == 1) then
-          connDim1Local(1)=connDim1(1)     
-          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) >= 2) then
-          connDim1Local(1)=connDim1(1)
-          connDim1Local(2)=connDim1(2)
+    if (present(connflagDim1)) then
+       if (size(connflagDim1) == 1) then
+          connflagDim1Local(1)=connflagDim1(1)     
+          connflagDim1Local(2)=connflagDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim1) >= 2) then
+          connflagDim1Local(1)=connflagDim1(1)
+          connflagDim1Local(2)=connflagDim1(2)
        endif
     else
-       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim2)) then
-       if (size(connDim2) == 1) then
-          connDim2Local(1)=connDim2(1)     
-          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) >= 2) then
-          connDim2Local(1)=connDim2(1)
-          connDim2Local(2)=connDim2(2)
+    if (present(connflagDim2)) then
+       if (size(connflagDim2) == 1) then
+          connflagDim2Local(1)=connflagDim2(1)     
+          connflagDim2Local(2)=connflagDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim2) >= 2) then
+          connflagDim2Local(1)=connflagDim2(1)
+          connflagDim2Local(2)=connflagDim2(2)
        endif
     else
-       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim3)) then
-       if (size(connDim3) == 1) then
-          connDim3Local(1)=connDim3(1)     
-          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) >= 2) then
-          connDim3Local(1)=connDim3(1)
-          connDim3Local(2)=connDim3(2)
+    if (present(connflagDim3)) then
+       if (size(connflagDim3) == 1) then
+          connflagDim3Local(1)=connflagDim3(1)     
+          connflagDim3Local(2)=connflagDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim3) >= 2) then
+          connflagDim3Local(1)=connflagDim3(1)
+          connflagDim3Local(2)=connflagDim3(2)
        endif
     else
-       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -9766,7 +9766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreateShapeTile()
       function ESMF_GridCreateShapeTileArb(coordTypeKind, minIndex,  &
         maxIndex, arbIndexCount, arbIndexList, &
-        keywordEnforcer, connDim1, connDim2, connDim3, &
+        keywordEnforcer, connflagDim1, connflagDim2, connflagDim3, &
         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
         bipolePos1, bipolePos2, bipolePos3, &
         coordDep1, coordDep2, coordDep3, &
@@ -9782,9 +9782,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  ! N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  ! N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  ! N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)  ! N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)  ! N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)  ! N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)! N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)! N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)! N. IMP.
@@ -9828,7 +9828,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -9837,7 +9837,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -9846,7 +9846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -9955,9 +9955,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer              :: dimCount,distDimCount,undistDimCount
     integer, pointer     :: indexArray(:,:)
     integer              :: i,j,ud
-    type(ESMF_GridConn)  :: connDim1Local(2)
-    type(ESMF_GridConn)  :: connDim2Local(2)
-    type(ESMF_GridConn)  :: connDim3Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim1Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim2Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim3Local(2)
     integer, pointer     :: distSize(:)
     integer, pointer     :: distDimLocal(:)
     logical, pointer     :: isDist(:)
@@ -10040,9 +10040,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Argument Consistency Checking --------------------------------------------------------------
-    if ((dimCount .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connflagDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
@@ -10135,64 +10135,64 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif   
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
-    if (present(connDim1)) then
-       if (size(connDim1) == 1) then
-          connDim1Local(1)=connDim1(1)     
-          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) >= 2) then
-          connDim1Local(1)=connDim1(1)
-          connDim1Local(2)=connDim1(2)
+    if (present(connflagDim1)) then
+       if (size(connflagDim1) == 1) then
+          connflagDim1Local(1)=connflagDim1(1)     
+          connflagDim1Local(2)=connflagDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim1) >= 2) then
+          connflagDim1Local(1)=connflagDim1(1)
+          connflagDim1Local(2)=connflagDim1(2)
        endif
     else
-       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim2)) then
-       if (size(connDim2) == 1) then
-          connDim2Local(1)=connDim2(1)     
-          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) >= 2) then
-          connDim2Local(1)=connDim2(1)
-          connDim2Local(2)=connDim2(2)
+    if (present(connflagDim2)) then
+       if (size(connflagDim2) == 1) then
+          connflagDim2Local(1)=connflagDim2(1)     
+          connflagDim2Local(2)=connflagDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim2) >= 2) then
+          connflagDim2Local(1)=connflagDim2(1)
+          connflagDim2Local(2)=connflagDim2(2)
        endif
     else
-       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
-    if (present(connDim3)) then
-       if (size(connDim3) == 1) then
-          connDim3Local(1)=connDim3(1)     
-          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) >= 2) then
-          connDim3Local(1)=connDim3(1)
-          connDim3Local(2)=connDim3(2)
+    if (present(connflagDim3)) then
+       if (size(connflagDim3) == 1) then
+          connflagDim3Local(1)=connflagDim3(1)     
+          connflagDim3Local(2)=connflagDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim3) >= 2) then
+          connflagDim3Local(1)=connflagDim3(1)
+          connflagDim3Local(2)=connflagDim3(2)
        endif
     else
-       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -17024,7 +17024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridSetCommitShapeTile()
      subroutine ESMF_GridSetCmmitShapeTileIrreg(grid, name,coordTypeKind,  &
        minIndex, countsPerDEDim1, countsPerDeDim2,        &
-       keywordEnforcer, countsPerDEDim3, connDim1, connDim2, connDim3,     &
+       keywordEnforcer, countsPerDEDim3, connflagDim1, connflagDim2, connflagDim3,     &
        poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
        bipolePos1, bipolePos2, bipolePos3,                &
        coordDep1, coordDep2, coordDep3,                   &
@@ -17041,9 +17041,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)  !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)  !N. IMP.
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)  !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)  !N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
@@ -17111,7 +17111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     for the exclusive region (center stagger location).  
 !     If not specified  then grid is 2D. Also, If the array has only one entry,
 !     then the dimension is undistributed. 
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -17120,7 +17120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -17129,7 +17129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3
@@ -17267,9 +17267,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer     :: deBlockList(:,:,:),minPerDEDim(:,:),maxPerDEDim(:,:)
     integer              :: deCount
     integer              :: d,i1,i2,i3,k
-    type(ESMF_GridConn)  :: connDim1Local(2)
-    type(ESMF_GridConn)  :: connDim2Local(2)
-    type(ESMF_GridConn)  :: connDim3Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim1Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim2Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim3Local(2)
     integer              :: connCount, petListCount 
     integer              :: top
 
@@ -17309,9 +17309,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
     endif
 
-    if ((dimCount .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connflagDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
@@ -17428,9 +17428,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim1)) then
-      if (size(connDim1) == 1) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim1)) then
+      if (size(connflagDim1) == 1) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17448,8 +17448,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim1) == 2) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim1) == 2) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17459,7 +17459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17473,9 +17473,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    endif
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim2)) then
-      if (size(connDim2) == 1) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim2)) then
+      if (size(connflagDim2) == 1) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17493,8 +17493,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim2) == 2) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim2) == 2) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17504,7 +17504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17519,9 +17519,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim3)) then
-      if (size(connDim3) == 1) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim3)) then
+      if (size(connflagDim3) == 1) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17539,8 +17539,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim3) == 2) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim3) == 2) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17550,7 +17550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -17631,65 +17631,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
-    if (present(connDim1)) then
-       if (size(connDim1) == 1) then
-          connDim1Local(1)=connDim1(1)     
-          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) >= 2) then
-          connDim1Local(1)=connDim1(1)
-          connDim1Local(2)=connDim1(2)
+    if (present(connflagDim1)) then
+       if (size(connflagDim1) == 1) then
+          connflagDim1Local(1)=connflagDim1(1)     
+          connflagDim1Local(2)=connflagDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim1) >= 2) then
+          connflagDim1Local(1)=connflagDim1(1)
+          connflagDim1Local(2)=connflagDim1(2)
        endif
     else
-       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim2)) then
-       if (size(connDim2) == 1) then
-          connDim2Local(1)=connDim2(1)     
-          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) >= 2) then
-          connDim2Local(1)=connDim2(1)
-          connDim2Local(2)=connDim2(2)
+    if (present(connflagDim2)) then
+       if (size(connflagDim2) == 1) then
+          connflagDim2Local(1)=connflagDim2(1)     
+          connflagDim2Local(2)=connflagDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim2) >= 2) then
+          connflagDim2Local(1)=connflagDim2(1)
+          connflagDim2Local(2)=connflagDim2(2)
        endif
     else
-       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim3)) then
-       if (size(connDim3) == 1) then
-          connDim3Local(1)=connDim3(1)     
-          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) >= 2) then
-          connDim3Local(1)=connDim3(1)
-          connDim3Local(2)=connDim3(2)
+    if (present(connflagDim3)) then
+       if (size(connflagDim3) == 1) then
+          connflagDim3Local(1)=connflagDim3(1)     
+          connflagDim3Local(2)=connflagDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim3) >= 2) then
+          connflagDim3Local(1)=connflagDim3(1)
+          connflagDim3Local(2)=connflagDim3(2)
        endif
     else
-       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -18045,7 +18045,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridSetCommitShapeTile()
       subroutine ESMF_GridSetCmmitShapeTileReg(grid, name, coordTypeKind, &
         regDecomp, decompFlag, minIndex, maxIndex, &
-        keywordEnforcer, connDim1, connDim2, connDim3, &
+        keywordEnforcer, connflagDim1, connflagDim2, connflagDim3, &
         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
         bipolePos1, bipolePos2, bipolePos3, &
         coordDep1, coordDep2, coordDep3, &
@@ -18062,9 +18062,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in), optional :: minIndex(:)
        integer,               intent(in)           :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)   !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)   !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)   !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in), optional :: connflagDim1(:)   !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in), optional :: connflagDim2(:)   !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in), optional :: connflagDim3(:)   !N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
@@ -18121,7 +18121,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !      The upper extent of the grid array.
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -18130,7 +18130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -18139,7 +18139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -18276,9 +18276,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer     :: gridAlignLocal(:)
     integer              :: deCount
     integer              :: d,i1,i2,i3,k
-    type(ESMF_GridConn)  :: connDim1Local(2)
-    type(ESMF_GridConn)  :: connDim2Local(2)
-    type(ESMF_GridConn)  :: connDim3Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim1Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim2Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim3Local(2)
     integer              :: connCount, petListCount
 
 
@@ -18315,9 +18315,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
     endif
 
-    if ((dimCount .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connflagDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
@@ -18412,9 +18412,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim1)) then
-      if (size(connDim1) == 1) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim1)) then
+      if (size(connflagDim1) == 1) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18432,8 +18432,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim1) == 2) then
-         if (connDim1(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim1) == 2) then
+         if (connflagDim1(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18443,7 +18443,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim1(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim1(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(1) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18457,9 +18457,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    endif
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim2)) then
-      if (size(connDim2) == 1) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim2)) then
+      if (size(connflagDim2) == 1) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18477,8 +18477,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim2) == 2) then
-         if (connDim2(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim2) == 2) then
+         if (connflagDim2(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18488,7 +18488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim2(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim2(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(2) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18503,9 +18503,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
    ! make sure connected dimensions don't have an edge width
-   if (present(connDim3)) then
-      if (size(connDim3) == 1) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+   if (present(connflagDim3)) then
+      if (size(connflagDim3) == 1) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18523,8 +18523,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-      else if (size(connDim3) == 2) then
-         if (connDim3(1) /= ESMF_GRIDCONN_NONE) then
+      else if (size(connflagDim3) == 2) then
+         if (connflagDim3(1) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeLWidth)) then
                if (gridEdgeLWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18534,7 +18534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             endif
          endif
-         if (connDim3(2) /= ESMF_GRIDCONN_NONE) then
+         if (connflagDim3(2) /= ESMF_GRIDCONN_NONE) then
             if (present(gridEdgeUWidth)) then
                if (gridEdgeUWidth(3) > 0) then
                    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
@@ -18623,66 +18623,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
-    if (present(connDim1)) then
-       if (size(connDim1) == 1) then
-          connDim1Local(1)=connDim1(1)     
-          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) >= 2) then
-          connDim1Local(1)=connDim1(1)
-          connDim1Local(2)=connDim1(2)
+    if (present(connflagDim1)) then
+       if (size(connflagDim1) == 1) then
+          connflagDim1Local(1)=connflagDim1(1)     
+          connflagDim1Local(2)=connflagDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim1) >= 2) then
+          connflagDim1Local(1)=connflagDim1(1)
+          connflagDim1Local(2)=connflagDim1(2)
        endif
     else
-       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim2)) then
-       if (size(connDim2) == 1) then
-          connDim2Local(1)=connDim2(1)     
-          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) >= 2) then
-          connDim2Local(1)=connDim2(1)
-          connDim2Local(2)=connDim2(2)
+    if (present(connflagDim2)) then
+       if (size(connflagDim2) == 1) then
+          connflagDim2Local(1)=connflagDim2(1)     
+          connflagDim2Local(2)=connflagDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim2) >= 2) then
+          connflagDim2Local(1)=connflagDim2(1)
+          connflagDim2Local(2)=connflagDim2(2)
        endif
     else
-       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim3)) then
-       if (size(connDim3) == 1) then
-          connDim3Local(1)=connDim3(1)     
-          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) >= 2) then
-          connDim3Local(1)=connDim3(1)
-          connDim3Local(2)=connDim3(2)
+    if (present(connflagDim3)) then
+       if (size(connflagDim3) == 1) then
+          connflagDim3Local(1)=connflagDim3(1)     
+          connflagDim3Local(2)=connflagDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim3) >= 2) then
+          connflagDim3Local(1)=connflagDim3(1)
+          connflagDim3Local(2)=connflagDim3(2)
        endif
     else
-       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -18936,7 +18936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridSetCommitShapeTile()
       subroutine ESMF_GridSetCmmitShapeTileArb(grid, name,coordTypeKind, &
 		minIndex, maxIndex, arbIndexCount, arbIndexList, &
-        keywordEnforcer, connDim1, connDim2, connDim3, &
+        keywordEnforcer, connflagDim1, connflagDim2, connflagDim3, &
         poleStaggerLoc1, poleStaggerLoc2, poleStaggerLoc3, &
         bipolePos1, bipolePos2, bipolePos3, &
         coordDep1, coordDep2, coordDep3, &
@@ -18952,9 +18952,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)           :: arbIndexCount
        integer,               intent(in)           :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn),   intent(in), optional :: connDim1(:)   !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim2(:)   !N. IMP.
-       type(ESMF_GridConn),   intent(in), optional :: connDim3(:)   !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in), optional :: connflagDim1(:)   !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in), optional :: connflagDim2(:)   !N. IMP.
+       type(ESMF_GridConn_Flag),   intent(in), optional :: connflagDim3(:)   !N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc1(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc2(2)!N. IMP.
        type(ESMF_StaggerLoc),intent(in),optional::poleStaggerLoc3(2)!N. IMP.
@@ -19006,7 +19006,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      where arbIndexCount is the input argument specified below
 ! \item[{arbIndexCount}] 
 !      The number of grid cells in the local DE
-! \item[{[connDim1]}] 
+! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
@@ -19015,7 +19015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim2]}] 
+! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
@@ -19024,7 +19024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
-! \item[{[connDim3]}] 
+! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
@@ -19135,9 +19135,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer     :: minIndexLocal(:)
     integer, pointer     :: maxIndexLocal(:)
     integer              :: i,j,d,f,i1,i2,i3,k,ind,ud
-    type(ESMF_GridConn)  :: connDim1Local(2)
-    type(ESMF_GridConn)  :: connDim2Local(2)
-    type(ESMF_GridConn)  :: connDim3Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim1Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim2Local(2)
+    type(ESMF_GridConn_Flag)  :: connflagDim3Local(2)
     integer              :: connCount, petListCount 
     integer              :: top
     integer, pointer     :: distSize(:)
@@ -19197,9 +19197,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Argument Consistency Checking --------------------------------------------------------------
-    if ((dimCount .lt. 3) .and. present(connDim3)) then
+    if ((dimCount .lt. 3) .and. present(connflagDim3)) then
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- connDim3 not allowed when grid is less than dimCount 3", & 
+                 msg="- connflagDim3 not allowed when grid is less than dimCount 3", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
@@ -19297,65 +19297,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif   
 
     ! Set Default for connections (although they don't work yet in distgrid/array, so they aren't really used anywhere yet.)
-    if (present(connDim1)) then
-       if (size(connDim1) == 1) then
-          connDim1Local(1)=connDim1(1)     
-          connDim1Local(2)=connDim1(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim1) >= 2) then
-          connDim1Local(1)=connDim1(1)
-          connDim1Local(2)=connDim1(2)
+    if (present(connflagDim1)) then
+       if (size(connflagDim1) == 1) then
+          connflagDim1Local(1)=connflagDim1(1)     
+          connflagDim1Local(2)=connflagDim1(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim1) >= 2) then
+          connflagDim1Local(1)=connflagDim1(1)
+          connflagDim1Local(2)=connflagDim1(2)
        endif
     else
-       connDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim1Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim1Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim1Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim2)) then
-       if (size(connDim2) == 1) then
-          connDim2Local(1)=connDim2(1)     
-          connDim2Local(2)=connDim2(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim2) >= 2) then
-          connDim2Local(1)=connDim2(1)
-          connDim2Local(2)=connDim2(2)
+    if (present(connflagDim2)) then
+       if (size(connflagDim2) == 1) then
+          connflagDim2Local(1)=connflagDim2(1)     
+          connflagDim2Local(2)=connflagDim2(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim2) >= 2) then
+          connflagDim2Local(1)=connflagDim2(1)
+          connflagDim2Local(2)=connflagDim2(2)
        endif
     else
-       connDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim2Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim2Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim2Local(2)=ESMF_GRIDCONN_NONE
     endif
 
-    if (present(connDim3)) then
-       if (size(connDim3) == 1) then
-          connDim3Local(1)=connDim3(1)     
-          connDim3Local(2)=connDim3(1)    ! if only 1 connection is specified then repeat for both ends  
-       else if (size(connDim3) >= 2) then
-          connDim3Local(1)=connDim3(1)
-          connDim3Local(2)=connDim3(2)
+    if (present(connflagDim3)) then
+       if (size(connflagDim3) == 1) then
+          connflagDim3Local(1)=connflagDim3(1)     
+          connflagDim3Local(2)=connflagDim3(1)    ! if only 1 connection is specified then repeat for both ends  
+       else if (size(connflagDim3) >= 2) then
+          connflagDim3Local(1)=connflagDim3(1)
+          connflagDim3Local(2)=connflagDim3(2)
        endif
     else
-       connDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
-       connDim3Local(2)=ESMF_GRIDCONN_NONE
+       connflagDim3Local(1)=ESMF_GRIDCONN_NONE ! if not present then default to no connection
+       connflagDim3Local(2)=ESMF_GRIDCONN_NONE
     endif
 
 
     ! check for not implemented functionality
-    if (connDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim1Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim1Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim1Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim2Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim2Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim2Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif
 
-    if (connDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
-        connDim3Local(2) /= ESMF_GRIDCONN_NONE) then
+    if (connflagDim3Local(1) /= ESMF_GRIDCONN_NONE .or. &
+        connflagDim3Local(2) /= ESMF_GRIDCONN_NONE) then
        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, & 
                  msg="- Only ESMF_GRIDCONN_NONE Grid connection implemented so far", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
@@ -19750,7 +19750,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridConn), intent(in) :: &
+      type (ESMF_GridConn_Flag), intent(in) :: &
          GridConn1,      &! Two igrid statuses to compare for
          GridConn2        ! equality
 
@@ -19784,7 +19784,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridConn), intent(in) :: &
+      type (ESMF_GridConn_Flag), intent(in) :: &
          GridConn1,      &! Two GridConn Statuses to compare for
          GridConn2        ! inequality
 
@@ -22100,13 +22100,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     subroutine SetupTileConn(dimCount, minIndex, maxIndex, &
-        connDim1, connDim2, connDim3, connList, rc)
+        connflagDim1, connflagDim2, connflagDim3, connList, rc)
        integer,               intent(in)            :: dimCount
        integer,               intent(in)            :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn),   intent(in),  optional :: connDim3(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
+       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_DistgridConnection), pointer       :: connList(:) 
        integer,               intent(out), optional :: rc
        type(ESMF_PoleType) ::   poleTypeLocal(2)

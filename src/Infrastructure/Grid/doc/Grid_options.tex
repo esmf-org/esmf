@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.42 2011/06/24 04:15:54 rokuingh Exp $
+% $Id: Grid_options.tex,v 1.43 2011/06/24 04:48:37 rokuingh Exp $
 
 \subsubsection{ESMF\_CoordSys}
 \label{sec:opt:coordsys}
@@ -25,12 +25,12 @@ A constant value which is used to indicate that a particular dimension is arbitr
 
 
 
-\subsubsection{ESMF\_GridConn}
+\subsubsection{ESMF\_GridConn\_Flag}
 \label{sec:opt:gridconn}
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
 The {\tt ESMF\_GridCreateShapeTile} command has three specific arguments
-{\tt connDim1}, {\tt connDim2}, and {\tt connDim3}. These can be used
+{\tt connflagDim1}, {\tt connflagDim2}, and {\tt connflagDim3}. These can be used
 to setup different types of connections at the ends of each dimension
 of a Tile.  Each of these parameters is a two element array. The first
 element is the connection type at the minimum end of the dimension
