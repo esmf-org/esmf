@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.95 2011/06/24 17:53:10 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.96 2011/06/24 18:29:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.95 2011/06/24 17:53:10 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.96 2011/06/24 18:29:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1386,11 +1386,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    ! Flush before crossing language interface to ensure correct output order
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutPrint(delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
