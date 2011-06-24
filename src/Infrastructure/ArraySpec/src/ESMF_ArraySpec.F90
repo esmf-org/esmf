@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.52 2011/06/23 21:54:11 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.53 2011/06/24 16:12:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@ module ESMF_ArraySpecMod
     sequence
     private
     integer             :: rank       ! number of dimensions
-    type(ESMF_TypeKind) :: typekind   ! fortran type and kind enum/integer
+    type(ESMF_TypeKind_Flag) :: typekind   ! fortran type and kind enum/integer
     ESMF_INIT_DECLARE
   end type
 
@@ -92,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.52 2011/06/23 21:54:11 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.53 2011/06/24 16:12:18 rokuingh Exp $'
 
 !==============================================================================
 
@@ -310,7 +310,7 @@ contains
     type(ESMF_ArraySpec), intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rank
-    type(ESMF_TypeKind),  intent(out), optional :: typekind
+    type(ESMF_TypeKind_Flag),  intent(out), optional :: typekind
     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
@@ -419,7 +419,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_ArraySpec), intent(out)           :: arrayspec
     integer,              intent(in)            :: rank
-    type(ESMF_TypeKind),  intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !

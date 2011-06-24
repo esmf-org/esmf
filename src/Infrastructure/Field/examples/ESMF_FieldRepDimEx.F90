@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.18 2011/06/24 15:03:55 rokuingh Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.19 2011/06/24 16:12:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
     ! local arguments used to get info from field
     type(ESMF_Grid)         :: grid1
     type(ESMF_Array)        :: array
-    type(ESMF_TypeKind)     :: typekind
+    type(ESMF_TypeKind_Flag)     :: typekind
     integer                 :: dimCount, gridrank_repdim
     type(ESMF_StaggerLoc)   :: lstaggerloc
     integer, dimension(4) :: lgridToFieldMap

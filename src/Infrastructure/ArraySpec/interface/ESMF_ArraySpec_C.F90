@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec_C.F90,v 1.13 2011/01/05 20:05:40 svasquez Exp $
+! $Id: ESMF_ArraySpec_C.F90,v 1.14 2011/06/24 16:12:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_ArraySpec_C.F90,v 1.13 2011/01/05 20:05:40 svasquez Exp $'
+!      '$Id: ESMF_ArraySpec_C.F90,v 1.14 2011/06/24 16:12:17 rokuingh Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -53,7 +53,7 @@
 
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
     integer :: rc
 
     integer                 :: localrc      ! local return code
@@ -86,7 +86,7 @@
 
     type(ESMF_ArraySpec) :: arrayspec
     integer :: rank
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
     integer :: rc
 
     integer                 :: localrc      ! local return code
@@ -149,7 +149,7 @@
     implicit none
     
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
     integer :: rc
 
     integer                 :: localrc      ! local return code

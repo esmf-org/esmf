@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGet.cppF90,v 1.7 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_TypeKindGet.cppF90,v 1.8 2011/06/24 16:12:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ module ESMF_TypeKindGetMod
 ^define ESMF_METHOD "ESMF_TypeKindGet"
 !BOP
 ! !IROUTINE: ESMF_TypeKindGet -- Generic interface to return the correct
-!                                ESMF_TypeKind parameter of a scalar.
+! ESMF_TypeKind_Flag parameter of a scalar.
 !
 ! !INTERFACE:
 
@@ -72,7 +72,7 @@ TypeKindInterfaceMacro(ESMF_TypeKindGet)
 !   function ESMF_TypeKindGet<typekind>(var, rc) @\
 ! @\
 ! !RETURN VALUE: @\
-!      type(ESMF_TypeKind) :: ESMF_TypeKindGet<typekind> @\
+!      type(ESMF_TypeKind_Flag) :: ESMF_TypeKindGet<typekind> @\
 ! @\
 ! !ARGUMENTS: @\
 !     <type>(ESMF_KIND_<typekind>), intent(in) :: var @\
@@ -103,7 +103,7 @@ TypeKindInterfaceMacro(ESMF_TypeKindGet)
 ^undef  ESMF_METHOD @\
 !define ESMF_METHOD "ESMF_TypeKindGet##mtypekind" @\
 ^define ESMF_METHOD "ESMF_TypeKindGet" @\
- type(ESMF_TypeKind) function ESMF_TypeKindGet##mtypekind(var, rc) @\
+ type(ESMF_TypeKind_Flag) function ESMF_TypeKindGet##mtypekind(var, rc) @\
 @\
     mtypename(ESMF_KIND_##mtypekind), intent(in) :: var @\
     integer, intent(out), optional :: rc @\

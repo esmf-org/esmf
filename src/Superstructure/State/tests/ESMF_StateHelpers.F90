@@ -1,4 +1,4 @@
-! $Id: ESMF_StateHelpers.F90,v 1.24 2011/06/23 18:14:13 rokuingh Exp $
+! $Id: ESMF_StateHelpers.F90,v 1.25 2011/06/24 16:12:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -178,8 +178,8 @@ subroutine CreateFields(igrid1, field1, field2, field3, field4, field5, &
     type(ESMF_Field), intent(out), optional :: field2, field3, field4, field5
     integer, intent(in), optional :: dim1, dim2, dim3, dim4, dim5
     integer, intent(in), optional :: halo1, halo2, halo3, halo4, halo5
-    type(ESMF_TypeKind), intent(in), optional :: dkind1, dkind2 
-    type(ESMF_TypeKind), intent(in), optional :: dkind3, dkind4, dkind5
+    type(ESMF_TypeKind_Flag), intent(in), optional :: dkind1, dkind2 
+    type(ESMF_TypeKind_Flag), intent(in), optional :: dkind3, dkind4, dkind5
     type(ESMF_RelLoc), intent(in), optional :: relloc1, relloc2
     type(ESMF_RelLoc), intent(in), optional :: relloc3, relloc4, relloc5
     type(ESMF_RelLoc), intent(in), optional :: vrelloc1, vrelloc2
@@ -189,7 +189,7 @@ subroutine CreateFields(igrid1, field1, field2, field3, field4, field5, &
     ! Local variables
     integer :: halof1, halof2, halof3, halof4, halof5
     integer :: dimf1, dimf2, dimf3, dimf4, dimf5
-    type(ESMF_TypeKind) :: dkindf1, dkindf2, dkindf3, dkindf4, dkindf5
+    type(ESMF_TypeKind_Flag) :: dkindf1, dkindf2, dkindf3, dkindf4, dkindf5
     type(ESMF_RelLoc) :: rellocf1, rellocf2, rellocf3, rellocf4, rellocf5
     type(ESMF_RelLoc) :: vrellocf1, vrellocf2, vrellocf3, vrellocf4, vrellocf5
     type(ESMF_ArraySpec) :: arrayspecf1, arrayspecf2
@@ -495,7 +495,7 @@ subroutine InternalFillConstantField(field, r4val, r8val, i4val, i8val, rc)
     integer, intent(out), optional :: rc
     
     ! Local variables
-    type(ESMF_TypeKind) :: dk
+    type(ESMF_TypeKind_Flag) :: dk
     integer :: rank, kind
 
     ! pointer zoo
@@ -1005,7 +1005,7 @@ subroutine InternalValidateConstantField(field, r8val, r4val, i8val, i4val, &
     integer :: i, j, k, l, m
     integer :: lb(7), ub(7), halo
 
-    type(ESMF_TypeKind) :: dk
+    type(ESMF_TypeKind_Flag) :: dk
     integer :: rank, kind
 
     real (ESMF_KIND_R8), dimension(:,:),       pointer :: ptr2dr8

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.22 2011/06/24 15:04:19 rokuingh Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.23 2011/06/24 16:12:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ program ESMF_AttributeEx
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: name
-      type(ESMF_TypeKind)     :: tk
+      type(ESMF_TypeKind_Flag)     :: tk
 
       integer(ESMF_KIND_I4)                :: inI4
       integer(ESMF_KIND_I4), dimension(3)  :: inI4l

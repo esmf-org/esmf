@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.98 2011/06/23 20:35:38 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.99 2011/06/24 16:12:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.98 2011/06/23 20:35:38 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.99 2011/06/24 16:12:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1171,7 +1171,7 @@ contains
 !     character (len=*), intent(in), optional :: convention
 !     character (len=*), intent(in), optional :: purpose
 !     character (len=*), intent(in), optional :: attPackInstanceName
-!     type(ESMF_TypeKind), intent(out), optional :: typekind
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer, intent(out), optional :: itemCount
 !     logical, intent(out), optional :: isPresent
 !     integer, intent(out), optional :: rc
@@ -1231,7 +1231,7 @@ contains
 !     <object>, see below for supported values  
 !     integer, intent(in) :: attributeIndex
 !     character (len = *), intent(out) :: name
-!     type(ESMF_TypeKind), intent(out), optional :: typekind
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer, intent(out), optional :: itemCount   
 !     integer, intent(out), optional :: rc   
 !
@@ -2889,7 +2889,7 @@ contains
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
-      type(ESMF_TypeKind) :: localTk @\
+      type(ESMF_TypeKind_Flag) :: localTk @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3176,7 +3176,7 @@ contains
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
-      type(ESMF_TypeKind) :: localTk @\
+      type(ESMF_TypeKind_Flag) :: localTk @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3458,7 +3458,7 @@ contains
       integer :: localrc, i, j, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
-      type(ESMF_TypeKind) :: localTk @\
+      type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
  @\
@@ -3649,7 +3649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
-      type(ESMF_TypeKind), intent(out), optional :: typekind @\
+      type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -3691,7 +3691,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc              @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
-      type(ESMF_TypeKind) :: localTk @\
+      type(ESMF_TypeKind_Flag) :: localTk @\
       integer :: litemCount @\
  @\
       ! Initialize  @\
@@ -3773,7 +3773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis   @\
       integer, intent(in) :: attributeIndex @\
       character(len=*), intent(out) :: name @\
-      type(ESMF_TypeKind), intent(out), optional :: typekind @\
+      type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -3804,7 +3804,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc  @\
       character(len=len(name)) :: localName @\
-      type(ESMF_TypeKind) :: localTk @\
+      type(ESMF_TypeKind_Flag) :: localTk @\
       integer :: litemCount @\
  @\
       ! Initialize  @\

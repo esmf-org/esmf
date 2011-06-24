@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.38 2011/06/23 20:35:40 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.39 2011/06/24 16:12:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.38 2011/06/23 20:35:40 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.39 2011/06/24 16:12:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -52,7 +52,7 @@ program ESMF_AttributeCplCompUTest
       character(ESMF_MAXSTR) :: conv, purp, attrname, &
                                 attrnameOut, attrvalue
       integer                :: rc, count, items
-      type(ESMF_TypeKind)    :: attrTK
+      type(ESMF_TypeKind_Flag)    :: attrTK
 
       integer(ESMF_KIND_I4)                  :: outI4
       real(ESMF_KIND_I8)                     :: inR8, outR8, defaultR8, dfltoutR8

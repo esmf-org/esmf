@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.58 2011/06/24 14:25:51 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.59 2011/06/24 16:12:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.58 2011/06/24 14:25:51 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.59 2011/06/24 16:12:33 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -454,7 +454,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Locstream), intent(in)            :: locstream
     character (len=*),    intent(in)            :: keyName
-    type(ESMF_TypeKind),  intent(in), optional  :: keyTypeKind
+    type(ESMF_TypeKind_Flag),  intent(in), optional  :: keyTypeKind
     character (len=*),    intent(in), optional  :: keyUnits 
     character (len=*),    intent(in), optional  :: keyLongName 
     integer, intent(out), optional :: rc
@@ -486,7 +486,7 @@ contains
     type(ESMF_LocStreamType), pointer :: lstypep
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array
-    type(ESMF_TypeKind) :: localKeyTypeKind 
+    type(ESMF_TypeKind_Flag) :: localKeyTypeKind 
     integer :: localrc
 
     ! Initialize
@@ -1089,7 +1089,7 @@ contains
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
       type(ESMF_UnmappedAction) :: localunmappedaction
       type(ESMF_Mesh) :: mesh
-      type(ESMF_TypeKind) ::keyTypeKind
+      type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
       integer :: keyCount,i
       integer :: localrc
@@ -1207,7 +1207,7 @@ contains
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
       type(ESMF_UnmappedAction) :: localunmappedaction
       type(ESMF_DistGrid) :: newDistGrid
-      type(ESMF_TypeKind) ::keyTypeKind
+      type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
       integer :: keyCount,i
       integer :: localrc
@@ -2309,7 +2309,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
     character (len=*),    intent(in)              :: keyName
     character (len=*),    intent(out), optional   :: keyUnits 
     character (len=*),    intent(out), optional   :: keyLongName 
-    type(ESMF_TypeKind), intent(out), optional    :: typekind
+    type(ESMF_TypeKind_Flag), intent(out), optional    :: typekind
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4025,7 +4025,7 @@ end subroutine ESMF_LocStreamGetBounds
       character(len=ESMF_MAXSTR), pointer :: keyArray(:)  ! order sort keys
       logical :: dummy
 
-      type(ESMF_TypeKind)              :: keyKind       ! key kind
+      type(ESMF_TypeKind_Flag)              :: keyKind       ! key kind
       integer                          :: localKind
 
       ! Initialize return code; assume failure until success is certain
@@ -4303,7 +4303,7 @@ end subroutine ESMF_LocStreamGetBounds
       type(ESMF_LocStream), pointer    :: ls            ! Pointer to new LS
       type(ESMF_LocStream), pointer    :: lsIn          ! Pointer to LS element
       type(ESMF_DELayout)              :: delayout      ! Layout
-      type(ESMF_TypeKind)              :: keyKind       ! key kind
+      type(ESMF_TypeKind_Flag)              :: keyKind       ! key kind
       type(ESMF_InternDG)              :: internDG      ! Internal distgrid
       type(ESMF_Pointer)               :: ptr           ! temporary pointer
       integer :: nDEs, nDEsIn                           ! Number of DEs
@@ -4807,7 +4807,7 @@ end subroutine ESMF_LocStreamGetBounds
       real(ESMF_KIND_R8), allocatable     :: partitionR8(:), resultR8(:)
 
       type(ESMF_Pointer)                  :: ptr           ! Temporary pointer
-      type(ESMF_TypeKind)                 :: keyKind       ! key kind
+      type(ESMF_TypeKind_Flag)                 :: keyKind       ! key kind
       integer                             :: localkind
       integer                             :: localrc
       integer                             :: iDE, index, partitionSize, part
@@ -4989,7 +4989,7 @@ end subroutine ESMF_LocStreamGetBounds
       type(ESMF_VM) :: vm
       type(ESMF_ArrayBundle) :: oldAB, newAB
       type(ESMF_RouteHandle) :: routehandle
-      type(ESMF_TypeKind) ::keyTypeKind
+      type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
       integer :: keyCount,i
       integer :: localrc
@@ -5285,7 +5285,7 @@ end subroutine ESMF_LocStreamGetBounds
       type(ESMF_LocStream):: newLocStream
       type(ESMF_ArrayBundle) :: oldAB, newAB
       type(ESMF_RouteHandle) :: routehandle
-      type(ESMF_TypeKind) ::keyTypeKind
+      type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
       integer :: keyCount,i
       integer :: localrc
@@ -5510,13 +5510,13 @@ end subroutine ESMF_LocStreamGetBounds
       integer :: tmpLBnd, tmpUBnd
       character(len=ESMF_MAXSTR)    :: string
       character(len=ESMF_MAXSTR)    :: coordKeyList(3)
-      type(ESMF_TypeKind)           :: coordTypeKindList(3)
+      type(ESMF_TypeKind_Flag)           :: coordTypeKindList(3)
       real(ESMF_KIND_R8), pointer :: keyDataR8(:)
       real(ESMF_KIND_R4), pointer :: keyDataR4(:)
       integer (ESMF_KIND_I4), pointer :: keyDataI4(:)
       integer :: dim
       integer :: i,j,pos
-      type(ESMF_TypeKind) :: typekind
+      type(ESMF_TypeKind_Flag) :: typekind
 
 ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL

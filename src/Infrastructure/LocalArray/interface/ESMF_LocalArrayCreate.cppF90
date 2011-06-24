@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.50 2011/06/24 14:25:53 rokuingh Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.51 2011/06/24 16:12:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.50 2011/06/24 14:25:53 rokuingh Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.51 2011/06/24 16:12:35 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -478,7 +478,7 @@ end function
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByTKR
 !
 ! !ARGUMENTS:
-    type(ESMF_TypeKind),  intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
     integer,              intent(in)            :: rank
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: totalCount(:)
@@ -666,7 +666,7 @@ end function
     type (ESMF_LocalArray) :: array     ! new C++ LocalArray
     integer                :: localrc   ! local return code
     integer :: rank
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
 
     array%this = ESMF_NULL_POINTER
 
@@ -1040,7 +1040,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     ! Local vars
     integer :: localrc                  ! local return code
     type(ESMF_Logical) :: dealloc       ! do we need to free space?
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
     integer :: rank
 
 !  To reduce the depth of crossings of the F90/C++ boundary we first
@@ -1115,7 +1115,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! !ARGUMENTS:
     type(ESMF_LocalArray), intent(inout)         :: array
     integer, dimension(:), intent(in)            :: totalCount
-    type(ESMF_TypeKind),   intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag),   intent(in)            :: typekind
     integer,               intent(in)            :: rank
     integer, dimension(:), intent(in)            :: totalLBound
     integer, dimension(:), intent(in)            :: totalUBound
@@ -1583,7 +1583,7 @@ TypeKindRankDeclarationMacro(LocalArrConstrF90Ptr)
 ! 
 ! !ARGUMENTS: 
     type(ESMF_LocalArray), intent(inout) :: array 
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
     integer :: rank   
     integer, intent(out), optional :: rc 
 ! 
@@ -1812,7 +1812,7 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
     integer :: localtk
     integer :: rank
 
-    type(ESMF_TypeKind)             :: typekind
+    type(ESMF_TypeKind_Flag)             :: typekind
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2129,7 +2129,7 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ! !ARGUMENTS:
    type(ESMF_LocalArray), intent(inout) :: array
    integer, dimension(:), intent(in) :: totalCount
-   type(ESMF_TypeKind), intent(in) :: typekind
+   type(ESMF_TypeKind_Flag), intent(in) :: typekind
    integer, intent(in) :: rank
    integer, dimension(:), intent(in) :: totalLBound
    integer, dimension(:), intent(in) :: totalUBound

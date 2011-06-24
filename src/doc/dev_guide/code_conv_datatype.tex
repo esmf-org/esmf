@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.6 2010/11/03 22:48:47 theurich Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.7 2011/06/24 16:12:53 rokuingh Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -40,7 +40,7 @@ This means that any other syntax, such as:
 \end{verbatim}
 is NOT to be used.
 
-{\tt ESMF\_KIND\_I}, {\tt ESMF\_KIND\_R}: Note that the {\tt ESMF\_TypeKind} parameters: {\tt ESMF\_KIND\_I} and {\tt ESMF\_KIND\_R} are defined for use in user code only. They are handles offered to the user for ESMF internal default kinds and not to be used internally in the ESMF framework.
+{\tt ESMF\_KIND\_I}, {\tt ESMF\_KIND\_R}: Note that the {\tt ESMF\_TypeKind\_Flag} parameters: {\tt ESMF\_KIND\_I} and {\tt ESMF\_KIND\_R} are defined for use in user code only. They are handles offered to the user for ESMF internal default kinds and not to be used internally in the ESMF framework.
 
 {\bf Real Data:}
 \begin{enumerate}
@@ -195,13 +195,13 @@ for comparison purposes.  These constants must be used to ensure compatibility w
                }
 \end{verbatim}
 
-\subsubsection{ESMF\_TypeKind ``labels'': When knowing the data type/kind is necessary}
+\subsubsection{ESMF\_TypeKind\_Flag ``labels'': When knowing the data type/kind is necessary}
 
 An enumerated parameter in C++ and a corresponding sequence parameter in Fortran are provided in order to identify the type-and-kind of data being processed in various ESMF routines. There is a one to one correspondence between the Fortran sequence and the C++ enumerated type. They are mostly used as a tool to customize code for a specific data type and kind, and to insure the correct handling of user data across Fortran-C interfaces.
 
-In Fortran this sequenced type's name is {\tt ESMF\_TypeKind}.
+In Fortran this sequenced type's name is {\tt ESMF\_TypeKind\_Flag}.
 
-The {\tt ESMF\_TypeKind} parameter names declared are:
+The {\tt ESMF\_TypeKind\_Flag} parameter names declared are:
 
 \begin{verbatim}
                ESMF_TYPEKIND_I4   (4 byte integer)
@@ -216,10 +216,10 @@ The following are supported for user interface use only (they are not to be used
                ESMF_TYPEKIND_R    (labels real_not_autopromoted data)
 \end{verbatim}
 
-Fortran {\tt ESMF\_TypeKind} parameters mostly appear in calls to C routines that create or manipulate arrays, fields, or bundles. e.g.
+Fortran {\tt ESMF\_TypeKind\_Flag} parameters mostly appear in calls to C routines that create or manipulate arrays, fields, or bundles. e.g.
 \begin{verbatim}
          ....
-         ESMF_TypeKind :: tk
+         ESMF_TypeKind_Flag :: tk
          ...
           !-set tk
          ...
@@ -269,7 +269,7 @@ There must be a one to one correspondence of Fortran and C arguments as illustra
      type(ESMF_Logical)     <-->  ESMC_Logical
      etc.
 \end{verbatim}
-Also, {\tt ESMF\_TypeKind} and {\tt ESMC\_TypeKind} values are set to have matching values. That is:
+Also, {\tt ESMF\_TypeKind\_Flag} and {\tt ESMC\_TypeKind} values are set to have matching values. That is:
 \begin{verbatim}
              ESMF_TYPEKIND_I<n> = ESMC_TYPEKIND_I<n>
              ESMF_TYPEKIND_R<n> = ESMC_TYPEKIND_R<n>

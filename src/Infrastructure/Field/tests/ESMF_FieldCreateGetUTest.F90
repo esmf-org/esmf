@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.79 2011/06/23 18:13:53 rokuingh Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.80 2011/06/24 16:12:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2003,7 +2003,7 @@ contains
         type(ESMF_Field)        :: field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: staggerloc
         integer, dimension(1) :: gridToFieldMap
@@ -2404,7 +2404,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(2) :: lgridToFieldMap
@@ -2808,7 +2808,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(3) :: lgridToFieldMap
@@ -2963,7 +2963,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(3) :: lgridToFieldMap
@@ -3742,7 +3742,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(3) :: lgridToFieldMap
@@ -4048,7 +4048,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -4221,7 +4221,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -4450,7 +4450,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -4686,7 +4686,7 @@ contains
 
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -4858,7 +4858,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -5098,7 +5098,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -5340,7 +5340,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -5566,7 +5566,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -5817,7 +5817,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap
@@ -6049,7 +6049,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(3) :: lgridToFieldMap
@@ -6277,7 +6277,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1
         type(ESMF_Array)        :: array
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount, gridrank_repdim
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(2) :: lgridToFieldMap
@@ -6501,7 +6501,7 @@ contains
         ! local arguments used to get info from field
         type(ESMF_Grid)         :: grid1, grid2
         type(ESMF_Array)        :: array1, array2
-        type(ESMF_TypeKind)     :: typekind
+        type(ESMF_TypeKind_Flag)     :: typekind
         integer                 :: dimCount
         type(ESMF_StaggerLoc)   :: lstaggerloc
         integer, dimension(7) :: lgridToFieldMap

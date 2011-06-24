@@ -1,4 +1,4 @@
-! $Id: ESMF_TypeKindGetUTest.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_TypeKindGetUTest.F90,v 1.16 2011/06/24 16:12:42 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TypeKindGetUTest.F90,v 1.15 2011/01/05 20:05:46 svasquez Exp $'
+      '$Id: ESMF_TypeKindGetUTest.F90,v 1.16 2011/06/24 16:12:42 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,7 +60,7 @@
     real                :: vreal
     real (ESMF_KIND_R4) :: vreal4
     real (ESMF_KIND_R8) :: vreal8
-    type(ESMF_TypeKind) :: typekind
+    type(ESMF_TypeKind_Flag) :: typekind
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are

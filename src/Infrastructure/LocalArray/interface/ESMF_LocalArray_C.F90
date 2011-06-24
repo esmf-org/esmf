@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_C.F90,v 1.5 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_LocalArray_C.F90,v 1.6 2011/06/24 16:12:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalArray_C.F90,v 1.5 2011/01/05 20:05:44 svasquez Exp $'
+!      '$Id: ESMF_LocalArray_C.F90,v 1.6 2011/06/24 16:12:35 rokuingh Exp $'
 !==============================================================================
 subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
   lbounds, ubounds, rc)
@@ -35,7 +35,7 @@ subroutine f_esmf_localarrayf90allocate(array, rank, typekind, counts, &
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_TypeKind) :: typekind
+  type(ESMF_TypeKind_Flag) :: typekind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)
@@ -56,7 +56,7 @@ subroutine f_esmf_localarrayf90deallocate(array, rank, typekind, rc)
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_TypeKind) :: typekind
+  type(ESMF_TypeKind_Flag) :: typekind
   integer :: rc
 
   call ESMF_LocalArrayF90Deallocate(array, typekind, rank, rc=rc)
@@ -73,7 +73,7 @@ subroutine f_esmf_localarrayadjust(array, rank, typekind, counts, &
 
   type(ESMF_LocalArray) :: array
   integer :: rank
-  type(ESMF_TypeKind) :: typekind
+  type(ESMF_TypeKind_Flag) :: typekind
   integer :: counts(rank)
   integer :: lbounds(rank)
   integer :: ubounds(rank)

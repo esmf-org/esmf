@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_autopromote.tex,v 1.1 2007/05/02 22:01:21 cdeluca Exp $
+% CVS $Id: code_conv_autopromote.tex,v 1.2 2011/06/24 16:12:53 rokuingh Exp $
 
 \subsection{ESMF Data Type Autopromotion Support Policy and Guide}
 
@@ -55,14 +55,14 @@ The requirements for safe interfacing of autopromoted user code with ESMF are as
              ...
             call ESMF_ClockGet(clock, runTimeStepCount, rc)
 \end{verbatim}
-\item When user data is autopromoted, the {\tt ESMF\_TypeKind} parameter argument corresponding to the autopromoted data must be adjusted appropriately. The {\tt ESMF\_TypeKind} parameter for an array or field that has been autopromoted can be obtained during execution by using the function {\tt ESMF\_TypeKindFind()}. {\tt ESMF\_TypeKindFind()} is an overloaded function that returns the {\tt ESMF\_TypeKind} parameter corresponding to the runtime type and kind of an input scalar.
+\item When user data is autopromoted, the {\tt ESMF\_TypeKind\_Flag} parameter argument corresponding to the autopromoted data must be adjusted appropriately. The {\tt ESMF\_TypeKind\_Flag} parameter for an array or field that has been autopromoted can be obtained during execution by using the function {\tt ESMF\_TypeKindFind()}. {\tt ESMF\_TypeKindFind()} is an overloaded function that returns the {\tt ESMF\_TypeKind\_Flag} parameter corresponding to the runtime type and kind of an input scalar.
 
-      e.g. In the following code excerpt {\tt ESMF\_TypeKindFind()} is used to determine at runtime the correct {\tt ESMF\_TypeKind} parameter to use in the {\tt ESMF\_ArraySpecSet()} routine in preparation for creation of an ESMF Array that will store integer data that may or may not be autopromoted.
+      e.g. In the following code excerpt {\tt ESMF\_TypeKindFind()} is used to determine at runtime the correct {\tt ESMF\_TypeKind\_Flag} parameter to use in the {\tt ESMF\_ArraySpecSet()} routine in preparation for creation of an ESMF Array that will store integer data that may or may not be autopromoted.
 \begin{verbatim}
           ...
           integer :: iScalar
           ...
-          type(ESMF_TypeKind) myTypeKind
+          type(ESMF_TypeKind_Flag) myTypeKind
           myTypeKind= ESMF_TypeKindFind(iScalar)
           call ESMF_ArraySpecSet(arrayspec, rank, myTypeKind, rc)
 \end{verbatim}

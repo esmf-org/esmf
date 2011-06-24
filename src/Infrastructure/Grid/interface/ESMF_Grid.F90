@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.227 2011/06/24 05:20:51 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.228 2011/06/24 16:12:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.227 2011/06/24 05:20:51 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.228 2011/06/24 16:12:28 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1496,7 +1496,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_GridItem_Flag),   intent(in)           :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
-      type (ESMF_TypeKind),   intent(in),optional  :: itemTypeKind
+      type (ESMF_TypeKind_Flag),   intent(in),optional  :: itemTypeKind
       integer,                intent(in),optional  :: staggerEdgeLWidth(:)
       integer,                intent(in),optional  :: staggerEdgeUWidth(:)
       integer,                intent(in),optional  :: staggerAlign(:)
@@ -1983,7 +1983,7 @@ end subroutine ESMF_GridConvertIndex
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(in)            :: grid
        type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-       type(ESMF_TypeKind),   intent(in),  optional :: typekind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: typekind
        integer,               intent(in),  optional :: gridToArrayMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
@@ -2041,7 +2041,7 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_ArraySpec) :: arrayspec         
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_IndexFlag) :: indexflag    
-    type(ESMF_TypeKind) :: localTypeKind
+    type(ESMF_TypeKind_Flag) :: localTypeKind
     type(ESMF_StaggerLoc) :: localStaggerLoc
     integer, pointer :: arrayLBound(:),arrayUBound(:)
     integer, pointer :: distgridToArrayMap(:)
@@ -2680,7 +2680,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
        type(ESMF_Grid) :: newGrid
        integer :: localrc ! local error status
-       type(ESMF_TypeKind) :: coordTypeKind
+       type(ESMF_TypeKind_Flag) :: coordTypeKind
        integer :: distgridToGridMap(ESMF_MAXDIM)
        integer :: coordDimCount(ESMF_MAXDIM)
        integer :: coordDimMap(ESMF_MAXDIM,ESMF_MAXDIM)
@@ -2695,7 +2695,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Array), allocatable :: srcA(:), dstA(:)
        type(ESMF_Array), allocatable :: srcA2D(:), dstA2D(:)
        type(ESMF_DistGrid):: dg
-       type(ESMF_TypeKind):: tk
+       type(ESMF_TypeKind_Flag):: tk
        integer:: atodMap(1), k
        real(ESMF_KIND_R8), pointer:: farrayPtr(:), farrayPtr2d(:,:)
        integer:: rank, dimCount
@@ -3301,7 +3301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -3587,7 +3587,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -3857,7 +3857,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -4089,7 +4089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional  :: distgridToGridMap(:)
        type(ESMF_CoordSys),   intent(in),  optional  :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional  :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional  :: coordTypeKind
        integer,               intent(in),  optional  :: coordDimCount(:)
        integer,               intent(in),  optional  :: coordDimMap(:,:)
        integer,               intent(in),  optional  :: gridEdgeLWidth(:)
@@ -4342,7 +4342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distDim(:)
        type(ESMF_CoordSys),   intent(in),   optional  :: coordSys
-       type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
        integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        character (len=*),     intent(in),   optional  :: name
@@ -5700,7 +5700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -5972,7 +5972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -6228,7 +6228,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -6451,7 +6451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -6709,7 +6709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -6951,7 +6951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -7164,7 +7164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -7415,7 +7415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -7650,7 +7650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_CoordSys),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
        integer,               intent(in),  optional :: coordDep3(:)
@@ -7850,7 +7850,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileIrreg
 !
 ! !ARGUMENTS:
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: countsPerDEDim1(:)
        integer,               intent(in)            :: countsPerDEDim2(:)
@@ -8875,7 +8875,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileReg
 !
 ! !ARGUMENTS:
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: regDecomp(:)
        type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
        integer,               intent(in),  optional :: minIndex(:)
@@ -9776,7 +9776,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateShapeTileArb
 !
 ! !ARGUMENTS:
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
        integer,               intent(in)   	    :: arbIndexCount
@@ -10508,7 +10508,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
       type(ESMF_Grid),       intent(in)            :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TypeKind),   intent(out), optional :: coordTypeKind
+      type(ESMF_TypeKind_Flag),   intent(out), optional :: coordTypeKind
       integer,               intent(out), optional :: dimCount
       integer,               intent(out), optional :: tileCount
       integer,               intent(out), optional :: staggerlocCount
@@ -11583,7 +11583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -11874,7 +11874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -12163,7 +12163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  integer :: dimCount 
- type(ESMF_TypeKind) :: typekind 
+ type(ESMF_TypeKind_Flag) :: typekind 
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
@@ -12460,7 +12460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -12751,7 +12751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  integer :: dimCount 
- type(ESMF_TypeKind) :: typekind 
+ type(ESMF_TypeKind_Flag) :: typekind 
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
@@ -13040,7 +13040,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  integer :: dimCount 
- type(ESMF_TypeKind) :: typekind 
+ type(ESMF_TypeKind_Flag) :: typekind 
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
@@ -13932,7 +13932,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -14192,7 +14192,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -14452,7 +14452,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  integer :: dimCount 
- type(ESMF_TypeKind) :: typekind 
+ type(ESMF_TypeKind_Flag) :: typekind 
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
@@ -14709,7 +14709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer ::  dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray):: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -14968,7 +14968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: localDeCount, dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -15228,7 +15228,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  integer :: dimCount 
- type(ESMF_TypeKind) :: typekind 
+ type(ESMF_TypeKind_Flag) :: typekind 
  type(ESMF_LocalArray) :: localArray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
@@ -15486,7 +15486,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localArray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -15745,7 +15745,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array) :: array 
     integer :: localrc ! local error status 
     integer :: dimCount 
-    type(ESMF_TypeKind) :: typekind 
+    type(ESMF_TypeKind_Flag) :: typekind 
     type(ESMF_LocalArray) :: localarray
     type(ESMF_DataCopy_Flag) :: datacopyflagInt
     integer :: coordDimCount(ESMF_MAXDIM)
@@ -16007,7 +16007,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  type(ESMF_Array) :: array 
  integer :: localrc ! local error status 
  integer :: dimCount 
- type(ESMF_TypeKind) :: typekind 
+ type(ESMF_TypeKind_Flag) :: typekind 
  type(ESMF_LocalArray) :: localarray
  type(ESMF_DataCopy_Flag) :: datacopyflagInt
  integer :: coordDimCount(ESMF_MAXDIM)
@@ -16701,7 +16701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distgridToGridMap(:)
        integer,               intent(in),   optional  :: distDim(:)
        type(ESMF_CoordSys),   intent(in),   optional  :: coordSys
-       type(ESMF_TypeKind),   intent(in),   optional  :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
        integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
        integer,               intent(in),   optional  :: minIndex(:)
@@ -17035,7 +17035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
 	   type (ESMF_Grid)                             :: grid
        character (len=*),     intent(in),  optional :: name 
-       type(ESMF_TypeKind),   intent(in),  optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: countsPerDEDim1(:)
        integer,               intent(in)            :: countsPerDEDim2(:)
@@ -18056,7 +18056,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
        type(ESMF_Grid),       intent(inout)        :: grid
        character (len=*),     intent(in), optional :: name 
-       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in), optional :: coordTypeKind
        integer,               intent(in), optional :: regDecomp(:)
        type(ESMF_DecompFlag), intent(in), optional :: decompflag(:)
        integer,               intent(in), optional :: minIndex(:)
@@ -18946,7 +18946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        type(ESMF_Grid),       intent(inout)        :: grid
        character (len=*),     intent(in), optional :: name 
-       type(ESMF_TypeKind),   intent(in), optional :: coordTypeKind
+       type(ESMF_TypeKind_Flag),   intent(in), optional :: coordTypeKind
        integer,               intent(in), optional :: minIndex(:)
        integer,               intent(in)           :: maxIndex(:)
        integer,               intent(in)           :: arbIndexCount

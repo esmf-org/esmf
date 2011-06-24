@@ -1,4 +1,4 @@
-!  $Id: ESMF_Array_C.F90,v 1.1 2011/05/07 00:21:34 samsoncheung Exp $
+!  $Id: ESMF_Array_C.F90,v 1.2 2011/06/24 16:12:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Array_C.F90,v 1.1 2011/05/07 00:21:34 samsoncheung Exp $'
+!      '$Id: ESMF_Array_C.F90,v 1.2 2011/06/24 16:12:13 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -64,7 +64,7 @@
     character(len=10) :: piofmt
     integer           :: time
 
-    type(ESMF_TypeKind)             :: typekind
+    type(ESMF_TypeKind_Flag)             :: typekind
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -282,7 +282,7 @@
     type(ESMF_IOFmtFlag) :: iofmt_internal
     character(len=10) :: piofmt
 
-    type(ESMF_TypeKind)             :: typekind
+    type(ESMF_TypeKind_Flag)             :: typekind
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

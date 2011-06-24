@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.20 2010/11/03 22:48:53 theurich Exp $
+! $Id: user_coupler.F90,v 1.21 2011/06/24 16:12:55 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -69,7 +69,7 @@
         type(ESMF_FieldDataMap) :: datamap1
         type(ESMF_ArraySpec) :: arrayspec1
         integer :: rank1
-        type(ESMF_TypeKind) :: dk1
+        type(ESMF_TypeKind_Flag) :: dk1
         integer :: status
      
         print *, "User Coupler Init starting"

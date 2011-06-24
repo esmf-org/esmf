@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.51 2011/06/09 05:13:33 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.52 2011/06/24 16:12:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.51 2011/06/09 05:13:33 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.52 2011/06/24 16:12:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -1129,18 +1129,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine ESMF_TypeKindString(datakind, string, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_TypeKind), intent(in) :: datakind
+      type(ESMF_TypeKind_Flag), intent(in) :: datakind
       character(len=*), intent(out) :: string
       integer, intent(out), optional :: rc  
 
 !
 ! !DESCRIPTION:
-!   Return an {\tt ESMF\_TypeKind} variable as a string.
+!   Return an {\tt ESMF\_TypeKind\_Flag} variable as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[datakind]
-!       The {\tt ESMF\_TypeKind}.
+!       The {\tt ESMF\_TypeKind\_Flag}.
 !     \item[string]
 !       The value as a string.
 !     \item[{[rc]}]
@@ -1160,8 +1160,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (datakind == ESMF_TYPEKIND_I8)  string = "Integer*8"
       if (datakind == ESMF_TYPEKIND_R4)  string = "Real*4"
       if (datakind == ESMF_TYPEKIND_R8)  string = "Real*8"
-      if (datakind == ESMF_C8)  string = "Complex*8"
-      if (datakind == ESMF_C16) string = "Complex*16"
+      if (datakind == ESMF_TYPEKIND_C8)  string = "Complex*8"
+      if (datakind == ESMF_TYPEKIND_C16) string = "Complex*16"
  
       if (present(rc)) rc = ESMF_SUCCESS
 

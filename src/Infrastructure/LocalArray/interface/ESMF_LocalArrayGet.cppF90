@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.28 2011/06/23 18:14:03 rokuingh Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.29 2011/06/24 16:12:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@ module ESMF_LocalArrayGetMod
       integer :: localrc                   ! local return code @\
       logical :: copyreq                  ! did user specify copy? @\
       integer :: rank @\
-      type(ESMF_TypeKind) :: typekind @\
+      type(ESMF_TypeKind_Flag) :: typekind @\
  @\
       type (ESMF_LAWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
       integer :: lb(mrank), ub(mrank)  ! size info for the array @\
@@ -211,7 +211,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.28 2011/06/23 18:14:03 rokuingh Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.29 2011/06/24 16:12:35 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -275,7 +275,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_TypeKind),        intent(out), optional :: typekind
+    type(ESMF_TypeKind_Flag),        intent(out), optional :: typekind
     integer,                    intent(out), optional :: rank
     integer,                    intent(out), optional :: totalCount(:)
     integer,                    intent(out), optional :: totalLBound(:)

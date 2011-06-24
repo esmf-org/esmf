@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.107 2011/06/24 03:01:05 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.108 2011/06/24 16:12:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.107 2011/06/24 03:01:05 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.108 2011/06/24 16:12:23 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1595,7 +1595,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_Grid),       intent(in)            :: grid               
-    type(ESMF_TypeKind),   intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag),   intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
@@ -2611,7 +2611,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)            :: locstream
-    type(ESMF_TypeKind),  intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
     integer,              intent(in),  optional :: ungriddedUBound(:)
@@ -3269,7 +3269,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh               
-    type(ESMF_TypeKind), intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag), intent(in)            :: typekind
     type(ESMF_MeshLoc),  intent(in),  optional :: location
     integer,             intent(in),  optional :: gridToFieldMap(:)    
     integer,             intent(in),  optional :: ungriddedLBound(:)
@@ -3963,7 +3963,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
     type(ESMF_XGrid),     intent(in)            :: xgrid
     type(ESMF_XGridSide), intent(in),  optional :: xgridSide
     integer,              intent(in),  optional :: gridIndex
-    type(ESMF_TypeKind),  intent(in)            :: typekind
+    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
     integer,              intent(in),  optional :: ungriddedUBound(:)

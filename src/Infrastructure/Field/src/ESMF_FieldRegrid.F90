@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.68 2011/06/24 05:20:48 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.69 2011/06/24 16:12:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.68 2011/06/24 05:20:48 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.69 2011/06/24 16:12:23 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1161,7 +1161,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	type(ESMF_MeshLoc)   :: meshLoc
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
         integer :: gridDimCount, localDECount
-	type(ESMF_TypeKind) :: typekind
+	type(ESMF_TypeKind_Flag) :: typekind
         logical              :: isLatLonDeg
         integer              :: isSphere
 

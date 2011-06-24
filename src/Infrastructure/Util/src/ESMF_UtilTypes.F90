@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.126 2011/06/23 22:54:47 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.127 2011/06/24 16:12:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -149,7 +149,7 @@
 !     ! WARNING: 
 !     !  constants MUST match corresponding values in ../include/ESMC_Util.h
 
-      type ESMF_TypeKind
+      type ESMF_TypeKind_Flag
       sequence
       ! TODO: can this be made private now?
       !!private
@@ -157,24 +157,24 @@
       end type
 
       ! these work well for internal ESMF use, arguments, etc
-      type(ESMF_TypeKind), parameter :: &
+      type(ESMF_TypeKind_Flag), parameter :: &
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-                   ESMF_TYPEKIND_I1 = ESMF_TypeKind(1), &
+                   ESMF_TYPEKIND_I1 = ESMF_TypeKind_Flag(1), &
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-                   ESMF_TYPEKIND_I2 = ESMF_TypeKind(2), &
+                   ESMF_TYPEKIND_I2 = ESMF_TypeKind_Flag(2), &
 #endif
-                   ESMF_TYPEKIND_I4 = ESMF_TypeKind(3), &
-                   ESMF_TYPEKIND_I8 = ESMF_TypeKind(4), &
-                   ESMF_TYPEKIND_R4 = ESMF_TypeKind(5), &
-                   ESMF_TYPEKIND_R8 = ESMF_TypeKind(6), &
-                   ESMF_C8 = ESMF_TypeKind(7), &
-                   ESMF_C16 = ESMF_TypeKind(8), &
-                   ESMF_TYPEKIND_LOGICAL = ESMF_TypeKind(9), &
-                   ESMF_TYPEKIND_CHARACTER = ESMF_TypeKind(10), &
-                   ESMF_TYPEKIND_I  = ESMF_TypeKind(90), &
-                   ESMF_TYPEKIND_R  = ESMF_TypeKind(91), &
-                   ESMF_NOKIND = ESMF_TypeKind(99)
+                   ESMF_TYPEKIND_I4 = ESMF_TypeKind_Flag(3), &
+                   ESMF_TYPEKIND_I8 = ESMF_TypeKind_Flag(4), &
+                   ESMF_TYPEKIND_R4 = ESMF_TypeKind_Flag(5), &
+                   ESMF_TYPEKIND_R8 = ESMF_TypeKind_Flag(6), &
+                   ESMF_TYPEKIND_C8 = ESMF_TypeKind_Flag(7), &
+                   ESMF_TYPEKIND_C16 = ESMF_TypeKind_Flag(8), &
+                   ESMF_TYPEKIND_LOGICAL = ESMF_TypeKind_Flag(9), &
+                   ESMF_TYPEKIND_CHARACTER = ESMF_TypeKind_Flag(10), &
+                   ESMF_TYPEKIND_I  = ESMF_TypeKind_Flag(90), &
+                   ESMF_TYPEKIND_R  = ESMF_TypeKind_Flag(91), &
+                   ESMF_NOKIND = ESMF_TypeKind_Flag(99)
 
       ! these are the only Fortran kind parameters supported
       ! by ESMF.
@@ -655,7 +655,7 @@
 
       public ESMF_TYPEKIND_I4, ESMF_TYPEKIND_I8, & 
              ESMF_TYPEKIND_R4, ESMF_TYPEKIND_R8, &
-             ESMF_C8, ESMF_C16, &
+             ESMF_TYPEKIND_C8, ESMF_TYPEKIND_C16, &
              ESMF_TYPEKIND_LOGICAL, ESMF_TYPEKIND_CHARACTER, &
              ESMF_KIND_I, ESMF_KIND_R, &
              ESMF_NOKIND
@@ -754,7 +754,7 @@
 
       public ESMF_KeywordEnforcer
 
-      public ESMF_Status, ESMF_Pointer, ESMF_TypeKind
+      public ESMF_Status, ESMF_Pointer, ESMF_TypeKind_Flag
       public ESMF_DataValue
 
       public ESMF_MapPtr
@@ -954,21 +954,21 @@ end function
 
 function ESMF_dkeq(dk1, dk2)
  logical ESMF_dkeq
- type(ESMF_TypeKind), intent(in) :: dk1, dk2
+ type(ESMF_TypeKind_Flag), intent(in) :: dk1, dk2
 
  ESMF_dkeq = (dk1%dkind == dk2%dkind)
 end function
 
 function ESMF_dkne(dk1, dk2)
  logical ESMF_dkne
- type(ESMF_TypeKind), intent(in) :: dk1, dk2
+ type(ESMF_TypeKind_Flag), intent(in) :: dk1, dk2
 
  ESMF_dkne = (dk1%dkind /= dk2%dkind)
 end function
 
 subroutine ESMF_dkas(intval, dkval)
  integer, intent(out) :: intval
- type(ESMF_TypeKind), intent(in) :: dkval
+ type(ESMF_TypeKind_Flag), intent(in) :: dkval
 
  intval = dkval%dkind
 end subroutine

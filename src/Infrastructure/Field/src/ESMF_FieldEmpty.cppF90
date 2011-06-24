@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.14 2011/06/24 03:01:05 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.15 2011/06/24 16:12:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.14 2011/06/24 03:01:05 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.15 2011/06/24 16:12:23 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -880,7 +880,7 @@ subroutine ESMF_FieldEmptyCompTK(field, typekind, &
 !
 ! !ARGUMENTS:
  type(ESMF_Field) :: field 
- type(ESMF_TYPEKIND), intent(in)  :: typekind
+ type(ESMF_TypeKind_Flag), intent(in)  :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below 
  type(ESMF_IndexFlag), intent(in), optional :: indexflag 
  integer, intent(in), optional :: gridToFieldMap(:) 

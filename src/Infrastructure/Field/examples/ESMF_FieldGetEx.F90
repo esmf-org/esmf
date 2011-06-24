@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.20 2011/06/24 15:03:55 rokuingh Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.21 2011/06/24 16:12:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
     integer :: excl_count(1:3)
     integer :: total_count(1:3)
 
-    type(ESMF_TypeKind)        :: typekind
+    type(ESMF_TypeKind_Flag)        :: typekind
     integer                    :: rank
     type(ESMF_StaggerLoc)      :: staggerloc 
     integer                    :: gridToFieldMap(3)    

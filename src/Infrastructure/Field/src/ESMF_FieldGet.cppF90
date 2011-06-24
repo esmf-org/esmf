@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.82 2011/06/24 03:01:05 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.83 2011/06/24 16:12:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.82 2011/06/24 03:01:05 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.83 2011/06/24 16:12:23 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -128,7 +128,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LocStream),  intent(out), optional :: locstream     
     type(ESMF_XGrid),      intent(out), optional :: xgrid     
     type(ESMF_Array),      intent(out), optional :: array     
-    type(ESMF_TypeKind),   intent(out), optional :: typekind
+    type(ESMF_TypeKind_Flag),   intent(out), optional :: typekind
     integer,               intent(out), optional :: dimCount
     integer,               intent(out), optional :: rank
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 

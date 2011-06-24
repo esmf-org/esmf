@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.65 2011/06/23 18:13:45 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.66 2011/06/24 16:12:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.65 2011/06/23 18:13:45 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.66 2011/06/24 16:12:13 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -143,7 +143,7 @@ contains
     type(ESMF_Array),              intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),          intent(out), optional :: arrayspec
-    type(ESMF_TypeKind),           intent(out), optional :: typekind
+    type(ESMF_TypeKind_Flag),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: localarrayList(:)
     type(ESMF_IndexFlag),          intent(out), optional :: indexflag
@@ -318,7 +318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc        ! local return code
-    type(ESMF_TypeKind)           :: opt_typekind           ! helper variable
+    type(ESMF_TypeKind_Flag)           :: opt_typekind           ! helper variable
     integer                       :: opt_rank               ! helper variable
     type(ESMF_Pointer), pointer   :: opt_localarrayPtrList(:)   ! helper variable
     integer                       :: len_localarrayPtrList, i   ! helper variable
@@ -751,7 +751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Local variables @\
     integer                             :: localrc     ! local return code @\
     integer                             :: rank @\
-    type(ESMF_TypeKind)                 :: typekind @\
+    type(ESMF_TypeKind_Flag)                 :: typekind @\
     type(ESMF_LocalArray)               :: localarray @\
 @\
     ! Initialize return code @\

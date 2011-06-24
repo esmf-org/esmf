@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.29 2011/06/21 01:22:50 w6ws Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.30 2011/06/24 16:12:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.29 2011/06/21 01:22:50 w6ws Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.30 2011/06/24 16:12:13 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -544,7 +544,7 @@ contains
     character(len=10) :: piofmt
     integer           :: time
 
-    type(ESMF_TypeKind)             :: typekind
+    type(ESMF_TypeKind_Flag)             :: typekind
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

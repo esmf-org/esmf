@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.63 2011/06/23 18:14:05 rokuingh Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.64 2011/06/24 16:12:37 rokuingh Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -49,7 +49,7 @@
     integer(ESMF_KIND_I4), dimension(:,:), pointer :: int2Dptr
     type(ESMF_ArraySpec) :: arrayspec, arrayspec1
     integer :: rub(1), rlb(1)
-    type(ESMF_TypeKind) :: akind
+    type(ESMF_TypeKind_Flag) :: akind
     type(ESMF_LocalArray) :: array2, array4
 #endif
 
