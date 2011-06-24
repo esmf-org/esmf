@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.144 2011/06/24 05:48:15 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.145 2011/06/24 16:53:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.144 2011/06/24 05:48:15 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.145 2011/06/24 16:53:09 theurich Exp $'
 
 !==============================================================================
 !
@@ -721,18 +721,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Returns information about an {\tt ESMF\_CplComp}.
+! Get information about an {\tt ESMF\_CplComp} object.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
-!   {\tt ESMF\_CplComp} to query.
+!   The {\tt ESMF\_CplComp} object being queried.
 ! \item[{[config]}]
-!   Return the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
+!   Return the associated Config.
+!   It is an error to query for the Config if none is associated with
+!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
+!   through {\tt ESMF\_CplCompStatusGet()} for {\tt configIsPresent}.
 ! \item[{[configFile]}]
-!   Return the configuration filename for this {\tt ESMF\_CplComp}.
+!   Return the associated configuration filename.
+!   It is an error to query for the configuration filename if none is associated with
+!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
+!   through {\tt ESMF\_CplCompStatusGet()} for {\tt configFileIsPresent}.
 ! \item[{[clock]}]
-!   Return the private clock for this {\tt ESMF\_CplComp}.
+!   Return the associated Clock.
+!   It is an error to query for the Clock if none is associated with
+!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
+!   through {\tt ESMF\_CplCompStatusGet()} for {\tt clockIsPresent}.
 ! \item[{[localPet]}]
 !   Return the local PET id within the {\tt ESMF\_CplComp} object.
 ! \item[{[petCount]}]
@@ -748,7 +757,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[cplCompStatus]}]
 !   Return the CplCompStatus.
 ! \item[{[vm]}]
-!   Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   Return the associated VM.
+!   It is an error to query for the VM if none is associated with
+!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
+!   through {\tt ESMF\_CplCompStatusGet()} for {\tt vmIsPresent}.
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]

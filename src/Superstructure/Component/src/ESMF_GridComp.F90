@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.167 2011/06/24 05:48:15 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.168 2011/06/24 16:53:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.167 2011/06/24 05:48:15 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.168 2011/06/24 16:53:09 theurich Exp $'
 
 !==============================================================================
 !
@@ -735,24 +735,42 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Get information about an {\tt ESMF\_GridComp}.
+! Get information about an {\tt ESMF\_GridComp} object.
 !  
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
-!   {\tt ESMF\_GridComp} object to query.
+!   The {\tt ESMF\_GridComp} object being queried.
 ! \item[{[grid]}]
-!   Return the {\tt ESMF\_Grid} associated with this {\tt ESMF\_GridComp}.
+!   Return the associated Grid.
+!   It is an error to query for the Grid if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt gridIsPresent}.
 ! \item[{[importState]}]
-!   Return the import State.
+!   Return the associated import State.
+!   It is an error to query for the import State if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt importStateIsPresent}.
 ! \item[{[exportState]}]
-!   Return the export State.
+!   Return the associated export State.
+!   It is an error to query for the export State if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt exportStateIsPresent}.
 ! \item[{[config]}]
-!   Return the {\tt ESMF\_Config} object for this {\tt ESMF\_GridComp}.
+!   Return the associated Config.
+!   It is an error to query for the Config if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt configIsPresent}.
 ! \item[{[configFile]}]
-!   Return the configuration filename for this {\tt ESMF\_GridComp}.
+!   Return the associated configuration filename.
+!   It is an error to query for the configuration filename if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt configFileIsPresent}.
 ! \item[{[clock]}]
-!   Return the private clock for this {\tt ESMF\_GridComp}.
+!   Return the associated Clock.
+!   It is an error to query for the Clock if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt clockIsPresent}.
 ! \item[{[localPet]}]
 !   Return the local PET id within the {\tt ESMF\_GridComp} object.
 ! \item[{[petCount]}]
@@ -771,7 +789,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[gridCompStatus]}]
 !   Return the GridCompStatus.
 ! \item[{[vm]}]
-!   Return the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   Return the associated VM.
+!   It is an error to query for the VM if none is associated with
+!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
+!   through {\tt ESMF\_GridCompStatusGet()} for {\tt vmIsPresent}.
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_GridComp}.
 ! \item[{[rc]}]
