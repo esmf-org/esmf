@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.43 2011/06/16 05:56:38 eschwab Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.44 2011/06/24 14:25:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 
 !BOC
     ! LogWrite 
-    call ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, rc=rc2)
+    call ESMF_LogWrite("Log Write 2", ESMF_LOGMSG_INFO, rc=rc2)
 !EOC
 
     if (rc2.NE.ESMF_SUCCESS) then
@@ -111,7 +111,7 @@
 
 !BOC
     ! LogWrite; ESMF_CONTEXT expands into __LINE__,ESMF_FILENAME,ESMF_METHOD
-    call ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT, &
+    call ESMF_LogWrite("Log Write 2", ESMF_LOGMSG_INFO, ESMF_CONTEXT, &
                        log=alog, rc=rc2)
 !EOC
 

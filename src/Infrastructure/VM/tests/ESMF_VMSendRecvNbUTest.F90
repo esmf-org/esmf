@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.15 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_VMSendRecvNbUTest.F90,v 1.16 2011/06/24 14:26:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.15 2011/02/24 17:50:31 theurich Exp $'
+      '$Id: ESMF_VMSendRecvNbUTest.F90,v 1.16 2011/06/24 14:26:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -142,7 +142,7 @@
       enddo
       
       write(infostring, *) "First round: src=",src," dst=",dst
-      call ESMF_LogWrite(infostring, ESMF_LOG_INFO)
+      call ESMF_LogWrite(infostring, ESMF_LOGMSG_INFO)
 
       !The solution to test against is..
       do  i=1,count
@@ -315,7 +315,7 @@
       enddo
 
       write(infostring, *) "Second round: src=",src," dst=",dst
-      call ESMF_LogWrite(infostring, ESMF_LOG_INFO)
+      call ESMF_LogWrite(infostring, ESMF_LOGMSG_INFO)
 
       !The solution to test against is..
       do  i=1,count

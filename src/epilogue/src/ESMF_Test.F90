@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.17 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_Test.F90,v 1.18 2011/06/24 14:26:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.17 2011/02/24 17:50:31 theurich Exp $'
+      '$Id: ESMF_Test.F90,v 1.18 2011/06/24 14:26:13 rokuingh Exp $'
 
 !==============================================================================
 
@@ -92,13 +92,13 @@
       if(condition) then
         write(msg, *) "PASS ", trim(name), ", ", trim(file), ", line", line
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
       else
         write(msg, *) "FAIL ", trim(name), ", ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         result = result + 1  ! count total failures; 0 = all pass
       end if
@@ -142,7 +142,7 @@
       call ESMF_VMGetGlobal(vm, rc=localrc)
       call ESMF_VMGet(vm, petCount=petCount, rc=localrc)
       write(msg, *) "NUMBER_OF_PROCESSORS", petCount
-      call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+      call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
 
       call ESMF_Test(condition, name, failMsg, result,  file, line, unit)
 
@@ -234,19 +234,19 @@
 
       write(msg, *) "Number of failed tests:", result
       print *, trim(msg)
-      call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+      call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
       if (present(unit)) write(unit, *) trim(msg)
 
       write(msg, *) "Ending Test, file ", trim(file), ", line", line
       print *, trim(msg)
-      call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+      call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
       if (present(unit)) write(unit, *) trim(msg)
 
       call ESMF_Finalize(rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
           write(msg, *) "Failure in Finalizing ESMF"
           print *, trim(msg)
-          call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+          call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
           if (present(unit)) write(unit, *) trim(msg)
       endif
 
@@ -290,7 +290,7 @@
         failMsg = "Unable to get global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       end if
@@ -301,7 +301,7 @@
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       endif
@@ -315,7 +315,7 @@
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       endif
@@ -363,7 +363,7 @@
         failMsg = "Unable to get global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       end if
@@ -374,7 +374,7 @@
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       endif
@@ -388,7 +388,7 @@
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       endif
@@ -436,7 +436,7 @@
         failMsg = "Unable to get global VM" 
         write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       end if
@@ -447,7 +447,7 @@
         write(msg, *) "FAIL ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       endif
@@ -461,7 +461,7 @@
         write(msg, *) "SKIP ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, trim(msg)
-        call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
         if (present(unit)) write(unit, *) trim(msg)
         return
       endif
@@ -623,12 +623,12 @@
 
       write(msg, *) "Beginning Test, file ", trim(file), ", line", line
       print *, trim(msg)
-      call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+      call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
       if (present(unit)) write(unit, *) trim(msg)
 
       write(msg, *) "NUMBER_OF_PROCESSORS", numPETs
       print *, trim(msg)
-      call ESMF_LogWrite(trim(msg), ESMF_LOG_INFO)
+      call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
       if (present(unit)) write(unit, *) trim(msg)
 
       end subroutine ESMF_TestStart

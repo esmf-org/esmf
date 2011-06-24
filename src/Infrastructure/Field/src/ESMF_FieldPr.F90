@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.45 2011/06/21 01:12:32 w6ws Exp $
+! $Id: ESMF_FieldPr.F90,v 1.46 2011/06/24 14:25:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
+        !nsc call ESMF_LogWrite("Field Print:", ESMF_LOGMSG_INFO)
         write(ESMF_UtilIOStdout,*) "Field Print Starts ====>"
 
         call ESMF_StatusString(fieldstatus, str, localrc)
@@ -150,7 +150,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
         
         if (.not. associated(field%ftypep)) then
-        !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
+        !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOGMSG_INFO)
           write(ESMF_UtilIOStdout,*) "Empty or Uninitialized Field"
           write(ESMF_UtilIOStdout,*) "Field Print Ends   ====>"
           if (present(rc)) rc = ESMF_SUCCESS
@@ -162,7 +162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
-      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOGMSG_INFO)
         write(ESMF_UtilIOStdout,*)  "  Name = '",  trim(name), "'"
 
         call ESMF_BasePrint(fp%base, defaultopts, localrc)

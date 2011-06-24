@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.57 2011/06/23 21:06:18 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.58 2011/06/24 14:25:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.57 2011/06/23 21:06:18 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.58 2011/06/24 14:25:51 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -3799,7 +3799,7 @@ end subroutine ESMF_LocStreamGetBounds
 ! check grid status
       if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
         call ESMF_LogWrite(msg="trying to copy an uninitialized igrid", &
-                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+                           ESMF_LOGMSG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -4041,7 +4041,7 @@ end subroutine ESMF_LocStreamGetBounds
 ! check igrid status
       if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to copy an uninitialized igrid", &
-                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+                           ESMF_LOGMSG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -4629,7 +4629,7 @@ end subroutine ESMF_LocStreamGetBounds
 ! check igrid status
       if (igridIn%ptr%igridStatus.eq.ESMF_IGRID_STATUS_UNINIT) then
         call ESMF_LogWrite("trying to copy an uninitialized igrid", &
-                           ESMF_LOG_WARNING, ESMF_CONTEXT)
+                           ESMF_LOGMSG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif

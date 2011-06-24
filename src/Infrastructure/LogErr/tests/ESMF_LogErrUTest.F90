@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.74 2011/06/23 15:55:48 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.75 2011/06/24 14:25:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.74 2011/06/23 15:55:48 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.75 2011/06/24 14:25:59 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -119,7 +119,7 @@
       !NEX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogWrite(log=log5, msg="Log Single Msg",msgtype=ESMF_LOG_INFO, &
+      call ESMF_LogWrite(log=log5, msg="Log Single Msg",logmsgflag=ESMF_LOGMSG_INFO, &
                          rc=rc)
       write(name, *) "Write to Single Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -149,7 +149,7 @@
       !NEX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogWrite(log=log1, msg="Log Write 2",msgtype=ESMF_LOG_INFO, &
+      call ESMF_LogWrite(log=log1, msg="Log Write 2",logmsgflag=ESMF_LOGMSG_INFO, &
                          rc=rc)
       write(name, *) "Use of separate log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -190,7 +190,7 @@
       !EX_UTest
       ! Test Log Write
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogWrite(msg="Log Write 2",msgtype=ESMF_LOG_INFO,rc=rc)
+      call ESMF_LogWrite(msg="Log Write 2",logmsgflag=ESMF_LOGMSG_INFO,rc=rc)
       write(name, *) "Use of default log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -467,7 +467,7 @@
       !EX_UTest
       ! Test Log Write without opening log file
       write(failMsg, *) "Returned ESMF_SUCCESS"
-      call ESMF_LogWrite(log=log2, msg="Log Write One",msgtype=ESMF_LOG_INFO,rc=rc)
+      call ESMF_LogWrite(log=log2, msg="Log Write One",logmsgflag=ESMF_LOGMSG_INFO,rc=rc)
       write(name, *) "Write without opening log file Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -551,7 +551,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       ! Get date and time to compare later in the test
       call date_and_time(values=my_v)
-      call ESMF_LogWrite(log=log2, msg=random_string,msgtype=ESMF_LOG_INFO,rc=rc)
+      call ESMF_LogWrite(log=log2, msg=random_string,logmsgflag=ESMF_LOGMSG_INFO,rc=rc)
       write(name, *) "Write to log file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -674,11 +674,11 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgAllow filter
+      ! Test logmsgflag filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgAllow set to info only Test"
+      write(name, *) " LogSet with logmsgflag set to info only Test"
       call ESMF_LogSet (  &
-          msgAllow=(/ ESMF_LOG_INFO /),  &
+          logmsgflag=(/ ESMF_LOGMSG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -710,20 +710,20 @@ if (time_diff < zero) stop 1
 	if (rc /= ESMF_SUCCESS) exit
 
 	call ESMF_LogSet (log=log8,  &
-            msgAllow=(/ ESMF_LOG_INFO /),  &
+            logmsgflag=(/ ESMF_LOGMSG_INFO /),  &
             rc=rc)
 	if (rc /= ESMF_SUCCESS) exit
 
 	call ESMF_LogWrite (log=log8,  &
-            msgType=ESMF_LOG_INFO, msg='should be in log', rc=rc)
+            logmsgflag=ESMF_LOGMSG_INFO, msg='should be in log', rc=rc)
 	if (rc /= ESMF_SUCCESS) exit
 
 	call ESMF_LogWrite (log=log8,  &
-            msgType=ESMF_LOG_WARNING, msg='should NOT be in log', rc=rc)
+            logmsgflag=ESMF_LOGMSG_WARNING, msg='should NOT be in log', rc=rc)
 	if (rc /= ESMF_SUCCESS) exit
 
 	call ESMF_LogWrite (log=log8,  &
-            msgType=ESMF_LOG_ERROR, msg='should NOT be in log', rc=rc)
+            logmsgflag=ESMF_LOGMSG_ERROR, msg='should NOT be in log', rc=rc)
 	if (rc /= ESMF_SUCCESS) exit
 
 	call ESMF_LogClose (log8, rc=rc)
@@ -770,31 +770,31 @@ if (time_diff < zero) stop 1
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgAllow filter
+      ! Test logmsgflag filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgAllow set for warnings and info Test"
+      write(name, *) " LogSet with logmsgflag set for warnings and info Test"
       call ESMF_LogSet (  &
-          msgAllow=(/ ESMF_LOG_WARNING, ESMF_LOG_INFO /),  &
+          logmsgflag=(/ ESMF_LOGMSG_WARNING, ESMF_LOGMSG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgAllow filter
+      ! Test logmsgflag filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgAllow set for errors and info Test"
+      write(name, *) " LogSet with logmsgflag set for errors and info Test"
       call ESMF_LogSet (  &
-          msgAllow=(/ ESMF_LOG_ERROR, ESMF_LOG_INFO /),  &
+          logmsgflag=(/ ESMF_LOGMSG_ERROR, ESMF_LOGMSG_INFO /),  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test msgAllow filter
+      ! Test logmsgflag filter
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      write(name, *) " LogSet with msgAllow set for all types Test"
+      write(name, *) " LogSet with logmsgflag set for all types Test"
       call ESMF_LogSet (  &
-          msgAllow = ESMF_LOG_ALL,  &
+          logmsgflag = ESMF_LOG_ALL,  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

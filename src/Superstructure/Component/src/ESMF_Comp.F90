@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.211 2011/06/24 05:48:15 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.212 2011/06/24 14:26:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.211 2011/06/24 05:48:15 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.212 2011/06/24 14:26:06 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -586,9 +586,9 @@ contains
     if (present(configFile) .and. present(config)) then
       ! a config object gets priority over a name if both are specified.
       call ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
-        ESMF_LOG_WARNING)
+        ESMF_LOGMSG_WARNING)
       call ESMF_LogWrite(msg="Using Config object; ignoring Config filename.", &
-        msgtype=ESMF_LOG_WARNING)
+        logmsgflag=ESMF_LOGMSG_WARNING)
       compp%config = config
       compp%compStatus%configIsPresent = .true.
     else if (present(configFile)) then
@@ -1396,7 +1396,7 @@ contains
 
     if (.not.associated(compp)) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
-      !nsc                      ESMF_LOG_INFO)
+      !nsc                      ESMF_LOGMSG_INFO)
       write (ESMF_UtilIOStdout,*)  "Invalid or uninitialized Component"
       return
     endif
@@ -1412,7 +1412,7 @@ contains
         
     if (baseStatus /= ESMF_STATUS_READY) then
       !nsc  call ESMF_LogWrite("Invalid or uninitialized Component",  &
-      !nsc                      ESMF_LOG_INFO)
+      !nsc                      ESMF_LOGMSG_INFO)
       write (ESMF_UtilIOStdout,*)  "Invalid or uninitialized Component"
       return
     endif

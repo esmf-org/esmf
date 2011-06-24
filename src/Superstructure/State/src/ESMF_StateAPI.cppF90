@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.9 2011/06/23 17:55:41 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.10 2011/06/24 14:26:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.9 2011/06/23 17:55:41 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.10 2011/06/24 14:26:10 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2136,12 +2136,12 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
          msgbuf = "Unspecified direction"
        case (ESMF_STATEINTENT_INVALID%state)
          call ESMF_LogWrite(msg="Uninitialized or already destroyed State", &
-             msgtype=ESMF_LOG_INFO)
+             logmsgflag=ESMF_LOGMSG_INFO)
          if (present (rc1)) rc1 = ESMF_SUCCESS
          return
        case default
          call ESMF_LogWrite ("error: unknown state",  &
-             msgtype=ESMF_LOG_INFO)
+             logmsgflag=ESMF_LOGMSG_INFO)
        end select
 
        siwrap => null ()

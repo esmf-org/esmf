@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.10 2011/05/11 22:38:06 rokuingh Exp $
+! $Id: CplCompTemplate.F90,v 1.11 2011/06/24 14:26:04 rokuingh Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -44,12 +44,12 @@
      
       type(ESMF_State) :: state1, state2
 
-      call ESMF_LogWrite("Coupler Initialize routine called", ESMF_LOG_INFO)
+      call ESMF_LogWrite("Coupler Initialize routine called", ESMF_LOGMSG_INFO)
 
       call ESMF_StateGet(importstate,  "GComp1 Import", state1, rc=rc)
       call ESMF_StateGet(importstate,  "GComp2 Import", state2, rc=rc)
 
-      call ESMF_LogWrite("Coupler Initialize routine returning", ESMF_LOG_INFO)
+      call ESMF_LogWrite("Coupler Initialize routine returning", ESMF_LOGMSG_INFO)
       rc=ESMF_SUCCESS
 
     end subroutine my_init
@@ -61,9 +61,9 @@
       type(ESMF_Clock) :: externalclock
       integer, intent(out) :: rc
      
-      call ESMF_LogWrite("Coupler Run routine called", ESMF_LOG_INFO)
+      call ESMF_LogWrite("Coupler Run routine called", ESMF_LOGMSG_INFO)
 
-      call ESMF_LogWrite("Coupler Run routine returning", ESMF_LOG_INFO)
+      call ESMF_LogWrite("Coupler Run routine returning", ESMF_LOGMSG_INFO)
       rc=ESMF_SUCCESS
 
     end subroutine my_run
@@ -75,9 +75,9 @@
       type(ESMF_Clock) :: externalclock
       integer, intent(out) :: rc
      
-      call ESMF_LogWrite("Coupler Finalize routine called", ESMF_LOG_INFO)
+      call ESMF_LogWrite("Coupler Finalize routine called", ESMF_LOGMSG_INFO)
 
-      call ESMF_LogWrite("Coupler Finalize routine returning", ESMF_LOG_INFO)
+      call ESMF_LogWrite("Coupler Finalize routine returning", ESMF_LOGMSG_INFO)
       rc=ESMF_SUCCESS
 
     end subroutine my_final

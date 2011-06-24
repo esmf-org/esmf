@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.5 2011/06/23 15:54:37 rokuingh Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.6 2011/06/24 14:26:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.5 2011/06/23 15:54:37 rokuingh Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.6 2011/06/24 14:26:10 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -232,7 +232,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           if (itemCount < localitemcount) then
             write (errmsg,*)  &
                'itemCount', itemCount, ' too small.  Setting to', localitemcount
-            call ESMF_LogWrite (trim (errmsg), ESMF_LOG_INFO,  &
+            call ESMF_LogWrite (trim (errmsg), ESMF_LOGMSG_INFO,  &
                 method=ESMF_METHOD, rc=rc)
           end if
           localitemcount = max (localitemcount, itemCount)

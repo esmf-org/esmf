@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.77 2011/05/18 19:04:34 rokuingh Exp $
+! $Id: ESMF_Config.F90,v 1.78 2011/06/24 14:25:46 rokuingh Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2171,7 +2171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
       if ( present (delayout) ) then
-         call ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
+         call ESMF_LogWrite("DELayout not used yet", ESMF_LOGMSG_WARNING, &
                            ESMF_CONTEXT)
       endif
 
@@ -2820,7 +2820,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   trim(config%cptr%attr_used(i)%label) // &
                   "' unused (not retrieved via ESMF_ConfigGetAttribute() " // &
                   "or ESMF_ConfigGetChar())."
-              call ESMF_LogWrite(logmsg, ESMF_LOG_WARNING, ESMF_CONTEXT)
+              call ESMF_LogWrite(logmsg, ESMF_LOGMSG_WARNING, ESMF_CONTEXT)
                 localrc = ESMF_RC_ATTR_UNUSED
             endif
           enddo

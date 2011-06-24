@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.24 2011/06/06 20:32:10 oehmke Exp $
+! $Id: ESMF_IOScrip.F90,v 1.25 2011/06/24 14:25:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2105,7 +2105,7 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", msgtype=ESMF_LOG_ERROR, &
+        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgflag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
 	trim(errmsg),trim(nf90_strerror(ncStatus))

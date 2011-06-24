@@ -78,7 +78,7 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    call ESMF_LogWrite("ESMF AppDriver start", ESMF_LOG_INFO)
+    call ESMF_LogWrite("ESMF AppDriver start", ESMF_LOGMSG_INFO)
 
 !---------------------------------------------------------------------------
 !  Create and load a configuration file.
@@ -127,7 +127,7 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
+    call ESMF_LogWrite("Component Create finished", ESMF_LOGMSG_INFO)
 
 !----------------------------------------------------------------------------
 !  Register the set services method for the top Gridded Component.
