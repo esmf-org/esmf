@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.88 2011/06/23 14:15:26 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.89 2011/06/24 04:58:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1392,9 +1392,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!      This routine opens a file with {\tt filename} and associates
-!      it with the {\tt ESMF\_Log}.  This is only
-!      used when the user does not want to use the default Log.
+!      This routine opens a file named {\tt filename} and associates
+!      it with the {\tt ESMF\_Log}.  If the incoming log is already a
+!      valid Log object, no new Log is opened and the Log argument remains
+!      unchanged.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1402,9 +1403,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [log]
 !            An {\tt ESMF\_Log} object.
 !      \item [filename]
-!            Name of file.  Maximum length 58 characters to allow for
-!            the PET number to be added and keep the total file name
-!            length under 64 characters.
+!            Name of log file to be opened.
 !      \item [{[logtype]}]
 !            Set the logtype. See section \ref{opt:logtype} for a list of
 !            valid options.
@@ -1796,10 +1795,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !      The arguments are:
 !      \begin{description}
-! 	
+! 
 !      \item [rcToCheck]
 !            rc value for set
-!      \item [msg]
+!      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
