@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.363 2011/06/23 00:39:15 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.364 2011/06/24 03:01:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.363 2011/06/23 00:39:15 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.364 2011/06/24 03:01:04 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -221,7 +221,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, allocatable :: arrayCompUBnd(:, :), arrayCompLBnd(:, :)
       type(ESMF_DistGrid)  :: arrayDistGrid, gridDistGrid
       type(ESMF_GridDecompType) :: decompType
-      type(ESMF_GeomType) :: geomType
+      type(ESMF_GeomType_Flag) :: geomtype
       type(ESMF_Grid) :: grid
       type(ESMF_Status) :: basestatus
 
@@ -264,12 +264,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	  ! get the grid decomp type if geombase is grid
       decompType = ESMF_GRID_NONARBITRARY
-          call ESMF_GeomBaseGet(ftypep%geombase, geomType=geomType, rc=localrc)
+          call ESMF_GeomBaseGet(ftypep%geombase, geomtype=geomtype, rc=localrc)
           if (ESMF_LogFoundError(localrc, &  
             ESMF_ERR_PASSTHRU, &  
             ESMF_CONTEXT, rcToReturn=rc)) return  
           
-          if (geomType .eq. ESMF_GEOMTYPE_GRID) then
+          if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
              call ESMF_GeomBaseGet(ftypep%geombase, grid=grid, rc=localrc)
              if (ESMF_LogFoundError(localrc, &  
           	    ESMF_ERR_PASSTHRU, &  

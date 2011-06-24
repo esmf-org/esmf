@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $
+! $Id: ESMF_GeomBase.F90,v 1.15 2011/06/24 03:01:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,21 +61,21 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_GeomType
+! ! ESMF_GeomType_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_GeomType
+  type ESMF_GeomType_Flag
    sequence
      integer :: type
   end type
 
-  type(ESMF_GeomType), parameter :: &
-                      ESMF_GEOMTYPE_INVALID=ESMF_GeomType(-1), &
-                      ESMF_GEOMTYPE_UNINIT=ESMF_GeomType(0), &
-                      ESMF_GEOMTYPE_GRID=ESMF_GeomType(1), &
-                      ESMF_GEOMTYPE_MESH=ESMF_GeomType(2), &
-                      ESMF_GEOMTYPE_LOCSTREAM=ESMF_GeomType(3), &
-                      ESMF_GEOMTYPE_XGRID=ESMF_GeomType(4)
+  type(ESMF_GeomType_Flag), parameter :: &
+                      ESMF_GEOMTYPE_INVALID=ESMF_GeomType_Flag(-1), &
+                      ESMF_GEOMTYPE_UNINIT=ESMF_GeomType_Flag(0), &
+                      ESMF_GEOMTYPE_GRID=ESMF_GeomType_Flag(1), &
+                      ESMF_GEOMTYPE_MESH=ESMF_GeomType_Flag(2), &
+                      ESMF_GEOMTYPE_LOCSTREAM=ESMF_GeomType_Flag(3), &
+                      ESMF_GEOMTYPE_XGRID=ESMF_GeomType_Flag(4)
 
 !------------------------------------------------------------------------------
 ! ! ESMF_GeomBaseClass
@@ -85,7 +85,7 @@
   ! F90 class type to hold pointer to object
   type ESMF_GeomBaseClass
   sequence    
-    type(ESMF_GeomType) :: type
+    type(ESMF_GeomType_Flag) :: type
     type(ESMF_StaggerLoc) :: staggerloc
     type(ESMF_Grid) :: grid
     type(ESMF_MeshLoc) :: meshloc ! either nodes or elements
@@ -118,7 +118,7 @@
 !
 public ESMF_GeomBase
 public ESMF_GeomBaseClass ! for internal use only
-public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
+public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
                        ESMF_GEOMTYPE_GRID,  ESMF_GEOMTYPE_MESH, &
                        ESMF_GEOMTYPE_LOCSTREAM, ESMF_GEOMTYPE_XGRID
 
@@ -156,7 +156,7 @@ public ESMF_GeomType,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.14 2011/02/24 21:52:21 oehmke Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.15 2011/06/24 03:01:09 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -776,7 +776,7 @@ end interface
 ! !INTERFACE:
       subroutine ESMF_GeomBaseGet(gridbase, &
           dimCount, localDECount, distgrid, &
-          distgridToGridMap, indexFlag, geomType, &
+          distgridToGridMap, indexFlag, geomtype, &
           grid, staggerloc, mesh, meshLoc, locstream, &
           xgrid, xgridside, gridIndex,rc)
 !
@@ -787,7 +787,7 @@ end interface
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
       integer,               intent(out), optional :: distgridToGridMap(:)
       type(ESMF_IndexFlag),  intent(out), optional :: indexflag
-      type(ESMF_GeomType),   intent(out), optional :: geomType
+      type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype
       type(ESMF_Grid),       intent(out), optional :: grid      
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc
       type(ESMF_Mesh),       intent(out), optional :: mesh      
@@ -818,7 +818,7 @@ end interface
 !   mapping between the grids dimensions and the distgrid.
 ! \item[{[indexflag]}]
 !    Flag that indicates how the DE-local indices are to be defined.
-! \item[{[geomType]}]
+! \item[{[geomtype]}]
 !    Flag that indicates what type of object this gridbase holds. 
 !    Can be {\tt ESMF_GEOMTYPE_GRID}, {\tt ESMF_GEOMTYPE_MESH},...
 ! \item[{[grid]}]
@@ -854,8 +854,8 @@ end interface
     gbcp=>gridbase%gbcp
 
     ! get type
-    if (present(geomType)) then
-       geomType=gbcp%type
+    if (present(geomtype)) then
+       geomtype=gbcp%type
     endif
 
     ! Get grid object plus error checking
@@ -1572,7 +1572,7 @@ end subroutine ESMF_GeomBaseGet
 
 ! !ARGUMENTS:
 
-      type (ESMF_GeomType), intent(in) :: &
+      type (ESMF_GeomType_Flag), intent(in) :: &
          GeomType1,      &! Two igrid statuses to compare for
          GeomType2        ! equality
 
@@ -1606,7 +1606,7 @@ end subroutine ESMF_GeomBaseGet
 
 ! !ARGUMENTS:
 
-      type (ESMF_GeomType), intent(in) :: &
+      type (ESMF_GeomType_Flag), intent(in) :: &
          GeomType1,      &! Two GeomType Statuses to compare for
          GeomType2        ! inequality
 

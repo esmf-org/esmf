@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.113 2011/06/23 22:54:39 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.114 2011/06/24 03:01:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.113 2011/06/23 22:54:39 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.114 2011/06/24 03:01:07 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -889,7 +889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_FieldBundleType), pointer  :: this
     integer                 :: fieldCount, i
     type(ESMF_Logical)      :: linkChange
-    type(ESMF_GEOMTYPE)     :: geomtype
+    type(ESMF_GeomType_Flag)     :: geomtype
     type(ESMF_Grid)         :: grid
     type(ESMF_XGrid)        :: xgrid
     type(ESMF_Mesh)         :: mesh
@@ -1312,7 +1312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_GeomType),    intent(out), optional :: geomtype
+    type(ESMF_GeomType_Flag),    intent(out), optional :: geomtype
     type(ESMF_Grid),        intent(out), optional :: grid
     type(ESMF_LocStream),   intent(out), optional :: locstream
     type(ESMF_Mesh),        intent(out), optional :: mesh
@@ -1366,7 +1366,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: l_fieldCount, i         ! helper variable
     type(ESMF_Field), pointer     :: l_fieldList(:)
     type(ESMF_FieldBundleType), pointer     :: this
-    type(ESMF_GeomType)           :: l_geomtype
+    type(ESMF_GeomType_Flag)           :: l_geomtype
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3103,8 +3103,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4), pointer :: tmp_indices(:,:)
         integer(ESMF_KIND_I4), pointer :: prev_indices(:,:)
         real(ESMF_KIND_R8), pointer :: prev_weights(:)
-        type(ESMF_GeomType) :: srcGeomtype        
-        type(ESMF_GeomType) :: dstGeomtype        
+        type(ESMF_GeomType_Flag) :: srcGeomtype        
+        type(ESMF_GeomType_Flag) :: dstGeomtype        
         integer :: j
 
         ! Initialize return code; assume routine not implemented 
@@ -3170,11 +3170,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstField = dstFieldList(i)
           
           ! If these are both Grids, then check for optimization
-          call ESMF_FieldGet(srcField, geomType=srcGeomType, rc=localrc)
+          call ESMF_FieldGet(srcField, geomtype=srcGeomType, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_FieldGet(dstField, geomType=dstGeomType, rc=localrc)
+          call ESMF_FieldGet(dstField, geomtype=dstGeomType, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5010,7 +5010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_FieldBundleType), pointer :: bp   ! fieldbundle type
       type(ESMF_AttReconcileFlag) :: lattreconflag
       type(ESMF_Grid) :: grid
-      type(ESMF_GeomType) :: geomtype
+      type(ESMF_GeomType_Flag) :: geomtype
       type(ESMF_Logical) :: linkChange
       type(ESMF_Field), pointer :: flist(:)
 
@@ -5156,7 +5156,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
     integer                                           :: localrc
-    type(ESMF_GeomType)                               :: geomtype
+    type(ESMF_GeomType_Flag)                               :: geomtype
     type(ESMF_Grid)                                   :: grid
     type(ESMF_XGrid)                                  :: xgrid
     type(ESMF_Mesh)                                   :: mesh
@@ -5255,7 +5255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 
     integer                                           :: localrc
-    type(ESMF_GeomType)                               :: geomtype
+    type(ESMF_GeomType_Flag)                               :: geomtype
     type(ESMF_Grid)                                   :: grid
     type(ESMF_Logical)                                :: linkChange
 

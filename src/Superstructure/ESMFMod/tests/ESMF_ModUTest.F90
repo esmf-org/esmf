@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.10 2011/06/23 22:54:50 rokuingh Exp $
+! $Id: ESMF_ModUTest.F90,v 1.11 2011/06/24 03:01:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.10 2011/06/23 22:54:50 rokuingh Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.11 2011/06/24 03:01:11 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -111,7 +111,7 @@ contains
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Field) :: field
     type(ESMF_FieldBundle) :: fieldbundle
-    type(ESMF_GeomType) :: geomtype
+    type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     type(ESMF_GridComp) :: gridcomp
     type(ESMF_GridConn) :: gridconn
@@ -295,8 +295,8 @@ contains
 ! NEX_noUTest
 
   subroutine geom_type (dummy)
-    use ESMF_Mod, only: ESMF_GeomType
-    type(ESMF_GeomType), intent(in), optional :: dummy
+    use ESMF_Mod, only: ESMF_GeomType_Flag
+    type(ESMF_GeomType_Flag), intent(in), optional :: dummy
     failMsg = "Geom type fail"
     name = "Geom type"
     call ESMF_Test (.true.,  & name, failMsg, result, ESMF_SRCLINE)

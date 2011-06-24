@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.66 2011/06/23 22:54:36 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.67 2011/06/24 03:01:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.66 2011/06/23 22:54:36 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.67 2011/06/24 03:01:05 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -394,8 +394,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer :: localrc
         integer              :: lregridScheme
         type(ESMF_RegridMethod_Flag) :: lregridmethod
-        type(ESMF_GeomType)  :: srcgeomtype
-        type(ESMF_GeomType)  :: dstgeomtype
+        type(ESMF_GeomType_Flag)  :: srcgeomtype
+        type(ESMF_GeomType_Flag)  :: dstgeomtype
         type(ESMF_Grid)      :: srcGrid
         type(ESMF_Grid)      :: dstGrid
         type(ESMF_Array)     :: srcArray
@@ -902,7 +902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
         integer :: localrc, i
 
-        type(ESMF_GeomType)  :: geomtype
+        type(ESMF_GeomType_Flag)  :: geomtype
         type(ESMF_XGrid)     :: srcXGrid, dstXGrid        
 
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
@@ -1152,7 +1152,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
         integer :: localrc
         integer              :: lregridScheme
-        type(ESMF_GeomType)  :: geomtype
+        type(ESMF_GeomType_Flag)  :: geomtype
 
         type(ESMF_Grid)      :: Grid
         type(ESMF_Array)     :: Array
@@ -1336,7 +1336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer :: localrc
         integer              :: isSphere
         integer              :: lregridScheme
-        type(ESMF_GeomType)  :: geomtype
+        type(ESMF_GeomType_Flag)  :: geomtype
 
         type(ESMF_Grid)      :: Grid
         type(ESMF_Array)     :: Array

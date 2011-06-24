@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.13 2011/06/23 18:13:51 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.14 2011/06/24 03:01:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.13 2011/06/23 18:13:51 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.14 2011/06/24 03:01:05 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -758,7 +758,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase)       :: geombase
     type(ESMF_IndexFlag)      :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType)       :: geomtype
+    type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
     type(ESMF_FieldStatus_Flag)    :: status
 
@@ -785,7 +785,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     geombase=field%ftypep%geombase 
-    call ESMF_GeomBaseGet(geombase, geomType=geomtype, rc=localrc) 
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) 
     if (ESMF_LogFoundError(localrc, &   
         ESMF_ERR_PASSTHRU, &   
         ESMF_CONTEXT, rcToReturn=rc)) return   
@@ -996,7 +996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
     integer :: memDimCount
     type(ESMF_GeomBase)       :: geombase
-    type(ESMF_GeomType)       :: geomtype
+    type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
     type(ESMF_FieldStatus_Flag)    :: status
     type(ESMF_GridDecompType) :: decompType
@@ -1023,7 +1023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif 
 
     geombase=field%ftypep%geombase 
-    call ESMF_GeomBaseGet(geombase, geomType=geomtype, rc=localrc) 
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) 
     if (ESMF_LogFoundError(localrc, &   
         ESMF_ERR_PASSTHRU, &   
         ESMF_CONTEXT, rcToReturn=rc)) return   
@@ -1182,7 +1182,7 @@ end subroutine ESMF_FieldEmptyCompTK
     logical :: flipflop(ESMF_MAXDIM)
     logical :: found
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType) :: geomType
+    type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     integer :: arbdim
 
@@ -1204,12 +1204,12 @@ end subroutine ESMF_FieldEmptyCompTK
 
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
-    call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc)
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rcToReturn=rc)) return  
 
-    if (geomType .eq. ESMF_GEOMTYPE_GRID) then
+    if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
        if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  
@@ -2049,7 +2049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
-    type(ESMF_GeomType)   :: geomtype @\
+    type(ESMF_GeomType_Flag)   :: geomtype @\
     type(ESMF_Grid)       :: grid @\
     type(ESMF_FieldStatus_Flag):: status @\
     type(ESMF_GridDecompType) :: decompType @\
@@ -2075,7 +2075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif @\
 @\
     geombase=field%ftypep%geombase @\
-    call ESMF_GeomBaseGet(geombase, geomType=geomtype, rc=localrc) @\
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
@@ -2241,7 +2241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)            :: geombase @\
-    type(ESMF_GeomType)            :: geomtype @\
+    type(ESMF_GeomType_Flag)            :: geomtype @\
     type(ESMF_Grid)                :: grid @\
     type(ESMF_FieldStatus_Flag)         :: status @\
     type(ESMF_GridDecompType)      :: decompType @\
@@ -2267,7 +2267,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif @\
 @\
     geombase=field%ftypep%geombase @\
-    call ESMF_GeomBaseGet(geombase, geomType=geomtype, rc=localrc) @\
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
@@ -3696,7 +3696,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     type(ESMF_IndexFlag)           :: g_indexflag @\
     logical                        :: found @\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_GeomType)            :: geomType @\
+    type(ESMF_GeomType_Flag)            :: geomtype @\
     type(ESMF_Grid)                :: grid @\
     integer                        :: distgridDimCount, distgridDimCount_norep, arbdim @\
 @\
@@ -3757,12 +3757,12 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 @\
     ! Check if geombase is a grid, if so, check if it is arbitrary @\
     decompType = ESMF_GRID_NONARBITRARY @\
-    call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc) @\
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
  @\
-    if (geomType .eq. ESMF_GEOMTYPE_GRID) then @\
+    if (geomtype .eq. ESMF_GEOMTYPE_GRID) then @\
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) @\
        if (ESMF_LogFoundError(localrc, &   @\
            ESMF_ERR_PASSTHRU, &   @\
@@ -4213,7 +4213,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     type(ESMF_IndexFlag)           :: indexflag @\
     logical                        :: found @\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_GeomType)            :: geomType @\
+    type(ESMF_GeomType_Flag)            :: geomtype @\
     type(ESMF_Grid)                :: grid @\
     integer                        :: distgridDimCount, distgridDimCount_norep, arbdim @\
 @\
@@ -4266,12 +4266,12 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     endif @\
     ! Check if geombase is a grid, if so, check if it is arbitrary @\
     decompType = ESMF_GRID_NONARBITRARY @\
-    call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc) @\
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
         ESMF_ERR_PASSTHRU, &   @\
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
  @\
-    if (geomType .eq. ESMF_GEOMTYPE_GRID) then @\
+    if (geomtype .eq. ESMF_GEOMTYPE_GRID) then @\
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) @\
        if (ESMF_LogFoundError(localrc, &   @\
            ESMF_ERR_PASSTHRU, &   @\

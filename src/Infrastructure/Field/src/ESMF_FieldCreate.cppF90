@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.106 2011/06/23 18:13:50 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.107 2011/06/24 03:01:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.106 2011/06/23 18:13:50 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.107 2011/06/24 03:01:05 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -579,7 +579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical :: flipflop(ESMF_MAXDIM)
     logical :: found
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType) :: geomType
+    type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     integer :: arbdim
 
@@ -602,12 +602,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
-    call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc)
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rcToReturn=rc)) return  
 
-    if (geomType .eq. ESMF_GEOMTYPE_GRID) then
+    if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
        if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  
@@ -970,7 +970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: distgridToGridMap(ESMF_MAXDIM)
     logical :: found
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType) :: geomType
+    type(ESMF_GeomType_Flag) :: geomtype
     type(ESMF_Grid) :: grid
     integer :: arbdim
 
@@ -992,12 +992,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
-    call ESMF_GeomBaseGet(geombase, geomType=geomType, rc=localrc)
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
     if (ESMF_LogFoundError(localrc, &  
         ESMF_ERR_PASSTHRU, &  
         ESMF_CONTEXT, rcToReturn=rc)) return  
 
-    if (geomType .eq. ESMF_GEOMTYPE_GRID) then
+    if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
        if (ESMF_LogFoundError(localrc, &  
            ESMF_ERR_PASSTHRU, &  

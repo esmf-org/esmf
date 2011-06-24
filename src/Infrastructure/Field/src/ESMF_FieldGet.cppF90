@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.81 2011/06/23 00:39:17 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.82 2011/06/24 03:01:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.81 2011/06/23 00:39:17 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.82 2011/06/24 03:01:05 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -122,7 +122,7 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),  intent(out), optional :: arrayspec
     type(ESMF_FieldStatus_Flag),intent(out), optional :: status
-    type(ESMF_GeomType),   intent(out), optional :: geomtype     
+    type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype     
     type(ESMF_Grid),       intent(out), optional :: grid     
     type(ESMF_Mesh),       intent(out), optional :: mesh     
     type(ESMF_LocStream),  intent(out), optional :: locstream     
@@ -276,7 +276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_FieldType), pointer :: ftype
     integer :: localrc
     type(ESMF_GridDecompType) :: decompType
-    type(ESMF_GeomType) :: localGeomType
+    type(ESMF_GeomType_Flag) :: localGeomType
     type(ESMF_Status) :: fieldstatus
 
     ! Initialize
@@ -314,7 +314,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-        geomType = localGeomType
+        geomtype = localGeomType
     endif
 
     if (present(grid)) then
