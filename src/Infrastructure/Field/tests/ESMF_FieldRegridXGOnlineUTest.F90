@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.9 2011/06/23 22:54:38 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.10 2011/06/24 17:43:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -662,7 +662,7 @@ contains
     if(lpet == 0) print *, ' dst flux and area from direct Regrid: ', allsrcsum
     dstFlux_reg = allsrcsum(1)
     call ESMF_FieldRegrid(srcField=f_ocn, dstField=f_atm, routehandle=rh_o2a, &
-      zeroflag=ESMF_REGION_SELECT, rc=localrc)
+      zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -766,7 +766,7 @@ contains
     !----------------------------------------------------
     !call display_flux1D(exf, xArea, xFrac)
     call ESMF_FieldRegrid(f_ocn, f_xgrid, routehandle=rh_o2x, &
-      zeroflag=ESMF_REGION_SELECT, rc=localrc)
+      zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -780,7 +780,7 @@ contains
 
     !call display_flux2D(atm, srcArea, srcFracPtr)
     call ESMF_FieldRegrid(f_xgrid, f_atm, routehandle=rh_x2a, &
-      zeroflag=ESMF_REGION_SELECT, rc=localrc)
+      zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1358,7 +1358,7 @@ contains
 
     !call display_flux2D(ocn, dstArea, dstFracPtr)
     call ESMF_FieldRegrid(srcField=f_ocn, dstField=f_atm, routehandle=rh_o2a, &
-      zeroflag=ESMF_REGION_SELECT, rc=localrc)
+      zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1490,7 +1490,7 @@ contains
     !----------------------------------------------------
     !call display_flux1D(exf, xArea, xFrac)
     call ESMF_FieldRegrid(f_ocn, f_xgrid, routehandle=rh_o2x, &
-      zeroflag=ESMF_REGION_SELECT, rc=localrc)
+      zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1504,7 +1504,7 @@ contains
 
     !call display_flux2D(atm, srcArea, srcFracPtr)
     call ESMF_FieldRegrid(f_xgrid, f_atm, routehandle=rh_x2a, &
-      zeroflag=ESMF_REGION_SELECT, rc=localrc)
+      zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

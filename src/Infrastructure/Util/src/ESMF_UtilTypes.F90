@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.128 2011/06/24 16:52:17 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.129 2011/06/24 17:43:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -441,35 +441,35 @@
                                ESMF_INDEX_USER = ESMF_Index_Flag(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_HaloStartRegionFlag
+!     ! ESMF_StartRegion_Flag
 !
 !     ! Interface flag for setting index bounds
 
-      type ESMF_HaloStartRegionFlag
+      type ESMF_StartRegion_Flag
       sequence
       private
         integer :: i_type
       end type
 
-      type(ESMF_HaloStartRegionFlag), parameter ::  &
-        ESMF_REGION_EXCLUSIVE = ESMF_HaloStartRegionFlag(0), &
-        ESMF_REGION_COMPUTATIONAL = ESMF_HaloStartRegionFlag(1)
+      type(ESMF_StartRegion_Flag), parameter ::  &
+        ESMF_STARTREGION_EXCLUSIVE = ESMF_StartRegion_Flag(0), &
+        ESMF_STARTREGION_COMPUTATIONAL = ESMF_StartRegion_Flag(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_RegionFlag
+!     ! ESMF_Region_Flag
 !
 !     ! Interface flag for setting index bounds
 
-      type ESMF_RegionFlag
+      type ESMF_Region_Flag
       sequence
       private
         integer :: i_type
       end type
 
-      type(ESMF_RegionFlag), parameter ::  &
-        ESMF_REGION_TOTAL = ESMF_RegionFlag(0), &
-        ESMF_REGION_SELECT = ESMF_RegionFlag(1), &
-        ESMF_REGION_EMPTY = ESMF_RegionFlag(2)
+      type(ESMF_Region_Flag), parameter ::  &
+        ESMF_REGION_TOTAL = ESMF_Region_Flag(0), &
+        ESMF_REGION_SELECT = ESMF_Region_Flag(1), &
+        ESMF_REGION_EMPTY = ESMF_Region_Flag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_CommFlag
@@ -683,9 +683,9 @@
 
       public ESMF_Index_Flag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
-      public ESMF_HaloStartRegionFlag, &
-             ESMF_REGION_EXCLUSIVE, ESMF_REGION_COMPUTATIONAL
-      public ESMF_RegionFlag, &
+      public ESMF_StartRegion_Flag, &
+             ESMF_STARTREGION_EXCLUSIVE, ESMF_STARTREGION_COMPUTATIONAL
+      public ESMF_Region_Flag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
       public ESMF_CommFlag, &
              ESMF_COMM_BLOCKING, ESMF_COMM_NBSTART, &
@@ -1154,11 +1154,11 @@ function ESMF_ifeq(if1, if2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_RegionFlag types
+! function to compare two ESMF_Region_Flag types
 
 function ESMF_rfeq(rf1, rf2)
   logical ESMF_rfeq
-  type(ESMF_RegionFlag), intent(in) :: rf1, rf2
+  type(ESMF_Region_Flag), intent(in) :: rf1, rf2
 
   ESMF_rfeq = (rf1%i_type == rf2%i_type)
 end function

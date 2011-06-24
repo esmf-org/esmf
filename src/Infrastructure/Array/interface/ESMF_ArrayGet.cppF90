@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.67 2011/06/24 16:51:50 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.68 2011/06/24 17:43:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.67 2011/06/24 16:51:50 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.68 2011/06/24 17:43:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1025,14 +1025,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
-  subroutine ESMF_ArrayGetHalo(array, routehandle, keywordEnforcer, regionflag, &
+  subroutine ESMF_ArrayGetHalo(array, routehandle, keywordEnforcer, zeroregion, &
     haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)             :: array
     type(ESMF_RouteHandle), intent(in)             :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_RegionFlag),  intent(out),  optional :: regionflag
+    type(ESMF_Region_Flag),  intent(out),  optional :: zeroregion
     integer,        target, intent(out),  optional :: haloLDepth(:)
     integer,        target, intent(out),  optional :: haloUDepth(:)
     integer,                intent(out),  optional :: rc  
@@ -1050,20 +1050,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Queried {\tt ESMF\_Array} object.
 !   \item [routehandle]
 !         Handle to the stored Route
-!   \item [{[regionflag]}]
+!   \item [{[zeroregion]}]
 !         Specifies the reference for halo width arguments: 
-!         {\tt ESMF\_REGION\_EXCLUSIVE} or {\tt ESMF\_REGION\_COMPUTATIONAL}
+!         {\tt ESMF\_STARTREGION\_EXCLUSIVE} or {\tt ESMF\_STARTREGION\_COMPUTATIONAL}
 !         (default).
 !   \item[{[haloLDepth]}] 
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total data
 !      region with respect to the lower corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
+!      or exclusive region (depending on {\tt zeroregion}.
 !   \item[{[haloUDepth]}] 
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total data
 !      region with respect to the upper corner of the computational region
-!      or exclusive region (depending on {\tt regionflag}.
+!      or exclusive region (depending on {\tt zeroregion}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1076,7 +1076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
-    regionflag = ESMF_REGION_EMPTY  ! quiet down compiler warnings while not fully implemented
+    zeroregion = ESMF_REGION_EMPTY  ! quiet down compiler warnings while not fully implemented
     
   end subroutine ESMF_ArrayGetHalo
 !------------------------------------------------------------------------------

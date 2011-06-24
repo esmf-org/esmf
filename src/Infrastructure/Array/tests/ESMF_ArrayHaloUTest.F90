@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.15 2011/06/22 15:07:00 rokuingh Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.16 2011/06/24 17:43:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.15 2011/06/22 15:07:00 rokuingh Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.16 2011/06/24 17:43:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -775,7 +775,7 @@ program ESMF_ArrayHaloUTest
   write(name, *) "ArrayHaloStore Test-3"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
-    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    startregion=ESMF_STARTREGION_COMPUTATIONAL, &
     haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -1095,7 +1095,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
 ! Test-4: 2D decomposition, overlapping halo regions, asymmetric haloDepth
-!         and use of halostartregionflag
+!         and use of startregion
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1191,7 +1191,7 @@ program ESMF_ArrayHaloUTest
   write(name, *) "ArrayHaloStore Test-4"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
-    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    startregion=ESMF_STARTREGION_COMPUTATIONAL, &
     haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -1597,7 +1597,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------
 ! Test-5: 2D decomposition with periodic boundary condition along 2nd dimension,
 !         overlapping halo regions, asymmetric haloDepth and
-!         use of halostartregionflag
+!         use of startregion
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -1704,7 +1704,7 @@ program ESMF_ArrayHaloUTest
   write(name, *) "ArrayHaloStore Test-5"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
-    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    startregion=ESMF_STARTREGION_COMPUTATIONAL, &
     haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -2201,7 +2201,7 @@ program ESMF_ArrayHaloUTest
   write(name, *) "ArrayHaloStore Test-6"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
-    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    startregion=ESMF_STARTREGION_COMPUTATIONAL, &
     haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -2658,7 +2658,7 @@ program ESMF_ArrayHaloUTest
   write(name, *) "ArrayHaloStore Test-7"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, &
-    halostartregionflag=ESMF_REGION_COMPUTATIONAL, &
+    startregion=ESMF_STARTREGION_COMPUTATIONAL, &
     haloLDepth=(/0,1/), haloUDepth=(/2,3/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   

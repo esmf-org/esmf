@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.50 2011/06/24 16:52:20 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.51 2011/06/24 17:43:59 rokuingh Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -305,21 +305,21 @@ Valid values are:
          Determine the maximum of all data elements.
 \end{description}
 
-\subsubsection{ESMF\_HaloStartRegionFlag}
-\label{opt:halostartregionflag}
+\subsubsection{ESMF\_StartRegion\_Flag}
+\label{opt:startregion}
 {\sf DESCRIPTION:\\}
 Specifies the start of the effective halo region of an Array or Field object.
 
 Valid values are:
 \begin{description}
-\item [ESMF\_REGION\_EXCLUSIVE]
+\item [ESMF\_STARTREGION\_EXCLUSIVE]
       Region of elements that are exclusively owned by the local DE.
-\item [ESMF\_REGION\_COMPUTATIONAL]
+\item [ESMF\_STARTREGION\_COMPUTATIONAL]
       User defined region, greater or equal to the exclusive region.
 \end{description}
 
-\subsubsection{ESMF\_RegionFlag}
-\label{opt:regionflag}
+\subsubsection{ESMF\_Region\_Flag}
+\label{opt:zeroregion}
 {\sf DESCRIPTION:\\}
 Specifies various regions in the data layout of an Array or Field object.
 

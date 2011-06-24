@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.30 2011/06/24 16:12:13 rokuingh Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.31 2011/06/24 17:43:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.30 2011/06/24 16:12:13 rokuingh Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.31 2011/06/24 17:43:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -296,13 +296,13 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayHaloStore(array, routehandle, keywordEnforcer, &
-      halostartregionflag, haloLDepth, haloUDepth, rc)
+      startregion, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)                :: array
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_HaloStartRegionFlag),intent(in),optional::halostartregionflag
+    type(ESMF_StartRegion_Flag),intent(in),optional::startregion
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -313,7 +313,7 @@ contains
 !
 ! !DESCRIPTION:
 !   Store an Array halo operation over the data in {\tt array}. By default,
-!   i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth} and
+!   i.e. without specifying {\tt startregion}, {\tt haloLDepth} and
 !   {\tt haloUDepth}, all elements in the total Array region that lie outside
 !   the exclusive region will be considered potential destination elements for
 !   halo. However, only those elements that have a corresponding halo source
@@ -321,15 +321,15 @@ contains
 !   the halo operation. Elements that have no associated source remain 
 !   unchanged under halo.
 !
-!   Specifying {\tt halostartregionflag} allows to change the shape of the 
+!   Specifying {\tt startregion} allows to change the shape of the 
 !   effective halo region from the inside. Setting this flag to
-!   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
+!   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region of the Array are considered for potential
-!   destination elements for halo. The default is {\tt ESMF\_REGION\_EXCLUSIVE}.
+!   destination elements for halo. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
-!   by {\tt halostartregionflag}, the {\tt haloLDepth} and {\tt haloUDepth}
+!   by {\tt startregion}, the {\tt haloLDepth} and {\tt haloUDepth}
 !   define a halo depth in each direction. Note that the maximum halo region is
 !   limited by the total Array region, independent of the actual
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array region is
@@ -356,22 +356,22 @@ contains
 !     region may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[halostartregionflag]}]
+!   \item [{[startregion]}]
 !     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
-!     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
+!     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
-!     See section \ref{opt:halostartregionflag} for a complete list of
+!     See section \ref{opt:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
 !     This vector specifies the lower corner of the effective halo
-!     region with respect to the lower corner of {\tt halostartregionflag}.
+!     region with respect to the lower corner of {\tt startregion}.
 !     The size of {\tt haloLDepth} must equal the number of distributed Array
 !     dimensions.
 !   \item[{[haloUDepth]}] 
 !     This vector specifies the upper corner of the effective halo
-!     region with respect to the upper corner of {\tt halostartregionflag}.
+!     region with respect to the upper corner of {\tt startregion}.
 !     The size of {\tt haloUDepth} must equal the number of distributed Array
 !     dimensions.
 !   \item [{[rc]}]
@@ -381,7 +381,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                         :: localrc        ! local return code
-    type(ESMF_HaloStartRegionFlag)  :: opt_halostartregionflag ! helper variable
+    type(ESMF_StartRegion_Flag)  :: opt_startregion ! helper variable
     type(ESMF_InterfaceInt)         :: haloLDepthArg  ! helper variable
     type(ESMF_InterfaceInt)         :: haloUDepthArg  ! helper variable
 
@@ -393,8 +393,8 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
     ! Set default flags
-    opt_halostartregionflag = ESMF_REGION_EXCLUSIVE
-    if (present(halostartregionflag)) opt_halostartregionflag = halostartregionflag
+    opt_startregion = ESMF_STARTREGION_EXCLUSIVE
+    if (present(startregion)) opt_startregion = startregion
 
     ! Deal with (optional) array arguments
     haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
@@ -405,7 +405,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayHaloStore(array, routehandle, opt_halostartregionflag, &
+    call c_ESMC_ArrayHaloStore(array, routehandle, opt_startregion, &
       haloLDepthArg, haloUDepthArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

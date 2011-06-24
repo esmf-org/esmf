@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.69 2011/06/24 16:12:23 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.70 2011/06/24 17:43:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.69 2011/06/24 16:12:23 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.70 2011/06/24 17:43:49 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -103,14 +103,14 @@ contains
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegrid()
       subroutine ESMF_FieldRegrid(srcField, dstField, &
-                   routehandle, keywordEnforcer, zeroflag, checkflag, rc)
+                   routehandle, keywordEnforcer, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field),       intent(in),    optional :: srcField
       type(ESMF_Field),       intent(inout), optional :: dstField
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_RegionFlag),  intent(in),    optional :: zeroflag
+      type(ESMF_Region_Flag),  intent(in),    optional :: zeroregion
       logical,                intent(in),    optional :: checkflag
       integer,                intent(out),   optional :: rc 
 !
@@ -146,17 +146,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Field} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroflag]}]
+!   \item [{[zeroregion]}]
 !     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstField} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
 !     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstField} will not be
 !     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     added to the incoming element values. Setting {\tt zeroregion} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination Array that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     multiplication. See section \ref{opt:zeroregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]
@@ -193,18 +193,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-                 routehandle=routehandle, zeroflag=zeroflag, &
+                 routehandle=routehandle, zeroregion=zeroregion, &
                  checkflag=checkflag, rc=localrc)
 		else if (present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, &
-                 routehandle=routehandle, zeroflag=zeroflag, &
+                 routehandle=routehandle, zeroregion=zeroregion, &
                  checkflag=checkflag, rc=localrc)
 		else if (.not. present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(dstArray=dstArray, &
-                 routehandle=routehandle, zeroflag=zeroflag, &
+                 routehandle=routehandle, zeroregion=zeroregion, &
                  checkflag=checkflag, rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
-          call ESMF_ArraySMM(routehandle=routehandle, zeroflag=zeroflag, &
+          call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
                  checkflag=checkflag, rc=localrc)
         else
           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
@@ -220,7 +220,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Once the compilation order is sorted out, 
         ! Should be able to call into Field SMM directly.
         !call ESMF_FieldSMM(srcField=srcField, dstField=dstField, &
-        !           routehandle=routehandle, zeroflag=zeroflag, &
+        !           routehandle=routehandle, zeroregion=zeroregion, &
         !           checkflag=checkflag, rc=localrc)
 
         !if (ESMF_LogFoundError(localrc, &

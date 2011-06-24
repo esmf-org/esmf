@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.40 2011/06/23 22:54:38 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.41 2011/06/24 17:43:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -511,7 +511,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
-                zeroflag=ESMF_REGION_SELECT, &
+                zeroregion=ESMF_REGION_SELECT, &
                 checkflag=.TRUE.,&
                 rc = localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -542,7 +542,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldRegrid(field, dstField(i), routehandle=rh_xgrid2dst(i), &
-                zeroflag=ESMF_REGION_SELECT, &
+                zeroregion=ESMF_REGION_SELECT, &
                 checkflag=.TRUE.,&
                 rc = localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -984,7 +984,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldRegrid(srcField(i), field, routehandle=rh_src2xgrid(i), &
-                zeroflag=ESMF_REGION_SELECT, &
+                zeroregion=ESMF_REGION_SELECT, &
                 checkflag=.TRUE.,&
                 rc = localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -1015,7 +1015,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             call ESMF_FieldRegrid(field, dstField(i), routehandle=rh_xgrid2dst(i), &
-                zeroflag=ESMF_REGION_SELECT, &
+                zeroregion=ESMF_REGION_SELECT, &
                 checkflag=.TRUE.,&
                 rc = localrc)
             if (ESMF_LogFoundError(localrc, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.115 2011/06/24 05:20:49 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.116 2011/06/24 17:43:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.115 2011/06/24 05:20:49 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.116 2011/06/24 17:43:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2857,14 +2857,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegrid(srcFieldBundle, dstFieldBundle, &
-         routehandle, keywordEnforcer, zeroflag, checkflag, rc)
+         routehandle, keywordEnforcer, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
         type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
         type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
+        type(ESMF_Region_Flag),  intent(in),    optional  :: zeroregion
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
 !
@@ -2901,17 +2901,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_FieldBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroflag]}]
+!   \item [{[zeroregion]}]
 !     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstFieldBundle} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
 !     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstFieldBundle} will not be
 !     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     added to the incoming element values. Setting {\tt zeroregion} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination FieldBundle that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     multiplication. See section \ref{opt:zeroregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]
@@ -2939,7 +2939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         call ESMF_FieldBundleSMM(srcFieldBundle=srcFieldBundle, &
           dstFieldBundle=dstFieldBundle, routehandle=routehandle, &
-          zeroflag=zeroflag, checkflag=checkflag, rc=localrc)
+          zeroregion=zeroregion, checkflag=checkflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
@@ -3837,14 +3837,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, &
-        routehandle, keywordEnforcer, zeroflag, checkflag, rc)
+        routehandle, keywordEnforcer, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_FieldBundle), intent(in),    optional  :: srcFieldBundle
         type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
         type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
+        type(ESMF_Region_Flag),  intent(in),    optional  :: zeroregion
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
 !
@@ -3882,17 +3882,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_FieldBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroflag]}]
+!   \item [{[zeroregion]}]
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstFieldBundle} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
 !     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstFieldBundle} will not be
 !     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     added to the incoming element values. Setting {\tt zeroregion} to 
 !
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination FieldBundle that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     multiplication. See section \ref{opt:zeroregion} for a complete list of
 !     valid settings.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input FieldBundle pair will be checked for
@@ -3909,7 +3909,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer                 :: localrc      ! local return code
         
         ! local variables to buffer optional arguments
-        type(ESMF_RegionFlag)   :: l_zeroflag
+        type(ESMF_Region_Flag)   :: l_zeroregion
         logical                 :: l_checkflag! helper variable
 
         ! local internal variables
@@ -3930,8 +3930,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Set default flags
         l_checkflag = ESMF_FALSE
         if (present(checkflag)) l_checkflag = checkflag
-        l_zeroflag = ESMF_REGION_TOTAL
-        if (present(zeroflag)) l_zeroflag = zeroflag
+        l_zeroregion = ESMF_REGION_TOTAL
+        if (present(zeroregion)) l_zeroregion = zeroregion
 
         src_bundle = .true.
         if (present(srcFieldBundle)) then
@@ -3954,16 +3954,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! perform FieldBundle SMM
         if(src_bundle .and. dst_bundle) &
             call ESMF_ArrayBundleSMM(srcab, dstab, routehandle, &
-                zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
         if(src_bundle .and. .not. dst_bundle) &
             call ESMF_ArrayBundleSMM(srcArrayBundle=srcab, routehandle=routehandle, &
-                zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
         if(.not. src_bundle .and. dst_bundle) &
             call ESMF_ArrayBundleSMM(dstArrayBundle=dstab, routehandle=routehandle, &
-                zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
         if(.not. src_bundle .and. .not. dst_bundle) &
             call ESMF_ArrayBundleSMM(routehandle=routehandle, &
-                zeroflag=l_zeroflag, checkflag=l_checkflag, rc=localrc)
+                zeroregion=l_zeroregion, checkflag=l_checkflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
             

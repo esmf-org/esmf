@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.150 2011/06/24 16:12:13 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.151 2011/06/24 17:43:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.150 2011/06/24 16:12:13 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.151 2011/06/24 17:43:44 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -531,7 +531,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
-    commflag, finishedflag, cancelledflag, zeroflag, checkflag, rc)
+    commflag, finishedflag, cancelledflag, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
@@ -541,7 +541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommFlag),    intent(in),   optional  :: commflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
-    type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
+    type(ESMF_Region_Flag),  intent(in),   optional  :: zeroregion
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -601,17 +601,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt .false.} indicates that none of the communication operations was
 !     cancelled. The data in {\tt dstArray} is valid if {\tt finishedflag} 
 !     returns equal {\tt .true.}.
-!   \item [{[zeroflag]}]
+!   \item [{[zeroregion]}]
 !     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstArray} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
 !     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstArray} will not be
 !     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     added to the incoming element values. Setting {\tt zeroregion} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination Array that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     multiplication. See section \ref{opt:zeroregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]
@@ -632,7 +632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommFlag)     :: opt_commflag ! helper variable
     type(ESMF_Logical)      :: opt_finishedflag   ! helper variable
     type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
-    type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
+    type(ESMF_Region_Flag)   :: opt_zeroregion ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -661,14 +661,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set default flags
     opt_commflag = ESMF_COMM_BLOCKING
     if (present(commflag)) opt_commflag = commflag
-    opt_zeroflag = ESMF_REGION_TOTAL
-    if (present(zeroflag)) opt_zeroflag = zeroflag
+    opt_zeroregion = ESMF_REGION_TOTAL
+    if (present(zeroregion)) opt_zeroregion = zeroregion
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
-      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_zeroflag, &
+      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_zeroregion, &
       opt_checkflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

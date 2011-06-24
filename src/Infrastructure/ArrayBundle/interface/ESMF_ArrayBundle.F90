@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.69 2011/06/21 01:29:50 w6ws Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.70 2011/06/24 17:43:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.69 2011/06/21 01:29:50 w6ws Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.70 2011/06/24 17:43:48 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1216,13 +1216,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayBundleHaloStore(arraybundle, routehandle, &
-      keywordEnforcer, halostartregionflag, haloLDepth, haloUDepth, rc)
+      keywordEnforcer, startregion, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)                :: arraybundle
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_HaloStartRegionFlag),intent(in),optional::halostartregionflag
+    type(ESMF_StartRegion_Flag),intent(in),optional::startregion
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -1233,7 +1233,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   \begin{sloppypar}
 !   Store an ArrayBundle halo operation over the data in {\tt arraybundle}. By 
-!   default, i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth}
+!   default, i.e. without specifying {\tt startregion}, {\tt haloLDepth}
 !   and {\tt haloUDepth}, all elements in the total Array regions that lie
 !   outside the exclusive regions will be considered potential destination
 !   elements for halo. However, only those elements that have a corresponding
@@ -1242,15 +1242,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   remain unchanged under halo.
 !   \end{sloppypar}
 !
-!   Specifying {\tt halostartregionflag} allows to change the shape of the 
+!   Specifying {\tt startregion} allows to change the shape of the 
 !   effective halo region from the inside. Setting this flag to
-!   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
+!   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region for each Array are considered for potential
-!   destination elements for halo. The default is {\tt ESMF\_REGION\_EXCLUSIVE}.
+!   destination elements for halo. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
-!   by {\tt halostartregionflag}, the {\tt haloLDepth} and {\tt haloUDepth}
+!   by {\tt startregion}, the {\tt haloLDepth} and {\tt haloUDepth}
 !   define a halo depth in each direction. Note that the maximum halo region is
 !   limited by the total region for each Array, independent of the actual
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Array regions are
@@ -1278,22 +1278,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     regions may be destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[halostartregionflag]}]
+!   \item [{[startregion]}]
 !     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
-!     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
+!     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
-!     See section \ref{opt:halostartregionflag} for a complete list of
+!     See section \ref{opt:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
 !     This vector specifies the lower corner of the effective halo
-!     region with respect to the lower corner of {\tt halostartregionflag}.
+!     region with respect to the lower corner of {\tt startregion}.
 !     The size of {\tt haloLDepth} must equal the number of distributed Array
 !     dimensions.
 !   \item[{[haloUDepth]}] 
 !     This vector specifies the upper corner of the effective halo
-!     region with respect to the upper corner of {\tt halostartregionflag}.
+!     region with respect to the upper corner of {\tt startregion}.
 !     The size of {\tt haloUDepth} must equal the number of distributed Array
 !     dimensions.
 !   \item [{[rc]}]
@@ -1303,7 +1303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                         :: localrc        ! local return code
-    type(ESMF_HaloStartRegionFlag)  :: opt_halostartregionflag ! helper variable
+    type(ESMF_StartRegion_Flag)  :: opt_startregion ! helper variable
     type(ESMF_InterfaceInt)         :: haloLDepthArg  ! helper variable
     type(ESMF_InterfaceInt)         :: haloUDepthArg  ! helper variable
 
@@ -1315,8 +1315,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
     ! Set default flags
-    opt_halostartregionflag = ESMF_REGION_EXCLUSIVE
-    if (present(halostartregionflag)) opt_halostartregionflag = halostartregionflag
+    opt_startregion = ESMF_STARTREGION_EXCLUSIVE
+    if (present(startregion)) opt_startregion = startregion
 
     ! Deal with (optional) array arguments
     haloLDepthArg = ESMF_InterfaceIntCreate(haloLDepth, rc=localrc)
@@ -1328,7 +1328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleHaloStore(arraybundle, routehandle, &
-      opt_halostartregionflag, haloLDepthArg, haloUDepthArg, localrc)
+      opt_startregion, haloLDepthArg, haloUDepthArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -2335,14 +2335,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleSMM(srcArrayBundle, dstArrayBundle, &
-    routehandle, keywordEnforcer, zeroflag, checkflag, rc)
+    routehandle, keywordEnforcer, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in),    optional  :: srcArrayBundle
     type(ESMF_ArrayBundle), intent(inout), optional  :: dstArrayBundle
     type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_RegionFlag),  intent(in),    optional  :: zeroflag
+    type(ESMF_Region_Flag),  intent(in),    optional  :: zeroregion
     logical,                intent(in),    optional  :: checkflag
     integer,                intent(out),   optional  :: rc
 !
@@ -2363,16 +2363,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroflag]}]
+!   \item [{[zeroregion]}]
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of 
 !     all DEs in all Arrays in {\tt dstArrayBundle} will be initialized to zero 
 !     before updating the elements with the results of the sparse matrix 
 !     multiplication. If set to {\tt ESMF\_REGION\_EMPTY} the elements in the
 !     Arrays in {\tt dstArrayBundle} will not be modified prior to the sparse
 !     matrix multiplication and results will be added to the incoming element
-!     values. Setting {\tt zeroflag} to {\tt ESMF\_REGION\_SELECT} will only
+!     values. Setting {\tt zeroregion} to {\tt ESMF\_REGION\_SELECT} will only
 !     zero out those elements in the destination Arrays that will be updated
-!     by the sparse matrix multiplication. See section \ref{opt:regionflag}
+!     by the sparse matrix multiplication. See section \ref{opt:zeroregion}
 !     for a complete list of valid settings.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pairs will be checked for
@@ -2387,7 +2387,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_RegionFlag)   :: opt_zeroflag ! helper variable
+    type(ESMF_Region_Flag)   :: opt_zeroregion ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
     type(ESMF_ArrayBundle)  :: opt_srcArrayBundle ! helper variable
     type(ESMF_ArrayBundle)  :: opt_dstArrayBundle ! helper variable
@@ -2416,14 +2416,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     ! Set default flags
-    opt_zeroflag = ESMF_REGION_TOTAL
-    if (present(zeroflag)) opt_zeroflag = zeroflag
+    opt_zeroregion = ESMF_REGION_TOTAL
+    if (present(zeroregion)) opt_zeroregion = zeroregion
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayBundleSMM(opt_srcArrayBundle, opt_dstArrayBundle,&
-      routehandle, opt_zeroflag, opt_checkflag, localrc)
+      routehandle, opt_zeroregion, opt_checkflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

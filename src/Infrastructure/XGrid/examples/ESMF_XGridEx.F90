@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.30 2011/06/24 15:04:16 rokuingh Exp $
+! $Id: ESMF_XGridEx.F90,v 1.31 2011/06/24 17:43:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -447,7 +447,7 @@
     do i = 1, 2
         call ESMF_FieldRegrid(srcField(i), field, &
             routehandle=rh_src2xgrid(i), &
-            zeroflag=ESMF_REGION_SELECT, rc = localrc)
+            zeroregion=ESMF_REGION_SELECT, rc = localrc)
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		endflag=ESMF_END_ABORT)
     enddo

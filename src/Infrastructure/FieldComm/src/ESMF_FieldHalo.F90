@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.13 2011/04/12 14:30:16 feiliu Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.14 2011/06/24 17:43:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.13 2011/04/12 14:30:16 feiliu Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.14 2011/06/24 17:43:54 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -252,14 +252,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_FieldHaloStore(field, routehandle, keywordEnforcer,  &
-      halostartregionflag, haloLDepth, haloUDepth, rc)
+      startregion, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(inout)                :: field
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_HaloStartRegionFlag), intent(in), &
-                            optional :: halostartregionflag
+    type(ESMF_StartRegion_Flag), intent(in), &
+                            optional :: startregion
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
@@ -270,7 +270,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Store a Field halo operation over the data in {\tt field}. By default,
-!   i.e. without specifying {\tt halostartregionflag}, {\tt haloLDepth} and
+!   i.e. without specifying {\tt startregion}, {\tt haloLDepth} and
 !   {\tt haloUDepth}, all elements in the total Field region that lie outside
 !   the exclusive region will be considered potential destination elements for
 !   halo. However, only those elements that have a corresponding halo source
@@ -278,15 +278,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the halo operation. Elements that have no associated source remain 
 !   unchanged under halo.
 !
-!   Specifying {\tt halostartregionflag} allows to change the shape of the 
+!   Specifying {\tt startregion} allows to change the shape of the 
 !   effective halo region from the inside. Setting this flag to
-!   {\tt ESMF\_REGION\_COMPUTATIONAL} means that only elements outside 
+!   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region of the Field are considered for potential
-!   destination elements for halo. The default is {\tt ESMF\_REGION\_EXCLUSIVE}.
+!   destination elements for halo. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
-!   by {\tt halostartregionflag}, the {\tt haloLDepth} and {\tt haloUDepth}
+!   by {\tt startregion}, the {\tt haloLDepth} and {\tt haloUDepth}
 !   define a halo depth in each direction. Note that the maximum halo region is
 !   limited by the total Field region, independent of the actual
 !   {\tt haloLDepth} and {\tt haloUDepth} setting. The total Field region is
@@ -313,22 +313,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destroyed by this call.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[halostartregionflag]}]
+!   \item [{[startregion]}]
 !     \begin{sloppypar}
 !     The start of the effective halo region on every DE. The default
-!     setting is {\tt ESMF\_REGION\_EXCLUSIVE}, rendering all non-exclusive
+!     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
-!     See section \ref{opt:halostartregionflag} for a complete list of
+!     See section \ref{opt:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
 !     This vector specifies the lower corner of the effective halo
-!     region with respect to the lower corner of {\tt halostartregionflag}.
+!     region with respect to the lower corner of {\tt startregion}.
 !     The size of {\tt haloLDepth} must equal the number of distributed Array
 !     dimensions.
 !   \item[{[haloUDepth]}] 
 !     This vector specifies the upper corner of the effective halo
-!     region with respect to the upper corner of {\tt halostartregionflag}.
+!     region with respect to the upper corner of {\tt startregion}.
 !     The size of {\tt haloUDepth} must equal the number of distributed Array
 !     dimensions.
 !   \item [{[rc]}]
@@ -356,7 +356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the Array interface, which will sort out optional arguments
     call ESMF_ArrayHaloStore(array, routehandle=routehandle, &
-      halostartregionflag=halostartregionflag, haloLDepth=haloLDepth, &
+      startregion=startregion, haloLDepth=haloLDepth, &
       haloUDepth=haloUDepth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

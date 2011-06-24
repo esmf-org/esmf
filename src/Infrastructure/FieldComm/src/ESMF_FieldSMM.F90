@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.28 2011/04/08 21:21:06 feiliu Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.29 2011/06/24 17:43:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.28 2011/04/08 21:21:06 feiliu Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.29 2011/06/24 17:43:54 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -79,14 +79,14 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldSMM(srcField, dstField, routehandle, keywordEnforcer, &
-             zeroflag, checkflag, rc)
+             zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_Field),       intent(in),   optional  :: srcField
         type(ESMF_Field),       intent(inout),optional  :: dstField
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_RegionFlag),  intent(in),   optional  :: zeroflag
+        type(ESMF_Region_Flag),  intent(in),   optional  :: zeroregion
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
@@ -132,17 +132,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_Field} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[zeroflag]}]
+!   \item [{[zeroregion]}]
 !     \begin{sloppypar}
 !     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
 !     all DEs in {\tt dstField} will be initialized to zero before updating the 
 !     elements with the results of the sparse matrix multiplication. If set to
 !     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstField} will not be
 !     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroflag} to 
+!     added to the incoming element values. Setting {\tt zeroregion} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination Field that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:regionflag} for a complete list of
+!     multiplication. See section \ref{opt:zeroregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]
@@ -194,7 +194,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         
         ! perform Field sparse matrix multiplication through internal array
         call ESMF_ArraySMM(srcArray=l_srcArray, dstArray=l_dstArray, &
-          routehandle=routehandle, zeroflag=zeroflag, checkflag=checkflag, &
+          routehandle=routehandle, zeroregion=zeroregion, checkflag=checkflag, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

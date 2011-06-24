@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.24 2011/06/24 15:03:44 rokuingh Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.25 2011/06/24 17:43:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -282,12 +282,12 @@ program ESMF_ArraySparseMatMulEx
 ! \end{verbatim}
 !
 ! The call to {\tt ESMF\_ArraySMM()} does provide the option to turn
-! the default {\tt dstArray} initialization off. If argument {\tt zeroflag}
+! the default {\tt dstArray} initialization off. If argument {\tt zeroregion}
 ! is set to {\tt ESMF\_REGION\_EMPTY}
 !EOE
 !BOC
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=sparseMatMulHandle, zeroflag=ESMF_REGION_EMPTY, rc=rc)
+    routehandle=sparseMatMulHandle, zeroregion=ESMF_REGION_EMPTY, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
