@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.18 2011/06/24 14:26:13 rokuingh Exp $
+! $Id: ESMF_Test.F90,v 1.19 2011/06/24 15:04:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.18 2011/06/24 14:26:13 rokuingh Exp $'
+      '$Id: ESMF_Test.F90,v 1.19 2011/06/24 15:04:36 rokuingh Exp $'
 
 !==============================================================================
 
@@ -602,8 +602,8 @@
       ! initialize the framework.  if this fails, print a message directly
       ! because there is no guarentee that the log code will be working.
       call ESMF_Initialize(vm=globalVM, defaultlogfilename=logFileName, &
-                           defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
-                           !defaultlogtype=ESMF_LOG_SINGLE, rc=localrc)
+                           logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
+                           !logkindflag=ESMF_LOGKIND_SINGLE, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) then
           write(msg, *) "FAIL  Unable to initialize the ESMF Framework.  Error code ", localrc
           print *, trim(msg)

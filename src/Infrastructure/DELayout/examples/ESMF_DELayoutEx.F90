@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.27 2011/06/22 19:51:30 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.28 2011/06/24 15:03:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ program ESMF_DELayoutEx
   finalrc = ESMF_SUCCESS
   
   call ESMF_Initialize(vm=vm, defaultlogfilename="DELayoutEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
   call ESMF_VMGet(vm, localPET=localPET, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99

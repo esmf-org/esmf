@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.34 2011/06/23 15:54:59 rokuingh Exp $
+! $Id: ESMF_ArraySparseMatMulSTest.F90,v 1.35 2011/06/24 15:04:50 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -87,7 +87,7 @@ program ESMF_ArraySparseMatMulSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArraySparseMatMulSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

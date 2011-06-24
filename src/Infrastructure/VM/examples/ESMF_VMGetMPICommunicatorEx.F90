@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.21 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.22 2011/06/24 15:04:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@ program ESMF_VMGetMPICommunicatorEx
   integer :: finalrc
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMGetMPICommunicatorEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   call ESMF_VMGet(vm, mpiCommunicator=mpic, rc=rc)

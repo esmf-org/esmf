@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.78 2011/06/24 14:26:08 rokuingh Exp $
+! $Id: ESMF_Init.F90,v 1.79 2011/06/24 15:04:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalendar, &
-        defaultLogFileName, defaultLogType, mpiCommunicator,  &
+        defaultLogFileName, logkindflag, mpiCommunicator,  &
         ioUnitLBound, ioUnitUBound, vm, rc)
 !
 ! !ARGUMENTS:
@@ -103,7 +103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      type(ESMF_LogType),      intent(in),  optional :: defaultLogType
+      type(ESMF_LogKind_Flag),      intent(in),  optional :: logkindflag
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
@@ -144,7 +144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     large number of log files and writing log messages from all the processors
 !     could become a performance bottleneck.  Therefore, it is recommended
 !     to turn the Error Log feature off in these situations by setting
-!     {\tt defaultLogType} to ESMF\_LOG\_NONE.
+!     {\tt logkindflag} to ESMF\_LOGKIND\_NONE.
 !
 !     When integrating ESMF with applications where Fortran unit number conflicts
 !     exist, the optional {\tt ioUnitLBound} and {\tt ioUnitUBound} arguments may be
@@ -165,10 +165,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
-!     \item [{[defaultLogType]}]
+!     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
-!           See section \ref{opt:logtype} for a list of valid options.
-!           If not specified, defaults to {\tt ESMF\_LOG\_MULTI}.
+!           See section \ref{opt:logkindflag} for a list of valid options.
+!           If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
@@ -204,7 +204,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
         defaultConfigFileName=defaultConfigFileName, &
         defaultCalendar=defaultCalendar, defaultLogFileName=defaultLogFileName,&
-        defaultLogType=defaultLogType, mpiCommunicator=mpiCommunicator, &
+        logkindflag=logkindflag, mpiCommunicator=mpiCommunicator, &
         ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound,  &
         rc=localrc)
                                       
@@ -237,7 +237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
-        defaultCalendar, defaultLogFileName, defaultLogType, &
+        defaultCalendar, defaultLogFileName, logkindflag, &
         mpiCommunicator, ioUnitLBound, ioUnitUBound, rc)
 !
 ! !ARGUMENTS:
@@ -245,7 +245,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar     
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
+      type(ESMF_LogKind_Flag),      intent(in),  optional :: logkindflag  
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
@@ -268,9 +268,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to "ESMF_ErrorLog".
-!     \item [{[defaultLogType]}]
+!     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
-!           If not specified, defaults to "ESMF\_LOG\_MULTI".
+!           If not specified, defaults to "ESMF\_LOGKIND\_MULTI".
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
@@ -291,7 +291,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical :: rcpresent                       ! Return code present   
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
-      type(ESMF_LogType) :: defaultLogTypeUse
+      type(ESMF_LogKind_Flag) :: logkindflagUse
       logical :: openflag
 
       ! Initialize return code
@@ -344,30 +344,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
-      ! check defaultLogType in case it is coming across from the C++ side with
+      ! check logkindflag in case it is coming across from the C++ side with
       ! an incorrect value
-      if (present(defaultLogType)) then
-        if (defaultLogType.eq.ESMF_LOG_SINGLE .OR. &
-            defaultLogType.eq.ESMF_LOG_MULTI .OR. &
-            defaultLogType.eq.ESMF_LOG_NONE) then
-          defaultLogTypeUse = defaultLogType
+      if (present(logkindflag)) then
+        if (logkindflag.eq.ESMF_LOGKIND_SINGLE .OR. &
+            logkindflag.eq.ESMF_LOGKIND_MULTI .OR. &
+            logkindflag.eq.ESMF_LOGKIND_NONE) then
+          logkindflagUse = logkindflag
         else
-          defaultLogTypeUse = ESMF_LOG_MULTI
+          logkindflagUse = ESMF_LOGKIND_MULTI
         endif
       else
-        defaultLogTypeUse = ESMF_LOG_MULTI
+        logkindflagUse = ESMF_LOGKIND_MULTI
       endif
 
       if (present(defaultLogFileName)) then
          if (len_trim(defaultLogFileName).ne.0) then
-           call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogTypeUse, &
+           call ESMF_LogInitialize(defaultLogFileName, logkindflag=logkindflagUse, &
                                   rc=status)
          else
-           call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
+           call ESMF_LogInitialize("ESMF_LogFile", logkindflag=logkindflagUse, &
                                      rc=status)
          endif
       else
-         call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogTypeUse, &
+         call ESMF_LogInitialize("ESMF_LogFile", logkindflag=logkindflagUse, &
                                    rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then

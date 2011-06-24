@@ -59,7 +59,7 @@ program ESMF_AttributeCIMSTest
 
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeCIMSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

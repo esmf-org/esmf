@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.32 2011/06/21 22:25:19 svasquez Exp $
+% $Id: LogErr_desc.tex,v 1.33 2011/06/24 15:04:04 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -37,17 +37,17 @@ the user can choose to never halt by setting the {\tt halt} property to
 {\tt ESMF\_LOG\_HALT\_NEVER}; this is the default.
 
 Log will automatically put the PET number into the Log.  Also, the user can 
-either specify {\tt ESMF\_LOG\_SINGLE} which writes all the entries to a single 
-Log or {\tt ESMF\_LOG\_MULTI} which writes entries to multiple Logs according to 
+either specify {\tt ESMF\_LOGKIND\_SINGLE} which writes all the entries to a single 
+Log or {\tt ESMF\_LOGKIND\_MULTI} which writes entries to multiple Logs according to 
 the PET number.  To distinguish Logs from each other when using 
-{\tt ESMF\_LOG\_MULTI}, the PET number (in the format {\tt PETx.}) will be 
+{\tt ESMF\_LOGKIND\_MULTI}, the PET number (in the format {\tt PETx.}) will be 
 prepended to the file name where x is the PET number.
 
 Opening multiple log files and writing log messages from all the processors
 may affect the application performance while running on a large number of
-processors.  For that reason, {\tt ESMF\_LOG\_NONE} is provided to
+processors.  For that reason, {\tt ESMF\_LOGKIND\_NONE} is provided to
 switch off the Log capability.  All the Log methods have no effect
-in the {\tt ESMF\_LOG\_NONE} mode.
+in the {\tt ESMF\_LOGKIND\_NONE} mode.
 
 \begin{sloppypar}
 A tracing capability may be enabled by setting the {\tt trace} flag

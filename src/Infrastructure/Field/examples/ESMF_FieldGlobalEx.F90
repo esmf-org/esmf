@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.22 2011/06/23 18:13:49 rokuingh Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.23 2011/06/24 15:03:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(defaultlogfilename="FieldGlobalEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
 !-------------------------------------------------------------------------
 !   ! Example 1:

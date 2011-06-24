@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.23 2011/01/19 02:13:18 svasquez Exp $
+% $Id: LogErr_rest.tex,v 1.24 2011/06/24 15:04:04 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,8 +39,8 @@ If a new Log is required, {\tt ESMF\_LogOpen()} is used with a new Log object
 passed in so that there are no conflicts with the default Log.
 \end{sloppypar}
 
-\item{\bf ESMF\_LOG\_SINGLE does not work properly.}
-When the {\tt ESMF\_LogType} is set to {\tt ESMF\_LOG\_SINGLE}, different system may behave
+\item{\bf ESMF\_LOGKIND\_SINGLE does not work properly.}
+When the {\tt ESMF\_LogKind\_Flag} is set to {\tt ESMF\_LOGKIND\_SINGLE}, different system may behave
 differently.  The log messages from some processors may be lost or overwritten
 by other processors.  Users are advised not to use this mode.  The MPI-based
 I/O will be implemented to fix the problem in the future release. 

@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.24 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.25 2011/06/24 15:04:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@ program ESMF_InternalStateEx
 !-------------------------------------------------------------------------
         
   call ESMF_Initialize(defaultlogfilename="InternalStateEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
 !-------------------------------------------------------------------------

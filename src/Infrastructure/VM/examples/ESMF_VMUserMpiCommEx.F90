@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.16 2011/06/22 15:07:48 rokuingh Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.17 2011/06/24 15:04:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ program ESMF_VMUserMpiCommEx
   if (rank < 2) then
     call ESMF_Initialize(mpiCommunicator=esmfComm, &
 		    defaultlogfilename="VMUserMpiCommEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     ! Only call ESMF_Initialize() on rank 0 and 1, passing the prepared MPI
     ! communicator that spans these ranks.
 !EOC

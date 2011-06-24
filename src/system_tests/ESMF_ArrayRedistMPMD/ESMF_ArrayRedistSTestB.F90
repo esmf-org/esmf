@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestB.F90,v 1.23 2011/06/23 15:54:53 rokuingh Exp $
+! $Id: ESMF_ArrayRedistSTestB.F90,v 1.24 2011/06/24 15:04:44 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 ! ESMF_ArrayRedistSTestA.F90 sets string used by test script to count system tests.
@@ -107,7 +107,7 @@ program ESMF_ArrayRedistSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayRedistSTestB.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

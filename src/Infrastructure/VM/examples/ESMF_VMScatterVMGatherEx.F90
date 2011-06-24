@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.17 2011/02/24 17:50:31 theurich Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.18 2011/06/24 15:04:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_VMScatterVMGatherEx
   finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMScatterVMGatherEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
  
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)

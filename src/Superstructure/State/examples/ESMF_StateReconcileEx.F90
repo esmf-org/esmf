@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.38 2011/05/19 19:13:51 feiliu Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.39 2011/06/24 15:04:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@ end module ESMF_StateReconcileEx_Mod
 
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="StateReconcileEx.Log", &
-                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     
     ! verify that this example can run on the given petCount
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)

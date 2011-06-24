@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.26 2011/06/22 15:06:58 rokuingh Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.27 2011/06/24 15:03:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@ program ESMF_ArrayFarrayHaloEx
   
 !BOC
   call ESMF_Initialize(defaultlogfilename="ArrayFarrayHaloEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !EOC

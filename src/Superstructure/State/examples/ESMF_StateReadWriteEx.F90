@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.14 2011/06/23 15:54:34 rokuingh Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.15 2011/06/24 15:04:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="StateReadWriteEx.Log", &
-                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
 
     state = ESMF_StateCreate(name="Ocean Import",  &

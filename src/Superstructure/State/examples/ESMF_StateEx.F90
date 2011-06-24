@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.43 2011/06/23 15:54:34 rokuingh Exp $
+! $Id: ESMF_StateEx.F90,v 1.44 2011/06/24 15:04:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 
 
     call ESMF_Initialize(defaultlogfilename="StateEx.Log", &
-                     defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
 !-------------------------------------------------------------------------
     print *, "State Example 1: Import State"

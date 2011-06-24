@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.21 2011/05/19 23:16:02 svasquez Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.22 2011/06/24 15:04:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@ program ESMF_AttributeEx
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)

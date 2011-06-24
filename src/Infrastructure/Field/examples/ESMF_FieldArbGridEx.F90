@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.19 2011/06/22 15:07:22 rokuingh Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.20 2011/06/24 15:03:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="FieldArbGridEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Calculate localArbIndex and localArbIndexCount for a 100x200 2D arbitrary grid with 

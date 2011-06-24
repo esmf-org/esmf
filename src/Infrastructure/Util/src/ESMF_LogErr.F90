@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.90 2011/06/24 14:26:01 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.91 2011/06/24 15:04:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -100,17 +100,17 @@ type(ESMF_HaltType), parameter           :: &
     ESMF_LOG_HALT_ON_WARNING = ESMF_HaltType(2), &
     ESMF_LOG_HALT_ON_ERROR =   ESMF_HaltType(3)
     
-!     ! ESMF_LogType
-type ESMF_LogType
+!     ! ESMF_LogKind_Flag
+type ESMF_LogKind_Flag
     sequence
     integer      :: ftype
 end type
     
 !     ! Log Types
-type(ESMF_LogType), parameter		:: &
-    ESMF_LOG_SINGLE = ESMF_LogType(1), &
-    ESMF_LOG_MULTI = ESMF_LogType(2),  &
-    ESMF_LOG_NONE = ESMF_LogType(3)
+type(ESMF_LogKind_Flag), parameter		:: &
+    ESMF_LOGKIND_SINGLE = ESMF_LogKind_Flag(1), &
+    ESMF_LOGKIND_MULTI = ESMF_LogKind_Flag(2),  &
+    ESMF_LOGKIND_NONE = ESMF_LogKind_Flag(3)
 
 !     ! Log Entry                            
 type ESMF_LogEntry
@@ -155,7 +155,7 @@ type ESMF_LogPrivate
     type(ESMF_Logical)			            ::  flushed 
     type(ESMF_Logical)			            ::  dirty
     type(ESMF_HaltType)                             ::  halt
-    type(ESMF_LogType)			            ::  logtype      
+    type(ESMF_LogKind_Flag)			            ::  logkindflag      
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY   => null ()
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
@@ -177,15 +177,15 @@ end type ESMF_LogPrivate
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-    public ESMF_LogType
+    public ESMF_LogKind_Flag
 
     public ESMF_LOGMSG_INFO
     public ESMF_LOGMSG_WARNING
     public ESMF_LOGMSG_ERROR
     public ESMF_LOG_ALL
-    public ESMF_LOG_SINGLE
-    public ESMF_LOG_MULTI
-    public ESMF_LOG_NONE    
+    public ESMF_LOGKIND_SINGLE
+    public ESMF_LOGKIND_MULTI
+    public ESMF_LOGKIND_NONE    
     public ESMF_LOG_HALT_NEVER
     public ESMF_LOG_HALT_ON_WARNING
     public ESMF_LOG_HALT_ON_ERROR
@@ -601,14 +601,14 @@ end function
 
 function ESMF_llteq(lt1, lt2)
   logical ESMF_llteq
-  type(ESMF_LogType), intent(in) :: lt1,lt2
+  type(ESMF_LogKind_Flag), intent(in) :: lt1,lt2
 
     ESMF_llteq = (lt1%ftype == lt2%ftype)
 end function
 
 function ESMF_lltne(lt1, lt2)
   logical ESMF_lltne
-  type(ESMF_LogType), intent(in) :: lt1,lt2
+  type(ESMF_LogKind_Flag), intent(in) :: lt1,lt2
 
     ESMF_lltne = (lt1%ftype /= lt2%ftype)
 end function
@@ -667,7 +667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       alog => ESMF_LogTable(log%logTableIndex)
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-      if (alog%logtype /= ESMF_LOG_NONE) then
+      if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
 	if (alog%FileIsOpen == ESMF_TRUE) then
 	    call ESMF_LogFlush(log,rc=rc2)		
     	    CLOSE(UNIT=alog%unitNumber)
@@ -1218,7 +1218,7 @@ end function ESMF_LogFoundError
 ! !IROUTINE: ESMF_LogGet - Return information about a log object
 
 ! !INTERFACE: 
-      subroutine ESMF_LogGet(log,verbose,flush,rootOnly,halt,logtype,stream,&
+      subroutine ESMF_LogGet(log,verbose,flush,rootOnly,halt,logkindflag,stream,&
                              maxElements, trace, rc)
 !
 ! !ARGUMENTS:
@@ -1228,7 +1228,7 @@ end function ESMF_LogFoundError
       type(ESMF_Logical), intent(out),optional   :: flush       	
       type(ESMF_Logical), intent(out),optional   :: rootOnly    	
       type(ESMF_HaltType), intent(out),optional  :: halt        	
-      type(ESMF_LogType), intent(out),optional   :: logtype     	
+      type(ESMF_LogKind_Flag), intent(out),optional   :: logkindflag     	
       integer, intent(out),optional              :: stream      	
       integer, intent(out),optional              :: maxElements
       logical, intent(out),optional              :: trace	
@@ -1257,7 +1257,7 @@ end function ESMF_LogFoundError
 !              \item {\tt ESMF\_LOG\_HALTERROR};
 !              \item {\tt ESMF\_LOG\_HALTNEVER}.
 !            \end{description}
-!      \item [{[logtype]}]
+!      \item [{[logkindflag]}]
 !            Defines either single or multilog.
 !      \item [{[stream]}]
 !            The type of stream, with the following valid values and meanings:
@@ -1310,8 +1310,8 @@ end function ESMF_LogFoundError
 	if (present(halt)) then
           halt=alog%halt
         endif
-	if (present(logtype)) then
-          logtype=alog%logtype
+	if (present(logkindflag)) then
+          logkindflag=alog%logkindflag
         endif
 	if (present(stream)) then
           stream=alog%stream
@@ -1337,11 +1337,11 @@ end subroutine ESMF_LogGet
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogInitialize(filename, logtype, rc)
+      subroutine ESMF_LogInitialize(filename, logkindflag, rc)
 !
 ! !ARGUMENTS:
       character(len=*)                         :: filename	   
-      type(ESMF_LogType), intent(in),optional  :: logtype 	    
+      type(ESMF_LogKind_Flag), intent(in),optional  :: logkindflag 	    
       integer, intent(out),optional	       :: rc	  	   
 
 ! !DESCRIPTION:
@@ -1356,9 +1356,9 @@ end subroutine ESMF_LogGet
 !            Name of file.  Maximum length 58 characters to allow for
 !            the PET number to be added and keep the total file name
 !            length under 64 characters.
-!      \item [{[logtype]}]
-!            Specifies {\tt ESMF\_LOG\_SINGLE}, {\tt ESMF\_LOG\_MULTI} or
-!            {\tt ESMF\_LOG\_NONE}.
+!      \item [{[logkindflag]}]
+!            Specifies {\tt ESMF\_LOGKIND\_SINGLE}, {\tt ESMF\_LOGKIND\_MULTI} or
+!            {\tt ESMF\_LOGKIND\_NONE}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1367,7 +1367,7 @@ end subroutine ESMF_LogGet
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LogOpen(ESMF_LogDefault, filename, logtype=logtype, rc=rc)
+    call ESMF_LogOpen(ESMF_LogDefault, filename, logkindflag=logkindflag, rc=rc)
 
 end subroutine ESMF_LogInitialize
 
@@ -1378,13 +1378,13 @@ end subroutine ESMF_LogInitialize
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(log, filename, keywordEnforcer, logtype, rc)
+    subroutine ESMF_LogOpen(log, filename, keywordEnforcer, logkindflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Log),     intent(inout)          :: log		   
     character(len=*),   intent(in)             :: filename	   
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_LogType), intent(in),   optional :: logtype 	    
+    type(ESMF_LogKind_Flag), intent(in),   optional :: logkindflag 	    
     integer,            intent(out),  optional :: rc		   
 
 !
@@ -1404,10 +1404,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            An {\tt ESMF\_Log} object.
 !      \item [filename]
 !            Name of log file to be opened.
-!      \item [{[logtype]}]
-!            Set the logtype. See section \ref{opt:logtype} for a list of
+!      \item [{[logkindflag]}]
+!            Set the logkindflag. See section \ref{opt:logkindflag} for a list of
 !            valid options.
-!            If not specified, defaults to {\tt ESMF\_LOG\_MULTI}.
+!            If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1476,16 +1476,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     alog%halt=ESMF_LOG_HALT_NEVER
     nullify(alog%errorMask)
     alog%errorMaskCount=0
-    if (present(logtype)) then
-      	alog%logtype=logtype
+    if (present(logkindflag)) then
+      	alog%logkindflag=logkindflag
     else
-        alog%logtype=ESMF_LOG_MULTI
+        alog%logkindflag=ESMF_LOGKIND_MULTI
     endif
     alog%traceFlag = .false.
     
-  if(alog%logtype /= ESMF_LOG_NONE) then
+  if(alog%logkindflag /= ESMF_LOGKIND_NONE) then
     	
-    if (alog%logtype == ESMF_LOG_SINGLE) then
+    if (alog%logkindflag == ESMF_LOGKIND_SINGLE) then
         alog%nameLogErrFile=trim(filename)
     else
         fname = trim(alog%petNumLabel) // "." // trim(filename)
@@ -1560,7 +1560,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     !TODO: this is really strange because every time ESMF_LogOpen() is called
     !TODO: the _default_ Log on the C side is initialized, odd, isn't it? *gjt*
-    call c_ESMC_LogInitialize(filename,alog%petNumber,alog%logtype,rc2)
+    call c_ESMC_LogInitialize(filename,alog%petNumber,alog%logkindflag,rc2)
     if (present(rc)) then
         rc=ESMF_SUCCESS    
     endif
@@ -1965,7 +1965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (associated(alog)) then
 
-      if (alog%logtype /= ESMF_LOG_NONE) then
+      if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
         if (alog%FileIsOpen /= ESMF_TRUE) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &

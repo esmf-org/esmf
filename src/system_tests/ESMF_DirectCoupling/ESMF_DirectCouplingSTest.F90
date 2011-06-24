@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.21 2011/06/23 15:55:12 rokuingh Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.22 2011/06/24 15:05:03 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -145,7 +145,7 @@ program ESMF_DirectCouplingSTest
 
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm,  defaultlogfilename="DirectCouplingSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

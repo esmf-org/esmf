@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesSTest.F90,v 1.5 2011/06/22 15:09:21 rokuingh Exp $
+! $Id: ESMF_WebServicesSTest.F90,v 1.6 2011/06/24 15:05:41 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -189,7 +189,7 @@ program ESMF_WebServicesSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="WebServicesSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

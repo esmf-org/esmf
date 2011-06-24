@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.19 2011/06/23 18:13:49 rokuingh Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.20 2011/06/24 15:03:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@
 
     ! necessary call to get ESMF going
     call ESMF_Initialize(defaultlogfilename="FieldFromUserEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
 !-------------------------------------------------------------------------
 !   ! Example 1:

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldLSSMMSTest.F90,v 1.20 2011/06/23 15:55:22 rokuingh Exp $
+! $Id: ESMF_FieldLSSMMSTest.F90,v 1.21 2011/06/24 15:05:16 rokuingh Exp $
 !
 ! System test code FieldLSSMM
 !  Description on Sourceforge under System Test #79497
@@ -79,7 +79,7 @@
 !
     ! Initialize framework and get back default global VM
     call ESMF_Initialize(vm=vm, defaultlogfilename="FieldLSSMMSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)

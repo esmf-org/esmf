@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridDisjointSTest.F90,v 1.17 2011/06/23 15:55:28 rokuingh Exp $
+! $Id: ESMF_FieldRegridDisjointSTest.F90,v 1.18 2011/06/24 15:05:28 rokuingh Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -84,7 +84,7 @@
 !
     ! Initialize framework and get back default global VM
     call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridDisjointSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)

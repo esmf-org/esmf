@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.49 2011/06/23 15:54:30 rokuingh Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.50 2011/06/24 15:04:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -252,7 +252,7 @@
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework, and get the default VM
     call ESMF_Initialize(vm=vm, defaultlogfilename="AppMainEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) then
         print *, "failed to initialize ESMF Framework"
 !EOC

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.41 2011/06/23 15:55:04 rokuingh Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.42 2011/06/24 15:04:55 rokuingh Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -54,7 +54,7 @@
 !
 
     call ESMF_Initialize(defaultlogfilename="CompCreateSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the default global VM

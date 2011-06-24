@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.18 2011/06/22 15:07:48 rokuingh Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.19 2011/06/24 15:04:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@ program ESMF_VMUserMpiEx
 #endif
 !BOC
   call ESMF_Initialize(defaultlogfilename="VMUserMpiEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

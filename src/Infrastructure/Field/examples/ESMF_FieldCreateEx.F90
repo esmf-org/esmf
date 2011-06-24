@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.107 2011/06/22 15:07:22 rokuingh Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.108 2011/06/24 15:03:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="FieldCreateEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &

@@ -1,4 +1,4 @@
-% $Id: LogErr_implnotes.tex,v 1.22 2011/01/05 20:05:44 svasquez Exp $
+% $Id: LogErr_implnotes.tex,v 1.23 2011/06/24 15:04:04 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -19,11 +19,11 @@ The {\tt ESMF\_LOG} stores information for a specific Log file.   When working
 with more than one Log file, multiple {\tt ESMF\_LOG}'s are required (one 
 {\tt ESMF\_LOG} for each Log file).  For each Log, a handle is returned 
 through the {\tt ESMF\_LogInitialize} method for the default log or {\tt ESMF\_LogOpen} for a user created log.  The user can specify single or multi logs by 
-setting the {\tt logtype} property in the {\tt ESMF\_LogInitialize} or 
-{\tt ESMF\_Open} method to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
-Similarly, the user can set the {\tt defaultlogtype} property for the default
+setting the {\tt logkindflag} property in the {\tt ESMF\_LogInitialize} or 
+{\tt ESMF\_Open} method to {\tt ESMF\_LOGKIND\_SINGLE} or {\tt ESMF\_LOGKIND\_MULTI}.
+Similarly, the user can set the {\tt logkindflag} property for the default
 Log with the {\tt ESMF\_Initialize} method call.
-The {\tt logtype} is useful as the PET numbers are automatically added to the 
+The {\tt logkindflag} is useful as the PET numbers are automatically added to the 
 log entries.  A single log will put all entries, regardless of PET number, 
 into a single log while a multi log will create multiple logs with the PET 
 number prepended to the filename and all entries will be written to their 

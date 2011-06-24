@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.15 2011/06/23 15:55:46 rokuingh Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.16 2011/06/24 15:05:44 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_diable_SYSTEM_TEST        String used by test script to count system tests.
@@ -86,7 +86,7 @@ program ESMF_XGridSerialSTest
 
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="XGridSerialSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

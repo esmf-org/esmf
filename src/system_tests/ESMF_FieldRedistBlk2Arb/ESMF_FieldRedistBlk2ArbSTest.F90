@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.24 2011/02/24 21:52:22 oehmke Exp $
+! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.25 2011/06/24 15:05:23 rokuingh Exp $
 !
 ! System test FieldRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -72,7 +72,7 @@
 !
      ! Initialize the framework and get back the default global VM
      call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRedistBlk2ArbSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
      if (rc .ne. ESMF_SUCCESS) goto 20
 
      ! Get the PET count and our PET number

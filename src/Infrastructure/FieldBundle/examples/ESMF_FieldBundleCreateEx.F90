@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.14 2011/06/22 16:37:30 feiliu Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.15 2011/06/24 15:03:57 rokuingh Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -39,7 +39,7 @@
 !-------------------------------------------------------------------------
     ! Initialize framework
     call ESMF_Initialize(defaultlogfilename="FieldBundleCreateEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
     
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

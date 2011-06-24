@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.23 2011/06/23 15:55:43 rokuingh Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.24 2011/06/24 15:05:39 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -133,7 +133,7 @@ program ESMF_SequentialEnsembleSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="SequentialEnsembleSTest.Log", &
-	defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+	logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

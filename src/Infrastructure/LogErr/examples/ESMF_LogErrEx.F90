@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.44 2011/06/24 14:25:56 rokuingh Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.45 2011/06/24 15:04:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
     ! return variables
     integer :: rc1, rc2, rc3, rcToTest, allocRcToTest
     type(ESMF_LOG) :: alog  ! a log object that is not the default log
-    type(ESMF_LogType) :: defaultLogtype
+    type(ESMF_LogKind_Flag) :: logkindflag
     type(ESMF_Time) :: time
     integer, pointer :: intptr(:)
 !EOC
@@ -54,7 +54,7 @@
 
 !BOC
     ! Initialize ESMF to initialize the default Log
-    call ESMF_Initialize(rc=rc1, defaultlogtype=ESMF_LOG_MULTI)
+    call ESMF_Initialize(rc=rc1, logkindflag=ESMF_LOGKIND_MULTI)
 !EOC
 
     if (rc1.NE.ESMF_SUCCESS) then
@@ -139,7 +139,7 @@
 !BOC
     ! This is an example showing a query of the default Log.  Please note that
     ! no Log is passed in the argument list, so the default Log will be used.
-    call ESMF_LogGet(logtype=defaultLogtype, rc=rc3)
+    call ESMF_LogGet(logkindflag=logkindflag, rc=rc3)
 !EOC
 
     if (rc3.NE.ESMF_SUCCESS) then

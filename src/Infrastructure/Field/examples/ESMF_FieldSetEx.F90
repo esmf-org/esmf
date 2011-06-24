@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.13 2011/01/05 20:05:42 svasquez Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.14 2011/06/24 15:03:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(defaultlogfilename="FieldSetEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------

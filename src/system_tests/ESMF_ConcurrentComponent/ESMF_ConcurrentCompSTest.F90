@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentCompSTest.F90,v 1.29 2011/06/23 15:55:09 rokuingh Exp $
+! $Id: ESMF_ConcurrentCompSTest.F90,v 1.30 2011/06/24 15:05:00 rokuingh Exp $
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497
@@ -97,7 +97,7 @@
 !
     ! Initialize framework and get back default global VM
     call ESMF_Initialize(vm=vm, defaultlogfilename="ConcurrentCompSTest.Log", &
-                        defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)

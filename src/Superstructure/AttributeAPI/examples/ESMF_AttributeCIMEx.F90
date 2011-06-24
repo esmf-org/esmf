@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.37 2011/06/23 15:54:25 rokuingh Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.38 2011/06/24 15:04:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@ program ESMF_AttributeCIMEx
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeCIMEx.Log", &
-        defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+        logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       if (rc/=ESMF_SUCCESS) goto 10
       
       ! get the vm

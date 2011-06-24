@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.18 2011/06/22 15:07:33 rokuingh Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.19 2011/06/24 15:04:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@ program ESMF_GridCreateEx
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="GridCreateRegFromDGEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
 !BOE
 ! First construct a single tile distgrid with regular distribution of the

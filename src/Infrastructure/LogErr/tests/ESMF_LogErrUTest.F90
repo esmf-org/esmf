@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.75 2011/06/24 14:25:59 rokuingh Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.76 2011/06/24 15:04:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.75 2011/06/24 14:25:59 rokuingh Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.76 2011/06/24 15:04:07 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@
 
       !LOCAL VARIABLES:
       type(ESMF_Log) :: log1, log5, log7
-      type(ESMF_LogType) :: logtype
+      type(ESMF_LogKind_Flag) :: logkindflag
 
 #ifdef ESMF_TESTEXHAUSTIVE
       type(ESMF_VM):: vm
@@ -107,10 +107,10 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Log Open
-      logtype = ESMF_LOG_SINGLE
+      logkindflag = ESMF_LOGKIND_SINGLE
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogOpen(log5, "Single_Log_File", logtype=logtype,  rc=rc)
-      write(name, *) "Open ESMF_LOG_SINGLE Log Test"
+      call ESMF_LogOpen(log5, "Single_Log_File", logkindflag=logkindflag,  rc=rc)
+      write(name, *) "Open ESMF_LOGKIND_SINGLE Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
@@ -128,20 +128,20 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Log Open
-      logtype = ESMF_LOG_NONE
+      logkindflag = ESMF_LOGKIND_NONE
       write(failMsg, *) "Did not return ESMF_RC_FILE_OPEN"
-      call ESMF_LogOpen(log5, "None_Log_File", logtype=logtype,  rc=rc)
-      write(name, *) "Open ESMF_LOG_NONE Log of opened file Test"
+      call ESMF_LogOpen(log5, "None_Log_File", logkindflag=logkindflag,  rc=rc)
+      write(name, *) "Open ESMF_LOGKIND_NONE Log of opened file Test"
       call ESMF_Test((rc.eq.ESMF_RC_FILE_OPEN), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Log Open
-      logtype = ESMF_LOG_NONE
+      logkindflag = ESMF_LOGKIND_NONE
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogOpen(log7, "None_Log_File", logtype=logtype,  rc=rc)
-      write(name, *) "Open ESMF_LOG_NONE Log Test"
+      call ESMF_LogOpen(log7, "None_Log_File", logkindflag=logkindflag,  rc=rc)
+      write(name, *) "Open ESMF_LOGKIND_NONE Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
 

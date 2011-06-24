@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.29 2011/06/22 15:07:51 rokuingh Exp $
+! $Id: ESMF_XGridEx.F90,v 1.30 2011/06/24 15:04:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(defaultlogfilename="XGridEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
     if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%

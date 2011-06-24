@@ -45,7 +45,7 @@
   finalrc = ESMF_SUCCESS
   
   call ESMF_Initialize(defaultlogfilename="FieldWriteEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
   if (rc.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE

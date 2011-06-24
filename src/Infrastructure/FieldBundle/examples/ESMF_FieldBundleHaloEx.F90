@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.12 2011/06/22 16:37:30 feiliu Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.13 2011/06/24 15:03:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.12 2011/06/22 16:37:30 feiliu Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.13 2011/06/24 15:03:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -56,7 +56,7 @@
     finalrc = ESMF_SUCCESS
 !------------------------------------------------------------------------------
     call ESMF_Initialize(defaultlogfilename="FieldBundleHaloEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) &

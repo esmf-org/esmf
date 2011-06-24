@@ -1,16 +1,16 @@
-% $Id: LogErr_usage.tex,v 1.27 2011/01/19 02:13:18 svasquez Exp $
+% $Id: LogErr_usage.tex,v 1.28 2011/06/24 15:04:04 rokuingh Exp $
 
 %\subsection{Use and Examples}
 
 By default {\tt ESMF\_Initialize()} opens a default Log in 
-{\tt ESMF\_LOG\_MULTI} mode. ESMF handles the initialization and finalization
+{\tt ESMF\_LOGKIND\_MULTI} mode. ESMF handles the initialization and finalization
 of the default Log so the user can immediately start using it. If additional Log
 objects are desired, they must be explicitly created or opened using
 {\tt ESMF\_LogOpen()}.
 
 {\tt ESMF\_LogOpen()} requires a Log object and filename argument. Additionally,
-the user can specify single or multi Logs by setting the {\tt logtype} property
-to {\tt ESMF\_LOG\_SINGLE} or {\tt ESMF\_LOG\_MULTI}.
+the user can specify single or multi Logs by setting the {\tt logkindflag} property
+to {\tt ESMF\_LOGKIND\_SINGLE} or {\tt ESMF\_LOGKIND\_MULTI}.
 This is useful as the PET numbers are automatically added to the Log entries.
 A single Log will put all entries, regardless of PET number, into a single
 log while a multi Log will create multiple Logs with the PET number prepended
@@ -58,8 +58,8 @@ be placed at the beginning of each method.  The user can then use the
 parameters into the method.  The user does not have to specify line number as
 it is a value supplied by cpp.
 
-An example of Log output is given below running with {\tt logtype} 
-property set to {\tt ESMF\_LOG\_MULTI} (default) using the default Log:
+An example of Log output is given below running with {\tt logkindflag} 
+property set to {\tt ESMF\_LOGKIND\_MULTI} (default) using the default Log:
 
 (Log file {\tt PET0.ESMF\_LogFile})
 \begin{verbatim}

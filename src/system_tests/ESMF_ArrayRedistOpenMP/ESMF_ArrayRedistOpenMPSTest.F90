@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.15 2011/06/23 15:54:55 rokuingh Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.16 2011/06/24 15:04:45 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -92,7 +92,7 @@ program ESMF_ArrayRedistOpenMPSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayRedistOpenMPSTest.Log", &
-    defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+    logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)

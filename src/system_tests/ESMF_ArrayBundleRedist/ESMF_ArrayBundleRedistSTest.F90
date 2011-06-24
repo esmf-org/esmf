@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleRedistSTest.F90,v 1.16 2011/06/23 15:54:47 rokuingh Exp $
+! $Id: ESMF_ArrayBundleRedistSTest.F90,v 1.17 2011/06/24 15:04:38 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -94,7 +94,7 @@ program ESMF_ArrayBundleRedistSTest
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, &
     defaultlogfilename="ArrayBundleRedistSTest.Log", &
-    defaultlogtype=ESMF_LOG_MULTI, rc=localrc)
+    logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

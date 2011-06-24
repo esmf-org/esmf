@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.24 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.25 2011/06/24 15:04:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -145,7 +145,7 @@ program ESMF_VMComponentEx
   finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(defaultlogfilename="VMComponentEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC  

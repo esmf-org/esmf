@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.11 2011/01/07 18:32:17 rokuingh Exp $
+! $Id: ESMF_GridCreateFromF90ArraysEx.F90,v 1.12 2011/06/24 15:04:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@ program ESMF_GridCreateEx
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="GridCreateFromF90ArraysEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
 
       rootPet = zero

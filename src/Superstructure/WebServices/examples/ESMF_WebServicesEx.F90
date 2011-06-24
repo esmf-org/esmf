@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.7 2011/05/05 17:26:45 theurich Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.8 2011/06/24 15:04:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -155,7 +155,7 @@ program WebServicesEx
   finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(defaultlogfilename="WebServicesEx.Log", &
-                    defaultlogtype=ESMF_LOG_MULTI, rc=rc)
+                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) then
     finalrc = ESMF_FAILURE
