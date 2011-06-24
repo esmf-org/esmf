@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.40 2011/06/14 05:57:56 eschwab Exp $
+// $Id: ESMCI_Util.h,v 1.41 2011/06/24 17:54:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -64,9 +64,9 @@ enum ESMC_BlockingFlag { ESMF_BLOCKING=1,
 enum ESMC_ContextFlag { ESMF_CHILD_IN_NEW_VM=1,
                         ESMF_CHILD_IN_PARENT_VM};
 
-// de pin flag
-enum ESMC_DePinFlag { ESMF_DE_PIN_PET=1,
-                        ESMF_DE_PIN_VAS};
+// pin flag
+enum ESMC_Pin_Flag { ESMF_PIN_DE_TO_PET=1,
+                     ESMF_PIN_DE_TO_VAS};
 
 // direction type
 enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,

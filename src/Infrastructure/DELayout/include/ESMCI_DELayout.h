@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.35 2011/06/22 18:44:40 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.36 2011/06/24 17:53:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
                     // new style delayouts follow proposal sent out on 02/15/06
     
     // - NEWSTYLE section
-    ESMC_DePinFlag dePinFlag; // type of resources DEs are pinned to    
+    ESMC_Pin_Flag pinFlag; // type of resources DEs are pinned to    
     
     int vasLocalDeCount;// number of DEs associated with local VAS
     int *vasLocalDeList;// list that holds all of the de indices for this VAS
@@ -111,16 +111,16 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     // construct() and destruct()
     int construct(VM *vmArg=ESMC_NULL_POINTER, 
-      ESMC_DePinFlag *dePinFlagArg=ESMC_NULL_POINTER, 
+      ESMC_Pin_Flag *pinFlagArg=ESMC_NULL_POINTER, 
       int *petMap=ESMC_NULL_POINTER, int petMapCount=0);
     int destruct();
     
   public:
     // create() and destroy()
     static DELayout *create(int *petMap, int petMapCount,
-      ESMC_DePinFlag *dePinFlag, VM *vm=NULL, int *rc=NULL);
+      ESMC_Pin_Flag *pinFlag, VM *vm=NULL, int *rc=NULL);
     static DELayout *create(int *deCount=NULL,
-      InterfaceInt *deGrouping=NULL, ESMC_DePinFlag *dePinFlag=NULL,
+      InterfaceInt *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
       InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout);
     // get() and set()
@@ -134,7 +134,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int getPet(int i)               const {return deInfoList[i].pet;}
     int getVas(int i)               const {return deInfoList[i].vas;}
     ESMC_Logical getOneToOneFlag()  const {return oneToOneFlag;}
-    ESMC_DePinFlag getDePinFlag()   const {return dePinFlag;}
+    ESMC_Pin_Flag getPinFlag()      const {return pinFlag;}
     int getDEMatchDE(int DEid, DELayout &layoutMatch, int *deMatchCount, 
       int *deMatchList, int len_deMatchList)const;
     int getDEMatchPET(int DEid, VM &vmMatch, int *petMatchCount,

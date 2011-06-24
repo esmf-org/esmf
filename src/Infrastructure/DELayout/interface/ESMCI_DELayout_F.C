@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.15 2011/06/22 18:44:42 theurich Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.16 2011/06/24 17:53:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ extern "C" {
   // - ESMF-public methods:
 
   void FTN(c_esmc_delayoutcreatefrompetmap)(ESMCI::DELayout **ptr, int *petMap, 
-    int *petMapCount, ESMC_DePinFlag *dePinFlag, ESMCI::VM **vm, int *rc){
+    int *petMapCount, ESMC_Pin_Flag *pinFlag, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatefrompetmap()"
     // Initialize return code; assume routine not implemented
@@ -58,7 +58,7 @@ extern "C" {
     else opt_vm = *vm;
     // call into C++
     *ptr = ESMCI::DELayout::create(petMap, *petMapCount,
-      ESMC_NOT_PRESENT_FILTER(dePinFlag), 
+      ESMC_NOT_PRESENT_FILTER(pinFlag), 
       opt_vm, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -67,7 +67,7 @@ extern "C" {
   }
 
   void FTN(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
-    ESMCI::InterfaceInt **deGrouping, ESMC_DePinFlag *dePinFlag, 
+    ESMCI::InterfaceInt **deGrouping, ESMC_Pin_Flag *pinFlag, 
     ESMCI::InterfaceInt **petList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatedefault()"
@@ -82,7 +82,7 @@ extern "C" {
     *ptr = ESMCI::DELayout::create(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       *deGrouping, 
-      ESMC_NOT_PRESENT_FILTER(dePinFlag),
+      ESMC_NOT_PRESENT_FILTER(pinFlag),
       *petList, opt_vm, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
@@ -123,7 +123,7 @@ extern "C" {
 
   void FTN(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
     int *deCount, ESMCI::InterfaceInt **petMap, ESMCI::InterfaceInt **vasMap,
-    ESMC_Logical *oneToOneFlag, ESMC_DePinFlag *dePinFlag,
+    ESMC_Logical *oneToOneFlag, ESMC_Pin_Flag *pinFlag,
     int *localDeCount, ESMCI::InterfaceInt **localDeList,
     int *vasLocalDeCount, ESMCI::InterfaceInt **vasLocalDeList, int *rc){
 #undef  ESMC_METHOD
@@ -171,8 +171,8 @@ extern "C" {
     }
     if (ESMC_NOT_PRESENT_FILTER(oneToOneFlag) != ESMC_NULL_POINTER)
       *oneToOneFlag = (*ptr)->getOneToOneFlag();
-    if (ESMC_NOT_PRESENT_FILTER(dePinFlag) != ESMC_NULL_POINTER)
-      *dePinFlag = (*ptr)->getDePinFlag();
+    if (ESMC_NOT_PRESENT_FILTER(pinFlag) != ESMC_NULL_POINTER)
+      *pinFlag = (*ptr)->getPinFlag();
     if (ESMC_NOT_PRESENT_FILTER(localDeCount) != ESMC_NULL_POINTER)
       *localDeCount = (*ptr)->getLocalDeCount();
     if (*localDeList != NULL){

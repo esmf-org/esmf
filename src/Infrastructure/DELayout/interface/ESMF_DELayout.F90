@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.94 2011/06/24 16:51:55 rokuingh Exp $
+! $Id: ESMF_DELayout.F90,v 1.95 2011/06/24 17:53:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.94 2011/06/24 16:51:55 rokuingh Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.95 2011/06/24 17:53:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -245,7 +245,7 @@ contains
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in), optional  :: deCount
     integer, target,              intent(in), optional  :: deGrouping(:)
-    type(ESMF_Pin_Flag),         intent(in), optional  :: pinflag
+    type(ESMF_Pin_Flag),          intent(in), optional  :: pinflag
     integer, target,              intent(in), optional  :: petList(:)
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -366,7 +366,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     integer,                      intent(in)            :: petMap(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Pin_Flag),         intent(in), optional  :: pinflag
+    type(ESMF_Pin_Flag),          intent(in), optional  :: pinflag
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
 !         
@@ -462,7 +462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in)            :: compWeights(:)
     integer,                      intent(in)            :: commWeights(:,:)
     integer, target,              intent(in), optional  :: deGrouping(:)
-    type(ESMF_Pin_Flag),         intent(in), optional  :: pinflag
+    type(ESMF_Pin_Flag),          intent(in), optional  :: pinflag
     integer, target,              intent(in), optional  :: petList(:)
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -821,7 +821,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,          intent(out),  optional  :: petMap(:)
     integer, target,          intent(out),  optional  :: vasMap(:)
     logical,                  intent(out),  optional  :: oneToOneFlag
-    type(ESMF_Pin_Flag),     intent(out),  optional  :: pinflag
+    type(ESMF_Pin_Flag),      intent(out),  optional  :: pinflag
     integer,                  intent(out),  optional  :: localDeCount
     integer, target,          intent(out),  optional  :: localDeList(:)
     integer,                  intent(out),  optional  :: vasLocalDeCount

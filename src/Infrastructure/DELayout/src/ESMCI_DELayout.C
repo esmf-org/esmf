@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.44 2011/06/22 18:44:43 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.45 2011/06/24 17:53:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.44 2011/06/22 18:44:43 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.45 2011/06/24 17:53:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -73,7 +73,7 @@ DELayout *DELayout::create(
 //
   int *petMap,              // (in) pointer to petMap list
   int petMapCount,          // (in) number of element in petMap
-  ESMC_DePinFlag *dePinFlag,// (in) type of resources DEs are pinned to
+  ESMC_Pin_Flag *pinFlag,   // (in) type of resources DEs are pinned to
   VM *vm,                   // (in) VM context
   int *rc){                 // (out) return code
 //
@@ -89,7 +89,7 @@ DELayout *DELayout::create(
   DELayout *delayout;
   try{
     delayout = new DELayout;
-    localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
+    localrc = delayout->construct(vm, pinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return ESMC_NULL_POINTER;
@@ -122,7 +122,7 @@ DELayout *DELayout::create(
 //
   int *deCountArg,              // (in) number of DEs
   InterfaceInt *deGrouping,     // (in) deGrouping vector
-  ESMC_DePinFlag *dePinFlag,    // (in) type of resources DEs are pinned to
+  ESMC_Pin_Flag *pinFlag,       // (in) type of resources DEs are pinned to
   InterfaceInt *petListArg,     // (in) list of PETs to be used in delayout
   VM *vm,                       // (in) VM context
   int *rc){                     // (out) return code
@@ -245,7 +245,7 @@ DELayout *DELayout::create(
   DELayout *delayout;
   try{
     delayout = new DELayout;
-    localrc = delayout->construct(vm, dePinFlag, petMap, petMapCount);
+    localrc = delayout->construct(vm, pinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       if (petMapDeleteFlag) delete [] petMap;
       delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -446,10 +446,10 @@ int DELayout::construct(
 //
 // !ARGUMENTS:
 //
-  VM *vmArg,                   // (in) VM context
-  ESMC_DePinFlag *dePinFlagArg,// (in) type of resources DEs are pinned to
-  int *petMap,                 // (in) pointer to petMap list
-  int petMapCount){            // (in) number of element in petMap
+  VM *vmArg,                    // (in) VM context
+  ESMC_Pin_Flag *pinFlagArg,    // (in) type of resources DEs are pinned to
+  int *petMap,                  // (in) pointer to petMap list
+  int petMapCount){             // (in) number of element in petMap
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMC\_DELayout object.
@@ -473,10 +473,10 @@ int DELayout::construct(
   int localVas = vmArg->getVas(localPet);
   
   // by default pin DEs to PETs
-  if (dePinFlagArg == ESMC_NULL_POINTER)
-    dePinFlag = ESMF_DE_PIN_PET;
+  if (pinFlagArg == ESMC_NULL_POINTER)
+    pinFlag = ESMF_PIN_DE_TO_PET;
   else
-    dePinFlag = *dePinFlagArg;
+    pinFlag = *pinFlagArg;
   
   // by default use a sequential 1-to-1 petMap
   int petMapDeleteFlag = 0; // reset
@@ -1332,11 +1332,11 @@ int DELayout::print()const{
       printf("ESMF_TRUE\n");
     else
       printf("ESMF_FALSE\n");
-    printf("dePinFlag = ");
-    if (dePinFlag == ESMF_DE_PIN_PET)
-      printf("ESMF_DE_PIN_PET\n");
-    else if (dePinFlag == ESMF_DE_PIN_VAS)
-      printf("ESMF_DE_PIN_VAS\n");
+    printf("pinFlag = ");
+    if (pinFlag == ESMF_PIN_DE_TO_PET)
+      printf("ESMF_PIN_DE_TO_PET\n");
+    else if (pinFlag == ESMF_PIN_DE_TO_VAS)
+      printf("ESMF_PIN_DE_TO_VAS\n");
     else
       printf(" ...unknown... \n");
     printf("deCount = %d\n", deCount);
@@ -1435,7 +1435,7 @@ int DELayout::serialize(
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  ESMC_DePinFlag *dp;
+  ESMC_Pin_Flag *dp;
   de_type *dep;
   int r;
 
@@ -1474,9 +1474,9 @@ int DELayout::serialize(
     ip += oldstyle ? 3 : 2;
 
   if (!oldstyle){
-    dp = (ESMC_DePinFlag *)ip;
+    dp = (ESMC_Pin_Flag *)ip;
     if (inquireflag != ESMF_INQUIREONLY)
-      *dp++ = dePinFlag;
+      *dp++ = pinFlag;
     else
       dp++;
     ip = (int *)dp;
@@ -1571,7 +1571,7 @@ DELayout *DELayout::deserialize(
   char *cp;
   int *ip;
   ESMC_Logical *lp;
-  ESMC_DePinFlag *dp;
+  ESMC_Pin_Flag *dp;
   de_type *dep;
   int r;
 
@@ -1597,8 +1597,8 @@ DELayout *DELayout::deserialize(
     a->ndim = *ip++;
   }
   if (!a->oldstyle){
-    dp = (ESMC_DePinFlag *)ip;
-    a->dePinFlag = *dp++;
+    dp = (ESMC_Pin_Flag *)ip;
+    a->pinFlag = *dp++;
     ip = (int *)dp;
   }
   
@@ -1694,7 +1694,7 @@ ServiceReply DELayout::serviceOffer(
   int localVas = vm->getVas(localPet);
   
   // DE to PET pinning is more restrictive -> check first
-  if (dePinFlag == ESMF_DE_PIN_PET){
+  if (pinFlag == ESMF_PIN_DE_TO_PET){
     // search for de in localDeList
     int i;
     for (i=0; i<localDeCount; i++)
@@ -1778,7 +1778,7 @@ int DELayout::serviceComplete(
   int localVas = vm->getVas(localPet);
   
   // DE to PET pinning is more restrictive -> check first
-  if (dePinFlag == ESMF_DE_PIN_PET){
+  if (pinFlag == ESMF_PIN_DE_TO_PET){
     // search for de in localDeList
     int i;
     for (i=0; i<localDeCount; i++)
