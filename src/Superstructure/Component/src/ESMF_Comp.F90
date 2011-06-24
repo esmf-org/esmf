@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.213 2011/06/24 21:46:02 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.214 2011/06/24 22:31:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,17 +59,17 @@ module ESMF_CompMod
 ! !PRIVATE TYPES:
   private
 !------------------------------------------------------------------------------
-! ! ESMF_CompType
+! ! ESMF_CompType_Flag
 !
-  type ESMF_CompType
+  type ESMF_CompType_Flag
     sequence
     private
     integer :: ctype
   end type
 
-  type(ESMF_CompType), parameter :: &
-    ESMF_COMPTYPE_GRID = ESMF_CompType(1), &
-    ESMF_COMPTYPE_CPL  = ESMF_CompType(2)
+  type(ESMF_CompType_Flag), parameter :: &
+    ESMF_COMPTYPE_GRID = ESMF_CompType_Flag(1), &
+    ESMF_COMPTYPE_CPL  = ESMF_CompType_Flag(2)
 
 !------------------------------------------------------------------------------
 ! ! ESMF Method Type
@@ -159,7 +159,7 @@ module ESMF_CompMod
     type(ESMF_Pointer)  :: this             ! C++ ftable pointer - MUST BE FIRST
     type(ESMF_Base)     :: base             ! base class
     type(ESMF_MethodTable) :: methodTable   ! attachable methods
-    type(ESMF_CompType) :: compType         ! component type
+    type(ESMF_CompType_Flag) :: compType         ! component type
     type(ESMF_Config)   :: config           ! configuration object
     type(ESMF_Clock)    :: clock            ! private component clock
     type(ESMF_Grid)     :: grid             ! default grid, gcomp only
@@ -235,7 +235,7 @@ module ESMF_CompMod
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
   public ESMF_CompClass, ESMF_CWrap
-  public ESMF_CompType
+  public ESMF_CompType_Flag
   public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
   public ESMF_CompStatus
   public ESMF_COMPSTATUS_ALL_PRESENT, ESMF_COMPSTATUS_ALL_NOTPRESENT
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.213 2011/06/24 21:46:02 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.214 2011/06/24 22:31:09 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -451,17 +451,17 @@ contains
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_CompTypes to see if they're the same 
+! function to compare two ESMF_CompType_Flags to see if they're the same 
 
   function ESMF_cteq(ct1, ct2)
     logical ESMF_cteq
-    type(ESMF_CompType), intent(in) :: ct1, ct2
+    type(ESMF_CompType_Flag), intent(in) :: ct1, ct2
     ESMF_cteq = (ct1%ctype == ct2%ctype)    
   end function
 
   function ESMF_ctne(ct1, ct2)
     logical ESMF_ctne
-    type(ESMF_CompType), intent(in) :: ct1, ct2
+    type(ESMF_CompType_Flag), intent(in) :: ct1, ct2
     ESMF_ctne = (ct1%ctype /= ct2%ctype)
   end function
 !------------------------------------------------------------------------------
@@ -483,7 +483,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
-    type(ESMF_CompType),     intent(in)            :: compType
+    type(ESMF_CompType_Flag),     intent(in)            :: compType
     character(len=*),        intent(in),  optional :: name
     character(len=*),        intent(in),  optional :: dirPath
     character(len=*),        intent(in),  optional :: configFile
@@ -1068,7 +1068,7 @@ contains
     character(len=*),        intent(out), optional :: configFile
     type(ESMF_Config),       intent(out), optional :: config
     logical,                 intent(out), optional :: configIsPresent
-    type(ESMF_CompType),     intent(out), optional :: compType
+    type(ESMF_CompType_Flag),     intent(out), optional :: compType
     type(ESMF_Method),       intent(out), optional :: currentMethod
     integer,                 intent(out), optional :: currentPhase
     integer,                 intent(out), optional :: localPet

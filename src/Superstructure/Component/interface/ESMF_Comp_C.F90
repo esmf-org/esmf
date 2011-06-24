@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.71 2011/06/24 05:48:13 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.72 2011/06/24 22:31:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.71 2011/06/24 05:48:13 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.72 2011/06/24 22:31:07 rokuingh Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ recursive subroutine f_esmf_compgetctype(comp, comptype, rc)
   implicit none
 
   type(ESMF_CWrap) :: comp
-  type(ESMF_CompType) :: comptype
+  type(ESMF_CompType_Flag) :: comptype
   integer :: rc
 
   ! Initialize return code; assume routine not implemented

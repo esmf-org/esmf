@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.33 2011/06/24 16:52:23 rokuingh Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.34 2011/06/24 22:31:12 rokuingh Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -903,7 +903,7 @@ module ESMF_ComplianceICMod
     type(ESMF_GridComp)                   :: comp
     integer,      intent(out), optional   :: rc
     
-    type(ESMF_CompType)                   :: comptype
+    type(ESMF_CompType_Flag)                   :: comptype
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
