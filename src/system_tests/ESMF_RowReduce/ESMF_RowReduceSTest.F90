@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.42 2011/06/23 18:14:28 rokuingh Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.43 2011/06/24 20:30:24 rokuingh Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -222,7 +222,7 @@
 
     ! Call the Reduce code
     call ESMF_DELayoutAllFullReduce(delayout1, rowdata, result, rowlen, &
-                                    ESMF_SUM, rc=rc)
+                                    ESMF_REDUCE_SUM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Row Reduction operation called"
 

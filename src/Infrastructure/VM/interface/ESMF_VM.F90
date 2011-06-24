@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.136 2011/06/24 18:25:32 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.137 2011/06/24 20:30:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.136 2011/06/24 18:25:32 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.137 2011/06/24 20:30:15 rokuingh Exp $"
 
 !==============================================================================
 
@@ -737,7 +737,7 @@ contains
 !    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
 !    <type>(ESMF_KIND_<kind>),         intent(out)           :: recvData
 !    integer,                          intent(in)            :: count
-!    type(ESMF_ReduceFlag),            intent(in)            :: reduceflag
+!    type(ESMF_Reduce_Flag),            intent(in)            :: reduceflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
@@ -820,7 +820,7 @@ contains
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer(ESMF_KIND_I4),         intent(out)           :: recvData
     integer,                       intent(in)            :: count
-    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
@@ -881,7 +881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R4),         intent(out)           :: recvData
     integer,                    intent(in)            :: count
-    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
@@ -942,7 +942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R8),         intent(out)           :: recvData
     integer,                    intent(in)            :: count
-    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
@@ -1614,7 +1614,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
 !    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
 !    integer,                          intent(in)            :: count
-!    type(ESMF_ReduceFlag),            intent(in)            :: reduceflag
+!    type(ESMF_Reduce_Flag),            intent(in)            :: reduceflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
@@ -1697,7 +1697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
-    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
@@ -1757,7 +1757,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),                 intent(in)            :: vm
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData
-    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
@@ -1815,7 +1815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
-    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
@@ -1876,7 +1876,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
-    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
@@ -4469,7 +4469,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    <type>(ESMF_KIND_<kind>), target, intent(in)             :: sendData(:)
 !    <type>(ESMF_KIND_<kind>), target, intent(out)            :: recvData(:)
 !    integer,                          intent(in)             :: count
-!    type(ESMF_ReduceFlag),            intent(in)             :: reduceflag
+!    type(ESMF_Reduce_Flag),            intent(in)             :: reduceflag
 !    integer,                          intent(in)             :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_BlockingFlag),          intent(in),  optional :: blockingflag
@@ -4555,7 +4555,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
-    type(ESMF_ReduceFlag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingflag
@@ -4617,7 +4617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)             :: sendData(:)
     real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)
     integer,                    intent(in)             :: count
-    type(ESMF_ReduceFlag),      intent(in)             :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)             :: reduceflag
     integer,                    intent(in)             :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag
@@ -4679,7 +4679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
-    type(ESMF_ReduceFlag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_BlockingFlag),    intent(in),  optional :: blockingflag

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.152 2011/06/24 18:24:09 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.153 2011/06/24 20:30:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.152 2011/06/24 18:24:09 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.153 2011/06/24 20:30:04 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -234,7 +234,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(inout)           :: array
     real(ESMF_KIND_R8),         intent(out),  optional  :: result
-    type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)              :: reduceflag
     integer,                    intent(in)              :: rootPET
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc  
@@ -298,7 +298,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(inout)           :: array
     real(ESMF_KIND_R8), target, intent(out),  optional  :: farray(:,:)
-    type(ESMF_ReduceFlag),      intent(in)              :: reduceflag
+    type(ESMF_Reduce_Flag),      intent(in)              :: reduceflag
     integer,                    intent(in)              :: rootPET
     integer,                    intent(in)              :: dimList(:)
     integer,                    intent(in),   optional  :: tile
@@ -1726,8 +1726,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Array),    intent(in)              :: array
     real(ESMF_KIND_R8),     intent(out)             :: result
-    type(ESMF_ReduceFlag),  intent(in)              :: reduceflag
-    type(ESMF_ReduceFlag),  intent(in)              :: reduceflagDummy !prevent conflict
+    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflag
+    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflagDummy !prevent conflict
     integer,                intent(in)              :: rootPET
     type(ESMF_VM),          intent(in),   optional  :: vm
     integer,                intent(out),  optional  :: rc  
@@ -1792,7 +1792,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Array),    intent(in)              :: array
     real(ESMF_KIND_R8),     intent(out)             :: result
-    type(ESMF_ReduceFlag),  intent(in)              :: reduceflag
+    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflag
     integer,                intent(in)              :: rootPET
     type(ESMF_CommHandle),  intent(inout)           :: commhandle
     type(ESMF_VM),          intent(in),   optional  :: vm
@@ -1862,7 +1862,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Array),    intent(in)              :: array
     real(ESMF_KIND_R8),     intent(out)             :: result
-    type(ESMF_ReduceFlag),  intent(in)              :: reduceflag
+    type(ESMF_Reduce_Flag),  intent(in)              :: reduceflag
     integer,                intent(in)              :: rootPET
     integer,                intent(in)              :: de
     type(ESMF_VM),          intent(in),   optional  :: vm

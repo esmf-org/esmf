@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.10 2011/06/24 17:43:51 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.11 2011/06/24 20:30:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -502,7 +502,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_VMAllReduce(vm, (/eleCount/), totCount, 1, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/eleCount/), totCount, 1, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -637,7 +637,7 @@ contains
         srcsum(3) = srcsum(3) +          srcArea(i,j)
       enddo
     enddo
-    call ESMF_VMAllReduce(vm, srcsum, allsrcsum, 3, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, srcsum, allsrcsum, 3, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1326,7 +1326,7 @@ contains
         srcsum(3) = srcsum(2) +          srcArea(i,j)
       enddo
     enddo
-    call ESMF_VMAllReduce(vm, srcsum, allsrcsum, 3, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, srcsum, allsrcsum, 3, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1640,7 +1640,7 @@ contains
       sum(3) = sum(3) +                 area(i)
     enddo
 
-    call ESMF_VMAllReduce(vm, sum, allsum, 3, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, sum, allsum, 3, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1678,7 +1678,7 @@ contains
       enddo
     enddo
 
-    call ESMF_VMAllReduce(vm, sum, allsum, 3, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, sum, allsum, 3, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

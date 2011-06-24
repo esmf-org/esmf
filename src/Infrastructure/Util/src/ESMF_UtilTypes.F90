@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.130 2011/06/24 18:24:15 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.131 2011/06/24 20:30:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -326,15 +326,15 @@
 
 !     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
 
-      type ESMF_ReduceFlag
+      type ESMF_Reduce_Flag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_ReduceFlag), parameter ::  ESMF_SUM   = ESMF_ReduceFlag(1), &
-                                          ESMF_MIN   = ESMF_ReduceFlag(2), &
-                                          ESMF_MAX   = ESMF_ReduceFlag(3)
+      type(ESMF_Reduce_Flag), parameter ::  ESMF_REDUCE_SUM   = ESMF_Reduce_Flag(1), &
+                                          ESMF_REDUCE_MIN  = ESMF_Reduce_Flag(2), &
+                                          ESMF_REDUCE_MAX  = ESMF_Reduce_Flag(3)
                                      
 !------------------------------------------------------------------------------
 !
@@ -691,7 +691,7 @@
              ESMF_ROUTESYNC_BLOCKING, ESMF_ROUTESYNC_NBSTART, &
              ESMF_ROUTESYNC_NBTESTFINISH, ESMF_ROUTESYNC_NBWAITFINISH, ESMF_ROUTESYNC_CANCEL
 
-      public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
+      public ESMF_Reduce_Flag, ESMF_REDUCE_SUM, ESMF_REDUCE_MIN, ESMF_REDUCE_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
              ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM

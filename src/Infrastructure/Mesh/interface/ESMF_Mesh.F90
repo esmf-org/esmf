@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.67 2011/06/23 21:06:20 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.68 2011/06/24 20:30:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.67 2011/06/23 21:06:20 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.68 2011/06/24 20:30:09 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.67 2011/06/23 21:06:20 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.68 2011/06/24 20:30:09 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1216,7 +1216,7 @@ end function ESMF_MeshCreateFromFile
 
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
     ! NodeOwners1(:) 
-    call ESMF_VMAllReduce(vm, NodeUsed, NodeOwners1, NodeCnt, ESMF_MIN, rc=localrc)
+    call ESMF_VMAllReduce(vm, NodeUsed, NodeOwners1, NodeCnt, ESMF_REDUCE_MIN, rc=localrc)
    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1303,7 +1303,7 @@ end function ESMF_MeshCreateFromFile
     else 
        localSplitElems(1)=0
     endif
-    call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_MAX, rc=localrc)
+    call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_REDUCE_MAX, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return    
     if (globalSplitElems(1) .eq. 1) then

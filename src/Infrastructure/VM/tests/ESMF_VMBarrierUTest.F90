@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.19 2011/02/24 06:47:11 theurich Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.20 2011/06/24 20:30:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.19 2011/02/24 06:47:11 theurich Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.20 2011/06/24 20:30:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -74,7 +74,7 @@
       print *, "timing precision is: ", dt_prec_local(1)
       
       ! Find the maximum dt_prec across all PETs
-      call ESMF_VMAllReduce(vm, dt_prec_local, dt_prec_max, 1, ESMF_MAX, rc=rc)
+      call ESMF_VMAllReduce(vm, dt_prec_local, dt_prec_max, 1, ESMF_REDUCE_MAX, rc=rc)
       dt_prec = dt_prec_max(1)
       print *, "max timing precision is: ", dt_prec
       

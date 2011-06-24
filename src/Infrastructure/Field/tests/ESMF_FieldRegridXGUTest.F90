@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.41 2011/06/24 17:43:51 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.42 2011/06/24 20:30:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1271,7 +1271,7 @@ contains
          print *, indices(1,j), '->', indices(2,j)
     enddo
 
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1572,7 +1572,7 @@ contains
     do j = 1, size(indices,1)
          print *, indices(j,1), '->', indices(j,2)
     enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1870,7 +1870,7 @@ contains
     !do j = 1, size(indices,2)
     !     print *, indices(1,j), '->', indices(2,j)
     !enddo
-    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_SUM, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/size(weights), size(indices,2) /), gn, 2, ESMF_REDUCE_SUM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2183,7 +2183,7 @@ contains
 
     simax = maxval(indices(1,:))
     dimax = maxval(indices(2,:))
-    call ESMF_VMAllReduce(vm, (/ simax, dimax /), gn, 2, ESMF_MAX, rc=localrc)
+    call ESMF_VMAllReduce(vm, (/ simax, dimax /), gn, 2, ESMF_REDUCE_MAX, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
