@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.31 2011/06/24 17:43:44 rokuingh Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.32 2011/06/24 18:24:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.31 2011/06/24 17:43:44 rokuingh Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.32 2011/06/24 18:24:09 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -123,13 +123,13 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayHalo(array, routehandle, keywordEnforcer, &
-    commflag, finishedflag, cancelledflag, checkflag, rc)
+    routesyncflag, finishedflag, cancelledflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(inout)           :: array
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    type(ESMF_RouteSync_Flag),    intent(in),   optional  :: routesyncflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
     logical,                intent(in),   optional  :: checkflag
@@ -160,18 +160,18 @@ contains
 !     {\tt ESMF\_Array} containing data to be haloed.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[commflag]}]
-!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!   \item [{[routesyncflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_ROUTESYNC\_BLOCKING},
 !     resulting in a blocking operation.
-!     See section \ref{opt:commflag} for a complete list of valid settings.
+!     See section \ref{opt:routesyncflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
 !     \begin{sloppypar}
-!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Used in combination with {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
 !     are still unfinished operations that require additional calls with
-!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
-!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}, or a final call with
+!     {\tt routesyncflag = ESMF\_ROUTESYNC\_NBWAITFINISH}. For all other {\tt routesyncflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
 !     \end{sloppypar}
 !   \item [{[cancelledflag]}]
@@ -194,7 +194,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
+    type(ESMF_RouteSync_Flag)     :: opt_routesyncflag ! helper variable
     type(ESMF_Logical)      :: opt_finishedflag   ! helper variable
     type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
@@ -208,14 +208,14 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit, routehandle, rc)
     
     ! Set default flags
-    opt_commflag = ESMF_COMM_BLOCKING
-    if (present(commflag)) opt_commflag = commflag
+    opt_routesyncflag = ESMF_ROUTESYNC_BLOCKING
+    if (present(routesyncflag)) opt_routesyncflag = routesyncflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayHalo(array, routehandle, &
-      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_checkflag, localrc)
+      opt_routesyncflag, opt_finishedflag, opt_cancelledflag, opt_checkflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -736,14 +736,14 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayRedist(srcArray, dstArray, routehandle, keywordEnforcer, &
-    commflag, finishedflag, cancelledflag, checkflag, rc)
+    routesyncflag, finishedflag, cancelledflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in),   optional  :: srcArray
     type(ESMF_Array),       intent(inout),optional  :: dstArray
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    type(ESMF_RouteSync_Flag),    intent(in),   optional  :: routesyncflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
     logical,                intent(in),   optional  :: checkflag
@@ -781,18 +781,18 @@ contains
 !     {\tt ESMF\_Array} with destination data.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[commflag]}]
-!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!   \item [{[routesyncflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_ROUTESYNC\_BLOCKING},
 !     resulting in a blocking operation.
-!     See section \ref{opt:commflag} for a complete list of valid settings.
+!     See section \ref{opt:routesyncflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
 !     \begin{sloppypar}
-!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Used in combination with {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
 !     are still unfinished operations that require additional calls with
-!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
-!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}, or a final call with
+!     {\tt routesyncflag = ESMF\_ROUTESYNC\_NBWAITFINISH}. For all other {\tt routesyncflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
 !     \end{sloppypar}
 !   \item [{[cancelledflag]}]
@@ -817,7 +817,7 @@ contains
     integer                 :: localrc      ! local return code
     type(ESMF_Array)        :: opt_srcArray ! helper variable
     type(ESMF_Array)        :: opt_dstArray ! helper variable
-    type(ESMF_CommFlag)     :: opt_commflag ! helper variable
+    type(ESMF_RouteSync_Flag)     :: opt_routesyncflag ! helper variable
     type(ESMF_Logical)      :: opt_finishedflag! helper variable
     type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
@@ -846,14 +846,14 @@ contains
     endif
     
     ! Set default flags
-    opt_commflag = ESMF_COMM_BLOCKING
-    if (present(commflag)) opt_commflag = commflag
+    opt_routesyncflag = ESMF_ROUTESYNC_BLOCKING
+    if (present(routesyncflag)) opt_routesyncflag = routesyncflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedist(opt_srcArray, opt_dstArray, routehandle, &
-      opt_commflag, opt_finishedflag, opt_cancelledflag, opt_checkflag, localrc)
+      opt_routesyncflag, opt_finishedflag, opt_cancelledflag, opt_checkflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

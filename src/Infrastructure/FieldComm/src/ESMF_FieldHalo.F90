@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.14 2011/06/24 17:43:54 rokuingh Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.15 2011/06/24 18:24:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.14 2011/06/24 17:43:54 rokuingh Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.15 2011/06/24 18:24:14 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -100,13 +100,13 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldHalo(field, routehandle, keywordEnforcer,  &
-                            commflag, finishedflag, checkflag, rc)
+                            routesyncflag, finishedflag, checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Field),       intent(inout)           :: field
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
-    type(ESMF_CommFlag),    intent(in),   optional  :: commflag
+    type(ESMF_RouteSync_Flag),    intent(in),   optional  :: routesyncflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
@@ -136,18 +136,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !     {\tt ESMF\_Field} containing data to be haloed.
 !   \item [routehandle]
 !     Handle to the precomputed Route.
-!   \item [{[commflag]}]
-!     Indicate communication option. Default is {\tt ESMF\_COMM\_BLOCKING},
+!   \item [{[routesyncflag]}]
+!     Indicate communication option. Default is {\tt ESMF\_ROUTESYNC\_BLOCKING},
 !     resulting in a blocking operation.
-!     See section \ref{opt:commflag} for a complete list of valid settings.
+!     See section \ref{opt:routesyncflag} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
 !     \begin{sloppypar}
-!     Used in combination with {\tt commflag = ESMF\_COMM\_NBTESTFINISH}.
+!     Used in combination with {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}.
 !     Returned {\tt finishedflag} equal to {\tt .true.} indicates that all
 !     operations have finished. A value of {\tt .false.} indicates that there
 !     are still unfinished operations that require additional calls with
-!     {\tt commflag = ESMF\_COMM\_NBTESTFINISH}, or a final call with
-!     {\tt commflag = ESMF\_COMM\_NBWAITFINISH}. For all other {\tt commflag}
+!     {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}, or a final call with
+!     {\tt routesyncflag = ESMF\_ROUTESYNC\_NBWAITFINISH}. For all other {\tt routesyncflag}
 !     settings the returned value in {\tt finishedflag} is always {\tt .true.}.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]
@@ -180,7 +180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Call into the Array interface, which will sort out optional arguments
-    call ESMF_ArrayHalo(array, routehandle=routehandle, commflag=commflag, &
+    call ESMF_ArrayHalo(array, routehandle=routehandle, routesyncflag=routesyncflag, &
       finishedflag=finishedflag, checkflag=checkflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.27 2011/06/22 15:07:00 rokuingh Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.28 2011/06/24 18:24:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.27 2011/06/22 15:07:00 rokuingh Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.28 2011/06/24 18:24:11 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -457,7 +457,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray BLOCKING Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_BLOCKING, rc=rc)
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_BLOCKING, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
@@ -503,8 +503,8 @@ program ESMF_ArrayArbIdxSMMUTest
   farrayPtr = -99 ! reset to something that would be caught during verification
 
   ! The following barrier call holds up PET 0 from calling into ArraySMM() 
-  ! until all other PETs have called in with ESMF_COMM_NBSTART, and have done
-  ! one round of calling in with ESMF_COMM_NBTESTFINISH. Doing this tests the
+  ! until all other PETs have called in with ESMF_ROUTESYNC_NBSTART, and have done
+  ! one round of calling in with ESMF_ROUTESYNC_NBTESTFINISH. Doing this tests the
   ! non-blocking mode of ArraySMM().
   if (localPet==0) call ESMF_VMBarrier(vm)
 
@@ -513,7 +513,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray NBSTART Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, rc=rc)
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_NBSTART, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
@@ -521,7 +521,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray NBTESTFINISH Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBTESTFINISH, &
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_NBTESTFINISH, &
     finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -551,11 +551,11 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet=",localPet, &
-    "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+    "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
   
   ! The folling barrier call releases PET 0 which was waiting on the barrier
   ! call before the first call to ArraySMM() above. Releasing PET 0 now will
-  ! allow the folling call with ESMF_COMM_NBWAITFINISH to finish up, where
+  ! allow the folling call with ESMF_ROUTESYNC_NBWAITFINISH to finish up, where
   ! the finishedflag on all PETs will be .true. on return.
   if (localPet/=0) call ESMF_VMBarrier(vm)
 
@@ -564,7 +564,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_NBWAITFINISH, &
     finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -576,7 +576,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet=",localPet, &
-    "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
+    "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
   ! (note: by default ArraySMM() initializes _all_ destination elements
@@ -621,8 +621,8 @@ program ESMF_ArrayArbIdxSMMUTest
   farrayPtr = -99 ! reset to something that would be caught during verification
 
   ! The following barrier call holds up PET 0 from calling inte ArraySMM() 
-  ! until all other PETs have called in with ESMF_COMM_NBSTART, and have done
-  ! one round of calling in with ESMF_COMM_NBTESTFINISH. Doing this tests the
+  ! until all other PETs have called in with ESMF_ROUTESYNC_NBSTART, and have done
+  ! one round of calling in with ESMF_ROUTESYNC_NBTESTFINISH. Doing this tests the
   ! non-blocking mode of ArraySMM().
   if (localPet==0) call ESMF_VMBarrier(vm)
 
@@ -631,7 +631,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray NBSTART Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBSTART, rc=rc)
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_NBSTART, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 !------------------------------------------------------------------------
@@ -639,7 +639,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray NBTESTFINISH Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBTESTFINISH, &
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_NBTESTFINISH, &
     finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -669,11 +669,11 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test(evalflag, name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet=",localPet, &
-    "ESMF_COMM_NBTESTFINISH: finishedflag=", finishedflag
+    "ESMF_ROUTESYNC_NBTESTFINISH: finishedflag=", finishedflag
   
   ! The folling barrier call releases PET 0 which was waiting on the barrier
   ! call before the first call to ArraySMM() above. Releasing PET 0 now will
-  ! allow the folling call with ESMF_COMM_NBWAITFINISH to finish up, where
+  ! allow the folling call with ESMF_ROUTESYNC_NBWAITFINISH to finish up, where
   ! the finishedflag on all PETs will be .true. on return.
   if (localPet/=0) call ESMF_VMBarrier(vm)
 
@@ -682,7 +682,7 @@ program ESMF_ArrayArbIdxSMMUTest
   write(name, *) "ArraySMM: srcArray -> dstArray NBWAITFINISH Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
-    routehandle=routehandle, commflag=ESMF_COMM_NBWAITFINISH, &
+    routehandle=routehandle, routesyncflag=ESMF_ROUTESYNC_NBWAITFINISH, &
     finishedflag=finishedflag, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -694,7 +694,7 @@ program ESMF_ArrayArbIdxSMMUTest
   call ESMF_Test(finishedflag, name, failMsg, result, ESMF_SRCLINE)
   
   print *, "localPet=",localPet, &
-    "ESMF_COMM_NBWAITFINISH: finishedflag=", finishedflag
+    "ESMF_ROUTESYNC_NBWAITFINISH: finishedflag=", finishedflag
   
   ! The expected result of the sparse matrix multiplication in dstArray is:
   ! (note: by default ArraySMM() initializes _all_ destination elements

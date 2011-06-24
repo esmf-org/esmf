@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.129 2011/06/24 17:43:56 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.130 2011/06/24 18:24:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -472,22 +472,22 @@
         ESMF_REGION_EMPTY = ESMF_Region_Flag(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_CommFlag
+!     ! ESMF_RouteSync_Flag
 !
 !     ! Interface flag for setting communication options
 
-      type ESMF_CommFlag
+      type ESMF_RouteSync_Flag
       sequence
       private
         integer :: i_type
       end type
 
-      type(ESMF_CommFlag), parameter ::  &
-        ESMF_COMM_BLOCKING        = ESMF_CommFlag(0), &
-        ESMF_COMM_NBSTART         = ESMF_CommFlag(1), &
-        ESMF_COMM_NBTESTFINISH    = ESMF_CommFlag(2), &
-        ESMF_COMM_NBWAITFINISH    = ESMF_CommFlag(3), &
-        ESMF_COMM_CANCEL          = ESMF_CommFlag(4)
+      type(ESMF_RouteSync_Flag), parameter ::  &
+        ESMF_ROUTESYNC_BLOCKING        = ESMF_RouteSync_Flag(0), &
+        ESMF_ROUTESYNC_NBSTART         = ESMF_RouteSync_Flag(1), &
+        ESMF_ROUTESYNC_NBTESTFINISH    = ESMF_RouteSync_Flag(2), &
+        ESMF_ROUTESYNC_NBWAITFINISH    = ESMF_RouteSync_Flag(3), &
+        ESMF_ROUTESYNC_CANCEL          = ESMF_RouteSync_Flag(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_AttWriteFlag
@@ -687,9 +687,9 @@
              ESMF_STARTREGION_EXCLUSIVE, ESMF_STARTREGION_COMPUTATIONAL
       public ESMF_Region_Flag, &
              ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
-      public ESMF_CommFlag, &
-             ESMF_COMM_BLOCKING, ESMF_COMM_NBSTART, &
-             ESMF_COMM_NBTESTFINISH, ESMF_COMM_NBWAITFINISH, ESMF_COMM_CANCEL
+      public ESMF_RouteSync_Flag, &
+             ESMF_ROUTESYNC_BLOCKING, ESMF_ROUTESYNC_NBSTART, &
+             ESMF_ROUTESYNC_NBTESTFINISH, ESMF_ROUTESYNC_NBWAITFINISH, ESMF_ROUTESYNC_CANCEL
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &

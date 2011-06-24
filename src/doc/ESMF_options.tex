@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.51 2011/06/24 17:43:59 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.52 2011/06/24 18:24:17 rokuingh Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -142,21 +142,21 @@ Valid values are:
 
 \end{description}
 
-\subsubsection{ESMF\_CommFlag}
-\label{opt:commflag}
+\subsubsection{ESMF\_RouteSync\_Flag}
+\label{opt:routesyncflag}
 {\sf DESCRIPTION:\\}  
 Switch between blocking and non-blocking execution of RouteHandle based
 communication calls. Every RouteHandle based communication method contains
-an optional argument {\tt commflag} that is of type {\tt ESMF\_CommFlag}.
+an optional argument {\tt routesyncflag} that is of type {\tt ESMF\_RouteSync\_Flag}.
 
 Valid values are:
 \begin{description}
 
-\item [ESMF\_COMM\_BLOCKING]
+\item [ESMF\_ROUTESYNC\_BLOCKING]
          Execute a precomputed communication pattern in blocking mode. This
          mode guarantees that when the method returns all PET-local data
          transfers, both in-bound and out-bound, have finished. 
-\item [ESMF\_COMM\_NBSTART]
+\item [ESMF\_ROUTESYNC\_NBSTART]
          \begin{sloppypar}
          Start executing a precomputed communication pattern in non-blocking
          mode. When a method returns from being called in this mode, it
@@ -164,25 +164,25 @@ Valid values are:
          It is now safe for the user to overwrite out-bound data elements.
          No guarantees are made for in-bound data elements at this stage. It is
          unsafe to access these elements until a call in
-         {\tt ESMF\_COMM\_NBTESTFINISH} mode has been issued and has returned
+         {\tt ESMF\_ROUTESYNC\_NBTESTFINISH} mode has been issued and has returned
          with {\tt finishedflag} equal to .true., or a call in
-         {\tt ESMF\_COMM\_NBWAITFINISH} mode has been issued and has returned.
+         {\tt ESMF\_ROUTESYNC\_NBWAITFINISH} mode has been issued and has returned.
          \end{sloppypar}
-\item [ESMF\_COMM\_NBTESTFINISH]
+\item [ESMF\_ROUTESYNC\_NBTESTFINISH]
          Test whether the transfer of data of a precomputed communication
-         pattern, started with {\tt ESMF\_COMM\_NBSTART}, has completed.
+         pattern, started with {\tt ESMF\_ROUTESYNC\_NBSTART}, has completed.
          Finish up as much as possible and set the {\tt finishedflag} to 
          {\tt .true.} if {\em all} data operations have completed, or
          {\tt .false.} if there are still outstanding transfers. Only after
          a {\tt finishedflag} equal to {\tt .true.} has been returned is it
          safe to access any of the in-bound data elements.
-\item [ESMF\_COMM\_NBWAITFINISH]
+\item [ESMF\_ROUTESYNC\_NBWAITFINISH]
          Wait (i.e. block) until the transfer of data of a precomputed
-         communication pattern, started with {\tt ESMF\_COMM\_NBSTART}, has
+         communication pattern, started with {\tt ESMF\_ROUTESYNC\_NBSTART}, has
          completed. Finish up {\em all} data operations and set the returned 
          {\tt finishedflag} to {\tt .true.}. It is safe to access any of the
          in-bound data elements once the call has returned.
-\item [ESMF\_COMM\_CANCEL]
+\item [ESMF\_ROUTESYNC\_CANCEL]
          Cancel outstanding transfers for a precomputed communication pattern.
 \end{description}
 
