@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.114 2011/06/24 03:01:07 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.115 2011/06/24 05:20:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.114 2011/06/24 03:01:07 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.115 2011/06/24 05:20:49 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2813,7 +2813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! TODO:
         ! internal grids match
-        !if(ESMF_GridMatch(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
+        !if(ESMF_GridMatchType(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
         !    call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         !       "src and dst FieldBundle must have matching grid", &
         !        ESMF_CONTEXT, rcToReturn=rc)
@@ -3201,8 +3201,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    ! TODO: This only needs to consider matching the Field staggerlocs in the Grid
                    !       and it only needs to match the coordinates and distribution
                    !       Reimplement as a FieldMatch() with an EXACTMAT output????
-                   if ((ESMF_GridMatch(currSrcGrid, prevSrcGrid)==ESMF_GRIDMATCH_EXACT) .and. &
-                       (ESMF_GridMatch(currDstGrid, prevDstGrid)==ESMF_GRIDMATCH_EXACT)) then
+                   if ((ESMF_GridMatchType(currSrcGrid, prevSrcGrid)==ESMF_GRIDMATCH_EXACT) .and. &
+                       (ESMF_GridMatchType(currDstGrid, prevDstGrid)==ESMF_GRIDMATCH_EXACT)) then
                       matchesPrev=.true.
                    endif
                 endif
@@ -4608,7 +4608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! TODO:
         ! internal grids match
-        !if(ESMF_GridMatch(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
+        !if(ESMF_GridMatchType(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
         !    call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         !       "src and dst FieldBundle must have matching grid", &
         !        ESMF_CONTEXT, rcToReturn=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.226 2011/06/24 04:48:40 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.227 2011/06/24 05:20:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -192,17 +192,17 @@ integer,parameter :: ESMF_GRID_ARBDIM = -1
 ! ! ESMF_GridStatus_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_GridMatchType
+  type ESMF_GridMatchType_Flag
   sequence
 !  private
      integer :: gridmatch
   end type
 
-  type(ESMF_GridMatchType), parameter :: &
-                      ESMF_GRIDMATCH_INVALID=ESMF_GridMatchType(-1), &
-                      ESMF_GRIDMATCH_UNINIT=ESMF_GridMatchType(0), &
-                      ESMF_GRIDMATCH_NONE=ESMF_GridMatchType(1), &
-		      ESMF_GRIDMATCH_EXACT=ESMF_GridMatchType(2)
+  type(ESMF_GridMatchType_Flag), parameter :: &
+                      ESMF_GRIDMATCH_INVALID=ESMF_GridMatchType_Flag(-1), &
+                      ESMF_GRIDMATCH_UNINIT=ESMF_GridMatchType_Flag(0), &
+                      ESMF_GRIDMATCH_NONE=ESMF_GridMatchType_Flag(1), &
+		      ESMF_GRIDMATCH_EXACT=ESMF_GridMatchType_Flag(2)
 
 !------------------------------------------------------------------------------
 !
@@ -215,7 +215,7 @@ public ESMF_GridConn_Flag,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
 public ESMF_GridStatus_Flag,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
                       ESMF_GRIDSTATUS_EMPTY,  ESMF_GRIDSTATUS_COMPLETE
 
-public  ESMF_GridMatchType,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
+public ESMF_GridMatchType_Flag,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
                          ESMF_GRIDMATCH_NONE,  ESMF_GRIDMATCH_EXACT
 
 public  ESMF_PoleType,  ESMF_POLETYPE_NONE, ESMF_POLETYPE_MONOPOLE, &
@@ -280,7 +280,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridSerialize
   public ESMF_GridDeserialize
 
-  public ESMF_GridMatch
+  public ESMF_GridMatchType
 
   public ESMF_GridValidate
 
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.226 2011/06/24 04:48:40 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.227 2011/06/24 05:20:51 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -823,7 +823,7 @@ end interface
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchEqual
+         module procedure ESMF_GridMatchTypeEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
@@ -839,7 +839,7 @@ end interface
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchNotEqual
+         module procedure ESMF_GridMatchTypeNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -855,7 +855,7 @@ end interface
       interface operator (>)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchGreater
+         module procedure ESMF_GridMatchTypeGreater
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -870,7 +870,7 @@ end interface
       interface operator (.lt.)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchLess
+         module procedure ESMF_GridMatchTypeLess
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -885,7 +885,7 @@ end interface
       interface operator (>=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchGreaterEqual
+         module procedure ESMF_GridMatchTypeGreaterEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -900,7 +900,7 @@ end interface
       interface operator (.le.)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchLessEqual
+         module procedure ESMF_GridMatchTypeLessEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -16606,15 +16606,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatch()"
+#define ESMF_METHOD "ESMF_GridMatchType()"
 !BOP
-! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
+! !IROUTINE: ESMF_GridMatchType - Check if two Grid objects match
 
 ! !INTERFACE:
-  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, rc)
+  function ESMF_GridMatchType(grid1, grid2, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_GridMatchType) :: ESMF_GridMatch
+    type(ESMF_GridMatchType_Flag) :: ESMF_GridMatchType
       
 ! !ARGUMENTS:
     type(ESMF_Grid),  intent(in)              :: grid1
@@ -16652,7 +16652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! init to one setting in case of error
-    ESMF_GridMatch = ESMF_GRIDMATCH_NONE
+    ESMF_GridMatchType = ESMF_GRIDMATCH_NONE
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid1, rc)
@@ -16665,14 +16665,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (matchResult == 1) then
-       ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
+       ESMF_GridMatchType = ESMF_GRIDMATCH_EXACT
     else
-       ESMF_GridMatch = ESMF_GRIDMATCH_NONE
+       ESMF_GridMatchType = ESMF_GRIDMATCH_NONE
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-  end function ESMF_GridMatch
+  end function ESMF_GridMatchType
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -20324,19 +20324,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchEqual"
+#define ESMF_METHOD "ESMF_GridMatchTypeEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchEqual - Equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchTypeEqual - Equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchTypeEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchEqual
+      logical :: ESMF_GridMatchTypeEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType), intent(in) :: &
+      type (ESMF_GridMatchType_Flag), intent(in) :: &
          GridMatch1,      &! Two igrid statuses to compare for
          GridMatch2        ! equality
 
@@ -20352,25 +20352,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchEqual = (GridMatch1%gridmatch == &
+      ESMF_GridMatchTypeEqual = (GridMatch1%gridmatch == &
                               GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchEqual
+      end function ESMF_GridMatchTypeEqual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchNotEqual"
+#define ESMF_METHOD "ESMF_GridMatchTypeNotEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchNotEqual - Non-equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchTypeNotEqual - Non-equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchNotEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchTypeNotEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchNotEqual
+      logical :: ESMF_GridMatchTypeNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType), intent(in) :: &
+      type (ESMF_GridMatchType_Flag), intent(in) :: &
          GridMatch1,      &! Two GridMatch Statuses to compare for
          GridMatch2        ! inequality
 
@@ -20386,27 +20386,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchNotEqual = (GridMatch1%gridmatch /= &
+      ESMF_GridMatchTypeNotEqual = (GridMatch1%gridmatch /= &
                                  GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchNotEqual
+      end function ESMF_GridMatchTypeNotEqual
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchGreater"
+#define ESMF_METHOD "ESMF_GridMatchTypeGreater"
 !BOPI
-! !IROUTINE: ESMF_GridMatchGreater - Equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchTypeGreater - Equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchGreater(GridMatch1, GridMatch2)
+      function ESMF_GridMatchTypeGreater(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchGreater
+      logical :: ESMF_GridMatchTypeGreater
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType), intent(in) :: &
+      type (ESMF_GridMatchType_Flag), intent(in) :: &
          GridMatch1,      &! Two igrid statuses to compare for
          GridMatch2        ! equality
 
@@ -20422,25 +20422,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchGreater = (GridMatch1%gridmatch > &
+      ESMF_GridMatchTypeGreater = (GridMatch1%gridmatch > &
                               GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchGreater
+      end function ESMF_GridMatchTypeGreater
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchLess"
+#define ESMF_METHOD "ESMF_GridMatchTypeLess"
 !BOPI
-! !IROUTINE: ESMF_GridMatchLess - Non-equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchTypeLess - Non-equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchLess(GridMatch1, GridMatch2)
+      function ESMF_GridMatchTypeLess(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchLess
+      logical :: ESMF_GridMatchTypeLess
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType), intent(in) :: &
+      type (ESMF_GridMatchType_Flag), intent(in) :: &
          GridMatch1,      &! Two GridMatch Statuses to compare for
          GridMatch2        ! inequality
 
@@ -20456,26 +20456,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchLess = (GridMatch1%gridmatch .lt. &
+      ESMF_GridMatchTypeLess = (GridMatch1%gridmatch .lt. &
                                  GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchLess
+      end function ESMF_GridMatchTypeLess
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchGreaterEqual"
+#define ESMF_METHOD "ESMF_GridMatchTypeGreaterEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchGreaterEqual - Greater than or equal of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchTypeGreaterEqual - Greater than or equal of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchGreaterEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchTypeGreaterEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchGreaterEqual
+      logical :: ESMF_GridMatchTypeGreaterEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType), intent(in) :: &
+      type (ESMF_GridMatchType_Flag), intent(in) :: &
          GridMatch1,      &! Two igrid statuses to compare for
          GridMatch2        ! equality
 
@@ -20491,25 +20491,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchGreaterEqual = (GridMatch1%gridmatch >= &
+      ESMF_GridMatchTypeGreaterEqual = (GridMatch1%gridmatch >= &
                               GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchGreaterEqual
+      end function ESMF_GridMatchTypeGreaterEqual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchLessEqual"
+#define ESMF_METHOD "ESMF_GridMatchTypeLessEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchLessEqual - Less than or equal of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchTypeLessEqual - Less than or equal of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchLessEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchTypeLessEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchLessEqual
+      logical :: ESMF_GridMatchTypeLessEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType), intent(in) :: &
+      type (ESMF_GridMatchType_Flag), intent(in) :: &
          GridMatch1,      &! Two GridMatch Statuses to compare for
          GridMatch2        ! inequality
 
@@ -20525,10 +20525,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchLessEqual = (GridMatch1%gridmatch .le. &
+      ESMF_GridMatchTypeLessEqual = (GridMatch1%gridmatch .le. &
                                  GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchLessEqual
+      end function ESMF_GridMatchTypeLessEqual
 
 
 

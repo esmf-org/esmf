@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.67 2011/06/24 03:01:05 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.68 2011/06/24 05:20:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.67 2011/06/24 03:01:05 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.68 2011/06/24 05:20:48 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -945,7 +945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(srcGrid, gridA(i))==ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatchType(srcGrid, gridA(i))==ESMF_GRIDMATCH_EXACT) then
                     srcIdx = i
                     srcSide = ESMF_XGRID_SIDEA
                     found = .true.
@@ -953,7 +953,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(srcGrid, gridB(i))==ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatchType(srcGrid, gridB(i))==ESMF_GRIDMATCH_EXACT) then
                     if(found) then
                         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
@@ -1016,7 +1016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(dstGrid, gridA(i))==ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatchType(dstGrid, gridA(i))==ESMF_GRIDMATCH_EXACT) then
                     dstIdx = i
                     dstSide = ESMF_XGRID_SIDEA
                     found = .true.
@@ -1024,7 +1024,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(dstGrid, gridB(i))==ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatchType(dstGrid, gridB(i))==ESMF_GRIDMATCH_EXACT) then
                     if(found) then
                         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
