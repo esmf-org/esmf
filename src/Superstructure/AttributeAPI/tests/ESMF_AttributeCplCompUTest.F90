@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.39 2011/06/24 16:12:48 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.40 2011/06/24 16:28:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.39 2011/06/24 16:12:48 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.40 2011/06/24 16:28:03 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1298,7 +1298,7 @@ program ESMF_AttributeCplCompUTest
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
-      !NEX_UTest
+      !EX_UTest
       ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test 2
       call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1306,7 +1306,7 @@ program ESMF_AttributeCplCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test 2
       call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1314,7 +1314,7 @@ program ESMF_AttributeCplCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test 2
       call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1322,7 +1322,7 @@ program ESMF_AttributeCplCompUTest
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Unlink a CplComp Attribute hierarchy from a State Attribute hierarchy CplComp Test 3
       call ESMF_AttributeLinkRemove(cplcomp, sfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1330,7 +1330,7 @@ program ESMF_AttributeCplCompUTest
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Unlink a CplComp Attribute hierarchy to a CplComp Attribute hierarchy CplComp Test 3
       call ESMF_AttributeLinkRemove(cplcomp, cfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1338,7 +1338,7 @@ program ESMF_AttributeCplCompUTest
       call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Unlink a CplComp Attribute hierarchy to a GridComp Attribute hierarchy CplComp Test 3
       call ESMF_AttributeLinkRemove(cplcomp, gfc, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
