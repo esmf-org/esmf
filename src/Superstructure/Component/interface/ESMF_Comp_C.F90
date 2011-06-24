@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.70 2011/02/23 23:37:42 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.71 2011/06/24 05:48:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.70 2011/02/23 23:37:42 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.71 2011/06/24 05:48:13 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -168,7 +168,7 @@ end subroutine f_esmf_compinsertvm
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compgetctype"
-recursive subroutine f_esmf_compgetctype(comp, ctype, rc)
+recursive subroutine f_esmf_compgetctype(comp, comptype, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -177,13 +177,13 @@ recursive subroutine f_esmf_compgetctype(comp, ctype, rc)
   implicit none
 
   type(ESMF_CWrap) :: comp
-  type(ESMF_CompType) :: ctype
+  type(ESMF_CompType) :: comptype
   integer :: rc
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  call ESMF_CompGet(comp%compp, ctype=ctype, rc=rc)
+  call ESMF_CompGet(comp%compp, comptype=comptype, rc=rc)
 end subroutine f_esmf_compgetctype
 
 #undef  ESMF_METHOD

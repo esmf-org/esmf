@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.143 2011/06/22 22:12:45 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.144 2011/06/24 05:48:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,6 +45,7 @@ module ESMF_CplCompMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_CompMod
+  use ESMF_CplCompStatusMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
 
@@ -56,6 +57,12 @@ module ESMF_CplCompMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
+
+! - ESMF-public types:
+  public ESMF_CplCompStatus             ! implemented in ESMF_CplCompStatusMod
+
+!------------------------------------------------------------------------------
+! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
   public operator(==)
@@ -84,6 +91,8 @@ module ESMF_CplCompMod
   public ESMF_CplCompWait
   public ESMF_CplCompWriteRestart
 
+  public ESMF_CplCompStatusGet          ! implemented in ESMF_CplCompStatusMod
+  
 ! - ESMF-internal methods:
   public ESMF_CplCompGetInit
 
@@ -92,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.143 2011/06/22 22:12:45 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.144 2011/06/24 05:48:15 theurich Exp $'
 
 !==============================================================================
 !
@@ -685,12 +694,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompGet"
 !BOP
-! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
+! !IROUTINE: ESMF_CplCompGet - Get CplComp information
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, config, configFile, &
     clock, localPet, petCount, contextflag, currentMethod, currentPhase, &
-    vm, name, rc)
+    cplCompStatus, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(in)            :: cplcomp
@@ -703,20 +712,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ContextFlag), intent(out), optional :: contextflag
     type(ESMF_Method),      intent(out), optional :: currentMethod
     integer,                intent(out), optional :: currentPhase
+    type(ESMF_CplCompStatus), intent(out), optional :: cplCompStatus
     type(ESMF_VM),          intent(out), optional :: vm
     character(len=*),       intent(out), optional :: name
     integer,                intent(out), optional :: rc
-
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Returns information about an {\tt ESMF\_CplComp}.
-! For queries where the caller
-! only wants a single value, specify the argument by name.
-! All the arguments after {\tt cplcomp} argument are optional 
-! to facilitate this.
 !
 ! The arguments are:
 ! \begin{description}
@@ -740,6 +745,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   See section \ref{opt:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
+! \item[{[cplCompStatus]}]
+!   Return the CplCompStatus.
 ! \item[{[vm]}]
 !   Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 ! \item[{[name]}]
@@ -759,10 +766,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompGet(cplcomp%compp, name, vm=vm, contextflag=contextflag, &
+    call ESMF_CompGet(cplcomp%compp, name=name, vm=vm, contextflag=contextflag,&
       clock=clock, configFile=configFile, config=config, &
       currentMethod=currentMethod, currentPhase=currentPhase, &
-      localPet=localPet, petCount=petCount, rc=localrc)
+      localPet=localPet, petCount=petCount, compStatus=cplCompStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

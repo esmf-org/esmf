@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.34 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.35 2011/06/24 05:48:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,6 +61,8 @@
     character(ESMF_MAXSTR) :: cname, bname
     type (dataWrapper) :: wrap1, wrap2
     type(testData), target :: data1, data2
+    type(ESMF_CplCompStatus) :: cplStatus
+    logical         :: isPresent
 #endif
 
 !-------------------------------------------------------------------------------
@@ -165,7 +167,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Create a Coupler Component with a negative number in the petlist
-    ! to force ab error.
+    ! to force an error.
     cname = "CplComp with out of range PetList"
     cpl2 = ESMF_CplCompCreate(name=cname, petList=(/0,-3/), rc=rc)
     write(failMsg, *) "Did not return ESMF_RC_ARG_VALUE"
@@ -175,14 +177,14 @@
     !------------------------------------------------------------------------
     !EX_UTest
     ! Create a Coupler Component setting with an out of range petlist
-    ! to force ab error.
+    ! to force an error.
     cname = "CplComp with out of range PetList"
     cpl2 = ESMF_CplCompCreate(name=cname, petList=(/0,2,5,8/), rc=rc)
     write(failMsg, *) "Did not return ESMF_RC_ARG_VALUE"
     write(name, *) "Creating a Coupler Component with out of range petList"
     call ESMF_Test((rc.eq.ESMF_RC_ARG_VALUE), name, failMsg, result, ESMF_SRCLINE)
 
-   !------------------------------------------------------------------------
+    !------------------------------------------------------------------------
     !EX_UTest
     ! Query the run status of a Gridded Component
     bool = ESMF_CplCompIsPetLocal(cpl2, rc=rc)
@@ -194,15 +196,36 @@
                                 name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-
-   !
     !EX_UTest
-   !  Test creation of a Component
+    ! Test creation of a Component
     cplname = "One Way Coupler"
     cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Get status of a Coupler Component
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Get status of a Coupler Component"
+    call ESMF_CplCompGet(cpl, cplCompStatus=cplStatus, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Query clockIsPresent
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Query clockIsPresent bit for Clock that was not set Test"
+    call ESMF_CplCompStatusGet(cplStatus, clockIsPresent=isPresent, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !EX_UTest
+    ! Verify clockIsPresent
+    write(failMsg, *) "Did not verify"
+    write(name, *) "Verify clockIsPresent for Clock that was not set Test"
+    call ESMF_Test((.not.isPresent), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !EX_UTest
