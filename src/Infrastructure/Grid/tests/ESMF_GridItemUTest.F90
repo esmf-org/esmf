@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.19 2011/06/22 15:07:34 rokuingh Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.20 2011/06/24 04:15:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.19 2011/06/22 15:07:34 rokuingh Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.20 2011/06/24 04:15:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -759,7 +759,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
   type (ESMF_Grid) :: grid
   type (ESMF_StaggerLoc),intent(in) :: staggerloc
-  type (ESMF_GridItem), intent(in) :: item
+  type (ESMF_GridItem_Flag), intent(in) :: item
   integer,intent(in) :: localPet, petCount
   integer,intent(in) :: ielbnd0(:),ieubnd0(:),iloff0(:),iuoff0(:)
   integer,intent(in) :: ielbnd1(:),ieubnd1(:),iloff1(:),iuoff1(:)

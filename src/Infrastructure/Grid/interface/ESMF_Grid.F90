@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.224 2011/06/24 03:37:16 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.225 2011/06/24 04:15:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -88,22 +88,22 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_GridItem
+! ! ESMF_GridItem_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_GridItem
+  type ESMF_GridItem_Flag
   sequence
 !  private
      integer :: gridItem
   end type
 
-  type(ESMF_GridItem), parameter :: &
-                      ESMF_GRIDITEM_INVALID=ESMF_GridItem(-2), &
-                      ESMF_GRIDITEM_UNINIT=ESMF_GridItem(-1), &
-                      ESMF_GRIDITEM_MASK=ESMF_GridItem(0), &
-                      ESMF_GRIDITEM_AREA=ESMF_GridItem(1), &
-                      DEPREC_ESMF_GRIDITEM_AREAM=ESMF_GridItem(2), & ! DEPRECATED: If using, please email esmf support.
-                      DEPREC_ESMF_GRIDITEM_FRAC=ESMF_GridItem(3)     ! DEPRECATED: If using, please email esmf support.
+  type(ESMF_GridItem_Flag), parameter :: &
+                      ESMF_GRIDITEM_INVALID=ESMF_GridItem_Flag(-2), &
+                      ESMF_GRIDITEM_UNINIT=ESMF_GridItem_Flag(-1), &
+                      ESMF_GRIDITEM_MASK=ESMF_GridItem_Flag(0), &
+                      ESMF_GRIDITEM_AREA=ESMF_GridItem_Flag(1), &
+                      DEPREC_ESMF_GRIDITEM_AREAM=ESMF_GridItem_Flag(2), & ! DEPRECATED: If using, please email esmf support.
+                      DEPREC_ESMF_GRIDITEM_FRAC=ESMF_GridItem_Flag(3)     ! DEPRECATED: If using, please email esmf support.
 
 
 !------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ public ESMF_CoordSys, ESMF_COORDSYS_CART, &
                       ESMF_COORDSYS_SPH_DEG, &
                       ESMF_COORDSYS_SPH_RAD
 
-public  ESMF_GridItem,  ESMF_GRIDITEM_INVALID, ESMF_GRIDITEM_UNINIT, &
+public ESMF_GridItem_Flag,  ESMF_GRIDITEM_INVALID, ESMF_GRIDITEM_UNINIT, &
                       ESMF_GRIDITEM_MASK, ESMF_GRIDITEM_AREA, &
                       DEPREC_ESMF_GRIDITEM_AREAM, DEPREC_ESMF_GRIDITEM_FRAC
 public  ESMF_DefaultFlag
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.224 2011/06/24 03:37:16 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.225 2011/06/24 04:15:55 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1493,7 +1493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)           :: grid 
-      type (ESMF_GridItem),   intent(in)           :: item
+      type (ESMF_GridItem_Flag),   intent(in)           :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
       type (ESMF_TypeKind),   intent(in),optional  :: itemTypeKind
@@ -13697,7 +13697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in)            :: grid
-!     type (ESMF_GridItem),   intent(in)            :: item
+!     type (ESMF_GridItem_Flag),   intent(in)            :: item
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
 !     integer,                intent(in),  optional :: localDE
@@ -13831,7 +13831,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),  optional :: localDE
@@ -14089,7 +14089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in), optional                 :: localDE
@@ -14349,7 +14349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in), optional :: localDE
@@ -14608,7 +14608,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in), optional :: localDE
@@ -14865,7 +14865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in), optional :: localDE
@@ -15125,7 +15125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
@@ -15385,7 +15385,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),optional :: localDE
@@ -15642,7 +15642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in),optional :: localDE
@@ -15904,7 +15904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
@@ -16162,7 +16162,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type(ESMF_Array),       intent(out)           :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -16249,7 +16249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),  optional :: localDE
@@ -19555,7 +19555,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: item
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
       type(ESMF_Array),       intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
