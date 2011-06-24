@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.9 2011/06/23 21:55:04 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.10 2011/06/24 16:09:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -292,7 +292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT)) &
         return  ! bail out
       do i=1, size(connectionList)
-        ESMF_INIT_CHECK_SHALLOW(ESMF_DistGridConnectionGetInit, connectionList(i), rc)
+ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DistGridConnectionGetInit, connectionList(i), rc)
         if (connectionList(i)%elementCount /= elementCount) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="elementCount mismatch between DistGridConnection elements.", &
