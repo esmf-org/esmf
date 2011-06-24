@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.15 2011/06/24 16:12:23 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.16 2011/06/24 16:52:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.15 2011/06/24 16:12:23 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.16 2011/06/24 16:52:00 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -654,7 +654,7 @@ subroutine ESMF_FieldEmptyCompAS(field, arrayspec, &
  type(ESMF_Field) :: field 
  type(ESMF_ArraySpec), intent(in) :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below 
- type(ESMF_IndexFlag), intent(in), optional :: indexflag 
+ type(ESMF_Index_Flag), intent(in), optional :: indexflag 
  integer, intent(in), optional :: gridToFieldMap(:) 
  integer, intent(in), optional :: ungriddedLBound(:) 
  integer, intent(in), optional :: ungriddedUBound(:) 
@@ -756,7 +756,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase)       :: geombase
-    type(ESMF_IndexFlag)      :: g_indexflag
+    type(ESMF_Index_Flag)      :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_GeomType_Flag)       :: geomtype
     type(ESMF_Grid)           :: grid
@@ -882,7 +882,7 @@ subroutine ESMF_FieldEmptyCompTK(field, typekind, &
  type(ESMF_Field) :: field 
  type(ESMF_TypeKind_Flag), intent(in)  :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below 
- type(ESMF_IndexFlag), intent(in), optional :: indexflag 
+ type(ESMF_Index_Flag), intent(in), optional :: indexflag 
  integer, intent(in), optional :: gridToFieldMap(:) 
  integer, intent(in), optional :: ungriddedLBound(:) 
  integer, intent(in), optional :: ungriddedUBound(:) 
@@ -1542,7 +1542,7 @@ end subroutine ESMF_FieldEmptyCompTK
     type(ESMF_Array) :: array                  
     integer :: i, arrayRank, gridDimCount, gridDimCount_norep, grid_repdimcount
     type(ESMF_DistGrid) :: distgrid
-    type(ESMF_IndexFlag) :: indexflag    
+    type(ESMF_Index_Flag) :: indexflag    
     integer, pointer :: distgridToArrayMap(:)
     integer, pointer :: arrayLBound(:),arrayUBound(:)
     integer              :: ungriddedDimCount
@@ -1915,7 +1915,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
@@ -2037,7 +2037,7 @@ end subroutine ESMF_FieldEmptyCompTK
     ! input arguments @\
     type(ESMF_Field) :: field @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag), intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -2332,7 +2332,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_Grid),       intent(in)            :: grid @\
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   type(ESMF_STAGGERLOC), intent(in),  optional :: staggerloc @\
@@ -2446,7 +2446,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
     type(ESMF_Field) :: field @\
     type(ESMF_Grid) :: grid                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag), intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     type(ESMF_StaggerLoc), intent(in), optional ::staggerloc  @\
@@ -2727,7 +2727,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
 !   type(ESMF_Field),      intent(inout)         :: field @\
 !   type(ESMF_LocStream),  intent(in)            :: locstream @\
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
@@ -2816,7 +2816,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGridPtr)
     type(ESMF_Field) :: field @\
     type(ESMF_LocStream) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+    type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -2991,7 +2991,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 !   type(ESMF_Mesh),       intent(in)            :: mesh @\
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
 !   type(ESMF_MeshLoc),    intent(in),  optional :: location @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
@@ -3087,7 +3087,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
     type(ESMF_Mesh) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_MeshLoc), intent(in), optional    :: location @\
-    type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+    type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -3271,7 +3271,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 !   type(ESMF_XGridSide),  intent(in),  optional :: xgridSide @\
 !   integer,               intent(in),  optional :: gridIndex @\
 !   <type> (ESMF_KIND_<kind>), target            :: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:) @\
@@ -3370,7 +3370,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
     type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
     integer,              intent(in), optional  :: gridIndex @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+    type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -3556,7 +3556,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !   type(ESMF_Field),      intent(inout)        :: field @\
 !   type(ESMF_GeomBase),   intent(in)           :: geombase @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target  :: farray @\
-!   type(ESMF_IndexFlag),  intent(in)           :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 !   type(ESMF_DataCopy_Flag),   intent(in), optional :: datacopyflag @\
 !   integer,               intent(in), optional :: gridToFieldMap(:) @\
 !   integer,               intent(in), optional :: ungriddedLBound(:) @\
@@ -3664,7 +3664,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     type(ESMF_Field) :: field @\
     type(ESMF_GeomBase) :: geombase            @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag),   intent(in)           :: indexflag @\
+    type(ESMF_Index_Flag),   intent(in)           :: indexflag @\
     type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -3693,7 +3693,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     type(ESMF_DistGrid)            :: distgrid @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
-    type(ESMF_IndexFlag)           :: g_indexflag @\
+    type(ESMF_Index_Flag)           :: g_indexflag @\
     logical                        :: found @\
     type(ESMF_GridDecompType)      :: decompType @\
     type(ESMF_GeomType_Flag)            :: geomtype @\
@@ -4210,7 +4210,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     type(ESMF_DistGrid)            :: distgrid @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
-    type(ESMF_IndexFlag)           :: indexflag @\
+    type(ESMF_Index_Flag)           :: indexflag @\
     logical                        :: found @\
     type(ESMF_GridDecompType)      :: decompType @\
     type(ESMF_GeomType_Flag)            :: geomtype @\

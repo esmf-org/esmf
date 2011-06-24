@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.32 2011/06/24 15:43:07 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.33 2011/06/24 16:52:23 rokuingh Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1386,7 +1386,7 @@ module ESMF_ComplianceICMod
     type(ESMF_Time)         :: refTime, refTimeCopy
     type(ESMF_Time)         :: currTime, currTimeCopy
     integer(ESMF_KIND_I8)   :: advanceCount, advanceCountCopy
-    type(ESMF_Direction)    :: direction, directionCopy
+    type(ESMF_Direction_Flag)    :: direction, directionCopy
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1478,7 +1478,7 @@ module ESMF_ComplianceICMod
     type(ESMF_Time)         :: refTime, refTimeInt
     type(ESMF_Time)         :: currTime, currTimeInt
     integer(ESMF_KIND_I8)   :: advanceCount, advanceCountInt
-    type(ESMF_Direction)    :: direction, directionInt
+    type(ESMF_Direction_Flag)    :: direction, directionInt
     type(ESMF_GridCompStatus) :: compStatus
 
     if (present(rc)) rc = ESMF_SUCCESS

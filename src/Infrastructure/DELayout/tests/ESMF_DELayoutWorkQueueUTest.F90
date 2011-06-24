@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.25 2011/06/22 19:51:32 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.26 2011/06/24 16:51:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@ module ESMF_DELayoutWQUTest_mod
 
     deCount = 10*petCount
     delayout = ESMF_DELayoutCreate(deCount=deCount, &
-      dePinFlag=ESMF_DE_PIN_VAS, rc=rc)
+      pinflag=ESMF_PIN_DE_TO_VAS, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
 !    call ESMF_DELayoutPrint(delayout, rc=rc)

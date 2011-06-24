@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.64 2011/06/23 22:55:08 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.65 2011/06/24 16:52:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@ logical                       :: checkpoint = .FALSE.
   ! integer, allocatable ::  localDeList(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
   ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  ! type(ESMF_IndexFlag) :: indexflag
+  ! type(ESMF_Index_Flag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -402,7 +402,7 @@ logical                       :: checkpoint = .FALSE.
   ! integer, allocatable ::  localDeList(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
   ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  ! type(ESMF_IndexFlag) :: indexflag
+  ! type(ESMF_Index_Flag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -773,7 +773,7 @@ logical                       :: checkpoint = .FALSE.
   ! integer, allocatable ::  localDeList(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
   ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  ! type(ESMF_IndexFlag) :: indexflag
+  ! type(ESMF_Index_Flag) :: indexflag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -2349,7 +2349,7 @@ logical                       :: checkpoint = .FALSE.
  
   ! local ESMF types
   type(ESMF_LocalArray), allocatable :: larrayList(:)
-  type(ESMF_IndexFlag) :: indexflag
+  type(ESMF_Index_Flag) :: indexflag
 
   ! local parameters
   integer :: localrc ! local error status
@@ -2633,7 +2633,7 @@ logical                       :: checkpoint = .FALSE.
  
   ! local ESMF types
   type(ESMF_LocalArray), allocatable :: larrayList(:)
-  type(ESMF_IndexFlag) :: indexflag
+  type(ESMF_Index_Flag) :: indexflag
 
   ! local integer variables
   integer :: de, localDeCount, dimCount 
@@ -2904,7 +2904,7 @@ logical                       :: checkpoint = .FALSE.
   ! local ESMF types
   type(ESMF_LocalArray), allocatable :: larrayList1(:)
   type(ESMF_LocalArray), allocatable :: larrayList2(:)
-  type(ESMF_IndexFlag) :: indexflag
+  type(ESMF_Index_Flag) :: indexflag
 
   ! local integer variables
   integer :: de, i1, i2, i3, i4, i5, i6, i7, k

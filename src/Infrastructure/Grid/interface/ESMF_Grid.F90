@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.228 2011/06/24 16:12:28 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.229 2011/06/24 16:52:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.228 2011/06/24 16:12:28 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.229 2011/06/24 16:52:03 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -2040,7 +2040,7 @@ end subroutine ESMF_GridConvertIndex
     type(ESMF_Array) :: array             
     type(ESMF_ArraySpec) :: arrayspec         
     type(ESMF_DistGrid) :: distgrid
-    type(ESMF_IndexFlag) :: indexflag    
+    type(ESMF_Index_Flag) :: indexflag    
     type(ESMF_TypeKind_Flag) :: localTypeKind
     type(ESMF_StaggerLoc) :: localStaggerLoc
     integer, pointer :: arrayLBound(:),arrayUBound(:)
@@ -2687,7 +2687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: gridEdgeLWidth(ESMF_MAXDIM)
        integer :: gridEdgeUWidth(ESMF_MAXDIM)
        integer :: gridAlign(ESMF_MAXDIM)
-       type(ESMF_IndexFlag) :: indexflag
+       type(ESMF_Index_Flag) :: indexflag
        integer :: i, j, nStaggers
        type(ESMF_ArrayBundle) :: srcAB, dstAB
        type(ESMF_RouteHandle) :: routehandle
@@ -3045,7 +3045,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,pointer      :: maxIndexPDimPTile(:,:)
     integer,pointer      :: minIndexLocal(:)
     integer,pointer      :: maxIndexLocal(:)
-    type(ESMF_IndexFlag) :: indexflag
+    type(ESMF_Index_Flag) :: indexflag
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -3309,7 +3309,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -3595,7 +3595,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -4096,7 +4096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional  :: gridEdgeUWidth(:)
        integer,               intent(in),  optional  :: gridAlign(:)
        integer,               intent(in),  optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional  :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
        character (len=*),     intent(in),  optional  :: name
        integer,               intent(out), optional  :: rc
 !
@@ -5708,7 +5708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -5980,7 +5980,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -6459,7 +6459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -6717,7 +6717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -7172,7 +7172,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -7423,7 +7423,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -7872,7 +7872,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -8897,7 +8897,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        character (len=*),     intent(in),  optional :: name 
        integer,               intent(out), optional :: rc
@@ -10523,7 +10523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,       target, intent(out), optional :: gridEdgeLWidth(:)
       integer,       target, intent(out), optional :: gridEdgeUWidth(:)
       integer,       target, intent(out), optional :: gridAlign(:)
-      type(ESMF_IndexFlag),  intent(out), optional :: indexflag
+      type(ESMF_Index_Flag),  intent(out), optional :: indexflag
       type(ESMF_GridStatus_Flag), intent(out), optional :: status
       character (len=*),     intent(out), optional :: name
       integer,               intent(out), optional :: rc
@@ -16712,7 +16712,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: gridEdgeUWidth(:)
        integer,               intent(in),   optional  :: gridAlign(:)
        integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       type(ESMF_Index_Flag),  intent(in),   optional  :: indexflag
        logical,               intent(in),   optional  :: destroyDistgrid
        logical,               intent(in),   optional  :: destroyDELayout
        character (len=*),     intent(in),   optional  :: name
@@ -17057,7 +17057,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: gridEdgeUWidth(:)
        integer,               intent(in),  optional :: gridAlign(:)
        integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        integer,               intent(out), optional :: rc
 !
@@ -18078,7 +18078,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in), optional :: gridEdgeUWidth(:)
        integer,               intent(in), optional :: gridAlign(:)
        integer,               intent(in), optional :: gridMemLBound(:)
-       type(ESMF_IndexFlag),  intent(in), optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in), optional :: indexflag
        integer,               intent(in), optional :: petMap(:,:,:)
        integer,               intent(out), optional :: rc
 !
@@ -20597,7 +20597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,                      intent(in)            :: countsPerDEDim1(:)
        integer,                      intent(in)            :: countsPerDEDim2(:)
        integer,                      intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_IndexFlag),         intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
        integer,                      intent(in),  optional :: petMap(:,:,:)
        type(ESMF_DistgridConnection), intent(in), optional :: connList(:)
        integer,               intent(out), optional :: rc
@@ -21046,7 +21046,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: maxIndex(:)
        integer,               intent(in),  optional :: regDecomp(:)
        type(ESMF_DecompFlag), intent(in),  optional :: decompflag(:)
-       type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
        integer,               intent(in),  optional :: petMap(:,:,:)
        type(ESMF_DistgridConnection), intent(in), optional :: connList(:)
        integer,               intent(out), optional :: rc

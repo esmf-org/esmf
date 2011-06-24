@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.66 2011/06/24 16:12:13 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.67 2011/06/24 16:51:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.66 2011/06/24 16:12:13 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.67 2011/06/24 16:51:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -146,7 +146,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TypeKind_Flag),           intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: localarrayList(:)
-    type(ESMF_IndexFlag),          intent(out), optional :: indexflag
+    type(ESMF_Index_Flag),          intent(out), optional :: indexflag
     integer,               target, intent(out), optional :: distgridToArrayMap(:)
     integer,               target, intent(out), optional :: distgridToPackedArrayMap(:)
     integer,               target, intent(out), optional :: arrayToDistGridMap(:)

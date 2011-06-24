@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.15 2011/06/24 03:01:09 rokuingh Exp $
+! $Id: ESMF_GeomBase.F90,v 1.16 2011/06/24 16:52:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.15 2011/06/24 03:01:09 rokuingh Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.16 2011/06/24 16:52:02 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -786,7 +786,7 @@ end interface
       integer,               intent(out), optional :: localDECount
       type(ESMF_DistGrid),   intent(out), optional :: distgrid
       integer,               intent(out), optional :: distgridToGridMap(:)
-      type(ESMF_IndexFlag),  intent(out), optional :: indexflag
+      type(ESMF_Index_Flag),  intent(out), optional :: indexflag
       type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype
       type(ESMF_Grid),       intent(out), optional :: grid      
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc

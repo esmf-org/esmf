@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.93 2011/06/22 18:44:42 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.94 2011/06/24 16:51:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.93 2011/06/22 18:44:42 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.94 2011/06/24 16:51:55 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -239,13 +239,13 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
   function ESMF_DELayoutCreateDefault(keywordEnforcer, deCount, deGrouping, &
-    dePinFlag, petList, vm, rc)
+    pinflag, petList, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in), optional  :: deCount
     integer, target,              intent(in), optional  :: deGrouping(:)
-    type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
+    type(ESMF_Pin_Flag),         intent(in), optional  :: pinflag
     integer, target,              intent(in), optional  :: petList(:)
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -282,7 +282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          to a certain group will be mapped against the {\em same} PET. This
 !          does not, however, mean that DEs belonging to different DE groups 
 !          must be mapped to different PETs.
-!     \item[{[dePinFlag]}]
+!     \item[{[pinflag]}]
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
@@ -327,7 +327,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
-      dePinFlag, petListArg, vm, localrc)
+      pinflag, petListArg, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -360,13 +360,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
-  function ESMF_DELayoutCreateFromPetMap(petMap, keywordEnforcer, dePinFlag, &
+  function ESMF_DELayoutCreateFromPetMap(petMap, keywordEnforcer, pinflag, &
     vm, rc)
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: petMap(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
+    type(ESMF_Pin_Flag),         intent(in), optional  :: pinflag
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
 !         
@@ -395,7 +395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument determines the number of DEs in the created DELayout. It is
 !          erroneous to specify a PET identifier that lies outside the VM 
 !          context.
-!     \item[{[dePinFlag]}]
+!     \item[{[pinflag]}]
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
@@ -428,7 +428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap(1), len_petMap, &
-      dePinFlag, vm, localrc)
+      pinflag, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -454,7 +454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
   function ESMF_DELayoutCreateHintWeights(keywordEnforcer, deCount, &
-    compWeights, commWeights, deGrouping, dePinFlag, petList, vm, rc)
+    compWeights, commWeights, deGrouping, pinflag, petList, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -462,7 +462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                      intent(in)            :: compWeights(:)
     integer,                      intent(in)            :: commWeights(:,:)
     integer, target,              intent(in), optional  :: deGrouping(:)
-    type(ESMF_DePinFlag),         intent(in), optional  :: dePinFlag
+    type(ESMF_Pin_Flag),         intent(in), optional  :: pinflag
     integer, target,              intent(in), optional  :: petList(:)
     type(ESMF_VM),                intent(in), optional  :: vm
     integer,                      intent(out),optional  :: rc
@@ -507,7 +507,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          weights are a relative measure and only meaningful when compared to 
 !          weights of the same DELayout.
 !          (UNIMPLEMENTED!)
-!     \item[{[dePinFlag]}]
+!     \item[{[pinflag]}]
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
@@ -562,7 +562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
-      dePinFlag, petListArg, vm, localrc)
+      pinflag, petListArg, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -810,7 +810,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
-    vasMap, oneToOneFlag, dePinFlag, localDeCount, localDeList, &
+    vasMap, oneToOneFlag, pinflag, localDeCount, localDeList, &
     vasLocalDeCount, vasLocalDeList, rc)
 !
 ! !ARGUMENTS:
@@ -821,7 +821,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,          intent(out),  optional  :: petMap(:)
     integer, target,          intent(out),  optional  :: vasMap(:)
     logical,                  intent(out),  optional  :: oneToOneFlag
-    type(ESMF_DePinFlag),     intent(out),  optional  :: dePinFlag
+    type(ESMF_Pin_Flag),     intent(out),  optional  :: pinflag
     integer,                  intent(out),  optional  :: localDeCount
     integer, target,          intent(out),  optional  :: localDeList(:)
     integer,                  intent(out),  optional  :: vasLocalDeCount
@@ -857,7 +857,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Upon return this holds {\tt .TRUE.} if the specified 
 !        {\tt ESMF\_DELayout} describes a 1-to-1 mapping between DEs and PETs,
 !        {\tt .FALSE.} otherwise.
-!     \item[{[dePinFlag]}]
+!     \item[{[pinflag]}]
 !        Upon return this flag will indicate the type of DE pinning. 
 !        See section \ref{opt:depinflag} for a list of valid pinning 
 !        options.
@@ -936,7 +936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutGet(delayout, vm, deCount, petMapArg, vasMapArg, &
-      oneToOneFlagArg, dePinFlag, localDeCount, localDeListArg, &
+      oneToOneFlagArg, pinflag, localDeCount, localDeListArg, &
       vasLocalDeCount, vasLocalDeListArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

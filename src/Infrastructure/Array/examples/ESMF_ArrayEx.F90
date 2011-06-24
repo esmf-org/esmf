@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.75 2011/06/24 15:03:44 rokuingh Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.76 2011/06/24 16:51:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayEx
   real(ESMF_KIND_R8), pointer:: myFarray1D(:), myFarray3D(:,:,:)
   real(ESMF_KIND_R8), pointer:: myFarray2D(:,:)
   real(ESMF_KIND_R8):: dummySum
-  type(ESMF_IndexFlag):: indexflag
+  type(ESMF_Index_Flag):: indexflag
   integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
   integer, allocatable:: connectionList(:,:)
   integer, allocatable:: arrayToDistGridMap(:)

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.127 2011/06/24 16:12:40 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.128 2011/06/24 16:52:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -384,29 +384,29 @@
 !
 !     ! Typed DE pinning flag
 
-      type ESMF_DePinFlag
+      type ESMF_Pin_Flag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_DePinFlag), parameter:: &
-        ESMF_DE_PIN_PET        = ESMF_DePinFlag(1), &
-        ESMF_DE_PIN_VAS        = ESMF_DePinFlag(2)
+      type(ESMF_Pin_Flag), parameter:: &
+        ESMF_PIN_DE_TO_PET        = ESMF_Pin_Flag(1), &
+        ESMF_PIN_DE_TO_VAS        = ESMF_Pin_Flag(2)
 
 !------------------------------------------------------------------------------
 !
 !     ! Direction type
 
-      type ESMF_Direction
+      type ESMF_Direction_Flag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_Direction), parameter:: &
-        ESMF_DIRECTION_FORWARD = ESMF_Direction(1), &
-        ESMF_DIRECTION_REVERSE = ESMF_Direction(2)
+      type(ESMF_Direction_Flag), parameter:: &
+        ESMF_DIRECTION_FORWARD = ESMF_Direction_Flag(1), &
+        ESMF_DIRECTION_REVERSE = ESMF_Direction_Flag(2)
 
 !------------------------------------------------------------------------------
 !
@@ -425,20 +425,20 @@
                            ESMF_IOFMT_NETCDF4C = ESMF_IOFmtFlag(3)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_IndexFlag
+!     ! ESMF_Index_Flag
 !
 !     ! Interface flag for setting index bounds
 
-      type ESMF_IndexFlag
+      type ESMF_Index_Flag
       sequence
       private
         integer :: i_type
       end type
 
-      type(ESMF_IndexFlag), parameter ::  &
-                               ESMF_INDEX_DELOCAL  = ESMF_IndexFlag(0), &
-                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1), &
-                               ESMF_INDEX_USER = ESMF_IndexFlag(2)
+      type(ESMF_Index_Flag), parameter ::  &
+                               ESMF_INDEX_DELOCAL  = ESMF_Index_Flag(0), &
+                               ESMF_INDEX_GLOBAL = ESMF_Index_Flag(1), &
+                               ESMF_INDEX_USER = ESMF_Index_Flag(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_HaloStartRegionFlag
@@ -676,12 +676,12 @@
       public ESMF_InquireFlag
       public ESMF_INQUIREONLY, ESMF_NOINQUIRE
 
-      public ESMF_Direction, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
+      public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmtFlag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
              ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C
 
-      public ESMF_IndexFlag
+      public ESMF_Index_Flag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
       public ESMF_HaloStartRegionFlag, &
              ESMF_REGION_EXCLUSIVE, ESMF_REGION_COMPUTATIONAL
@@ -696,7 +696,7 @@
              ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
-      public ESMF_DePinFlag, ESMF_DE_PIN_PET, ESMF_DE_PIN_VAS
+      public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
       public ESMF_Copy_Flag, ESMF_COPY_ALIAS, ESMF_COPY_REFERENCE, &
                                ESMF_COPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
@@ -1110,18 +1110,18 @@ subroutine ESMF_tfas2_v (tfval, lval)
 end subroutine
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_Direction types
+! function to compare two ESMF_Direction_Flag types
 
 function ESMF_freq(fr1, fr2)
  logical ESMF_freq
- type(ESMF_Direction), intent(in) :: fr1, fr2
+ type(ESMF_Direction_Flag), intent(in) :: fr1, fr2
 
  ESMF_freq = (fr1%value == fr2%value)
 end function
 
 function ESMF_frne(fr1, fr2)
  logical ESMF_frne
- type(ESMF_Direction), intent(in) :: fr1, fr2
+ type(ESMF_Direction_Flag), intent(in) :: fr1, fr2
 
  ESMF_frne = (fr1%value /= fr2%value)
 end function
@@ -1144,11 +1144,11 @@ function ESMF_ioeq(io1, io2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_IndexFlag types
+! function to compare two ESMF_Index_Flag types
 
 function ESMF_ifeq(if1, if2)
   logical ESMF_ifeq
-  type(ESMF_IndexFlag), intent(in) :: if1, if2
+  type(ESMF_Index_Flag), intent(in) :: if1, if2
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
 end function

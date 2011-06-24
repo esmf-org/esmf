@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.79 2011/06/24 16:12:13 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.80 2011/06/24 16:51:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.79 2011/06/24 16:12:13 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.80 2011/06/24 16:51:50 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -799,7 +799,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! !ARGUMENTS: @\
 !   <type> (ESMF_KIND_<kind>), intent(in), target  :: farray(<rank>) @\
 !   type(ESMF_DistGrid),   intent(in)              :: distgrid @\
-!   type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)              :: indexflag @\
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
 !   integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
@@ -947,7 +947,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
-    type(ESMF_IndexFlag),  intent(in)              :: indexflag @\
+    type(ESMF_Index_Flag),  intent(in)              :: indexflag @\
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
@@ -1055,7 +1055,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_LocalArray), intent(in)              :: localarrayList(:)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       type(ESMF_Index_Flag),  intent(in),   optional  :: indexflag
        type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
@@ -1531,7 +1531,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_TypeKind_Flag),   intent(in)              :: typekind
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       type(ESMF_Index_Flag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
@@ -1846,7 +1846,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_IndexFlag),  intent(in),   optional  :: indexflag
+       type(ESMF_Index_Flag),  intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)

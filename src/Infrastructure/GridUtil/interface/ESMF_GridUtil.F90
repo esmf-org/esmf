@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.23 2011/02/23 20:01:10 w6ws Exp $
+! $Id: ESMF_GridUtil.F90,v 1.24 2011/06/24 16:52:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.23 2011/02/23 20:01:10 w6ws Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.24 2011/06/24 16:52:07 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -372,7 +372,7 @@ module ESMF_GridUtilMod
     integer :: localrc 
     type(ESMF_Pointer) :: theMesh
     type(ESMF_InterfaceInt) :: maskValuesArg
-    type(ESMF_IndexFlag) :: indexflag
+    type(ESMF_Index_Flag) :: indexflag
     type(ESMF_RegridConserve) :: lregridConserve
     integer :: localIsLatLonDeg     
 

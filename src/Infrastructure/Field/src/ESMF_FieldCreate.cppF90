@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.108 2011/06/24 16:12:23 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.109 2011/06/24 16:52:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.108 2011/06/24 16:12:23 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.109 2011/06/24 16:52:00 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -966,7 +966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localGridToFieldMap(ESMF_MAXDIM)
     logical :: flipflop(ESMF_MAXDIM)
     type(ESMF_DataCopy_Flag)    :: l_datacopyflag
-    type (ESMF_IndexFlag) :: arrayIndexFlag, gridIndexFlag    
+    type (ESMF_Index_Flag) :: arrayIndexFlag, gridIndexFlag    
     integer :: distgridToGridMap(ESMF_MAXDIM)
     logical :: found
     type(ESMF_GridDecompType) :: decompType
@@ -1273,7 +1273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS: @\
 !   type(ESMF_GeomBase) :: geombase                  @\
 !   <type> (ESMF_KIND_<kind>), dimension(<rank>), target :: farray @\
-!   type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag), intent(in)            :: indexflag @\
 !   type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
 !   integer, intent(in), optional :: gridToFieldMap(:)     @\
 !   integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -1378,7 +1378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! input arguments @\
     type(ESMF_GeomBase) :: geombase                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag), intent(in)            :: indexflag @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -1597,7 +1597,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     type(ESMF_Grid),       intent(in)            :: grid               
     type(ESMF_TypeKind_Flag),   intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+    type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
     integer,               intent(in),  optional :: gridToFieldMap(:)    
     integer,               intent(in),  optional :: ungriddedLBound(:)
@@ -1769,7 +1769,7 @@ end function ESMF_FieldCreateGridTKR
     type(ESMF_Grid),       intent(in)            :: grid               
     type(ESMF_ArraySpec),  intent(in)            :: arrayspec     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_IndexFlag),  intent(in),  optional :: indexflag
+    type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
     integer,               intent(in),  optional :: gridToFieldMap(:)    
     integer,               intent(in),  optional :: ungriddedLBound(:)
@@ -1871,7 +1871,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
     type(ESMF_StaggerLoc)  :: localStaggerLoc
-    type(ESMF_IndexFlag)   :: g_indexflag
+    type(ESMF_Index_Flag)   :: g_indexflag
     type(ESMF_GridDecompType) :: decompType
     type(ESMF_Logical) :: linkChange
 
@@ -2163,7 +2163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS: @\
 !   type(ESMF_Grid),       intent(in)            :: grid                  @\
 !   <type> (ESMF_KIND_<kind>), intent(in) target :: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc  @\
@@ -2292,7 +2292,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! input arguments @\
     type(ESMF_Grid),       intent(in)            :: grid @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc @\
@@ -2977,7 +2977,7 @@ end function ESMF_FieldCreateLSTKR
 ! !ARGUMENTS: @\
 !   type(ESMF_LocStream),  intent(in)            :: locstream                  @\
 !   <type> (ESMF_KIND_<kind>), intent(in), target:: farray(<rank>) @\
-!   type(ESMF_IndexFlag),  intent(in)            :: indexflag @\
+!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
 !   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
 !   integer,               intent(in),  optional :: gridToFieldMap(:)     @\
 !   integer,               intent(in),  optional :: ungriddedLBound(:) @\
@@ -3071,7 +3071,7 @@ end function ESMF_FieldCreateLSTKR
     ! input arguments @\
     type(ESMF_LocStream), intent(in) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag), intent(in)            :: indexflag @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -3657,7 +3657,7 @@ end function ESMF_FieldCreateMeshTKR
 !   type(ESMF_Mesh),     intent(in)               :: mesh                  @\
 !   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
 !   type(ESMF_MeshLoc),  intent(in),  optional    :: location @\
-!   type(ESMF_IndexFlag), intent(in)              :: indexflag @\
+!   type(ESMF_Index_Flag), intent(in)              :: indexflag @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional    :: datacopyflag @\
 !   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
 !   integer,             intent(in),  optional    :: ungriddedLBound(:) @\
@@ -3756,7 +3756,7 @@ end function ESMF_FieldCreateMeshTKR
     type(ESMF_Mesh), intent(in) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
     type(ESMF_MeshLoc), intent(in), optional    :: location @\
-    type(ESMF_IndexFlag), intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag), intent(in)            :: indexflag @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -4356,7 +4356,7 @@ end function ESMF_FieldCreateXGTKR
 !   type(ESMF_XGridSide), intent(in), optional    :: xgridSide @\
 !   integer,              intent(in), optional    :: gridIndex @\
 !   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
-!   type(ESMF_IndexFlag), intent(in)              :: indexflag @\
+!   type(ESMF_Index_Flag), intent(in)              :: indexflag @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional    :: datacopyflag @\
 !   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
 !   integer,             intent(in),  optional    :: ungriddedLBound(:) @\
@@ -4457,7 +4457,7 @@ end function ESMF_FieldCreateXGTKR
     type(ESMF_XGridSide), intent(in), optional        :: xgridSide @\
     integer, intent(in), optional                     :: gridIndex @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_IndexFlag), intent(in)                  :: indexflag @\
+    type(ESMF_Index_Flag), intent(in)                  :: indexflag @\
     type(ESMF_DataCopy_Flag), intent(in), optional         :: datacopyflag @\
     integer, intent(in), optional                     :: gridToFieldMap(:)     @\
     integer, intent(in), optional                     :: ungriddedLBound(:) @\

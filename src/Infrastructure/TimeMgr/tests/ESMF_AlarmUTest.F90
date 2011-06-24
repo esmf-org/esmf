@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.65 2011/06/16 05:56:50 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.66 2011/06/24 16:52:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.65 2011/06/16 05:56:50 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.66 2011/06/24 16:52:15 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -72,7 +72,7 @@
       logical :: alarmCountPass, isringing, sticky, enabled
       integer(ESMF_KIND_I8) :: forwardCount
       logical :: willRingNext, testPass, alarmsNotEqual, alarmsEqual
-      type(ESMF_Direction) :: reverseDirection, forwardDirection
+      type(ESMF_Direction_Flag) :: reverseDirection, forwardDirection
       type(ESMF_Alarm) :: alarm, alarm2, afterAlarm, beforeAlarm
       type(ESMF_Alarm) :: alarmList(201), alarmListOne(1)
       type(ESMF_Alarm) :: alarm6, alarm7, alarm8

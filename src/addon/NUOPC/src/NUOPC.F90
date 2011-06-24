@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.13 2011/06/23 15:54:42 rokuingh Exp $
+! $Id: NUOPC.F90,v 1.14 2011/06/24 16:52:18 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -766,7 +766,7 @@ module NUOPC
     type(ESMF_Clock)        :: internalClock
     type(ESMF_Time)         :: externalCurrTime, currTime, stopTime
     type(ESMF_TimeInterval) :: externalTimeStep, timeStep
-    type(ESMF_Direction)    :: direction
+    type(ESMF_Direction_Flag)    :: direction
 
     if (present(rc)) rc = ESMF_SUCCESS
     

@@ -1,4 +1,4 @@
-% $Id: DELayout_options.tex,v 1.4 2011/06/22 18:44:38 theurich Exp $
+% $Id: DELayout_options.tex,v 1.5 2011/06/24 16:51:52 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsubsection{ESMF\_DePinFlag}
+\subsubsection{ESMF\_Pin\_Flag}
 
 \label{opt:depinflag}
 {\sf DESCRIPTION:\\}
@@ -16,12 +16,12 @@ Specifies which VM resource DEs are pinned to - i.e. PETs or VASs.
 
 Valid values are:
 \begin{description}
-  \item [ESMF\_DE\_PIN\_PET] 
+  \item [ESMF\_PIN\_DE\_TO\_PET] 
     Pin DEs against PETs. This means that even if a group of PETs in the 
     VM are sharing a common virtual address space (VAS), DEs cannot
     be shared between PETs, but must be serviced by the specific PET they
     are pinned to.
-  \item [ESMF\_DE\_PIN\_VAS]
+  \item [ESMF\_PIN\_DE\_TO\_VAS]
     Pin DEs against VASs. DEs may be serviced by any PET that is 
     executing within the virtual address space (VAS) the DE is pinned to.
 \end{description}

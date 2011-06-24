@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.59 2011/06/24 16:12:33 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.60 2011/06/24 16:52:08 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_LocStreamMod
      type (ESMF_Base)                     :: base             ! base class object
      logical                              :: destroyDistgrid 
      type (ESMF_DistGrid)                 :: distgrid         ! description of index space of Arrays
-     type(ESMF_IndexFlag)                 :: indexflag
+     type(ESMF_Index_Flag)                 :: indexflag
      integer                              :: keyCount         ! Number of keys
      character(len=ESMF_MAXSTR), pointer  :: keyNames(:)      ! Names
      character(len=ESMF_MAXSTR), pointer  :: keyUnits(:)      ! Units
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.59 2011/06/24 16:12:33 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.60 2011/06/24 16:52:08 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1323,7 +1323,7 @@ contains
       character (len=*),     intent(in),  optional :: name
       type(ESMF_DistGrid),   intent(in)            :: distgrid
       logical,               intent(in), optional  :: destroyDistgrid
-      type(ESMF_IndexFlag),  intent(in), optional  :: indexflag    
+      type(ESMF_Index_Flag),  intent(in), optional  :: indexflag    
       integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1354,7 +1354,7 @@ contains
       type (ESMF_LocStreamType), pointer :: lstypep
       type(ESMF_LocStream)               :: locstream 
       integer :: dimCount 
-      type(ESMF_IndexFlag)  :: indexflagLocal
+      type(ESMF_Index_Flag)  :: indexflagLocal
       logical :: destroyDistgridLocal
 
       ! Initialize return code; assume failure until success is certain
@@ -1458,7 +1458,7 @@ contains
       character (len=*), intent(in), optional         :: name
       integer, intent(in), optional                   :: minIndex
       integer, intent(in)                             :: countsPerDE(:)
-      type(ESMF_IndexFlag), intent(in), optional      :: indexflag
+      type(ESMF_Index_Flag), intent(in), optional      :: indexflag
       integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
@@ -1491,7 +1491,7 @@ contains
     type(ESMF_DistGrid)                 :: distgrid
     integer, pointer :: deBLockList(:,:,:)   
     integer               :: minIndexLocal, maxIndexLocal
-    type(ESMF_IndexFlag)  :: indexflagLocal
+    type(ESMF_Index_Flag)  :: indexflagLocal
     integer :: numDEs
 
       ! Initialize return code; assume failure until success is certain
@@ -1583,7 +1583,7 @@ contains
 ! !ARGUMENTS:
       character (len=*), intent(in), optional         :: name
       integer, intent(in)                             :: localCount
-      type(ESMF_IndexFlag), intent(in), optional      :: indexflag
+      type(ESMF_Index_Flag), intent(in), optional      :: indexflag
       integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
@@ -1616,7 +1616,7 @@ contains
     type(ESMF_DistGrid)                 :: distgrid
     integer, pointer :: deBLockList(:,:,:)   
     integer               :: minIndex(1), maxIndex(1)
-    type(ESMF_IndexFlag)  :: indexflagLocal
+    type(ESMF_Index_Flag)  :: indexflagLocal
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1721,7 +1721,7 @@ contains
       type(ESMF_DecompFlag), intent(in),  optional  :: decompflag
       integer,               intent(in),  optional  :: minIndex
       integer,               intent(in)             :: maxIndex
-      type(ESMF_IndexFlag),  intent(in),  optional  :: indexflag
+      type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
       integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -1763,7 +1763,7 @@ contains
       type(ESMF_DistGrid)   :: distgrid
       integer               :: minIndexLocal,regDecompLocal
       type(ESMF_DecompFlag) :: decompFlagLocal
-      type(ESMF_IndexFlag)  :: indexflagLocal
+      type(ESMF_Index_Flag)  :: indexflagLocal
       type(ESMF_VM)         :: vm 
 
       ! Initialize return code; assume failure until success is certain
@@ -1998,7 +1998,7 @@ contains
     integer, intent(out),optional                :: keyCount
     character(len=ESMF_MAXSTR),optional          :: keyNames(:) 
     integer, intent(out),optional                :: localDECount
-    type(ESMF_IndexFlag), intent(out), optional  :: indexflag
+    type(ESMF_Index_Flag), intent(out), optional  :: indexflag
     character(len=*), intent(out),     optional  :: name
     integer, intent(out), optional               :: rc
 !
