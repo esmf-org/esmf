@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.54 2011/06/24 20:30:20 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.55 2011/06/24 21:46:08 rokuingh Exp $
 
 \section{Global Options, Flags and Parameters}
 
@@ -186,7 +186,7 @@ Valid values are:
          Cancel outstanding transfers for a precomputed communication pattern.
 \end{description}
 
-\subsubsection{ESMF\_ContextFlag}
+\subsubsection{ESMF\_Context\_Flag}
 \label{opt:contextflag}
 {\sf DESCRIPTION:\\}  
 Indicates the type of VM context in which a Component will be executing its
@@ -195,11 +195,11 @@ standard methods.
 Valid values are:
 \begin{description}
 
-\item [ESMF\_CHILD\_IN\_NEW\_VM]
+\item [ESMF\_CONTEXT\_OWN\_VM]
          The component is running in its own, separate VM context. Resources
          are inherited from the parent but can be arranged to fit the
          component's requirements.
-\item [ESMF\_CHILD\_IN\_PARENT\_VM]
+\item [ESMF\_CONTEXT\_PARENT\_VM]
          The component uses the parent's VM for resource management. Compared
          to components that use their own VM context components that run in the
          parent's VM context are more light-weight with respect to the overhead

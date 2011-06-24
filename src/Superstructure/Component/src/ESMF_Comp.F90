@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.212 2011/06/24 14:26:06 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.213 2011/06/24 21:46:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_CompMod
 
     logical             :: vm_released      ! flag whether vm is running
 
-    type(ESMF_ContextFlag)    :: contextflag      ! contextflag
+    type(ESMF_Context_Flag)    :: contextflag      ! contextflag
     type(ESMF_CompStatus)     :: compStatus       ! isPresent bits
     
     ESMF_INIT_DECLARE
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.212 2011/06/24 14:26:06 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.213 2011/06/24 21:46:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -491,7 +491,7 @@ contains
     type(ESMF_Grid),         intent(in),  optional :: grid
     type(ESMF_Clock),        intent(in),  optional :: clock
     integer,                 intent(in),  optional :: petlist(:)
-    type(ESMF_ContextFlag),  intent(in),  optional :: contextflag
+    type(ESMF_Context_Flag),  intent(in),  optional :: contextflag
     integer,                 intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -521,7 +521,7 @@ contains
 !    List of {\tt PET}s for this component. The default is to use all PETs.
 !   \item[{[contextflag]}]
 !    Specify the component's VM context. The default context is
-!    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
+!    {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{opt:contextflag} for a
 !    complete list of options.
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -563,7 +563,7 @@ contains
     nullify(compp%is%statep)
     nullify(compp%es%statep)
     compp%vm_released = .FALSE.
-    compp%contextflag = ESMF_CHILD_IN_NEW_VM
+    compp%contextflag = ESMF_CONTEXT_OWN_VM
     
     compp%compStatus = ESMF_COMPSTATUS_ALL_NOTPRESENT
 
@@ -655,7 +655,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
     if (present(contextflag)) then
-      if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
+      if (contextflag==ESMF_CONTEXT_PARENT_VM) then
         if ((compp%npetlist .gt. 0) .and. (compp%npetlist .lt. npets)) then
           ! conflict between contextflag and petlist -> bail out
           deallocate(compp%petlist) ! local garbage collection for bail-on-error
@@ -667,7 +667,7 @@ contains
       endif
       compp%contextflag = contextflag
     else
-      compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
+      compp%contextflag = ESMF_CONTEXT_OWN_VM    ! default
     endif
     
     ! check for conflict between petlist and current VM petCount
@@ -1058,7 +1058,7 @@ contains
     type(ESMF_VM),           intent(out), optional :: vm_parent
     type(ESMF_VMPlan),       intent(out), optional :: vmplan
     type(ESMF_Pointer),      intent(out), optional :: vm_info
-    type(ESMF_ContextFlag),  intent(out), optional :: contextflag
+    type(ESMF_Context_Flag),  intent(out), optional :: contextflag
     type(ESMF_Grid),         intent(out), optional :: grid
     logical,                 intent(out), optional :: gridIsPresent
     type(ESMF_State),        intent(out), optional :: importState
@@ -1596,7 +1596,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
-    if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
+    if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
         ESMF_CONTEXT, rcTOReturn=rc)
@@ -1675,7 +1675,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
-    if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
+    if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
         ESMF_CONTEXT, rcTOReturn=rc)
@@ -1754,7 +1754,7 @@ contains
     ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
 
     ! ensure that this is not a child_in_parent_vm plan
-    if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
+    if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
         msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
         ESMF_CONTEXT, rcTOReturn=rc)

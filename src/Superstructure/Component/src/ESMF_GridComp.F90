@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.169 2011/06/24 17:30:30 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.170 2011/06/24 21:46:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.169 2011/06/24 17:30:30 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.170 2011/06/24 21:46:02 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -367,7 +367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: petList(:)
-    type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
+    type(ESMF_Context_Flag),  intent(in),    optional :: contextflag
     character(len=*),        intent(in),    optional :: name
     integer,                 intent(out),   optional :: rc
 !
@@ -383,7 +383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! inefficient.  If the application is sequential, i.e., each component is
 ! running on all the PETs of the global VM, it will be more efficient to use
 ! the global VM instead of creating a new one.  This can be done by setting
-! {\tt contextflag} to ESMF\_CHILD\_IN\_PARENT\_VM.
+! {\tt contextflag} to ESMF\_CONTEXT\_PARENT\_VM.
 !
 ! The return value is the new {\tt ESMF\_GridComp}.
 !   
@@ -425,7 +425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the parent PETs.
 ! \item[{[contextflag]}]
 !   Specify the component's VM context. The default context is
-!   {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
+!   {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{opt:contextflag} for a
 !   complete list of valid flags.
 ! \item[{[name]}]
 !   Name of the newly-created {\tt ESMF\_GridComp}.  This name can be altered
@@ -720,7 +720,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),        intent(out), optional :: clock
     integer,                 intent(out), optional :: localPet
     integer,                 intent(out), optional :: petCount
-    type(ESMF_ContextFlag),  intent(out), optional :: contextflag
+    type(ESMF_Context_Flag),  intent(out), optional :: contextflag
     type(ESMF_Method),       intent(out), optional :: currentMethod
     integer,                 intent(out), optional :: currentPhase
     type(ESMF_CompType),     intent(out), optional :: comptype
@@ -774,7 +774,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[petCount]}]
 !   Return the number of PETs in the the {\tt ESMF\_GridComp} object.
 ! \item[{[contextflag]}]
-!   Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_GridComp}.
+!   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_GridComp}.
 !   See section \ref{opt:contextflag} for a complete list of valid flags.
 ! \item[{[currentMethod]}]
 !   Return the current {\tt ESMF\_Method} of the {\tt ESMF\_GridComp} execution.

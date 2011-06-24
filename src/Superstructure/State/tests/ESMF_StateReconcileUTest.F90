@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.40 2011/06/16 18:46:56 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.41 2011/06/24 21:46:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -611,7 +611,7 @@ program ESMF_StateReconcileUTest
     !NEX_UTest_Multi_Proc_Only
     comp1name = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=comp1name, &
-      contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)
+      contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -620,7 +620,7 @@ program ESMF_StateReconcileUTest
     !NEX_UTest_Multi_Proc_Only
     comp2name = "Ocean"
     comp2 = ESMF_GridCompCreate(name=comp2name, &
-      contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)
+      contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

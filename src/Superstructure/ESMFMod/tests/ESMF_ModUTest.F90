@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.12 2011/06/24 04:48:42 rokuingh Exp $
+! $Id: ESMF_ModUTest.F90,v 1.13 2011/06/24 21:46:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.12 2011/06/24 04:48:42 rokuingh Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.13 2011/06/24 21:46:05 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -105,7 +105,7 @@ contains
     type(ESMF_Calendar) :: calendar
     type(ESMF_Clock) :: clock
     type(ESMF_Config) :: config
-    type(ESMF_ContextFlag) :: contextflag
+    type(ESMF_Context_Flag) :: contextflag
     type(ESMF_CplComp) :: cplcomp
     type(ESMF_DELayout) :: delayout
     type(ESMF_DistGrid) :: distgrid
@@ -223,8 +223,8 @@ contains
 ! NEX_noUTest
 
   subroutine context_type (dummy)
-    use ESMF_Mod, only: ESMF_ContextFlag
-    type(ESMF_ContextFlag), intent(in), optional :: dummy
+    use ESMF_Mod, only: ESMF_Context_Flag
+    type(ESMF_Context_Flag), intent(in), optional :: dummy
     failMsg = "ContextFlag type fail"
     name = "ContextFlag type"
     call ESMF_Test (.true.,  &

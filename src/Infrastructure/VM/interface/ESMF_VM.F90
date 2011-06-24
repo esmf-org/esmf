@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.137 2011/06/24 20:30:15 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.138 2011/06/24 21:46:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.137 2011/06/24 20:30:15 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.138 2011/06/24 21:46:00 rokuingh Exp $"
 
 !==============================================================================
 
@@ -6884,7 +6884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),     intent(in)            :: vm
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
-    type(ESMF_ContextFlag), intent(in)       :: contextflag
+    type(ESMF_Context_Flag), intent(in)       :: contextflag
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:

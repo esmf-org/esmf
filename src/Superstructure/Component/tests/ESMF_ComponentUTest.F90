@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.21 2011/02/23 23:37:42 theurich Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.22 2011/06/24 21:46:03 rokuingh Exp $
 !
 ! Test code which creates a new Component.
 
@@ -94,7 +94,7 @@
     ! Verifing that a Gridded Component can be created in parent VM context
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="grid.rc", contextflag=ESMF_CHILD_IN_PARENT_VM, rc=rc)  
+      configFile="grid.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -177,7 +177,7 @@
     ! Verifing that a Gridded Component can be created in new VM context
     cname = "Atmosphere - child in new VM context"
     comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="grid.rc", contextflag=ESMF_CHILD_IN_NEW_VM, rc=rc)  
+      configFile="grid.rc", contextflag=ESMF_CONTEXT_OWN_VM, rc=rc)  
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Gridded Component"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

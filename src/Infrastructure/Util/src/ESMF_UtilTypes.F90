@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.131 2011/06/24 20:30:11 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.132 2011/06/24 21:45:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -355,15 +355,15 @@
 !
 !     ! Typed context flag
 
-      type ESMF_ContextFlag
+      type ESMF_Context_Flag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_ContextFlag), parameter:: &
-        ESMF_CHILD_IN_NEW_VM     = ESMF_ContextFlag(1), &
-        ESMF_CHILD_IN_PARENT_VM  = ESMF_ContextFlag(2)
+      type(ESMF_Context_Flag), parameter:: &
+        ESMF_CONTEXT_OWN_VM     = ESMF_Context_Flag(1), &
+        ESMF_CONTEXT_PARENT_VM  = ESMF_Context_Flag(2)
 
 !------------------------------------------------------------------------------
 !
@@ -694,7 +694,7 @@
       public ESMF_Reduce_Flag, ESMF_REDUCE_SUM, ESMF_REDUCE_MIN, ESMF_REDUCE_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_VASBLOCKING, &
              ESMF_NONBLOCKING
-      public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
+      public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
       public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
       public ESMF_Copy_Flag, ESMF_COPY_ALIAS, ESMF_COPY_REFERENCE, &
@@ -999,18 +999,18 @@ function ESMF_bfne(bf1, bf2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_ContextFlags
+! function to compare two ESMF_Context_Flags
 
 function ESMF_ctfeq(ctf1, ctf2)
  logical ESMF_ctfeq
- type(ESMF_ContextFlag), intent(in) :: ctf1, ctf2
+ type(ESMF_Context_Flag), intent(in) :: ctf1, ctf2
 
  ESMF_ctfeq = (ctf1%value == ctf2%value)
 end function
 
 function ESMF_ctfne(ctf1, ctf2)
  logical ESMF_ctfne
- type(ESMF_ContextFlag), intent(in) :: ctf1, ctf2
+ type(ESMF_Context_Flag), intent(in) :: ctf1, ctf2
 
  ESMF_ctfne = (ctf1%value /= ctf2%value)
 end function
