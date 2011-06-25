@@ -1,4 +1,4 @@
-! $Id: ESMF_LogPublic.F90,v 1.2 2011/01/05 20:05:44 svasquez Exp $
+! $Id: ESMF_LogPublic.F90,v 1.3 2011/06/25 01:18:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ module ESMF_LogPublicMod
   public  ! everything in this file is public
 
   character(*), parameter:: ESMF_LOG_ERRMSG  = "ESMF interface returned ERROR"
-  character(*), parameter:: ESMF_LOG_ERRPASS = "Passing error in return code"
+  character(*), parameter:: ESMF_LOGERR_PASSTHRU = "Passing error in return code"
 
   ! The list if RC constants must be kept in sync with the macros defined
   ! in file ESMF_ErrReturnCodes.inc

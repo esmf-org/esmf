@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.70 2011/06/24 17:43:49 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.71 2011/06/25 01:18:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.70 2011/06/24 17:43:49 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.71 2011/06/25 01:18:19 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -622,7 +622,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         else
-          call ESMF_FieldGet(srcField, mesh=srcMesh, meshLocation=srcMeshloc, rc=localrc)
+          call ESMF_FieldGet(srcField, mesh=srcMesh, meshloc=srcMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -694,7 +694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call ESMF_FieldGet(dstField, mesh=dstMesh, meshLocation=dstMeshloc, rc=localrc)
+          call ESMF_FieldGet(dstField, mesh=dstMesh, meshloc=dstMeshloc, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -753,7 +753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                       ESMF_CONTEXT, rcToReturn=rc)) return
               else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
-                 call ESMF_FieldGet(srcFracField, meshlocation=fracMeshloc, &
+                 call ESMF_FieldGet(srcFracField, meshloc=fracMeshloc, &
                       rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -799,7 +799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                       ESMF_CONTEXT, rcToReturn=rc)) return
               else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
-                 call ESMF_FieldGet(dstFracField, meshlocation=fracMeshloc, &
+                 call ESMF_FieldGet(dstFracField, meshloc=fracMeshloc, &
                       rc=localrc)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1252,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call ESMF_FieldGet(areaField, mesh=Mesh, meshLocation=meshLoc, &
+          call ESMF_FieldGet(areaField, mesh=Mesh, meshloc=meshLoc, &
                  localDECount=localDECount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

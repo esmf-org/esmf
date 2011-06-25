@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.83 2011/06/24 16:12:23 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.84 2011/06/25 01:18:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.83 2011/06/24 16:12:23 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.84 2011/06/25 01:18:19 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -113,7 +113,7 @@ contains
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
     status, geomtype, grid, mesh, locstream, xgrid, array, &
-    typekind, dimCount, rank, staggerloc, meshLocation, xgridSide, &
+    typekind, dimCount, rank, staggerloc, meshloc, xgridSide, &
     gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, name, rc) 
 !
@@ -132,7 +132,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: dimCount
     integer,               intent(out), optional :: rank
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
-    type(ESMF_MeshLoc),    intent(out), optional :: meshLocation 
+    type(ESMF_MeshLoc),    intent(out), optional :: meshloc 
     type(ESMF_XGridSide),  intent(out), optional :: xgridSide 
     integer,               intent(out), optional :: gridIndex
     integer,               intent(out), optional :: gridToFieldMap(:)    
@@ -201,7 +201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
 !       Section \ref{sec:opt:staggerloc}.
-! \item [{[meshLocation]}]
+! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the mesh to build the Field on. Can be either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
@@ -345,7 +345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(meshLocation)) then
+    if (present(meshloc)) then
         if (ftype%status .ne. ESMF_FIELDSTATUS_GRIDSET .and. &
             ftype%status .ne. ESMF_FIELDSTATUS_COMPLETE) then
             if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
@@ -353,7 +353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
         call ESMF_GeomBaseGet(ftype%geombase, &
-                  meshloc=meshLocation, rc=localrc)
+                  meshloc=meshloc, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

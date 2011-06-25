@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.6 2011/04/28 22:16:34 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.7 2011/06/25 01:18:30 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -102,9 +102,9 @@ module NUOPC_ModelExplicit
     ! SPECIALIZE by calling into optional attached method to set internal clock
     call ESMF_MethodExecute(gcomp, label=label_SetClock, &
       existflag=existflag, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! query if all import Fields are connected
@@ -150,11 +150,11 @@ module NUOPC_ModelExplicit
     ! SPECIALIZE by calling into attached method to fill initial data
     call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
       existflag=existflag, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &

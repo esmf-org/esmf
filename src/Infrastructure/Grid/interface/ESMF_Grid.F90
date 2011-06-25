@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.230 2011/06/24 19:15:13 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.231 2011/06/25 01:18:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -186,7 +186,7 @@
 ! ! Special dimenaion for Arbitrarily distributed dimension
 !
 !------------------------------------------------------------------------------
-integer,parameter :: ESMF_GRID_ARBDIM = -1
+integer,parameter :: ESMF_ARBDIM = -1
 
 !------------------------------------------------------------------------------
 ! ! ESMF_GridStatus_Flag
@@ -291,7 +291,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_ArrayCreateFromGrid
   public ESMF_GridGetArrayInfo
 
-  public ESMF_GRID_ARBDIM
+  public ESMF_ARBDIM
 
 ! - ESMF-internal methods:
   public ESMF_GridGetInit  
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.230 2011/06/24 19:15:13 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.231 2011/06/25 01:18:24 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3927,35 +3927,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -4386,10 +4386,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      map of each coordinate array's dimensions onto the grids
 !      dimensions.  {\tt coordDimMap(i,j)} is the grid dimension of the jth dimension
 !      of the i'th coordinate array.  If not specified, the default value of
-!      {\tt coordDimMap(i,1)} is /ESMF\_GRID\_ARBDIM/ if the ith dimension of the grid is
+!      {\tt coordDimMap(i,1)} is /ESMF\_ARBDIM/ if the ith dimension of the grid is
 !      arbitrarily distributed, or {\tt i} if the ith dimension is not distributed.
 !      Note that if j is bigger than {\tt coordDimCount(i)} then it's ignored.
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[name]}]
 !     {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
@@ -6284,35 +6284,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -6997,35 +6997,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -7696,35 +7696,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -9904,35 +9904,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -10213,15 +10213,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    if (present(coordDep1)) then
       ! error checking, if this dimension is arbitrary, one of the 
-      ! coordinate dimension has to be be ESMF_GRID_ARBDIM
+      ! coordinate dimension has to be be ESMF_ARBDIM
       if (isDist(1)) then
 	found = .false.
 	do i=1,size(coordDep1)
-	  if (coordDep1(i) == ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep1(i) == ESMF_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
+                 msg="- coordDep1 does not contain ESMF_ARBDIM", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
@@ -10233,25 +10233,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
    else 
       coordDimCount(1)=1
-      ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+      ! ESMF_ARBDIM if 1 is distributed, otherwise 1
       if (isDist(1)) then
-        coordDimMap(1,1)=ESMF_GRID_ARBDIM      
+        coordDimMap(1,1)=ESMF_ARBDIM      
       else
 	coordDimMap(1,1)=1
       endif
    endif
 
    if (present(coordDep2)) then
-      ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+      ! error checking, one of the dimensions has to be ESMF_ARBDIM
       ! if dimension 2 is arbitrary
       if (isDist(2)) then
 	found = .false.
 	do i=1,size(coordDep2)
-	  if (coordDep2(i) == ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep2(i) == ESMF_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
+                 msg="- coordDep2 does not contain ESMF_ARBDIM", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
@@ -10263,9 +10263,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
    else 
       coordDimCount(2)=1
-      ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+      ! ESMF_ARBDIM if 1 is distributed, otherwise 1
       if (isDist(2)) then
-        coordDimMap(2,1)=ESMF_GRID_ARBDIM      
+        coordDimMap(2,1)=ESMF_ARBDIM      
       else
 	coordDimMap(2,1)=2
       endif
@@ -10273,16 +10273,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    if (dimCount > 2) then
       if (present(coordDep3)) then 
-        ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+        ! error checking, one of the dimensions has to be ESMF_ARBDIM
         ! if dimension 3 is arbitrary
         if (isDist(3)) then
 	  found = .false.
 	  do i=1,size(coordDep3)
-	    if (coordDep3(i) == ESMF_GRID_ARBDIM) found = .true.
+	    if (coordDep3(i) == ESMF_ARBDIM) found = .true.
           enddo
 	  if (.not. found) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                 msg="- coordDep3 does not contain ESMF_ARBDIM", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	    return
           endif
@@ -10294,9 +10294,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
       else 
         coordDimCount(3)=1
-        ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+        ! ESMF_ARBDIM if 1 is distributed, otherwise 1
         if (isDist(3)) then
-          coordDimMap(3,1)=ESMF_GRID_ARBDIM      
+          coordDimMap(3,1)=ESMF_ARBDIM      
         else
 	  coordDimMap(3,1)=3
         endif
@@ -19082,35 +19082,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The size of the array specifies the number of dimensions of the 
 !     first coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
+!     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
 !     of the index dimensions the corresponding coordinate
-!     arrays map to. The format should be /ESMF\_GRID\_ARBDIM/ where
-!     /ESMF\_GRID\_ARBDIM/ is mapped to the collapsed 1D dimension from all
+!     arrays map to. The format should be /ESMF\_ARBDIM/ where
+!     /ESMF\_ARBDIM/ is mapped to the collapsed 1D dimension from all
 !     the arbitrarily distributed dimensions.  n is the dimension that 
 !     is not distributed (if exists).  
-!     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
+!     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -19376,15 +19376,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    if (present(coordDep1)) then
       ! error checking, if this dimension is arbitrary, one of the 
-      ! coordinate dimension has to be be ESMF_GRID_ARBDIM
+      ! coordinate dimension has to be be ESMF_ARBDIM
       if (isDist(1)) then
 	found = .false.
 	do i=1,size(coordDep1)
-	  if (coordDep1(i) == ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep1(i) == ESMF_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
+                 msg="- coordDep1 does not contain ESMF_ARBDIM", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
@@ -19396,25 +19396,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
    else 
       coordDimCount(1)=1
-      ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+      ! ESMF_ARBDIM if 1 is distributed, otherwise 1
       if (isDist(1)) then
-        coordDimMap(1,1)=ESMF_GRID_ARBDIM      
+        coordDimMap(1,1)=ESMF_ARBDIM      
       else
 	coordDimMap(1,1)=1
       endif
    endif
 
    if (present(coordDep2)) then
-      ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+      ! error checking, one of the dimensions has to be ESMF_ARBDIM
       ! if dimension 2 is arbitrary
       if (isDist(2)) then
 	found = .false.
 	do i=1,size(coordDep2)
-	  if (coordDep2(i) == ESMF_GRID_ARBDIM) found = .true.
+	  if (coordDep2(i) == ESMF_ARBDIM) found = .true.
         enddo
 	if (.not. found) then
            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
+                 msg="- coordDep2 does not contain ESMF_ARBDIM", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	    return
         endif
@@ -19426,9 +19426,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
    else 
       coordDimCount(2)=1
-      ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+      ! ESMF_ARBDIM if 1 is distributed, otherwise 1
       if (isDist(2)) then
-        coordDimMap(2,1)=ESMF_GRID_ARBDIM      
+        coordDimMap(2,1)=ESMF_ARBDIM      
       else
 	coordDimMap(2,1)=2
       endif
@@ -19436,16 +19436,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
    if (dimCount > 2) then
       if (present(coordDep3)) then 
-        ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+        ! error checking, one of the dimensions has to be ESMF_ARBDIM
         ! if dimension 3 is arbitrary
         if (isDist(3)) then
 	  found = .false.
 	  do i=1,size(coordDep3)
-	    if (coordDep3(i) == ESMF_GRID_ARBDIM) found = .true.
+	    if (coordDep3(i) == ESMF_ARBDIM) found = .true.
           enddo
 	  if (.not. found) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                 msg="- coordDep3 does not contain ESMF_ARBDIM", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 	    return
           endif
@@ -19457,9 +19457,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo
       else 
         coordDimCount(3)=1
-        ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+        ! ESMF_ARBDIM if 1 is distributed, otherwise 1
         if (isDist(3)) then
-          coordDimMap(3,1)=ESMF_GRID_ARBDIM      
+          coordDimMap(3,1)=ESMF_ARBDIM      
         else
 	  coordDimMap(3,1)=3
         endif
@@ -21832,15 +21832,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present(coordDep1)) then
          ! error checking, if this dimension is arbitrary, one of the 
-         ! coordinate dimension has to be be ESMF_GRID_ARBDIM
+         ! coordinate dimension has to be be ESMF_ARBDIM
          if (isDist(1)) then
             found = .false.
             do i=1,size(coordDep1)
-               if (coordDep1(i) == ESMF_GRID_ARBDIM) found = .true.
+               if (coordDep1(i) == ESMF_ARBDIM) found = .true.
             enddo
             if (.not. found) then
                call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                    msg="- coordDep1 does not contain ESMF_GRID_ARBDIM", & 
+                    msg="- coordDep1 does not contain ESMF_ARBDIM", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
                return
             endif
@@ -21852,25 +21852,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          enddo
       else 
          coordDimCount(1)=1
-         ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+         ! ESMF_ARBDIM if 1 is distributed, otherwise 1
          if (isDist(1)) then
-            coordDimMap(1,1)=ESMF_GRID_ARBDIM      
+            coordDimMap(1,1)=ESMF_ARBDIM      
          else
             coordDimMap(1,1)=1
          endif
       endif
 
       if (present(coordDep2)) then
-         ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+         ! error checking, one of the dimensions has to be ESMF_ARBDIM
          ! if dimension 2 is arbitrary
          if (isDist(2)) then
             found = .false.
             do i=1,size(coordDep2)
-               if (coordDep2(i) == ESMF_GRID_ARBDIM) found = .true.
+               if (coordDep2(i) == ESMF_ARBDIM) found = .true.
             enddo
             if (.not. found) then
                call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                    msg="- coordDep2 does not contain ESMF_GRID_ARBDIM", & 
+                    msg="- coordDep2 does not contain ESMF_ARBDIM", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
                return
             endif
@@ -21882,9 +21882,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          enddo
       else 
          coordDimCount(2)=1
-         ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+         ! ESMF_ARBDIM if 1 is distributed, otherwise 1
          if (isDist(2)) then
-            coordDimMap(2,1)=ESMF_GRID_ARBDIM      
+            coordDimMap(2,1)=ESMF_ARBDIM      
          else
             coordDimMap(2,1)=2
          endif
@@ -21892,16 +21892,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (dimCount > 2) then
          if (present(coordDep3)) then 
-            ! error checking, one of the dimensions has to be ESMF_GRID_ARBDIM
+            ! error checking, one of the dimensions has to be ESMF_ARBDIM
             ! if dimension 3 is arbitrary
             if (isDist(3)) then
                found = .false.
                do i=1,size(coordDep3)
-                  if (coordDep3(i) == ESMF_GRID_ARBDIM) found = .true.
+                  if (coordDep3(i) == ESMF_ARBDIM) found = .true.
                enddo
                if (.not. found) then
                   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                       msg="- coordDep3 does not contain ESMF_GRID_ARBDIM", & 
+                       msg="- coordDep3 does not contain ESMF_ARBDIM", & 
                        ESMF_CONTEXT, rcToReturn=rc) 
                   return
                endif
@@ -21913,9 +21913,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             enddo
          else 
             coordDimCount(3)=1
-            ! ESMF_GRID_ARBDIM if 1 is distributed, otherwise 1
+            ! ESMF_ARBDIM if 1 is distributed, otherwise 1
             if (isDist(3)) then
-               coordDimMap(3,1)=ESMF_GRID_ARBDIM      
+               coordDimMap(3,1)=ESMF_ARBDIM      
             else
                coordDimMap(3,1)=3
             endif
