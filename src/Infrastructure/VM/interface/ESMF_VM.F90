@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.141 2011/06/27 17:33:21 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.142 2011/06/27 17:40:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.141 2011/06/27 17:33:21 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.142 2011/06/27 17:40:23 theurich Exp $"
 
 !==============================================================================
 
@@ -653,7 +653,7 @@ contains
 !EOPI
 !-------------------------------------------------------------------------------
 
-    ESMF_INIT_TYPE xginit1, xginit2
+    ESMF_INIT_TYPE init1, init2
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
@@ -666,12 +666,12 @@ contains
     !       Or replicate logic for C interface also.
 
     ! check inputs
-    xginit1 = ESMF_VMGetInit(vm1)
-    xginit2 = ESMF_VMGetInit(vm2)
+    init1 = ESMF_VMGetInit(vm1)
+    init2 = ESMF_VMGetInit(vm2)
 
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
-    if (xginit1 .eq. ESMF_INIT_CREATED .and. &
-      xginit2 .eq. ESMF_INIT_CREATED) then
+    if (init1 .eq. ESMF_INIT_CREATED .and. &
+      init2 .eq. ESMF_INIT_CREATED) then
       ESMF_VMEQ = vm1%this == vm2%this
     else
       ESMF_VMEQ = ESMF_FALSE
@@ -704,15 +704,6 @@ contains
 !EOPI
 !-------------------------------------------------------------------------------
 
-    ESMF_INIT_TYPE xginit1, xginit2
-    integer :: localrc1, localrc2
-    logical :: lval1, lval2
-
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
-    ! init checks on both args, and in the case where both are uninitialized,
-    ! to distinguish equality based on uninitialized type (uncreated,
-    ! deleted).
-    
     ESMF_VMNE = .not.ESMF_VMEQ(vm1, vm2)
 
   end function ESMF_VMNE
