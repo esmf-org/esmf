@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.6 2011/06/24 14:26:10 rokuingh Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.7 2011/06/27 21:28:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.6 2011/06/24 14:26:10 rokuingh Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.7 2011/06/27 21:28:44 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -401,8 +401,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt State}. In particular
-!     all associated proxy objects are destroyed.
+!     Releases resources associated with this {\tt State}.
 !
 !     The arguments are:
 !     \begin{description}

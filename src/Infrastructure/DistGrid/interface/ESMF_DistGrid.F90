@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.93 2011/06/27 19:46:22 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.94 2011/06/27 21:28:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.93 2011/06/27 19:46:22 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.94 2011/06/27 21:28:28 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2471,7 +2471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridDestroy()"
 !BOP
-! !IROUTINE: ESMF_DistGridDestroy - Release all resources associated with DistGrid object
+! !IROUTINE: ESMF_DistGridDestroy - Release resources associated with a DistGrid 
 
 ! !INTERFACE:
   subroutine ESMF_DistGridDestroy(distgrid, keywordEnforcer, rc)
@@ -2485,7 +2485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Destroy an {\tt ESMF\_DistGrid} object, releasing all resources associated
+!   Destroys an {\tt ESMF\_DistGrid}, releasing the resources associated
 !   with the object.
 !
 !   The arguments are:

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.110 2011/06/27 19:46:24 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.111 2011/06/27 21:28:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.110 2011/06/27 19:46:24 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.111 2011/06/27 21:28:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -348,7 +348,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldDestroy"
 !BOP
-! !IROUTINE: ESMF_FieldDestroy - Release all resources associated with a Field
+! !IROUTINE: ESMF_FieldDestroy - Release resources associated with a Field
 ! !INTERFACE:
   subroutine ESMF_FieldDestroy(field, keywordEnforcer, rc)
 !
@@ -361,7 +361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Releases all resources associated with the {\tt ESMF\_Field}.  If an 
+! Releases resources associated with the {\tt ESMF\_Field}.  If an 
 ! {\tt ESMF\_Grid} is associated with {\tt field}, it will not be released.  If 
 ! {\tt field} is not released with this call, it will be released by the
 ! automatic garbage collection facility in the scope of the Component 
@@ -413,7 +413,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldDestruct"
 !BOPI
-! !IROUTINE:   ESMF_FieldDestruct - Free any Field memory allocated internally
+! !IROUTINE:   ESMF_FieldDestruct - Release Field memory allocated internally
 !
 ! !INTERFACE:
   subroutine ESMF_FieldDestruct(ftype, rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.16 2011/06/24 16:52:02 rokuingh Exp $
+! $Id: ESMF_GeomBase.F90,v 1.17 2011/06/27 21:28:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.16 2011/06/24 16:52:02 rokuingh Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.17 2011/06/27 21:28:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -726,7 +726,7 @@ end interface
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomBaseDestroy"
 !BOPI
-! !IROUTINE: ESMF_GeomBaseDestroy - Free all resources associated with a GeomBase 
+! !IROUTINE: ESMF_GeomBaseDestroy - Release resources associated with a GeomBase
 
 ! !INTERFACE:
       subroutine ESMF_GeomBaseDestroy(gridbase, rc)
@@ -736,8 +736,8 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_GridBas} object. This call does not destroy wrapped
-!    Grid, LocStream, or other Grid objects. 
+!   Destroys an {\tt ESMF\_GridBase} object. This call does not destroy wrapped
+!   Grid, LocStream, or other Grid objects. 
 !
 !     The arguments are:
 !     \begin{description}

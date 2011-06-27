@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.149 2011/06/27 19:46:40 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.150 2011/06/27 21:28:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.149 2011/06/27 19:46:40 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.150 2011/06/27 21:28:41 theurich Exp $'
 
 !==============================================================================
 !
@@ -477,7 +477,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompDestroy"
 !BOP
-! !IROUTINE: ESMF_CplCompDestroy - Release all resources associated with this CplComp
+! !IROUTINE: ESMF_CplCompDestroy - Release resources associated with a CplComp
 
 ! !INTERFACE:
   subroutine ESMF_CplCompDestroy(cplcomp, keywordEnforcer, rc)
@@ -491,7 +491,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Releases all resources associated with this {\tt ESMF\_CplComp}.
+! Destroys an {\tt ESMF\_CplComp}, releasing the resources associated
+! with the object.
 !
 ! The arguments are:
 ! \begin{description}

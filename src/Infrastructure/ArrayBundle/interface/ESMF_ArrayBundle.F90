@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.72 2011/06/27 19:46:19 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.73 2011/06/27 21:28:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.72 2011/06/27 19:46:19 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.73 2011/06/27 21:28:27 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -729,7 +729,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleDestroy()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleDestroy - Release all resources associated with an ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleDestroy - Release resources associated with an ArrayBundle
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleDestroy(arraybundle, keywordEnforcer, rc)
@@ -743,7 +743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Destroy an {\tt ESMF\_ArrayBundle} object. The member Arrays are not
+! Destroys an {\tt ESMF\_ArrayBundle} object. The member Arrays are not
 ! touched by this operation and remain valid objects that need to be 
 ! destroyed individually if necessary.
 !

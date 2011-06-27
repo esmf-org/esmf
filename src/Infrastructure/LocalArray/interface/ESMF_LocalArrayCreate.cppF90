@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.53 2011/06/27 19:46:37 rokuingh Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.54 2011/06/27 21:28:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.53 2011/06/27 19:46:37 rokuingh Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.54 2011/06/27 21:28:36 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1010,7 +1010,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayDestroy"
 !BOP
-! !IROUTINE: ESMF_LocalArrayDestroy - Release all resources associated with LocalArray object
+! !IROUTINE: ESMF_LocalArrayDestroy - Release resources associated with a LocalArray
 !
 ! !INTERFACE:
   subroutine ESMF_LocalArrayDestroy(localarray, keywordEnforcer, rc)
@@ -1025,7 +1025,7 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Destroy an {\tt ESMF\_LocalArray} object, releasing all resources associated
+!   Destroys an {\tt ESMF\_LocalArray}, releasing all resources associated
 !   with the object.
 !
 !   The arguments are:

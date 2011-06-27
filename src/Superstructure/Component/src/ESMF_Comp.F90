@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.216 2011/06/27 19:46:40 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.217 2011/06/27 21:28:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.216 2011/06/27 19:46:40 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.217 2011/06/27 21:28:41 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -747,7 +747,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CompDestruct"
 !BOPI
-! !IROUTINE: ESMF_CompDestruct - Internal routine for freeing resources
+! !IROUTINE: ESMF_CompDestruct - Release resources associated with a Component
 
 ! !INTERFACE:
   subroutine ESMF_CompDestruct(compp, rc)
@@ -757,7 +757,8 @@ contains
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Component}.
+!     Destroys an {\tt ESMF\_Component}, releasing the resources associated
+!     with the object.
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.53 2011/06/21 04:04:53 w6ws Exp $
+! $Id: ESMF_RHandle.F90,v 1.54 2011/06/27 21:28:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.53 2011/06/21 04:04:53 w6ws Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.54 2011/06/27 21:28:38 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -240,7 +240,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandleDestroy"
 !BOPI
-! !IROUTINE: ESMF_RouteHandleDestroy - Free all resources associated with a RouteHandle 
+! !IROUTINE: ESMF_RouteHandleDestroy - Release resources associated with a RouteHandle
 
 ! !INTERFACE:
   subroutine ESMF_RouteHandleDestroy(rhandle, rc)
@@ -250,8 +250,8 @@ contains
     integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!   Destroys an {\tt ESMF\_RouteHandle} object previously allocated
-!   via an {\tt ESMF_RouteHandleCreate()} routine.
+!   Destroys an {\tt ESMF\_RouteHandle}, releaseing the resources associated
+!   with the object.
 !
 !   The arguments are:
 !   \begin{description}

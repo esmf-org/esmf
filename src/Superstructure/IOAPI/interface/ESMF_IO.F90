@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.10 2011/06/09 20:26:39 eschwab Exp $
+! $Id: ESMF_IO.F90,v 1.11 2011/06/27 21:28:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_IO.F90,v 1.10 2011/06/09 20:26:39 eschwab Exp $'
+      '$Id: ESMF_IO.F90,v 1.11 2011/06/27 21:28:43 theurich Exp $'
 
 !==============================================================================
 !
@@ -317,7 +317,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IODestroy()"
 !BOPI
-! !IROUTINE: ESMF_IODestroy - Free all resources associated with an ESMF IO object
+! !IROUTINE: ESMF_IODestroy - Release resources associated with an ESMF IO object
 !
 ! !INTERFACE:
       subroutine ESMF_IODestroy(io, rc)
@@ -327,7 +327,7 @@
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt ESMF\_IO} object.
+!     Releases resources associated with this {\tt ESMF\_IO} object.
 !
 !     The arguments are:
 !     \begin{description}
