@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.91 2011/06/27 17:14:20 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.92 2011/06/27 18:22:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ module ESMF_DistGridMod
   use ESMF_VMMod                  ! ESMF VM
   use ESMF_DELayoutMod            ! ESMF DELayout
   use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
-  use ESMF_IOUtilMod
+  use ESMF_IOUtilMod              ! ESMF I/O utility layer
 
   use ESMF_DistGridConnectionMod  ! ESMF DistGrid connections
   
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.91 2011/06/27 17:14:20 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.92 2011/06/27 18:22:19 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -165,14 +165,14 @@ module ESMF_DistGridMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_DistGridCreateDG
-    module procedure ESMF_DistGridCreateDGP
+    module procedure ESMF_DistGridCreateDGT
     module procedure ESMF_DistGridCreateRD
     module procedure ESMF_DistGridCreateDB
     module procedure ESMF_DistGridCreateRDFA
     module procedure ESMF_DistGridCreateDBFA      
-    module procedure ESMF_DistGridCreateRDP
+    module procedure ESMF_DistGridCreateRDT
     module procedure ESMF_DistGridCreateDBP
-    module procedure ESMF_DistGridCreateRDPFA
+    module procedure ESMF_DistGridCreateRDTFA
     module procedure ESMF_DistGridCreateDBPFA
     module procedure ESMF_DistGridCreateDBAI1D
     module procedure ESMF_DistGridCreateDBAI
@@ -289,9 +289,9 @@ module ESMF_DistGridMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (distgrid1 == distgrid2) then ... endif
+!   if (distgrid1 /= distgrid2) then ... endif
 !             OR
-!   result = (distgrid1 == distgrid2)
+!   result = (distgrid1 /= distgrid2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -400,7 +400,7 @@ contains
 !EOPI
 !-------------------------------------------------------------------------------
 
-    ESMF_INIT_TYPE dginit1, dginit2
+    ESMF_INIT_TYPE init1, init2
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
@@ -413,12 +413,12 @@ contains
     !       Or replicate logic for C interface also.
 
     ! check inputs
-    dginit1 = ESMF_DistGridGetInit(distgrid1)
-    dginit2 = ESMF_DistGridGetInit(distgrid2)
+    init1 = ESMF_DistGridGetInit(distgrid1)
+    init2 = ESMF_DistGridGetInit(distgrid2)
 
     ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
-    if (dginit1 .eq. ESMF_INIT_CREATED .and. &
-      dginit2 .eq. ESMF_INIT_CREATED) then
+    if (init1 .eq. ESMF_INIT_CREATED .and. &
+      init2 .eq. ESMF_INIT_CREATED) then
       ESMF_DistGridEQ = distgrid1%this .eq. distgrid2%this
     else
       ESMF_DistGridEQ = .false.
@@ -445,21 +445,12 @@ contains
     type(ESMF_DistGrid), intent(in) :: distgrid2
 
 ! !DESCRIPTION:
-!   Test if both {\tt distgrid1} and {\tt distgrid2} alias the same ESMF DistGrid 
-!   object.
+!   Test if both {\tt distgrid1} and {\tt distgrid2} alias the same
+!   ESMF DistGrid object.
 !
 !EOPI
 !-------------------------------------------------------------------------------
 
-    ESMF_INIT_TYPE dginit1, dginit2
-    integer :: localrc1, localrc2
-    logical :: lval1, lval2
-
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
-    ! init checks on both args, and in the case where both are uninitialized,
-    ! to distinguish equality based on uninitialized type (uncreated,
-    ! deleted).
-    
     ESMF_DistGridNE = .not.ESMF_DistGridEQ(distgrid1, distgrid2)
 
   end function ESMF_DistGridNE
@@ -751,13 +742,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateDGP()"
+#define ESMF_METHOD "ESMF_DistGridCreateDGT()"
 !BOP
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from DistGrid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDGP(distgrid, firstExtraPTile, lastExtraPTile, &
+  function ESMF_DistGridCreateDGT(distgrid, firstExtraPTile, lastExtraPTile, &
     keywordEnforcer, indexflag, connectionList, rc)
 !
 ! !ARGUMENTS:
@@ -770,7 +761,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDGP
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDGT
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -855,15 +846,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
-    ESMF_DistGridCreateDGP = dg 
+    ESMF_DistGridCreateDGT = dg 
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDGP)
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDGT)
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateDGP
+  end function ESMF_DistGridCreateDGT
 !------------------------------------------------------------------------------
 
 
@@ -1539,13 +1530,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRDP()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDT()"
 !BOP
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDP(minIndexPTile, maxIndexPTile, &
+  function ESMF_DistGridCreateRDT(minIndexPTile, maxIndexPTile, &
     keywordEnforcer, regDecompPTile, decompflagPTile, regDecompFirstExtraPTile,&
     regDecompLastExtraPTile, deLabelList, indexflag, connectionList, &
     delayout, vm, rc)
@@ -1566,7 +1557,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDP
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDT
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1728,15 +1719,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
-    ESMF_DistGridCreateRDP = distgrid 
+    ESMF_DistGridCreateRDT = distgrid 
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDP)
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDT)
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
  
-  end function ESMF_DistGridCreateRDP
+  end function ESMF_DistGridCreateRDT
 !------------------------------------------------------------------------------
 
 
@@ -1887,13 +1878,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateRDPFA()"
+#define ESMF_METHOD "ESMF_DistGridCreateRDTFA()"
 !BOPI
 ! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDPFA(minIndex, maxIndex, regDecomp, decompflag, &
+  function ESMF_DistGridCreateRDTFA(minIndex, maxIndex, regDecomp, decompflag, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !
 ! !ARGUMENTS:
@@ -1909,7 +1900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDPFA
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
@@ -2019,15 +2010,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set return value
-    ESMF_DistGridCreateRDPFA = distgrid
+    ESMF_DistGridCreateRDTFA = distgrid
  
     ! Set init code
-    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDPFA)
+    ESMF_INIT_SET_CREATED(ESMF_DistGridCreateRDTFA)
  
     ! return successfully
     !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
  
-  end function ESMF_DistGridCreateRDPFA
+  end function ESMF_DistGridCreateRDTFA
 !------------------------------------------------------------------------------
 
 
@@ -2480,7 +2471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridDestroy()"
 !BOP
-! !IROUTINE: ESMF_DistGridDestroy - Destroy DistGrid object
+! !IROUTINE: ESMF_DistGridDestroy - Release all resources associated with DistGrid object
 
 ! !INTERFACE:
   subroutine ESMF_DistGridDestroy(distgrid, keywordEnforcer, rc)
@@ -2494,7 +2485,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Destroy an {\tt ESMF\_DistGrid} object.
+!   Destroy an {\tt ESMF\_DistGrid} object, releasing all resources associated
+!   with the object.
 !
 !   The arguments are:
 !   \begin{description}
