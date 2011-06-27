@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.22 2011/02/23 23:37:42 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.23 2011/06/27 23:24:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -44,7 +44,6 @@ namespace ESMCI {
 // constants and enums
 
 enum CompType { COMPTYPE_GRID=1, COMPTYPE_CPL, COMPTYPE_UNKNOWN };
-enum GridCompType { ATM=2, LAND, OCEAN, SEAICE, RIVER, UNKNOWN };
 enum method { SETNONE=0, SETINIT, SETRUN, SETFINAL, SETWRITERESTART,
   SETREADRESTART, SETINITIC, SETRUNIC, SETFINALIC, SETWRITERESTARTIC,
   SETREADRESTARTIC, SETREGISTER };

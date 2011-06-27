@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.48 2011/06/24 05:48:11 theurich Exp $
+% $Id: Component_refdoc.ctex,v 1.49 2011/06/27 23:24:12 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,12 +56,12 @@
 \input{../Superstructure/Component/doc/GridComp_desc}
 #endif
 
-\subsection{GridComp Options}
-#ifdef STANDALONE
-\input{GridComp_options}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/GridComp_options}
-#endif
+%\subsection{GridComp Options}
+%#ifdef STANDALONE
+%\input{GridComp_options}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/GridComp_options}
+%#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
