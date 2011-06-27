@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.32 2011/06/24 18:24:09 rokuingh Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.33 2011/06/27 16:44:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.32 2011/06/24 18:24:09 rokuingh Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.33 2011/06/27 16:44:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -134,7 +134,6 @@ contains
     logical,                intent(out),  optional  :: cancelledflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -250,7 +249,6 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -306,7 +304,6 @@ contains
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -435,15 +432,13 @@ contains
     type(ESMF_Array), intent(in)              :: array
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Print internal information of the specified {\tt ESMF\_Array} object. \\
-
+!
 !   The arguments are:
 !   \begin{description}
 !   \item[array] 
@@ -463,11 +458,12 @@ contains
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    ! Flush before crossing language interface to ensure correct output order
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Call into the C++ interface
     call c_ESMC_ArrayPrint(array, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -749,7 +745,6 @@ contains
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -888,7 +883,6 @@ contains
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -943,7 +937,6 @@ contains
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
 !   integer,                  intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1297,7 +1290,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
     integer,                intent(out),  optional  :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible

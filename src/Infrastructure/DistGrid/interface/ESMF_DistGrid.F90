@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.89 2011/06/24 19:15:11 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.90 2011/06/27 16:44:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.89 2011/06/24 19:15:11 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.90 2011/06/27 16:44:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -3063,11 +3063,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    ! Flush before crossing language interface to ensure correct output order
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Call into the C++ interface
     call c_ESMC_DistGridPrint(distgrid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
