@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.96 2011/06/24 18:29:42 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.97 2011/06/27 17:59:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,13 +34,13 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 
 ! !USES:
-  use ESMF_UtilTypesMod     ! ESMF utility types
-  use ESMF_InitMacrosMod    ! ESMF initializer macros
-  use ESMF_BaseMod          ! ESMF base class
-  use ESMF_LogErrMod        ! ESMF error handling
-  use ESMF_VMMod            ! ESMF VM
-  use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
-  use ESMF_IOUtilMod
+  use ESMF_UtilTypesMod           ! ESMF utility types
+  use ESMF_InitMacrosMod          ! ESMF initializer macros
+  use ESMF_BaseMod                ! ESMF base class
+  use ESMF_LogErrMod              ! ESMF error handling
+  use ESMF_VMMod                  ! ESMF VM
+  use ESMF_F90InterfaceMod        ! ESMF F90-C++ interface helper
+  use ESMF_IOUtilMod              ! ESMF I/O utility layer
   
   implicit none
 
@@ -96,6 +96,9 @@ module ESMF_DELayoutMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public operator(==)
+  public operator(/=)
+
   public ESMF_DELayoutCreate
   public ESMF_DELayoutDestroy
   
@@ -120,19 +123,15 @@ module ESMF_DELayoutMod
 ! - deprecated methods
   public ESMF_DELayoutGetDeprecated
   public ESMF_DELayoutGetDELocalInfo
-  
-
 
 !EOPI
-  
-  public operator(==), operator(/=)
   
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.96 2011/06/24 18:29:42 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.97 2011/06/27 17:59:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -160,17 +159,142 @@ module ESMF_DELayoutMod
 !  types of {\tt ESMF\_DELayoutCreate} functions.   
 !EOPI 
   end interface
+!------------------------------------------------------------------------------
 
+!===============================================================================
+! DELayoutOperator() interfaces
+!===============================================================================
 
-! overload == & /= for derived types
+! -------------------------- ESMF-public interface ----------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAssignment(=) - DELayout assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   delayout1 = delayout2
+!
+! !ARGUMENTS:
+!   type(ESMF_DELayout) :: delayout1
+!   type(ESMF_DELayout) :: delayout2
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Assign delayout1 as an alias to the same ESMF DELayout object in memory
+!   as delayout2. If delayout2 is invalid, then delayout1 will be equally
+!   invalid after the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[delayout1]
+!     The {\tt ESMF\_DELayout} object on the left hand side of the assignment.
+!   \item[delayout2]
+!     The {\tt ESMF\_DELayout} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
 
+! -------------------------- ESMF-public interface ----------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutOperator(==) - DELayout equality operator
+!
+! !INTERFACE:
+  interface operator(==)
+!   if (delayout1 == delayout2) then ... endif
+!             OR
+!   result = (delayout1 == delayout2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_DELayout), intent(in) :: delayout1
+!   type(ESMF_DELayout), intent(in) :: delayout2
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Test whether delayout1 and delayout2 are valid aliases to the same ESMF
+!   DELayout object in memory. For a more general comparison of two
+!   ESMF DELayouts, going beyond the simple alias test, the 
+!   ESMF\_DELayoutMatch() function (not yet implemented) must
+!   be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[delayout1]
+!     The {\tt ESMF\_DELayout} object on the left hand side of the equality
+!     operation.
+!   \item[delayout2]
+!     The {\tt ESMF\_DELayout} object on the right hand side of the equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_DELayoutEQ
+
+  end interface
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public interface ----------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutOperator(/=) - DELayout not equal operator
+!
+! !INTERFACE:
+  interface operator(/=)
+!   if (delayout1 /= delayout2) then ... endif
+!             OR
+!   result = (delayout1 /= delayout2)
+! !RETURN VALUE:
+!   logical :: result
+!
+! !ARGUMENTS:
+!   type(ESMF_DELayout), intent(in) :: delayout1
+!   type(ESMF_DELayout), intent(in) :: delayout2
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Test whether delayout1 and delayout2 are {\it not} valid aliases to the
+!   same ESMF DELayout object in memory. For a more general comparison of two
+!   ESMF DELayouts, going beyond the simple alias test, the 
+!   ESMF\_DELayoutMatch() function (not yet implemented) must
+!   be used.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[delayout1]
+!     The {\tt ESMF\_DELayout} object on the left hand side of the non-equality
+!     operation.
+!   \item[delayout2]
+!     The {\tt ESMF\_DELayout} object on the right hand side of the non-equality
+!     operation.
+!   \end{description}
+!
+!EOP
+    module procedure ESMF_DELayoutNE
+
+  end interface
+!------------------------------------------------------------------------------
+
+!===============================================================================
+! ServiceReplyOperator() interfaces
+!===============================================================================
+
+! -------------------------- ESMF-public interface ----------------------------
   interface operator (==)
     module procedure ESMF_sreq
   end interface
+!------------------------------------------------------------------------------
 
+! -------------------------- ESMF-public interface ----------------------------
   interface operator (/=)
     module procedure ESMF_srne
   end interface
+!------------------------------------------------------------------------------
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -180,6 +304,86 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutEQ()"
+!BOPI
+! !IROUTINE:  ESMF_DELayoutEQ - Compare two DELayouts for equality
+!
+! !INTERFACE:
+  function ESMF_DELayoutEQ(delayout1, delayout2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DELayoutEQ
+
+! !ARGUMENTS:
+    type(ESMF_DELayout), intent(in) :: delayout1
+    type(ESMF_DELayout), intent(in) :: delayout2
+
+! !DESCRIPTION:
+!   Test if both {\tt delayout1} and {\tt delayout2} alias the same
+!   ESMF DELayout object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_INIT_TYPE init1, init2
+    integer :: localrc1, localrc2
+    logical :: lval1, lval2
+
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! init checks on both args, and in the case where both are uninitialized,
+    ! to distinguish equality based on uninitialized type (uncreated,
+    ! deleted).
+
+    ! TODO: Consider moving this logic to C++: use Base class? status?
+    !       Or replicate logic for C interface also.
+
+    ! check inputs
+    init1 = ESMF_DELayoutGetInit(delayout1)
+    init2 = ESMF_DELayoutGetInit(delayout2)
+
+    ! TODO: this line must remain split in two for SunOS f90 8.3 127000-03
+    if (init1 .eq. ESMF_INIT_CREATED .and. &
+      init2 .eq. ESMF_INIT_CREATED) then
+      ESMF_DELayoutEQ = delayout1%this .eq. delayout2%this
+    else
+      ESMF_DELayoutEQ = .false.
+    endif
+
+  end function ESMF_DELayoutEQ
+!-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutNE()"
+!BOPI
+! !IROUTINE:  ESMF_DELayoutNE - Compare two DELayouts for non-equality
+!
+! !INTERFACE:
+  function ESMF_DELayoutNE(delayout1, delayout2)
+! 
+! !RETURN VALUE:
+    logical :: ESMF_DELayoutNE
+
+! !ARGUMENTS:
+    type(ESMF_DELayout), intent(in) :: delayout1
+    type(ESMF_DELayout), intent(in) :: delayout2
+
+! !DESCRIPTION:
+!   Test if both {\tt delayout1} and {\tt delayout2} alias the same
+!   ESMF DELayout object.
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    ESMF_DELayoutNE = .not.ESMF_DELayoutEQ(delayout1, delayout2)
+
+  end function ESMF_DELayoutNE
+!-------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -200,35 +404,6 @@ contains
   end function
 !------------------------------------------------------------------------------
 
-
-! -------------------------- ESMF-public method -------------------------------
-!BOP
-! !IROUTINE: ESMF_DELayoutAssignment(=) - DELayout assignment
-!
-! !INTERFACE:
-!   interface assignment(=)
-!   delayout1 = delayout2
-!
-! !ARGUMENTS:
-!   type(ESMF_DELayout) :: delayout1
-!   type(ESMF_DELayout) :: delayout2
-!
-!
-! !DESCRIPTION:
-!   Assign delayout1 as an alias to the same ESMF DELayout object in memory
-!   as delayout2. If delayout2 is invalid, then delayout1 will be equally invalid after
-!   the assignment.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[delayout1]
-!     The {\tt ESMF\_DELayout} object on the left hand side of the assignment.
-!   \item[delayout2]
-!     The {\tt ESMF\_DELayout} object on the right hand side of the assignment.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
@@ -724,7 +899,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutCreateND(delayout, vmObject, opt_deCountList(1), &
       len_deCountList, opt_petList(1), len_petList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1062,7 +1237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_deCountPerDim => dummy
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutGetDeprecated(delayout, deCount, dimCount, localDeCount, &
       opt_localDeList(1), len_localDeList, localDe, oneToOneFlag, logRectFlag, &
       opt_deCountPerDim(1), len_deCountPerDim, localrc)
@@ -1160,7 +1335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       len_cw = 0
       opt_DEcw => dummy
     endif
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutGetDELocalInfo(delayout, de, opt_DEcoord(1), len_coord,&
       opt_DEcde(1), len_cde, opt_DEcw(1), len_cw, connectionCount, pid, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1249,7 +1424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_deMatchList => dummy
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutGetDEMatchDE(delayout, de, delayoutMatch, &
       deMatchCount, opt_deMatchList(1), len_deMatchList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1331,7 +1506,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_petMatchList => dummy
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
       petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1391,7 +1566,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutPrint(delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1577,7 +1752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutValidate(delayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1657,7 +1832,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       opt_petMatchList => dummy
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutGetDEMatchPET(delayout, de, vmMatch, &
       petMatchCount, opt_petMatchList(1), len_petMatchList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1733,7 +1908,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       linquireflag = ESMF_NOINQUIRE
     end if
  
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutSerialize(delayout, buffer, length, offset, &
                                   linquireflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1791,7 +1966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, buffer, &
       offset, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
