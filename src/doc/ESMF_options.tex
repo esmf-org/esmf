@@ -1,32 +1,9 @@
-% $Id: ESMF_options.tex,v 1.58 2011/06/27 18:54:32 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.59 2011/06/27 19:03:02 rokuingh Exp $
 
-\section{Global Options, Flags and Parameters}
-
-\subsection{Options}
-
-\subsubsection{ESMF\_Method}
-\label{opt:method}
-{\sf DESCRIPTION:\\}  
-Specify standard ESMF Component method.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_SETFINAL]
-      Finalize method.
-\item [ESMF\_SETINIT]
-      Initialize method.
-\item [ESMF\_SETREADRESTART]
-      ReadRestart method.
-\item [ESMF\_SETRUN]
-      Run method.
-\item [ESMF\_SETWRITERESTART]
-      WriteRestart method.
-\end{description}
+\section{Constants}
 
 
-\subsection{Flags}
-
-\subsubsection{ESMF\_AllocFlag}
+\subsection{ESMF\_AllocFlag}
 \label{opt:allocflag}
 {\sf DESCRIPTION:\\}  
 Indicates whether to allocate data or not.
@@ -39,7 +16,295 @@ Valid values are:
       Do not allocate data at this time. 
 \end{description}
 
-\subsubsection{ESMF\_Sync\_Flag}
+\subsection{ESMF\_DefaultFlag}
+\label{opt:defaultflag}
+{\sf DESCRIPTION:\\}
+Indicates whether to use defaults or not.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_USE\_DEFAULTS]
+      Use default values where possible.
+\item [ESMF\_NO\_DEFAULTS]
+      Don't use any default values.
+\end{description}
+
+\subsection{ESMF\_IOFmtFlag}
+\label{opt:iofmtflag}
+{\sf DESCRIPTION:\\}
+Indicates IO format options that is currently supported.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_IOFMT\_BIN]
+      Binary format.
+\item [ESMF\_IOFMT\_NETCDF]
+      NETCDF and PNETCDF format.
+\end{description}
+
+\subsection{ESMF\_Status}
+\label{opt:status}
+{\sf DESCRIPTION:\\}
+This is a general object status flag used throughout the
+framework.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATUS\_UNINIT] 
+         Object is uninitialized.
+   \item [ESMF\_STATUS\_READY]
+         Object is ready for use.
+   \item [ESMF\_STATUS\_UNALLOCATED]
+         Object has not yet been allocated.
+   \item [ESMF\_STATUS\_ALLOCATED]
+         Object has been allocated.
+   \item [ESMF\_STATUS\_BUSY]
+         Object is not able to respond.
+   \item [ESMF\_STATUS\_INVALID]
+         Object is invalid.
+\end{description}
+
+\subsection{ESMF\_CONTEXT}
+\label{opt:contextflag}
+{\sf DESCRIPTION:\\}  
+Indicates the type of VM context in which a Component will be executing its
+standard methods.
+
+Valid values are:
+\begin{description}
+
+\item [ESMF\_CONTEXT\_OWN\_VM]
+         The component is running in its own, separate VM context. Resources
+         are inherited from the parent but can be arranged to fit the
+         component's requirements.
+\item [ESMF\_CONTEXT\_PARENT\_VM]
+         The component uses the parent's VM for resource management. Compared
+         to components that use their own VM context components that run in the
+         parent's VM context are more light-weight with respect to the overhead
+         of calling into their initialize, run and finalize methods.
+         Furthermore, VM-specific properties remain unchanged when going from
+         the parent component to the child component. These properties include
+         the MPI communicator, the number of PETs, the PET labeling, 
+         communication attributes, threading-level.
+
+\end{description}
+
+\subsection{ESMF\_DATACOPY}
+\label{opt:datacopyflag}
+{\sf DESCRIPTION:\\}
+Indicates whether to reference a data item or make a copy of it.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_DATACOPY\_VALUE]
+      Copy the data item to another buffer.
+\item [ESMF\_DATACOPY\_REFERENCE]
+      Reference the data item.
+\end{description}
+
+\subsection{ESMF\_DECOMP}
+\label{opt:decompflag}
+{\sf DESCRIPTION:\\}
+Indicates how DistGrid elements are decomposed over DEs.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_DECOMP\_CYCLIC]
+      Decompose elements cyclically across DEs.
+\item [ESMF\_DECOMP\_DEFAULT]
+      Use default decomposition behavior. Currently equal to 
+      {\tt ESMF\_DECOMP\_BALANCED}.
+\item [ESMF\_DECOMP\_BALANCED]
+      Decompose elements as homogenously as possible across DEs. The maximum 
+      difference in number of elements per DE is 1, with the extra elements on
+      the lower DEs.
+\item [ESMF\_DECOMP\_RESTFIRST]
+      Divide elements over DEs. Assign the rest of this division to the first
+      DE.
+\item [ESMF\_DECOMP\_RESTLAST]
+      Divide elements over DEs. Assign the rest of this division to the last DE.
+\end{description}
+
+\subsection{ESMF\_GEOMTYPE}
+\label{opt:geomtype}
+
+{\sf DESCRIPTION:\\}
+Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
+be built. 
+
+Valid values are:
+\begin{description}
+\item [ESMF\_GEOMTYPE\_GRID]
+      An ESMF\_Grid, a structured grid composed of one or more logically rectangular tiles
+\item [ESMF\_GEOMTYPE\_MESH]
+      An ESMF\_Mesh, an unstructured grid
+\item [ESMF\_GEOMTYPE\_XGRID]
+      An ESMF\_XGrid, an exchange grid
+\item [ESMF\_TYPEKIND\_LOCSTREAM]
+      An ESMF\_LocStream, a disconnected series of points with associated key values
+\end{description}
+
+\subsection{ESMF\_INDEX}
+\label{opt:indexflag}
+{\sf DESCRIPTION:\\}
+Indicates whether index is local (per DE) or global (per object).
+
+Valid values are:
+\begin{description}
+\item [ESMF\_INDEX\_DELOCAL]
+      Indicates that DE-local index space starts at lower bound 1 for each DE.
+\item [ESMF\_INDEX\_GLOBAL]
+      Indicates that global indices are used. This means that DE-local index
+      space starts at the global lower bound for each DE.
+\item [ESMF\_INDEX\_USER]
+      Indicates that the DE-local index bounds are explicitly set by the user.
+\end{description}
+
+\subsection{ESMF\_KIND}
+
+{\sf DESCRIPTION:\\}
+These are integer parameters of the proper type to be
+used when declaring variables with a specific precision 
+in Fortran syntax.  For example:
+\begin{verbatim}
+ integer(ESMF_KIND_I4) :: myintegervariable
+ real(ESMF_KIND_R4) :: myrealvariable
+\end{verbatim}
+The Fortran 90 standard does not mandate what numeric values
+correspond to actual number of bytes allocated for the
+various kinds, so these are defined by ESMF to be correct across
+the different supported Fortran 90 compilers.   Note that not
+all compilers support every kind listed below; in particular
+1 and 2 byte integers can be problematic.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_KIND\_I1]
+      1 byte integer.
+\item [ESMF\_KIND\_I2]
+      2 byte integer.
+\item [ESMF\_KIND\_I4]
+      4 byte integer.
+\item [ESMF\_KIND\_I8]
+      8 byte integer.
+\item [ESMF\_KIND\_R4]
+      4 byte real.
+\item [ESMF\_KIND\_R8]
+      8 byte real.
+\item [ESMF\_KIND\_C8]
+      8 byte character.
+\item [ESMF\_KIND\_C16]
+      16 byte character.
+\end{description}
+
+\subsection{ESMF\_METHOD}
+\label{opt:method}
+{\sf DESCRIPTION:\\}  
+Specify standard ESMF Component method.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_FINALIZE]
+      Finalize method.
+\item [ESMF\_INITIALIZE]
+      Initialize method.
+\item [ESMF\_READRESTART]
+      ReadRestart method.
+\item [ESMF\_RUN]
+      Run method.
+\item [ESMF\_WRITERESTART]
+      WriteRestart method.
+\end{description}
+
+\subsection{ESMF\_REDUCE}
+\label{opt:reduceflag}
+{\sf DESCRIPTION:\\}
+Indicates reduce operation to a {\tt Reduce()} method.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_REDUCE\_SUM]
+         Use arithmetic sum to add all data elements.
+   \item [ESMF\_REDUCE\_MIN]
+         Determine the minimum of all data elements.
+   \item [ESMF\_REDUCE\_MAX]
+         Determine the maximum of all data elements.
+\end{description}
+
+\subsection{ESMF\_REGION}
+\label{opt:zeroregion}
+{\sf DESCRIPTION:\\}
+Specifies various regions in the data layout of an Array or Field object.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_REGION\_TOTAL]
+      Total allocated memory.
+\item [ESMF\_REGION\_SELECT]
+      Region of operation-specific elements.
+\item [ESMF\_REGION\_EMPTY]
+      The empty region contains no elements.
+\end{description}
+
+\subsection{ESMF\_ROUTESYNC}
+\label{opt:routesyncflag}
+{\sf DESCRIPTION:\\}  
+Switch between blocking and non-blocking execution of RouteHandle based
+communication calls. Every RouteHandle based communication method contains
+an optional argument {\tt routesyncflag} that is of type {\tt ESMF\_RouteSync\_Flag}.
+
+Valid values are:
+\begin{description}
+
+\item [ESMF\_ROUTESYNC\_BLOCKING]
+         Execute a precomputed communication pattern in blocking mode. This
+         mode guarantees that when the method returns all PET-local data
+         transfers, both in-bound and out-bound, have finished. 
+\item [ESMF\_ROUTESYNC\_NBSTART]
+         \begin{sloppypar}
+         Start executing a precomputed communication pattern in non-blocking
+         mode. When a method returns from being called in this mode, it
+         guarantees that all PET-local out-bound data has been transferred.
+         It is now safe for the user to overwrite out-bound data elements.
+         No guarantees are made for in-bound data elements at this stage. It is
+         unsafe to access these elements until a call in
+         {\tt ESMF\_ROUTESYNC\_NBTESTFINISH} mode has been issued and has returned
+         with {\tt finishedflag} equal to .true., or a call in
+         {\tt ESMF\_ROUTESYNC\_NBWAITFINISH} mode has been issued and has returned.
+         \end{sloppypar}
+\item [ESMF\_ROUTESYNC\_NBTESTFINISH]
+         Test whether the transfer of data of a precomputed communication
+         pattern, started with {\tt ESMF\_ROUTESYNC\_NBSTART}, has completed.
+         Finish up as much as possible and set the {\tt finishedflag} to 
+         {\tt .true.} if {\em all} data operations have completed, or
+         {\tt .false.} if there are still outstanding transfers. Only after
+         a {\tt finishedflag} equal to {\tt .true.} has been returned is it
+         safe to access any of the in-bound data elements.
+\item [ESMF\_ROUTESYNC\_NBWAITFINISH]
+         Wait (i.e. block) until the transfer of data of a precomputed
+         communication pattern, started with {\tt ESMF\_ROUTESYNC\_NBSTART}, has
+         completed. Finish up {\em all} data operations and set the returned 
+         {\tt finishedflag} to {\tt .true.}. It is safe to access any of the
+         in-bound data elements once the call has returned.
+\item [ESMF\_ROUTESYNC\_CANCEL]
+         Cancel outstanding transfers for a precomputed communication pattern.
+\end{description}
+
+\subsection{ESMF\_STARTREGION}
+\label{opt:startregion}
+{\sf DESCRIPTION:\\}
+Specifies the start of the effective halo region of an Array or Field object.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_STARTREGION\_EXCLUSIVE]
+      Region of elements that are exclusively owned by the local DE.
+\item [ESMF\_STARTREGION\_COMPUTATIONAL]
+      User defined region, greater or equal to the exclusive region.
+\end{description}
+
+
+\subsection{ESMF\_SYNC}
 \label{opt:syncflag}
 {\sf DESCRIPTION:\\}  
 Indicates method blocking behavior and PET synchronization for VM communication
@@ -138,227 +403,9 @@ Valid values are:
          {\tt ESMF\_GridCompWait()} or {\tt ESMF\_CplCompWait()} method to
          block the local parent PET until the child component method has
          completed in the local VAS.
-         
-
 \end{description}
 
-\subsubsection{ESMF\_RouteSync\_Flag}
-\label{opt:routesyncflag}
-{\sf DESCRIPTION:\\}  
-Switch between blocking and non-blocking execution of RouteHandle based
-communication calls. Every RouteHandle based communication method contains
-an optional argument {\tt routesyncflag} that is of type {\tt ESMF\_RouteSync\_Flag}.
-
-Valid values are:
-\begin{description}
-
-\item [ESMF\_ROUTESYNC\_BLOCKING]
-         Execute a precomputed communication pattern in blocking mode. This
-         mode guarantees that when the method returns all PET-local data
-         transfers, both in-bound and out-bound, have finished. 
-\item [ESMF\_ROUTESYNC\_NBSTART]
-         \begin{sloppypar}
-         Start executing a precomputed communication pattern in non-blocking
-         mode. When a method returns from being called in this mode, it
-         guarantees that all PET-local out-bound data has been transferred.
-         It is now safe for the user to overwrite out-bound data elements.
-         No guarantees are made for in-bound data elements at this stage. It is
-         unsafe to access these elements until a call in
-         {\tt ESMF\_ROUTESYNC\_NBTESTFINISH} mode has been issued and has returned
-         with {\tt finishedflag} equal to .true., or a call in
-         {\tt ESMF\_ROUTESYNC\_NBWAITFINISH} mode has been issued and has returned.
-         \end{sloppypar}
-\item [ESMF\_ROUTESYNC\_NBTESTFINISH]
-         Test whether the transfer of data of a precomputed communication
-         pattern, started with {\tt ESMF\_ROUTESYNC\_NBSTART}, has completed.
-         Finish up as much as possible and set the {\tt finishedflag} to 
-         {\tt .true.} if {\em all} data operations have completed, or
-         {\tt .false.} if there are still outstanding transfers. Only after
-         a {\tt finishedflag} equal to {\tt .true.} has been returned is it
-         safe to access any of the in-bound data elements.
-\item [ESMF\_ROUTESYNC\_NBWAITFINISH]
-         Wait (i.e. block) until the transfer of data of a precomputed
-         communication pattern, started with {\tt ESMF\_ROUTESYNC\_NBSTART}, has
-         completed. Finish up {\em all} data operations and set the returned 
-         {\tt finishedflag} to {\tt .true.}. It is safe to access any of the
-         in-bound data elements once the call has returned.
-\item [ESMF\_ROUTESYNC\_CANCEL]
-         Cancel outstanding transfers for a precomputed communication pattern.
-\end{description}
-
-\subsubsection{ESMF\_Context\_Flag}
-\label{opt:contextflag}
-{\sf DESCRIPTION:\\}  
-Indicates the type of VM context in which a Component will be executing its
-standard methods.
-
-Valid values are:
-\begin{description}
-
-\item [ESMF\_CONTEXT\_OWN\_VM]
-         The component is running in its own, separate VM context. Resources
-         are inherited from the parent but can be arranged to fit the
-         component's requirements.
-\item [ESMF\_CONTEXT\_PARENT\_VM]
-         The component uses the parent's VM for resource management. Compared
-         to components that use their own VM context components that run in the
-         parent's VM context are more light-weight with respect to the overhead
-         of calling into their initialize, run and finalize methods.
-         Furthermore, VM-specific properties remain unchanged when going from
-         the parent component to the child component. These properties include
-         the MPI communicator, the number of PETs, the PET labeling, 
-         communication attributes, threading-level.
-
-\end{description}
-
-\subsubsection{ESMF\_DATACOPY}
-\label{opt:datacopyflag}
-{\sf DESCRIPTION:\\}
-Indicates whether to reference a data item or make a copy of it.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_DATACOPY\_VALUE]
-      Copy the data item to another buffer.
-\item [ESMF\_DATACOPY\_REFERENCE]
-      Reference the data item.
-\end{description}
-
-\subsubsection{ESMF\_DefaultFlag}
-\label{opt:defaultflag}
-{\sf DESCRIPTION:\\}
-Indicates whether to use defaults or not.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_USE\_DEFAULTS]
-      Use default values where possible.
-\item [ESMF\_NO\_DEFAULTS]
-      Don't use any default values.
-\end{description}
-
-\subsubsection{ESMF\_Decomp\_Flag}
-\label{opt:decompflag}
-{\sf DESCRIPTION:\\}
-Indicates how DistGrid elements are decomposed over DEs.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_DECOMP\_CYCLIC]
-      Decompose elements cyclically across DEs.
-\item [ESMF\_DECOMP\_DEFAULT]
-      Use default decomposition behavior. Currently equal to 
-      {\tt ESMF\_DECOMP\_BALANCED}.
-\item [ESMF\_DECOMP\_BALANCED]
-      Decompose elements as homogenously as possible across DEs. The maximum 
-      difference in number of elements per DE is 1, with the extra elements on
-      the lower DEs.
-\item [ESMF\_DECOMP\_RESTFIRST]
-      Divide elements over DEs. Assign the rest of this division to the first
-      DE.
-\item [ESMF\_DECOMP\_RESTLAST]
-      Divide elements over DEs. Assign the rest of this division to the last DE.
-\end{description}
-
-\subsubsection{ESMF\_IOFmtFlag}
-\label{opt:iofmtflag}
-{\sf DESCRIPTION:\\}
-Indicates IO format options that is currently supported.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_IOFMT\_BIN]
-      Binary format.
-\item [ESMF\_IOFMT\_NETCDF]
-      NETCDF and PNETCDF format.
-\end{description}
-
-\subsubsection{ESMF\_Index\_Flag}
-\label{opt:indexflag}
-{\sf DESCRIPTION:\\}
-Indicates whether index is local (per DE) or global (per object).
-
-Valid values are:
-\begin{description}
-\item [ESMF\_INDEX\_DELOCAL]
-      Indicates that DE-local index space starts at lower bound 1 for each DE.
-\item [ESMF\_INDEX\_GLOBAL]
-      Indicates that global indices are used. This means that DE-local index
-      space starts at the global lower bound for each DE.
-\item [ESMF\_INDEX\_USER]
-      Indicates that the DE-local index bounds are explicitly set by the user.
-      
-\end{description}
-
-\subsubsection{ESMF\_Reduce\_Flag}
-\label{opt:reduceflag}
-{\sf DESCRIPTION:\\}
-Indicates reduce operation to a {\tt Reduce()} method.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_REDUCE\_SUM]
-         Use arithmetic sum to add all data elements.
-   \item [ESMF\_REDUCE\_MIN]
-         Determine the minimum of all data elements.
-   \item [ESMF\_REDUCE\_MAX]
-         Determine the maximum of all data elements.
-\end{description}
-
-\subsubsection{ESMF\_StartRegion\_Flag}
-\label{opt:startregion}
-{\sf DESCRIPTION:\\}
-Specifies the start of the effective halo region of an Array or Field object.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_STARTREGION\_EXCLUSIVE]
-      Region of elements that are exclusively owned by the local DE.
-\item [ESMF\_STARTREGION\_COMPUTATIONAL]
-      User defined region, greater or equal to the exclusive region.
-\end{description}
-
-\subsubsection{ESMF\_Region\_Flag}
-\label{opt:zeroregion}
-{\sf DESCRIPTION:\\}
-Specifies various regions in the data layout of an Array or Field object.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_REGION\_TOTAL]
-      Total allocated memory.
-\item [ESMF\_REGION\_SELECT]
-      Region of operation-specific elements.
-\item [ESMF\_REGION\_EMPTY]
-      The empty region contains no elements.
-\end{description}
-
-\subsubsection{ESMF\_Status}
-\label{opt:status}
-{\sf DESCRIPTION:\\}
-This is a general object status flag used throughout the
-framework.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_STATUS\_UNINIT] 
-         Object is uninitialized.
-   \item [ESMF\_STATUS\_READY]
-         Object is ready for use.
-   \item [ESMF\_STATUS\_UNALLOCATED]
-         Object has not yet been allocated.
-   \item [ESMF\_STATUS\_ALLOCATED]
-         Object has been allocated.
-   \item [ESMF\_STATUS\_BUSY]
-         Object is not able to respond.
-   \item [ESMF\_STATUS\_INVALID]
-         Object is invalid.
-\end{description}
-
-
-\subsection{Parameters}
-
-\subsubsection{ESMF\_TYPEKIND}
+\subsection{ESMF\_TYPEKIND}
 \label{opt:typekind}
 
 {\sf DESCRIPTION:\\}
@@ -384,44 +431,7 @@ Valid values are:
       8 byte real.
 \end{description}
 
-\subsubsection{Fortran Kinds}
-
-{\sf DESCRIPTION:\\}
-These are integer parameters of the proper type to be
-used when declaring variables with a specific precision 
-in Fortran syntax.  For example:
-\begin{verbatim}
- integer(ESMF_KIND_I4) :: myintegervariable
- real(ESMF_KIND_R4) :: myrealvariable
-\end{verbatim}
-The Fortran 90 standard does not mandate what numeric values
-correspond to actual number of bytes allocated for the
-various kinds, so these are defined by ESMF to be correct across
-the different supported Fortran 90 compilers.   Note that not
-all compilers support every kind listed below; in particular
-1 and 2 byte integers can be problematic.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_KIND\_I1]
-      1 byte integer.
-\item [ESMF\_KIND\_I2]
-      2 byte integer.
-\item [ESMF\_KIND\_I4]
-      4 byte integer.
-\item [ESMF\_KIND\_I8]
-      8 byte integer.
-\item [ESMF\_KIND\_R4]
-      4 byte real.
-\item [ESMF\_KIND\_R8]
-      8 byte real.
-\item [ESMF\_KIND\_C8]
-      8 byte character.
-\item [ESMF\_KIND\_C16]
-      16 byte character.
-\end{description}
-
-\subsubsection{ESMF Version}
+\subsubsection{ESMF\_VERSION}
 
 {\sf DESCRIPTION:\\}
 The following parameters are available to allow detection of the
@@ -438,27 +448,3 @@ version of ESMF in use.
 \item [ESMF\_VERSION\_STRING]
       Character string parameter describing the release (e.g., "3.1.0rp2")
 \end{description}
-
-
-
-\subsubsection{ESMF\_GeomType\_Flag}
-\label{opt:geomtype}
-
-{\sf DESCRIPTION:\\}
-Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
-be built. 
-
-Valid values are:
-\begin{description}
-\item [ESMF\_GEOMTYPE\_GRID]
-      An ESMF\_Grid, a structured grid composed of one or more logically rectangular tiles
-\item [ESMF\_GEOMTYPE\_MESH]
-      An ESMF\_Mesh, an unstructured grid
-\item [ESMF\_GEOMTYPE\_XGRID]
-      An ESMF\_XGrid, an exchange grid
-\item [ESMF\_TYPEKIND\_LOCSTREAM]
-      An ESMF\_LocStream, a disconnected series of points with associated key values
-\end{description}
-
-
-
