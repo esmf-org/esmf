@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.13 2011/06/24 21:46:05 rokuingh Exp $
+! $Id: ESMF_ModUTest.F90,v 1.14 2011/06/27 22:30:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.13 2011/06/24 21:46:05 rokuingh Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.14 2011/06/27 22:30:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -119,7 +119,7 @@ contains
     type(ESMF_LocStream) :: locstream
     type(ESMF_Log) :: log
     type(ESMF_Mesh) :: mesh
-    type(ESMF_Method) :: method
+    type(ESMF_Method_Flag) :: method
     type(ESMF_RegridMethod_Flag) :: regridmethod
     type(ESMF_RouteHandle) :: routehandle
     type(ESMF_StaggerLoc) :: staggerloc
@@ -390,8 +390,8 @@ contains
 ! NEX_noUTest
 
   subroutine method_type (dummy)
-    use ESMF_Mod, only: ESMF_Method
-    type(ESMF_Method), intent(in), optional :: dummy
+    use ESMF_Mod, only: ESMF_Method_Flag
+    type(ESMF_Method_Flag), intent(in), optional :: dummy
     failMsg = "Method type fail"  
     name = "Method type"  
     call ESMF_Test (.true.,  &  

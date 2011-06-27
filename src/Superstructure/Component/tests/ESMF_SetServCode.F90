@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.20 2011/01/05 20:05:47 svasquez Exp $
+! $Id: ESMF_SetServCode.F90,v 1.21 2011/06/27 22:30:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -69,11 +69,11 @@ contains
        ! Initialize return code
        rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=my_init1, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, userRoutine=my_init1, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=my_run1, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=my_run1, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=my_final1, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, userRoutine=my_final1, &
          rc=rc)
                                                      
     end subroutine SetServ1
@@ -86,11 +86,11 @@ contains
        ! Initialize return code
        rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=my_init2, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, userRoutine=my_init2, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=my_run2, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=my_run2, &
          rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=my_final2, &
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, userRoutine=my_final2, &
          rc=rc)
 
     end subroutine SetServ2
@@ -102,17 +102,17 @@ contains
       type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
       integer, intent(out) :: rc
-      type(ESMF_Method):: currentMethod
+      type(ESMF_Method_Flag):: methodflag
       integer          :: currentPhase
      
       print *, "User initialize 1 routine called"
       
       ! set user return code according to correctness of method and phase test
 
-      call ESMF_GridCompGet(gcomp, currentMethod=currentMethod, &
+      call ESMF_GridCompGet(gcomp, methodflag=methodflag, &
         currentPhase=currentPhase)
         
-      if (currentMethod/=ESMF_SETINIT) then
+      if (methodflag/=ESMF_METHOD_INITIALIZE) then
         rc = ESMF_FAILURE
         return
       endif

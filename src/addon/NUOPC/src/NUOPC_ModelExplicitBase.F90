@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.4 2011/06/25 01:18:30 rokuingh Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.5 2011/06/27 22:30:56 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -35,28 +35,28 @@ module NUOPC_ModelExplicitBase
     
     rc = ESMF_SUCCESS
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=Noop, phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=Noop, phase=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
       userRoutine=Noop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &

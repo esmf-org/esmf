@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.41 2011/06/24 21:46:07 rokuingh Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.42 2011/06/27 22:30:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
       userRoutine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -263,7 +263,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_INITIALIZE, &
       userRoutine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -271,7 +271,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_FINALIZE, &
       userRoutine=comp1_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -279,7 +279,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_FINALIZE, &
       userRoutine=comp2_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -483,7 +483,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
       userRoutine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -491,7 +491,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_INITIALIZE, &
       userRoutine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -499,7 +499,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_FINALIZE, &
       userRoutine=comp1_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -507,7 +507,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_FINALIZE, &
       userRoutine=comp2_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -654,7 +654,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
       userRoutine=comp1_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -662,7 +662,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_INITIALIZE, &
       userRoutine=comp2_init, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -670,7 +670,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp1, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_FINALIZE, &
       userRoutine=comp1_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"
@@ -678,7 +678,7 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-    call ESMF_GridCompSetEntryPoint(comp2, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_FINALIZE, &
       userRoutine=comp2_final, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Calling GridCompSetEntryPoint"

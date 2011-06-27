@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.34 2011/06/23 20:35:37 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.35 2011/06/27 22:30:39 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -62,11 +62,11 @@ module ESMF_AttributeUpdateMod
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userm1_init, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userm1_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userm1_run, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userm1_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm1_final, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userm1_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine userm1_register
@@ -112,11 +112,11 @@ module ESMF_AttributeUpdateMod
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userm2_init, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userm2_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userm2_run, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userm2_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userm2_final, rc=rc)
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userm2_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
   end subroutine userm2_register
@@ -161,11 +161,11 @@ module ESMF_AttributeUpdateMod
     rc = ESMF_SUCCESS
     
     ! Register the callback routines.
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, usercpl_init, rc=rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, usercpl_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, usercpl_run, rc=rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUN, usercpl_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, usercpl_final, rc=rc)
+    call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, usercpl_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine usercpl_register

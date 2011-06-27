@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.5 2010/11/03 22:48:53 theurich Exp $
+! $Id: land_comp.F90,v 1.6 2011/06/27 22:32:00 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,13 +67,13 @@ module land_comp
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=land_init, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=land_init, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=land_run, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=land_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=land_final, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=land_final, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

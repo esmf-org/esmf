@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.53 2011/06/24 15:04:20 rokuingh Exp $
+! $Id: ESMF_CplEx.F90,v 1.54 2011/06/27 22:30:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -58,11 +58,11 @@
       integer, intent(out)  :: rc     ! must not be optional
 
       ! Set the entry points for standard ESMF Component methods
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, &
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, &
                           userRoutine=CPL_Init, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, &
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUN, &
                           userRoutine=CPL_Run, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, &
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, &
                           userRoutine=CPL_Final, rc=rc)
 
       rc = ESMF_SUCCESS

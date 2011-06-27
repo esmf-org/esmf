@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.174 2011/06/27 21:28:41 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.175 2011/06/27 22:30:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.174 2011/06/27 21:28:41 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.175 2011/06/27 22:30:45 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -638,7 +638,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINALIC, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_FINALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -686,7 +686,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
     ! call Comp method
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETFINAL, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_FINALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -708,7 +708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, grid, importState, &
     exportState, config, configFile, clock, localPet, petCount, contextflag, &
-    currentMethod, currentPhase, comptype, gridCompStatus, vm, name, rc)
+    methodflag, currentPhase, comptype, gridCompStatus, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(in)           :: gridcomp
@@ -722,7 +722,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: localPet
     integer,                 intent(out), optional :: petCount
     type(ESMF_Context_Flag),  intent(out), optional :: contextflag
-    type(ESMF_Method),       intent(out), optional :: currentMethod
+    type(ESMF_Method_Flag),       intent(out), optional :: methodflag
     integer,                 intent(out), optional :: currentPhase
     type(ESMF_CompType_Flag),     intent(out), optional :: comptype
     type(ESMF_GridCompStatus), intent(out), optional :: gridCompStatus
@@ -777,8 +777,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_GridComp}.
 !   See section \ref{const:contextflag} for a complete list of valid flags.
-! \item[{[currentMethod]}]
-!   Return the current {\tt ESMF\_Method} of the {\tt ESMF\_GridComp} execution.
+! \item[{[methodflag]}]
+!   Return the current {\tt ESMF\_Method\_Flag} of the {\tt ESMF\_GridComp} execution.
 !   See section \ref{const:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_GridComp} execution.
@@ -811,7 +811,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name=name, vm=vm, contextflag=contextflag,&
       grid=grid, importState=importState, exportState=exportState, clock=clock,&
-      configFile=configFile, config=config, currentMethod=currentMethod, &
+      configFile=configFile, config=config, methodflag=methodflag, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       comptype=comptype, compStatus=gridCompStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -836,7 +836,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
     type(ESMF_GridComp),  intent(in)            :: gridcomp
-    type(ESMF_Method),    intent(in)            :: method
+    type(ESMF_Method_Flag),    intent(in)            :: method
     integer,              intent(out)           :: phaseCount
     logical,              intent(out)           :: phaseZeroFlag
     integer,              intent(out), optional :: rc 
@@ -849,8 +849,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
 ! \item[method]
-!   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
-!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{const:method} 
+!   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
+!   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[phaseCount]
 !   The number of phases for {\tt method}. The method has 1..phaseCount phases.
@@ -1031,7 +1031,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINITIC, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_INITIALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1078,7 +1078,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETINIT, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_INITIALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1286,7 +1286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETREADRESTART, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_READRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1381,7 +1381,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUNIC, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_RUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1428,7 +1428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETRUN, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_RUN, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1533,7 +1533,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
     type(ESMF_GridComp),  intent(inout)         :: gridcomp
-    type(ESMF_Method),    intent(in)            :: method
+    type(ESMF_Method_Flag),    intent(in)            :: method
     interface
       subroutine userRoutine(gridcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1564,8 +1564,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
 ! \item[method]
-!   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
-!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{const:method} 
+!   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
+!   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this Component 
@@ -2428,7 +2428,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(gridcomp%compp, method=ESMF_SETWRITERESTART, &
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_WRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

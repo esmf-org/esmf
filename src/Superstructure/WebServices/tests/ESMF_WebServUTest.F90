@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.9 2011/05/17 16:33:20 svasquez Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.10 2011/06/27 22:30:54 rokuingh Exp $
 !
 ! Test code which creates a new Component.
 
@@ -59,15 +59,15 @@ module ESMF_WebServUserModel
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, &
                                     userRoutine=user_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, &
                                     userRoutine=user_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, &
                                     userRoutine=user_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.50 2011/06/24 15:04:20 rokuingh Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.51 2011/06/27 22:30:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,9 +40,9 @@
       type(ESMF_GridComp) :: gcomp
       integer, intent(out) :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, my_init, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, my_run, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, my_final, rc=rc)
       
     end subroutine PHYS_SetServices
       
@@ -103,9 +103,9 @@
       type(ESMF_GridComp) :: gcomp
       integer, intent(out) :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, my_init, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, my_run, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, my_final, rc=rc)
       
     end subroutine DYNM_SetServices
       
@@ -167,9 +167,9 @@
       type(ESMF_CplComp) :: cpl
       integer, intent(out) :: rc
 
-       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETINIT, my_init, rc=rc)
-       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETRUN, my_run, rc=rc)
-       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETFINAL, my_final, rc=rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_METHOD_INITIALIZE, my_init, rc=rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_METHOD_RUN, my_run, rc=rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_METHOD_FINALIZE, my_final, rc=rc)
       
     end subroutine CPLR_SetServices
       
@@ -479,10 +479,10 @@
     ! Each Component must supply a SetServices routine which makes the
     !  following types of calls:
     !
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_Init, 1, rc=rc)
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETINIT, PHYS_InitPhase2, 2, rc=rc)
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETRUN, PHYS_Run, 0, rc=rc)
-    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_SETFINAL, PHYS_Final, 0, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_METHOD_INITIALIZE, PHYS_Init, 1, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_METHOD_INITIALIZE, PHYS_InitPhase2, 2, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_METHOD_RUN, PHYS_Run, 0, rc=rc)
+    !! call ESMF_GridCompSetEntryPoint(gcomp1, ESMF_METHOD_FINALIZE, PHYS_Final, 0, rc=rc)
     !
     ! The arguments are: the component, the type of routine, 
     !  the name of the internal subroutine which contains the user code, 

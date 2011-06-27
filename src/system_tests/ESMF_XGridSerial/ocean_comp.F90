@@ -1,4 +1,4 @@
-! $Id: ocean_comp.F90,v 1.4 2010/11/03 22:48:53 theurich Exp $
+! $Id: ocean_comp.F90,v 1.5 2011/06/27 22:32:02 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,13 +67,13 @@ module ocean_comp
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=ocean_init, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=ocean_init, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=ocean_run, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=ocean_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=ocean_final, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=ocean_final, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

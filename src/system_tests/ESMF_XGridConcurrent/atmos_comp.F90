@@ -1,4 +1,4 @@
-! $Id: atmos_comp.F90,v 1.5 2010/11/03 22:48:53 theurich Exp $
+! $Id: atmos_comp.F90,v 1.6 2011/06/27 22:32:00 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -67,13 +67,13 @@ module atmos_comp
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=atmos_init, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=atmos_init, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=atmos_run, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=atmos_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=atmos_final, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=atmos_final, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

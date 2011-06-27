@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.20 2011/01/25 20:55:52 rokuingh Exp $
+! $Id: user_FortranComponent.F90,v 1.21 2011/06/27 22:31:19 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,13 +75,13 @@ module user_FortranComponent
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, &
       userRoutine=myInitInFortran, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, &
       userRoutine=myRunInFortran, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, &
       userRoutine=myFinalInFortran, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   end subroutine

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.25 2011/06/24 15:04:14 rokuingh Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.26 2011/06/27 22:30:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -57,11 +57,11 @@ module ESMF_VMComponentEx_gcomp_mod
     integer, intent(out):: rc
     
     ! register INIT method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, mygcomp_init, rc=rc)
     ! register RUN method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, mygcomp_run, rc=rc)
     ! register FINAL method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, mygcomp_final, rc=rc)
   end subroutine !--------------------------------------------------------------
   
 !BOC

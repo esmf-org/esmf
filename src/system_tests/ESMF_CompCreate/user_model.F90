@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.32 2011/05/19 19:13:56 feiliu Exp $
+! $Id: user_model.F90,v 1.33 2011/06/27 22:31:17 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -84,16 +84,16 @@
 
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=user_init1,&
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=user_init1,&
           phase=1, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=user_init2,&
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=user_init2,&
           phase=2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=user_run, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=user_run, &
           rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=user_final, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=user_final, &
           rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
 

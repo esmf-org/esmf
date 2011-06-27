@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.217 2011/06/27 21:28:41 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.218 2011/06/27 22:30:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,26 +74,26 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! ! ESMF Method Type
 !
-  type ESMF_Method
+  type ESMF_Method_Flag
     sequence
     private
     integer :: method
   end type
 
-  type(ESMF_Method), parameter :: &
-    ESMF_SETNONE            = ESMF_Method(0), &
-    ESMF_SETINIT            = ESMF_Method(1), &
-    ESMF_SETRUN             = ESMF_Method(2), &
-    ESMF_SETFINAL           = ESMF_Method(3), &
-    ESMF_SETWRITERESTART    = ESMF_Method(4), &
-    ESMF_SETREADRESTART     = ESMF_Method(5), &
-    ESMF_SETINITIC          = ESMF_Method(6), &
-    ESMF_SETRUNIC           = ESMF_Method(7), &
-    ESMF_SETFINALIC         = ESMF_Method(8), &
-    ESMF_SETWRITERESTARTIC  = ESMF_Method(9), &
-    ESMF_SETREADRESTARTIC   = ESMF_Method(10), &
-    ESMF_SETVM              = ESMF_Method(11), &
-    ESMF_SETSERVICES        = ESMF_Method(12)
+  type(ESMF_Method_Flag), parameter :: &
+    ESMF_METHOD_NONE            = ESMF_Method_Flag(0), &
+    ESMF_METHOD_INITIALIZE            = ESMF_Method_Flag(1), &
+    ESMF_METHOD_RUN             = ESMF_Method_Flag(2), &
+    ESMF_METHOD_FINALIZE           = ESMF_Method_Flag(3), &
+    ESMF_METHOD_WRITERESTART    = ESMF_Method_Flag(4), &
+    ESMF_METHOD_READRESTART     = ESMF_Method_Flag(5), &
+    ESMF_METHOD_INITIALIZEIC          = ESMF_Method_Flag(6), &
+    ESMF_METHOD_RUNIC           = ESMF_Method_Flag(7), &
+    ESMF_METHOD_FINALIZEIC         = ESMF_Method_Flag(8), &
+    ESMF_METHOD_WRITERESTARTIC  = ESMF_Method_Flag(9), &
+    ESMF_METHOD_READRESTARTIC   = ESMF_Method_Flag(10), &
+    ESMF_SETVM              = ESMF_Method_Flag(11), &
+    ESMF_SETSERVICES        = ESMF_Method_Flag(12)
     
 !------------------------------------------------------------------------------
 ! ! ESMF_CompStatus
@@ -224,10 +224,10 @@ module ESMF_CompMod
 ! !PUBLIC TYPES:
   public ESMF_GridComp, ESMF_CplComp
 
-  public ESMF_Method, ESMF_SETNONE, ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL
-  public ESMF_SETWRITERESTART, ESMF_SETREADRESTART
-  public ESMF_SETINITIC, ESMF_SETRUNIC, ESMF_SETFINALIC
-  public ESMF_SETWRITERESTARTIC, ESMF_SETREADRESTARTIC
+  public ESMF_Method_Flag, ESMF_METHOD_NONE, ESMF_METHOD_INITIALIZE, ESMF_METHOD_RUN, ESMF_METHOD_FINALIZE
+  public ESMF_METHOD_WRITERESTART, ESMF_METHOD_READRESTART
+  public ESMF_METHOD_INITIALIZEIC, ESMF_METHOD_RUNIC, ESMF_METHOD_FINALIZEIC
+  public ESMF_METHOD_WRITERESTARTIC, ESMF_METHOD_READRESTARTIC
   public ESMF_SETVM, ESMF_SETSERVICES
   
   public ESMF_SINGLEPHASE     ! deprecated!!!!
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.217 2011/06/27 21:28:41 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.218 2011/06/27 22:30:45 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -438,13 +438,13 @@ contains
 
   function ESMF_meeq(me1, me2)
     logical ESMF_meeq
-    type(ESMF_Method), intent(in) :: me1, me2
+    type(ESMF_Method_Flag), intent(in) :: me1, me2
     ESMF_meeq = (me1%method == me2%method)    
   end function
 
   function ESMF_mene(me1, me2)
     logical ESMF_mene
-    type(ESMF_Method), intent(in) :: me1, me2
+    type(ESMF_Method_Flag), intent(in) :: me1, me2
     ESMF_mene = (me1%method /= me2%method)
   end function
 !------------------------------------------------------------------------------
@@ -854,7 +854,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer                 :: compp
-    type(ESMF_Method),       intent(in)              :: method
+    type(ESMF_Method_Flag),       intent(in)              :: method
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(in),    optional :: clock
@@ -1050,7 +1050,7 @@ contains
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, grid, gridIsPresent, importState, &
     exportState, clock, dirPath, configFile, config, configIsPresent, &
-    compType, currentMethod, currentPhase, localPet, petCount, compStatus, rc)
+    compType, methodflag, currentPhase, localPet, petCount, compStatus, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer               :: compp
@@ -1070,7 +1070,7 @@ contains
     type(ESMF_Config),       intent(out), optional :: config
     logical,                 intent(out), optional :: configIsPresent
     type(ESMF_CompType_Flag),     intent(out), optional :: compType
-    type(ESMF_Method),       intent(out), optional :: currentMethod
+    type(ESMF_Method_Flag),       intent(out), optional :: methodflag
     integer,                 intent(out), optional :: currentPhase
     integer,                 intent(out), optional :: localPet
     integer,                 intent(out), optional :: petCount
@@ -1085,7 +1085,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_Status)       :: baseStatus
-    type(ESMF_Method)       :: currentMethodArg
+    type(ESMF_Method_Flag)       :: methodflagArg
     integer                 :: currentPhaseArg
 
     ! Initialize return code; assume not implemented until success is certain
@@ -1236,16 +1236,16 @@ contains
       configFile = compp%configFile
     endif
 
-    ! access currentMethod and currentPhase
-    if (present(currentMethod) .or. present(currentPhase)) then
-      call c_ESMC_CompGet(compp%vm_cargo, currentMethodArg, currentPhaseArg, &
+    ! access methodflag and currentPhase
+    if (present(methodflag) .or. present(currentPhase)) then
+      call c_ESMC_CompGet(compp%vm_cargo, methodflagArg, currentPhaseArg, &
         localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
     endif
-    if (present(currentMethod)) then
-      currentMethod = currentMethodArg
+    if (present(methodflag)) then
+      methodflag = methodflagArg
     endif
     if (present(currentPhase)) then
       currentPhase = currentPhaseArg

@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.8 2011/06/25 01:18:30 rokuingh Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.9 2011/06/27 22:30:56 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -64,17 +64,17 @@ module NUOPC_DriverExplicit
     
     rc = ESMF_SUCCESS
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=Initialize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out

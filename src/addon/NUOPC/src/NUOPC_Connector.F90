@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.9 2011/06/25 01:18:29 rokuingh Exp $
+! $Id: NUOPC_Connector.F90,v 1.10 2011/06/27 22:30:56 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -50,28 +50,28 @@ module NUOPC_Connector
     
     rc = ESMF_SUCCESS
     
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, &
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, &
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP1, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, &
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
-    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, &
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &

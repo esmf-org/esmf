@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentUTest.F90,v 1.30 2011/01/05 20:05:46 svasquez Exp $
+! $Id: ESMF_VMComponentUTest.F90,v 1.31 2011/06/27 22:30:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -62,15 +62,15 @@ module ESMF_VMComponentUTest_gcomp_mod
     rc = ESMF_SUCCESS
 
     ! register INIT method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=mygcomp_init, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, userRoutine=mygcomp_init, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register RUN method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=mygcomp_run, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=mygcomp_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register FINAL method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=mygcomp_final, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, userRoutine=mygcomp_final, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -85,15 +85,15 @@ module ESMF_VMComponentUTest_gcomp_mod
     rc = ESMF_SUCCESS
 
     ! register INIT method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, userRoutine=mygcomp_init, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, userRoutine=mygcomp_init, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register RUN method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=mygcomp_run, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=mygcomp_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! register FINAL method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, userRoutine=mygcomp_final, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, userRoutine=mygcomp_final, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -166,7 +166,7 @@ program ESMF_VMComponentUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMComponentUTest.F90,v 1.30 2011/01/05 20:05:46 svasquez Exp $'
+    '$Id: ESMF_VMComponentUTest.F90,v 1.31 2011/06/27 22:30:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0

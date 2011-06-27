@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesSTest.F90,v 1.6 2011/06/24 15:05:41 rokuingh Exp $
+! $Id: ESMF_WebServicesSTest.F90,v 1.7 2011/06/27 22:31:58 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -43,15 +43,15 @@ module ESMF_WebServUserModel
 
     ! Register the callback routines.
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, &
                                     userRoutine=user_init, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, &
                                     userRoutine=user_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, &
                                     userRoutine=user_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

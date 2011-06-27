@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.12 2010/11/03 22:48:49 theurich Exp $
+! $Id: ioComp.F90,v 1.13 2011/06/27 22:31:26 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -54,13 +54,13 @@ module ioCompMod
     rc = ESMF_SUCCESS
 
     ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=compInit, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=compInit, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=compRun, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=compRun, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=compFinal, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=compFinal, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

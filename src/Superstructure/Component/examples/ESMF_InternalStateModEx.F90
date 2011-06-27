@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.10 2011/06/24 15:04:20 rokuingh Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.11 2011/06/27 22:30:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,11 +75,11 @@ module user_mod
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     ! register INIT method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, mygcomp_init, rc=rc)
     ! register RUN method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, mygcomp_run, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, mygcomp_run, rc=rc)
     ! register FINAL method
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, mygcomp_final, rc=rc)
   end subroutine !--------------------------------------------------------------
   
 

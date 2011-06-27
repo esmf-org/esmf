@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.150 2011/06/27 21:28:41 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.151 2011/06/27 22:30:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.150 2011/06/27 21:28:41 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.151 2011/06/27 22:30:45 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -625,7 +625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINALIC, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_FINALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -676,7 +676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETFINAL, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_FINALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -697,7 +697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, config, configFile, &
-    clock, localPet, petCount, contextflag, currentMethod, currentPhase, &
+    clock, localPet, petCount, contextflag, methodflag, currentPhase, &
     cplCompStatus, vm, name, rc)
 !
 ! !ARGUMENTS:
@@ -709,7 +709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: localPet
     integer,                intent(out), optional :: petCount
     type(ESMF_Context_Flag), intent(out), optional :: contextflag
-    type(ESMF_Method),      intent(out), optional :: currentMethod
+    type(ESMF_Method_Flag),      intent(out), optional :: methodflag
     integer,                intent(out), optional :: currentPhase
     type(ESMF_CplCompStatus), intent(out), optional :: cplCompStatus
     type(ESMF_VM),          intent(out), optional :: vm
@@ -748,8 +748,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_CplComp}.
 !   See section \ref{const:contextflag} for a complete list of valid flags.
-! \item[{[currentMethod]}]
-!   Return the current {\tt ESMF\_Method} of the {\tt ESMF\_CplComp} execution.
+! \item[{[methodflag]}]
+!   Return the current {\tt ESMF\_Method\_Flag} of the {\tt ESMF\_CplComp} execution.
 !   See section \ref{const:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
@@ -779,7 +779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompGet(cplcomp%compp, name=name, vm=vm, contextflag=contextflag,&
       clock=clock, configFile=configFile, config=config, &
-      currentMethod=currentMethod, currentPhase=currentPhase, &
+      methodflag=methodflag, currentPhase=currentPhase, &
       localPet=localPet, petCount=petCount, compStatus=cplCompStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -936,7 +936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINITIC, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_INITIALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -984,7 +984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETINIT, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_INITIALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1192,7 +1192,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETREADRESTART, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_READRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1286,7 +1286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUNIC, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_RUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1333,7 +1333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETRUN, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_RUN, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1434,7 +1434,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)          :: cplcomp
-    type(ESMF_Method),  intent(in)             :: method
+    type(ESMF_Method_Flag),  intent(in)             :: method
     interface
       subroutine userRoutine(cplcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1465,8 +1465,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   An {\tt ESMF\_CplComp} object.
 ! \item[method]
-!   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
-!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{const:method} 
+!   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
+!   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this {\tt method}.
@@ -2328,7 +2328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
-    call ESMF_CompExecute(cplcomp%compp, method=ESMF_SETWRITERESTART, &
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_WRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.2 2011/06/24 15:04:17 rokuingh Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.3 2011/06/27 22:30:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ module producerMod
   subroutine producerReg(gcomp, rc)
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, init, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, init, rc=rc)
   end subroutine
   
 !-------------------------------------------------------------------------
@@ -91,7 +91,7 @@ module consumerMod
   subroutine consumerReg(gcomp, rc)
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, init, rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, init, rc=rc)
   end subroutine
   
 !-------------------------------------------------------------------------

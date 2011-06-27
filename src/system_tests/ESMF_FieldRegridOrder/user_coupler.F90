@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.16 2011/06/23 22:55:05 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.17 2011/06/27 22:31:49 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -39,9 +39,9 @@
       print *, "in user setservices routine"
 
       ! Register the callback routines.
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETRUN, user_run, rc=rc)
-      call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, user_init, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_RUN, user_run, rc=rc)
+      call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, user_final, rc=rc)
 
       print *, "Registered Initialize, Run, and Finalize routines"
 

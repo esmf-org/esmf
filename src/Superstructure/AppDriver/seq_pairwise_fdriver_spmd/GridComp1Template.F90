@@ -1,4 +1,4 @@
-! $Id: GridComp1Template.F90,v 1.8 2011/06/24 14:26:04 rokuingh Exp $
+! $Id: GridComp1Template.F90,v 1.9 2011/06/27 22:30:36 rokuingh Exp $
 !
 ! Template code for a child Grid Component, which has no subcomponents
 !  below it.  This is where the bulk of the computation is expected to be
@@ -37,9 +37,9 @@
        type(ESMF_GridComp) :: gcomp
        integer, intent(out) :: rc
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, my_init, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, my_run, rc=rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, my_final, rc=rc)
 
     end subroutine UserGrid_SetServices
 

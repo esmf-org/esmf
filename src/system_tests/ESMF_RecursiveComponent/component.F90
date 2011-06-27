@@ -1,4 +1,4 @@
-! $Id: component.F90,v 1.14 2011/03/25 23:05:23 svasquez Exp $
+! $Id: component.F90,v 1.15 2011/06/27 22:31:55 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -62,13 +62,13 @@ module componentMod
     rc = ESMF_SUCCESS
 
     ! Register Init, Run, Finalize
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, userRoutine=compInit, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, userRoutine=compInit, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, userRoutine=compRun, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=compRun, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, userRoutine=compFinal, &
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=compFinal, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

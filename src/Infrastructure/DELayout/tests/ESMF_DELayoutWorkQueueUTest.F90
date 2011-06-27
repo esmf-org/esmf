@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.26 2011/06/24 16:51:57 rokuingh Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.27 2011/06/27 22:30:31 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ module ESMF_DELayoutWQUTest_mod
     
     ! Run this VM default mode: mpi-only, no threads
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, userRoutine=mygcomp_run, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=mygcomp_run, &
       rc=rc)
     if (rc /= ESMF_SUCCESS) return  ! bail out
     

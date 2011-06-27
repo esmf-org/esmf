@@ -1,4 +1,4 @@
-! $Id: NUOPC_MediatorExplicit.F90,v 1.3 2011/06/25 01:18:30 rokuingh Exp $
+! $Id: NUOPC_MediatorExplicit.F90,v 1.4 2011/06/27 22:30:56 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_MediatorExplicit.F90"
 
@@ -43,7 +43,7 @@ module NUOPC_MediatorExplicit
       return  ! bail out
 
     ! Override InitP2 -> compatibility checking
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP2, phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
@@ -51,7 +51,7 @@ module NUOPC_MediatorExplicit
       return  ! bail out
     
     ! Override InitP3 -> data initialize callback + initial time stamping
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP3, phase=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &

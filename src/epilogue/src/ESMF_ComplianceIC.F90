@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.34 2011/06/24 22:31:12 rokuingh Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.35 2011/06/27 22:30:58 rokuingh Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -91,7 +91,7 @@ module ESMF_ComplianceICMod
     ! Start Compliance Checking and IC method Registration
     
     ! check Initialize registration
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETINIT, phaseCount, &
+    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_INITIALIZE, phaseCount, &
       phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -104,7 +104,7 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, &
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
         userRoutine=ic_init, phase=0, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -126,7 +126,7 @@ module ESMF_ComplianceICMod
         file=__FILE__)) &
         return  ! bail out
       do phase=1, phaseCount
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINITIC, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
           userRoutine=ic_init, phase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -136,7 +136,7 @@ module ESMF_ComplianceICMod
     endif
     
     ! check Run registration
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETRUN, phaseCount, &
+    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_RUN, phaseCount, &
       phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -149,7 +149,7 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUNIC, &
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
         userRoutine=ic_run, phase=0, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -171,7 +171,7 @@ module ESMF_ComplianceICMod
         file=__FILE__)) &
         return  ! bail out
       do phase=1, phaseCount
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUNIC, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
           userRoutine=ic_run, phase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
@@ -181,7 +181,7 @@ module ESMF_ComplianceICMod
     endif
 
     ! check Finalize registration
-    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_SETFINAL, phaseCount, &
+    call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_FINALIZE, phaseCount, &
       phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -194,7 +194,7 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINALIC, &
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
         userRoutine=ic_final, phase=0, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -216,7 +216,7 @@ module ESMF_ComplianceICMod
         file=__FILE__)) &
         return  ! bail out
       do phase=1, phaseCount
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINALIC, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
           userRoutine=ic_final, phase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &

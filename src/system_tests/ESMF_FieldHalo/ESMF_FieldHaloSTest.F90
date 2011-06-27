@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.65 2011/06/23 18:14:16 rokuingh Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.66 2011/06/27 22:31:33 rokuingh Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -185,11 +185,11 @@
 
       external myinit, myrun, myfinal
 
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, myinit, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, myinit, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, myrun, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, myrun, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, myfinal, rc=rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, myfinal, rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
 
       rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2011/02/23 20:22:27 w6ws Exp $
+! $Id: user_model1.F90,v 1.15 2011/06/27 22:31:31 rokuingh Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -72,15 +72,15 @@
         print *, "In user 1 register routine"
         ! Register the callback routines.
 
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, &
           userRoutine=user_init, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, &
           userRoutine=user_run, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
+        call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, &
           userRoutine=user_final, rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
