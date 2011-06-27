@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.90 2011/06/27 16:44:55 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.91 2011/06/27 17:14:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.90 2011/06/27 16:44:55 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.91 2011/06/27 17:14:20 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -227,8 +227,8 @@ module ESMF_DistGridMod
 !
 ! !DESCRIPTION:
 !   Assign distgrid1 as an alias to the same ESMF DistGrid object in memory
-!   as distgrid2. If distgrid2 is invalid, then distgrid1 will be equally invalid after
-!   the assignment.
+!   as distgrid2. If distgrid2 is invalid, then distgrid1 will be equally
+!   invalid after the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -240,7 +240,6 @@ module ESMF_DistGridMod
 !
 !EOP
 !------------------------------------------------------------------------------
-
 
 ! -------------------------- ESMF-public interface ----------------------------
 !BOP
@@ -283,7 +282,6 @@ module ESMF_DistGridMod
 
   end interface
 !------------------------------------------------------------------------------
-
 
 ! -------------------------- ESMF-public interface ----------------------------
 !BOP
