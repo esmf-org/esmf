@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.35 2011/06/21 01:29:50 w6ws Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.36 2011/06/27 18:40:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -375,7 +375,8 @@ extern "C" {
     ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
-    fflush (stdout);
+    // Flush before crossing language interface to ensure correct output order
+    fflush(stdout);
   }
 
   void FTN(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,

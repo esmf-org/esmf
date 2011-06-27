@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.70 2011/06/24 17:43:48 rokuingh Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.71 2011/06/27 18:40:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.70 2011/06/24 17:43:48 rokuingh Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.71 2011/06/27 18:40:36 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -259,9 +259,9 @@ module ESMF_ArrayBundleMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (arraybundle1 == arraybundle2) then ... endif
+!   if (arraybundle1 /= arraybundle2) then ... endif
 !             OR
-!   result = (arraybundle1 == arraybundle2)
+!   result = (arraybundle1 /= arraybundle2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -729,7 +729,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleDestroy()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleDestroy - Destroy an ArrayBundle
+! !IROUTINE: ESMF_ArrayBundleDestroy - Release all resources associated with an ArrayBundle
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleDestroy(arraybundle, keywordEnforcer, rc)
@@ -1357,14 +1357,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Print internal information of the specified {\tt ESMF\_ArrayBundle} object. \\
+!   Print internal information of the specified {\tt ESMF\_ArrayBundle}
+!   object to {\tt stdout}. \\
 !
 !   The arguments are:
 !   \begin{description}
@@ -1385,11 +1384,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
-    ! Call into the C++ interface layer
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
+    ! Flush before crossing language interface to ensure correct output order
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Call into the C++ interface.
     call c_ESMC_ArrayBundlePrint(arraybundle, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
