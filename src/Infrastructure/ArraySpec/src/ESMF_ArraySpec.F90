@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.54 2011/06/27 18:26:57 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.55 2011/06/27 19:46:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.54 2011/06/27 18:26:57 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.55 2011/06/27 19:46:20 rokuingh Exp $'
 
 !==============================================================================
 
@@ -326,7 +326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[rank]}]
 !     Array rank (dimensionality -- 1D, 2D, etc). Maximum possible is 7D.
 !   \item[{[typekind]}]
-!     Array typekind.  See section \ref{opt:typekind} for valid values.
+!     Array typekind.  See section \ref{const:typekind} for valid values.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -431,7 +431,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[rank]
 !     Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
 !   \item[typekind]
-!     Array typekind.  See section \ref{opt:typekind} for valid values.
+!     Array typekind.  See section \ref{const:typekind} for valid values.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

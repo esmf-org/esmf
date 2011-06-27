@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.71 2011/06/27 18:40:36 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.72 2011/06/27 19:46:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.71 2011/06/27 18:40:36 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.72 2011/06/27 19:46:19 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1283,7 +1283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
-!     See section \ref{opt:startregion} for a complete list of
+!     See section \ref{const:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item[{[haloLDepth]}] 
@@ -2372,7 +2372,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     matrix multiplication and results will be added to the incoming element
 !     values. Setting {\tt zeroregion} to {\tt ESMF\_REGION\_SELECT} will only
 !     zero out those elements in the destination Arrays that will be updated
-!     by the sparse matrix multiplication. See section \ref{opt:zeroregion}
+!     by the sparse matrix multiplication. See section \ref{const:region}
 !     for a complete list of valid settings.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pairs will be checked for

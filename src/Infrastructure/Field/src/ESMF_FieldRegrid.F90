@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.71 2011/06/25 01:18:19 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.72 2011/06/27 19:46:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.71 2011/06/25 01:18:19 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.72 2011/06/27 19:46:24 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -156,7 +156,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     added to the incoming element values. Setting {\tt zeroregion} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination Array that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:zeroregion} for a complete list of
+!     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.231 2011/06/25 01:18:24 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.232 2011/06/27 19:46:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.231 2011/06/25 01:18:24 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.232 2011/06/27 19:46:30 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1367,7 +1367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\item[{[datacopyflag]}]
 !    If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case the Grid 
 !    coordinate Array will be set to a reference to {\tt array}. Please see 
-!    Section~\ref{opt:datacopyflag} for further description and a list of
+!    Section~\ref{const:datacopyflag} for further description and a list of
 !    valid values. 
 !    [THE ESMF\_DATACOPY\_VALUE OPTION IS CURRENTLY NOT IMPLEMENTED] 
 ! \item[{[staggerEdgeLWidth]}] 
@@ -3020,7 +3020,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[name]}]
 !      Name of the new Grid. If not specified, a new unique name will be 
@@ -3425,7 +3425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -3619,7 +3619,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -3704,7 +3704,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -4168,7 +4168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[name]}]
 !     {\tt ESMF\_Grid} name.
@@ -5365,7 +5365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
@@ -5810,7 +5810,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -6004,7 +6004,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -6075,7 +6075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -6551,7 +6551,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -6741,7 +6741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -6802,7 +6802,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -7264,7 +7264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -7447,7 +7447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -7508,7 +7508,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -8032,7 +8032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -8924,7 +8924,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -9050,7 +9050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -10581,7 +10581,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     index space. The array should be of size greater or equal to the Grid dimCount. 
 ! \item[{[indexflag]}]
 !    Flag indicating the indexing scheme being used in the Grid. Please
-!    see Section~\ref{opt:indexflag} for the list of options. 
+!    see Section~\ref{const:indexflag} for the list of options. 
 ! \item[{[status]}]
 !    Flag indicating the status of the Grid. Please
 !    see Section~\ref{sec:opt:gridstatus} for the list of options. 
@@ -11457,7 +11457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -11571,7 +11571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -11861,7 +11861,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -12150,7 +12150,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -12447,7 +12447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -12738,7 +12738,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13027,7 +13027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13807,7 +13807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -13920,7 +13920,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14179,7 +14179,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14439,7 +14439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14697,7 +14697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14955,7 +14955,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15215,7 +15215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15474,7 +15474,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15732,7 +15732,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -15994,7 +15994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -16778,7 +16778,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[destroyDistgrid]}]
 !      If true, when the Grid is destroyed the DistGrid will be destroyed also. 
@@ -17234,7 +17234,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -18114,7 +18114,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -18240,7 +18240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -20639,7 +20639,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If not specified  then grid is 2D. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -21070,7 +21070,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{minIndex}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -21079,7 +21079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The upper extent of the grid array.
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D

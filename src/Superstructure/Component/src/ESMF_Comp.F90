@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.215 2011/06/24 23:34:24 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.216 2011/06/27 19:46:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.215 2011/06/24 23:34:24 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.216 2011/06/27 19:46:40 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -521,7 +521,7 @@ contains
 !    List of {\tt PET}s for this component. The default is to use all PETs.
 !   \item[{[contextflag]}]
 !    Specify the component's VM context. The default context is
-!    {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{opt:contextflag} for a
+!    {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{const:contextflag} for a
 !    complete list of options.
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -878,7 +878,7 @@ contains
 ! \item[compp]
 !   Component to call Initialization routine for.
 ! \item[method]
-!   One of the ESMF Component methods. See section \ref{opt:methods} 
+!   One of the ESMF Component methods. See section \ref{const:methods} 
 !   for a complete list of valid methods.
 ! \item[{[importState]}]  
 !   Import data for component method.
@@ -887,7 +887,7 @@ contains
 ! \item[{[clock]}]  
 !   External clock for passing in time information.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS.
@@ -1858,7 +1858,7 @@ contains
 ! \item[{[syncflag]}]
 !   The blocking behavior determines exactly what this call waits for. The
 !   default is {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs across each VAS.
-!   See section \ref{opt:syncflag} for a list of valid blocking options.
+!   See section \ref{const:sync} for a list of valid blocking options.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}] 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.153 2011/06/24 20:30:04 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.154 2011/06/27 19:46:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.153 2011/06/24 20:30:04 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.154 2011/06/27 19:46:17 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -258,7 +258,7 @@ contains
 !        Argument into which to reduce the Array. Only root
 !        must provide a valid {\tt result} argument.
 !     \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations. There will be options that determine the 
 !        sequence of operations to ensure bit-wise reproducibility.
 !     \item[rootPET]
@@ -331,7 +331,7 @@ contains
 !        Fortran array into which to reduce the Array. Only root
 !        must provide a valid {\tt farray} argument.
 !     \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations. There will be options that determine the 
 !        sequence of operations to ensure bit-wise reproducibility.
 !     \item[rootPET]
@@ -583,7 +583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[routesyncflag]}]
 !     Indicate communication option. Default is {\tt ESMF\_ROUTESYNC\_BLOCKING},
 !     resulting in a blocking operation.
-!     See section \ref{opt:routesyncflag} for a complete list of valid settings.
+!     See section \ref{const:routesync} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
 !     \begin{sloppypar}
 !     Used in combination with {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}.
@@ -611,7 +611,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     added to the incoming element values. Setting {\tt zeroregion} to 
 !     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
 !     destination Array that will be updated by the sparse matrix
-!     multiplication. See section \ref{opt:zeroregion} for a complete list of
+!     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item [{[checkflag]}]
@@ -1747,7 +1747,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt result} arguments on other PETs will be used to check the
 !        data type and kind but are otherwise ignored.
 !   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
 !     \item[rootPET]
 !        PET on which result will be returned.
@@ -1813,7 +1813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt result} arguments on other PETs will be used to check the
 !        data type and kind but are otherwise ignored.
 !     \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
 !     \item[rootPET]
 !        PET on which result will be returned.
@@ -1883,7 +1883,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt result} arguments on other PETs will be used to check the
 !        data type and kind but are otherwise ignored.
 !     \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
 !     \item[rootPET]
 !        PET on which result will be returned.

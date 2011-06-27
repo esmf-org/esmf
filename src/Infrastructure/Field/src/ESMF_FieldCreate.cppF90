@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.109 2011/06/24 16:52:00 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.110 2011/06/27 19:46:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.109 2011/06/24 16:52:00 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.110 2011/06/27 19:46:24 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -897,7 +897,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_Array} object.
 ! \item [{[datacopyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{opt:datacopyflag}.  The default is
+!       For valid values see \ref{const:datacopyflag}.  The default is
 !       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -1298,10 +1298,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for the {\tt farray}. @\
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
-!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -1472,7 +1472,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -1627,7 +1627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      exclusive region is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
-!      defined by the associated Grid. See section \ref{opt:indexflag}
+!      defined by the associated Grid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
@@ -1799,7 +1799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      exclusive region is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
-!      defined by the associated Grid. See section \ref{opt:indexflag}
+!      defined by the associated Grid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
@@ -2003,7 +2003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_Array} object.
 ! \item [{[datacopyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{opt:datacopyflag}.  The default is
+!       For valid values see \ref{const:datacopyflag}.  The default is
 !       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
@@ -2200,10 +2200,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
-!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
@@ -2436,7 +2436,7 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
@@ -2879,7 +2879,7 @@ end function ESMF_FieldCreateLSTKR
 !       {\tt ESMF\_Array} object.
 ! \item [{[datacopyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{opt:datacopyflag}.  The default is
+!       For valid values see \ref{const:datacopyflag}.  The default is
 !       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -3002,10 +3002,10 @@ end function ESMF_FieldCreateLSTKR
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
-!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -3159,7 +3159,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -3558,7 +3558,7 @@ end function ESMF_FieldCreateMeshTKR
 !       \end{sloppypar}
 ! \item [{[datacopyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{opt:datacopyflag}.  The default is
+!       For valid values see \ref{const:datacopyflag}.  The default is
 !       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -3686,10 +3686,10 @@ end function ESMF_FieldCreateMeshTKR
 !       \end{sloppypar} @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
-!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -3849,7 +3849,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       \end{sloppypar} @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -4255,7 +4255,7 @@ end function ESMF_FieldCreateXGTKR
 !       {\tt ESMF\_Array} object.
 ! \item [{[datacopyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{opt:datacopyflag}.  The default is
+!       For valid values see \ref{const:datacopyflag}.  The default is
 !       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -4386,10 +4386,10 @@ end function ESMF_FieldCreateXGTKR
 !       for the {\tt farray}. @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
-!       \ref{opt:indexflag} for a list of valid indexflag options. @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
@@ -4551,7 +4551,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 !       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{opt:datacopyflag}.  The default is @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\

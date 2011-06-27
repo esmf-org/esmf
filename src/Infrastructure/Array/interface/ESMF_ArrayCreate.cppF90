@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.80 2011/06/24 16:51:50 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.81 2011/06/27 19:46:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.80 2011/06/24 16:51:50 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.81 2011/06/27 19:46:17 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -856,7 +856,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 !      to the rank of farray. @\
 ! \item[indexflag] @\
 !      Indicate how DE-local indices are defined. See section @\
-!      \ref{opt:indexflag} for a list of valid indexflag options. @\
+!      \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item[{[datacopyflag]}] @\
 !      Specifies whether the Array object will reference the memory allocation @\
 !      provided by {\tt farray} directly or will copy the data from @\
@@ -1118,7 +1118,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      region of each DE is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
-!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      defined by the associated DistGrid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
 ! \item[{[datacopyflag]}]
 !      Specifies whether the Array object will reference the memory allocation
@@ -1575,7 +1575,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      region of each DE is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
-!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      defined by the associated DistGrid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
@@ -1890,7 +1890,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      region of each DE is placed to start at the local index space origin,
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
-!      defined by the associated DistGrid. See section \ref{opt:indexflag}
+!      defined by the associated DistGrid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by

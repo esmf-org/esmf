@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.68 2011/06/24 17:43:44 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.69 2011/06/27 19:46:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.68 2011/06/24 17:43:44 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.69 2011/06/27 19:46:17 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -199,7 +199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     PET.
 !   \item[{[indexflag]}]
 !     Upon return this flag indicates how the DE-local indices are defined.
-!     See section \ref{opt:indexflag} for a list of possible return values.
+!     See section \ref{const:indexflag} for a list of possible return values.
 !   \item[{[distgridToArrayMap]}]
 !     Upon return this list holds the Array dimensions against which the
 !     DistGrid dimensions are mapped. {\tt distgridToArrayMap} must be allocated

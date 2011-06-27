@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.92 2011/06/27 18:22:19 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.93 2011/06/27 19:46:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.92 2011/06/27 18:22:19 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.93 2011/06/27 19:46:22 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -914,7 +914,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
-!          \ref{opt:decompflag} for a list of valid decomposition flag options.
+!          \ref{const:decompflag} for a list of valid decomposition flag options.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
 !          decomposition. The default is a zero vector.
@@ -1260,7 +1260,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
-!          \ref{opt:decompflag} for a list of valid decomposition flag options.
+!          \ref{const:decompflag} for a list of valid decomposition flag options.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
 !          decomposition. The default is a zero vector.
@@ -1591,7 +1591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
-!          See section \ref{opt:decompflag} for a list of valid decomposition
+!          See section \ref{const:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[regDecompFirstExtraPTile]}]
 !          Extra elements on the first DEs along each dimension in a regular
@@ -1931,7 +1931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of decomposition flags indicating how each dimension of each
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
-!          See section \ref{opt:decompflag} for a list of valid decomposition
+!          See section \ref{const:decompflag} for a list of valid decomposition
 !          flag options. The second index indicates the tile number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default

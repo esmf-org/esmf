@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.59 2011/06/27 19:03:02 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.60 2011/06/27 19:46:42 rokuingh Exp $
 
 \section{Constants}
 
@@ -65,7 +65,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_CONTEXT}
-\label{opt:contextflag}
+\label{const:contextflag}
 {\sf DESCRIPTION:\\}  
 Indicates the type of VM context in which a Component will be executing its
 standard methods.
@@ -90,7 +90,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_DATACOPY}
-\label{opt:datacopyflag}
+\label{const:datacopyflag}
 {\sf DESCRIPTION:\\}
 Indicates whether to reference a data item or make a copy of it.
 
@@ -103,7 +103,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_DECOMP}
-\label{opt:decompflag}
+\label{const:decompflag}
 {\sf DESCRIPTION:\\}
 Indicates how DistGrid elements are decomposed over DEs.
 
@@ -126,7 +126,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_GEOMTYPE}
-\label{opt:geomtype}
+\label{const:geomtype}
 
 {\sf DESCRIPTION:\\}
 Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
@@ -145,7 +145,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_INDEX}
-\label{opt:indexflag}
+\label{const:indexflag}
 {\sf DESCRIPTION:\\}
 Indicates whether index is local (per DE) or global (per object).
 
@@ -198,7 +198,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_METHOD}
-\label{opt:method}
+\label{const:method}
 {\sf DESCRIPTION:\\}  
 Specify standard ESMF Component method.
 
@@ -217,7 +217,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_REDUCE}
-\label{opt:reduceflag}
+\label{const:reduce}
 {\sf DESCRIPTION:\\}
 Indicates reduce operation to a {\tt Reduce()} method.
 
@@ -232,7 +232,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_REGION}
-\label{opt:zeroregion}
+\label{const:region}
 {\sf DESCRIPTION:\\}
 Specifies various regions in the data layout of an Array or Field object.
 
@@ -247,7 +247,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_ROUTESYNC}
-\label{opt:routesyncflag}
+\label{const:routesync}
 {\sf DESCRIPTION:\\}  
 Switch between blocking and non-blocking execution of RouteHandle based
 communication calls. Every RouteHandle based communication method contains
@@ -291,7 +291,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_STARTREGION}
-\label{opt:startregion}
+\label{const:startregion}
 {\sf DESCRIPTION:\\}
 Specifies the start of the effective halo region of an Array or Field object.
 
@@ -305,7 +305,7 @@ Valid values are:
 
 
 \subsection{ESMF\_SYNC}
-\label{opt:syncflag}
+\label{const:sync}
 {\sf DESCRIPTION:\\}  
 Indicates method blocking behavior and PET synchronization for VM communication
 methods, as well as for standard Component methods, such as Initialize(), Run() 
@@ -406,7 +406,7 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_TYPEKIND}
-\label{opt:typekind}
+\label{const:typekind}
 
 {\sf DESCRIPTION:\\}
 Supported ESMF type and kind combinations.   

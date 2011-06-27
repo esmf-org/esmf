@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommNBEx.F90,v 1.14 2011/06/24 18:24:08 rokuingh Exp $
+! $Id: ESMF_ArrayCommNBEx.F90,v 1.15 2011/06/27 19:46:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@ program ESMF_ArrayCommNBEx
 ! Access to the non-blocking execution mode is provided uniformly across all
 ! RouteHandle based communication calls. Every such call contains the optional
 ! {\tt routesyncflag} argument of type {\tt ESMF\_RouteSync\_Flag}. Section
-! \ref{opt:routesyncflag} lists all of the valid settings for this flag.
+! \ref{const:routesync} lists all of the valid settings for this flag.
 !
 ! It is an execution time decision to select whether to invoke a precomputed
 ! communication pattern, stored in a RouteHandle, in the blocking or

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.29 2011/06/24 16:12:35 rokuingh Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.30 2011/06/27 19:46:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -61,7 +61,7 @@ module ESMF_LocalArrayGetMod
 ! \item[{[datacopyflag]}] @\
 !   An optional copy flag which can be specified. @\
 !   Can either make a new copy of the data or reference existing data. @\
-!   See section \ref{opt:datacopyflag} for a list of possible values. @\
+!   See section \ref{const:datacopyflag} for a list of possible values. @\
 ! \item[{[rc]}] @\
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 ! \end{description} @\
@@ -211,7 +211,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.29 2011/06/24 16:12:35 rokuingh Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.30 2011/06/27 19:46:37 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.84 2011/06/25 01:18:19 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.85 2011/06/27 19:46:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.84 2011/06/25 01:18:19 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.85 2011/06/27 19:46:24 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -171,7 +171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_FIELDSTATUS\_COMPLETE} (the Field has a GeomBase and an Array internally).
 !       \end{sloppypar}
 ! \item [{[geomtype]}]
-!       Specifies the type of geometry on which the Field is built. Please see Section~\ref{opt:geomtype} for 
+!       Specifies the type of geometry on which the Field is built. Please see Section~\ref{const:geomtype} for 
 !       the range of values.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.

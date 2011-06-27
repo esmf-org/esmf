@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.142 2011/06/27 17:40:23 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.143 2011/06/27 19:46:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.142 2011/06/27 17:40:23 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.143 2011/06/27 19:46:39 rokuingh Exp $"
 
 !==============================================================================
 
@@ -763,7 +763,7 @@ contains
 !   \item[count] 
 !        Number of elements in sendData. Must be the same on all PETs.
 !   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
 !   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
@@ -1638,7 +1638,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
 !   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
 !   \item[{[syncflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
@@ -4480,7 +4480,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
 !   \item[reduceflag] 
-!        Reduction operation. See section \ref{opt:reduceflag} for a list of 
+!        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
 !   \item[rootPet] 
 !        PET on which reduced data is returned.

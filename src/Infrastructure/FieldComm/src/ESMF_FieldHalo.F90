@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.15 2011/06/24 18:24:14 rokuingh Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.16 2011/06/27 19:46:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.15 2011/06/24 18:24:14 rokuingh Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.16 2011/06/27 19:46:28 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -139,7 +139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item [{[routesyncflag]}]
 !     Indicate communication option. Default is {\tt ESMF\_ROUTESYNC\_BLOCKING},
 !     resulting in a blocking operation.
-!     See section \ref{opt:routesyncflag} for a complete list of valid settings.
+!     See section \ref{const:routesync} for a complete list of valid settings.
 !   \item [{[finishedflag]}]
 !     \begin{sloppypar}
 !     Used in combination with {\tt routesyncflag = ESMF\_ROUTESYNC\_NBTESTFINISH}.
@@ -318,7 +318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The start of the effective halo region on every DE. The default
 !     setting is {\tt ESMF\_STARTREGION\_EXCLUSIVE}, rendering all non-exclusive
 !     elements potential halo destination elments.
-!     See section \ref{opt:startregion} for a complete list of
+!     See section \ref{const:startregion} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
 !   \item[{[haloLDepth]}] 

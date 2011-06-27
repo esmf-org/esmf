@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.62 2011/06/24 20:30:08 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.63 2011/06/27 19:46:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.62 2011/06/24 20:30:08 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.63 2011/06/27 19:46:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1342,7 +1342,7 @@ contains
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
-!          that the index range on each DE starts at 1. See Section~\ref{opt:indexflag}
+!          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1478,7 +1478,7 @@ contains
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
-!          that the index range on each DE starts at 1. See Section~\ref{opt:indexflag}
+!          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1600,7 +1600,7 @@ contains
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
-!          that the index range on each DE starts at 1. See Section~\ref{opt:indexflag}
+!          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1741,7 +1741,7 @@ contains
 !          \begin{sloppypar}
 !          Specify what to do with leftover locations after division.
 !          If not specified, defaults to {\tt ESMF\_DECOMP\_BALANCED}. Please
-!          see Section~\ref{opt:decompflag} for a full description of the 
+!          see Section~\ref{const:decompflag} for a full description of the 
 !          possible options. 
 !          \end{sloppypar}
 !     \item{[[minIndex]}]
@@ -1751,7 +1751,7 @@ contains
 !     \item[{[indexflag]}]
 !          Flag that indicates how the DE-local indices are to be defined.
 !          Defaults to {\tt ESMF\_INDEX\_DELOCAL}, which indicates
-!          that the index range on each DE starts at 1. See Section~\ref{opt:indexflag}
+!          that the index range on each DE starts at 1. See Section~\ref{const:indexflag}
 !          for the full range of options. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2461,7 +2461,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2540,7 +2540,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2706,7 +2706,7 @@ end subroutine ESMF_LocStreamGetKeyI4
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2873,7 +2873,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 !     \item[{[datacopyflag]}]
 !          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
 !          farray is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{opt:datacopyflag} for further description and a
+!          Please see Section~\ref{const:datacopyflag} for further description and a
 !          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.

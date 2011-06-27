@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.148 2011/06/24 23:34:24 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.149 2011/06/27 19:46:40 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.148 2011/06/24 23:34:24 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.149 2011/06/27 19:46:40 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -414,7 +414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the parent PETs.
 ! \item[{[contextflag]}]
 !   Specify the component's VM context. The default context is
-!   {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{opt:contextflag} for a
+!   {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{const:contextflag} for a
 !   complete list of valid flags.
 ! \item[{[name]}]
 !   Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
@@ -591,7 +591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
@@ -746,10 +746,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return the number of PETs in the the {\tt ESMF\_CplComp} object.
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_CplComp}.
-!   See section \ref{opt:contextflag} for a complete list of valid flags.
+!   See section \ref{const:contextflag} for a complete list of valid flags.
 ! \item[{[currentMethod]}]
 !   Return the current {\tt ESMF\_Method} of the {\tt ESMF\_CplComp} execution.
-!   See section \ref{opt:method}  for a complete list of valid options.
+!   See section \ref{const:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
 ! \item[{[cplCompStatus]}]
@@ -902,7 +902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
@@ -1157,7 +1157,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
 ! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
@@ -1252,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
@@ -1465,7 +1465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   An {\tt ESMF\_CplComp} object.
 ! \item[method]
 !   One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
-!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method} 
+!   {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this {\tt method}.
@@ -2212,7 +2212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp] 
 !   {\tt ESMF\_CplComp} to wait for.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
@@ -2293,7 +2293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   argument will be passed to the user-supplied routine.  The 
 !   clock argument in the user code cannot be optional. 
 ! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{opt:syncflag} 
+!   Blocking behavior of this method call. See section \ref{const:sync} 
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
