@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.53 2011/06/24 16:12:18 rokuingh Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.54 2011/06/27 18:26:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.53 2011/06/24 16:12:18 rokuingh Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.54 2011/06/27 18:26:57 theurich Exp $'
 
 !==============================================================================
 
@@ -371,12 +371,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Print ArraySpec internals. \\
-!
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}
