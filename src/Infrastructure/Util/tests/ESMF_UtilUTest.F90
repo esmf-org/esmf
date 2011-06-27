@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.32 2011/04/05 15:05:12 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.33 2011/06/27 18:54:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.32 2011/04/05 15:05:12 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.33 2011/06/27 18:54:29 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -105,15 +105,15 @@
     ! Print all the constants, just for the record.
 
       print *
-      print *, ' ESMF_MAJOR_VERSION =', ESMF_MAJOR_VERSION
-      print *, ' ESMF_MINOR_VERSION =', ESMF_MINOR_VERSION
-      print *, ' ESMF_REVISION      =', ESMF_REVISION
-      print *, ' ESMF_PATCHLEVEL    =', ESMF_PATCHLEVEL
+      print *, ' ESMF_VERSION_MAJOR =', ESMF_VERSION_MAJOR
+      print *, ' ESMF_VERSION_MINOR =', ESMF_VERSION_MINOR
+      print *, ' ESMF_VERSION_REVISION      =', ESMF_VERSION_REVISION
+      print *, ' ESMF_VERSION_PATCHLEVEL    =', ESMF_VERSION_PATCHLEVEL
       print *, ' ESMF_VERSION_STRING=', trim (ESMF_VERSION_STRING)
 
     !NEX_UTest
     ! Compare numeric major version to the string
-    write (major_version,'(i2)') ESMF_MAJOR_VERSION
+    write (major_version,'(i2)') ESMF_VERSION_MAJOR
     evs = ESMF_VERSION_STRING
     evs_dotpos = index (evs, '.')
     write(failMsg, *) "Numeric and character major_version mismatch"
@@ -123,7 +123,7 @@
     !
     !NEX_UTest
     ! Compare numeric minor version to the string
-    write (minor_version,'(i2)') ESMF_MINOR_VERSION
+    write (minor_version,'(i2)') ESMF_VERSION_MINOR
     evs = evs(evs_dotpos+1:)
     evs_dotpos = index (evs, '.')
     write(failMsg, *) "Numeric and character minor_version mismatch"
@@ -133,7 +133,7 @@
     !
     !NEX_UTest
     ! Compare numeric revision to the string
-    write (revision,'(i2)') ESMF_REVISION
+    write (revision,'(i2)') ESMF_VERSION_REVISION
     evs = evs(evs_dotpos+1:)
     do, i=1, len (evs)
       if (scan (evs(i:i), '0123456789') /= 1) exit

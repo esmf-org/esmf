@@ -1,4 +1,4 @@
-! $Id: ESMF_Info.F90,v 1.7 2011/06/22 15:08:07 rokuingh Exp $
+! $Id: ESMF_Info.F90,v 1.8 2011/06/27 18:54:31 rokuingh Exp $
 
 program ESMF_Info
 
@@ -30,10 +30,10 @@ program ESMF_Info
     else
       ! regular execution
       print *, "ESMF_Info"
-      print *, "  ESMF_MAJOR_VERSION:   ", ESMF_MAJOR_VERSION
-      print *, "  ESMF_MINOR_VERSION:   ", ESMF_MINOR_VERSION
-      print *, "  ESMF_REVISION:        ", ESMF_REVISION
-      print *, "  ESMF_PATCHLEVEL:      ", ESMF_PATCHLEVEL
+      print *, "  ESMF_VERSION_MAJOR:   ", ESMF_VERSION_MAJOR
+      print *, "  ESMF_VERSION_MINOR:   ", ESMF_VERSION_MINOR
+      print *, "  ESMF_VERSION_REVISION:        ", ESMF_VERSION_REVISION
+      print *, "  ESMF_VERSION_PATCHLEVEL:      ", ESMF_VERSION_PATCHLEVEL
       print *, "  ESMF_VERSION_STRING:  ", ESMF_VERSION_STRING
     end if
   endif

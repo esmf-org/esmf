@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.133 2011/06/24 23:34:18 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.134 2011/06/27 18:54:27 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -80,10 +80,10 @@
      
 !EOPI
 
-      integer, parameter :: ESMF_MAJOR_VERSION = 5
-      integer, parameter :: ESMF_MINOR_VERSION = 2
-      integer, parameter :: ESMF_REVISION      = 0
-      integer, parameter :: ESMF_PATCHLEVEL    = 0
+      integer, parameter :: ESMF_VERSION_MAJOR = 5
+      integer, parameter :: ESMF_VERSION_MINOR = 2
+      integer, parameter :: ESMF_VERSION_REVISION      = 0
+      integer, parameter :: ESMF_VERSION_PATCHLEVEL    = 0
       character(*), parameter :: ESMF_VERSION_STRING = &
                                  "5.2.0r beta snapshot"
 
@@ -731,8 +731,8 @@
 ! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
       public ESMF_MAXDIM, ESMF_MAXIGRIDDIM, ESMF_MAXGRIDDIM
      
-      public ESMF_MAJOR_VERSION, ESMF_MINOR_VERSION
-      public ESMF_REVISION, ESMF_PATCHLEVEL
+      public ESMF_VERSION_MAJOR, ESMF_VERSION_MINOR
+      public ESMF_VERSION_REVISION, ESMF_VERSION_PATCHLEVEL
       public ESMF_VERSION_STRING 
 
       public ESMF_ObjectID
