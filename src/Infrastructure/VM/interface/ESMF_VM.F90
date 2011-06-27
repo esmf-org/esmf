@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.139 2011/06/24 23:34:20 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.140 2011/06/27 16:50:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -186,7 +186,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.139 2011/06/24 23:34:20 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.140 2011/06/27 16:50:01 theurich Exp $"
 
 !==============================================================================
 
@@ -516,8 +516,6 @@ module ESMF_VMMod
 !   type(ESMF_VM) :: vm1
 !   type(ESMF_VM) :: vm2
 !
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -553,8 +551,6 @@ module ESMF_VMMod
 ! !ARGUMENTS:
 !   type(ESMF_VM), intent(in) :: vm1
 !   type(ESMF_VM), intent(in) :: vm2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -597,8 +593,6 @@ module ESMF_VMMod
 ! !ARGUMENTS:
 !   type(ESMF_VM), intent(in) :: vm1
 !   type(ESMF_VM), intent(in) :: vm2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -743,7 +737,6 @@ contains
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -851,7 +844,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
         ESMF_TYPEKIND_I4, reduceflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -912,7 +905,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
         ESMF_TYPEKIND_R4, reduceflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -973,7 +966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMAllFullReduce(vm, sendData(1), recvData, count, &
         ESMF_TYPEKIND_R8, reduceflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1004,7 +997,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1103,7 +1095,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1173,7 +1165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData, recvData, size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1243,7 +1235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 8 ! 8 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1313,7 +1305,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMAllGather(vm, sendData(1), recvData(1), size, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1357,7 +1349,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1468,7 +1459,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1528,7 +1519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1588,7 +1579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllGatherV(vm, sendData, sendCount, &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1728,7 +1719,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_I4, reduceflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1787,7 +1778,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllReduce(vm, sendData, recvData, 1, ESMF_TYPEKIND_I4, &
       reduceflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1846,7 +1837,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R4, reduceflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1907,7 +1898,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMAllReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R8, reduceflag, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1942,7 +1933,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2057,7 +2047,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2118,7 +2108,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2179,7 +2169,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
       recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2205,7 +2195,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),  intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        intent(out), optional :: rc           
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2233,7 +2222,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMBarrier(vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2262,7 +2251,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2365,7 +2353,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2437,8 +2425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2509,7 +2496,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count * 8 ! 8 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2581,7 +2568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2653,7 +2640,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2724,7 +2711,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2795,7 +2782,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     if (count > 0) then
       size = count
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData, size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2951,7 +2938,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -3053,7 +3039,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3124,7 +3110,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3195,7 +3181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 8 ! 8 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3266,7 +3252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMGather(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3309,7 +3295,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3391,7 +3376,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_I4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3437,7 +3422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3483,7 +3468,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGatherV(vm, sendData, sendCount, recvData, &
       recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_R8, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3517,7 +3502,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,            intent(out),  optional  :: pthreadsEnabledFlag
     logical,            intent(out),  optional  :: openMPEnabledFlag
     integer,            intent(out),  optional  :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3574,7 +3558,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
       pthreadsEnabledFlagArg, openMPEnabledFlagArg, localrc)
     if (present (pthreadsEnabledFlag))  &
@@ -3602,7 +3586,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM), intent(out)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional  :: rc           
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3664,7 +3647,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc           
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -3712,7 +3694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGetCurrent(vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3757,7 +3739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGetCurrentID(vmId, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3805,7 +3787,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGetVMId(vm, vmId, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3838,7 +3820,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: threadId
     integer,       intent(out), optional :: vas
     integer,       intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3882,7 +3863,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
       threadId, vas, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3909,19 +3890,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        intent(out), optional :: rc           
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Print internal information about the specified {\tt ESMF\_VM} to
-!   {\tt stdout}.\newline
-!
-!   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!   On some platforms/compilers there is a potential issue with interleaving
-!   Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!   the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!   may be used on unit 6 to get coherent output.  \\
+!   {\tt stdout}.\\
 !
 !   The arguments are:
 !   \begin{description}
@@ -3942,7 +3916,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Flush before crossing language interface to ensure correct output order
+    call ESMF_UtilIOUnitFlush(ESMF_UtilIOStdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface.
     call c_ESMC_VMPrint(vm, localrc) 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3971,7 +3950,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),         intent(out), optional :: commhandle
 !    integer,                       intent(out), optional :: rc           
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -4071,7 +4049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4143,7 +4121,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4215,7 +4193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 8 ! 8 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4287,7 +4265,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData(1), size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4359,7 +4337,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 1 ! 1 byte
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4431,7 +4409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 1 ! 1 byte
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMRecv(vm, recvData, size, srcPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4475,7 +4453,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -4587,7 +4564,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_I4, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4649,7 +4626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R4, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4711,7 +4688,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       call c_ESMC_VMReduce(vm, sendData(1), recvData(1), count, &
         ESMF_TYPEKIND_R8, reduceflag, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4743,7 +4720,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -4846,7 +4822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4917,7 +4893,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4988,7 +4964,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 8 ! 8 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5059,7 +5035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
     size = count * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMScatter(vm, sendData(1), recvData(1), size, rootPet, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5102,7 +5078,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -5179,7 +5154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
       recvData(1), recvCount, ESMF_TYPEKIND_I4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5225,7 +5200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
       recvData(1), recvCount, ESMF_TYPEKIND_R4, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5271,7 +5246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMScatterV(vm, sendData(1), sendCounts(1), sendOffsets(1), &
       recvData(1), recvCount, ESMF_TYPEKIND_R8, rootPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5301,7 +5276,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -5390,7 +5364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5462,7 +5436,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5534,7 +5508,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 8 ! 8 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5606,7 +5580,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count * 4 ! 4 bytes
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData(1), size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5678,7 +5652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count ! 1 byte
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5750,7 +5724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       ! There is data to be received
       size = count ! 1 byte
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         call c_ESMC_VMSend(vm, sendData, size, dstPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5795,7 +5769,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -5905,7 +5878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
         recvData(1), recvSize, srcPet, localrc)
@@ -5981,7 +5954,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
         recvData(1), recvSize, srcPet, localrc)
@@ -6057,7 +6030,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     sendSize = sendCount * 8 ! 8 bytes
     recvSize = recvCount * 8 ! 8 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
         recvData(1), recvSize, srcPet, localrc)
@@ -6133,7 +6106,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData(1), sendSize, dstPet, &
         recvData(1), recvSize, srcPet, localrc)
@@ -6209,7 +6182,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     sendSize = sendCount ! 1 byte
     recvSize = recvCount ! 1 byte
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     if (blocking) then
       call c_ESMC_VMSendRecv(vm, sendData, sendSize, dstPet, &
         recvData, recvSize, srcPet, localrc)
@@ -6273,7 +6246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMThreadBarrier(vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6298,8 +6271,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM), intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -6327,7 +6298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMValidate(vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6352,8 +6323,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), intent(out)           :: time
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -6403,8 +6372,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), intent(in)            :: delay
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -6453,8 +6420,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), intent(out)           :: prec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: rc
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -6538,7 +6503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMInitialize(GlobalVM, mpiCommunicator, localrc)
     ! Cannot use LogErr here because LogErr initializes _after_ VM
     if (localrc /= ESMF_SUCCESS) then
@@ -6588,7 +6553,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMFinalize(keepMpiFlag, localrc)
     ! Cannot use LogErr here because LogErr initializes _after_ VM
     if (localrc /= ESMF_SUCCESS) then
@@ -6635,7 +6600,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMAbort(localrc)
     ! Cannot use LogErr here because LogErr initializes _after_ VM
     if (localrc /= ESMF_SUCCESS) then
@@ -6686,7 +6651,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMShutdown(vm, vmplan, vm_info, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6915,7 +6880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6966,7 +6931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMPlanDestruct(vmplan, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7164,7 +7129,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       npetlist, petlist, localrc)
@@ -7236,7 +7201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       npetlist, petlist, localrc)
@@ -7308,7 +7273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMPlanGetInit, vmplan, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
       npetlist, petlist, localrc)
@@ -7591,7 +7556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 #else
     if (count > 0) then
-      ! Call into the C++ interface, which will sort out optional arguments.
+      ! Call into the C++ interface.
       if (blocking) then
         do k=1, count
           call c_ESMC_VMBcastVMId(vm, bcstData(k), rootPet, localrc)
@@ -7647,7 +7612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMRecvVMId(vm, vmId, srcPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7697,7 +7662,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     call c_ESMC_VMSendVMId(vm, vmId, dstPet, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7751,7 +7716,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_CommHandleGetInit, commhandle, rc)
     
-    ! Call into the C++ interface, which will sort out optional arguments.
+    ! Call into the C++ interface.
     !todo: call c_ESMC_CommHandleValidate(commhandle, localrc)
     localrc = ESMF_SUCCESS  ! remove when todo is done.
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
