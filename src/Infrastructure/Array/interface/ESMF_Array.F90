@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.154 2011/06/27 19:46:17 rokuingh Exp $
+! $Id: ESMF_Array.F90,v 1.155 2011/06/27 21:11:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.154 2011/06/27 19:46:17 rokuingh Exp $'
+    '$Id: ESMF_Array.F90,v 1.155 2011/06/27 21:11:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -541,7 +541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteSync_Flag),    intent(in),   optional  :: routesyncflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(out),  optional  :: cancelledflag
-    type(ESMF_Region_Flag),  intent(in),   optional  :: zeroregion
+    type(ESMF_Region_Flag), intent(in),   optional  :: zeroregion
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
 !
@@ -632,7 +632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteSync_Flag)     :: opt_routesyncflag ! helper variable
     type(ESMF_Logical)      :: opt_finishedflag   ! helper variable
     type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
-    type(ESMF_Region_Flag)   :: opt_zeroregion ! helper variable
+    type(ESMF_Region_Flag)  :: opt_zeroregion ! helper variable
     type(ESMF_Logical)      :: opt_checkflag! helper variable
 
     ! initialize return code; assume routine not implemented

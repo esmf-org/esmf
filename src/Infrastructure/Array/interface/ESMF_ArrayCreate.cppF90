@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.81 2011/06/27 19:46:17 rokuingh Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.82 2011/06/27 21:11:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.81 2011/06/27 19:46:17 rokuingh Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.82 2011/06/27 21:11:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -227,9 +227,9 @@ module ESMF_ArrayCreateMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (array1 == array2) then ... endif
+!   if (array1 /= array2) then ... endif
 !             OR
-!   result = (array1 == array2)
+!   result = (array1 /= array2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -2300,7 +2300,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayDestroy()"
 !BOP
-! !IROUTINE: ESMF_ArrayDestroy - Destroy Array object
+! !IROUTINE: ESMF_ArrayDestroy - Release resources associated with an Array object
 
 ! !INTERFACE:
   subroutine ESMF_ArrayDestroy(array, keywordEnforcer, rc)
@@ -2309,14 +2309,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     type(ESMF_Array), intent(inout)           :: array
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional  :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Destroy an {\tt ESMF\_Array} object.
+!     Destroy an {\tt ESMF\_Array}, releasing the resources associated with
+!     the object.
 !
 !     The arguments are:
 !     \begin{description}
