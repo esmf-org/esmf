@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.219 2011/06/28 02:07:25 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.220 2011/06/28 05:19:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.219 2011/06/28 02:07:25 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.220 2011/06/28 05:19:38 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1050,32 +1050,32 @@ contains
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, grid, gridIsPresent, importState, &
     exportState, clock, dirPath, configFile, config, configIsPresent, &
-    compType, methodflag, currentPhase, localPet, petCount, compStatus, rc)
+    compType, currentMethod, currentPhase, localPet, petCount, compStatus, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass),    pointer               :: compp
-    character(len=*),        intent(out), optional :: name
-    type(ESMF_VM),           intent(out), optional :: vm
-    type(ESMF_VM),           intent(out), optional :: vm_parent
-    type(ESMF_VMPlan),       intent(out), optional :: vmplan
-    type(ESMF_Pointer),      intent(out), optional :: vm_info
+    type(ESMF_CompClass),     pointer               :: compp
+    character(len=*),         intent(out), optional :: name
+    type(ESMF_VM),            intent(out), optional :: vm
+    type(ESMF_VM),            intent(out), optional :: vm_parent
+    type(ESMF_VMPlan),        intent(out), optional :: vmplan
+    type(ESMF_Pointer),       intent(out), optional :: vm_info
     type(ESMF_Context_Flag),  intent(out), optional :: contextflag
-    type(ESMF_Grid),         intent(out), optional :: grid
-    logical,                 intent(out), optional :: gridIsPresent
-    type(ESMF_State),        intent(out), optional :: importState
-    type(ESMF_State),        intent(out), optional :: exportState
-    type(ESMF_Clock),        intent(out), optional :: clock
-    character(len=*),        intent(out), optional :: dirPath
-    character(len=*),        intent(out), optional :: configFile
-    type(ESMF_Config),       intent(out), optional :: config
-    logical,                 intent(out), optional :: configIsPresent
-    type(ESMF_CompType_Flag),     intent(out), optional :: compType
-    type(ESMF_Method_Flag),       intent(out), optional :: methodflag
-    integer,                 intent(out), optional :: currentPhase
-    integer,                 intent(out), optional :: localPet
-    integer,                 intent(out), optional :: petCount
-    type(ESMF_CompStatus),   intent(out), optional :: compStatus
-    integer,                 intent(out), optional :: rc
+    type(ESMF_Grid),          intent(out), optional :: grid
+    logical,                  intent(out), optional :: gridIsPresent
+    type(ESMF_State),         intent(out), optional :: importState
+    type(ESMF_State),         intent(out), optional :: exportState
+    type(ESMF_Clock),         intent(out), optional :: clock
+    character(len=*),         intent(out), optional :: dirPath
+    character(len=*),         intent(out), optional :: configFile
+    type(ESMF_Config),        intent(out), optional :: config
+    logical,                  intent(out), optional :: configIsPresent
+    type(ESMF_CompType_Flag), intent(out), optional :: compType
+    type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
+    integer,                  intent(out), optional :: currentPhase
+    integer,                  intent(out), optional :: localPet
+    integer,                  intent(out), optional :: petCount
+    type(ESMF_CompStatus),    intent(out), optional :: compStatus
+    integer,                  intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1085,7 +1085,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_Status)       :: baseStatus
-    type(ESMF_Method_Flag)       :: methodflagArg
+    type(ESMF_Method_Flag)  :: currentMethodArg
     integer                 :: currentPhaseArg
 
     ! Initialize return code; assume not implemented until success is certain
@@ -1236,16 +1236,16 @@ contains
       configFile = compp%configFile
     endif
 
-    ! access methodflag and currentPhase
-    if (present(methodflag) .or. present(currentPhase)) then
-      call c_ESMC_CompGet(compp%vm_cargo, methodflagArg, currentPhaseArg, &
+    ! access currentMethod and currentPhase
+    if (present(currentMethod) .or. present(currentPhase)) then
+      call c_ESMC_CompGet(compp%vm_cargo, currentMethodArg, currentPhaseArg, &
         localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
     endif
-    if (present(methodflag)) then
-      methodflag = methodflagArg
+    if (present(currentMethod)) then
+      currentMethod = currentMethodArg
     endif
     if (present(currentPhase)) then
       currentPhase = currentPhaseArg

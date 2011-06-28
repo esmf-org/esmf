@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.21 2011/06/27 22:30:46 rokuingh Exp $
+! $Id: ESMF_SetServCode.F90,v 1.22 2011/06/28 05:19:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -97,22 +97,23 @@ contains
 
 
     subroutine my_init1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importState
-      type(ESMF_State) :: exportState
-      type(ESMF_Clock) :: externalclock
-      integer, intent(out) :: rc
-      type(ESMF_Method_Flag):: methodflag
-      integer          :: currentPhase
+      type(ESMF_GridComp)   :: gcomp
+      type(ESMF_State)      :: importState
+      type(ESMF_State)      :: exportState
+      type(ESMF_Clock)      :: externalclock
+      integer, intent(out)  :: rc
+      ! local variables
+      type(ESMF_Method_Flag)  :: currentMethod
+      integer                 :: currentPhase
      
       print *, "User initialize 1 routine called"
       
       ! set user return code according to correctness of method and phase test
 
-      call ESMF_GridCompGet(gcomp, methodflag=methodflag, &
+      call ESMF_GridCompGet(gcomp, currentMethod=currentMethod, &
         currentPhase=currentPhase)
         
-      if (methodflag/=ESMF_METHOD_INITIALIZE) then
+      if (currentMethod/=ESMF_METHOD_INITIALIZE) then
         rc = ESMF_FAILURE
         return
       endif

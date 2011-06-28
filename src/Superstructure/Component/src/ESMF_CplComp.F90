@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.153 2011/06/28 04:55:39 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.154 2011/06/28 05:19:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.153 2011/06/28 04:55:39 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.154 2011/06/28 05:19:38 theurich Exp $'
 
 !==============================================================================
 !
@@ -689,7 +689,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, configIsPresent, config, &
     configFileIsPresent, configFile, clockIsPresent, clock, localPet, petCount, &
-    contextflag, methodflag, currentPhase, vmIsPresent, vm, name, rc)
+    contextflag, currentMethod, currentPhase, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(in)            :: cplcomp
@@ -703,7 +703,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: localPet
     integer,                 intent(out), optional :: petCount
     type(ESMF_Context_Flag), intent(out), optional :: contextflag
-    type(ESMF_Method_Flag),  intent(out), optional :: methodflag
+    type(ESMF_Method_Flag),  intent(out), optional :: currentMethod
     integer,                 intent(out), optional :: currentPhase
     logical,                 intent(out), optional :: vmIsPresent
     type(ESMF_VM),           intent(out), optional :: vm
@@ -751,7 +751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_CplComp}.
 !   See section \ref{const:contextflag} for a complete list of valid flags.
-! \item[{[methodflag]}]
+! \item[{[currentMethod]}]
 !   Return the current {\tt ESMF\_Method\_Flag} of the {\tt ESMF\_CplComp} execution.
 !   See section \ref{const:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
@@ -784,7 +784,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompGet(cplcomp%compp, name=name, vm=vm, contextflag=contextflag,&
       clock=clock, configFile=configFile, config=config, &
-      methodflag=methodflag, currentPhase=currentPhase, &
+      currentMethod=currentMethod, currentPhase=currentPhase, &
       localPet=localPet, petCount=petCount, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &

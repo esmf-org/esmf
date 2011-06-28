@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.177 2011/06/28 04:55:39 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.178 2011/06/28 05:19:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.177 2011/06/28 04:55:39 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.178 2011/06/28 05:19:38 theurich Exp $'
 
 !==============================================================================
 !
@@ -701,7 +701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importStateIsPresent, importState, exportStateIsPresent, exportState, &
     configIsPresent, config, configFileIsPresent, configFile, &
     clockIsPresent, clock, localPet, petCount, contextflag, &
-    methodflag, currentPhase, comptype, vmIsPresent, vm, name, rc)
+    currentMethod, currentPhase, comptype, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),      intent(in)            :: gridcomp
@@ -721,7 +721,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: localPet
     integer,                  intent(out), optional :: petCount
     type(ESMF_Context_Flag),  intent(out), optional :: contextflag
-    type(ESMF_Method_Flag),   intent(out), optional :: methodflag
+    type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
     integer,                  intent(out), optional :: currentPhase
     type(ESMF_CompType_Flag), intent(out), optional :: comptype
     logical,                  intent(out), optional :: vmIsPresent
@@ -794,7 +794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[contextflag]}]
 !   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_GridComp}.
 !   See section \ref{const:contextflag} for a complete list of valid flags.
-! \item[{[methodflag]}]
+! \item[{[currentMethod]}]
 !   Return the current {\tt ESMF\_Method\_Flag} of the {\tt ESMF\_GridComp} execution.
 !   See section \ref{const:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
@@ -830,7 +830,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! call Comp method
     call ESMF_CompGet(gridcomp%compp, name=name, vm=vm, contextflag=contextflag,&
       grid=grid, importState=importState, exportState=exportState, clock=clock,&
-      configFile=configFile, config=config, methodflag=methodflag, &
+      configFile=configFile, config=config, currentMethod=currentMethod, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
       comptype=comptype, compStatus=compStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
