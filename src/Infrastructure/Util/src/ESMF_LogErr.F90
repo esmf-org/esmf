@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.91 2011/06/24 15:04:12 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.92 2011/06/28 03:48:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -80,12 +80,23 @@ character(8), parameter ::  &
       'TRACE   '  &
     /)
 
-type(ESMF_LogMsg_Flag), parameter           :: &
+type(ESMF_LogMsg_Flag), parameter :: &
     ESMF_LOG_ALL(4) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
       ESMF_LOGMSG_TRACE     &
+    /)
+
+integer, private :: i_ac
+type(ESMF_LogMsg_Flag), parameter :: &
+    ESMF_LOG_EMPTY(0) = (/ (ESMF_LogMsg_Flag(0), i_ac=1,0) /)
+
+type(ESMF_LogMsg_Flag), parameter :: &
+    ESMF_LOG_NOTRACE(3) = (/ &
+      ESMF_LOGMSG_INFO,     &
+      ESMF_LOGMSG_WARNING,  &
+      ESMF_LOGMSG_ERROR     &
     /)
 
 !     ! ESMF_Halt
@@ -96,7 +107,7 @@ end type
 
 !     ! Halt Types
 type(ESMF_HaltType), parameter           :: &
-    ESMF_LOG_HALT_NEVER  =  ESMF_HaltType(1), &
+    ESMF_LOG_HALT_NEVER  =     ESMF_HaltType(1), &
     ESMF_LOG_HALT_ON_WARNING = ESMF_HaltType(2), &
     ESMF_LOG_HALT_ON_ERROR =   ESMF_HaltType(3)
     
