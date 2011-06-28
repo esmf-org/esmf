@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.93 2011/06/28 04:10:54 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.94 2011/06/28 19:57:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -88,9 +88,14 @@ type(ESMF_LogMsg_Flag), parameter :: &
       ESMF_LOGMSG_TRACE     &
     /)
 
+#if !defined (ESMF_PGI_NAMEDCONSTANT_BUG)
 integer, private :: i_ac
 type(ESMF_LogMsg_Flag), parameter :: &
     ESMF_LOG_EMPTY(0) = (/ (ESMF_LogMsg_Flag(0), i_ac=1,0) /)
+#else
+type(ESMF_LogMsg_Flag) :: &
+    ESMF_LOG_EMPTY(0)
+#endif
 
 type(ESMF_LogMsg_Flag), parameter :: &
     ESMF_LOG_NOTRACE(3) = (/ &
@@ -1643,10 +1648,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            An array of message types that will be logged.  Log write requests
 !            not matching the list will be ignored.  By default all messages
 !            will be logged.   See section \ref{opt:logmsgflag} for a list of
-!            valid message types.  In addition, the following named constant
+!            valid message types.  In addition, the following named constants
 !            may be used:
 !            \begin{description}
 !              \item {\tt ESMF\_LOG\_ALL} - Log all message types;
+!              \item {\tt ESMF\_LOG\_EMPTY} - Log no message types;
+!              \item {\tt ESMF\_LOG\_NOTRACE} - Log all message types except trace messages;
 !            \end{description}
 !            If an empty array is provided, no messages will be logged.  
 !      \item [{[errorMask]}]
