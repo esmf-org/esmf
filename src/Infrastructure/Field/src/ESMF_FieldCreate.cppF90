@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.111 2011/06/27 21:28:30 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.112 2011/06/28 22:02:01 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.111 2011/06/27 21:28:30 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.112 2011/06/28 22:02:01 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3260,7 +3260,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshTKR(mesh, typekind, location, &
+  function ESMF_FieldCreateMeshTKR(mesh, typekind, meshloc,  &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -3270,7 +3270,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh               
     type(ESMF_TypeKind_Flag), intent(in)            :: typekind
-    type(ESMF_MeshLoc),  intent(in),  optional :: location
+    type(ESMF_MeshLoc),  intent(in),  optional :: meshloc
     integer,             intent(in),  optional :: gridToFieldMap(:)    
     integer,             intent(in),  optional :: ungriddedLBound(:)
     integer,             intent(in),  optional :: ungriddedUBound(:)
@@ -3289,7 +3289,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 !       {\tt ESMF\_Mesh} object. 
 ! \item [typekind]
 !       The typekind of the Field.
-! \item [{[location]}]
+! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
@@ -3379,7 +3379,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_FieldCreateMeshTKR = ESMF_FieldCreate(mesh, arrayspec, &
-      location=location, gridToFieldMap=gridToFieldMap, &
+      meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
       ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
       name=name, rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3398,7 +3398,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshArraySpec(mesh, arrayspec, &
-    location, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -3407,7 +3407,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !ARGUMENTS:
     type(ESMF_Mesh),      intent(in)            :: mesh               
     type(ESMF_ArraySpec), intent(in)            :: arrayspec     
-    type(ESMF_MeshLoc),   intent(in),  optional :: location
+    type(ESMF_MeshLoc),   intent(in),  optional :: meshloc
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
     integer,              intent(in),  optional :: ungriddedUBound(:)
@@ -3426,7 +3426,7 @@ end function ESMF_FieldCreateMeshTKR
 !       {\tt ESMF\_Mesh} object. 
 ! \item [arrayspec]
 !       Data type and kind specification. 
-! \item [{[location]}]
+! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
@@ -3493,7 +3493,7 @@ end function ESMF_FieldCreateMeshTKR
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
  
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, meshloc,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3519,7 +3519,7 @@ end function ESMF_FieldCreateMeshTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshArray(mesh, array, location, &
+  function ESMF_FieldCreateMeshArray(mesh, array, meshloc,  &
     datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -3529,7 +3529,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh                
     type(ESMF_Array),    intent(in)            :: array     
-    type(ESMF_MeshLoc),  intent(in),  optional :: location         
+    type(ESMF_MeshLoc),  intent(in),  optional :: meshloc         
     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag       
     integer,             intent(in),  optional :: gridToFieldMap(:)    
     integer,             intent(in),  optional :: ungriddedLBound(:)
@@ -3550,7 +3550,7 @@ end function ESMF_FieldCreateMeshTKR
 !       {\tt ESMF\_Mesh} object. 
 ! \item [array]
 !       {\tt ESMF\_Array} object.
-! \item [{[location]}]
+! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
@@ -3621,7 +3621,7 @@ end function ESMF_FieldCreateMeshTKR
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
 
     ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh, location, rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, meshloc,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3647,7 +3647,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateMeshData<rank><type><kind>(mesh, & @\
-!   farray, location, indexflag, datacopyflag, & @\
+!   farray, meshloc,  indexflag, datacopyflag, & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -3656,7 +3656,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !ARGUMENTS: @\
 !   type(ESMF_Mesh),     intent(in)               :: mesh                  @\
 !   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
-!   type(ESMF_MeshLoc),  intent(in),  optional    :: location @\
+!   type(ESMF_MeshLoc),  intent(in),  optional    :: meshloc @\
 !   type(ESMF_Index_Flag), intent(in)              :: indexflag @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional    :: datacopyflag @\
 !   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
@@ -3678,7 +3678,7 @@ end function ESMF_FieldCreateMeshTKR
 !       Native fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
-! \item [{[location]}] @\
+! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
@@ -3746,7 +3746,7 @@ end function ESMF_FieldCreateMeshTKR
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateMeshData" @\
   function ESMF_FieldCreateMeshData##mrank##D##mtypekind(mesh, & @\
-    farray, location, indexflag, datacopyflag, & @\
+    farray, meshloc,  indexflag, datacopyflag, & @\
     gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 @\
     ! return value @\
@@ -3755,7 +3755,7 @@ end function ESMF_FieldCreateMeshTKR
     ! input arguments @\
     type(ESMF_Mesh), intent(in) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_MeshLoc), intent(in), optional    :: location @\
+    type(ESMF_MeshLoc), intent(in), optional    :: meshloc @\
     type(ESMF_Index_Flag), intent(in)            :: indexflag @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
@@ -3780,7 +3780,7 @@ end function ESMF_FieldCreateMeshTKR
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\
@@ -3812,7 +3812,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateMeshDataPtr<rank><type><kind>(mesh, & @\
-!   farrayPtr, location, datacopyflag, gridToFieldMap, & @\
+!   farrayPtr, meshloc,  datacopyflag, gridToFieldMap, & @\
 !   name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -3821,7 +3821,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ! !ARGUMENTS: @\
 !   type(ESMF_Mesh),     intent(in)            :: mesh                  @\
 !   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
-!   type(ESMF_MeshLoc),  intent(in),  optional :: location @\
+!   type(ESMF_MeshLoc),  intent(in),  optional :: meshloc @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
 !   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
 !   character (len=*),   intent(in),  optional :: name  @\
@@ -3841,7 +3841,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[location]}] @\
+! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
@@ -3888,7 +3888,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateMeshDataPtr" @\
   function ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind(mesh, & @\
-    farrayPtr, location, datacopyflag, gridToFieldMap, & @\
+    farrayPtr, meshloc,  datacopyflag, gridToFieldMap, & @\
     name, rc) @\
 @\
     ! return value @\
@@ -3897,7 +3897,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
     ! input arguments @\
     type(ESMF_Mesh), intent(in) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-    type(ESMF_MeshLoc), intent(in), optional :: location @\
+    type(ESMF_MeshLoc), intent(in), optional :: meshloc @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
@@ -3919,7 +3919,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 @\
 @\
     ! Create GeomBase from Mesh@\
-    geombase=ESMF_GeomBaseCreate(mesh,location,rc=localrc)@\
+    geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc)@\
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &@\
       ESMF_CONTEXT, rcToReturn=rc)) return@\
 @\

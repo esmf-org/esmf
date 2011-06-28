@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.17 2011/06/27 21:28:31 theurich Exp $
+! $Id: ESMF_GeomBase.F90,v 1.18 2011/06/28 22:02:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -156,7 +156,7 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.17 2011/06/27 21:28:31 theurich Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.18 2011/06/28 22:02:03 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -777,7 +777,7 @@ end interface
       subroutine ESMF_GeomBaseGet(gridbase, &
           dimCount, localDECount, distgrid, &
           distgridToGridMap, indexFlag, geomtype, &
-          grid, staggerloc, mesh, meshLoc, locstream, &
+          grid, staggerloc, mesh, meshloc, locstream, &
           xgrid, xgridside, gridIndex,rc)
 !
 ! !ARGUMENTS:
@@ -791,7 +791,7 @@ end interface
       type(ESMF_Grid),       intent(out), optional :: grid      
       type(ESMF_StaggerLoc), intent(out), optional :: staggerloc
       type(ESMF_Mesh),       intent(out), optional :: mesh      
-      type(ESMF_MeshLoc),    intent(out), optional :: meshLoc
+      type(ESMF_MeshLoc),    intent(out), optional :: meshloc
       type(ESMF_LocStream),  intent(out), optional :: locstream
       type(ESMF_XGrid),      intent(out), optional :: xgrid
       type(ESMF_XGridSide),  intent(out), optional :: xgridside

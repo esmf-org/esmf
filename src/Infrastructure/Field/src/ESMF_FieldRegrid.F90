@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.72 2011/06/27 19:46:24 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.73 2011/06/28 22:02:01 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.72 2011/06/27 19:46:24 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.73 2011/06/28 22:02:01 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1158,7 +1158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: Array
         type(ESMF_Mesh)      :: Mesh
         type(ESMF_StaggerLoc) :: staggerLoc
-	type(ESMF_MeshLoc)   :: meshLoc
+	type(ESMF_MeshLoc)   :: meshloc
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
         integer :: gridDimCount, localDECount
 	type(ESMF_TypeKind_Flag) :: typekind
@@ -1252,12 +1252,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
         else
-          call ESMF_FieldGet(areaField, mesh=Mesh, meshloc=meshLoc, &
+          call ESMF_FieldGet(areaField, mesh=Mesh, meshloc=meshloc, &
                  localDECount=localDECount, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-	  if (meshLoc .ne. ESMF_MESHLOC_ELEMENT) then
+	  if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
                  call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
               msg="- can't currently calculate area on a mesh location other than elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 

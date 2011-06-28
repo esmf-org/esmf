@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.38 2011/06/24 15:04:33 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.39 2011/06/28 22:02:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ program ESMF_RegridWeightGen
       logical            :: convert3D
       logical            :: isConserve, srcIsSphere, dstIsSphere
       logical            :: addCorners,convertToDual
-      type(ESMF_MeshLoc) :: meshLoc
+      type(ESMF_MeshLoc) :: meshloc
       logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg
       logical            :: srcIsRegional, dstIsRegional, typeSetFlag
       character(len=256) :: methodStr
@@ -462,11 +462,11 @@ program ESMF_RegridWeightGen
      ! Set some varibles for File I/O needed by conservative
      addCorners=.false.
      convertToDual=.true.
-     meshLoc=ESMF_MESHLOC_NODE
+     meshloc=ESMF_MESHLOC_NODE
      if (isConserve) then
         addCorners=.true.
         convertToDual=.false.
-        meshLoc=ESMF_MESHLOC_ELEMENT
+        meshloc=ESMF_MESHLOC_ELEMENT
      endif
 
      if (srcIsRegional .and. dstIsRegional) then
@@ -540,7 +540,7 @@ program ESMF_RegridWeightGen
                        convertToDual=convertToDual, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-           srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
+           srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	endif
       else
@@ -549,7 +549,7 @@ program ESMF_RegridWeightGen
                     rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
-        srcField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
+        srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
       endif
 
@@ -591,7 +591,7 @@ program ESMF_RegridWeightGen
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-           dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
+           dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	endif
       else
@@ -601,7 +601,7 @@ program ESMF_RegridWeightGen
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        dstField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
+        dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
       endif
 
@@ -615,7 +615,7 @@ program ESMF_RegridWeightGen
          else
             call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-            srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,location=meshLoc,rc=rc)
+            srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
 
@@ -627,7 +627,7 @@ program ESMF_RegridWeightGen
          else
             call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-            dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,location=meshLoc,rc=rc)
+            dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
       endif
