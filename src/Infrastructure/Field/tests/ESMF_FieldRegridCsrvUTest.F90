@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.21 2011/06/24 20:30:06 rokuingh Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.22 2011/06/28 22:38:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1029,14 +1029,14 @@ contains
 
   ! Add Masks
   call ESMF_GridAddItem(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   call ESMF_GridAddItem(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -1154,7 +1154,7 @@ contains
 
 
      call ESMF_GridGetItem(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=srcMask, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=srcMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1248,7 +1248,7 @@ contains
 
 
      call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1375,7 +1375,7 @@ contains
 
      ! Get destination mask field
      call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1810,14 +1810,14 @@ contains
 
   ! Add Masks
   call ESMF_GridAddItem(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   call ESMF_GridAddItem(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -1930,7 +1930,7 @@ contains
 
 
      call ESMF_GridGetItem(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=srcMask, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=srcMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -2022,7 +2022,7 @@ contains
 
 
      call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -2147,7 +2147,7 @@ contains
 
      ! Get destination mask field
      call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=dstMask, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.96 2011/06/25 01:18:23 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.97 2011/06/28 22:38:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1484,7 +1484,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 
 !BOC 
    call ESMF_GridAddItem(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          item=ESMF_GRIDITEM_MASK, rc=rc)
+          itemflag=ESMF_GRIDITEM_MASK, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1529,7 +1529,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !BOC
    call ESMF_GridSetItem(grid2D,             &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          item=ESMF_GRIDITEM_MASK, array=arrayMask, rc=rc)
+          itemflag=ESMF_GRIDITEM_MASK, array=arrayMask, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1561,14 +1561,14 @@ call ESMF_GridDestroy(grid3D,rc=rc)
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    call ESMF_GridAddItem(grid2D,&
-          staggerLoc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, rc=rc)
+          staggerLoc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
 !BOC
    call ESMF_GridGetItem(grid2D,             &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          item=ESMF_GRIDITEM_MASK,           &
+          itemflag=ESMF_GRIDITEM_MASK,           &
           array=arrayMask, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1599,7 +1599,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    call ESMF_GridAddItem(grid2D,&
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
-          item=ESMF_GRIDITEM_MASK, rc=rc)
+          itemflag=ESMF_GRIDITEM_MASK, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
@@ -1610,7 +1610,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !BOC
    call ESMF_GridGetItem(grid2D, localDE=0,   &
           staggerloc=ESMF_STAGGERLOC_CORNER,  &
-          item=ESMF_GRIDITEM_MASK, farrayPtr=mask2D, rc=rc)
+          itemflag=ESMF_GRIDITEM_MASK, farrayPtr=mask2D, rc=rc)
 !EOC 
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif

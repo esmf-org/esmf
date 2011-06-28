@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.22 2011/06/24 16:12:30 rokuingh Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.23 2011/06/28 22:38:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.22 2011/06/24 16:12:30 rokuingh Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.23 2011/06/28 22:38:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -108,7 +108,7 @@ program ESMF_GridItemUTest
 
   ! Allocate Center (e.g. Center) stagger
   call ESMF_GridAddItem(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Centers as the average of the corners
@@ -116,7 +116,7 @@ program ESMF_GridItemUTest
 
      ! get and fill first coord array
      call ESMF_GridGetItem(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                         item=ESMF_GRIDITEM_MASK, &
+                         itemflag=ESMF_GRIDITEM_MASK, &
                          computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -141,7 +141,7 @@ program ESMF_GridItemUTest
 
   ! Allocate Center (e.g. Center) stagger
   call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Centers as the average of the corners
@@ -149,7 +149,7 @@ program ESMF_GridItemUTest
 
      ! get and fill first coord array
      call ESMF_GridGetItem(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                         item=ESMF_GRIDITEM_MASK, &
+                         itemflag=ESMF_GRIDITEM_MASK, &
                          computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -201,7 +201,7 @@ program ESMF_GridItemUTest
 
   ! Allocate Center (e.g. Center) stagger
   call ESMF_GridAddItem(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Centers as the average of the corners
@@ -209,7 +209,7 @@ program ESMF_GridItemUTest
 
      ! get and fill first coord array
      call ESMF_GridGetItem(gridA, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                         item=ESMF_GRIDITEM_MASK, &
+                         itemflag=ESMF_GRIDITEM_MASK, &
                          computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -234,7 +234,7 @@ program ESMF_GridItemUTest
 
   ! Allocate Center (e.g. Center) stagger
   call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Loop through DEs and set Centers as the average of the corners
@@ -242,7 +242,7 @@ program ESMF_GridItemUTest
 
      ! get and fill first coord array
      call ESMF_GridGetItem(gridB, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-                         item=ESMF_GRIDITEM_MASK, &
+                         itemflag=ESMF_GRIDITEM_MASK, &
                          computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrMask, &
                          rc=localrc)           
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -298,13 +298,13 @@ program ESMF_GridItemUTest
 
   ! Set Coord From Array
   call ESMF_GridSetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Coord From Array
   call ESMF_GridGetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -344,13 +344,13 @@ program ESMF_GridItemUTest
 
   ! Add Item
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
                rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Item Into Array
   call ESMF_GridGetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -399,7 +399,7 @@ program ESMF_GridItemUTest
 
   ! Set Coord From Array
   call ESMF_GridSetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
                 array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -408,7 +408,7 @@ program ESMF_GridItemUTest
 
   ! Get Coord From Grid
   call ESMF_GridGetItem(grid, localDE=0, &
-            staggerLoc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+            staggerLoc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
             farrayPtr=farrayPtr, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -446,13 +446,13 @@ program ESMF_GridItemUTest
 
   ! Add Item to bad item value
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_INVALID, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_INVALID, &
                rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) correct=.false.
 
   ! Add item with wrong type
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_MASK, &
                itemTypeKind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) correct=.false.
 
@@ -500,13 +500,13 @@ program ESMF_GridItemUTest
 
   ! Allocate coordinates
   call ESMF_GridAddItem(grid, staggerEdgeLWidth=(/1,2,3/), staggerEdgeUWidth=(/4,5,6/), &
-               staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, item=ESMF_GRIDITEM_MASK, rc=localrc)
+               staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
   ! check allocated staggerloc bounds
   call check2DP1Bnds2x2UsingSLoc(grid, staggerloc=ESMF_STAGGERLOC_EDGE2_VFACE, &
-           item=ESMF_GRIDITEM_MASK, &
+           itemflag=ESMF_GRIDITEM_MASK, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -516,7 +516,7 @@ program ESMF_GridItemUTest
 
   ! check unallocated staggerloc bounds
   call check2DP1Bnds2x2UsingSLoc(grid, staggerloc=ESMF_STAGGERLOC_CORNER_VFACE, &
-           item=ESMF_GRIDITEM_MASK, &
+           itemflag=ESMF_GRIDITEM_MASK, &
            localPet=localPet, petCount=petCount,                          &
            ielbnd0=(/1,1,1/),ieubnd0=(/1,3,5/),iloff0=(/1,2,3/),iuoff0=(/0,0,6/), &
            ielbnd1=(/2,1,1/),ieubnd1=(/3,3,5/),iloff1=(/0,2,3/),iuoff1=(/4,0,6/), &
@@ -564,7 +564,7 @@ program ESMF_GridItemUTest
 
   ! Add Item
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, rc=localrc)
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -578,7 +578,7 @@ program ESMF_GridItemUTest
      nullify(farrayPtrR8) 
 
      ! Get Item pointer
-     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, &
                         localDE=lDE, farrayPtr=farrayPtrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -624,7 +624,7 @@ program ESMF_GridItemUTest
 
   ! Add Item
   call ESMF_GridAddItem(grid, itemTypeKind=ESMF_TYPEKIND_R4, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, rc=localrc)
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -638,7 +638,7 @@ program ESMF_GridItemUTest
      nullify(farrayPtrR4) 
 
      ! Get Item pointer
-     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, &
                         localDE=lDE, farrayPtr=farrayPtrR4, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -686,11 +686,11 @@ program ESMF_GridItemUTest
 
   ! Add Items
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, rc=localrc)
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, rc=localrc)
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -705,7 +705,7 @@ program ESMF_GridItemUTest
      nullify(farrayPtr3D) 
 
      ! Get Item pointer
-     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_MASK, &
                         localDE=lDE, farrayPtr=farrayPtr3D, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -716,7 +716,7 @@ program ESMF_GridItemUTest
      nullify(farrayPtrR8) 
 
      ! Get Item pointer
-     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, &
                         localDE=lDE, farrayPtr=farrayPtrR8, rc=localrc)
      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -750,7 +750,7 @@ contains
 
 
 
-subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount, &
+subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, itemflag, localPet, petCount, &
                           ielbnd0,ieubnd0,iloff0,iuoff0, &
                           ielbnd1,ieubnd1,iloff1,iuoff1, &
                           ielbnd2,ieubnd2,iloff2,iuoff2, &
@@ -759,7 +759,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
   type (ESMF_Grid) :: grid
   type (ESMF_StaggerLoc),intent(in) :: staggerloc
-  type (ESMF_GridItem_Flag), intent(in) :: item
+  type (ESMF_GridItem_Flag), intent(in) :: itemflag
   integer,intent(in) :: localPet, petCount
   integer,intent(in) :: ielbnd0(:),ieubnd0(:),iloff0(:),iuoff0(:)
   integer,intent(in) :: ielbnd1(:),ieubnd1(:),iloff1(:),iuoff1(:)
@@ -780,7 +780,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
       ! check DE 0
       call ESMF_GridGetItemBounds(grid, localDE=0, &
-             staggerLoc=staggerloc, item=item,                  &
+             staggerLoc=staggerloc, itemflag=itemflag,                  &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd, exclusiveCount=ecnt,       &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -810,7 +810,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
  
       ! check DE 1
       call ESMF_GridGetItemBounds(grid, localDE=1, &
-             staggerLoc=staggerloc, item=item,                 &
+             staggerLoc=staggerloc, itemflag=itemflag,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,     &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -838,7 +838,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
       ! check DE 2
       call ESMF_GridGetItemBounds(grid, localDE=2, &
-             staggerLoc=staggerloc, item=item,                 &
+             staggerLoc=staggerloc, itemflag=itemflag,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd, exclusiveCount=ecnt,   &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -867,7 +867,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
       ! check DE 3
       call ESMF_GridGetItemBounds(grid, localDE=3, &
-             staggerLoc=staggerloc, item=item,                 &
+             staggerLoc=staggerloc, itemflag=itemflag,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -895,7 +895,7 @@ subroutine check2DP1Bnds2x2UsingSLoc(grid, staggerloc, item, localPet, petCount,
 
   else  if (petCount .eq. 4) then
       call ESMF_GridGetItemBounds(grid, localDE=0, &
-             staggerLoc=staggerloc, item=item,                 &
+             staggerLoc=staggerloc, itemflag=itemflag,                 &
              exclusiveLBound=elbnd, exclusiveUBound=eubnd,  exclusiveCount=ecnt,      &
              computationalLBound=clbnd, computationalUBound=cubnd, computationalCount=ccnt, rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE

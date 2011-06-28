@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.21 2011/06/24 15:03:55 rokuingh Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.22 2011/06/28 22:38:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.21 2011/06/24 15:03:55 rokuingh Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.22 2011/06/28 22:38:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -142,11 +142,11 @@ program ESMF_FieldRegridEx
 
   ! Allocate items for masking
   call ESMF_GridAddItem(gridSrc, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridAddItem(gridDst, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
@@ -176,7 +176,7 @@ program ESMF_FieldRegridEx
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
      call ESMF_GridGetItem(gridSrc, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            item=ESMF_GRIDITEM_MASK, farrayPtr=maskSrc, rc=localrc)
+            itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskSrc, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       call ESMF_FieldGet(srcField, lDE, farrayPtr, computationalLBound=fclbnd, &
@@ -227,7 +227,7 @@ program ESMF_FieldRegridEx
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
      call ESMF_GridGetItem(gridDst, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-            item=ESMF_GRIDITEM_MASK, farrayPtr=maskDst, rc=localrc)
+            itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskDst, rc=localrc)
      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &

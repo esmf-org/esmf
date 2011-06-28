@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.16 2011/06/23 22:54:41 rokuingh Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.17 2011/06/28 22:38:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.16 2011/06/23 22:54:41 rokuingh Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.17 2011/06/28 22:38:51 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -673,7 +673,7 @@ contains
 
   ! Allocate Masks
   call ESMF_GridAddItem(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -750,7 +750,7 @@ contains
 
 
      call ESMF_GridGetItem(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-          item=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
+          itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return

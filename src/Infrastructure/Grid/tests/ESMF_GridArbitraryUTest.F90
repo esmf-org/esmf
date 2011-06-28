@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.31 2011/06/25 01:18:26 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.32 2011/06/28 22:38:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.31 2011/06/25 01:18:26 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.32 2011/06/28 22:38:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -345,13 +345,13 @@ program ESMF_GridArbitraryUTest
 
   ! Set Coord From Array
   call ESMF_GridSetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Coord From Array
   call ESMF_GridGetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -516,13 +516,13 @@ program ESMF_GridArbitraryUTest
 
   ! Set Coord From Array
   call ESMF_GridSetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Coord From Array
   call ESMF_GridGetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_MASK, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_MASK, &
                array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -551,19 +551,19 @@ program ESMF_GridArbitraryUTest
 
   ! Add Item to staggerloc_corner should return failure
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CORNER, item=ESMF_GRIDITEM_AREA, &
+               staggerloc=ESMF_STAGGERLOC_CORNER, itemflag=ESMF_GRIDITEM_AREA, &
                rc=localrc)
   if (localrc .eq. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Add item to stagger_center
   call ESMF_GridAddItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, &
                rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Get Item Into Array
   call ESMF_GridGetItem(grid, &
-               staggerloc=ESMF_STAGGERLOC_CENTER, item=ESMF_GRIDITEM_AREA, &
+               staggerloc=ESMF_STAGGERLOC_CENTER, itemflag=ESMF_GRIDITEM_AREA, &
                array=array2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

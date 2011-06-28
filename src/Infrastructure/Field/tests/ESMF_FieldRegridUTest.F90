@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.31 2011/06/23 22:54:38 rokuingh Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.32 2011/06/28 22:38:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1406,14 +1406,14 @@ write(*,*) "LOCALRC=",localrc
 
   ! Allocate Masks
   call ESMF_GridAddItem(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -1468,7 +1468,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      call ESMF_GridGetItem(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1533,7 +1533,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      call ESMF_GridGetItem(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1612,7 +1612,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      call ESMF_GridGetItem(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -1834,14 +1834,14 @@ write(*,*) "LOCALRC=",localrc
 
   ! Allocate Masks
   call ESMF_GridAddItem(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
   call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -1903,7 +1903,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      call ESMF_GridGetItem(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -2292,7 +2292,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Allocate Masks
   call ESMF_GridAddItem(gridA, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -2354,7 +2354,7 @@ write(*,*) "LOCALRC=",localrc
 
 
      call ESMF_GridGetItem(gridA, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskA, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return
@@ -2746,7 +2746,7 @@ write(*,*) "LOCALRC=",localrc
 
   ! Allocate Masks
   call ESMF_GridAddItem(gridB, staggerloc=ESMF_STAGGERLOC_CENTER, &
-         item=ESMF_GRIDITEM_MASK, rc=localrc)
+         itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -2854,7 +2854,7 @@ write(*,*) "LOCALRC=",localrc
      endif
 
      call ESMF_GridGetItem(gridB, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           item=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
+                           itemflag=ESMF_GRIDITEM_MASK, farrayPtr=maskB, rc=localrc)
      if (localrc /=ESMF_SUCCESS) then
         rc=ESMF_FAILURE
         return

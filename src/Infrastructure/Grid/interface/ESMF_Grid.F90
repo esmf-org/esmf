@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.233 2011/06/27 21:28:33 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.234 2011/06/28 22:38:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.233 2011/06/27 21:28:33 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.234 2011/06/28 22:38:54 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1487,13 +1487,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridAddItem()
-     subroutine ESMF_GridAddItemNoValues(grid, item, &
+     subroutine ESMF_GridAddItemNoValues(grid, itemflag,  &
        keywordEnforcer, staggerloc, itemTypeKind, staggerEdgeLWidth, staggerEdgeUWidth, &
        staggerAlign, staggerLBound,  totalLWidth, totalUWidth,rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)           :: grid 
-      type (ESMF_GridItem_Flag),   intent(in)           :: item
+      type (ESMF_GridItem_Flag),   intent(in)           :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
       type (ESMF_TypeKind_Flag),   intent(in),optional  :: itemTypeKind
@@ -1522,7 +1522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 !     \item[{grid}]
 !       Grid to allocate coordinate storage in.  
-! \item[{item}]
+! \item[{itemflag}]
 !      The grid item to add. Please see Section~\ref{sec:opt:griditem} for a list of valid items. 
 ! \item[{[staggerloc]}]
 !      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
@@ -1627,7 +1627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
 
        ! Call C++ Subroutine to do the create
-       call c_ESMC_gridadditemarb(grid%this,tmp_staggerloc, item, itemTypeKind, localrc)
+       call c_ESMC_gridadditemarb(grid%this,tmp_staggerloc, itemflag,  itemTypeKind, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1654,7 +1654,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Call C++ Subroutine to do the create
-       call c_ESMC_gridadditem(grid%this,tmp_staggerloc, item, itemTypeKind, &
+       call c_ESMC_gridadditem(grid%this,tmp_staggerloc, itemflag,  itemTypeKind, &
           staggerEdgeLWidthArg, staggerEdgeUWidthArg, staggerAlignArg, &
           staggerLBoundArg,  localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5066,11 +5066,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Mask
     call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-	item = ESMF_GRIDITEM_MASK, rc=localrc)
+	itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
-	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
+	itemflag=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5588,11 +5588,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Mask
     call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-	item = ESMF_GRIDITEM_MASK, rc=localrc)
+	itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
-	item=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
+	itemflag=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -13688,7 +13688,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !BOP
 ! !IROUTINE: ESMF_GridGetItem - Get a Fortran pointer to Grid item data and item bounds
 ! !INTERFACE:
-!      subroutine ESMF_GridGetItem(grid, item, keywordEnforcer, &
+!      subroutine ESMF_GridGetItem(grid, itemflag,  keywordEnforcer, &
 !        staggerloc, localDE, <pointer argument>, 
 !        exclusiveLBound, exclusiveUBound, exclusiveCount, &
 !        computationalLBound, computationalUBound, computationalCount,  &
@@ -13697,7 +13697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Grid),        intent(in)            :: grid
-!     type (ESMF_GridItem_Flag),   intent(in)            :: item
+!     type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
 !     integer,                intent(in),  optional :: localDE
@@ -13745,7 +13745,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
@@ -13822,7 +13822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem1DI4(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem1DI4(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -13831,7 +13831,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),  optional :: localDE
@@ -13858,7 +13858,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
@@ -13985,7 +13985,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                    rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -14030,7 +14030,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -14080,7 +14080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem2DI4(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem2DI4(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               &
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -14089,7 +14089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in), optional                 :: localDE
@@ -14116,7 +14116,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
@@ -14246,7 +14246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                     rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -14290,7 +14290,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -14340,7 +14340,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem3DI4(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem3DI4(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               &
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -14349,7 +14349,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in), optional :: localDE
@@ -14376,7 +14376,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
@@ -14506,7 +14506,7 @@ endif
 
     ! Get the Array 
 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                    rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -14550,7 +14550,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -14599,7 +14599,7 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem1DR4(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem1DR4(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -14608,7 +14608,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in), optional :: localDE
@@ -14635,7 +14635,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
@@ -14762,7 +14762,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                    rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -14806,7 +14806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -14856,7 +14856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem2DR4(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem2DR4(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -14865,7 +14865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in), optional :: localDE
@@ -14892,7 +14892,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
@@ -15022,7 +15022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                     rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -15066,7 +15066,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -15116,7 +15116,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem3DR4(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem3DR4(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               &
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -15125,7 +15125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
@@ -15152,7 +15152,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
@@ -15282,7 +15282,7 @@ endif
 
     ! Get the Array 
 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                    rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -15326,7 +15326,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -15376,7 +15376,7 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem1DR8(grid, item, keywordEnforcer,       &
+      subroutine ESMF_GridGetItem1DR8(grid, itemflag,  keywordEnforcer,       &
           staggerloc, localDE, farrayPtr,                                & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,              &
           computationalLBound, computationalUBound, computationalCount,  &
@@ -15385,7 +15385,7 @@ endif
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),optional :: localDE
@@ -15412,7 +15412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
@@ -15539,7 +15539,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                     rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -15583,7 +15583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -15633,7 +15633,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem2DR8(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem2DR8(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -15642,7 +15642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in),optional :: localDE
@@ -15669,7 +15669,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
@@ -15801,7 +15801,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Get the Array 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                     rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -15845,7 +15845,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -15895,7 +15895,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItem3DR8(grid, item, keywordEnforcer,      &
+      subroutine ESMF_GridGetItem3DR8(grid, itemflag,  keywordEnforcer,      &
           staggerloc, localDE, farrayPtr,                               & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
@@ -15904,7 +15904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
@@ -15931,7 +15931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{grid}]
 !          Grid to get the information from.
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
@@ -16061,7 +16061,7 @@ endif
 
     ! Get the Array 
 
-    call ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+    call ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
                                    rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -16106,7 +16106,7 @@ endif
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item, &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,  &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -16157,12 +16157,12 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemIntoArray(grid, item, staggerloc, array, &
+      subroutine ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
         keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       type(ESMF_Array),       intent(out)           :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -16180,7 +16180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{item}]
+!     \item[{itemflag}]
 !          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
@@ -16217,7 +16217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     datacopyflag=ESMF_DATACOPY_REFERENCE
 
     ! Call C++ Subroutine
-    call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, item, &
+    call c_ESMC_gridgetitemintoarray(grid%this,tmp_staggerloc, itemflag,  &
       array, datacopyflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -16240,7 +16240,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridGetItemBounds -  Get Grid item bounds
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetItemBounds(grid, item, keywordEnforcer, &
+      subroutine ESMF_GridGetItemBounds(grid, itemflag,  keywordEnforcer, &
         staggerloc, localDE, &
         exclusiveLBound, exclusiveUBound, exclusiveCount, &
         computationalLBound, computationalUBound, computationalCount,  &
@@ -16249,7 +16249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),  optional :: localDE
@@ -16280,7 +16280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\begin{description}
 !\item[{grid}]
 !    Grid to get the information from.
-!\item[{item}]
+!\item[{itemflag}]
 !     The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !\item[{staggerloc}]
@@ -16403,7 +16403,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, item,  &
+    call c_ESMC_GridGetItemBounds(grid, localDE, tmp_staggerloc, itemflag,   &
       exclusiveLBoundArg, exclusiveUBoundArg, exclusiveCountArg, &
       computationalLBoundArg, computationalUBoundArg, computationalCountArg,&
       totalLBoundArg, totalUBoundArg, totalCountArg, localrc)
@@ -19550,12 +19550,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridSetItem - Set an item using an Array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetItemFromArray(grid, item, staggerloc, &
+      subroutine ESMF_GridSetItemFromArray(grid, itemflag,  staggerloc, &
         array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: item
+      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
       type(ESMF_Array),       intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -19573,7 +19573,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\begin{description}
 !\item[{grid}]
 !    The grid in which to set the array.
-!\item[{item}]
+!\item[{itemflag}]
 !    The item into which to copy the arrays. Please see Section~\ref{sec:opt:griditem} for a 
 !          list of valid items.   
 !\item[{staggerloc}]
@@ -19625,7 +19625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     datacopyflag=ESMF_DATACOPY_REFERENCE
 
     ! Call C++ Subroutine 
-    call c_ESMC_gridsetitemfromarray(grid%this,tmp_staggerloc, item, &
+    call c_ESMC_gridsetitemfromarray(grid%this,tmp_staggerloc, itemflag,  &
       array, datacopyflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
