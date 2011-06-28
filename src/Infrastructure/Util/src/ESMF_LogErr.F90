@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.92 2011/06/28 03:48:43 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.93 2011/06/28 04:10:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -193,7 +193,10 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_INFO
     public ESMF_LOGMSG_WARNING
     public ESMF_LOGMSG_ERROR
+    public ESMF_LOGMSG_TRACE
     public ESMF_LOG_ALL
+    public ESMF_LOG_EMPTY
+    public ESMF_LOG_NOTRACE
     public ESMF_LOGKIND_SINGLE
     public ESMF_LOGKIND_MULTI
     public ESMF_LOGKIND_NONE    
