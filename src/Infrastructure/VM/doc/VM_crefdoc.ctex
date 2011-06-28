@@ -1,4 +1,4 @@
-% $Id: VM_crefdoc.ctex,v 1.4 2011/01/05 20:05:46 svasquez Exp $ 
+% $Id: VM_crefdoc.ctex,v 1.5 2011/06/28 05:36:19 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 \input{../Infrastructure/VM/doc/VM_cdesc}
 #endif
 
-%\subsection{VM Options}
+%\subsection{Constants}
 %#ifdef STANDALONE
 %\input{VM_options}
 %#elif defined(CONSTITUENT)

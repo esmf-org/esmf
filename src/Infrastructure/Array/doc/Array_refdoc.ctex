@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.31 2011/01/05 20:05:39 svasquez Exp $ 
+% $Id: Array_refdoc.ctex,v 1.32 2011/06/28 05:36:12 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 \input{../Infrastructure/Array/doc/Array_desc}
 #endif
 
-%\subsection{Array Options}
+%\subsection{Constants}
 %#ifdef STANDALONE
 %\input{Array_options}
 %#elif defined(CONSTITUENT)

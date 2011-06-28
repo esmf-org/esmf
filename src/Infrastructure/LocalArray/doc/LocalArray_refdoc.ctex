@@ -1,4 +1,4 @@
-% $Id: LocalArray_refdoc.ctex,v 1.6 2011/01/05 20:05:44 svasquez Exp $ 
+% $Id: LocalArray_refdoc.ctex,v 1.7 2011/06/28 05:36:16 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 \input{../Infrastructure/LocalArray/doc/LocalArray_desc}
 #endif
 
-%\subsection{LocalArray Options}
+%\subsection{Constants}
 %#ifdef STANDALONE
 %\input{LocalArray_options}
 %#elif defined(CONSTITUENT)

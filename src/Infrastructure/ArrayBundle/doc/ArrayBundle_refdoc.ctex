@@ -1,4 +1,4 @@
-% $Id: ArrayBundle_refdoc.ctex,v 1.7 2011/01/05 20:05:40 svasquez Exp $ 
+% $Id: ArrayBundle_refdoc.ctex,v 1.8 2011/06/28 05:36:13 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 \input{../Infrastructure/ArrayBundle/doc/ArrayBundle_desc}
 #endif
 
-%\subsection{ArrayBundle Options}
+%\subsection{Constants}
 %#ifdef STANDALONE
 %\input{ArrayBundle_options}
 %#elif defined(CONSTITUENT)

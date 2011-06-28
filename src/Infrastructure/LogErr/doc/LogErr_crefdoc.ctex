@@ -1,4 +1,4 @@
-% $Id: LogErr_crefdoc.ctex,v 1.5 2011/01/05 20:05:44 svasquez Exp $
+% $Id: LogErr_crefdoc.ctex,v 1.6 2011/06/28 05:36:18 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@
 \input{../Infrastructure/LogErr/doc/LogErr_cdesc}
 #endif
 
-%\subsection{Log Options}
+%\subsection{Constants}
 #ifdef STANDALONE
 %\input{LogErr_options}
 #elif defined(CONSTITUENT)
