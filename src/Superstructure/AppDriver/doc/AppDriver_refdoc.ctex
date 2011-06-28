@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.24 2011/01/07 20:50:45 rokuingh Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.25 2011/06/28 05:28:25 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 \input{../Superstructure/AppDriver/doc/AppDriver_desc}
 #endif
 
-\subsection{Application Driver and Required ESMF Methods Options}
+\subsection{Constants}
 #ifdef STANDALONE
 \input{AppDriver_options}
 #elif defined(CONSTITUENT)
