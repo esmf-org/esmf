@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.35 2011/06/24 05:48:16 theurich Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.36 2011/06/28 04:55:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,7 +61,6 @@
     character(ESMF_MAXSTR) :: cname, bname
     type (dataWrapper) :: wrap1, wrap2
     type(testData), target :: data1, data2
-    type(ESMF_CplCompStatus) :: cplStatus
     logical         :: isPresent
 #endif
 
@@ -206,18 +205,10 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Get status of a Coupler Component
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get status of a Coupler Component"
-    call ESMF_CplCompGet(cpl, cplCompStatus=cplStatus, rc=rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !------------------------------------------------------------------------
-    !EX_UTest
     ! Query clockIsPresent
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Query clockIsPresent bit for Clock that was not set Test"
-    call ESMF_CplCompStatusGet(cplStatus, clockIsPresent=isPresent, rc=rc)
+    call ESMF_CplCompGet(cpl, clockIsPresent=isPresent, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------

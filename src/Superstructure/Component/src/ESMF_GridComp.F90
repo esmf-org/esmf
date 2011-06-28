@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.176 2011/06/28 02:07:25 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.177 2011/06/28 04:55:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,6 @@ module ESMF_GridCompMod
   use ESMF_StateMod
   use ESMF_GridMod
   use ESMF_CompMod
-  use ESMF_GridCompStatusMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
 
@@ -55,12 +54,6 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-
-!------------------------------------------------------------------------------
-! !PUBLIC TYPES:
-
-! - ESMF-public types:
-  public ESMF_GridCompStatus            ! implemented in ESMF_GridCompStatusMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -93,8 +86,6 @@ module ESMF_GridCompMod
   public ESMF_GridCompWait
   public ESMF_GridCompWriteRestart
   
-  public ESMF_GridCompStatusGet         ! implemented in ESMF_GridCompStatusMod
-  
 ! - ESMF-internal methods:
   public ESMF_GridCompGetInit
 
@@ -103,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.176 2011/06/28 02:07:25 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.177 2011/06/28 04:55:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -706,18 +697,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompGet - Get GridComp information
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, grid, importState, &
-    exportState, config, configFile, clock, localPet, petCount, contextflag, &
-    methodflag, currentPhase, comptype, gridCompStatus, vm, name, rc)
+  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, gridIsPresent, grid, &
+    importStateIsPresent, importState, exportStateIsPresent, exportState, &
+    configIsPresent, config, configFileIsPresent, configFile, &
+    clockIsPresent, clock, localPet, petCount, contextflag, &
+    methodflag, currentPhase, comptype, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),      intent(in)           :: gridcomp
+    type(ESMF_GridComp),      intent(in)            :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                  intent(out), optional :: gridIsPresent
     type(ESMF_Grid),          intent(out), optional :: grid
+    logical,                  intent(out), optional :: importStateIsPresent
     type(ESMF_State),         intent(out), optional :: importState
+    logical,                  intent(out), optional :: exportStateIsPresent
     type(ESMF_State),         intent(out), optional :: exportState    
+    logical,                  intent(out), optional :: configIsPresent
     type(ESMF_Config),        intent(out), optional :: config
+    logical,                  intent(out), optional :: configFileIsPresent
     character(len=*),         intent(out), optional :: configFile
+    logical,                  intent(out), optional :: clockIsPresent
     type(ESMF_Clock),         intent(out), optional :: clock
     integer,                  intent(out), optional :: localPet
     integer,                  intent(out), optional :: petCount
@@ -725,7 +724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Method_Flag),   intent(out), optional :: methodflag
     integer,                  intent(out), optional :: currentPhase
     type(ESMF_CompType_Flag), intent(out), optional :: comptype
-    type(ESMF_GridCompStatus), intent(out), optional :: gridCompStatus
+    logical,                  intent(out), optional :: vmIsPresent
     type(ESMF_VM),            intent(out), optional :: vm
     character(len=*),         intent(out), optional :: name
     integer,                  intent(out), optional :: rc
@@ -740,36 +739,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[gridcomp]
 !   The {\tt ESMF\_GridComp} object being queried.
+! \item[{[gridIsPresent]}]
+!   {\tt .true.} if {\tt grid} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[grid]}]
 !   Return the associated Grid.
 !   It is an error to query for the Grid if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt gridIsPresent}.
+!   the GridComp. If unsure, get {\tt gridIsPresent} first to determine
+!   the status.
+! \item[{[importStateIsPresent]}]
+!   {\tt .true.} if {\tt importState} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[importState]}]
 !   Return the associated import State.
 !   It is an error to query for the import State if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt importStateIsPresent}.
+!   the GridComp. If unsure, get {\tt importStateIsPresent} first to determine
+!   the status.
+! \item[{[exportStateIsPresent]}]
+!   {\tt .true.} if {\tt exportState} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[exportState]}]
 !   Return the associated export State.
 !   It is an error to query for the export State if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt exportStateIsPresent}.
+!   the GridComp. If unsure, get {\tt exportStateIsPresent} first to determine
+!   the status.
+! \item[{[configIsPresent]}]
+!   {\tt .true.} if {\tt config} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[config]}]
 !   Return the associated Config.
 !   It is an error to query for the Config if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt configIsPresent}.
+!   the GridComp. If unsure, get {\tt configIsPresent} first to determine
+!   the status.
+! \item[{[configFileIsPresent]}]
+!   {\tt .true.} if {\tt configFile} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
 !   It is an error to query for the configuration filename if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt configFileIsPresent}.
+!   the GridComp. If unsure, get {\tt configFileIsPresent} first to determine
+!   the status.
+! \item[{[clockIsPresent]}]
+!   {\tt .true.} if {\tt clock} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[clock]}]
 !   Return the associated Clock.
 !   It is an error to query for the Clock if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt clockIsPresent}.
+!   the GridComp. If unsure, get {\tt clockIsPresent} first to determine
+!   the status.
 ! \item[{[localPet]}]
 !   Return the local PET id within the {\tt ESMF\_GridComp} object.
 ! \item[{[petCount]}]
@@ -785,13 +802,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[comptype]}]
 !   Return the Component type: {\tt ESMF\_COMPTYPE\_GRID} or 
 !   {\tt ESMF\_COMPTYPE\_CPL}.
-! \item[{[gridCompStatus]}]
-!   Return the GridCompStatus.
+! \item[{[vmIsPresent]}]
+!   {\tt .true.} if {\tt vm} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[vm]}]
 !   Return the associated VM.
 !   It is an error to query for the VM if none is associated with
-!   the GridComp. If unsure, get {\tt gridCompStatus} first and query it
-!   through {\tt ESMF\_GridCompStatusGet()} for {\tt vmIsPresent}.
+!   the GridComp. If unsure, get {\tt vmIsPresent} first to determine
+!   the status.
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_GridComp}.
 ! \item[{[rc]}]
@@ -800,7 +818,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
+    integer               :: localrc      ! local return code
+    type(ESMF_CompStatus) :: compStatus
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -813,7 +832,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       grid=grid, importState=importState, exportState=exportState, clock=clock,&
       configFile=configFile, config=config, methodflag=methodflag, &
       currentPhase=currentPhase, localPet=localPet, petCount=petCount, &
-      comptype=comptype, compStatus=gridCompStatus, rc=localrc)
+      comptype=comptype, compStatus=compStatus, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call Comp method
+    call ESMF_CompStatusGet(compStatus, &
+      clockIsPresent = clockIsPresent, &
+      configIsPresent = configIsPresent, &
+      configFileIsPresent = configFileIsPresent, &
+      vmIsPresent = vmIsPresent, &
+      isIsPresent = importStateIsPresent, &
+      esIsPresent = exportStateIsPresent, &
+      gridIsPresent = gridIsPresent, &
+      rc = localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

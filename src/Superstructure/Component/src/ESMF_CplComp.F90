@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.152 2011/06/28 02:07:25 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.153 2011/06/28 04:55:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,6 @@ module ESMF_CplCompMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_CompMod
-  use ESMF_CplCompStatusMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
 
@@ -54,12 +53,6 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-
-!------------------------------------------------------------------------------
-! !PUBLIC TYPES:
-
-! - ESMF-public types:
-  public ESMF_CplCompStatus             ! implemented in ESMF_CplCompStatusMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -91,8 +84,6 @@ module ESMF_CplCompMod
   public ESMF_CplCompWait
   public ESMF_CplCompWriteRestart
 
-  public ESMF_CplCompStatusGet          ! implemented in ESMF_CplCompStatusMod
-  
 ! - ESMF-internal methods:
   public ESMF_CplCompGetInit
 
@@ -101,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.152 2011/06/28 02:07:25 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.153 2011/06/28 04:55:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -696,22 +687,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompGet - Get CplComp information
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, config, configFile, &
-    clock, localPet, petCount, contextflag, methodflag, currentPhase, &
-    cplCompStatus, vm, name, rc)
+  subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, configIsPresent, config, &
+    configFileIsPresent, configFile, clockIsPresent, clock, localPet, petCount, &
+    contextflag, methodflag, currentPhase, vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(in)            :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                 intent(out), optional :: configIsPresent
     type(ESMF_Config),       intent(out), optional :: config
+    logical,                 intent(out), optional :: configFileIsPresent
     character(len=*),        intent(out), optional :: configFile
+    logical,                 intent(out), optional :: clockIsPresent
     type(ESMF_Clock),        intent(out), optional :: clock
     integer,                 intent(out), optional :: localPet
     integer,                 intent(out), optional :: petCount
     type(ESMF_Context_Flag), intent(out), optional :: contextflag
     type(ESMF_Method_Flag),  intent(out), optional :: methodflag
     integer,                 intent(out), optional :: currentPhase
-    type(ESMF_CplCompStatus), intent(out), optional :: cplCompStatus
+    logical,                 intent(out), optional :: vmIsPresent
     type(ESMF_VM),           intent(out), optional :: vm
     character(len=*),        intent(out), optional :: name
     integer,                 intent(out), optional :: rc
@@ -726,21 +720,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} object being queried.
+! \item[{[configIsPresent]}]
+!   {\tt .true.} if {\tt config} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[config]}]
 !   Return the associated Config.
 !   It is an error to query for the Config if none is associated with
-!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
-!   through {\tt ESMF\_CplCompStatusGet()} for {\tt configIsPresent}.
+!   the CplComp. If unsure, get {\tt configIsPresent} first to determine
+!   the status.
+! \item[{[configFileIsPresent]}]
+!   {\tt .true.} if {\tt configFile} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
 !   It is an error to query for the configuration filename if none is associated with
-!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
-!   through {\tt ESMF\_CplCompStatusGet()} for {\tt configFileIsPresent}.
+!   the CplComp. If unsure, get {\tt configFileIsPresent} first to determine
+!   the status.
+! \item[{[clockIsPresent]}]
+!   {\tt .true.} if {\tt clock} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[clock]}]
 !   Return the associated Clock.
 !   It is an error to query for the Clock if none is associated with
-!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
-!   through {\tt ESMF\_CplCompStatusGet()} for {\tt clockIsPresent}.
+!   the CplComp. If unsure, get {\tt clockIsPresent} first to determine
+!   the status.
 ! \item[{[localPet]}]
 !   Return the local PET id within the {\tt ESMF\_CplComp} object.
 ! \item[{[petCount]}]
@@ -753,13 +756,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   See section \ref{const:method}  for a complete list of valid options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
-! \item[{[cplCompStatus]}]
-!   Return the CplCompStatus.
+! \item[{[vmIsPresent]}]
+!   {\tt .true.} if {\tt vm} was set in GridComp object,
+!   {\tt .false.} otherwise.
 ! \item[{[vm]}]
 !   Return the associated VM.
 !   It is an error to query for the VM if none is associated with
-!   the CplComp. If unsure, get {\tt cplCompStatus} first and query it
-!   through {\tt ESMF\_CplCompStatusGet()} for {\tt vmIsPresent}.
+!   the CplComp. If unsure, get {\tt vmIsPresent} first to determine
+!   the status.
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_CplComp}.
 ! \item[{[rc]}]
@@ -768,7 +772,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                  ! local return code
+    integer               :: localrc      ! local return code
+    type(ESMF_CompStatus) :: compStatus
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -780,7 +785,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_CompGet(cplcomp%compp, name=name, vm=vm, contextflag=contextflag,&
       clock=clock, configFile=configFile, config=config, &
       methodflag=methodflag, currentPhase=currentPhase, &
-      localPet=localPet, petCount=petCount, compStatus=cplCompStatus, rc=localrc)
+      localPet=localPet, petCount=petCount, compStatus=compStatus, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! call Comp method
+    call ESMF_CompStatusGet(compStatus, &
+      clockIsPresent = clockIsPresent, &
+      configIsPresent = configIsPresent, &
+      configFileIsPresent = configFileIsPresent, &
+      vmIsPresent = vmIsPresent, &
+      rc = localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

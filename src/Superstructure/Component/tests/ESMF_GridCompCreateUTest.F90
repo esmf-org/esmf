@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.36 2011/06/24 05:48:16 theurich Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.37 2011/06/28 04:55:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -57,7 +57,6 @@
     character(ESMF_MAXSTR) :: bname
     type(dataWrapper) :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
     type(ESMF_Grid) :: grid, gridIn
-    type(ESMF_GridCompStatus) :: gcStatus
     logical         :: isPresent
 #endif
 
@@ -167,20 +166,9 @@
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
-!   !  Get the GridCompStatus
-
-    call ESMF_GridCompGet(comp1, gridCompStatus=gcStatus, rc=rc)
-
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get the GridCompStatus Test"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-    !EX_UTest
 !   !  Query gridIsPresent
 
-    call ESMF_GridCompStatusGet(gcStatus, gridIsPresent=isPresent, rc=rc)
+    call ESMF_GridCompGet(comp1, gridIsPresent=isPresent, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Query gridIsPresent bit for Grid that was not set Test"
@@ -225,20 +213,9 @@
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
-!   !  Get the GridCompStatus
-
-    call ESMF_GridCompGet(comp1, gridCompStatus=gcStatus, rc=rc)
-
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Get the GridCompStatus Test"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-    !EX_UTest
 !   !  Query gridIsPresent
 
-    call ESMF_GridCompStatusGet(gcStatus, gridIsPresent=isPresent, rc=rc)
+    call ESMF_GridCompGet(comp1, gridIsPresent=isPresent, rc=rc)
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Query gridIsPresent for Grid that was set Test"

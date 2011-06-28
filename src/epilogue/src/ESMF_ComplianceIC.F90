@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.35 2011/06/27 22:30:58 rokuingh Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.36 2011/06/28 04:55:43 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1479,18 +1479,10 @@ module ESMF_ComplianceICMod
     type(ESMF_Time)         :: currTime, currTimeInt
     integer(ESMF_KIND_I8)   :: advanceCount, advanceCountInt
     type(ESMF_Direction_Flag)    :: direction, directionInt
-    type(ESMF_GridCompStatus) :: compStatus
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_GridCompGet(comp, gridCompStatus=compStatus, rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    call ESMF_GridCompStatusGet(compStatus, clockIsPresent=clockIsPresent, &
-      rc=rc)
+    call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=__FILE__)) &
