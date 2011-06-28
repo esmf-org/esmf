@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.161 2011/06/23 00:39:18 rokuingh Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.162 2011/06/28 17:12:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.161 2011/06/23 00:39:18 rokuingh Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.162 2011/06/28 17:12:43 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -73,6 +73,7 @@
       type(ESMF_Grid) :: grid, grid2
       real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
       type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS, f7
+      real(ESMF_KIND_R4), allocatable :: farray(:,:)
       type(ESMF_FieldStatus_Flag) :: fstatus
       integer :: ulb(1), uub(1)
       character (len = 20) :: gname, gname3
@@ -816,8 +817,25 @@
 
       ! destroy the paritial creation field
       call ESMF_FieldDestroy(f7, rc=rc)
-      call ESMF_GridDestroy(grid, rc=rc)
 
+      ! Test 2 step partial creation
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      f7 = ESMF_FieldEmptyCreate(rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create an empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      allocate(farray(5,10)) 
+      call ESMF_FieldEmptyComplete(f7, grid, farray=farray, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Complete the empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate(farray)
+      call ESMF_GridDestroy(grid, rc=rc)
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
