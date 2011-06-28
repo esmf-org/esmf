@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.15 2011/03/10 04:24:20 w6ws Exp $
+$Id: ESMF_Conf.inc,v 1.16 2011/06/28 19:56:17 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,9 +41,16 @@ Use getarg code for pre-11.2 compilers to avoid PGI library bug.
 #endif
 
 #if 0
-Older PGI compiler were strict F90, and did not allow members of a type
-to have initializers.  This allows all other architectures to have them
-by letting us write conditional code.
+PGI 11.5 and previous have a bug when creating named constants which
+are arrays of zero length.  See ticket #3341575.
+#endif
+
+#define ESMF_PGI_NAMEDCONSTANT_BUG
+
+#if 0
+Older PGI compiler were strict F90, and did not allow derived type
+components to have F95 initializers.  This allows all other architectures
+to have them by letting us write conditional code.
 #endif
 
 #if (ESMF_PGIVERSION_MAJOR < 8)
