@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.336 2011/05/17 22:50:23 theurich Exp $
+#  $Id: common.mk,v 1.337 2011/06/28 15:45:16 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -340,12 +340,12 @@ ifneq ($(ESMF_ARRAY_LITE),TRUE)
 export ESMF_ARRAY_LITE = FALSE
 endif
 
-ifneq ($(ESMF_NO_INTEGER_1_BYTE),TRUE)
-export ESMF_NO_INTEGER_1_BYTE = FALSE
+ifneq ($(ESMF_NO_INTEGER_1_BYTE),FALSE)
+export ESMF_NO_INTEGER_1_BYTE = TRUE
 endif
 
-ifneq ($(ESMF_NO_INTEGER_2_BYTE),TRUE)
-export ESMF_NO_INTEGER_2_BYTE = FALSE
+ifneq ($(ESMF_NO_INTEGER_2_BYTE),FALSE)
+export ESMF_NO_INTEGER_2_BYTE = TRUE
 endif
 
 ifneq ($(ESMF_TESTEXHAUSTIVE),ON)
