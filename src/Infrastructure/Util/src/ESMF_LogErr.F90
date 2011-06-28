@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.94 2011/06/28 19:57:41 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.95 2011/06/28 22:33:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@ character(8), parameter ::  &
     /)
 
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOG_ALL(4) = (/ &
+    ESMF_LOGMSG_ALL(4) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR,    &
@@ -91,14 +91,14 @@ type(ESMF_LogMsg_Flag), parameter :: &
 #if !defined (ESMF_PGI_NAMEDCONSTANT_BUG)
 integer, private :: i_ac
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOG_EMPTY(0) = (/ (ESMF_LogMsg_Flag(0), i_ac=1,0) /)
+    ESMF_LOGMSG_NONE(0) = (/ (ESMF_LogMsg_Flag(0), i_ac=1,0) /)
 #else
 type(ESMF_LogMsg_Flag) :: &
-    ESMF_LOG_EMPTY(0)
+    ESMF_LOGMSG_NONE(0)
 #endif
 
 type(ESMF_LogMsg_Flag), parameter :: &
-    ESMF_LOG_NOTRACE(3) = (/ &
+    ESMF_LOGMSG_NOTRACE(3) = (/ &
       ESMF_LOGMSG_INFO,     &
       ESMF_LOGMSG_WARNING,  &
       ESMF_LOGMSG_ERROR     &
@@ -177,13 +177,13 @@ type ESMF_LogPrivate
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
     integer                                         ::  errorMaskCount= 0
     integer, dimension(:), pointer                  ::  errorMask(:)=> null ()
-    type(ESMF_LogMsg_Flag), pointer                     ::  logmsgflag(:) => null ()
+    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgflag(:) => null ()
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
     integer                                         ::  errorMaskCount
     integer, dimension(:), pointer                  ::  errorMask(:)
-    type(ESMF_LogMsg_Flag), pointer                     ::  logmsgflag(:)
+    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgflag(:)
 #endif                                          
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -199,9 +199,9 @@ end type ESMF_LogPrivate
     public ESMF_LOGMSG_WARNING
     public ESMF_LOGMSG_ERROR
     public ESMF_LOGMSG_TRACE
-    public ESMF_LOG_ALL
-    public ESMF_LOG_EMPTY
-    public ESMF_LOG_NOTRACE
+    public ESMF_LOGMSG_ALL
+    public ESMF_LOGMSG_NONE
+    public ESMF_LOGMSG_NOTRACE
     public ESMF_LOGKIND_SINGLE
     public ESMF_LOGKIND_MULTI
     public ESMF_LOGKIND_NONE    
@@ -1607,7 +1607,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_HaltType), intent(in),    optional :: halt		   
       integer,             intent(in),    optional :: stream		   
       integer,             intent(in),    optional :: maxElements 	   
-      type(ESMF_LogMsg_Flag),  intent(in),    optional :: logmsgflag(:) 	   
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgflag(:) 	   
       integer,             intent(in),    optional :: errorMask(:)
       logical,             intent(in),    optional :: trace	   
       integer,             intent(out),   optional :: rc  		   
@@ -1651,8 +1651,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            valid message types.  In addition, the following named constants
 !            may be used:
 !            \begin{description}
-!              \item {\tt ESMF\_LOG\_ALL} - Log all message types;
-!              \item {\tt ESMF\_LOG\_EMPTY} - Log no message types;
+!              \item {\tt ESMF\_LOG\_ALL} - Log all message types including trace messages;
+!              \item {\tt ESMF\_LOG\_NONE} - Log no message types;
 !              \item {\tt ESMF\_LOG\_NOTRACE} - Log all message types except trace messages;
 !            \end{description}
 !            If an empty array is provided, no messages will be logged.  
@@ -1760,10 +1760,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present (logmsgflag)) then
         if (associated (alog%logmsgflag))  &
           deallocate (alog%logmsgflag)
-        if (size (logmsgflag) > 0) then
           allocate (alog%logmsgflag(size (logmsgflag)))
           alog%logmsgflag = logmsgflag
-        end if
       end if
 
       if (present (trace)) then

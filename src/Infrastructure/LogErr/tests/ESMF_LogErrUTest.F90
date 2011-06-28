@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.77 2011/06/28 04:10:56 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.78 2011/06/28 22:33:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.77 2011/06/28 04:10:56 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.78 2011/06/28 22:33:22 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -792,29 +792,99 @@ if (time_diff < zero) stop 1
       !EX_UTest
       ! Test logmsgflag filter
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) " LogSet with logmsgflag set for all types Test"
+      write(name, *) " LogSet with logmsgflag set for ALL types Test"
       call ESMF_LogSet (  &
-          logmsgflag = ESMF_LOG_ALL,  &
+          logmsgflag = ESMF_LOGMSG_ALL,  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Test logmsgflag filter with EMPTY
+      ! Test logmsgflag filter when ALL set
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) " LogSet with logmsgflag set for EMPTY Test"
-      call ESMF_LogSet (  &
-          logmsgflag = ESMF_LOG_EMPTY,  &
-          rc=rc)
-      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Test logmsgflag filter when EMPTY set
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) " LogWrite when EMPTY set Test"
+      write(name, *) " LogWrite ERROR when ALL set Test"
       call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_ERROR,  &
-          msg="EMPTY set, should NOT be in log",  &
+          msg="ALL set, should be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when ALL set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite WARNING when ALL set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_WARNING,  &
+          msg="ALL set, should be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when ALL set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite INFO when ALL set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_INFO,  &
+          msg="ALL set, should be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when ALL set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite TRACE when ALL set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_TRACE,  &
+          msg="ALL set, should be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter with NO messages
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogSet with logmsgflag set for NONE Test"
+      call ESMF_LogSet (  &
+          logmsgflag = ESMF_LOGMSG_NONE,  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NONE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite ERROR when NONE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_ERROR,  &
+          msg="NONE set, should NOT be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NONE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite WARNING when NONE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_WARNING,  &
+          msg="NONE set, should NOT be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NONE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite INFO when NONE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_INFO,  &
+          msg="NONE set, should NOT be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NONE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite TRACE when NONE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_TRACE,  &
+          msg="NONE set, should NOT be in log",  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -824,7 +894,37 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogSet with logmsgflag set for NOTRACE Test"
       call ESMF_LogSet (  &
-          logmsgflag = ESMF_LOG_NOTRACE,  &
+          logmsgflag = ESMF_LOGMSG_NOTRACE,  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NOTRACE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite ERROR when NOTRACE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_ERROR,  &
+          msg="NOTRACE set, should be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NOTRACE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite WARNING when NOTRACE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_WARNING,  &
+          msg="NOTRACE set, should be in log",  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test logmsgflag filter when NOTRACE set
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogWrite INFO when NOTRACE set Test"
+      call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_INFO,  &
+          msg="NOTRACE set, should be in log",  &
           rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
