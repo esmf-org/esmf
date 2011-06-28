@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.20 2011/02/23 23:37:42 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.21 2011/06/28 02:07:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.20 2011/02/23 23:37:42 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.21 2011/06/28 02:07:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -176,37 +176,37 @@ int Comp::setEntryPoint(
 
   char const *methodString;
   switch(method){
-  case ESMCI::SETINIT:
+  case ESMCI::METHOD_INITIALIZE:
     methodString = "Initialize";
     break;
-  case ESMCI::SETRUN:
+  case ESMCI::METHOD_RUN:
     methodString = "Run";
     break;
-  case ESMCI::SETFINAL:
+  case ESMCI::METHOD_FINALIZE:
     methodString = "Finalize";
     break;
-  case ESMCI::SETWRITERESTART:
+  case ESMCI::METHOD_WRITERESTART:
     methodString = "WriteRestart";
     break;
-  case ESMCI::SETREADRESTART:
+  case ESMCI::METHOD_READRESTART:
     methodString = "ReadRestart";
     break;
-  case ESMCI::SETINITIC:
+  case ESMCI::METHOD_INITIALIZEIC:
     methodString = "InitializeIC";
     break;
-  case ESMCI::SETRUNIC:
+  case ESMCI::METHOD_RUNIC:
     methodString = "RunIC";
     break;
-  case ESMCI::SETFINALIC:
+  case ESMCI::METHOD_FINALIZEIC:
     methodString = "FinalizeIC";
     break;
-  case ESMCI::SETWRITERESTARTIC:
+  case ESMCI::METHOD_WRITERESTARTIC:
     methodString = "WriteRestartIC";
     break;
-  case ESMCI::SETREADRESTARTIC:
+  case ESMCI::METHOD_READRESTARTIC:
     methodString = "ReadRestartIC";
     break;
-  case ESMCI::SETREGISTER:
+  case ESMCI::METHOD_SETSERVICES:
     methodString = "Register";
     break;
   default:

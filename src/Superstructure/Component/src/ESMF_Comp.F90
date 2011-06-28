@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.218 2011/06/27 22:30:45 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.219 2011/06/28 02:07:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,14 +82,14 @@ module ESMF_CompMod
 
   type(ESMF_Method_Flag), parameter :: &
     ESMF_METHOD_NONE            = ESMF_Method_Flag(0), &
-    ESMF_METHOD_INITIALIZE            = ESMF_Method_Flag(1), &
+    ESMF_METHOD_INITIALIZE      = ESMF_Method_Flag(1), &
     ESMF_METHOD_RUN             = ESMF_Method_Flag(2), &
-    ESMF_METHOD_FINALIZE           = ESMF_Method_Flag(3), &
+    ESMF_METHOD_FINALIZE        = ESMF_Method_Flag(3), &
     ESMF_METHOD_WRITERESTART    = ESMF_Method_Flag(4), &
     ESMF_METHOD_READRESTART     = ESMF_Method_Flag(5), &
-    ESMF_METHOD_INITIALIZEIC          = ESMF_Method_Flag(6), &
+    ESMF_METHOD_INITIALIZEIC    = ESMF_Method_Flag(6), &
     ESMF_METHOD_RUNIC           = ESMF_Method_Flag(7), &
-    ESMF_METHOD_FINALIZEIC         = ESMF_Method_Flag(8), &
+    ESMF_METHOD_FINALIZEIC      = ESMF_Method_Flag(8), &
     ESMF_METHOD_WRITERESTARTIC  = ESMF_Method_Flag(9), &
     ESMF_METHOD_READRESTARTIC   = ESMF_Method_Flag(10), &
     ESMF_SETVM              = ESMF_Method_Flag(11), &
@@ -273,7 +273,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.218 2011/06/27 22:30:45 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.219 2011/06/28 02:07:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================

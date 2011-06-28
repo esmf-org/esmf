@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.30 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: ESMC_CplComp.h,v 1.31 2011/06/28 02:07:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -346,8 +346,9 @@ int ESMC_CplCompSetEntryPoint(
 //  \item[comp]
 //    An {\tt ESMC\_CplComp} object. 
 //  \item[method]
-//    One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
-//    {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method}
+//    One of a set of predefined Component methods 
+//    - e.g. {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
+//    {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{opt:method}
 //    for a complete list of valid method options. 
 //  \item[userRoutine]
 //    The user-supplied subroutine to be associated for this Component 

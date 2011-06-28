@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.175 2011/06/27 22:30:45 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.176 2011/06/28 02:07:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.175 2011/06/27 22:30:45 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.176 2011/06/28 02:07:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -367,7 +367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),        intent(in),    optional :: configFile
     type(ESMF_Clock),        intent(in),    optional :: clock
     integer,                 intent(in),    optional :: petList(:)
-    type(ESMF_Context_Flag),  intent(in),    optional :: contextflag
+    type(ESMF_Context_Flag), intent(in),    optional :: contextflag
     character(len=*),        intent(in),    optional :: name
     integer,                 intent(out),   optional :: rc
 !
@@ -711,24 +711,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     methodflag, currentPhase, comptype, gridCompStatus, vm, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(in)           :: gridcomp
+    type(ESMF_GridComp),      intent(in)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Grid),         intent(out), optional :: grid
-    type(ESMF_State),        intent(out), optional :: importState
-    type(ESMF_State),        intent(out), optional :: exportState    
-    type(ESMF_Config),       intent(out), optional :: config
-    character(len=*),        intent(out), optional :: configFile
-    type(ESMF_Clock),        intent(out), optional :: clock
-    integer,                 intent(out), optional :: localPet
-    integer,                 intent(out), optional :: petCount
+    type(ESMF_Grid),          intent(out), optional :: grid
+    type(ESMF_State),         intent(out), optional :: importState
+    type(ESMF_State),         intent(out), optional :: exportState    
+    type(ESMF_Config),        intent(out), optional :: config
+    character(len=*),         intent(out), optional :: configFile
+    type(ESMF_Clock),         intent(out), optional :: clock
+    integer,                  intent(out), optional :: localPet
+    integer,                  intent(out), optional :: petCount
     type(ESMF_Context_Flag),  intent(out), optional :: contextflag
-    type(ESMF_Method_Flag),       intent(out), optional :: methodflag
-    integer,                 intent(out), optional :: currentPhase
-    type(ESMF_CompType_Flag),     intent(out), optional :: comptype
+    type(ESMF_Method_Flag),   intent(out), optional :: methodflag
+    integer,                  intent(out), optional :: currentPhase
+    type(ESMF_CompType_Flag), intent(out), optional :: comptype
     type(ESMF_GridCompStatus), intent(out), optional :: gridCompStatus
-    type(ESMF_VM),           intent(out), optional :: vm
-    character(len=*),        intent(out), optional :: name
-    integer,                 intent(out), optional :: rc
+    type(ESMF_VM),            intent(out), optional :: vm
+    character(len=*),         intent(out), optional :: name
+    integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -835,11 +835,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     phaseZeroFlag, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_GridComp),  intent(in)            :: gridcomp
-    type(ESMF_Method_Flag),    intent(in)            :: method
-    integer,              intent(out)           :: phaseCount
-    logical,              intent(out)           :: phaseZeroFlag
-    integer,              intent(out), optional :: rc 
+    type(ESMF_GridComp),    intent(in)            :: gridcomp
+    type(ESMF_Method_Flag), intent(in)            :: method
+    integer,                intent(out)           :: phaseCount
+    logical,                intent(out)           :: phaseZeroFlag
+    integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Get phaseCount
@@ -1532,8 +1532,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_GridComp),  intent(inout)         :: gridcomp
-    type(ESMF_Method_Flag),    intent(in)            :: method
+    type(ESMF_GridComp),    intent(inout)         :: gridcomp
+    type(ESMF_Method_Flag), intent(in)            :: method
     interface
       subroutine userRoutine(gridcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1548,8 +1548,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end subroutine
     end interface
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(in),  optional :: phase
-    integer,              intent(out), optional :: rc 
+    integer,                intent(in),  optional :: phase
+    integer,                intent(out), optional :: rc 
 !
 ! !STATUS:
 ! \apiStatusCompatible

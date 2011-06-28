@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.14 2011/02/10 04:18:47 ESRL\ryan.okuinghttons Exp $
+// $Id: user_CComponent.C,v 1.15 2011/06/28 02:07:28 theurich Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -250,11 +250,11 @@ extern "C" {
     *rc = ESMC_GridCompPrint(gcomp);
     if (*rc!=ESMF_SUCCESS) return;  // bail out
 
-    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
+    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE,myInitInC,1);
     if (*rc!=ESMF_SUCCESS) return;  // bail out
-    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
+    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, myRunInC, 1);
     if (*rc!=ESMF_SUCCESS) return;  // bail out
-    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 1);
+    *rc = ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE,myFinalInC, 1);
     if (*rc!=ESMF_SUCCESS) return;  // bail out
   }
 } //extern "C"

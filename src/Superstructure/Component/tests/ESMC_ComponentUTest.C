@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.17 2011/06/16 05:56:55 eschwab Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.18 2011/06/28 02:07:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -85,9 +85,9 @@ void myRegistrationInC(ESMC_GridComp gcomp, int *rc){
   printf("I am in myRegistrationInC()\n");
   ESMC_GridCompPrint(gcomp);
   
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, myInitInC, 1);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, myRunInC, 1);
-  ESMC_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, myFinalInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, myInitInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, myRunInC, 1);
+  ESMC_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, myFinalInC, 1);
     
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -150,9 +150,9 @@ void myCplRegistrationInC(ESMC_CplComp cplcomp, int *rc){
   printf("I am in myCplRegistrationInC()\n");
   ESMC_CplCompPrint(cplcomp);
   
-  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETINIT, myCplInitInC, 1);
-  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETRUN, myCplRunInC, 1);
-  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_SETFINAL, myCplFinalInC, 1);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, myCplInitInC, 1);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, myCplRunInC, 1);
+  ESMC_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, myCplFinalInC, 1);
     
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;

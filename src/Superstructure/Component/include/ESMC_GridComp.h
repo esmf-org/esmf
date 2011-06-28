@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.36 2011/02/23 23:37:42 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.37 2011/06/28 02:07:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,8 +39,8 @@
 extern "C" {
 #endif
 
-enum ESMC_Method { ESMF_SETINIT=1, ESMF_SETRUN, ESMF_SETFINAL,
-  ESMF_SETWRITERESTART, ESMF_SETREADRESTART };
+enum ESMC_Method { ESMF_METHOD_INITIALIZE=1, ESMF_METHOD_RUN,
+  ESMF_METHOD_FINALIZE, ESMF_METHOD_WRITERESTART, ESMF_METHOD_READRESTART };
 
 // Class declaration type
 typedef void* ESMC_GridComp;
@@ -356,8 +356,9 @@ int ESMC_GridCompSetEntryPoint(
 //  \item[comp]
 //    An {\tt ESMC\_GridComp} object. 
 //  \item[method]
-//    One of a set of predefined Component methods - e.g. {\tt ESMF\_SETINIT}, 
-//    {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}. See section \ref{opt:method}
+//    One of a set of predefined Component methods 
+//    - e.g. {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
+//    {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{opt:method}
 //    for a complete list of valid method options. 
 //  \item[userRoutine]
 //    The user-supplied subroutine to be associated for this Component 

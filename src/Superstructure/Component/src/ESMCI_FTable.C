@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.56 2011/05/27 00:03:36 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.57 2011/06/28 02:07:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.56 2011/05/27 00:03:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.57 2011/06/28 02:07:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -636,7 +636,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   int i = ftable->getEntry(name, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return; // bail out
-  enum ESMCI::method currentMethod = ESMCI::SETNONE;  // default invalid
+  enum ESMCI::method currentMethod = ESMCI::METHOD_NONE;  // default invalid
   if (i > -1)
     currentMethod = ftable->methodFromIndex(i);
   
@@ -749,7 +749,7 @@ void FTN(c_esmc_compget)(
     *method = cargo->currentMethod;
     *phase = cargo->currentPhase;
   }else{
-    *method = ESMCI::SETNONE;
+    *method = ESMCI::METHOD_NONE;
     *phase = 0;
   }
 
@@ -967,7 +967,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   
   // call into register routine using the component's VM
   void *vm_cargo = NULL;
-  enum method reg = SETREGISTER;
+  enum method reg = METHOD_SETSERVICES;
   FTN(c_esmc_ftablecallentrypointvm)(&vm_parent, &vmplan_p, &vm_info,
     &vm_cargo, &tabptr, &reg, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
@@ -1844,37 +1844,37 @@ void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
 //==============================================================================
 char const *FTable::methodString(enum ESMCI::method method){
   switch(method){
-  case ESMCI::SETINIT:
+  case ESMCI::METHOD_INITIALIZE:
     return "Initialize";
     break;
-  case ESMCI::SETRUN:
+  case ESMCI::METHOD_RUN:
     return "Run";
     break;
-  case ESMCI::SETFINAL:
+  case ESMCI::METHOD_FINALIZE:
     return "Finalize";
     break;
-  case ESMCI::SETWRITERESTART:
+  case ESMCI::METHOD_WRITERESTART:
     return "WriteRestart";
     break;
-  case ESMCI::SETREADRESTART:
+  case ESMCI::METHOD_READRESTART:
     return "ReadRestart";
     break;
-  case ESMCI::SETINITIC:
+  case ESMCI::METHOD_INITIALIZEIC:
     return "InitializeIC";
     break;
-  case ESMCI::SETRUNIC:
+  case ESMCI::METHOD_RUNIC:
     return "RunIC";
     break;
-  case ESMCI::SETFINALIC:
+  case ESMCI::METHOD_FINALIZEIC:
     return "FinalizeIC";
     break;
-  case ESMCI::SETWRITERESTARTIC:
+  case ESMCI::METHOD_WRITERESTARTIC:
     return "WriteRestartIC";
     break;
-  case ESMCI::SETREADRESTARTIC:
+  case ESMCI::METHOD_READRESTARTIC:
     return "ReadRestartIC";
     break;
-  case ESMCI::SETREGISTER:
+  case ESMCI::METHOD_SETSERVICES:
     return "Register";
     break;
   default:
@@ -1887,28 +1887,28 @@ char const *FTable::methodString(enum ESMCI::method method){
 //==============================================================================
 enum method FTable::methodFromString(char const *methodString){
   if (!strncmp(methodString, "InitializeIC", strlen("InitializeIC")))
-    return ESMCI::SETINITIC;
+    return ESMCI::METHOD_INITIALIZEIC;
   else if (!strncmp(methodString, "RunIC", strlen("RunIC")))
-    return ESMCI::SETRUNIC;
+    return ESMCI::METHOD_RUNIC;
   else if (!strncmp(methodString, "FinalizeIC", strlen("FinalizeIC")))
-    return ESMCI::SETFINALIC;
+    return ESMCI::METHOD_FINALIZEIC;
   else if (!strncmp(methodString, "WriteRestartIC", strlen("WriteRestartIC")))
-    return ESMCI::SETWRITERESTARTIC;
+    return ESMCI::METHOD_WRITERESTARTIC;
   else if (!strncmp(methodString, "ReadRestartIC", strlen("ReadRestartIC")))
-    return ESMCI::SETREADRESTARTIC;
+    return ESMCI::METHOD_READRESTARTIC;
   else if (!strncmp(methodString, "Initialize", strlen("Initialize")))
-    return ESMCI::SETINIT;
+    return ESMCI::METHOD_INITIALIZE;
   else if (!strncmp(methodString, "Run", strlen("Run")))
-    return ESMCI::SETRUN;
+    return ESMCI::METHOD_RUN;
   else if (!strncmp(methodString, "Finalize", strlen("Finalize")))
-    return ESMCI::SETFINAL;
+    return ESMCI::METHOD_FINALIZE;
   else if (!strncmp(methodString, "WriteRestart", strlen("WriteRestart")))
-    return ESMCI::SETWRITERESTART;
+    return ESMCI::METHOD_WRITERESTART;
   else if (!strncmp(methodString, "ReadRestart", strlen("ReadRestart")))
-    return ESMCI::SETREADRESTART;
+    return ESMCI::METHOD_READRESTART;
   else if (!strncmp(methodString, "Register", strlen("Register")))
-    return ESMCI::SETREGISTER;
-  return ESMCI::SETNONE;
+    return ESMCI::METHOD_SETSERVICES;
+  return ESMCI::METHOD_NONE;
 }
 //==============================================================================
 

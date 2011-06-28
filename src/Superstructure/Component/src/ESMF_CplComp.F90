@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.151 2011/06/27 22:30:45 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.152 2011/06/28 02:07:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.151 2011/06/27 22:30:45 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.152 2011/06/28 02:07:25 theurich Exp $'
 
 !==============================================================================
 !
@@ -358,13 +358,13 @@ contains
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Config),      intent(in),  optional :: config
-    character(len=*),       intent(in),  optional :: configFile
-    type(ESMF_Clock),       intent(in),  optional :: clock
-    integer,                intent(in),  optional :: petList(:)
+    type(ESMF_Config),       intent(in),  optional :: config
+    character(len=*),        intent(in),  optional :: configFile
+    type(ESMF_Clock),        intent(in),  optional :: clock
+    integer,                 intent(in),  optional :: petList(:)
     type(ESMF_Context_Flag), intent(in),  optional :: contextflag
-    character(len=*),       intent(in),  optional :: name
-    integer,                intent(out), optional :: rc
+    character(len=*),        intent(in),  optional :: name
+    integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -701,20 +701,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     cplCompStatus, vm, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),     intent(in)            :: cplcomp
+    type(ESMF_CplComp),      intent(in)            :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Config),      intent(out), optional :: config
-    character(len=*),       intent(out), optional :: configFile
-    type(ESMF_Clock),       intent(out), optional :: clock
-    integer,                intent(out), optional :: localPet
-    integer,                intent(out), optional :: petCount
+    type(ESMF_Config),       intent(out), optional :: config
+    character(len=*),        intent(out), optional :: configFile
+    type(ESMF_Clock),        intent(out), optional :: clock
+    integer,                 intent(out), optional :: localPet
+    integer,                 intent(out), optional :: petCount
     type(ESMF_Context_Flag), intent(out), optional :: contextflag
-    type(ESMF_Method_Flag),      intent(out), optional :: methodflag
-    integer,                intent(out), optional :: currentPhase
+    type(ESMF_Method_Flag),  intent(out), optional :: methodflag
+    integer,                 intent(out), optional :: currentPhase
     type(ESMF_CplCompStatus), intent(out), optional :: cplCompStatus
-    type(ESMF_VM),          intent(out), optional :: vm
-    character(len=*),       intent(out), optional :: name
-    integer,                intent(out), optional :: rc
+    type(ESMF_VM),           intent(out), optional :: vm
+    character(len=*),        intent(out), optional :: name
+    integer,                 intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1433,8 +1433,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)          :: cplcomp
-    type(ESMF_Method_Flag),  intent(in)             :: method
+    type(ESMF_CplComp),     intent(inout)          :: cplcomp
+    type(ESMF_Method_Flag), intent(in)             :: method
     interface
       subroutine userRoutine(cplcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1449,8 +1449,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end subroutine
     end interface
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),  optional  :: phase
-    integer,            intent(out), optional  :: rc 
+    integer,                intent(in),  optional  :: phase
+    integer,                intent(out), optional  :: rc 
 !
 ! !STATUS:
 ! \apiStatusCompatible
