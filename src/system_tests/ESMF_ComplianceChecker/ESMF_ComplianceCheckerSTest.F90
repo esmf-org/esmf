@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.13 2011/06/24 15:38:53 theurich Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.14 2011/06/28 21:03:30 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -176,7 +176,7 @@ program ESMF_ComplianceCheckerSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-  dummyState = ESMF_StateCreate(statetype=ESMF_STATEINTENT_IMPORT, rc=localrc)
+  dummyState = ESMF_StateCreate(stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

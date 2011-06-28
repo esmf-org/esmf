@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.25 2011/06/23 15:55:27 rokuingh Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.26 2011/06/28 21:03:50 rokuingh Exp $
 !
 ! System test code FieldRegridConserv
 
@@ -161,14 +161,14 @@
 !-------------------------------------------------------------------------
 
     c1exp = ESMF_StateCreate(name="comp1 export",  &
-                             stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1 Initialize finished, rc =", rc
 
     c2imp = ESMF_StateCreate(name="comp2 import",  &
-                             stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10

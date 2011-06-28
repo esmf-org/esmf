@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.154 2011/06/28 05:19:38 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.155 2011/06/28 21:02:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.154 2011/06/28 05:19:38 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.155 2011/06/28 21:02:50 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1445,12 +1445,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetEntryPoint(cplcomp, method, userRoutine, &
+  subroutine ESMF_CplCompSetEntryPoint(cplcomp, methodflag, userRoutine, &
      keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(inout)          :: cplcomp
-    type(ESMF_Method_Flag), intent(in)             :: method
+    type(ESMF_Method_Flag), intent(in)             :: methodflag
     interface
       subroutine userRoutine(cplcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1473,19 +1473,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
-! predefined Component {\tt method}s. After this call the {\tt userRoutine}
+! predefined Component {\tt methodflag}s. After this call the {\tt userRoutine}
 ! becomes accessible via the standard Component method API.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   An {\tt ESMF\_CplComp} object.
-! \item[method]
+! \item[methodflag]
 !   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
 !   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[userRoutine]
-!   The user-supplied subroutine to be associated for this {\tt method}.
+!   The user-supplied subroutine to be associated for this {\tt methodflag}.
 !   This subroutine does not have to be public.
 ! \item[{[phase]}] 
 !   The {\tt phase} number for multi-phase methods. For single phase 
@@ -1513,7 +1513,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
   
-    call c_ESMC_SetEntryPoint(cplcomp, method, userRoutine, phaseArg, localrc)
+    call c_ESMC_SetEntryPoint(cplcomp, methodflag, userRoutine, phaseArg, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

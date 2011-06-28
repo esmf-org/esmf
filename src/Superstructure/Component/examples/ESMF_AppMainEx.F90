@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.51 2011/06/27 22:30:43 rokuingh Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.52 2011/06/28 21:02:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -321,12 +321,12 @@
     !  between components.
 
     states(1) = ESMF_StateCreate(name=cname1,  &
-                                 stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                                 stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     states(2) = ESMF_StateCreate(name=cname2,  &
-                                 stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                                 stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

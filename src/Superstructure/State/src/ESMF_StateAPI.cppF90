@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.11 2011/06/24 20:30:18 rokuingh Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.12 2011/06/28 21:02:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.11 2011/06/24 20:30:18 rokuingh Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.12 2011/06/28 21:02:55 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -955,7 +955,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
 ! !INTERFACE:
-      function ESMF_StateCreate(keywordEnforcer, statetype, &
+      function ESMF_StateCreate(keywordEnforcer, stateintent, &
                    arrayList, arraybundleList,  &
                    fieldList, fieldbundleList,  &
                    nestedStateList,             &
@@ -966,7 +966,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 !
 ! !ARGUMENTS:
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_StateIntent_Flag),   intent(in),  optional :: statetype
+      type(ESMF_StateIntent_Flag),   intent(in),  optional :: stateintent
       type(ESMF_Array),       intent(in),  optional :: arrayList(:)
       type(ESMF_ArrayBundle), intent(in),  optional :: arraybundleList(:)
       type(ESMF_Field),       intent(in),  optional :: fieldList(:)
@@ -985,7 +985,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[{[statetype]}]
+!   \item[{[stateintent]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are 
 !    {\tt ESMF\_STATEINTENT\_IMPORT}, {\tt ESMF\_STATEINTENT\_EXPORT}, 
 !    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED} The default 
@@ -1063,7 +1063,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
                  ESMF_CONTEXT, rcToReturn=rc)) return
         
         call ESMF_StateConstruct(stypep,  &
-                 statename=name, statetype=statetype, &
+                 statename=name, stateintent=stateintent, &
                  arrays=arrayList, arraybundles=arraybundleList, &
                  fields=fieldList, fieldbundles=fieldbundleList, &
                  states=nestedStateList,  &
@@ -1168,7 +1168,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetInfo(state,  &
-            keywordEnforcer, itemSearch, nestedFlag, stateType,  &
+            keywordEnforcer, itemSearch, nestedFlag, stateintent,  &
             itemCount, itemNameList, itemTypeList, name, rc)
 !
 ! !ARGUMENTS:
@@ -1176,7 +1176,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),        intent(in),  optional :: itemSearch
       logical,                  intent(in),  optional :: nestedFlag
-      type(ESMF_StateIntent_Flag),     intent(out), optional :: stateType
+      type(ESMF_StateIntent_Flag),     intent(out), optional :: stateintent
       integer,                  intent(out), optional :: itemCount
       character (len=*),        intent(out), optional :: itemNameList(:)
       type(ESMF_StateItem_Flag), intent(out), optional :: itemTypeList(:)
@@ -1206,9 +1206,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       State level only (default)
 !       When set to {\tt .true.}, additionally returns information from
 !       nested States
-!     \item[{[stateType]}]
+!     \item[{[stateintent]}]
 !       Returns the type, e.g., Import or Export, of this {\tt ESMF\_State}.
-!       Possible values are listed in Section~\ref{opt:statetype}.
+!       Possible values are listed in Section~\ref{const:stateintent}.
 !     \item[{[itemCount]}]
 !       Count of items in this {\tt ESMF\_State}.
 !       When the {\tt nestedFlag} option is
@@ -1228,7 +1228,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       set to {\tt .true.}, the list will include items present in nested
 !       States.  When using {\tt itemSearch}, it will return the types of
 !       items matching the specified name. Must be at least {\tt itemCount}
-!       long.  Return values are listed in Section~\ref{opt:stateitemtype}.
+!       long.  Return values are listed in Section~\ref{const:stateitem}.
 !     \item[{[name]}]
 !       Returns the name of this {\tt ESMF\_State}.
 !     \item[{[rc]}]
@@ -1265,7 +1265,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       stypep => state%statep
 
       if (present(name)) call ESMF_GetName(stypep%base, name=name, rc=localrc)
-      if (present(statetype)) statetype = stypep%st
+      if (present(stateintent)) stateintent = stypep%st
 
       localitemcount = infoCountWorker (stypep)
 
@@ -1602,7 +1602,7 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
 !      \item[itemType]
 !        Returned item types for the item with the given name, including 
 !        placeholder names.  Options are
-!        listed in Section~\ref{opt:stateitemtype}.  If no item with the
+!        listed in Section~\ref{const:stateitem}.  If no item with the
 !        given name is found, {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
 !        and {\tt rc} will {\bf not} be set to an error.
 !      \item[{[rc]}]

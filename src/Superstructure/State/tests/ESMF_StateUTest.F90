@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.99 2011/06/23 18:14:13 rokuingh Exp $
+! $Id: ESMF_StateUTest.F90,v 1.100 2011/06/28 21:02:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.99 2011/06/23 18:14:13 rokuingh Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.100 2011/06/28 21:02:56 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -103,7 +103,7 @@
       !NEX_UTest      
       ! Test Creation of an empty import State 
       statename = "Atmosphere In"
-      state1 = ESMF_StateCreate(name=statename, stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+      state1 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -143,7 +143,7 @@
       !EX_UTest 
       ! Test Creation of an empty import State 
       statename = "Test Array State"
-      state4 = ESMF_StateCreate(name=statename, stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+      state4 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -196,7 +196,7 @@
       !EX_UTest 
       ! Test Creation of an empty import State 
       statename = "Atmosphere In"
-      state1 = ESMF_StateCreate(name=statename, stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+      state1 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -237,7 +237,7 @@
       !EX_UTest
       ! Test Creation of an empty export State 
       statename = "Atmosphere Out"
-      state1 = ESMF_StateCreate(name=statename, stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+      state1 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty export State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -613,7 +613,7 @@
       bundlename = "Humidity"
       statename = "Export State"
       bundle2(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
-      state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATEINTENT_EXPORT, &
+      state2 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_EXPORT, &
                                 fieldbundleList=bundle2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a FieldBundle Test"
@@ -722,7 +722,7 @@
       statename = "Export State"
       fieldname = "Precipitation"
       field3(1) = ESMF_FieldEmptyCreate(name=fieldname, rc=rc)
-      state2 = ESMF_StateCreate(name=statename, stateType=ESMF_STATEINTENT_EXPORT, &
+      state2 = ESMF_StateCreate(name=statename, stateintent=ESMF_STATEINTENT_EXPORT, &
                                 fieldList=field3(1:1), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Field Test"
@@ -781,7 +781,7 @@
       !EX_UTest
       ! Test create an empty State
       state10 = ESMF_StateCreate (name="stateContainer",  &
-        statetype=ESMF_STATEINTENT_EXPORT, rc=rc)
+        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       write (failmsg, *) "Creating state10 for replacement"
       write (name, *) "Creating state10 for replacement test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -943,7 +943,7 @@
       ! Test create a State for replacement
 
       state11 = ESMF_StateCreate (name="stateContainer2",  &
-        statetype=ESMF_STATEINTENT_EXPORT, rc=rc)
+        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       write (failmsg, *) "Creating state11 for replacement"
       write (name, *) "Creating state11 for replacement test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -969,7 +969,7 @@
       ! Test create a 2nd State for replacement, but has same name
       ! as the 1st State
       state12 = ESMF_StateCreate (name="stateContainer2",  &
-        statetype=ESMF_STATEINTENT_EXPORT, rc=rc)
+        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       write (failmsg, *) "Creating state12 for replacement"
       write (name, *) "Creating state12 for replacement test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &

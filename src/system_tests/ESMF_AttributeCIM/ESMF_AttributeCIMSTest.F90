@@ -263,13 +263,13 @@ program ESMF_AttributeCIMSTest
 
   ! Gridded Component 1 initialize
   c1imp = ESMF_StateCreate(name="Comp1 importState",  &
-                           stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   c1exp = ESMF_StateCreate(name="Comp1 exportState",  &
-                           stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -285,13 +285,13 @@ program ESMF_AttributeCIMSTest
 
   ! Gridded Component 2 initialize
   c2imp = ESMF_StateCreate(name="Comp2 importState",  &
-                           stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   c2exp = ESMF_StateCreate(name="Comp2 exportState",  &
-                           stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -307,13 +307,13 @@ program ESMF_AttributeCIMSTest
 
   ! Gridded Component 3 initialize
   c3imp = ESMF_StateCreate(name="Comp3 importState",  &
-                           stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   c3exp = ESMF_StateCreate(name="Comp3 exportState",  &
-                           stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -329,13 +329,13 @@ program ESMF_AttributeCIMSTest
 
   ! Gridded Component 4 initialize
   c4imp = ESMF_StateCreate(name="Comp4 importState",  &
-                           stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   c4exp = ESMF_StateCreate(name="Comp4 exportState",  &
-                           stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                           stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

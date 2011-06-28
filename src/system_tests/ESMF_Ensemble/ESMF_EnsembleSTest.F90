@@ -1,4 +1,4 @@
-! $Id: ESMF_EnsembleSTest.F90,v 1.15 2011/06/24 15:05:06 rokuingh Exp $
+! $Id: ESMF_EnsembleSTest.F90,v 1.16 2011/06/28 21:03:37 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_DISABLED_SYSTEM_TEST        String used by test script to count system tests.
@@ -321,7 +321,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 
   ! Create export state for each of the ensemble components and init
   cA1exp = ESMF_StateCreate(name="compA1 export",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -331,7 +331,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   cA2exp = ESMF_StateCreate(name="compA2 export",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -341,7 +341,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   cB1exp = ESMF_StateCreate(name="compB1 export",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -351,7 +351,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   cB2exp = ESMF_StateCreate(name="compB2 export",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -363,7 +363,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   ! Create the import state for the coupler and add the four export states
   ! from the four ensemble components to the coupler's import state
   cplimp = ESMF_StateCreate(name="coupler import",  &
-                            stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -386,7 +386,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
 
   ! Create the export state for the coupler
   cplexp = ESMF_StateCreate(name="coupler export",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -398,7 +398,7 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   ! create the export state for the composite component compC and init
   ! the import state of compC is the export state of the coupler
   compCexp = ESMF_StateCreate(name="comp C export",  &
-                              stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                              stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

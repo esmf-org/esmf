@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.39 2011/06/24 16:28:03 theurich Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.40 2011/06/28 21:02:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.39 2011/06/24 16:28:03 theurich Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.40 2011/06/28 21:02:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -107,7 +107,7 @@ program ESMF_AttributeGridCompUTest
       ! preparations
       ! states
       sfg = ESMF_StateCreate(name="stateforgridcomp",  &
-                             stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       
       ! coupler components
       cfg = ESMF_CplCompCreate(name="cplcompforgridcomp", petList=(/0/), rc=rc)

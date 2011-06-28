@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.21 2011/06/23 15:54:32 rokuingh Exp $
+% $Id: State_usage.tex,v 1.22 2011/06/28 21:02:52 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@ to the API description for all possible methods of creating a State.
 An empty State can be created by providing only a name and type for
 the intended State:
 
-{\tt state = ESMF\_StateCreate(name, statetype=ESMF\_STATEINTENT\_IMPORT, rc=rc)}
+{\tt state = ESMF\_StateCreate(name, stateintent=ESMF\_STATEINTENT\_IMPORT, rc=rc)}
 
 When finished with an {\tt ESMF\_State}, the {\tt ESMF\_StateDestroy} method
 removes it.  However, the objects inside the {\tt ESMF\_State}

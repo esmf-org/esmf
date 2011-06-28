@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.42 2011/06/24 15:04:55 rokuingh Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.43 2011/06/28 21:03:27 rokuingh Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -94,10 +94,10 @@
 !-------------------------------------------------------------------------
 
       imp = ESMF_StateCreate(name="igrid import state",  &
-                             stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
       if ( (rc .ne. ESMF_SUCCESS) .or. (userrc .ne. ESMF_SUCCESS) ) goto 10
       exp = ESMF_StateCreate(name="igrid export state",  &
-                             stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompInitialize(comp1, importState=imp, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.7 2011/06/27 21:28:44 theurich Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.8 2011/06/28 21:02:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.7 2011/06/27 21:28:44 theurich Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.8 2011/06/28 21:02:55 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -123,7 +123,7 @@ contains
 ! !IROUTINE: ESMF_StateConstruct -- Construct a new State
 
 ! !INTERFACE:
-      subroutine ESMF_StateConstruct(stypep, statename, statetype, & 
+      subroutine ESMF_StateConstruct(stypep, statename, stateintent, & 
                          arrays, arraybundles, &
                          fields, fieldbundles, &
                          routehandles, states, &
@@ -132,7 +132,7 @@ contains
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer :: stypep
       character(len=*),       intent(in),  optional :: statename 
-      type(ESMF_StateIntent_Flag),   intent(in),  optional :: statetype
+      type(ESMF_StateIntent_Flag),   intent(in),  optional :: stateintent
       type(ESMF_Array),       intent(in),  optional :: arrays(:)
       type(ESMF_ArrayBundle), intent(in),  optional :: arraybundles(:)
       type(ESMF_Field),       intent(in),  optional :: fields(:)
@@ -152,7 +152,7 @@ contains
 !    Internal StateClass pointer.  Required.
 !   \item[{[statename]}]
 !    Name of this {\tt ESMF\_State} object. 
-!   \item[{[statetype]}]
+!   \item[{[stateintent]}]
 !    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATEINTENT\_IMPORT},
 !    {\tt ESMF\_STATEINTENT\_EXPORT}, or {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.   
 !    {\tt ESMF\_STATEINTENT\_UNSPECIFIED} is the default if not specified.
@@ -239,7 +239,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         end if
 
         ! Set initial values
-        call ESMF_StateConstructEmpty(stypep, statename, statetype, rc=localrc)
+        call ESMF_StateConstructEmpty(stypep, statename, stateintent, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -320,12 +320,12 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 ! !IROUTINE: ESMF_StateConstructEmpty -- Create a new State specifying no data
 
 ! !INTERFACE:
-      subroutine ESMF_StateConstructEmpty(stypep, statename, statetype, rc)
+      subroutine ESMF_StateConstructEmpty(stypep, statename, stateintent, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateClass), pointer             :: stypep
       character(len=*),     intent(in),  optional :: statename 
-      type(ESMF_StateIntent_Flag), intent(in),  optional :: statetype
+      type(ESMF_StateIntent_Flag), intent(in),  optional :: stateintent
       integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -335,7 +335,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 !      \begin{description}
 !       \item[{[stypep]}]
 !       Internal StateClass pointer.  Required.
-!       \item[{[statetype]}]
+!       \item[{[stateintent]}]
 !        Import or Export {\tt State}.  One of {\tt ESMF\_STATEINTENT\_IMPORT},
 !        {\tt ESMF\_STATEINTENT\_EXPORT}, or {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.  Default is 
 !        {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
@@ -361,8 +361,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Fill in basic information
-        if (present(statetype)) then
-          stypep%st = statetype
+        if (present(stateintent)) then
+          stypep%st = stateintent
         else
           stypep%st = ESMF_STATEINTENT_UNSPECIFIED
         endif

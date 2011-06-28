@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.25 2011/06/24 15:04:49 rokuingh Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.26 2011/06/28 21:03:19 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -227,12 +227,12 @@ program ESMF_ArrayScatterGatherSTest
   ! the terms import and export are used from the coupler's perspecitve,
   ! model component 1 and 2 add Arrays to both import and export states
   importState = ESMF_StateCreate(name="import",  &
-                                 stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                                 stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   exportState = ESMF_StateCreate(name="export",  &
-                                 stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                                 stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.36 2011/06/28 04:55:43 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.37 2011/06/28 21:03:02 rokuingh Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -728,7 +728,7 @@ module ESMF_ComplianceICMod
     integer                               :: itemCount, item
     integer                               :: fieldCount, fitem
     character(ESMF_MAXSTR)                :: name
-    type(ESMF_StateIntent_Flag)                  :: statetype
+    type(ESMF_StateIntent_Flag)           :: stateintent
     character(ESMF_MAXSTR)                :: tempString
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
     type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
@@ -752,7 +752,7 @@ module ESMF_ComplianceICMod
 
     if (stateValid) then
       ! Provide name and type of State
-      call ESMF_StateGet(state, name=name, statetype=statetype, &
+      call ESMF_StateGet(state, name=name, stateintent=stateintent, &
         itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
@@ -764,16 +764,16 @@ module ESMF_ComplianceICMod
         line=__LINE__, &
         file=__FILE__)) &
         return  ! bail out
-      if (statetype==ESMF_STATEINTENT_IMPORT) then
+      if (stateintent==ESMF_STATEINTENT_IMPORT) then
         tempString = "ESMF_STATEINTENT_IMPORT"
-      else if (statetype==ESMF_STATEINTENT_EXPORT) then
+      else if (stateintent==ESMF_STATEINTENT_EXPORT) then
         tempString = "ESMF_STATEINTENT_EXPORT"
-      else if (statetype==ESMF_STATEINTENT_UNSPECIFIED) then
+      else if (stateintent==ESMF_STATEINTENT_UNSPECIFIED) then
         tempString = "ESMF_STATEINTENT_UNSPECIFIED"
       else
         tempString = "ESMF_STATEINTENT_INVALID"
       endif
-      call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" statetype: "// &
+      call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" stateintent: "// &
         trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &

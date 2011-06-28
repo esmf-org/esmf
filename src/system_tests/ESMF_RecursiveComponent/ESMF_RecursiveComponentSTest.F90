@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.21 2011/06/24 15:05:38 rokuingh Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.22 2011/06/28 21:04:04 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -146,12 +146,12 @@ program ESMF_RecursiveComponentSTest
 !-------------------------------------------------------------------------
 
   import = ESMF_StateCreate(name="import",  &
-                            stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   export = ESMF_StateCreate(name="export",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.46 2011/06/24 15:04:41 rokuingh Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.47 2011/06/28 21:03:08 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -205,7 +205,7 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 
   c1exp = ESMF_StateCreate(name="comp1 export",  &
-                           stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                           stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -220,7 +220,7 @@ program ESMF_ArrayRedistSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   c2imp = ESMF_StateCreate(name="comp2 import",  &
-                           stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                           stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

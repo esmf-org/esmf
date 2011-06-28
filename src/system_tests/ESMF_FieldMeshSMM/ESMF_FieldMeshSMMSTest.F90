@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.21 2011/06/24 15:05:18 rokuingh Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.22 2011/06/28 21:03:46 rokuingh Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -203,7 +203,7 @@
 !-------------------------------------------------------------------------
 
     c1exp = ESMF_StateCreate(name="comp1 export",  &
-                             stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                             stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -218,7 +218,7 @@
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     c2imp = ESMF_StateCreate(name="comp2 import",  &
-                             stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                             stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)

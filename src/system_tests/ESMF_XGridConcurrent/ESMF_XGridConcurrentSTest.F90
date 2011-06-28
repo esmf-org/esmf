@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.10 2011/06/24 15:05:42 rokuingh Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.11 2011/06/28 21:04:07 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -214,7 +214,7 @@ program ESMF_XGridConcurrentSTest
 
   ! land export state
   land_export = ESMF_StateCreate(name="land export",  &
-                                 stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                                 stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -229,7 +229,7 @@ program ESMF_XGridConcurrentSTest
 
   ! ocean export state
   ocean_export = ESMF_StateCreate(name="ocean export",  &
-                                  stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                                  stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -244,7 +244,7 @@ program ESMF_XGridConcurrentSTest
 
   ! nestted state with land and ocean attached inside
   landocn_export = ESMF_StateCreate(name="landocn export",  &
-                                    stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                                    stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -261,7 +261,7 @@ program ESMF_XGridConcurrentSTest
 
   ! atmosphere import state
   atmos_import = ESMF_StateCreate(name="atmos import",  &
-                                  stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                                  stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

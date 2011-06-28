@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.34 2011/06/24 15:04:19 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.35 2011/06/28 21:02:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -110,9 +110,9 @@ implicit none
           petList=(/0,1,2,3/), rc=rc)
 
       c1exp = ESMF_StateCreate(name="Comp1 exportState", &
-                               stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                               stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       c2imp = ESMF_StateCreate(name="Comp2 importState", &
-                               stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                               stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
 !EOC      
 
       endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.44 2011/06/24 15:04:30 rokuingh Exp $
+! $Id: ESMF_StateEx.F90,v 1.45 2011/06/28 21:02:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
     ! This will probably be called from inside the Component Init code
     statename = "Atmosphere"
     state1 = ESMF_StateCreate(name=statename,   &
-                              statetype=ESMF_STATEINTENT_IMPORT, rc=rc)  
+                              stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(statename)
 
     ! Data would be added here and the State reused inside the run
@@ -73,7 +73,7 @@
 !BOC
     statename = "Ocean"
     state2 = ESMF_StateCreate(name=statename,  &
-                              statetype=ESMF_STATEINTENT_EXPORT, rc=rc)  
+                              stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)  
 !EOC
 
     print *, "State Create returned, name = ", trim(statename)
@@ -122,7 +122,7 @@
 !BOC
     statename = "Ocean"
     state3 = ESMF_StateCreate(name=statename,  &
-                              statetype=ESMF_STATEINTENT_EXPORT, rc=rc)  
+                              stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)  
 !EOC
     print *, "State Create returned", rc, " name = ", trim(statename)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

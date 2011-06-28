@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.15 2011/06/24 15:04:30 rokuingh Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.16 2011/06/28 21:02:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
     call ESMF_VMGet(vm, localPet=localPet, rc=rc)
 
     state = ESMF_StateCreate(name="Ocean Import",  &
-                             stateType=ESMF_STATEINTENT_IMPORT, rc=rc)  
+                             stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)  
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE

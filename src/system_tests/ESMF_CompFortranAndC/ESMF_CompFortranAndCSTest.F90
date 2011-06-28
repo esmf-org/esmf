@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.30 2011/06/24 15:04:57 rokuingh Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.31 2011/06/28 21:03:28 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -213,13 +213,13 @@ program ESMF_CompFortranAndC
 !-------------------------------------------------------------------------
 
   state1 = ESMF_StateCreate(name="igrid import state",  &
-                            stateType=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   state2 = ESMF_StateCreate(name="igrid export state",  &
-                            stateType=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                            stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)

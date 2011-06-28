@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.22 2011/06/27 22:31:26 rokuingh Exp $
+! $Id: modelComp.F90,v 1.23 2011/06/28 21:03:35 rokuingh Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -130,7 +130,7 @@ module modelCompMod
 
     ! Create State and initialize modelAComp
     modelAExp = ESMF_StateCreate(name="modelAComp export",  &
-                                 stateType=ESMF_STATEINTENT_EXPORT, rc=rc)
+                                 stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompInitialize(modelAComp, importState=importState, &
       exportState=modelAExp, userRc=userrc, rc=rc)
@@ -138,7 +138,7 @@ module modelCompMod
 
     ! Create State and initialize modelBComp
     modelBImp = ESMF_StateCreate(name="modelBComp import",  &
-                                 stateType=ESMF_STATEINTENT_IMPORT, rc=rc)
+                                 stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompInitialize(modelBComp, importState=modelBImp, &
       exportState=exportState, userRc=userrc, rc=rc)

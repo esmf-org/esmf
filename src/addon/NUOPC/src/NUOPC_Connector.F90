@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.10 2011/06/27 22:30:56 rokuingh Exp $
+! $Id: NUOPC_Connector.F90,v 1.11 2011/06/28 21:03:00 rokuingh Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -115,13 +115,13 @@ module NUOPC_Connector
       return  ! bail out
     
     ! access the state types
-    call ESMF_StateGet(importState, statetype=isType, itemCount=isItemCount, &
+    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_StateGet(exportState, statetype=esType, itemCount=esItemCount, &
+    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
@@ -203,13 +203,13 @@ module NUOPC_Connector
       return  ! bail out
     
     ! access the state types
-    call ESMF_StateGet(importState, statetype=isType, itemCount=isItemCount, &
+    call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_StateGet(exportState, statetype=esType, itemCount=esItemCount, &
+    call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
