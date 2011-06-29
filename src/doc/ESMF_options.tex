@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.64 2011/06/29 20:26:08 theurich Exp $
+% $Id: ESMF_options.tex,v 1.65 2011/06/29 23:20:54 theurich Exp $
 
 \section{Constants}
 
@@ -499,24 +499,29 @@ Valid values are:
 \label{const:version}
 
 {\sf DESCRIPTION:\\}
-The following parameters allow detection of the precise version of ESMF in use.
+The following named constants define the precise version of ESMF in use.
+
 \begin{description}
 \item [ESMF\_VERSION\_BETASNAPSHOT]
-      Logical parameter indicating beta snapshot phase
-      (.true. for any version during the pre-release development phase,
-      .false. for any released version of the software)
+      Constant of type {\tt logical} indicating beta snapshot phase
+      ({\tt .true.} for any version during the pre-release development phase,
+      {\tt .false.} for any released version of the software)
 \item [ESMF\_VERSION\_MAJOR]
-      Integer parameter with the major version number (e.g., 5 for v5.2.0r)
+      Constant of type {\tt integer} indicating the major version number
+      (e.g. 5 for v5.2.0r)
 \item [ESMF\_VERSION\_MINOR]
-      Integer parameter with the minor version number (e.g., 2 for v5.2.0r)
+      Constant of type {\tt integer} indicating the minor version number
+      (e.g. 2 for v5.2.0r)
 \item [ESMF\_VERSION\_PATCHLEVEL]
-      Integer parameter with the patch level of a specific revision
-      (e.g., 0 for v5.2.0r, or 1 for v5.2.0rp1)
+      Constant of type {\tt integer} indicating the patch level of a specific
+      revision (e.g. 0 for v5.2.0r, or 1 for v5.2.0rp1)
 \item [ESMF\_VERSION\_PUBLIC]
-      Logical parameter indicating public vs. internal relase status
-      (e.g., .true. for v5.2.0r, or .false. for v5.2.0)
+      Constant of type {\tt logical} indicating public vs. internal release
+      status (e.g. {\tt .true.} for v5.2.0r, or {\tt .false.} for v5.2.0)
 \item [ESMF\_VERSION\_REVISION]
-      Integer parameter with the revision number (e.g., 0 for v5.2.0r)
+      Constant of type {\tt integer} indicating the revision number
+      (e.g. 0 for v5.2.0r)
 \item [ESMF\_VERSION\_STRING]
-      Character string parameter describing the release (e.g., "5.2.0r")
+      Constant of type {\tt character} holding the exact release version string
+      (e.g. "5.2.0r")
 \end{description}
