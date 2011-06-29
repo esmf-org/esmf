@@ -1,12 +1,34 @@
-% $Id: ESMF_options.tex,v 1.62 2011/06/29 00:03:54 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.63 2011/06/29 20:03:56 rokuingh Exp $
 
 \section{Constants}
+
+\subsection{ESMF\_COMPTYPE}
+\label{const:comptype}
+{\sf DESCRIPTION:\\}
+Indicate the type of a Component.
+
+The type of this flag is:
+
+{\tt type(ESMF\_CompType\_Flag)}
+
+Valid values are:
+\begin{description}
+	\item[ESMF\_COMPTYPE\_GRID]
+	A {\tt ESMF\_GridComp} object. 
+	\item[ESMF\_COMPTYPE\_CPL]
+	A {\tt ESMF\_CplComp} objects.
+\end{description}
+
 
 \subsection{ESMF\_CONTEXT}
 \label{const:contextflag}
 {\sf DESCRIPTION:\\}  
 Indicates the type of VM context in which a Component will be executing its
 standard methods.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Context\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -26,10 +48,33 @@ Valid values are:
          communication attributes, threading-level.
 \end{description}
 
+\subsection{ESMF\_COPY}
+\label{const:copy}
+{\sf DESCRIPTION:\\}
+Indicates which type of copy behavior is used when copying ESMF objects.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Copy\_Flag)}
+
+Valid values are:
+\begin{description}
+	\item[ESMF\_COPY\_VALUE]
+	All data and pointers are copied to the destination object, nothing is referenced.
+	\item[ESMF\_COPY\_REFERENCE]
+	All data is copied as a reference from the destination to the source object.
+	\item[ESMF\_COPY\_ALIAS]
+	All local data of the object is coped by value, and pointer valued data is referenced.
+\end{description}
+
 \subsection{ESMF\_DATACOPY}
 \label{const:datacopyflag}
 {\sf DESCRIPTION:\\}
 Indicates whether to reference a data item or make a copy of it.
+
+The type of this flag is:
+
+{\tt type(ESMF\_DataCopy\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -43,6 +88,10 @@ Valid values are:
 \label{const:decompflag}
 {\sf DESCRIPTION:\\}
 Indicates how DistGrid elements are decomposed over DEs.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Decomp\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -62,12 +111,20 @@ Valid values are:
       Divide elements over DEs. Assign the rest of this division to the last DE.
 \end{description}
 
+\subsubsection{ESMF\_END}
+
+Please see section \ref{app:endflag} for documentation on this flag.
+
 \subsection{ESMF\_GEOMTYPE}
 \label{const:geomtype}
 
 {\sf DESCRIPTION:\\}
 Different types of geometries upon which an ESMF Field or ESMF Fieldbundle may
 be built. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_GeomType\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -86,6 +143,10 @@ Valid values are:
 {\sf DESCRIPTION:\\}
 Indicates whether index is local (per DE) or global (per object).
 
+The type of this flag is:
+
+{\tt type(ESMF\_Index\_Flag)}
+
 Valid values are:
 \begin{description}
 \item [ESMF\_INDEX\_DELOCAL]
@@ -100,7 +161,11 @@ Valid values are:
 \subsection{ESMF\_IOFmtFlag}
 \label{opt:iofmtflag}
 {\sf DESCRIPTION:\\}
-Indicates IO format options that is currently supported.
+Indicates IO format options that are currently supported.
+
+The type of this flag is:
+
+{\tt type(ESMF\_IOFmtFlag)}
 
 Valid values are:
 \begin{description}
@@ -152,6 +217,10 @@ Valid values are:
 {\sf DESCRIPTION:\\}  
 Specify standard ESMF Component method.
 
+The type of this flag is:
+
+{\tt type(ESMF\_Method\_Flag)}
+
 Valid values are:
 \begin{description}
 \item [ESMF\_FINALIZE]
@@ -171,6 +240,10 @@ Valid values are:
 {\sf DESCRIPTION:\\}
 Indicates reduce operation to a {\tt Reduce()} method.
 
+The type of this flag is:
+
+{\tt type(ESMF\_Reduce\_Flag)}
+
 Valid values are:
 \begin{description}
    \item [ESMF\_REDUCE\_SUM]
@@ -185,6 +258,10 @@ Valid values are:
 \label{const:region}
 {\sf DESCRIPTION:\\}
 Specifies various regions in the data layout of an Array or Field object.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Region\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -202,6 +279,10 @@ Valid values are:
 Switch between blocking and non-blocking execution of RouteHandle based
 communication calls. Every RouteHandle based communication method contains
 an optional argument {\tt routesyncflag} that is of type {\tt ESMF\_RouteSync\_Flag}.
+
+The type of this flag is:
+
+{\tt type(ESMF\_RouteSync\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -245,6 +326,10 @@ Valid values are:
 {\sf DESCRIPTION:\\}
 Specifies the start of the effective halo region of an Array or Field object.
 
+The type of this flag is:
+
+{\tt type(ESMF\_StartRegion\_Flag)}
+
 Valid values are:
 \begin{description}
 \item [ESMF\_STARTREGION\_EXCLUSIVE]
@@ -275,6 +360,10 @@ See the {\bf VM} item in \ref{sec:spatialclasses} for an
 explanation of the PET and VAS concepts used in the following
 descriptions.
          
+The type of this flag is:
+
+{\tt type(ESMF\_Sync\_Flag)}
+
 Valid values are:
 \begin{description}
 
@@ -365,6 +454,10 @@ and functions that specify or query a data precision and type.
 These values cannot be used when declaring variables; see the next 
 section on Fortran Kinds for that.
 
+The type of this flag is:
+
+{\tt type(ESMF\_TypeKind\_Flag)}
+
 Valid values are:
 \begin{description}
 \item [ESMF\_TYPEKIND\_I1]
@@ -379,6 +472,27 @@ Valid values are:
       4 byte real.
 \item [ESMF\_TYPEKIND\_R8]
       8 byte real.
+\end{description}
+
+\subsection{ESMF\_UNMAPPEDACTION}
+\label{const:unmappedaction}
+{\sf DESCRIPTION:\\}
+Indicates what action to take with respect to unmapped destination points
+and the entries of the sparse matrix that correspond to these points.
+
+The type of this flag is:
+
+{\tt type(ESMF\_UnmappedAction\_Flag)}
+
+Valid values are:
+\begin{description}
+	\item[ESMF\_UNMAPPEDACTION\_ERROR]
+	An error is issued when there exist destination points in a regridding
+	operation that are not mapped by corresponding source points.
+	\item[ESMF\_UNMAPPEDACTION\_IGNORE]
+	Destination points which do not have corresponding source points are 
+	ignored and zeros are used for the entries of the sparse matrix
+	that is generated.
 \end{description}
 
 \subsection{ESMF\_VERSION}

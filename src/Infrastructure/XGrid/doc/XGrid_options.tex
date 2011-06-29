@@ -1,11 +1,14 @@
-% $Id: XGrid_options.tex,v 1.2 2011/06/09 19:13:11 feiliu Exp $
-
-
+% $Id: XGrid_options.tex,v 1.3 2011/06/29 20:03:51 rokuingh Exp $
 
 \subsubsection{ESMF\_XGridSide}
 \label{opt:xgridoptions}
+
 {\sf DESCRIPTION:\\}  
 Specify which side of the {\tt ESMF\_XGrid} the current operation is taking place.
+
+The type of this flag is:
+
+{\tt type(ESMF\_XGridSide\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -15,7 +18,4 @@ Valid values are:
   B side of the eXchange Grid, corresponding to the B side of the Grids used to create an XGrid.
 \item [ESMF\_XGRID\_BALANCED]
   The internally generated balanced side of the eXchange Grid in the middle.
-
 \end{description}
-
-

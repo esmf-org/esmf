@@ -1,4 +1,4 @@
-% $Id: DELayout_options.tex,v 1.5 2011/06/24 16:51:52 rokuingh Exp $
+% $Id: DELayout_options.tex,v 1.6 2011/06/29 20:03:40 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,11 +8,15 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsubsection{ESMF\_Pin\_Flag}
-
+\subsubsection{ESMF\_PIN}
 \label{opt:depinflag}
+
 {\sf DESCRIPTION:\\}
 Specifies which VM resource DEs are pinned to - i.e. PETs or VASs.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Pin\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -27,11 +31,15 @@ Valid values are:
 \end{description}
 
 
-\subsubsection{ESMF\_ServiceReply}
-
+\subsubsection{ESMF\_SERVICEREPLY}
 \label{const:servicereply_flag}
+
 {\sf DESCRIPTION:\\}
 Reply when a PET offers to service a DE.
+
+The type of this flag is:
+
+{\tt type(ESMF\_ServiceReply\_Flag)}
 
 Valid values are:
 \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.235 2011/06/29 16:05:55 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.236 2011/06/29 20:03:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -124,19 +124,19 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_PoleType
+! ! ESMF_PoleKind_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_PoleType
+  type ESMF_PoleKind_Flag
   sequence
 !  private
-     integer :: poletype
+     integer :: polekind
   end type
 
-  type(ESMF_PoleType), parameter :: &
-    ESMF_POLETYPE_NONE = ESMF_PoleType(0), &
-    ESMF_POLETYPE_MONOPOLE = ESMF_PoleType(1), &
-    ESMF_POLETYPE_BIPOLE = ESMF_PoleType(2)
+  type(ESMF_PoleKind_Flag), parameter :: &
+    ESMF_POLEKIND_NONE = ESMF_PoleKind_Flag(0), &
+    ESMF_POLEKIND_MONOPOLE = ESMF_PoleKind_Flag(1), &
+    ESMF_POLEKIND_BIPOLE = ESMF_PoleKind_Flag(2)
 
 
 !------------------------------------------------------------------------------
@@ -218,8 +218,8 @@ public ESMF_GridStatus_Flag,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
 public ESMF_GridMatch_Flag,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
                          ESMF_GRIDMATCH_NONE,  ESMF_GRIDMATCH_EXACT
 
-public  ESMF_PoleType,  ESMF_POLETYPE_NONE, ESMF_POLETYPE_MONOPOLE, &
-                        ESMF_POLETYPE_BIPOLE
+public ESMF_PoleKind_Flag,  ESMF_POLEKIND_NONE, ESMF_POLEKIND_MONOPOLE, &
+                        ESMF_POLEKIND_BIPOLE
 
 
 public ESMF_CoordSys_Flag, ESMF_COORDSYS_CART, &
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.235 2011/06/29 16:05:55 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.236 2011/06/29 20:03:45 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5681,7 +5681,7 @@ end function ESMF_GridCreateFrmScripReg
       function ESMF_GridCreate1PeriDimI(minIndex,         &
         countsPerDEDim1,countsPerDeDim2, keywordEnforcer,                  &
         countsPerDEDim3,                                  &
-        poleType, periodicDim, poleDim,                   &
+        polekindflag, periodicDim, poleDim,                   &
         coordSys, coordTypeKind,                          &
         coordDep1, coordDep2, coordDep3,                  &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign,        &
@@ -5696,7 +5696,7 @@ end function ESMF_GridCreateFrmScripReg
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
+       type(ESMF_PoleKind_Flag),   intent(in),  optional :: polekindflag(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
@@ -5746,11 +5746,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     This array specifies the number of cells per DE for index dimension 3
 !     for the exclusive region (center stagger location).  
 !     If not specified  then grid is 2D. 
-! \item[{[poleType]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. poleType(1)             
-!      the connection that occurs at the minimum end of the index dimension. poleType(2)                       
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
 !      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{sec:opt:poletype} for a full list of options. If not specified,                            
+!      Section~\ref{sec:opt:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
 !      The periodic dimension. If not specified, defaults to 1.                                                
@@ -5851,7 +5851,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Build connection list
     call Setup1PeriodicConn(dimCount, minIndexLocal, maxIndexLocal, &
-                 poleType, periodicDim, poleDim, connList, rc=localrc)
+                 polekindflag, periodicDim, poleDim, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5952,7 +5952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreate1PeriDim()
       function ESMF_GridCreate1PeriDimR(regDecomp, decompFlag, &
         minIndex, maxIndex, keywordEnforcer,                                    &
-        poleType, periodicDim, poleDim,                        &
+        polekindflag, periodicDim, poleDim,                        &
         coordSys, coordTypeKind,                               &
         coordDep1, coordDep2, coordDep3,                       &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign,             &
@@ -5968,7 +5968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
+       type(ESMF_PoleKind_Flag),   intent(in),  optional :: polekindflag(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
@@ -6011,11 +6011,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      to /1,1,1,.../.
 ! \item[{maxIndex}] 
 !      The upper extent of the grid array.
-! \item[{[poleType]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. poleType(1)             
-!      the connection that occurs at the minimum end of the index dimension. poleType(2)                       
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
 !      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{sec:opt:poletype} for a full list of options. If not specified,                            
+!      Section~\ref{sec:opt:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
 !      The periodic dimension. If not specified, defaults to 1.                                                
@@ -6113,7 +6113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Build connection list
     call Setup1PeriodicConn(dimCount, minIndexLocal, maxIndexLocal, &
-                 poleType, periodicDim, poleDim, connList, rc=localrc)
+                 polekindflag, periodicDim, poleDim, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6210,7 +6210,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridCreate1PeriDim()
       function ESMF_GridCreate1PeriDimA(minIndex, maxIndex,  &
         arbIndexCount, arbIndexList, keywordEnforcer,                         &
-        poleType, periodicDim, poleDim,                      &
+        polekindflag, periodicDim, poleDim,                      &
         coordSys, coordTypeKind,                             &
         coordDep1, coordDep2, coordDep3,                     &
         distDim, name, rc)
@@ -6224,7 +6224,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
+       type(ESMF_PoleKind_Flag),   intent(in),  optional :: polekindflag(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
@@ -6263,11 +6263,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
-! \item[{[poleType]}]                                                                                          
-!      Two item array which specifies the type of connection which occurs at the pole. poleType(1)             
-!      the connection that occurs at the minimum end of the index dimension. poleType(2)                       
+! \item[{[polekindflag]}]                                                                                          
+!      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
+!      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
 !      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{sec:opt:poletype} for a full list of options. If not specified,                            
+!      Section~\ref{sec:opt:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
 !      The periodic dimension. If not specified, defaults to 1.                                                
@@ -6354,7 +6354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Build connection list
     call Setup1PeriodicConn(dimCount, minIndexLocal, maxIndexLocal, &
-                 poleType, periodicDim, poleDim, connList, rc=localrc)
+                 polekindflag, periodicDim, poleDim, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -21928,16 +21928,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end subroutine CoordInfoFromCoordDepArb
 
     subroutine Setup1PeriodicConn(dimCount, minIndex, maxIndex, &
-                 poleType, periodicDim, poleDim, connList, rc)
+                 polekindflag, periodicDim, poleDim, connList, rc)
        integer,               intent(in)            :: dimCount
        integer,               intent(in)            :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
-       type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
+       type(ESMF_PoleKind_Flag),   intent(in),  optional :: polekindflag(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
        type(ESMF_DistgridConnection), pointer       :: connList(:) 
        integer,               intent(out), optional :: rc
-       type(ESMF_PoleType) ::   poleTypeLocal(2)
+       type(ESMF_PoleKind_Flag) ::   polekindflagLocal(2)
        integer :: periodicDimLocal
        integer :: poleDimLocal
        integer :: connListCount, connListPos,i 
@@ -21980,12 +21980,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
 
        ! Set defaults
-       if (present(poleType)) then
-          poleTypeLocal(1)=poleType(1)
-          poleTypeLocal(2)=poleType(2)
+       if (present(polekindflag)) then
+          polekindflagLocal(1)=polekindflag(1)
+          polekindflagLocal(2)=polekindflag(2)
        else
-          poleTypeLocal(1)=ESMF_POLETYPE_MONOPOLE
-          poleTypeLocal(2)=ESMF_POLETYPE_MONOPOLE
+          polekindflagLocal(1)=ESMF_POLEKIND_MONOPOLE
+          polekindflagLocal(2)=ESMF_POLEKIND_MONOPOLE
        endif
 
        if (present(periodicDim)) then
@@ -22011,10 +22011,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Count number of connections
       connListCount=1 ! for periodic dim
-      if (poleTypeLocal(1) .ne. ESMF_POLETYPE_NONE) then
+      if (polekindflagLocal(1) .ne. ESMF_POLEKIND_NONE) then
          connListCount=connListCount+1
       endif
-      if (poleTypeLocal(2) .ne. ESMF_POLETYPE_NONE) then
+      if (polekindflagLocal(2) .ne. ESMF_POLEKIND_NONE) then
          connListCount=connListCount+1
       endif
 
@@ -22039,17 +22039,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       connListPos=2
  
       ! Lower end
-      if (poleTypeLocal(1) .ne. ESMF_POLETYPE_MONOPOLE) then
+      if (polekindflagLocal(1) .ne. ESMF_POLEKIND_MONOPOLE) then
          
-      else if (poleTypeLocal(1) .ne. ESMF_POLETYPE_BIPOLE) then
+      else if (polekindflagLocal(1) .ne. ESMF_POLEKIND_BIPOLE) then
          
       endif
       connListPos=connListPos+1
 
       ! Upper end
-      if (poleTypeLocal(2) .ne. ESMF_POLETYPE_MONOPOLE) then
+      if (polekindflagLocal(2) .ne. ESMF_POLEKIND_MONOPOLE) then
          
-      else if (poleTypeLocal(2) .ne. ESMF_POLETYPE_BIPOLE) then
+      else if (polekindflagLocal(2) .ne. ESMF_POLEKIND_BIPOLE) then
          
       endif
 
@@ -22109,7 +22109,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
        type(ESMF_DistgridConnection), pointer       :: connList(:) 
        integer,               intent(out), optional :: rc
-       type(ESMF_PoleType) ::   poleTypeLocal(2)
+       type(ESMF_PoleKind_Flag) ::   polekindflagLocal(2)
        integer :: periodicDimLocal
        integer :: poleDimLocal
        integer :: connListCount
@@ -22152,12 +22152,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
 
        ! Set defaults
-       if (present(poleType)) then
-          poleTypeLocal(1)=poleType(1)
-          poleTypeLocal(2)=poleType(2)
+       if (present(polekindflag)) then
+          polekindflagLocal(1)=polekindflag(1)
+          polekindflagLocal(2)=polekindflag(2)
        else
-          poleTypeLocal(1)=ESMF_POLETYPE_MONOPOLE
-          poleTypeLocal(2)=ESMF_POLETYPE_MONOPOLE
+          polekindflagLocal(1)=ESMF_POLEKIND_MONOPOLE
+          polekindflagLocal(2)=ESMF_POLEKIND_MONOPOLE
        endif
 
        if (present(periodicDim)) then
@@ -22183,10 +22183,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Count number of connections
       connListCount=1 ! for periodic dim
-      if (poleTypeLocal(1) .ne. ESMF_POLETYPE_NONE) then
+      if (polekindflagLocal(1) .ne. ESMF_POLEKIND_NONE) then
          connListCount=connListCount+1
       endif
-      if (poleTypeLocal(2) .ne. ESMF_POLETYPE_NONE) then
+      if (polekindflagLocal(2) .ne. ESMF_POLEKIND_NONE) then
          connListCount=connListCount+1
       endif
 
@@ -22225,7 +22225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_PoleType), intent(in) :: &
+      type (ESMF_PoleKind_Flag), intent(in) :: &
          PoleType1,      &! Two igrid statuses to compare for
          PoleType2        ! equality
 
@@ -22241,8 +22241,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_PoleTypeEqual = (PoleType1%poletype == &
-                              PoleType2%poletype)
+      ESMF_PoleTypeEqual = (PoleType1%polekind == &
+                              PoleType2%polekind)
 
       end function ESMF_PoleTypeEqual
 !------------------------------------------------------------------------------
@@ -22259,7 +22259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !ARGUMENTS:
 
-      type (ESMF_PoleType), intent(in) :: &
+      type (ESMF_PoleKind_Flag), intent(in) :: &
          PoleType1,      &! Two PoleType Statuses to compare for
          PoleType2        ! inequality
 
@@ -22275,8 +22275,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_PoleTypeNotEqual = (PoleType1%poletype /= &
-                                 PoleType2%poletype)
+      ESMF_PoleTypeNotEqual = (PoleType1%polekind /= &
+                                 PoleType2%polekind)
 
       end function ESMF_PoleTypeNotEqual
 

@@ -1,32 +1,36 @@
-% $Id: Grid_options.tex,v 1.44 2011/06/25 01:18:21 rokuingh Exp $
+% $Id: Grid_options.tex,v 1.45 2011/06/29 20:03:43 rokuingh Exp $
+
+\subsubsection{ESMF\_ARBDIM}
+\label{sec:opt:arbdim}
+
+{\sf DESCRIPTION:\\}
+A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
 
 \subsubsection{ESMF\_CoordSys}
 \label{sec:opt:coordsys}
+
 {\sf DESCRIPTION:\\}
  A set of values which indicates in which system the coordinates in the Grid are. This value is useful both to indicate to 
 other users the type of the coordinates, but also to control how the coordinates are interpreted in regridding methods 
 (e.g. {\tt ESMF\_FieldRegridStore()}).
 
-\medskip
+The type of this flag is:
+
+{\tt type(ESMF\_CoordSys\_Flag)}
+
+Valid values are:
 \begin{description}
 \item [ESMF\_COORDSYS\_CART] Cartesian coordinate system. 
 
 \item [ESMF\_COORDSYS\_SPH\_DEG] Spherical coordinates in degrees.
 
 \item [ESMF\_COORDSYS\_SPH\_RAD] Spherical coordinates in radians.
-
 \end{description}
-
-
-\subsubsection{ESMF\_ARBDIM}
-\label{sec:opt:arbdim}
-{\sf DESCRIPTION:\\}
-A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
-
 
 
 \subsubsection{ESMF\_GridConn\_Flag}
 \label{sec:opt:gridconn}
+
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
 The {\tt ESMF\_GridCreateShapeTile} command has three specific arguments
@@ -39,7 +43,11 @@ value for all the connections is ESMF\_GRIDCONN\_NONE, specifying no
 connection.
 \end{sloppypar}
 
-\medskip
+The type of this flag is:
+
+{\tt type(ESMF\_GridConn\_Flag)}
+
+Valid values are:
 \begin{description}
 \item [ESMF\_GRIDCONN\_NONE] No connection.
 
@@ -51,7 +59,6 @@ element i+n/2.
 
 \item [ESMF\_GRIDCONN\_BIPOLE] This edge is connected to itself. Given
 that the edge is n elements long, element i is connected to element n-i-1.
-
 \end{description}
 
 
@@ -64,7 +71,11 @@ This data is referred to as Grid ``items''. Some items may be used
 by ESMF for calculations involving the Grid. The following
 are the valid values of ESMF\_GridItem\_Flag.
 
-\medskip
+The type of this flag is:
+
+{\tt type(ESMF\_GridItem\_Flag)}
+
+Valid values are:
 \begin{tabular}{|l|c|c|c|c||}
 \hline
 \hline
@@ -77,14 +88,17 @@ Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\
 \end{tabular}
 
 
-
-\subsubsection{ESMF\_GridMatchType}
+\subsubsection{ESMF\_GRIDMATCH}
 \label{sec:opt:gridmatchtype}
 
 {\sf DESCRIPTION:\\}
  This type is used to indicate the level to which two grids match.
 
-\medskip
+The type of this flag is:
+
+{\tt type(ESMF\_GridMatch\_Flag)}
+
+Valid values are:
 \begin{description}
 \item [ESMF\_GRIDMATCH\_NONE:] The lowest level of grid matching. 
       This indicates that the Grid's don't match at any of the higher levels. 
@@ -94,7 +108,7 @@ Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\
 
 
 
-\subsubsection{ESMF\_GridStatus\_Flag}
+\subsubsection{ESMF\_GRIDSTATUS}
 \label{sec:opt:gridstatus}
 
 {\sf DESCRIPTION:\\}
@@ -103,7 +117,11 @@ present so that the library code can detect if a Grid has been
 appropriately setup for the task at hand. The following
 are the valid values of ESMF\_GRIDSTATUS.
 
-\medskip
+The type of this flag is:
+
+{\tt type(ESMF\_GridStatus\_Flag)}
+
+Valid values are:
 \begin{description}
 \item [ESMF\_GRIDSTATUS\_EMPTY:] Status after a Grid has been created with 
       {\tt ESMF\_GridCreateEmpty}.  A Grid object container is allocated but
@@ -118,28 +136,33 @@ are the valid values of ESMF\_GRIDSTATUS.
 
 
 
-\subsubsection{ESMF\_PoleType}
-\label{sec:opt:poletype}
+\subsubsection{ESMF\_POLEKIND}
+\label{sec:opt:polekind}
+
 {\sf DESCRIPTION:\\}
 This type describes the type of connection that occurs at the pole when a Grid is 
 created with {\tt ESMF\_GridCreate1PeriodicDim()}.
 
-\medskip
-\begin{description}
-\item [ESMF\_POLETYPE\_NONE] No connection at pole.
+The type of this flag is:
 
-\item [ESMF\_POLETYPE\_MONOPOLE] This edge is connected to itself. Given
+{\tt type(ESMF\_PoleKind\_Flag)}
+
+Valid values are:
+\begin{description}
+\item [ESMF\_POLEKIND\_NONE] No connection at pole.
+
+\item [ESMF\_POLEKIND\_MONOPOLE] This edge is connected to itself. Given
 that the edge is n elements long, then element i is connected to
 element i+n/2.
 
-\item [ESMF\_POLETYPE\_BIPOLE] This edge is connected to itself. Given
+\item [ESMF\_POLEKIND\_BIPOLE] This edge is connected to itself. Given
 that the edge is n elements long, element i is connected to element n-i-1.
-
 \end{description}
 
 
 
-\subsubsection{ESMF\_StaggerLoc}\label{sec:opt:staggerloc}
+\subsubsection{ESMF\_STAGGERLOC}
+\label{sec:opt:staggerloc}
 
  {\sf DESCRIPTION:\\}
  In the ESMF Grid class, data can be located at different positions in a

@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.22 2011/06/24 15:04:04 rokuingh Exp $
+% $Id: LogErr_options.tex,v 1.23 2011/06/29 20:03:46 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,26 +8,29 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsubsection{ESMF\_HaltType}
+\subsubsection{ESMF\_LOGKIND}
+\label{opt:logkindflag}
 
-\label{opt:Halttype}
 {\sf DESCRIPTION:\\}
-Specifies when to halt --- e.g., never, when a warning is issued, or when an
-error message is encountered.
+Specifies a single log file, multiple log files (one per PET), or no log files.
+
+The type of this flag is:
+
+{\tt type(ESMF\_LogKind\_Flag)}
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_LOG\_HALT\_NEVER] 
-         Never halt.  (Default.)
-   \item [ESMF\_LOG\_HALT\_ON\_WARNING]
-         Halt when either a warning or an error message is issued.
-   \item [ESMF\_LOG\_HALT\_ON\_ERROR]
-         Halt only when an error message is issued.
+   \item [ESMF\_LOGKIND\_SINGLE] 
+         Use a single log file, combining messages from all of the PETs.  Not supported on some platforms.
+   \item [ESMF\_LOGKIND\_MULTI]
+         Use multiple log files --- one per PET.  (Default.)
+   \item [ESMF\_LOGKIND\_NONE]
+         Do not issue messages to a log file.
 \end{description}
 
-\subsubsection{ESMF\_LogMsg\_Flag}
-
+\subsubsection{ESMF\_LOGMSG}
 \label{opt:logmsgflag}
+
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
 Specifies what message level --- e.g., informational, warning, 
@@ -35,6 +38,10 @@ error --- will be written to log files.  This may be used both when
 writing the message with {\tt ESMF\_LogWrite()}, and when setting the
 {\tt logmsgflag} option with {\tt ESMF\_LogSet()}.
 \end{sloppypar}
+
+The type of this flag is:
+
+{\tt type(ESMF\_LogMsg\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -47,23 +54,6 @@ Valid values are:
    \item [ESMF\_LOGMSG\_TRACE]
          Write or allow trace messages, when tracing is turned on.
 \end{description}
-
-\subsubsection{ESMF\_LogKind\_Flag}
-
-\label{opt:logkindflag}
-{\sf DESCRIPTION:\\}
-Specifies a single log file, multiple log files (one per PET), or no log files.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_LOGKIND\_SINGLE] 
-         Use a single log file, combining messages from all of the PETs.  Not supported on some platforms.
-   \item [ESMF\_LOGKIND\_MULTI]
-         Use multiple log files --- one per PET.  (Default.)
-   \item [ESMF\_LOGKIND\_NONE]
-         Do not issue messages to a log file.
-\end{description}
-
 
 
 

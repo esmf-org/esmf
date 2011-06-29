@@ -1,11 +1,14 @@
-% $Id: Field_options.tex,v 1.9 2011/06/23 22:54:33 rokuingh Exp $
-
-
+% $Id: Field_options.tex,v 1.10 2011/06/29 20:03:42 rokuingh Exp $
 
 \subsubsection{ESMF\_REGRIDMETHOD}
 \label{opt:regridmethod}
+
 {\sf DESCRIPTION:\\}  
 Specify which interpolation method to use during regridding. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_RegridMethod\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -19,10 +22,15 @@ Valid values are:
 
 \subsubsection{ESMF\_POLEMETHOD}
 \label{opt:polemethod}
+
 {\sf DESCRIPTION:\\}  
 \begin{sloppypar}
 When interpolating between two Grids which have been mapped to a sphere (using the {\tt ESMF\_REGRID\_SCHEME\_FULL3D} option to {\tt ESMF\_FieldRegridStore()}) these can be used to specify the type of artificial pole to create on the source Grid during interpolation. Creating the pole allows destination points above the top row or below the bottom row of the source Grid to still be mapped.
 \end{sloppypar}
+
+The type of this flag is:
+
+{\tt type(ESMF\_PoleMethod\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -33,15 +41,19 @@ Valid values are:
 \item [ESMF\_POLEMETHOD\_NPNTAVG] Construct an artificial pole placed in the center of the top (or bottom) row of nodes, but projected onto the sphere formed by the rest of the grid. The value at this pole is the average of the N source nodes next to the pole and surrounding the destination point (i.e. the value may differ for each destination point). Here N is set by using the {\tt regridPoleNPnts} parameter and ranges from 1 to the number of nodes around the pole. This option is useful for interpolating values which may be zeroed out by averaging around the entire pole (e.g. vector components). 
 \item [ESMF\_POLEMETHOD\_TEETH]
     No new pole point is constructed, instead the holes at the poles are filled by constructing triangles across the top and bottom row of the source Grid. This can be useful because no averaging occurs, however, because the top and bottom of the sphere are now flat, for a big enough mismatch between the size of the destination and source pole holes, some destination points may still not be able to be mapped to the source Grid. 
-
 \end{description}
 
 \subsubsection{ESMF\_FIELDSTATUS}
 \label{opt:fieldstatus}
+
 {\sf DESCRIPTION:\\}  
 \begin{sloppypar}
 An {ESMF\_Field} can be in different status after initialization. Field status can be queried using {\tt ESMF\_FieldGet()} method.
 \end{sloppypar}
+
+The type of this flag is:
+
+{\tt type(ESMF\_FieldStatus\_Flag)}
 
 Valid values are:
 \begin{description}
@@ -51,7 +63,6 @@ Valid values are:
       Field is partially created. It has a geombase object internally created and the geombase object associates with either a {\tt ESMF\_Grid}, or a {\tt ESMF\_Mesh}, or an {\tt ESMF\_XGrid}, or a {\tt ESMF\_LocStream}. It's an error to set another geombase object in such a Field. It can also be added to a {\tt ESMF\_State} and participate {\tt ESMF\_StateReconcile()}.
 \item [ESMF\_FIELDSTATUS\_COMPLETE]
       Field is completely created with geombase and data storage internally allocated. 
-
 \end{description}
 
 

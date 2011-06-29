@@ -1,6 +1,7 @@
-% $Id: Clock_options.tex,v 1.7 2011/06/24 16:52:12 rokuingh Exp $
+% $Id: Clock_options.tex,v 1.8 2011/06/29 20:03:50 rokuingh Exp $
 
-\subsubsection{ESMF\_Direction\_Flag}
+\subsubsection{ESMF\_DIRECTION}
+\label{const:direction}
 
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
@@ -26,6 +27,10 @@ its alarms after each time step is precisely replicated as it was in forward
 time-stepping mode.  All methods which query clock and alarm state will
 return the same result for a given timeStep, regardless of the direction of
 arrival.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Direction\_Flag)}
 
 Valid values are:
 \begin{description}
