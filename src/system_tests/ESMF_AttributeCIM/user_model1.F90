@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.18 2011/06/27 22:31:16 rokuingh Exp $
+! $Id: user_model1.F90,v 1.19 2011/06/29 14:51:20 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -186,9 +186,6 @@ module user_model1
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
                                     'Conservative-First-Order', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingDimension', &
-                                    '1D', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 Minutes', &
          convention=convCIM, purpose=purpField, rc=rc)
