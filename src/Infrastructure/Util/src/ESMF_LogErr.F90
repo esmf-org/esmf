@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.95 2011/06/28 22:33:24 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.96 2011/06/29 00:03:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1651,9 +1651,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            valid message types.  In addition, the following named constants
 !            may be used:
 !            \begin{description}
-!              \item {\tt ESMF\_LOG\_ALL} - Log all message types including trace messages;
-!              \item {\tt ESMF\_LOG\_NONE} - Log no message types;
-!              \item {\tt ESMF\_LOG\_NOTRACE} - Log all message types except trace messages;
+!              \item {\tt ESMF\_LOGMSG\_ALL} - Log all message types including trace messages;
+!              \item {\tt ESMF\_LOGMSG\_NONE} - Log no message types;
+!              \item {\tt ESMF\_LOGMSG\_NOTRACE} - Log all message types except trace messages;
 !            \end{description}
 !            If an empty array is provided, no messages will be logged.  
 !      \item [{[errorMask]}]
