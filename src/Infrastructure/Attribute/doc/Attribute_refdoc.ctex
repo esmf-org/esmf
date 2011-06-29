@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.29 2011/05/10 23:27:36 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.30 2011/06/29 15:04:26 eschwab Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,6 +79,7 @@
 \input{Attribute_usage} 
 \input{AttributeEx_fapi}
 \input{AttributePackageEx_fapi}
+\input{AttributeCustPackEx_fapi}
 \input{AttributeUpdateEx_fapi}
 \input{AttributeUpdateMod_fapi}
 \input{AttributeCIMEx_fapi}
@@ -90,6 +91,7 @@
 \input{../Infrastructure/Attribute/doc/Attribute_usage} 
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributePackageEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeCustPackEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateMod_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeCIMEx_fapi}

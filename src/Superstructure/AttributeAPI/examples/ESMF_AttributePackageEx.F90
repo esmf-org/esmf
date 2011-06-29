@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.30 2011/06/28 21:02:44 rokuingh Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.31 2011/06/29 15:04:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -17,11 +17,11 @@ program ESMF_AttributePackageEx
 !==============================================================================
 
 !BOE
-! \subsubsection{Attribute packages}
+! \subsubsection{Attribute packages} \label{ex:AttributePackageEx}
 !
 ! This example is slightly more complex than the example presented in section 
-! \ref{AttributeEx} and illustrates the use of the Attribute class to create 
-! Attribute hierarchies using Attribute packages.  A gridded Component
+! \ref{ex:AttributeEx} and illustrates the use of the Attribute class to
+! create Attribute hierarchies using Attribute packages.  A gridded Component
 ! is used in conjunction with two States, a FieldBundle, and various realistic
 ! Fields to create an Attribute hierarchy and copy it from one State to another.  
 ! Attribute packages are created on the Component and Fields, and the 
@@ -80,10 +80,10 @@ program ESMF_AttributePackageEx
 !EOE
 !BOC
       if (petCount<4) then
-        gridcomp = ESMF_GridCompCreate(name="gridded_component", &
+        gridcomp = ESMF_GridCompCreate(name="gridded_comp_ex2", &
           petList=(/0/), rc=rc)
       else 
-        gridcomp = ESMF_GridCompCreate(name="gridded_component", &
+        gridcomp = ESMF_GridCompCreate(name="gridded_comp_ex2", &
           petList=(/0,1,2,3/), rc=rc)
       endif
       importState = ESMF_StateCreate(name="importState",  &
