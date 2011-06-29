@@ -1,4 +1,4 @@
-! $Id: ioComp.F90,v 1.13 2011/06/27 22:31:26 rokuingh Exp $
+! $Id: ioComp.F90,v 1.14 2011/06/29 19:21:29 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -99,14 +99,14 @@ module ioCompMod
     arraySrc = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="ioComp.arraySrc", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, arraySrc, rc=rc)
+    call ESMF_StateAdd(exportState, (/arraySrc/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Create the destination Array and add it to the import State
     arrayDst = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="ioComp.arrayDst", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, arrayDst, rc=rc)
+    call ESMF_StateAdd(importState, (/arrayDst/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
   end subroutine

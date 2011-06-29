@@ -1,4 +1,4 @@
-! $Id: ESMF_EnsembleSTest.F90,v 1.16 2011/06/28 21:03:37 rokuingh Exp $
+! $Id: ESMF_EnsembleSTest.F90,v 1.17 2011/06/29 19:21:31 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_DISABLED_SYSTEM_TEST        String used by test script to count system tests.
@@ -367,19 +367,19 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_StateAdd(cplimp, cA1exp, rc=localrc)
+  call ESMF_StateAdd(cplimp, (/cA1exp/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_StateAdd(cplimp, cA2exp, rc=localrc)
+  call ESMF_StateAdd(cplimp, (/cA2exp/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_StateAdd(cplimp, cB1exp, rc=localrc)
+  call ESMF_StateAdd(cplimp, (/cB1exp/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_StateAdd(cplimp, cB2exp, rc=localrc)
+  call ESMF_StateAdd(cplimp, (/cB2exp/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.13 2011/06/27 22:31:11 rokuingh Exp $
+! $Id: user_model1.F90,v 1.14 2011/06/29 19:21:15 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -127,7 +127,7 @@ module user_model1
     srcArray1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="srcArray1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, srcArray1, rc=rc)
+    call ESMF_StateAdd(exportState, (/srcArray1/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create the dstArray1 and add it to the importState
@@ -137,7 +137,7 @@ module user_model1
     dstArray1 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="dstArray1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, dstArray1, rc=rc)
+    call ESMF_StateAdd(importState, (/dstArray1/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Fill the srcF90 array and ArrayScatter() it across srcArray1

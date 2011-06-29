@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.21 2011/06/27 22:31:19 rokuingh Exp $
+! $Id: user_FortranComponent.F90,v 1.22 2011/06/29 19:21:23 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -142,7 +142,7 @@ module user_FortranComponent
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add Array to the export State
-    call ESMF_StateAdd(exportState, array, rc=rc)
+    call ESMF_StateAdd(exportState, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_StatePrint(exportState, rc=rc)

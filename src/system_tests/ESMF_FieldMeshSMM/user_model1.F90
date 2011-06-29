@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.10 2011/06/27 22:31:37 rokuingh Exp $
+! $Id: user_model1.F90,v 1.11 2011/06/29 19:21:40 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -242,7 +242,7 @@
             srcfptr(i) = i
         enddo
 
-        call ESMF_StateAdd(exportState, humidity, rc=rc)
+        call ESMF_StateAdd(exportState, (/humidity/), rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
      !   call ESMF_StatePrint(exportState, rc=rc)
 

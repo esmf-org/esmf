@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.9 2011/06/27 22:31:36 rokuingh Exp $
+! $Id: user_model2.F90,v 1.10 2011/06/29 19:21:39 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -102,7 +102,7 @@
 
       dstfptr = 0
   
-      call ESMF_StateAdd(importState, humidity, rc=rc)
+      call ESMF_StateAdd(importState, (/humidity/), rc=rc)
       if(rc/=ESMF_SUCCESS) return
       !   call ESMF_StatePrint(importState, rc=rc)
   

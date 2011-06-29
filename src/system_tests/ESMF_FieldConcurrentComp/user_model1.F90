@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.15 2011/06/27 22:31:31 rokuingh Exp $
+! $Id: user_model1.F90,v 1.16 2011/06/29 19:21:34 w6ws Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -142,7 +142,7 @@
             grid=grid, name="rawdata", rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_StateAdd(exportState, rawdata, rc=status)
+        call ESMF_StateAdd(exportState, (/rawdata/), rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
   
@@ -150,7 +150,7 @@
             grid=grid, name="sorted_data1", rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_StateAdd(exportState, sorted_data, rc=status)
+        call ESMF_StateAdd(exportState, (/sorted_data/), rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 

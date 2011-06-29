@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.19 2011/06/29 14:51:20 eschwab Exp $
+! $Id: user_model1.F90,v 1.20 2011/06/29 19:21:20 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -227,7 +227,7 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Link the Attributes from the FieldBundle to the export State
-    call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=rc)
+    call ESMF_StateAdd(exportState, fieldbundleList=(/fieldbundle/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
   end subroutine user_init

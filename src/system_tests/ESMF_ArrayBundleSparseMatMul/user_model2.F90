@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.13 2011/06/27 22:31:01 rokuingh Exp $
+! $Id: user_model2.F90,v 1.14 2011/06/29 19:21:06 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -132,7 +132,7 @@ module user_model2
     arraybundle = ESMF_ArrayBundleCreate(arrayList=array, name="dstAryBndl", &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, arraybundle, rc=rc)
+    call ESMF_StateAdd(importState, (/arraybundle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"

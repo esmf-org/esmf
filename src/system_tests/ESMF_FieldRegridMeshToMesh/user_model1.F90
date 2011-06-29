@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2011/06/27 22:31:46 rokuingh Exp $
+! $Id: user_model1.F90,v 1.7 2011/06/29 19:21:48 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -211,7 +211,7 @@
       deallocate(ownedNodeCoords)
 
       ! Add Field to State
-      call ESMF_StateAdd(exportState, srcField, rc=rc)
+      call ESMF_StateAdd(exportState, (/srcField/), rc=rc)
       if (rc .ne. ESMF_SUCCESS) return
   !   call ESMF_StatePrint(exportState, rc=rc)
 

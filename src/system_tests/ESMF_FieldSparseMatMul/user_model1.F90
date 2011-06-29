@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2011/06/27 22:31:52 rokuingh Exp $
+! $Id: user_model1.F90,v 1.15 2011/06/29 19:21:55 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -121,7 +121,7 @@ module user_model1
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, field=field, rc=rc)
+    call ESMF_StateAdd(exportState, fieldList=(/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp1 Init returning"

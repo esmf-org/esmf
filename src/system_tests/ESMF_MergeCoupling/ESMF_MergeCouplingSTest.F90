@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.28 2011/06/28 21:04:02 rokuingh Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.29 2011/06/29 19:21:56 w6ws Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -187,8 +187,8 @@
 
       bothexp = ESMF_StateCreate(name="coupler import",  &
                                  stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
-      call ESMF_StateAddState(bothexp, c1exp, rc=rc)
-      call ESMF_StateAddState(bothexp, c2exp, rc=rc)
+      call ESMF_StateAddState(bothexp, (/c1exp/), rc=rc)
+      call ESMF_StateAddState(bothexp, (/c2exp/), rc=rc)
 
       call ESMF_CplCompInitialize(cpl, bothexp, c3imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10

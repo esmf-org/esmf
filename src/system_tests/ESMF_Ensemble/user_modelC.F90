@@ -1,4 +1,4 @@
-! $Id: user_modelC.F90,v 1.5 2011/06/27 22:31:28 rokuingh Exp $
+! $Id: user_modelC.F90,v 1.6 2011/06/29 19:21:31 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -93,7 +93,7 @@ module user_modelC
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_ArraySet(array, name="array data", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, array, rc=rc)
+    call ESMF_StateAdd(exportState, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! initial solution -- this is the average of the inital values of the

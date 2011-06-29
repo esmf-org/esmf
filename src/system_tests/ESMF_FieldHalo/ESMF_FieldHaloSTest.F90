@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.67 2011/06/28 21:03:41 rokuingh Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.68 2011/06/29 19:21:36 w6ws Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -288,7 +288,7 @@
       print *, "Field Create returned"
 
       ! Add the field to the import state.
-      call ESMF_StateAddField(importState, field1, rc=rc)
+      call ESMF_StateAddField(importState, (/field1/), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_StatePrint(importState, options="", rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30

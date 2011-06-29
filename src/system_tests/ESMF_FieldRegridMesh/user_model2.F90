@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2011/06/27 22:31:44 rokuingh Exp $
+! $Id: user_model2.F90,v 1.8 2011/06/29 19:21:47 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -171,7 +171,7 @@
       enddo    ! lDE
 
       ! Set Field Into State
-      call ESMF_StateAdd(importState, dstField, rc=rc)
+      call ESMF_StateAdd(importState, (/dstField/), rc=rc)
       if(rc/=ESMF_SUCCESS) return
 
     end subroutine user_init

@@ -1,4 +1,4 @@
-! $Id: ocean_comp.F90,v 1.6 2011/06/27 22:32:00 rokuingh Exp $
+! $Id: ocean_comp.F90,v 1.7 2011/06/29 19:22:00 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,7 +123,7 @@ module ocean_comp
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_ocn", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, field, rc=rc)
+    call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "ocean Init returning"

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.14 2011/06/27 22:31:11 rokuingh Exp $
+! $Id: user_model2.F90,v 1.15 2011/06/29 19:21:15 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,7 +123,7 @@ module user_model2
     srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="srcArray2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, srcArray2, rc=rc)
+    call ESMF_StateAdd(importState, (/srcArray2/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create the dstArray2 and add it to the exportState
@@ -133,7 +133,7 @@ module user_model2
     dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="dstArray2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, dstArray2, rc=rc)
+    call ESMF_StateAdd(exportState, (/dstArray2/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "User Comp2 Init returning"

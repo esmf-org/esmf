@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.12 2011/06/27 22:31:25 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.13 2011/06/29 19:21:28 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -118,7 +118,7 @@ module user_coupler
     	if (rc/=ESMF_SUCCESS) return ! bail out
     
         ! Add the dstArray into the exportState using the component export state name
-        call ESMF_StateAdd(exportState, dstArray, rc=rc)
+        call ESMF_StateAdd(exportState, (/dstArray/), rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
     end do    

@@ -1,4 +1,4 @@
-! $Id: atmos_comp.F90,v 1.6 2011/06/27 22:32:00 rokuingh Exp $
+! $Id: atmos_comp.F90,v 1.7 2011/06/29 19:22:00 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -124,7 +124,7 @@ module atmos_comp
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_atm", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, field, rc=rc)
+    call ESMF_StateAdd(importState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     ! Gain access to actual data via F90 array pointer

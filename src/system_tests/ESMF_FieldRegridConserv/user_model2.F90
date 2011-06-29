@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.23 2011/06/27 22:31:41 rokuingh Exp $
+! $Id: user_model2.F90,v 1.24 2011/06/29 19:21:44 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -154,7 +154,7 @@
       call ESMF_FieldGetDataPointer(humidity, idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
-      call ESMF_StateAddField(importState, humidity, status)
+      call ESMF_StateAddField(importState, (/array/), status)
       if (status .ne. ESMF_SUCCESS) goto 10
       !   call ESMF_StatePrint(importState, rc=status)
   

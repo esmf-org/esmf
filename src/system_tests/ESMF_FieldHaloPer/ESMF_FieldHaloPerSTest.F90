@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.62 2011/06/28 21:03:43 rokuingh Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.63 2011/06/29 19:21:37 w6ws Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -415,13 +415,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Add the fields to the import state.
-      call ESMF_StateAddField(importState, field(1), rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddField(importState, field(2), rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddField(importState, field(3), rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddField(importState, field(4), rc=rc)
+      call ESMF_StateAddField(importState, fieldList=field, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       if (verbose) call ESMF_StatePrint(importState, options="", rc=rc)

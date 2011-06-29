@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.5 2011/06/27 22:32:02 rokuingh Exp $
+! $Id: land_comp.F90,v 1.6 2011/06/29 19:22:01 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -124,7 +124,7 @@ module land_comp
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_lnd", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, field, rc=rc)
+    call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "land Init returning"

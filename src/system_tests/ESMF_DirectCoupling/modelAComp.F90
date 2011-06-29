@@ -1,4 +1,4 @@
-! $Id: modelAComp.F90,v 1.12 2011/06/27 22:31:26 rokuingh Exp $
+! $Id: modelAComp.F90,v 1.13 2011/06/29 19:21:29 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -99,9 +99,9 @@ module modelACompMod
     array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
       indexflag=ESMF_INDEX_GLOBAL, name="modelA.array", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(importState, array, rc=rc)
+    call ESMF_StateAdd(importState, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, array, rc=rc)
+    call ESMF_StateAdd(exportState, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
       
   end subroutine

@@ -1,4 +1,4 @@
-! $Id: modelComp.F90,v 1.23 2011/06/28 21:03:35 rokuingh Exp $
+! $Id: modelComp.F90,v 1.24 2011/06/29 19:21:29 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -166,9 +166,9 @@ module modelCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAdd(modelAExp, routehandle, rc=rc)
+    call ESMF_StateAdd(modelAExp, (/routehandle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(modelBImp, routehandle, rc=rc)
+    call ESMF_StateAdd(modelBImp, (/routehandle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine

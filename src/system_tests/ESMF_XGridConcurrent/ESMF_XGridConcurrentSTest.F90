@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.11 2011/06/28 21:04:07 rokuingh Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.12 2011/06/29 19:21:59 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -249,12 +249,12 @@ program ESMF_XGridConcurrentSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_StateAdd(landocn_export, land_export, rc=localrc)
+  call ESMF_StateAdd(landocn_export, (/land_export/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_StateAdd(landocn_export, ocean_export, rc=localrc)
+  call ESMF_StateAdd(landocn_export, (/ocean_export/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

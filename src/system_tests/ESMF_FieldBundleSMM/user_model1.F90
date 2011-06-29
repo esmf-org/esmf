@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.12 2011/06/27 22:31:30 rokuingh Exp $
+! $Id: user_model1.F90,v 1.13 2011/06/29 19:21:32 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -130,7 +130,7 @@ module user_model1
         name="fieldbundle data", rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-    call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=rc)
+    call ESMF_StateAdd(exportState, fieldbundleList=(/fieldbundle/), rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
    
     print *, "User Comp1 Init returning"

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSerialSTest.F90,v 1.17 2011/06/28 21:04:09 rokuingh Exp $
+! $Id: ESMF_XGridSerialSTest.F90,v 1.18 2011/06/29 19:22:01 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_diable_SYSTEM_TEST        String used by test script to count system tests.
@@ -249,12 +249,12 @@ program ESMF_XGridSerialSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_StateAdd(landocn_export, land_export, rc=localrc)
+  call ESMF_StateAdd(landocn_export, (/land_export/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_StateAdd(landocn_export, ocean_export, rc=localrc)
+  call ESMF_StateAdd(landocn_export, (/ocean_export/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2011/06/27 22:31:50 rokuingh Exp $
+! $Id: user_model1.F90,v 1.9 2011/06/29 19:21:53 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -128,7 +128,7 @@
         ! Set initial data values over whole array to our de id
         idata = real(de_id,ESMF_KIND_R8)
 
-        call ESMF_StateAdd(exportState, humidity, rc=rc)
+        call ESMF_StateAdd(exportState, (/humidity/), rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
      !   call ESMF_StatePrint(exportState, rc=rc)
 

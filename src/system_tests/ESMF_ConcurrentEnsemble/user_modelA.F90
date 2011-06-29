@@ -1,4 +1,4 @@
-! $Id: user_modelA.F90,v 1.4 2011/06/27 22:31:25 rokuingh Exp $
+! $Id: user_modelA.F90,v 1.5 2011/06/29 19:21:28 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -118,7 +118,7 @@ module user_modelA
     enddo
 
     ! Set the export state 
-    call ESMF_StateAdd(exportState, array, rc=rc)
+    call ESMF_StateAdd(exportState, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     allocate(intStatePtr%p)

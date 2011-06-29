@@ -1,4 +1,4 @@
-! $Id: cplComp.F90,v 1.14 2011/06/27 22:31:26 rokuingh Exp $
+! $Id: cplComp.F90,v 1.15 2011/06/29 19:21:29 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -109,9 +109,9 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAdd(importState, routehandle, rc=rc)
+    call ESMF_StateAdd(importState, (/routehandle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, routehandle, rc=rc)
+    call ESMF_StateAdd(exportState, (/routehandle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
   end subroutine
@@ -156,9 +156,9 @@ module cplCompMod
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Add RouteHandle to import and export State for direct coupling
-    call ESMF_StateAdd(importState, routehandle, rc=rc)
+    call ESMF_StateAdd(importState, (/routehandle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, routehandle, rc=rc)
+    call ESMF_StateAdd(exportState, (/routehandle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
   end subroutine

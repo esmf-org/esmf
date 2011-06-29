@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.33 2011/06/27 22:31:17 rokuingh Exp $
+! $Id: user_model.F90,v 1.34 2011/06/29 19:21:21 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -175,7 +175,7 @@
         ! Add an empty "humidity" field to the export state.
         humidity = ESMF_FieldEmptyCreate(name="humidity", rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
-        call ESMF_StateAdd(exportState, humidity, rc=rc)
+        call ESMF_StateAdd(exportState, (/humidity/), rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
         call ESMF_StatePrint(exportState, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail on error    
@@ -211,7 +211,7 @@
         if (onetime .gt. 0) then
           call ESMF_StateGet(exportState, "humidity", humidity, rc=rc)
           if (rc/=ESMF_SUCCESS) return ! bail on error    
-          call ESMF_StateAdd(importState, humidity, rc=rc)
+          call ESMF_StateAdd(importState, (/humidity/), rc=rc)
           if (rc/=ESMF_SUCCESS) return ! bail on error    
           onetime = 0
         endif

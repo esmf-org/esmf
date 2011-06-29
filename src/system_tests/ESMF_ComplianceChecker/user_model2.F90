@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.10 2011/06/27 22:31:21 rokuingh Exp $
+! $Id: user_model2.F90,v 1.11 2011/06/29 19:21:24 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -135,13 +135,13 @@ module user_model2
     field = ESMF_FieldEmptyCreate(name="myTestField", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
-    call ESMF_StateAdd(exportState, field, rc=rc)
+    call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     fieldbundle = ESMF_FieldBundleCreate(name="myTestFieldBundle", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_StateAdd(exportState, fieldbundle, rc=rc)
+    call ESMF_StateAdd(exportState, (/fieldbundle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     field = ESMF_FieldEmptyCreate(name="myTestField 1 in Bundle", rc=rc)
