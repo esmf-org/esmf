@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2010/07/20 05:49:39 eschwab Exp $
+# $Id: makefile,v 1.14 2011/06/29 14:52:59 eschwab Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -9,6 +9,7 @@ LOCDIR	  = src/Superstructure/AttributeAPI/examples
 
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_AttributeEx \
 		    $(ESMF_EXDIR)/ESMF_AttributePackageEx \
+		    $(ESMF_EXDIR)/ESMF_AttributeCustPackEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeUpdateEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeCIMEx \
 		    $(ESMF_EXDIR)/ESMF_AttReadCustCplCompEx \
@@ -20,6 +21,7 @@ ESMF_EXAMPLE_AttributeUpdate_OBJS = ESMF_AttributeUpdateMod.o
 
 EXAMPLES_RUN      = run_ESMF_AttributeEx \
 		    run_ESMF_AttributePackageEx \
+		    run_ESMF_AttributeCustPackEx \
 		    run_ESMF_AttributeUpdateEx \
 		    run_ESMF_AttributeCIMEx \
 		    run_ESMF_AttReadCustCplCompEx \
@@ -29,6 +31,7 @@ EXAMPLES_RUN      = run_ESMF_AttributeEx \
 
 EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni \
 		    run_ESMF_AttributePackageEx_uni \
+		    run_ESMF_AttributeCustPackEx_uni \
 		    run_ESMF_AttributeCIMEx_uni \
 		    run_ESMF_AttReadCustCplCompEx_uni \
 		    run_ESMF_AttReadGridCompEx_uni \
@@ -64,6 +67,14 @@ run_ESMF_AttributePackageEx:
 
 run_ESMF_AttributePackageEx_uni:
 	$(MAKE) EXNAME=AttributePackage NP=1 exfrun
+
+# --- ESMF_AttributeCustPackEx
+
+run_ESMF_AttributeCustPackEx:
+	$(MAKE) EXNAME=AttributeCustPack NP=4 exfrun
+
+run_ESMF_AttributeCustPackEx_uni:
+	$(MAKE) EXNAME=AttributeCustPack NP=1 exfrun
 
 # --- ESMF_AttributeUpdateEx
 
