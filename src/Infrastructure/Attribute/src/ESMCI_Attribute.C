@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.114 2011/06/21 01:43:54 w6ws Exp $
+// $Id: ESMCI_Attribute.C,v 1.115 2011/06/29 14:47:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.114 2011/06/21 01:43:54 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.115 2011/06/29 14:47:15 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -482,6 +482,8 @@ int Attribute::count=0;
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("LongName", "CIM 1.5",
                             "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("MetadataVersion", "CIM 1.5",
+                            "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("ModelType", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("ReleaseDate", "CIM 1.5",
@@ -502,8 +504,6 @@ int Attribute::count=0;
       localrc = AttPackAddAttribute("SimulationDuration", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationLongName", "CIM 1.5",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationMetadataVersion", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationNumberOfProcessingElements",
                                                           "CIM 1.5",
@@ -697,6 +697,7 @@ int Attribute::count=0;
   //
   localrc = stdParent->AttPackAddAttribute("Description");
   localrc = stdParent->AttPackAddAttribute("LongName");
+  localrc = stdParent->AttPackAddAttribute("MetadataVersion");
   localrc = stdParent->AttPackAddAttribute("ModelType");
   localrc = stdParent->AttPackAddAttribute("ReleaseDate");
   localrc = stdParent->AttPackAddAttribute("ShortName");
@@ -711,7 +712,6 @@ int Attribute::count=0;
   //
   localrc = stdParent->AttPackAddAttribute("SimulationDuration");
   localrc = stdParent->AttPackAddAttribute("SimulationLongName");
-  localrc = stdParent->AttPackAddAttribute("SimulationMetadataVersion");
   localrc = stdParent->AttPackAddAttribute("SimulationNumberOfProcessingElements");
   localrc = stdParent->AttPackAddAttribute("SimulationRationale");
   localrc = stdParent->AttPackAddAttribute("SimulationShortName");
@@ -4796,11 +4796,23 @@ if (attrRoot == ESMF_TRUE) {
       ESMC_LOG_WARN, ESMC_CONTEXT);
   }
 
-  // TODO:  auto-generate documentID and documentVersion?
+  // TODO:  auto-generate documentID ?
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 
                                  indent, 0);
-  localrc = io_xml->writeElement("documentVersion", "1.0", indent, 0);
+
+  if (attpack->AttributeIsSet("MetadataVersion")) {
+    localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeElement("documentVersion", value, indent, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    localrc = io_xml->writeElement("documentVersion", "1.0", indent, 0);
+  }
 
   // stamp the metadata source as ESMF, version x
   string metadataSource = "ESMF Version ";
@@ -5011,8 +5023,8 @@ if (attrRoot == ESMF_TRUE) {
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
 
-  if (attpack->AttributeIsSet("SimulationMetadataVersion")) {
-    localrc = attpack->AttributeGet("SimulationMetadataVersion", &valuevector);
+  if (attpack->AttributeIsSet("MetadataVersion")) {
+    localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
     if (valuevector.size() > 1) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
                           "Write items > 1 - Not yet implemented", &localrc);
@@ -5062,6 +5074,7 @@ if (attrRoot == ESMF_TRUE) {
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL;
+  Attribute *attpackMain = NULL;
 
   vector<string> valuevector, machineNameVector, compilerNameVector;
   string value, machineName, compilerName;
@@ -5271,7 +5284,23 @@ if (attrRoot == ESMF_TRUE) {
   // TODO:  auto-generate?
   localrc = io_xml->writeElement("documentID", 
                                  "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
-  localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
+
+  // get CIM/Main package to retrieve MetadataVersion
+  attpackMain = AttPackGet("CIM 1.5", "Model Component Simulation Description",
+                           "comp", attPackInstanceName);
+  if (attpackMain == NULL) return ESMF_SUCCESS;  // if package not found, return 
+  if (attpackMain->AttributeIsSet("MetadataVersion")) {
+    localrc = attpackMain->AttributeGet("MetadataVersion", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeElement("documentVersion", value, 2, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
+  }
 
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
@@ -6080,20 +6109,9 @@ if (attrRoot == ESMF_TRUE) {
                              "spatialRegriddingDimension", value.c_str()); 
         } else {
           // Output starting <spatialRegridding> element, to match ending 
-          // element </spatialRegridding>, but with a blank 
-          // spatialRegriddingDimension="" attr. This will produce an
-          // invalid CIM 1.5 file, yet keep it well-formed XML.  Better than 
-          // outputting no 
-          // <spatialRegriddingDimension></spatialRegriddingDimension> pair, 
-          // which would produce a more confusing validation error.
-          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
-                             "spatialRegriddingDimension", ""); 
-          ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension in "
-            "standard attribute package (convention='CIM 1.5', "
-            "purpose='Inputs Description') must to be set (to one of {1D, "
-            "2D, 3D}), when attribute SpatialRegriddingMethod is set, "
-            "to produce valid CIM XML output.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+          // element </spatialRegridding>, but without a
+          // spatialRegriddingDimension="" xml attribute.
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 0);
         }
         if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
           localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
