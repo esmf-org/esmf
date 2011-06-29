@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.14 2011/06/24 16:52:18 rokuingh Exp $
+! $Id: NUOPC.F90,v 1.15 2011/06/29 23:05:23 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -918,7 +918,7 @@ module NUOPC
         file=FILENAME)) &
         return  ! bail out
     endif
-    call ESMF_StateAdd(state, field, rc=rc)
+    call ESMF_StateAdd(state, fieldList=(/field/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
