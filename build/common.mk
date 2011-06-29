@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.337 2011/06/28 15:45:16 theurich Exp $
+#  $Id: common.mk,v 1.338 2011/06/29 20:26:00 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -445,13 +445,17 @@ export ESMFMKFILE = $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
 #-------------------------------------------------------------------------------
 ESMF_VERSION_STRING = `fgrep ESMF_VERSION_STRING $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* \"//' -e 's/\"//' `
 
-ESMF_MAJOR_VERSION = `fgrep ESMF_MAJOR_VERSION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+ESMF_VERSION_MAJOR = `fgrep ESMF_VERSION_MAJOR $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
 
-ESMF_MINOR_VERSION = `fgrep ESMF_MINOR_VERSION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+ESMF_VERSION_MINOR = `fgrep ESMF_VERSION_MINOR $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
 
-ESMF_REVISION = `fgrep ESMF_REVISION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+ESMF_VERSION_REVISION = `fgrep ESMF_VERSION_REVISION $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
 
-ESMF_PATCHLEVEL = `fgrep ESMF_PATCHLEVEL $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+ESMF_VERSION_PATCHLEVEL = `fgrep ESMF_VERSION_PATCHLEVEL $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+
+ESMF_VERSION_PUBLIC = `fgrep ESMF_VERSION_PUBLIC $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
+
+ESMF_VERSION_BETASNAPSHOT = `fgrep ESMF_VERSION_BETASNAPSHOT $(ESMF_DIR)/src/Infrastructure/Util/include/ESMC_Macros.h | $(ESMF_SED) -e 's/.* //' `
 
 #-------------------------------------------------------------------------------
 # TODO: in general ESMF_BUILD is respected - most generated files are created

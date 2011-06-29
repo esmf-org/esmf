@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.63 2011/06/29 20:03:56 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.64 2011/06/29 20:26:08 theurich Exp $
 
 \section{Constants}
 
@@ -496,19 +496,27 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_VERSION}
+\label{const:version}
 
 {\sf DESCRIPTION:\\}
-The following parameters are available to allow detection of the
-version of ESMF in use.
+The following parameters allow detection of the precise version of ESMF in use.
 \begin{description}
+\item [ESMF\_VERSION\_BETASNAPSHOT]
+      Logical parameter indicating beta snapshot phase
+      (.true. for any version during the pre-release development phase,
+      .false. for any released version of the software)
 \item [ESMF\_VERSION\_MAJOR]
-      Integer parameter with the major version number (e.g., 3 for v3.1.0)
+      Integer parameter with the major version number (e.g., 5 for v5.2.0r)
 \item [ESMF\_VERSION\_MINOR]
-      Integer parameter with the minor version number (e.g., 1 for v3.1.0)
-\item [ESMF\_VERSION\_REVISION]
-      Integer parameter with the revision number (e.g., 0 for v3.1.0)
+      Integer parameter with the minor version number (e.g., 2 for v5.2.0r)
 \item [ESMF\_VERSION\_PATCHLEVEL]
-      Integer parameter with the patch level of a specific revision (e.g., 2 for v3.1.0rp2)
+      Integer parameter with the patch level of a specific revision
+      (e.g., 0 for v5.2.0r, or 1 for v5.2.0rp1)
+\item [ESMF\_VERSION\_PUBLIC]
+      Logical parameter indicating public vs. internal relase status
+      (e.g., .true. for v5.2.0r, or .false. for v5.2.0)
+\item [ESMF\_VERSION\_REVISION]
+      Integer parameter with the revision number (e.g., 0 for v5.2.0r)
 \item [ESMF\_VERSION\_STRING]
-      Character string parameter describing the release (e.g., "3.1.0rp2")
+      Character string parameter describing the release (e.g., "5.2.0r")
 \end{description}

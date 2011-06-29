@@ -1,4 +1,4 @@
-/* $Id: ESMF_InfoC.c,v 1.1 2010/09/22 23:46:55 theurich Exp $ */
+/* $Id: ESMF_InfoC.c,v 1.2 2011/06/29 20:26:06 theurich Exp $ */
 
 #include <stdio.h>
 #include "ESMC.h"
@@ -26,11 +26,15 @@ int main(int argc, char *argv[]){
     }else{
       /* regular execution */
       printf("ESMF_InfoC\n");
-      printf("  ESMF_MAJOR_VERSION:  %d\n", ESMF_MAJOR_VERSION);
-      printf("  ESMF_MINOR_VERSION:  %d\n", ESMF_MINOR_VERSION);
-      printf("  ESMF_REVISION:       %d\n", ESMF_REVISION);
-      printf("  ESMF_PATCHLEVEL:     %d\n", ESMF_PATCHLEVEL);
-      printf("  ESMF_VERSION_STRING: %s\n", ESMF_VERSION_STRING);
+      printf("\n");
+      printf("  ESMF_VERSION_STRING:       %s\n", ESMF_VERSION_STRING);
+      printf("\n");
+      printf("  ESMF_VERSION_MAJOR:        %d\n", ESMF_VERSION_MAJOR);
+      printf("  ESMF_VERSION_MINOR:        %d\n", ESMF_VERSION_MINOR);
+      printf("  ESMF_VERSION_REVISION:     %d\n", ESMF_VERSION_REVISION);
+      printf("  ESMF_VERSION_PATCHLEVEL:   %d\n", ESMF_VERSION_PATCHLEVEL);
+      printf("  ESMF_VERSION_PUBLIC:       %c\n", ESMF_VERSION_PUBLIC);
+      printf("  ESMF_VERSION_BETASNAPSHOT: %c\n", ESMF_VERSION_BETASNAPSHOT);
     }
   }
 

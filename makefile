@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.123 2011/02/07 20:28:42 gerhard.j.theurich Exp $
+# $Id: makefile,v 1.124 2011/06/29 20:25:58 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -248,10 +248,13 @@ info_mk: chkdir_lib
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_VERSION_STRING=$(ESMF_VERSION_STRING)" >> $(MKINFO)
-	-@echo "ESMF_MAJOR_VERSION=$(ESMF_MAJOR_VERSION)" >> $(MKINFO)
-	-@echo "ESMF_MINOR_VERSION=$(ESMF_MINOR_VERSION)" >> $(MKINFO)
-	-@echo "ESMF_REVISION=$(ESMF_REVISION)" >> $(MKINFO)
-	-@echo "ESMF_PATCHLEVEL=$(ESMF_PATCHLEVEL)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
+	-@echo "ESMF_VERSION_MAJOR=$(ESMF_VERSION_MAJOR)" >> $(MKINFO)
+	-@echo "ESMF_VERSION_MINOR=$(ESMF_VERSION_MINOR)" >> $(MKINFO)
+	-@echo "ESMF_VERSION_REVISION=$(ESMF_VERSION_REVISION)" >> $(MKINFO)
+	-@echo "ESMF_VERSION_PATCHLEVEL=$(ESMF_VERSION_PATCHLEVEL)" >> $(MKINFO)
+	-@echo "ESMF_VERSION_PUBLIC=$(ESMF_VERSION_PUBLIC)" >> $(MKINFO)
+	-@echo "ESMF_VERSION_BETASNAPSHOT=$(ESMF_VERSION_BETASNAPSHOT)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_APPSDIR=$(ESMF_APPSDIR)" >> $(MKINFO)
