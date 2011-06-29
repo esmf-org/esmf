@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.35 2011/06/27 22:30:39 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.36 2011/06/29 18:56:27 w6ws Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -489,7 +489,7 @@ module ESMF_AttributeUpdateMod
     call ESMF_FieldBundleAdd(fieldbundle, (/CONVKE/), rc=status)
     call ESMF_FieldBundleAdd(fieldbundle, (/CONVPHI/), rc=status)
 
-    call ESMF_StateAdd(exportState, fieldbundle=fieldbundle, rc=status)
+    call ESMF_StateAdd(exportState, fieldbundleList=(/fieldbundle/), rc=status)
 !EOC
 
 !BOE

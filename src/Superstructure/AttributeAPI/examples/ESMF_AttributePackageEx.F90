@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.31 2011/06/29 15:04:28 eschwab Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.32 2011/06/29 18:56:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -466,7 +466,7 @@ program ESMF_AttributePackageEx
       call ESMF_FieldBundleAdd(fbundle, (/CONVKE/), rc=rc)
       call ESMF_FieldBundleAdd(fbundle, (/CONVPHI/), rc=rc)
       
-      call ESMF_StateAdd(exportState, fieldbundle=fbundle, rc=rc)
+      call ESMF_StateAdd(exportState, fieldbundleList=(/fbundle/), rc=rc)
 !EOC
 
 !BOE

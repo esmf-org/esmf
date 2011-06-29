@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.40 2011/06/29 14:49:01 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.41 2011/06/29 18:56:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -342,7 +342,7 @@ program ESMF_AttributeCIMEx
 
 !BOC
       ! Add the Field directly to the State
-      call ESMF_StateAdd(exportState, field=ozone, rc=rc)
+      call ESMF_StateAdd(exportState, fieldList=(/ozone/), rc=rc)
 !EOC
 
 !BOE
