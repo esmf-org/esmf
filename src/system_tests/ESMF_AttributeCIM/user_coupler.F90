@@ -188,6 +188,8 @@ module user_coupler
       'AerosolEmissionAndConc', convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
       'www.nerc.ac.uk', convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'MetadataVersion', &
+      '1.2', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Simulation run attributes
@@ -208,9 +210,6 @@ module user_coupler
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationNumberOfProcessingElements', &
      '16', &
-      convention=convCIM, purpose=purpComp, rc=rc)
-    call ESMF_AttributeSet(comp, 'SimulationMetadataVersion', &
-     '1.0', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 

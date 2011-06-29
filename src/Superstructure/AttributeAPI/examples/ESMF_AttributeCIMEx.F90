@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.39 2011/06/28 21:02:44 rokuingh Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.40 2011/06/29 14:49:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -165,6 +165,8 @@ program ESMF_AttributeCIMEx
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'URL', &
         'www.nerc.ac.uk', convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp, 'MetadataVersion', '1.1', &
+        convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Simulation run attributes
       call ESMF_AttributeSet(gridcomp, 'SimulationShortName', &
@@ -183,8 +185,6 @@ program ESMF_AttributeCIMEx
         convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'SimulationNumberOfProcessingElements', &
                                        '16', &
-        convention=convCIM, purpose=purpComp, rc=rc)
-      call ESMF_AttributeSet(gridcomp, 'SimulationMetadataVersion', '1.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
 
       ! Document genealogy
