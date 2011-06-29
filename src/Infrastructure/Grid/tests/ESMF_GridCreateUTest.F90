@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.119 2011/06/24 16:52:05 rokuingh Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.120 2011/06/29 16:05:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.119 2011/06/24 16:52:05 rokuingh Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.120 2011/06/29 16:05:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -191,7 +191,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that match returns true
-  if (ESMF_GridMatchType(grid,grid2,rc=localrc) /=ESMF_GRIDMATCH_EXACT) correct=.false.
+  if (ESMF_GridMatch(grid,grid2,rc=localrc) /=ESMF_GRIDMATCH_EXACT) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Destroy grid2 and make one that won't match
@@ -204,7 +204,7 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check that match returns false
-  if (ESMF_GridMatchType(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT) correct=.false.   
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)==ESMF_GRIDMATCH_EXACT) correct=.false.   
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   
   ! get rid of first grid
@@ -253,7 +253,7 @@ program ESMF_GridCreateUTest
 
   ! If the grid create copy works, then grid2 should now be 
   ! a perfect copy of grid, so check that match returns true
-  if (ESMF_GridMatchType(grid,grid2,rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
+  if (ESMF_GridMatch(grid,grid2,rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! get rid of first grid
@@ -301,7 +301,7 @@ program ESMF_GridCreateUTest
 #if 0
   ! If the grid create copy works, then grid2 should now be 
   ! a perfect copy of grid, so check that match returns true
-  if (.not. ESMF_GridMatchType(grid,grid2,rc=localrc)) correct=.false.
+  if (.not. ESMF_GridMatch(grid,grid2,rc=localrc)) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 #endif
 

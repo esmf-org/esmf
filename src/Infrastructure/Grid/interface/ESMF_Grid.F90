@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.234 2011/06/28 22:38:54 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.235 2011/06/29 16:05:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -140,19 +140,19 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_CoordSys
+! ! ESMF_CoordSys_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_CoordSys
+  type ESMF_CoordSys_Flag
   sequence
 !  private
      integer :: coordsys
   end type
 
-  type(ESMF_CoordSys), parameter :: &
-    ESMF_COORDSYS_CART    = ESMF_CoordSys(0), &
-    ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys(1), &
-    ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys(2)
+  type(ESMF_CoordSys_Flag), parameter :: &
+    ESMF_COORDSYS_CART    = ESMF_CoordSys_Flag(0), &
+    ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
+    ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
 
 
 !------------------------------------------------------------------------------
@@ -192,17 +192,17 @@ integer,parameter :: ESMF_ARBDIM = -1
 ! ! ESMF_GridStatus_Flag
 !
 !------------------------------------------------------------------------------
-  type ESMF_GridMatchType_Flag
+  type ESMF_GridMatch_Flag
   sequence
 !  private
      integer :: gridmatch
   end type
 
-  type(ESMF_GridMatchType_Flag), parameter :: &
-                      ESMF_GRIDMATCH_INVALID=ESMF_GridMatchType_Flag(-1), &
-                      ESMF_GRIDMATCH_UNINIT=ESMF_GridMatchType_Flag(0), &
-                      ESMF_GRIDMATCH_NONE=ESMF_GridMatchType_Flag(1), &
-		      ESMF_GRIDMATCH_EXACT=ESMF_GridMatchType_Flag(2)
+  type(ESMF_GridMatch_Flag), parameter :: &
+                      ESMF_GRIDMATCH_INVALID=ESMF_GridMatch_Flag(-1), &
+                      ESMF_GRIDMATCH_UNINIT=ESMF_GridMatch_Flag(0), &
+                      ESMF_GRIDMATCH_NONE=ESMF_GridMatch_Flag(1), &
+		      ESMF_GRIDMATCH_EXACT=ESMF_GridMatch_Flag(2)
 
 !------------------------------------------------------------------------------
 !
@@ -215,14 +215,14 @@ public ESMF_GridConn_Flag,  ESMF_GRIDCONN_NONE, ESMF_GRIDCONN_PERIODIC, &
 public ESMF_GridStatus_Flag,  ESMF_GRIDSTATUS_INVALID, ESMF_GRIDSTATUS_UNINIT, &
                       ESMF_GRIDSTATUS_EMPTY,  ESMF_GRIDSTATUS_COMPLETE
 
-public ESMF_GridMatchType_Flag,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
+public ESMF_GridMatch_Flag,  ESMF_GRIDMATCH_INVALID, ESMF_GRIDMATCH_UNINIT, &
                          ESMF_GRIDMATCH_NONE,  ESMF_GRIDMATCH_EXACT
 
 public  ESMF_PoleType,  ESMF_POLETYPE_NONE, ESMF_POLETYPE_MONOPOLE, &
                         ESMF_POLETYPE_BIPOLE
 
 
-public ESMF_CoordSys, ESMF_COORDSYS_CART, &
+public ESMF_CoordSys_Flag, ESMF_COORDSYS_CART, &
                       ESMF_COORDSYS_SPH_DEG, &
                       ESMF_COORDSYS_SPH_RAD
 
@@ -280,7 +280,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridSerialize
   public ESMF_GridDeserialize
 
-  public ESMF_GridMatchType
+  public ESMF_GridMatch
 
   public ESMF_GridValidate
 
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.234 2011/06/28 22:38:54 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.235 2011/06/29 16:05:55 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -823,7 +823,7 @@ end interface
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchTypeEqual
+         module procedure ESMF_GridMatchEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
@@ -839,7 +839,7 @@ end interface
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchTypeNotEqual
+         module procedure ESMF_GridMatchNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -855,7 +855,7 @@ end interface
       interface operator (>)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchTypeGreater
+         module procedure ESMF_GridMatchGreater
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -870,7 +870,7 @@ end interface
       interface operator (.lt.)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchTypeLess
+         module procedure ESMF_GridMatchLess
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -885,7 +885,7 @@ end interface
       interface operator (>=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchTypeGreaterEqual
+         module procedure ESMF_GridMatchGreaterEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -900,7 +900,7 @@ end interface
       interface operator (.le.)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMatchTypeLessEqual
+         module procedure ESMF_GridMatchLessEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -3300,7 +3300,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -3586,7 +3586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -3856,7 +3856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
        type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -4088,7 +4088,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_DistGrid),   intent(in)             :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional  :: distgridToGridMap(:)
-       type(ESMF_CoordSys),   intent(in),  optional  :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional  :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional  :: coordTypeKind
        integer,               intent(in),  optional  :: coordDimCount(:)
        integer,               intent(in),  optional  :: coordDimMap(:,:)
@@ -4341,7 +4341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)              :: indexArray(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),   optional  :: distDim(:)
-       type(ESMF_CoordSys),   intent(in),   optional  :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),   optional  :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
        integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
@@ -5699,7 +5699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -5971,7 +5971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -6227,7 +6227,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_PoleType),   intent(in),  optional :: poleType(2)
        integer,               intent(in),  optional :: periodicDim
        integer,               intent(in),  optional :: poleDim
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -6450,7 +6450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -6708,7 +6708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -6950,7 +6950,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -7163,7 +7163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -7414,7 +7414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in),  optional :: minIndex(:)
        integer,               intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -7649,7 +7649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(in)   	    :: arbIndexCount
        integer,               intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_CoordSys),   intent(in),  optional :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
        integer,               intent(in),  optional :: coordDep1(:)
        integer,               intent(in),  optional :: coordDep2(:)
@@ -16606,15 +16606,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchType()"
+#define ESMF_METHOD "ESMF_GridMatch()"
 !BOP
-! !IROUTINE: ESMF_GridMatchType - Check if two Grid objects match
+! !IROUTINE: ESMF_GridMatch - Check if two Grid objects match
 
 ! !INTERFACE:
-  function ESMF_GridMatchType(grid1, grid2, keywordEnforcer, rc)
+  function ESMF_GridMatch(grid1, grid2, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_GridMatchType_Flag) :: ESMF_GridMatchType
+    type(ESMF_GridMatch_Flag) :: ESMF_GridMatch
       
 ! !ARGUMENTS:
     type(ESMF_Grid),  intent(in)              :: grid1
@@ -16625,7 +16625,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !  Check if {\tt grid1} and {\tt grid2} match. Returns a range of values of type
-!  ESMF\_GridMatchType indicating how closely the Grids match. For a description of
+!  ESMF\_GridMatch indicating how closely the Grids match. For a description of
 !  the possible return values, please see~\ref{sec:opt:gridmatchtype}. 
 !  Please also note that this call returns the match for the piece of the Grids on
 !  the local PET only. It's entirely possible for this call to return a different match
@@ -16652,7 +16652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! init to one setting in case of error
-    ESMF_GridMatchType = ESMF_GRIDMATCH_NONE
+    ESMF_GridMatch = ESMF_GRIDMATCH_NONE
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit, grid1, rc)
@@ -16665,14 +16665,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (matchResult == 1) then
-       ESMF_GridMatchType = ESMF_GRIDMATCH_EXACT
+       ESMF_GridMatch = ESMF_GRIDMATCH_EXACT
     else
-       ESMF_GridMatchType = ESMF_GRIDMATCH_NONE
+       ESMF_GridMatch = ESMF_GRIDMATCH_NONE
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-  end function ESMF_GridMatchType
+  end function ESMF_GridMatch
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -16700,7 +16700,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_DistGrid),   intent(in),   optional  :: distgrid
        integer,               intent(in),   optional  :: distgridToGridMap(:)
        integer,               intent(in),   optional  :: distDim(:)
-       type(ESMF_CoordSys),   intent(in),   optional  :: coordSys
+       type(ESMF_CoordSys_Flag),   intent(in),   optional  :: coordSys
        type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
        integer,               intent(in),   optional  :: coordDimCount(:)
        integer,               intent(in),   optional  :: coordDimMap(:,:)
@@ -20324,19 +20324,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchTypeEqual"
+#define ESMF_METHOD "ESMF_GridMatchEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchTypeEqual - Equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchEqual - Equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchTypeEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchTypeEqual
+      logical :: ESMF_GridMatchEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType_Flag), intent(in) :: &
+      type (ESMF_GridMatch_Flag), intent(in) :: &
          GridMatch1,      &! Two igrid statuses to compare for
          GridMatch2        ! equality
 
@@ -20352,25 +20352,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchTypeEqual = (GridMatch1%gridmatch == &
+      ESMF_GridMatchEqual = (GridMatch1%gridmatch == &
                               GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchTypeEqual
+      end function ESMF_GridMatchEqual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchTypeNotEqual"
+#define ESMF_METHOD "ESMF_GridMatchNotEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchTypeNotEqual - Non-equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchNotEqual - Non-equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchTypeNotEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchNotEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchTypeNotEqual
+      logical :: ESMF_GridMatchNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType_Flag), intent(in) :: &
+      type (ESMF_GridMatch_Flag), intent(in) :: &
          GridMatch1,      &! Two GridMatch Statuses to compare for
          GridMatch2        ! inequality
 
@@ -20386,27 +20386,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchTypeNotEqual = (GridMatch1%gridmatch /= &
+      ESMF_GridMatchNotEqual = (GridMatch1%gridmatch /= &
                                  GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchTypeNotEqual
+      end function ESMF_GridMatchNotEqual
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchTypeGreater"
+#define ESMF_METHOD "ESMF_GridMatchGreater"
 !BOPI
-! !IROUTINE: ESMF_GridMatchTypeGreater - Equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchGreater - Equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchTypeGreater(GridMatch1, GridMatch2)
+      function ESMF_GridMatchGreater(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchTypeGreater
+      logical :: ESMF_GridMatchGreater
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType_Flag), intent(in) :: &
+      type (ESMF_GridMatch_Flag), intent(in) :: &
          GridMatch1,      &! Two igrid statuses to compare for
          GridMatch2        ! equality
 
@@ -20422,25 +20422,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchTypeGreater = (GridMatch1%gridmatch > &
+      ESMF_GridMatchGreater = (GridMatch1%gridmatch > &
                               GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchTypeGreater
+      end function ESMF_GridMatchGreater
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchTypeLess"
+#define ESMF_METHOD "ESMF_GridMatchLess"
 !BOPI
-! !IROUTINE: ESMF_GridMatchTypeLess - Non-equality of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchLess - Non-equality of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchTypeLess(GridMatch1, GridMatch2)
+      function ESMF_GridMatchLess(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchTypeLess
+      logical :: ESMF_GridMatchLess
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType_Flag), intent(in) :: &
+      type (ESMF_GridMatch_Flag), intent(in) :: &
          GridMatch1,      &! Two GridMatch Statuses to compare for
          GridMatch2        ! inequality
 
@@ -20456,26 +20456,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchTypeLess = (GridMatch1%gridmatch .lt. &
+      ESMF_GridMatchLess = (GridMatch1%gridmatch .lt. &
                                  GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchTypeLess
+      end function ESMF_GridMatchLess
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchTypeGreaterEqual"
+#define ESMF_METHOD "ESMF_GridMatchGreaterEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchTypeGreaterEqual - Greater than or equal of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchGreaterEqual - Greater than or equal of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchTypeGreaterEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchGreaterEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchTypeGreaterEqual
+      logical :: ESMF_GridMatchGreaterEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType_Flag), intent(in) :: &
+      type (ESMF_GridMatch_Flag), intent(in) :: &
          GridMatch1,      &! Two igrid statuses to compare for
          GridMatch2        ! equality
 
@@ -20491,25 +20491,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchTypeGreaterEqual = (GridMatch1%gridmatch >= &
+      ESMF_GridMatchGreaterEqual = (GridMatch1%gridmatch >= &
                               GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchTypeGreaterEqual
+      end function ESMF_GridMatchGreaterEqual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridMatchTypeLessEqual"
+#define ESMF_METHOD "ESMF_GridMatchLessEqual"
 !BOPI
-! !IROUTINE: ESMF_GridMatchTypeLessEqual - Less than or equal of GridMatch statuses
+! !IROUTINE: ESMF_GridMatchLessEqual - Less than or equal of GridMatch statuses
 !
 ! !INTERFACE:
-      function ESMF_GridMatchTypeLessEqual(GridMatch1, GridMatch2)
+      function ESMF_GridMatchLessEqual(GridMatch1, GridMatch2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMatchTypeLessEqual
+      logical :: ESMF_GridMatchLessEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMatchType_Flag), intent(in) :: &
+      type (ESMF_GridMatch_Flag), intent(in) :: &
          GridMatch1,      &! Two GridMatch Statuses to compare for
          GridMatch2        ! inequality
 
@@ -20525,10 +20525,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 
-      ESMF_GridMatchTypeLessEqual = (GridMatch1%gridmatch .le. &
+      ESMF_GridMatchLessEqual = (GridMatch1%gridmatch .le. &
                                  GridMatch2%gridmatch)
 
-      end function ESMF_GridMatchTypeLessEqual
+      end function ESMF_GridMatchLessEqual
 
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.23 2011/06/28 22:38:56 rokuingh Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.24 2011/06/29 16:05:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.23 2011/06/28 22:38:56 rokuingh Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.24 2011/06/29 16:05:57 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -89,7 +89,7 @@ program ESMF_GridItemUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test ESMF_GridMatchType() on Grids with the same item values"
+  write(name, *) "Test ESMF_GridMatch() on Grids with the same item values"
   write(failMsg, *) "Incorrect result"
 
   ! init flags
@@ -165,7 +165,7 @@ program ESMF_GridItemUTest
 
   ! Check Grid Match
   ! (it should pass)
-  if (ESMF_GridMatchType(gridA, gridB, rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
+  if (ESMF_GridMatch(gridA, gridB, rc=localrc)/=ESMF_GRIDMATCH_EXACT) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
@@ -182,7 +182,7 @@ program ESMF_GridItemUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test ESMF_GridMatchType() on Grids with different item values"
+  write(name, *) "Test ESMF_GridMatch() on Grids with different item values"
   write(failMsg, *) "Incorrect result"
 
   ! init flags
@@ -258,7 +258,7 @@ program ESMF_GridItemUTest
 
   ! Check Grid Match
   ! (it shouldn't pass)
-  if (ESMF_GridMatchType(gridA, gridB, rc=localrc)==ESMF_GRIDMATCH_EXACT) correct=.false.
+  if (ESMF_GridMatch(gridA, gridB, rc=localrc)==ESMF_GRIDMATCH_EXACT) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
