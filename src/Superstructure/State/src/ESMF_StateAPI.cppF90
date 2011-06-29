@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.12 2011/06/28 21:02:55 rokuingh Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.13 2011/06/29 20:59:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.12 2011/06/28 21:02:55 rokuingh Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.13 2011/06/29 20:59:13 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -120,26 +120,26 @@ module ESMF_StateAPIMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_StateAddOneArray
+!    module procedure ESMF_StateAddOneArray
     module procedure ESMF_StateAddOneArrayX
     module procedure ESMF_StateAddArrayList
 
-    module procedure ESMF_StateAddOneArrayBundle
+!    module procedure ESMF_StateAddOneArrayBundle
     module procedure ESMF_StateAddOneArrayBundleX
     module procedure ESMF_StateAddArrayBundleList
 
-    module procedure ESMF_StateAddOneField
+!    module procedure ESMF_StateAddOneField
     module procedure ESMF_StateAddOneFieldX
     module procedure ESMF_StateAddFieldList
 
-    module procedure ESMF_StateAddOneFieldBundle
+!    module procedure ESMF_StateAddOneFieldBundle
     module procedure ESMF_StateAddOneFieldBundleX
     module procedure ESMF_StateAddFieldBundleList
 
-    module procedure ESMF_StateAddOneRouteHandle
+!    module procedure ESMF_StateAddOneRouteHandle
     module procedure ESMF_StateAddRouteHandleList
 
-    module procedure ESMF_StateAddOneState
+!    module procedure ESMF_StateAddOneState
     module procedure ESMF_StateAddOneStateX
     module procedure ESMF_StateAddStateList
 
@@ -160,19 +160,19 @@ module ESMF_StateAPIMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_StateAddRpOneArray
+!    module procedure ESMF_StateAddRpOneArray
 !    module procedure ESMF_StateAddRpArrayList
 
-    module procedure ESMF_StateAddRpOneArrayBundle
+!    module procedure ESMF_StateAddRpOneArrayBundle
 !    module procedure ESMF_StateAddRpArrayBundleList
 
-    module procedure ESMF_StateAddRpOneField
+!    module procedure ESMF_StateAddRpOneField
 !    module procedure ESMF_StateAddRpFieldList
 
-    module procedure ESMF_StateAddRpOneFieldBundle
+!    module procedure ESMF_StateAddRpOneFieldBundle
 !    module procedure ESMF_StateAddRpFieldBundleList
 
-    module procedure ESMF_StateAddRpOneState
+!    module procedure ESMF_StateAddRpOneState
 !    module procedure ESMF_StateAddRpStateList
 
 
@@ -455,7 +455,7 @@ contains
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateAdd - Add a single item to a State
 !
 ! !INTERFACE:
@@ -503,53 +503,53 @@ contains
 !
 ! When replacing an existing <item>, the {\tt ESMF\_StateReplace} method
 ! should be used.
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #define StateAddMacro(mtype, mentryname, mname, mnameatt, mnameattbase) \
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_StateAdd" @\
-!BOPI @\
-! !IROUTINE: ESMF_StateAdd - Add an item to a State @\
-! @\
-! !INTERFACE: @\
-  ! Private name; call using ESMF_StateAdd()  @\
-  subroutine ESMF_StateAdd##mentryname (state, mname, keywordEnforcer, rc) @\
-! @\
-! !ARGUMENTS: @\
-    type(ESMF_State), intent(inout)          :: state @\
-    type(mtype),      intent(in)             :: mname @\
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
-    integer,          intent(out),  optional :: rc @\
-!EOPI @\
-!------------------------------------------------------------------------------ @\
- @\
-    call ESMF_StateAdd (state, mname, addflag=.true., proxyflag=.false., rc=rc) @\
- @\
-  end subroutine ESMF_StateAdd##mentryname @\
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_StateAddRp" @\
-!BOPI @\
-! !IROUTINE: ESMF_StateAddRp - Add/replace an item to a State @\
-! @\
-! !INTERFACE: @\
-  ! Private name; call using ESMF_StateAdd()  @\
-  subroutine ESMF_StateAddRp##mentryname (state, mname, keywordEnforcer, rc) @\
-! @\
-! !ARGUMENTS: @\
-    type(ESMF_State), intent(inout)          :: state @\
-    type(mtype),      intent(in)             :: mname @\
-    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
-    integer,          intent(out),  optional :: rc @\
-!EOPI @\
-!------------------------------------------------------------------------------ @\
- @\
-    call ESMF_StateAdd (state, mname,  & @\
-        addflag=.true., replaceflag=.true.,  & @\
-        proxyflag=.false., rc=rc) @\
- @\
-  end subroutine ESMF_StateAddRp##mentryname @\
+! ^undef  ESMF_METHOD @\
+! ^define ESMF_METHOD "ESMF_StateAdd" @\
+! !BOPI @\
+! ! !IROUTINE: ESMF_StateAdd - Add an item to a State @\
+! ! @\
+! ! !INTERFACE: @\
+!   ! Private name; call using ESMF_StateAdd()  @\
+!   subroutine ESMF_StateAdd##mentryname (state, mname, keywordEnforcer, rc) @\
+! ! @\
+! ! !ARGUMENTS: @\
+!     type(ESMF_State), intent(inout)          :: state @\
+!     type(mtype),      intent(in)             :: mname @\
+!     type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
+!     integer,          intent(out),  optional :: rc @\
+! !EOPI @\
+! !------------------------------------------------------------------------------ @\
+!  @\
+!     call ESMF_StateAdd (state, mname, addflag=.true., proxyflag=.false., rc=rc) @\
+!  @\
+!   end subroutine ESMF_StateAdd##mentryname @\
+! ^undef  ESMF_METHOD @\
+! ^define ESMF_METHOD "ESMF_StateAddRp" @\
+! !BOPI @\
+! ! !IROUTINE: ESMF_StateAddRp - Add/replace an item to a State @\
+! ! @\
+! ! !INTERFACE: @\
+!   ! Private name; call using ESMF_StateAdd()  @\
+!   subroutine ESMF_StateAddRp##mentryname (state, mname, keywordEnforcer, rc) @\
+! ! @\
+! ! !ARGUMENTS: @\
+!     type(ESMF_State), intent(inout)          :: state @\
+!     type(mtype),      intent(in)             :: mname @\
+!     type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
+!     integer,          intent(out),  optional :: rc @\
+! !EOPI @\
+! !------------------------------------------------------------------------------ @\
+!  @\
+!     call ESMF_StateAdd (state, mname,  & @\
+!         addflag=.true., replaceflag=.true.,  & @\
+!         proxyflag=.false., rc=rc) @\
+!  @\
+!   end subroutine ESMF_StateAddRp##mentryname @\
  @\
 !------------------------------------------------------------------------------ @\
 ^undef  ESMF_METHOD @\
@@ -710,13 +710,12 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ! !IROUTINE: ESMF_StateAdd - Add a list of items to a State
 !
 ! !INTERFACE:
-!  subroutine ESMF_StateAdd(state, <itemList>, count, rc)
+!  subroutine ESMF_StateAdd(state, <itemList>, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state 
 !    <itemList>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    integer,          intent(in),   optional :: count
 !    integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
@@ -748,9 +747,6 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !     Since <itemList>s can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
 !     destruction when they are no longer in use.
-! \item[{[count]}]
-!     The number of items to be added. By default equal to the
-!     size of the <itemList> argument.
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -765,13 +761,12 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ! !INTERFACE: @\
   ! Private name; call using ESMF_StateAdd()  @\
   subroutine ESMF_StateAdd##mentryname##List(state, mname,  & @\
-                                    keywordEnforcer, count, rc) @\
+                                    keywordEnforcer, rc) @\
 ! @\
 ! !ARGUMENTS: @\
     type(ESMF_State), intent(inout)          :: state  @\
     type(mtype),      intent(in)             :: mname(:) @\
     type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
-    integer,          intent(in),   optional :: count @\
     integer,          intent(out),  optional :: rc      @\
 !EOPI @\
 !------------------------------------------------------------------------------ @\
@@ -792,21 +787,6 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
          ESMF_CONTEXT, rcToReturn=rc)) return @\
                                    @\
       localcount = size (mname) @\
-      if (present (count)) then @\
-        if (count < 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
-            msg="- count must be positive", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        else if (count > localcount) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
-            msg="- count must be smaller than or equal to the size of " CONCAT/ #mname, & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        else @\
-          localcount = count @\
-        end if @\
-      end if @\
  @\
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc) @\
@@ -814,7 +794,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
           ESMF_INIT_CHECK_DEEP(ESMF_##mentryname##GetInit,mname(i),rc) @\
       enddo @\
  @\
-      call ESMF_StateClsAdd (state%statep, mname(:localcount), & @\
+      call ESMF_StateClsAdd (state%statep, mname, & @\
           addflag=.true., rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
@@ -867,13 +847,12 @@ StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundle
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAdd()   
       subroutine ESMF_StateAddRouteHandleList(state, routehandleList,  &
-                                              keywordEnforcer, count, rc)
+                                              keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout)      :: state 
       type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
       type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
-      integer,       intent(in),  optional :: count
       integer,       intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -892,8 +871,6 @@ StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundle
 !      Since objects can be added to multiple containers, it remains
 !      the responsibility of the user to manage the
 !      destruction of objects when they are no longer in use.
-!     \item[count]
-!      The number of {\tt ESMF\_RouteHandle}s to be added.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -905,21 +882,6 @@ StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundle
 
       ! check input variables
       localcount = size(routehandleList)
-      if (present(count)) then
-        if (count < 0) then
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            msg="- count must be positive", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        else if (count > localcount) then
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
-            msg="- count must be smaller than or equal to the size of routehandleList", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        else
-          localcount = count
-        end if
-      end if
 
       ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
       do i=1,localcount
@@ -936,7 +898,7 @@ StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundle
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call ESMF_StateClsAdd (state%statep,  routehandleList(:localcount),  &
+      call ESMF_StateClsAdd (state%statep,  routehandleList,  &
           addflag=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                     ESMF_CONTEXT, rcToReturn=rc))  return
