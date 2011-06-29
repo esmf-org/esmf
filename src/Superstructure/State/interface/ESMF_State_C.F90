@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.34 2011/06/23 15:54:35 rokuingh Exp $
+! $Id: ESMF_State_C.F90,v 1.35 2011/06/29 20:53:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.34 2011/06/23 15:54:35 rokuingh Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.35 2011/06/29 20:53:46 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -88,7 +88,7 @@
        !  set the valid init code of the new object
        call ESMF_ArraySetInitCreated(farray, rc)
 
-       call ESMF_StateAdd(state=state, array=farray, rc=rc)
+       call ESMF_StateAdd(state=state, arrayList=(/farray/), rc=rc)
 
 
    end subroutine f_esmf_stateaddarray
@@ -107,7 +107,7 @@
       integer, intent(out) :: rc        !out
 
        ! field is directly usable - it is a deep class implemented in Fortran
-       call ESMF_StateAdd(state=state, field=field, rc=rc)
+       call ESMF_StateAdd(state=state, fieldList=(/field/), rc=rc)
 
    end subroutine f_esmf_stateaddfield
 
