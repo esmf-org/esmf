@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.18 2011/06/28 22:02:01 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.19 2011/06/29 15:39:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.18 2011/06/28 22:02:01 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.19 2011/06/29 15:39:19 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -145,7 +145,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{sloppypar}
 ! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 ! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-! it. The empty {\tt ESMF\_Field} can be completed by either the {\tt ESMF\_FieldEmptyComp} or
+! it. The empty {\tt ESMF\_Field} can be completed in one more step or two more steps by
 ! the {\tt ESMF\_FieldEmptySet} and {\tt ESMF\_FieldEmptyComplete} methods.
 ! Attributes can be added to an empty Field object. For an example and
 ! associated documentation using this method see Section 
@@ -230,8 +230,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Set a grid and an optional staggerloc (default to center stagger 
 ! {\tt ESMF\_STAGGERLOC\_CENTER}) in an empty {\tt ESMF\_Field}. The 
 ! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase} 
-! built on the {\tt ESMF\_Grid} internally but holds on data. 
+! operation, the {\tt ESMF\_Field} contains 
+! the {\tt ESMF\_Grid} internally but holds no data. 
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 !
@@ -245,8 +245,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [field]
 !       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase}
-!       built on the {\tt ESMF\_Grid} internally but holds on data. 
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_Grid} internally but holds no data. 
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [grid]
@@ -334,8 +334,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Set a mesh and an optional meshloc (default to center stagger 
 ! {\tt ESMF\_MESHLOC\_NODE}) in an empty {\tt ESMF\_Field}. The 
 ! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase} 
-! built on the {\tt ESMF\_Mesh} internally but holds on data. 
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_Mesh} internally but holds no data. 
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 !
@@ -346,8 +346,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [field]
 !       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase}
-!       built on the {\tt ESMF\_Mesh} internally but holds on data. 
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_Mesh} internally but holds no data. 
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [mesh]
@@ -426,8 +426,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{sloppypar}
 ! Set a {\tt ESMF\_LocStream} in an empty {\tt ESMF\_Field}. The 
 ! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase} 
-! built on the {\tt ESMF\_LocStream} internally but holds on data. 
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_LocStream} internally but holds no data. 
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 !
@@ -438,8 +438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [field]
 !       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase}
-!       built on the {\tt ESMF\_LocStream} internally but holds on data. 
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_LocStream} internally but holds no data. 
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [locstream]
@@ -512,8 +512,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt ESMF\_XGrid\_Balanced}) and gridindex (default to 1) 
 ! in an empty {\tt ESMF\_Field}. The 
 ! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase} 
-! built on the {\tt ESMF\_XGrid} internally but holds on data. 
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_XGrid} internally but holds no data. 
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 !
@@ -524,8 +524,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [field]
 !       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains a {\tt ESMF\_GeomBase}
-!       built on the {\tt ESMF\_XGrid} internally but holds on data. 
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_XGrid} internally but holds no data. 
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [xgrid]
@@ -668,18 +668,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array} based on arrayspec. 
-! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase}
-! stored internally before calling this method and has a status of 
-! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field}
-! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+! The input {\tt ESMF\_Field} must have a status of 
+! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field}
+! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[field]
-!      The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase}
-!      stored internally before calling this method and has a status of 
-!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. The returned {\tt ESMF\_Field}
-!      has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+!      The input {\tt ESMF\_Field} with a status of 
+!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. 
 ! \item[arrayspec]
 !      Data type and kind specification. 
 ! \item[{[indexflag]}]
@@ -897,10 +894,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{sloppypar}
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array} based on typekind. 
-! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase}
-! stored internally before calling this method and has a status of 
-! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field}
-! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+! The input {\tt ESMF\_Field} must have a status of 
+! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field}
+! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
 ! \end{sloppypar}
 !
 ! For an example and
@@ -912,10 +908,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[field]
 ! \begin{sloppypar}
-!      The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase}
-!      stored internally before calling this method and has a status of 
-!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. The returned {\tt ESMF\_Field}
-!      has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+!      The input {\tt ESMF\_Field} with a status of 
+!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. 
 ! \end{sloppypar}
 ! \item[typekind]
 !      Data type and kind specification. 
@@ -1933,10 +1927,9 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \begin{sloppypar} @\
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an @\
 ! {\tt ESMF\_Array} based on typekind.  @\
-! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase} @\
-! stored internally before calling this method and has a status of  @\
-! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field} @\
-! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
+! The input {\tt ESMF\_Field} must have a status of  @\
+! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field} @\
+! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
 ! \end{sloppypar} @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
@@ -1950,10 +1943,8 @@ end subroutine ESMF_FieldEmptyCompTK
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
-!       The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase} @\
-!       stored internally before calling this method and has a status of  @\
-!       {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field} @\
-!       which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
+!       The input {\tt ESMF\_Field} with a status of @\
+!       {\tt ESMF\_FIELDSTATUS\_GRIDSET}. @\
 !       The {\tt ESMF\_Field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [farray] @\
@@ -2153,10 +2144,9 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! \begin{sloppypar} @\
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an @\
 ! {\tt ESMF\_Array} based on typekind.  @\
-! The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase} @\
-! stored internally before calling this method and has a status of  @\
-! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field} @\
-! which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
+! The input {\tt ESMF\_Field} must have a status of  @\
+! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field} @\
+! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
 ! \end{sloppypar} @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
@@ -2166,10 +2156,8 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! The arguments are: @\
 ! \begin{description} @\
 ! \item [field]  @\
-!       The input {\tt ESMF\_Field} must have a {\tt ESMF\_GeomBase} @\
-!       stored internally before calling this method and has a status of  @\
-!       {\tt ESMF\_FIELDSTATUS\_GRIDSET}. Returns a completed {\tt ESMF\_Field} @\
-!       which has a status {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
+!       The input {\tt ESMF\_Field} with a status of @\
+!       {\tt ESMF\_FIELDSTATUS\_GRIDSET}. @\
 !       The {\tt ESMF\_Field} will have the same dimension @\
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [farrayPtr] @\
@@ -3693,10 +3681,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     type(ESMF_DistGrid)            :: distgrid @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
-    type(ESMF_Index_Flag)           :: g_indexflag @\
+    type(ESMF_Index_Flag)          :: g_indexflag @\
     logical                        :: found @\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_GeomType_Flag)            :: geomtype @\
+    type(ESMF_GeomType_Flag)       :: geomtype @\
     type(ESMF_Grid)                :: grid @\
     integer                        :: distgridDimCount, distgridDimCount_norep, arbdim @\
 @\
@@ -3708,6 +3696,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     ! make sure field, grid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
+@\
+    ! make sure the input field has a EMPTY status @\
+    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &   @\
+             msg="- input Field must be empty", &  @\
+               ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+    endif @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\
@@ -4210,10 +4206,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     type(ESMF_DistGrid)            :: distgrid @\
     integer                        :: fieldUndistDimCount                         @\
     logical                        :: flipflop(ESMF_MAXDIM) @\
-    type(ESMF_Index_Flag)           :: indexflag @\
+    type(ESMF_Index_Flag)          :: indexflag @\
     logical                        :: found @\
     type(ESMF_GridDecompType)      :: decompType @\
-    type(ESMF_GeomType_Flag)            :: geomtype @\
+    type(ESMF_GeomType_Flag)       :: geomtype @\
     type(ESMF_Grid)                :: grid @\
     integer                        :: distgridDimCount, distgridDimCount_norep, arbdim @\
 @\
@@ -4225,6 +4221,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     ! make sure field, grid, farrayPtr are properly initialized @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit,geombase,rc) @\
+@\
+    ! make sure the input field has a EMPTY status @\
+    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &   @\
+             msg="- input Field must be empty", &  @\
+               ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+    endif @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\

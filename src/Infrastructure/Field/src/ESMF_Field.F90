@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.364 2011/06/24 03:01:04 rokuingh Exp $
+! $Id: ESMF_Field.F90,v 1.365 2011/06/29 15:39:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@ module ESMF_FieldMod
     type (ESMF_Base)              :: base             ! base class object
     type (ESMF_Array)             :: array
     type (ESMF_GeomBase)          :: geombase
-    type (ESMF_FieldStatus_Flag)       :: status
+    type (ESMF_FieldStatus_Flag)  :: status
     type (ESMF_Status)            :: iostatus         ! if unset, inherit from gcomp
     logical                       :: array_internal   ! .true. if field%array is
                                                       ! internally allocated
@@ -145,7 +145,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.364 2011/06/24 03:01:04 rokuingh Exp $'
+    '$Id: ESMF_Field.F90,v 1.365 2011/06/29 15:39:18 feiliu Exp $'
 
 !==============================================================================
 !
