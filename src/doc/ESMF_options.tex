@@ -1,68 +1,6 @@
-% $Id: ESMF_options.tex,v 1.61 2011/06/28 05:22:56 theurich Exp $
+% $Id: ESMF_options.tex,v 1.62 2011/06/29 00:03:54 rokuingh Exp $
 
 \section{Constants}
-
-
-\subsection{ESMF\_AllocFlag}
-\label{opt:allocflag}
-{\sf DESCRIPTION:\\}  
-Indicates whether to allocate data or not.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_ALLOC]
-      Allocate data. 
-\item [ESMF\_NO\_ALLOC]
-      Do not allocate data at this time. 
-\end{description}
-
-\subsection{ESMF\_DefaultFlag}
-\label{opt:defaultflag}
-{\sf DESCRIPTION:\\}
-Indicates whether to use defaults or not.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_USE\_DEFAULTS]
-      Use default values where possible.
-\item [ESMF\_NO\_DEFAULTS]
-      Don't use any default values.
-\end{description}
-
-\subsection{ESMF\_IOFmtFlag}
-\label{opt:iofmtflag}
-{\sf DESCRIPTION:\\}
-Indicates IO format options that is currently supported.
-
-Valid values are:
-\begin{description}
-\item [ESMF\_IOFMT\_BIN]
-      Binary format.
-\item [ESMF\_IOFMT\_NETCDF]
-      NETCDF and PNETCDF format.
-\end{description}
-
-\subsection{ESMF\_Status}
-\label{opt:status}
-{\sf DESCRIPTION:\\}
-This is a general object status flag used throughout the
-framework.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_STATUS\_UNINIT] 
-         Object is uninitialized.
-   \item [ESMF\_STATUS\_READY]
-         Object is ready for use.
-   \item [ESMF\_STATUS\_UNALLOCATED]
-         Object has not yet been allocated.
-   \item [ESMF\_STATUS\_ALLOCATED]
-         Object has been allocated.
-   \item [ESMF\_STATUS\_BUSY]
-         Object is not able to respond.
-   \item [ESMF\_STATUS\_INVALID]
-         Object is invalid.
-\end{description}
 
 \subsection{ESMF\_CONTEXT}
 \label{const:contextflag}
@@ -86,7 +24,6 @@ Valid values are:
          the parent component to the child component. These properties include
          the MPI communicator, the number of PETs, the PET labeling, 
          communication attributes, threading-level.
-
 \end{description}
 
 \subsection{ESMF\_DATACOPY}
@@ -158,6 +95,19 @@ Valid values are:
       space starts at the global lower bound for each DE.
 \item [ESMF\_INDEX\_USER]
       Indicates that the DE-local index bounds are explicitly set by the user.
+\end{description}
+
+\subsection{ESMF\_IOFmtFlag}
+\label{opt:iofmtflag}
+{\sf DESCRIPTION:\\}
+Indicates IO format options that is currently supported.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_IOFMT\_BIN]
+      Binary format.
+\item [ESMF\_IOFMT\_NETCDF]
+      NETCDF and PNETCDF format.
 \end{description}
 
 \subsection{ESMF\_KIND}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.68 2011/06/24 20:30:09 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.69 2011/06/29 00:03:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.68 2011/06/24 20:30:09 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.69 2011/06/29 00:03:52 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.68 2011/06/24 20:30:09 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.69 2011/06/29 00:03:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -992,7 +992,7 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, filetype, convert3D, &
+    function ESMF_MeshCreateFromFile(filename, filetypeflag, convert3D, &
                  convertToDual, rc)
 !
 !
@@ -1000,7 +1000,7 @@ contains
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
-    type(ESMF_FileFormat_Flag), intent(in)     :: filetype
+    type(ESMF_FileFormat_Flag), intent(in)     :: filetypeflag
     logical, intent(in), optional             :: convert3D
     logical, intent(in), optional             :: convertToDual
     integer, intent(out), optional            :: rc
@@ -1014,7 +1014,7 @@ contains
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[filetype] 
+!   \item[filetypeflag] 
 !         The file type of the grid file to be read, please see Section~\ref{sec:mesh:opt:fileformat}
 !         for a list of valid options. 
 !   \item[convert3D] 
@@ -1049,18 +1049,18 @@ contains
     endif
 
 
-    if (filetype .eq. ESMF_FILEFORMAT_SCRIP) then
+    if (filetypeflag .eq. ESMF_FILEFORMAT_SCRIP) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
           localConvertToDual, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetype .eq. ESMF_FILEFORMAT_ESMFMESH) then
+    elseif (filetypeflag .eq. ESMF_FILEFORMAT_ESMFMESH) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, localConvert3D, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                 msg="- the filetype has to be either ESMF_FILEFORMAT_ESMFMESH or ESMF_FILEFORMAT_SCRIP", & 
+                 msg="- the filetypeflag has to be either ESMF_FILEFORMAT_ESMFMESH or ESMF_FILEFORMAT_SCRIP", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif

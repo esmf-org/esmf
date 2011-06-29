@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.41 2011/06/24 15:04:09 rokuingh Exp $
+! $Id: ESMF_MeshEx.F90,v 1.42 2011/06/29 00:03:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -729,7 +729,7 @@ program ESMF_MeshEx
 ! weights are properly generated for the cell centers in the file. 
 !
 ! The following example code depicts how to create a Mesh using a SCRIP file. Note that
-! you have to set the filetype to ESMF\_FILEFORMAT\_SCRIP.  If the optional argument {\tt convert3D}
+! you have to set the filetypeflag to ESMF\_FILEFORMAT\_SCRIP.  If the optional argument {\tt convert3D}
 ! is set to .true., the coordinates will be converted into 3D Cartesian first.  If the grid
 ! is a global grid and will be used in a regrid operation, this flag should be set to .true.
 !EOE
@@ -737,7 +737,7 @@ program ESMF_MeshEx
 #ifdef ESMF_NETCDF
 !BOC
    mesh = ESMF_MeshCreate(filename="data/ne4np4-pentagons.nc", &
-	   filetype=ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=localrc)
+	   filetypeflag=ESMF_FILEFORMAT_SCRIP, convert3D=.true., rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -787,7 +787,7 @@ program ESMF_MeshEx
 !}
 !\end{verbatim}
 !
-! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note that you have to set the filetype to
+! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note that you have to set the filetypeflag to
 ! ESMF\_FILEFORMAT\_ESMFMESH.  As with the previous example, we set {\tt convert3D} to true because this is a
 ! global grid.
 !EOE
@@ -795,7 +795,7 @@ program ESMF_MeshEx
 #ifdef ESMF_NETCDF
 !BOC
    mesh = ESMF_MeshCreate(filename="data/ne4np4-esmf.nc", &
-            filetype=ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=localrc)
+            filetypeflag=ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
