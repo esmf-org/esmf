@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.37 2011/06/28 04:55:41 theurich Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.38 2011/06/29 17:49:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -325,17 +325,6 @@
     write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Getting a Grid that was not set Test"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-    !EX_UTest
-!   !  Validate returned Grid that was not set
-
-    call ESMF_GridValidate(grid, rc=rc)
-
-    write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-    write(name, *) "Validate Grid that was not set Test"
-    call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
