@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.179 2011/06/28 21:02:50 rokuingh Exp $
+! $Id: ESMF_GridComp.F90,v 1.180 2011/06/29 22:53:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.179 2011/06/28 21:02:50 rokuingh Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.180 2011/06/29 22:53:28 theurich Exp $'
 
 !==============================================================================
 !
@@ -132,7 +132,6 @@ module ESMF_GridCompMod
 !   type(ESMF_GridComp) :: gridcomp1
 !   type(ESMF_GridComp) :: gridcomp2
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -168,7 +167,6 @@ module ESMF_GridCompMod
 ! !ARGUMENTS:
 !   type(ESMF_GridComp), intent(in) :: gridcomp1
 !   type(ESMF_GridComp), intent(in) :: gridcomp2
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -211,7 +209,6 @@ module ESMF_GridCompMod
 ! !ARGUMENTS:
 !   type(ESMF_GridComp), intent(in) :: gridcomp1
 !   type(ESMF_GridComp), intent(in) :: gridcomp2
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -558,15 +555,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -653,14 +650,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_GridCompFinalize} but no redirection through the
@@ -928,9 +925,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! subroutine ESMF_GridCompGetInternalState(gridcomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_GridComp)               :: gridcomp
-!   type(wrapper)                     :: wrappedDataPointer
-!   integer,            intent(out)   :: rc
+!   type(ESMF_GridComp)             :: gridcomp
+!   type(wrapper)                   :: wrappedDataPointer
+!   integer,            intent(out) :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -994,15 +991,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1088,14 +1085,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_GridCompInitialize} but no redirection through the
@@ -1248,15 +1245,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1344,15 +1341,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1438,14 +1435,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_GridCompRun} but no redirection through the
@@ -1485,25 +1482,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)          :: gridcomp
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Grid),         intent(in),   optional :: grid
-    type(ESMF_Config),       intent(in),   optional :: config
-    character(len=*),        intent(in),   optional :: configFile
-    type(ESMF_Clock),        intent(in),   optional :: clock
-    character(len=*),        intent(in),   optional :: name
-    integer,                 intent(out),  optional :: rc
-
+    type(ESMF_Grid),     intent(in),  optional :: grid
+    type(ESMF_Config),   intent(in),  optional :: config
+    character(len=*),    intent(in),  optional :: configFile
+    type(ESMF_Clock),    intent(in),  optional :: clock
+    character(len=*),    intent(in),  optional :: name
+    integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Sets or resets information about an {\tt ESMF\_GridComp}.
-! The caller can set individual values by specifying
-! the arguments by name.
-! All the arguments except {\tt gridcomp} are optional    
-! to facilitate this.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1648,9 +1640,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! subroutine ESMF_GridCompSetInternalState(gridcomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_GridComp)               :: gridcomp
-!   type(wrapper)                     :: wrappedDataPointer
-!   integer,            intent(out)   :: rc
+!   type(ESMF_GridComp)             :: gridcomp
+!   type(wrapper)                   :: wrappedDataPointer
+!   integer,            intent(out) :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1705,7 +1697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     userRoutine, keywordEnforcer, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(inout)          :: gridcomp
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
     interface
       subroutine userRoutine(gridcomp, rc)
         use ESMF_CompMod
@@ -1715,8 +1707,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end subroutine
     end interface
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(out), optional  :: userRc
-    integer,             intent(out), optional  :: rc
+    integer,             intent(out), optional :: userRc
+    integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2329,11 +2321,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_GridCompWait(gridcomp, keywordEnforcer, syncflag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: gridcomp
+    type(ESMF_GridComp),  intent(inout)         :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
-    integer,                 intent(out), optional :: userRc
-    integer,                 intent(out), optional :: rc
+    integer,              intent(out), optional :: userRc
+    integer,              intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2390,15 +2382,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)           :: gridcomp
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible

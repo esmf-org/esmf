@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.155 2011/06/28 21:02:50 rokuingh Exp $
+! $Id: ESMF_CplComp.F90,v 1.156 2011/06/29 22:53:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.155 2011/06/28 21:02:50 rokuingh Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.156 2011/06/29 22:53:28 theurich Exp $'
 
 !==============================================================================
 !
@@ -130,7 +130,6 @@ module ESMF_CplCompMod
 !   type(ESMF_CplComp) :: cplcomp1
 !   type(ESMF_CplComp) :: cplcomp2
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -166,7 +165,6 @@ module ESMF_CplCompMod
 ! !ARGUMENTS:
 !   type(ESMF_CplComp), intent(in) :: cplcomp1
 !   type(ESMF_CplComp), intent(in) :: cplcomp2
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -209,7 +207,6 @@ module ESMF_CplCompMod
 ! !ARGUMENTS:
 !   type(ESMF_CplComp), intent(in) :: cplcomp1
 !   type(ESMF_CplComp), intent(in) :: cplcomp2
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -546,15 +543,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -641,17 +638,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
-!
-! !STATUS:
-! \apiStatusCompatible
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_CplCompFinalize} but no redirection through the
@@ -815,9 +809,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! subroutine ESMF_CplCompGetInternalState(cplcomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_CplComp)               :: cplcomp
-!   type(wrapper)                     :: wrappedDataPointer
-!   integer,            intent(out)   :: rc
+!   type(ESMF_CplComp)              :: cplcomp
+!   type(wrapper)                   :: wrappedDataPointer
+!   integer,            intent(out) :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -882,15 +876,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -977,14 +971,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_CplCompInitialize} but no redirection through the
@@ -1137,15 +1131,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1232,15 +1226,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1326,14 +1320,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_CplCompRun} but no redirection through the
@@ -1373,24 +1367,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     clock, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)           :: cplcomp
+    type(ESMF_CplComp), intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Config),  intent(in),    optional :: config
-    character(len=*),   intent(in),    optional :: configFile
-    type(ESMF_Clock),   intent(in),    optional :: clock
-    character(len=*),   intent(in),    optional :: name
-    integer,            intent(out),   optional :: rc
-
+    type(ESMF_Config),  intent(in),  optional :: config
+    character(len=*),   intent(in),  optional :: configFile
+    type(ESMF_Clock),   intent(in),  optional :: clock
+    character(len=*),   intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Sets or resets information about an {\tt ESMF\_CplComp}.
-! The caller can set individual values by specifying
-! the arguments by name.
-! All the arguments except {\tt cplcomp} are optional 
-! to facilitate this.
 !
 ! The arguments are:
 ! \begin{description}
@@ -1449,8 +1438,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
-    type(ESMF_CplComp),     intent(inout)          :: cplcomp
-    type(ESMF_Method_Flag), intent(in)             :: methodflag
+    type(ESMF_CplComp),     intent(inout)         :: cplcomp
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
     interface
       subroutine userRoutine(cplcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1465,8 +1454,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end subroutine
     end interface
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),  optional  :: phase
-    integer,                intent(out), optional  :: rc 
+    integer,                intent(in),  optional :: phase
+    integer,                intent(out), optional :: rc 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1532,9 +1521,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! subroutine ESMF_CplCompSetInternalState(cplcomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_CplComp)                :: cplcomp
-!   type(wrapper)                     :: wrappedDataPointer
-!   integer,            intent(out)   :: rc
+!   type(ESMF_CplComp)              :: cplcomp
+!   type(wrapper)                   :: wrappedDataPointer
+!   integer,            intent(out) :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1762,7 +1751,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive subroutine ESMF_CplCompSetVM(cplcomp, userRoutine, &
     keywordEnforcer, userRc, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout) :: cplcomp
+    type(ESMF_CplComp), intent(inout)         :: cplcomp
     interface
       subroutine userRoutine(cplcomp, rc)
         use ESMF_CompMod
@@ -1772,8 +1761,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end subroutine
     end interface
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(out), optional    :: userRc
-    integer, intent(out), optional    :: rc
+    integer,            intent(out), optional :: userRc
+    integer,            intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2212,11 +2201,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_CplCompWait(cplcomp, keywordEnforcer, syncflag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)         :: cplcomp
+    type(ESMF_CplComp),   intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
-    integer,                 intent(out), optional :: userRc
-    integer,                 intent(out), optional :: rc
+    integer,              intent(out), optional :: userRc
+    integer,              intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2273,15 +2262,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     importState, exportState, clock, syncflag, phase, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CplComp),      intent(inout)           :: cplcomp
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: userRc
-    integer,                 intent(out),   optional :: rc
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
