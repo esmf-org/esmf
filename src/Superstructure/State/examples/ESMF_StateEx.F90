@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.45 2011/06/28 21:02:53 rokuingh Exp $
+! $Id: ESMF_StateEx.F90,v 1.46 2011/06/29 17:44:33 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -85,7 +85,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_StateAdd(state2, bundle1, rc=rc)
+    call ESMF_StateAdd(state2, (/bundle1/), rc=rc)
     print *, "StateAdd returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -194,7 +194,7 @@
         print *, "FieldBundle Create returned", rc, "name = ", trim(bundlename)
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-        call ESMF_StateAdd(state3, bundle2, rc=rc)
+        call ESMF_StateAdd(state3, (/bundle2/), rc=rc)
 !EOC
         print *, "StateAdd returned", rc
         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.100 2011/06/28 21:02:56 rokuingh Exp $
+! $Id: ESMF_StateUTest.F90,v 1.101 2011/06/29 17:45:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.100 2011/06/28 21:02:56 rokuingh Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.101 2011/06/29 17:45:06 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -125,7 +125,7 @@
       ! Add  uncreated array to uncreated  State 
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Add uncreated array to uncreated State Test"
-      call ESMF_StateAdd(state4, testarray, rc=rc)
+      call ESMF_StateAdd(state4, (/testarray/), rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -154,7 +154,7 @@
       ! Add  uncreated array to a  State 
       write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
       write(name, *) "Add uncreated array to a State Test"
-      call ESMF_StateAdd(state4, testarray, rc=rc)
+      call ESMF_StateAdd(state4, (/testarray/), rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -254,7 +254,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
-      call ESMF_StateAdd(state1, bundle1, rc=rc)
+      call ESMF_StateAdd(state1, (/bundle1/), rc=rc)
       write(name, *) "Adding a FieldBundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -322,7 +322,7 @@
 
       !EX_UTest
       ! Add should should fail to replace existing item
-      call ESMF_StateAdd(state1, bundle1, rc=rc)
+      call ESMF_StateAdd(state1, (/bundle1/), rc=rc)
       write(name, *) "Replacing a FieldBundle with a second FieldBundle via Add in a State Test"
       call ESMF_Test((rc /= ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -373,7 +373,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
-      call ESMF_StateAdd(state1, bundle3, rc=rc)
+      call ESMF_StateAdd(state1, (/bundle3/), rc=rc)
       write(name, *) "Adding a FieldBundle with Fields to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -389,7 +389,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !EX_UTest
-      call ESMF_StateAdd(state1, field1, rc=rc)
+      call ESMF_StateAdd(state1, (/field1/), rc=rc)
       write(name, *) "Adding a Field to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -454,7 +454,7 @@
 
   !------------------------------------------------------------------------
   !EX_UTest
-  call ESMF_StateAdd(state1, array, rc=rc)
+  call ESMF_StateAdd(state1, (/array/), rc=rc)
   write(name, *) "Adding an Array to a State Test"
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
@@ -583,14 +583,14 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      call ESMF_StateAdd(state1, state3, rc=rc)
+      call ESMF_StateAdd(state1, (/state3/), rc=rc)
       write(name, *) "Adding an uninitialized State to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
-      call ESMF_StateAdd(state1, bundle5, rc=rc)
+      call ESMF_StateAdd(state1, (/bundle5/), rc=rc)
       write(name, *) "Adding an uninitialized FieldBundle to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -598,7 +598,7 @@
 
       !EX_UTest
       ! Test adding an uninitialized Field to a State
-      call ESMF_StateAdd(state1, field4, rc=rc)
+      call ESMF_StateAdd(state1, (/field4/), rc=rc)
       write(name, *) "Adding an uninitialized Field to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
@@ -624,7 +624,7 @@
 
       !EX_UTest
       ! Test adding a State to a State 
-      call ESMF_StateAdd(state2, state1, rc=rc)
+      call ESMF_StateAdd(state2, (/state1/), rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding a State to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -650,7 +650,7 @@
       ! this is illegal in fortran but not all compilers catch it - they just
       ! do bizarre things with them.  So use an alias to the same State.
       state3 = state2
-      call ESMF_StateAdd(state2, state3, rc=rc)
+      call ESMF_StateAdd(state2, (/state3/), rc=rc)
       write(failMsg, *) "Did return ESMF_SUCCESS"
       write(name, *) "Adding the same State to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -664,7 +664,7 @@
       bundlename = "Humidity"
       bundle2inner(1) = ESMF_FieldBundleCreate(name=bundlename, rc=rc)
       call ESMF_StateAdd(state1, &
-                         fieldBundle=bundle2inner(1),  &
+                         fieldBundleList=bundle2inner,  &
                          rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a FieldBundle to a outer State test"
@@ -808,7 +808,7 @@
 
       !EX_UTest
       ! Test adding in the Array
-      call ESMF_StateAdd (state10, array10, rc=rc)
+      call ESMF_StateAdd (state10, (/array10/), rc=rc)
       write (failmsg, *) "Adding an Array into a State"
       write (name, *) "Add an Array which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -856,7 +856,7 @@
 
       !EX_UTest
       ! Test adding in the ArrayBundle
-      call ESMF_StateAdd (state10, abund10, rc=rc)
+      call ESMF_StateAdd (state10, (/abund10/), rc=rc)
       write (failmsg, *) "Adding an ArrayBundle into a State"
       write (name, *) "Add an ArrayBundle which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -905,7 +905,7 @@
 
       !EX_UTest
       ! Test adding in the Field
-      call ESMF_StateAdd (state10, field10, rc=rc)
+      call ESMF_StateAdd (state10, (/field10/), rc=rc)
       write (failmsg, *) "Adding a Field into a State"
       write (name, *) "Add a Field which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -959,7 +959,7 @@
 
       !EX_UTest
       ! Test adding in the State - making a nested State
-      call ESMF_StateAdd (state10, nestedState=state11, rc=rc)
+      call ESMF_StateAdd (state10, nestedStateList=(/state11/), rc=rc)
       write (failmsg, *) "Adding a nested State into a State"
       write (name, *) "Add a nested State which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -1045,7 +1045,7 @@
 
       !EX_UTest
       ! Insert FieldBundle into a State
-      call ESMF_StateAdd (state10, fbundle, rc=rc)
+      call ESMF_StateAdd (state10, (/fbundle/), rc=rc)
       write (failmsg, *) "Adding FieldBundle into a State"
       write (name, *) "Add FieldBundle into a State test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -1069,7 +1069,7 @@
 
       !EX_UTest
       ! Insert FieldBundle into the nested State
-      call ESMF_StateAdd (state12, fbundle, rc=rc)
+      call ESMF_StateAdd (state12, (/fbundle/), rc=rc)
       write (failmsg, *) "Adding FieldBundle into a nested State"
       write (name, *) "Add FieldBundle into a nested State test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &

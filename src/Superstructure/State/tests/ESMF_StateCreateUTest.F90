@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.44 2011/06/28 21:02:56 rokuingh Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.45 2011/06/29 17:45:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ end module
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.44 2011/06/28 21:02:56 rokuingh Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.45 2011/06/29 17:45:06 w6ws Exp $'
 !------------------------------------------------------------------------------
 !   ! Local variables
     integer :: rc
@@ -355,7 +355,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test adding a bundle to a state
-      call ESMF_StateAdd(state2, bundle1, rc=rc)
+      call ESMF_StateAdd(state2, (/bundle1/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a FieldBundle to a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -380,7 +380,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test adding a second bundle to a state
-      call ESMF_StateAdd(state2, bundle2, rc=rc)
+      call ESMF_StateAdd(state2, (/bundle2/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a second FieldBundle to a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -475,7 +475,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Replacing a name placeholder with a real item, using bundle from above
-      call ESMF_StateAdd(state3, bundle2, rc=rc)
+      call ESMF_StateAdd(state3, (/bundle2/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Replacing a name placeholder with a bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -534,7 +534,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Add the Fieldbundle to the State
-      call ESMF_StateAdd(state1, bundle2, rc=rc)
+      call ESMF_StateAdd(state1, (/bundle2/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a FieldBundle to a nested State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -542,7 +542,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Add a nested State to another
-      call ESMF_StateAdd(state5, state1, rc=rc)
+      call ESMF_StateAdd(state5, (/state1/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Add a nested State into another State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -559,7 +559,7 @@ end module
       !------------------------------------------------------------------------
       !EX_UTest      
       ! Add another nested State to the first
-      call ESMF_StateAdd(state5, state2, rc=rc)
+      call ESMF_StateAdd(state5, (/state2/), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Add a second nested State into another State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
