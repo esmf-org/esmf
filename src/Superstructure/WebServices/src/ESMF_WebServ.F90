@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.22 2011/06/28 21:02:58 rokuingh Exp $
+! $Id: ESMF_WebServ.F90,v 1.23 2011/06/30 19:53:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -140,7 +140,7 @@ contains
           ! Check return code to make sure send went out ok
           if (localrc /= ESMF_SUCCESS) then
               call ESMF_LogSetError( &
-                      ESMF_RC_NOT_VALID, &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
                       msg="Error while sending message to non-root pet", &
                       ESMF_CONTEXT, &
                       rcToReturn=localrc)
@@ -222,7 +222,7 @@ contains
                         syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
        if (localrc /= ESMF_SUCCESS) then
            call ESMF_LogSetError( &
-                   ESMF_RC_NOT_VALID, &
+                   rcToCheck=ESMF_RC_NOT_VALID, &
                    msg="Error while receiving message from root pet", &
                    ESMF_CONTEXT, &
                    rcToReturn=localrc)
@@ -241,7 +241,7 @@ contains
           call ESMF_GridCompInitialize(comp, rc=localrc)
           if (localrc /= ESMF_SUCCESS) then
               call ESMF_LogSetError( &
-                      ESMF_RC_NOT_VALID, &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
                       msg="Error while calling ESMF Initialize.", &
                       ESMF_CONTEXT, &
                       rcToReturn=localrc)
@@ -258,7 +258,7 @@ contains
           call ESMF_GridCompRun(comp, rc=localrc)
           if (localrc /= ESMF_SUCCESS) then
               call ESMF_LogSetError( &
-                      ESMF_RC_NOT_VALID, &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
                       msg="Error while calling ESMF Run.", &
                       ESMF_CONTEXT, &
                       rcToReturn=localrc)
@@ -275,7 +275,7 @@ contains
           call ESMF_GridCompFinalize(comp, rc=localrc)
           if (localrc /= ESMF_SUCCESS) then
               call ESMF_LogSetError( &
-                      ESMF_RC_NOT_VALID, &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
                       msg="Error while calling ESMF Finalize.", &
                       ESMF_CONTEXT, &
                       rcToReturn=localrc)
@@ -298,7 +298,7 @@ contains
            localrc = ESMF_FAILURE
 
            call ESMF_LogSetError( &
-                   ESMF_RC_ARG_BAD, &
+                   rcToCheck=ESMF_RC_ARG_BAD, &
                    msg="Error while processing request.", &
                    ESMF_CONTEXT, &
                    rcToReturn=localrc)
