@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.65 2011/06/29 23:20:54 theurich Exp $
+% $Id: ESMF_options.tex,v 1.66 2011/06/30 00:09:06 theurich Exp $
 
 \section{Constants}
 
@@ -111,7 +111,7 @@ Valid values are:
       Divide elements over DEs. Assign the rest of this division to the last DE.
 \end{description}
 
-\subsubsection{ESMF\_END}
+\subsection{ESMF\_END}
 
 Please see section \ref{app:endflag} for documentation on this flag.
 
@@ -176,44 +176,50 @@ Valid values are:
 \end{description}
 
 \subsection{ESMF\_KIND}
+\label{const:kind}
 
 {\sf DESCRIPTION:\\}
-These are integer parameters of the proper type to be
-used when declaring variables with a specific precision 
-in Fortran syntax.  For example:
+Named constants to be used as {\em kind-parameter} in Fortran variable
+declarations. For example:
 \begin{verbatim}
- integer(ESMF_KIND_I4) :: myintegervariable
- real(ESMF_KIND_R4) :: myrealvariable
+  integer(ESMF_KIND_I4)       :: integerVariable
+  integer(kind=ESMF_KIND_I4)  :: integerVariable
+  real(ESMF_KIND_R4)          :: realVariable
+  real(kind=ESMF_KIND_R4)     :: realVariable
 \end{verbatim}
-The Fortran 90 standard does not mandate what numeric values
-correspond to actual number of bytes allocated for the
-various kinds, so these are defined by ESMF to be correct across
-the different supported Fortran 90 compilers.   Note that not
-all compilers support every kind listed below; in particular
+The Fortran standard does not mandate what numeric values correspond to
+actual number of bytes allocated for the various kinds. The following constants
+are defined by ESMF to be correct across the supported Fortran compilers.
+Note that not all compilers support every kind listed below; in particular
 1 and 2 byte integers can be problematic.
 
-Valid values are:
+The type of these named constants is:
+
+{\tt integer}
+
+The named constants are:
 \begin{description}
 \item [ESMF\_KIND\_I1]
-      1 byte integer.
+      Kind-parameter for 1 byte integer.
 \item [ESMF\_KIND\_I2]
-      2 byte integer.
+      Kind-parameter for 2 byte integer.
 \item [ESMF\_KIND\_I4]
-      4 byte integer.
+      Kind-parameter for 4 byte integer.
 \item [ESMF\_KIND\_I8]
-      8 byte integer.
+      Kind-parameter for 8 byte integer.
 \item [ESMF\_KIND\_R4]
-      4 byte real.
+      Kind-parameter for 4 byte real.
 \item [ESMF\_KIND\_R8]
-      8 byte real.
-\item [ESMF\_KIND\_C8]
-      8 byte character.
-\item [ESMF\_KIND\_C16]
-      16 byte character.
+      Kind-parameter for 8 byte real.
+%\item [ESMF\_KIND\_C8]
+%      Kind-parameter for 8 byte complex.
+%\item [ESMF\_KIND\_C16]
+%      Kind-parameter for 16 byte compled.
 \end{description}
 
 \subsection{ESMF\_METHOD}
 \label{const:method}
+
 {\sf DESCRIPTION:\\}  
 Specify standard ESMF Component method.
 
@@ -448,30 +454,28 @@ Valid values are:
 \label{const:typekind}
 
 {\sf DESCRIPTION:\\}
-Supported ESMF type and kind combinations.   
-This is an ESMF derived type used for arguments to subroutines 
-and functions that specify or query a data precision and type.
-These values cannot be used when declaring variables; see the next 
-section on Fortran Kinds for that.
+Named constants used to indicate type and kind combinations supported by the
+overloaded ESMF interfaces. The corresponding Fortran kind-parameter constants
+are described in section \ref{const:kind}.
 
-The type of this flag is:
+The type of these named constants is:
 
 {\tt type(ESMF\_TypeKind\_Flag)}
 
-Valid values are:
+The named constants are:
 \begin{description}
 \item [ESMF\_TYPEKIND\_I1]
-      1 byte integer.
+      Indicates 1 byte integer.
 \item [ESMF\_TYPEKIND\_I2]
-      2 byte integer.
+      Indicates 2 byte integer.
 \item [ESMF\_TYPEKIND\_I4]
-      4 byte integer.
+      Indicates 4 byte integer.
 \item [ESMF\_TYPEKIND\_I8]
-      8 byte integer.
+      Indicates 8 byte integer.
 \item [ESMF\_TYPEKIND\_R4]
-      4 byte real.
+      Indicates 4 byte real.
 \item [ESMF\_TYPEKIND\_R8]
-      8 byte real.
+      Indicates 8 byte real.
 \end{description}
 
 \subsection{ESMF\_UNMAPPEDACTION}
@@ -505,23 +509,23 @@ The following named constants define the precise version of ESMF in use.
 \item [ESMF\_VERSION\_BETASNAPSHOT]
       Constant of type {\tt logical} indicating beta snapshot phase
       ({\tt .true.} for any version during the pre-release development phase,
-      {\tt .false.} for any released version of the software)
+      {\tt .false.} for any released version of the software).
 \item [ESMF\_VERSION\_MAJOR]
       Constant of type {\tt integer} indicating the major version number
-      (e.g. 5 for v5.2.0r)
+      (e.g. 5 for v5.2.0r).
 \item [ESMF\_VERSION\_MINOR]
       Constant of type {\tt integer} indicating the minor version number
-      (e.g. 2 for v5.2.0r)
+      (e.g. 2 for v5.2.0r).
 \item [ESMF\_VERSION\_PATCHLEVEL]
       Constant of type {\tt integer} indicating the patch level of a specific
-      revision (e.g. 0 for v5.2.0r, or 1 for v5.2.0rp1)
+      revision (e.g. 0 for v5.2.0r, or 1 for v5.2.0rp1).
 \item [ESMF\_VERSION\_PUBLIC]
       Constant of type {\tt logical} indicating public vs. internal release
-      status (e.g. {\tt .true.} for v5.2.0r, or {\tt .false.} for v5.2.0)
+      status (e.g. {\tt .true.} for v5.2.0r, or {\tt .false.} for v5.2.0).
 \item [ESMF\_VERSION\_REVISION]
       Constant of type {\tt integer} indicating the revision number
-      (e.g. 0 for v5.2.0r)
+      (e.g. 0 for v5.2.0r).
 \item [ESMF\_VERSION\_STRING]
       Constant of type {\tt character} holding the exact release version string
-      (e.g. "5.2.0r")
+      (e.g. "5.2.0r").
 \end{description}
