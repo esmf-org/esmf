@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.144 2011/06/30 18:01:39 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.145 2011/06/30 19:24:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.144 2011/06/30 18:01:39 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.145 2011/06/30 19:24:31 theurich Exp $"
 
 !==============================================================================
 
@@ -3567,6 +3567,83 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetPetLocalInfo()"
+!BOP
+! !IROUTINE: ESMF_VMGet - Get VM PET local internals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGet()
+  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, ssiId, &
+    threadCount, threadId, vas, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(in)            :: vm
+    integer,       intent(in)            :: pet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,       intent(out), optional :: peCount
+    integer,       intent(out), optional :: ssiId
+    integer,       intent(out), optional :: threadCount
+    integer,       intent(out), optional :: threadId
+    integer,       intent(out), optional :: vas
+    integer,       intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!   Get internal information about a specific PET within an {\tt ESMF\_VM} 
+!   object.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!         Queried {\tt ESMF\_VM} object.
+!   \item[pet] 
+!         Queried PET id within the specified {\tt ESMF\_VM} object.
+!   \item[{[peCount]}]
+!        Upon return this holds the number of PEs associated with the specified
+!        PET in the {\tt ESMF\_VM} object.
+!   \item[{[ssiId]}]
+!        Upon return this holds the id of the single-system image (SSI) the
+!        specified PET is running on.
+!   \item[{[threadCount]}]
+!        Upon return this holds the number of PETs in the specified PET"s 
+!        thread group.
+!   \item[{[threadId]}]
+!        Upon return this holds the thread id of the specified PET within the 
+!        PET"s thread group.
+!   \item[{[vas]}]
+!        Virtual address space in which this PET operates.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
+      threadId, vas, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGetPetLocalInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 !BOP
 ! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
 
@@ -3787,83 +3864,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetVMId
-!------------------------------------------------------------------------------
-
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGetPetLocalInfo()"
-!BOP
-! !IROUTINE: ESMF_VMGet - Get VM PET local internals
-
-! !INTERFACE:
-  ! Private name; call using ESMF_VMGet()
-  subroutine ESMF_VMGetPetLocalInfo(vm, pet, keywordEnforcer, peCount, ssiId, &
-    threadCount, threadId, vas, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM), intent(in)            :: vm
-    integer,       intent(in)            :: pet
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,       intent(out), optional :: peCount
-    integer,       intent(out), optional :: ssiId
-    integer,       intent(out), optional :: threadCount
-    integer,       intent(out), optional :: threadId
-    integer,       intent(out), optional :: vas
-    integer,       intent(out), optional :: rc
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-!   Get internal information about a specific PET within an {\tt ESMF\_VM} 
-!   object.\newline
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!         Queried {\tt ESMF\_VM} object.
-!   \item[pet] 
-!         Queried PET id within the specified {\tt ESMF\_VM} object.
-!   \item[{[peCount]}]
-!        Upon return this holds the number of PEs associated with the specified
-!        PET in the {\tt ESMF\_VM} object.
-!   \item[{[ssiId]}]
-!        Upon return this holds the id of the single-system image (SSI) the
-!        specified PET is running on.
-!   \item[{[threadCount]}]
-!        Upon return this holds the number of PETs in the specified PET"s 
-!        thread group.
-!   \item[{[threadId]}]
-!        Upon return this holds the thread id of the specified PET within the 
-!        PET"s thread group.
-!   \item[{[vas]}]
-!        Virtual address space in which this PET operates.
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
-
-    ! Call into the C++ interface.
-    call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
-      threadId, vas, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_VMGetPetLocalInfo
 !------------------------------------------------------------------------------
 
 
