@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.60 2011/06/30 03:53:02 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.61 2011/06/30 04:01:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.60 2011/06/30 03:53:02 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.61 2011/06/30 04:01:31 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -491,7 +491,7 @@ DistGrid *DistGrid::create(
   InterfaceInt *minIndex,                 // (in)
   InterfaceInt *maxIndex,                 // (in)
   InterfaceInt *regDecomp,                // (in)
-  DecompFlag *decompflag,                 // (in)
+  Decomp_Flag *decompflag,                // (in)
   int decompflagCount,                    // (in)
   InterfaceInt *regDecompFirstExtra,      // (in)
   InterfaceInt *regDecompLastExtra,       // (in)
@@ -619,7 +619,7 @@ DistGrid *DistGrid::create(
     // decompflag was not provided -> set up default decompflag
     decompflagDeleteFlag = true; // set
     decompflagCount = dimCount;
-    decompflag = new DecompFlag[dimCount];
+    decompflag = new Decomp_Flag[dimCount];
     for (int i=0; i<dimCount; i++)
       decompflag[i] = DECOMP_DEFAULT;
   }
@@ -730,7 +730,7 @@ DistGrid *DistGrid::create(
     int de, decompChunk, extentIndex;
     switch (decompflag[i]){
       case DECOMP_DEFAULT:
-      case DECOMP_HOMOGEN:
+      case DECOMP_BALANCED:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
           extentIndex = de*dimCount+i;  // index into temp. arrays
@@ -1204,7 +1204,7 @@ DistGrid *DistGrid::create(
   InterfaceInt *minIndex,                 // (in)
   InterfaceInt *maxIndex,                 // (in)
   InterfaceInt *regDecomp,                // (in)
-  DecompFlag *decompflag,                 // (in)
+  Decomp_Flag *decompflag,                // (in)
   int decompflagCount,                    // (in)
   InterfaceInt *regDecompFirstExtra,      // (in)
   InterfaceInt *regDecompLastExtra,       // (in)
@@ -1263,7 +1263,7 @@ DistGrid *DistGrid::create(
   InterfaceInt *minIndex,                 // (in)
   InterfaceInt *maxIndex,                 // (in)
   InterfaceInt *regDecomp,                // (in)
-  DecompFlag *decompflag,                 // (in)
+  Decomp_Flag *decompflag,                // (in)
   int decompflagCount1,                   // (in)
   int decompflagCount2,                   // (in)
   InterfaceInt *regDecompFirstExtra,      // (in)
@@ -1417,7 +1417,7 @@ DistGrid *DistGrid::create(
     decompflagDeleteFlag = true; // set
     decompflagCount1 = dimCount;
     decompflagCount2 = tileCount;
-    decompflag = new DecompFlag[dimCount*tileCount];
+    decompflag = new Decomp_Flag[dimCount*tileCount];
     for (int i=0; i<dimCount*tileCount; i++)
       decompflag[i] = DECOMP_DEFAULT;
   }
@@ -1558,7 +1558,7 @@ DistGrid *DistGrid::create(
       int de, decompChunk, extentIndex;
       switch (decompflag[i]){
         case DECOMP_DEFAULT:
-        case DECOMP_HOMOGEN:
+        case DECOMP_BALANCED:
           for (int jj=0; jj<deCountPTile[tile]; jj++){
             int j = deTileStart + jj;
             de = deLabelList->array[j];

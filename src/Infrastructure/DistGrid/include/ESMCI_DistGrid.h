@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.41 2011/06/30 03:52:59 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.42 2011/06/30 04:01:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ namespace ESMCI {
 
   // constants and enums
 
-  enum DecompFlag {DECOMP_INVALID=0, DECOMP_DEFAULT, DECOMP_HOMOGEN,
+  enum Decomp_Flag {DECOMP_INVALID=0, DECOMP_DEFAULT, DECOMP_BALANCED,
     DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC};
 
   enum DistGridMatch_Flag {DISTGRIDMATCH_INVALID=0, DISTGRIDMATCH_NONE,
@@ -113,7 +113,7 @@ namespace ESMCI {
       ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
-      DecompFlag *decompflag, int decompflagCount,
+      Decomp_Flag *decompflag, int decompflagCount,
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
@@ -125,14 +125,14 @@ namespace ESMCI {
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
-      DecompFlag *decompflag, int decompflagCount,
+      Decomp_Flag *decompflag, int decompflagCount,
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,
       int fastAxis, VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
-      DecompFlag *decompflag, int decompflagCount1, int decompflagCount2,
+      Decomp_Flag *decompflag, int decompflagCount1, int decompflagCount2,
       InterfaceInt *regDecompFirstExtra, InterfaceInt *regDecompLastExtra, 
       InterfaceInt *deLabelList, ESMC_IndexFlag *indexflag, 
       InterfaceInt *connectionList,

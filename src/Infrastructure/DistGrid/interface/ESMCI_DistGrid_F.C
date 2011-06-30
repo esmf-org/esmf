@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.35 2011/06/30 03:53:00 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.36 2011/06/30 04:01:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ extern "C" {
   void FTN(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
-    ESMCI::DecompFlag *decompflag, int *decompflagCount, 
+    ESMCI::Decomp_Flag *decompflag, int *decompflagCount, 
     ESMCI::InterfaceInt **regDecompFirstExtra,
     ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
@@ -126,7 +126,7 @@ extern "C" {
   void FTN(c_esmc_distgridcreaterdfa)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
-    ESMCI::DecompFlag *decompflag, int *decompflagCount,
+    ESMCI::Decomp_Flag *decompflag, int *decompflagCount,
     ESMCI::InterfaceInt **regDecompFirstExtra,
     ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
@@ -154,7 +154,8 @@ extern "C" {
   void FTN(c_esmc_distgridcreaterdp)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
-    ESMCI::DecompFlag *decompflag, int *decompflagCount1, int *decompflagCount2,
+    ESMCI::Decomp_Flag *decompflag,
+    int *decompflagCount1, int *decompflagCount2,
     ESMCI::InterfaceInt **regDecompFirstExtra,
     ESMCI::InterfaceInt **regDecompLastExtra,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
