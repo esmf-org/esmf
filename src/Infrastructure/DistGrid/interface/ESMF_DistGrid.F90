@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.95 2011/06/30 03:53:00 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.96 2011/06/30 18:30:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.95 2011/06/30 03:53:00 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.96 2011/06/30 18:30:09 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2365,13 +2365,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check input
     dimCount = size(minIndexPTile)
     if (dimCount /= size(maxIndexPTile)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
           msg="- size(minIndexPTile) must match size(maxIndexPTile)", &
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     if (arbDim < 1 .or. arbDim > dimCount+1) then
-      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- arbDim out of range", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
