@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.34 2011/06/30 13:46:10 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.35 2011/06/30 19:19:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.34 2011/06/30 13:46:10 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.35 2011/06/30 19:19:18 w6ws Exp $'
 
 !==============================================================================
 !
@@ -425,7 +425,7 @@ integer, intent(out), optional              :: rc
     ngrid_a = size(sideA, 1)
     ngrid_b = size(sideB, 1)
     if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- number of Grids are invalid on one side of the XGrid", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -463,7 +463,7 @@ integer, intent(out), optional              :: rc
     ! Assign regrid scheme
     if(present(sideAToXGridScheme)) then
       if(sideAToXGridScheme == ESMF_REGRID_SCHEME_FULLTOREG3D) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
           msg="- side A to XGrid scheme cannot be ESMF_REGRID_SCHEME_FULLTOREG3D", & 
           ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -481,7 +481,7 @@ integer, intent(out), optional              :: rc
       XisSphere, XisLatLonDeg)
     if(present(sideBToXGridScheme)) then
       if(sideAToXGridScheme == ESMF_REGRID_SCHEME_FULLTOREG3D) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
           msg="- side B to XGrid scheme cannot be ESMF_REGRID_SCHEME_FULLTOREG3D", & 
           ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -498,7 +498,7 @@ integer, intent(out), optional              :: rc
       BXisSphere, BXisLatLonDeg)
     ! make sure A and B scheme means the same thing
     if( (XisSphere /= BXisSphere) .or. (XisLatLonDeg .neqv. BXisLatLonDeg)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
         msg="- side A to XGrid scheme not compatible with side B to XGrid scheme", &
         ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -514,7 +514,7 @@ integer, intent(out), optional              :: rc
     allocate(l_sideAPriority(ngrid_a), l_sideBPriority(ngrid_b))
     if(present(sideAPriority)) then
       if(size(sideAPriority) /= ngrid_a) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
          msg="- Number of sideA grids doesn't agree with size of sideAPriority", &
          ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -529,7 +529,7 @@ integer, intent(out), optional              :: rc
     endif
     if(present(sideBPriority)) then
       if(size(sideBPriority) /= ngrid_b) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
          msg="- Number of sideB grids doesn't agree with size of sideBPriority", &
          ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -603,7 +603,7 @@ integer, intent(out), optional              :: rc
       xgtype%sparseMatB2X(ngrid_b), &
       xgtype%sparseMatX2B(ngrid_b), stat=localrc)
     if(localrc /= 0) then
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
          msg="- Failed to allocate SMM parameters", &
          ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -699,7 +699,7 @@ integer, intent(out), optional              :: rc
       !    ESMF_ERR_PASSTHRU, &
       !    ESMF_CONTEXT, rcToReturn=rc)) return
       !if(sideCount /= size(sidemesharea)) then
-      !  call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+      !  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
       !     msg="- number of area elements not equal to frac elements", &
       !     ESMF_CONTEXT, rcToReturn=rc) 
       !  return
@@ -944,7 +944,7 @@ integer, intent(out), optional             :: rc
     ngrid_a = size(sideA, 1)
     ngrid_b = size(sideB, 1)
     if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- number of Grids are invalid on one side of the XGrid", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -960,7 +960,7 @@ integer, intent(out), optional             :: rc
       (.not. present(sparseMatX2A)).and. &
       (.not. present(sparseMatB2X)).and. &
       (.not. present(sparseMatX2B))) then
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- One of the sparseMat must be set to generate an XGrid", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -1385,7 +1385,7 @@ subroutine ESMF_XGridDistGrids(xgtype, rc)
     !   .not. associated(xgtype%sparseMatX2A) .and. &
     !   .not. associated(xgtype%sparseMatB2X) .and. &
     !   .not. associated(xgtype%sparseMatX2B)) then
-    !    call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+    !    call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
     !       "- one of the sparse matrix arguments must be specified", &
     !       ESMF_CONTEXT, rcToReturn=rc) 
     !    return
@@ -1485,7 +1485,7 @@ function ESMF_XGridDGOverlay(sparseMat, dim, rc)
         u = ubound(sparseMat(i)%factorIndexList, dim)
         do j = l, u
             if(iarray_t(sparseMat(i)%factorIndexList(dim,j)) == 1) then
-              call ESMF_LogSetError(ESMF_RC_ARG_RANK, &
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_RANK, &
                 msg=" - local duplicate index entry discovered", &
                 ESMF_CONTEXT, rcToReturn=rc)
               return
@@ -1640,7 +1640,7 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
     if(size(sparseMats,1) /= ngrid) then
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- number of Grids different from size of sparseMat for "//tag, &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -1649,14 +1649,14 @@ subroutine ESMF_SparseMatca(sparseMats, sparseMatd, ngrid, tag, rc)
     do i = 1, ngrid
         if(.not. associated(sparseMats(i)%factorIndexList) .or. &
            .not. associated(sparseMats(i)%factorList)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- sparseMat not initiailzed properly for "//tag, &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
 
         if(size(sparseMats(i)%factorIndexList, 2) /= size(sparseMats(i)%factorList, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- sparseMat factorIndexList and factorList sizes not consistent "//tag, &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -1821,7 +1821,7 @@ function SideAToSideB(AtoX, XtoB, rc)
     match = .true.
   endif
   if(.not. match) then
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
        msg="- Incorrect regrid schemes for XGrid generation", &
        ESMF_CONTEXT, rcToReturn=rc) 
     return
@@ -1874,7 +1874,7 @@ subroutine checkGrid(grid,staggerloc,rc)
 
    ! Error if decompType is ARBITRARY
    if (decompType .eq. ESMF_GRID_ARBITRARY) then
-         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
              msg="- can't currently regrid an arbitrarily distributed Grid", & 
              ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -1887,7 +1887,7 @@ subroutine checkGrid(grid,staggerloc,rc)
         ESMF_CONTEXT, rcToReturn=rc)) return
 
    if (dimCount .ne. 2) then
-         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
          msg="- can currently only create xgrid on 2D grids", & 
          ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -1905,7 +1905,7 @@ subroutine checkGrid(grid,staggerloc,rc)
        ! loop and make sure they aren't too small in any dimension
        do i=1,dimCount
           if (ec(i) .lt. 2) then
-             call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
           msg="- can't currently regrid a grid that contains a DE of width less than 2", & 
              ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -2094,7 +2094,7 @@ end subroutine ESMF_XGridConstructBaseObj
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
 
     if (.not. associated(xgrid%xgtypep)) then 
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg="Uninitialized or already destroyed XGrid: xgtypep unassociated", &
         ESMF_CONTEXT, rcToReturn=rc)
       return

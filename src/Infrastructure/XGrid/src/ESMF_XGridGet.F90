@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.22 2011/06/30 13:46:10 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.23 2011/06/30 19:19:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.22 2011/06/30 13:46:10 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.23 2011/06/30 19:19:18 w6ws Exp $'
 
 !==============================================================================
 !
@@ -216,7 +216,7 @@ integer, intent(out), optional              :: rc
     if(present(sideA)) then
         ngrid_a = size(sideA, 1)
         if(ngrid_a /= size(xgtypep%sideA, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sideA doesn't match the size of sideA in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -228,7 +228,7 @@ integer, intent(out), optional              :: rc
     if(present(sideB)) then
         ngrid_b = size(sideB, 1)
         if(ngrid_b /= size(xgtypep%sideB, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sideB doesn't match the size of sideB in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -241,13 +241,13 @@ integer, intent(out), optional              :: rc
     if(present(area)) then
         ncells = size(area,1)
         if(.not. associated(xgtypep%area)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized area in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
         if(ncells /= size(xgtypep%area, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- size of area doesn't match the size of area in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -258,14 +258,14 @@ integer, intent(out), optional              :: rc
         ndim = size(centroid, 1)
         ncells = size(centroid, 2)
         if(.not. associated(xgtypep%centroid)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized centroid in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
         if(ncells /= size(xgtypep%centroid, 2) .or. &
            ndim  /= size(xgtypep%centroid, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- size of centroid doesn't match the size of centroid in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -276,7 +276,7 @@ integer, intent(out), optional              :: rc
     if(present(distgridA)) then
         ngrid_a = size(distgridA)
         if(ngrid_a /= size(xgtypep%distgridA, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of distgridA doesn't match the size of distgridA in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -289,7 +289,7 @@ integer, intent(out), optional              :: rc
     if(present(distgridB)) then
         ngrid_b = size(distgridB)
         if(ngrid_b /= size(xgtypep%distgridB, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of distgridB doesn't match the size of distgridB in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -306,13 +306,13 @@ integer, intent(out), optional              :: rc
     if(present(sparseMatA2X)) then
         ngrid_a = size(sparseMatA2X, 1)
         if(.not. associated(xgtypep%sparseMatA2X)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized sparseMatA2X in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
         if(ngrid_a /= size(xgtypep%sparseMatA2X, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sparseMatA2X doesn't match the size of sparseMatA2X in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -325,13 +325,13 @@ integer, intent(out), optional              :: rc
     if(present(sparseMatX2A)) then
         ngrid_a = size(sparseMatX2A, 1)
         if(.not. associated(xgtypep%sparseMatX2A)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized sparseMatX2A in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
         if(ngrid_a /= size(xgtypep%sparseMatX2A, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sparseMatX2A doesn't match the size of sparseMatX2A in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -344,13 +344,13 @@ integer, intent(out), optional              :: rc
     if(present(sparseMatB2X)) then
         ngrid_a = size(sparseMatB2X, 1)
         if(.not. associated(xgtypep%sparseMatB2X)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized sparseMatB2X in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
         if(ngrid_a /= size(xgtypep%sparseMatB2X, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sparseMatB2X doesn't match the size of sparseMatB2X in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -363,13 +363,13 @@ integer, intent(out), optional              :: rc
     if(present(sparseMatX2B)) then
         ngrid_a = size(sparseMatX2B, 1)
         if(.not. associated(xgtypep%sparseMatX2B)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
                msg="- uninitialized sparseMatX2B in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
         endif    
         if(ngrid_a /= size(xgtypep%sparseMatX2B, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sparseMatX2B doesn't match the size of sparseMatX2B in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -560,7 +560,7 @@ integer, intent(out), optional               :: rc
     endif
 
     if(l_gridIndex .lt. 0) then
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- gridIndex cannot be less than 0", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -572,7 +572,7 @@ integer, intent(out), optional               :: rc
 
     if(l_xgridSide .eq. ESMF_XGRIDSIDE_A) then
         if(l_gridIndex .gt. size(xgtypep%distgridA, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
 msg="- gridIndex cannot be greater than the size of distgridA in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -582,7 +582,7 @@ msg="- gridIndex cannot be greater than the size of distgridA in the XGrid", &
 
     if(l_xgridSide .eq. ESMF_XGRIDSIDE_B) then
         if(l_gridIndex .gt. size(xgtypep%distgridB, 1)) then
-            call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
 msg="- gridIndex cannot be greater than the size of distgridB in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return

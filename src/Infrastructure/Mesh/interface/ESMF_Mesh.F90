@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.70 2011/06/30 03:53:05 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.71 2011/06/30 19:13:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.70 2011/06/30 03:53:05 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.71 2011/06/30 19:13:24 w6ws Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.70 2011/06/30 03:53:05 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.71 2011/06/30 19:13:24 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -560,7 +560,7 @@ contains
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -584,7 +584,7 @@ contains
 
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 2) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- MeshAddNodes() should be called before this", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -692,7 +692,7 @@ contains
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -700,7 +700,7 @@ contains
 
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 1) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- MeshAddNodes() should be called before this", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -1059,7 +1059,7 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                  msg="- the filetypeflag has to be either ESMF_FILEFORMAT_ESMFMESH or ESMF_FILEFORMAT_SCRIP", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return
@@ -1767,7 +1767,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -1776,7 +1776,7 @@ end function ESMF_MeshCreateFromScrip
     if (present(ownedNodeCoords)) then
        ! If mesh has been freed then exit
        if (mesh%isCMeshFreed) then
-          call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                 msg="- the mesh internals have been freed", & 
                 ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -1784,7 +1784,7 @@ end function ESMF_MeshCreateFromScrip
 
        ! Check array size
        if (size(ownedNodeCoords)<mesh%numOwnedNodes*mesh%spatialDim) then
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                 msg="- owndedNodeCoords too small to hold coordinates", & 
                 ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -1864,14 +1864,14 @@ end function ESMF_MeshCreateFromScrip
     
     ! If meshes have not been fully created
     if (.not. mesh1%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
     endif        
 
     if (.not. mesh2%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -1959,7 +1959,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2161,7 +2161,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2169,7 +2169,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2245,7 +2245,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2253,7 +2253,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2322,7 +2322,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2330,7 +2330,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2393,7 +2393,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2401,7 +2401,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2420,7 +2420,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! check size of areaList
     if (size(areaList) .lt. mesh%origElemCount) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- area list too small to hold element areas", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2493,7 +2493,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2501,7 +2501,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2567,7 +2567,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2575,7 +2575,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2584,7 +2584,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! check size of fracList
     if (size(origfracList) .lt. mesh%origElemCount) then
-       call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
                  msg="- frac list too small to hold element fracs", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2592,7 +2592,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! check size of fracList
     if (size(splitfracList) .lt. mesh%splitElemCount) then
-       call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
                  msg="- frac list too small to hold element fracs", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2602,7 +2602,7 @@ end function ESMF_MeshCreateFromScrip
     ! split fractions
     if (.not. mesh%hasSplitElem) then
        if (size(splitFracList) .ne. size(origFracList)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
                msg="- no solit elements so frac list sizes should be the same", & 
                ESMF_CONTEXT, rcToReturn=rc) 
           return 
@@ -2691,7 +2691,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2709,7 +2709,7 @@ end function ESMF_MeshCreateFromScrip
       ! copy split Element Map
       if (present(splitElemMap)) then
          if (size(splitElemMap) .lt. size(mesh%splitElemMap)) then
-            call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- splitElemMap input parameter wrong size ", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return 
@@ -2721,7 +2721,7 @@ end function ESMF_MeshCreateFromScrip
       if (present(splitElemStart) .or. present(splitElemCount) .or. &
           present(origElemStart)  .or. present(origElemCount) .or. &
           present(splitElemMap)) then
-          call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has no split elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
       endif 
@@ -2782,7 +2782,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2790,7 +2790,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2917,7 +2917,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh internals have been freed", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 
@@ -2925,7 +2925,7 @@ end function ESMF_MeshCreateFromScrip
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_WRONG, & 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
                  msg="- the mesh has not been fully created", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return 

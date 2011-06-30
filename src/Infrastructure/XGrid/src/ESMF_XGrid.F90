@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.29 2011/06/30 13:46:10 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.30 2011/06/30 19:19:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.29 2011/06/30 13:46:10 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.30 2011/06/30 19:19:18 w6ws Exp $'
 
 !==============================================================================
 !
@@ -686,7 +686,7 @@ contains
       ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
 
       if (.not.associated(xgrid%xgtypep)) then 
-         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed XGrid: xgtypep unassociated", &
              ESMF_CONTEXT, rcToReturn=rc)
          return
@@ -700,7 +700,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (xgridstatus .ne. ESMF_STATUS_READY) then
-         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed XGrid: xgridstatus not ready", &
              ESMF_CONTEXT, rcToReturn=rc)
          return
@@ -712,7 +712,7 @@ contains
 
       if(associated(xgtypep%area) .and. associated(xgtypep%centroid)) then
         if(size(xgtypep%area, 1) /= size(xgtypep%centroid, 1)) then
-           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
              msg="number of area cells differs from number of centroid cells", &
              ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -722,7 +722,7 @@ contains
       if(associated(xgtypep%sparseMatA2X) .or. associated(xgtypep%sparseMatX2A)) then
         if(associated(xgtypep%distgridA)) then
           if(size(xgtypep%distgridA, 1) /= ngridA) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="number of distgrids on side A differs from number of Grids on side A", &
                ESMF_CONTEXT, rcToReturn=rc)
              return
@@ -732,7 +732,7 @@ contains
 
       if(associated(xgtypep%sparseMatA2X)) then
         if(size(xgtypep%sparseMatA2X, 1) /= ngridA) then
-           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
              msg="number of sparseMat objects on side A differs from number of Grids on side A", &
              ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -740,7 +740,7 @@ contains
         do i = 1, ngridA
           if(size(xgtypep%sparseMatA2X(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatA2X(i)%factorList, 1)) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="number of elements in sparseMatA2X is inconsistent", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -750,7 +750,7 @@ contains
 
       if(associated(xgtypep%sparseMatX2A)) then
         if(size(xgtypep%sparseMatX2A, 1) /= ngridA) then
-           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
              msg="number of sparseMat objects on side A differs from number of Grids on side A", &
              ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -758,7 +758,7 @@ contains
         do i = 1, ngridA
           if(size(xgtypep%sparseMatX2A(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatX2A(i)%factorList, 1)) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="number of elements in sparseMatX2A is inconsistent", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -770,7 +770,7 @@ contains
       if(associated(xgtypep%sparseMatB2X) .or. associated(xgtypep%sparseMatX2B)) then
         if(associated(xgtypep%distgridB)) then
           if(size(xgtypep%distgridB, 1) /= ngridB) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="number of distgrids on side B differs from number of Grids on side B", &
                ESMF_CONTEXT, rcToReturn=rc)
              return
@@ -780,7 +780,7 @@ contains
 
       if(associated(xgtypep%sparseMatB2X)) then
         if(size(xgtypep%sparseMatB2X, 1) /= ngridB) then
-           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
              msg="number of sparseMat objects on side B differs from number of Grids on side B", &
              ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -788,7 +788,7 @@ contains
         do i = 1, ngridB
           if(size(xgtypep%sparseMatB2X(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatB2X(i)%factorList, 1)) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="number of elements in sparseMatB2X is inconsistent", &
                ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -798,7 +798,7 @@ contains
 
       if(associated(xgtypep%sparseMatX2B)) then
         if(size(xgtypep%sparseMatX2B, 1) /= ngridB) then
-           call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
              msg="number of sparseMat objects on side B differs from number of Grids on side B", &
              ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -806,7 +806,7 @@ contains
         do i = 1, ngridB
           if(size(xgtypep%sparseMatX2B(i)%factorIndexList, 2) /= &
             size(xgtypep%sparseMatX2B(i)%factorList, 1)) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                msg="number of elements in sparseMatX2B is inconsistent", &
                ESMF_CONTEXT, rcToReturn=rc)
             return

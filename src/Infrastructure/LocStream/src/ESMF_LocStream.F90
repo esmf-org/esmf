@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.64 2011/06/30 14:39:33 theurich Exp $
+! $Id: ESMF_LocStream.F90,v 1.65 2011/06/30 19:15:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.64 2011/06/30 14:39:33 theurich Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.65 2011/06/30 19:15:44 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1515,7 +1515,7 @@ contains
 
       ! make they've given us info
       if (numDEs .eq. 0) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
               msg="- countsPerDE is of length 0", & 
               ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -1874,7 +1874,7 @@ contains
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit,locstream,rc)      
 
       if (.not.associated(locstream%lstypep)) then 
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg="Uninitialized or already destroyed LocStream: lstypep unassociated", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -2057,7 +2057,7 @@ contains
     ! get keyNames
     if (present(keyNames)) then
        if (size(keyNames) .lt. lstypep%keyCount) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
               msg="- keyNames array too short", & 
               ESMF_CONTEXT, rcToReturn=rc) 
           return 
@@ -2252,21 +2252,21 @@ contains
  !
  !! Check consistency  of localDE
  !if (localDeCount < 0) then 
- !   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+ !   call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
  !          "- Negative number of localDeCount prohibits request", & 
  !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE>=localDeCount) then 
- !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+ !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
  !          "- localDE too big", & 
  !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE<0) then 
- !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+ !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
  !          "- localDE can't be less than 0", & 
  !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
@@ -2578,28 +2578,28 @@ end subroutine ESMF_LocStreamGetKeyBounds
  
  ! Check consistency  of localDE
  if (localDeCount < 0) then 
-    call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
            msg="- Negative number of localDeCount prohibits request", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDeCount == 0) then 
-    call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
            msg="- localDeCount == 0 prohibits request", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif
  
  if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- localDE too big", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDE<0) then 
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- localDE can't be less than 0", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
@@ -2744,28 +2744,28 @@ end subroutine ESMF_LocStreamGetKeyI4
  
  ! Check consistency  of localDE
  if (localDeCount < 0) then 
-    call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
            msg="- Negative number of localDeCount prohibits request", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDeCount == 0) then 
-    call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
            msg="- localDeCount == 0 prohibits request", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif
  
  if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- localDE too big", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDE<0) then 
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- localDE can't be less than 0", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
@@ -2911,28 +2911,28 @@ end subroutine ESMF_LocStreamGetKeyR4
  
  ! Check consistency  of localDE
  if (localDeCount < 0) then 
-    call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
            msg="- Negative number of localDeCount prohibits request", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDeCount == 0) then 
-    call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
            msg="- localDeCount == 0 prohibits request", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif
  
  if (localDE>=localDeCount) then 
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- localDE too big", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
  endif 
 
  if (localDE<0) then 
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- localDE can't be less than 0", & 
            ESMF_CONTEXT, rcToReturn=rc) 
     return 
@@ -3042,21 +3042,21 @@ end subroutine ESMF_LocStreamGetKeyR8
  !
  !! Check consistency  of localDE
  !if (localDeCount < 0) then 
- !   call ESMF_LogSetError(ESMF_RC_CANNOT_GET, & 
+ !   call ESMF_LogSetError(rcToCheck=ESMF_RC_CANNOT_GET, & 
  !          "- Negative number of localDeCount prohibits request", & 
  !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE>=localDeCount) then 
- !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+ !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
  !          "- localDE too big", & 
  !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
  !endif 
  !
  !if (localDE<0) then 
- !   call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+ !   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
  !          "- localDE can't be less than 0", & 
  !          ESMF_CONTEXT, rcToReturn=rc) 
  !   return 
