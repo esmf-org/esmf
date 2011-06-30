@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.40 2011/06/30 06:00:06 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.41 2011/06/30 14:49:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -452,7 +452,7 @@ program ESMF_RegridWeightGen
            ignoreUnmapped=.false.
         endif
      endif
-        
+
      ! Set flag to say if we're conservative
      isConserve=.false.
      if (trim(method) .eq. 'conserve') then
@@ -531,6 +531,11 @@ program ESMF_RegridWeightGen
            srcGrid = ESMF_GridCreate(srcfile,(/xpart,ypart/), addCornerStagger=addCorners, &
                        isSphere=srcIsSphere, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+          ! call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CORNER, filename="srcGrid", isSphere=.false., &
+          !       isLatLonDeg=.true., rc=rc)
+          ! if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     	   srcField = ESMF_FieldCreate(srcGrid, arrayspec, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)

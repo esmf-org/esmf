@@ -1,4 +1,5 @@
-// $Id: ESMCI_Grid.C,v 1.122 2011/06/13 18:44:29 oehmke Exp $
+
+// $Id: ESMCI_Grid.C,v 1.123 2011/06/30 14:49:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,11 +49,13 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.122 2011/06/13 18:44:29 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.123 2011/06/30 14:49:45 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -61,6 +64,16 @@ static const char *const version = "$Id: ESMCI_Grid.C,v 1.122 2011/06/13 18:44:2
 // Set up ESMCI name space for these methods
 namespace ESMCI{  
 
+
+  int grid_debug=false;
+
+  void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int *rc);
+  void _translate_distgrid_conn(DistGrid *distgrid, 
+                                ESMC_GridConn *connL, ESMC_GridConn *connU, int *rc);
+  void _add_poles_to_conn(DistGrid *distgrid, int *lwidth, int *uwidth, 
+                        ESMC_GridConn *connL, ESMC_GridConn *connU, InterfaceInt **connListOut, int *rc);
+
+  
 //  File Local Prototypes (actual implementation at end of file)
 static int _NumStaggerLocsFromDimCount(int dimCount);
 
@@ -1023,6 +1036,7 @@ Grid *Grid::create(
      return ESMC_NULL_POINTER;
   }
 
+
   // setup the grids internal structure using the passed in paramters. 
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
                     gridEdgeLWidthArg,gridEdgeUWidthArg, gridAlignArg,
@@ -1097,6 +1111,7 @@ Grid *Grid::create(
      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_Grid.", rcArg);
      return ESMC_NULL_POINTER;
   }
+
 
   // setup the grids internal structure using the passed in paramters. 
   localrc=construct(grid, nameLenArg, nameArg, typekindArg, distgridArg, 
@@ -3148,6 +3163,12 @@ int Grid::constructInternal(
 
   distgrid = distgridArg;
 
+  // Construct distgrid_wo_poles
+  _create_nopole_distgrid(distgrid, &distgrid_wo_poles, &localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+
+
   distDimCount=distDimCountArg;
 
   undistDimCount=undistDimCountArg;
@@ -3180,9 +3201,6 @@ int Grid::constructInternal(
     memcpy(undistUBound, undistUBoundArg, undistDimCount * sizeof(int));
   }
 
-
-
-
   // if there are any dimensions 
   if (dimCount) {
 
@@ -3192,11 +3210,16 @@ int Grid::constructInternal(
     //// record connU
     connU = new ESMC_GridConn[dimCount];
 
-    //// temporarily default these to no connection
+    //// Default these to no connection
     for(int i=0; i<dimCount; i++) {
       connL[i]=ESMC_GRIDCONN_NONE;
       connU[i]=ESMC_GRIDCONN_NONE;
     }
+    
+    // translate distgrid connections to fill connection info for poles
+    _translate_distgrid_conn(distgrid, connL, connU, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
 
     //// record gridEdgeLWidth
     gridEdgeLWidth = new int[dimCount];
@@ -3371,9 +3394,10 @@ int Grid::constructInternal(
  
   // allocate and fill isDELBnd and isDEUbnd
   // These record if the local de is on the top or bottom
-  // boundary in each dimension
+  // boundary in each dimension, use distgrid without poles
+  // because we don't want the poles to count
   if (decompType != ESMC_GRID_ARBITRARY){
-    localrc=_createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid, distgridToGridMap);
+    localrc=_createIsDEBnd(&isDELBnd,&isDEUBnd, distgrid_wo_poles, distgridToGridMap);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
@@ -3401,6 +3425,7 @@ int Grid::constructInternal(
   // Grid is now ready to be used in grid methods, so set status appropriately
   status=ESMC_GRIDSTATUS_SHAPE_READY;
 
+  
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -3669,6 +3694,7 @@ Grid::Grid(
   
   indexflag=ESMF_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
+  distgrid_wo_poles= ESMC_NULL_POINTER; 
 
   minIndex = ESMC_NULL_POINTER;
   maxIndex = ESMC_NULL_POINTER;
@@ -3763,6 +3789,7 @@ Grid::Grid(
   
   indexflag=ESMF_INDEX_DELOCAL;
   distgrid= ESMC_NULL_POINTER; 
+  distgrid_wo_poles= ESMC_NULL_POINTER; 
 
   minIndex = ESMC_NULL_POINTER;
   maxIndex = ESMC_NULL_POINTER;
@@ -3833,6 +3860,9 @@ void Grid::destruct(void){
    if (destroyDistgrid) {
      DistGrid::destroy(&distgrid);
    }
+
+   // Grid created this one
+   if (distgrid_wo_poles!=ESMC_NULL_POINTER) DistGrid::destroy(&distgrid_wo_poles);
 
    // delete delayout
    if (destroyDELayout) {
@@ -4428,23 +4458,64 @@ int Grid::getStaggerDistgrid(
         staggerEdgeUWidthIntIntArray[i]=staggerEdgeUWidthList[staggerloc][distgridToGridMap[i]];
       }
 
-      // Create new distgrid with this padding
-      staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
-						       staggerEdgeLWidthIntInt, 
-						       staggerEdgeUWidthIntInt, 
-						       &indexflag, NULL, 
+
+      // Get connection List with pole added back in
+      InterfaceInt *connListWPoles=NULL;
+      _add_poles_to_conn(distgrid_wo_poles,
+                         staggerEdgeLWidthIntIntArray,
+                         staggerEdgeUWidthIntIntArray,
+                         connL,connU, &connListWPoles, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+	return rc;
+
+
+      // Create stagger distgrid w no poles with this padding
+      staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
+                                                       ///   DistGrid *staggerdistgrid_wo_poles=DistGrid::create(distgrid_wo_poles,
+                                                       staggerEdgeLWidthIntInt, 
+                                                       staggerEdgeUWidthIntInt, 
+                                                       NULL,
+                                                       connListWPoles, 
                                                        &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
 	return rc;
-      
+
       // Get rid of Interface ints
       delete staggerEdgeLWidthIntInt;
       delete [] staggerEdgeLWidthIntIntArray;
 
       delete staggerEdgeUWidthIntInt;
       delete [] staggerEdgeUWidthIntIntArray;
-    }
+
+      if (connListWPoles!=NULL) delete connListWPoles;
+
+#if 0
+      // Get connection List with pole added back in
+      InterfaceInt *connListWPoles=NULL;
+      _add_poles_to_conn(distgrid_wo_poles,
+                         connL,connU, &connListWPoles, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+	return rc;
+
+     
+      // Create stagger distgrid w poles
+      staggerDistgridList[staggerloc]=DistGrid::create(staggerdistgrid_wo_poles,
+                                                       NULL,
+                                                       NULL,
+                                                        NULL,
+                                                       connListWPoles, 
+                                                       &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+	return rc;
+
+      //      DistGrid::destroy(&staggerdistgrid_wo_poles);
+
+      if (connListWPoles!=NULL) delete connListWPoles;
+
+#endif
+   }
     
+  
     // Return distgrid
     *distgridArg=staggerDistgridList[staggerloc];
     
@@ -4707,6 +4778,15 @@ int Grid::serialize(
     // make sure loffset is aligned correctly
     r=loffset%8;
     if (r!=0) loffset += 8-r;
+    // Serialize the DistGrid_wo_poles
+    localrc = distgrid_wo_poles->serialize(buffer, length, &loffset, inquireflag);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+     return rc;  
+
+
+    // make sure loffset is aligned correctly
+    r=loffset%8;
+    if (r!=0) loffset += 8-r;
 
     // Check if buffer has enough free memory to hold object
     if ((inquireflag != ESMF_INQUIREONLY) && (*length < loffset)){
@@ -4953,6 +5033,13 @@ int Grid::deserialize(
   
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, &loffset);
+
+  // make sure loffset is aligned correctly
+  r=loffset%8;
+  if (r!=0) loffset += 8-r;
+
+  // Deserialize the DistGrid
+  distgrid_wo_poles = DistGrid::deserialize(buffer, &loffset);
 
   // make sure loffset is aligned correctly
   r=loffset%8;
@@ -6428,6 +6515,7 @@ void GridIter::getDEBnds(
 
   // if cell iterator then expand bounds
   if (cellNodes) {
+#if 0
     if (grid->isForceConn()) {
       for (int i=0; i<rank; i++) {
         //// Expand to include all nodes touched by cells on this proc
@@ -6436,18 +6524,29 @@ void GridIter::getDEBnds(
       } 
 
     } else {
-
+#endif
       int localrc;
       for (int i=0; i<rank; i++) {
         //// Expand to include all nodes touched by cells on this proc
-        //// Note the below expect dim in 1 based.
         if (!grid->isLBnd(localDE,i)) lBnd[i]--;
         if (!grid->isUBnd(localDE,i)) uBnd[i]++; 
       } 
-    }
+
+      // Also expand for bipole
+      for (int i=0; i<rank; i++) {
+        //// Expand to include all nodes touched by cells on this proc
+        if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+        if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+      } 
+
+
+#if 0
+   }
+#endif
   }
 
 
+  //   printf("GI lBnd=%d %d UBnd=%d %d \n", lBnd[0],lBnd[1],uBnd[0],uBnd[1]);
 
 }
 //-----------------------------------------------------------------------------
@@ -6492,6 +6591,10 @@ void GridIter::setDEBnds(
     currOff *=(uBndInd[i]-lBndInd[i]+1);
   }  
 
+  //   printf("Ind lBnd=%d %d Ubnd=%d %d \n",lBndInd[0],lBndInd[1],uBndInd[0],uBndInd[1]);
+
+
+
   // Exclusive Bounds
   grid->getExclusiveLBound(staggerloc, localDE, exLBndInd);
 
@@ -6499,6 +6602,12 @@ void GridIter::setDEBnds(
   grid->getExclusiveUBound(staggerloc, localDE, uBndOrig);  
   grid->getExclusiveLBound(staggerloc, localDE, lBndOrig);  
 
+  int lBndNew[7];
+  int uBndNew[7];
+  grid->getDistExclusiveUBound(staggerDistgrid, localDE, uBndNew);  
+  grid->getDistExclusiveLBound(staggerDistgrid, localDE, lBndNew);  
+
+  //  printf("Orig lBnd=%d %d Ubnd=%d %d ::  New lBnd=%d %d UBnd=%d %d\n",lBndOrig[0],lBndOrig[1],uBndOrig[0],uBndOrig[1],lBndNew[0],lBndNew[1],uBndNew[0],uBndNew[1]);
 
   // Set to first index on DE
   for (int i=0; i<rank; i++) {
@@ -6758,7 +6867,7 @@ int GridIter::getGlobalID(
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 #else
 
-
+#if 0
   if (grid->isForceConn()) {
     // Temporarily handle periodicity until GT's permenant solution
     for (int i=0; i<rank; i++) {
@@ -6783,18 +6892,25 @@ int GridIter::getGlobalID(
     gid=staggerDistgrid->getSequenceIndexTile(1,deBasedInd,0,&localrc); 
      
   } else {
-
+#endif
     // Convert to DE based
     for (int i=0; i<rank; i++) {
       deBasedInd[i]=curInd[i]-exLBndInd[i];
     }
       
     // return sequence index
-    gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
+    //    gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
 
-    if (gid <0) printf("GI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
+    gid=staggerDistgrid->getSequenceIndexTile(1,curInd,6,&localrc);
+
+
+
+    if (gid <0) printf("GI Gid=%d curDE=%d curInd=%d %d dstBInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
+
+#if 0
+
   }
-
+#endif
   //  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
 #endif
 
@@ -6831,12 +6947,17 @@ int GridIter::getPoleID(
   // if done then leave
   if (done) return 0;
 
+#if 0
   if (grid->isForceConn()) {
+#endif
+
     // check to see if we're on this proc
     for (int i=0; i<rank; i++) {
       if ((curInd[i]==lBndInd[i]) && grid->isLBnd(curDE,i) && (connL[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1);
       if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i) && (connU[i]==ESMC_GRIDCONN_POLE)) return 2*(i+1)+1;
     }
+
+#if 0
   } else {
     // check to see if we're on this proc
     for (int i=0; i<rank; i++) {
@@ -6844,6 +6965,7 @@ int GridIter::getPoleID(
       if ((curInd[i]==uBndInd[i]) && grid->isUBnd(curDE,i)) return 2*(i+1)+1;
     }
   }
+#endif
 
   // if we pass the above test then we're not next to a pole node
   return 0;
@@ -7438,6 +7560,7 @@ void GridCellIter::getDEBnds(
   grid->getExclusiveLBound(staggerloc, localDE, lBnd);  
 
   // if cell iterator then expand bounds
+#if 0
   if (grid->isForceConn()) {
     for (int i=0; i<rank; i++) {
       //// Adjust based on alignment of each dimension
@@ -7449,16 +7572,32 @@ void GridCellIter::getDEBnds(
       }   
     }
   } else {
+#endif
     int localrc;
 
+#if 0
     for (int i=0; i<rank; i++) {
       if (align[i] <0) {
         if (grid->isUBnd(localDE,i)) uBnd[i]--;
       } else {
         if (grid->isLBnd(localDE,i)) lBnd[i]++;
       }    
-    } 
+    }
+#endif 
+
+    for (int i=0; i<rank; i++) {
+      if (align[i] <0) {
+        if (grid->isUBnd(localDE,i) && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+      } else {
+        if (grid->isLBnd(localDE,i) && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
+      }    
+    }
+ 
+#if 0
   }
+#endif
+
+  // printf("GCI lBnd=%d %d UBnd=%d %d \n", lBnd[0],lBnd[1],uBnd[0],uBnd[1]);
 
   // If using center make sure we aren't going to go outside the bounds
     int centerUBnd[ESMF_MAXDIM]; 
@@ -7791,7 +7930,7 @@ int GridCellIter::getGlobalID(
   if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 #else
 
-  
+#if 0  
   if (grid->isForceConn()) {
     // Temporarily handle periodicity until GT's permenant solution
 
@@ -7801,7 +7940,7 @@ int GridCellIter::getGlobalID(
     // if this change doesn't happen, then need to take care of that. 
     gid=centerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
   } else {
-    int deBasedInd[ESMF_MAXDIM];
+#endif
 
 
     // Convert to DE based
@@ -7810,11 +7949,16 @@ int GridCellIter::getGlobalID(
     }
       
     // return sequence index
-    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,3,&localrc);
+    // gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
+
+    gid=centerDistgrid->getSequenceIndexTile(1,curInd,6,&localrc);
 
     if (gid <0) printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
-  }
 
+#if 0
+
+  }
+#endif
 #endif
 
 
@@ -7950,7 +8094,7 @@ int GridCellIter::getLocalID(
 
 
 // This method must correspond to GridIter::setDEBnds(), so adjust accordingly
-void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCount, int staggerloc, int localDE, 
+void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCount, int staggerloc, int localDE, const ESMC_GridConn *connL, const ESMC_GridConn *connU,  
                                int *dimOffCN, int *lOffCN) {
   int uBnd[ESMF_MAXDIM];
   int lBnd[ESMF_MAXDIM];
@@ -7963,6 +8107,7 @@ void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCou
 
 
   // if cell iterator then expand bounds
+#if 0
     if (grid->isForceConn()) {
       for (int i=0; i<dimCount; i++) {
         //// Expand to include all nodes touched by cells on this proc
@@ -7970,13 +8115,28 @@ void precomputeCellNodeLIDInfo(Grid *grid, DistGrid *staggerDistgrid, int dimCou
         if (!grid->isUBnd(localDE,i)) uBnd[i]++;
       } 
     } else {
+#endif
       int localrc;
       for (int i=0; i<dimCount; i++) {
         //// Expand to include all nodes touched by cells on this proc
         if (!grid->isLBnd(localDE,i)) lBnd[i]--;
         if (!grid->isUBnd(localDE,i)) uBnd[i]++;
       } 
+
+      // Also expand for bipole
+      for (int i=0; i<dimCount; i++) {
+        //// Expand to include all nodes touched by cells on this proc
+        if (grid->isLBnd(localDE,i) && (connL[i]==ESMC_GRIDCONN_BIPOLE)) lBnd[i]--;
+        if (grid->isUBnd(localDE,i) && (connU[i]==ESMC_GRIDCONN_BIPOLE)) uBnd[i]++; 
+      } 
+
+
+#if 0
+
+ /* XMRKX */
+
     }
+#endif
 
 
 
@@ -8055,7 +8215,7 @@ void GridCellIter::getCornersCellNodeLocalID(
   *cnrCount=cnrNum;
 
   // Precompute info for calculating local IDs
-  precomputeCellNodeLIDInfo(grid, staggerDistgrid, rank, staggerloc, curDE, dimOffCN, &lOffCN);
+  precomputeCellNodeLIDInfo(grid, staggerDistgrid, rank, staggerloc, curDE, connL, connU, dimOffCN, &lOffCN);
 
   // Loop through setting corners
   for (int i=0; i<cnrNum; i++) {
@@ -8906,20 +9066,609 @@ int Grid::getCartCoordDimCount() {
 }
 
 
+
+// Check if the passed in connection is a monopole, if so return some info 
+// If isLower then is at the minimum end of the dimension, else is at the upper end.
+// PoleDimOut, periodicDimOut are 0-based
+ bool check_monopole(int *conn, int dimCount, int *widthIndex, bool *isLowerOut, int *poleDimOut, 
+                     int *periodicDimOut) {
+   int poleDim;
+
+  // Count negative orientations, and perhaps find pole dim
+  int neg=0;
+  for (int i=0; i<dimCount; i++) {
+    if (conn[2+dimCount+i] == -(i+1)) {
+      neg++;
+      poleDim=i;
+    }
+  }
+
+  // If don't have just one neg orientation, then not a monopole
+  if (neg != 1) return false;
+
+  // Check lower vs. upper
+  bool isLower;
+  if (conn[2+poleDim]==1) isLower=true;
+  else if (conn[2+poleDim]==2*widthIndex[poleDim]+1) isLower=false;
+  else return false; // positionVector not correct so not a pole
+  
+  // Make sure has periodic Dim positionVect
+  int periodicDim=-1;
+  for (int i=0; i<dimCount; i++) {
+    if (conn[2+i] == widthIndex[i]/2) {
+      periodicDim=i;
+    }
+  }
+  if (periodicDim == -1) return false; // no periodic offset
+
+  // Output
+  *isLowerOut=isLower;
+  *poleDimOut=poleDim;
+  *periodicDimOut=periodicDim;
+  return true;
+ }
+
+
+// Check if the passed in connection is a bipole, if so return some info 
+// If isLower then is at the minimum end of the dimension, else is at the upper end.
+// PoleDimOut, periodicDimOut are 0-based
+ bool check_bipole(int *conn, int dimCount, int *widthIndex, bool *isLowerOut, int *poleDimOut, 
+                   int *periodicDimOut) {
+   int negDim[ESMF_MAXDIM];
+
+  // Count negative orientations, and perhaps find pole dim
+  int neg=0;
+  for (int i=0; i<dimCount; i++) {
+    if (conn[2+dimCount+i] == -(i+1)) {
+      negDim[neg]=i;
+      neg++;
+    }
+  }
+
+  // If don't have two neg orientation, then not a monopole
+  if (neg != 2) return false;
+
+  // Find periodic dim 
+  int poleDim=-1;
+  int periodicDim=-1;
+  if (conn[2+negDim[0]]==widthIndex[negDim[0]]+1) {
+    periodicDim=negDim[0];
+    poleDim=negDim[1];
+  } else if (conn[2+negDim[1]]==widthIndex[negDim[1]]+1) {
+    periodicDim=negDim[1];
+    poleDim=negDim[0];
+  } else return false;
+
+  // Check lower vs. upper
+  bool isLower;
+  if (conn[2+poleDim]==1) isLower=true;
+  else if (conn[2+poleDim]==2*widthIndex[poleDim]+1) isLower=false;
+  else return false; // positionVector not correct so not a pole
+  
+  // Output
+  *isLowerOut=isLower;
+  *poleDimOut=poleDim;
+  *periodicDimOut=periodicDim;
+  return true;
+ }
+
+
+
+
+bool isPoleConn(int *conn, int dimCount, int const *minIndexPTile, int const *maxIndexPTile) {
+  bool isLower;
+  int poleDim, periodicDim;
+  int widthIndex[ESMF_MAXDIM];
+
+   // if same tile isn't involved then skip
+   int tile=conn[0];
+   if (tile != conn[1]) return false;
+
+  // Get MinIndex
+   int const *minIndex=minIndexPTile+(tile-1)*dimCount;
+
+  // Get MaxIndex
+   int const *maxIndex=maxIndexPTile+(tile-1)*dimCount;
+
+   // Compute width
+   for (int j=0; j<dimCount; j++) {
+     widthIndex[j]=maxIndex[j]-minIndex[j]+1;
+   }
+   // check if its a monpole 
+  if (check_monopole(conn, dimCount, widthIndex, 
+                     &isLower, &poleDim, &periodicDim)) {
+    return true;
+  } else if (check_bipole(conn, dimCount, widthIndex, 
+                          &isLower, &poleDim, &periodicDim)) {
+    return true;
+  } else return false;
+
+  return false;
+}
+
+void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int *rc) {
+  int localrc;
+
+  // Obviously no pole, so just copy
+  if (distgrid->getConnectionCount() <1) {
+    *distgrid_nopole=DistGrid::create(distgrid,
+                                      (InterfaceInt *)NULL, (InterfaceInt *)NULL,
+                                      (ESMC_IndexFlag *)NULL, (InterfaceInt *)NULL, &localrc);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return; 
+    return;
+  }
+
+// Get some info
+ int dimCount=distgrid->getDimCount();
+ int const *minIndexPTile=distgrid->getMinIndexPDimPTile();
+ int const *maxIndexPTile=distgrid->getMaxIndexPDimPTile();
+
+ 
+ // Get connection info from distgrid
+ int connCount=distgrid->getConnectionCount();
+ int * const* connList=distgrid->getConnectionList();
+ 
+  // Loop through counting non-pole connections
+ int newConnCount=0;  
+ for (int i=0; i<connCount; i++) {
+   if (!isPoleConn(connList[i],dimCount,minIndexPTile,maxIndexPTile)) newConnCount++;
+ }
+
+ // Allocate list without poles
+ int connSize=2+2*dimCount;
+ int *newConnList=new int[newConnCount*connSize];
+
+#if 0
+ printf("connCount=%d\n",connCount);
+
+ for (int i=0; i<connCount; i++) {
+   for (int j=0; j<connSize; j++) {
+     printf("%d ",connList[i][j]);
+   }
+   printf("\n");
+ }
+
+   printf("\n");
+   printf("\n");
+#endif
+
+
+ // Fill in
+ int k=0;
+ for (int i=0; i<connCount; i++) {
+   if (!isPoleConn(connList[i],dimCount,minIndexPTile,maxIndexPTile)) {
+     for (int j=0; j<connSize; j++) {
+       newConnList[k]=connList[i][j];
+       k++;
+     }
+   }
+ }
+
+ // Construct interface int
+ int extent[2];
+ 
+  extent[0]=connSize;
+  extent[1]=newConnCount;
+  InterfaceInt *newConnListII=new InterfaceInt(newConnList,2,extent);
+
+ *distgrid_nopole=DistGrid::create(distgrid,
+                                   (InterfaceInt *)NULL, (InterfaceInt *)NULL,
+                                   (ESMC_IndexFlag *)NULL, newConnListII, &localrc);
+ if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return; 
+
+#if 0
+ int tstconnCount=(*distgrid_nopole)->getConnectionCount();
+ int * const* tstconnList=(*distgrid_nopole)->getConnectionList();
+
+   printf("TST:\n");
+ for (int i=0; i<tstconnCount; i++) {
+   for (int j=0; j<connSize; j++) {
+     printf("%d ",tstconnList[i][j]);
+   }
+   printf("\n");
+ }
+#endif
+
+ // Free memory
+ delete newConnListII;
+ delete [] newConnList;
+}
+
+void _translate_distgrid_conn(DistGrid *distgrid, 
+                              ESMC_GridConn *connL, ESMC_GridConn *connU, int *rc) {
+  int localrc;
+  int widthIndex[ESMF_MAXDIM];
+  bool isLower;
+  int  poleDim, periodicDim;
+
+// Get some info
+ int dimCount=distgrid->getDimCount();
+ int const *minIndexPTile=distgrid->getMinIndexPDimPTile();
+ int const *maxIndexPTile=distgrid->getMaxIndexPDimPTile();
+ 
+ // Get connection info from distgrid
+ int connCount=distgrid->getConnectionCount();
+ int * const* connList=distgrid->getConnectionList();
+ int connSize=2+2*dimCount;
+ 
+#if 0
+ printf("ORIG CONNECTIONS\n");
+ for (int i=0; i<connCount; i++) {
+   for (int j=0; j<connSize; j++) {
+     printf("%d ",connList[i][j]);
+   }
+   printf("\n");
+ }
+#endif
+
+  // Loop through  translating connections
+ for (int i=0; i<connCount; i++) {
+
+   // if same tile isn't involved then skip
+   int tile=connList[i][0];
+   if (tile != connList[i][1]) continue;
+
+  // Get MinIndex
+   int const *minIndex=minIndexPTile+(tile-1)*dimCount;
+
+  // Get MaxIndex
+   int const *maxIndex=maxIndexPTile+(tile-1)*dimCount;
+
+   // Compute width
+   for (int j=0; j<dimCount; j++) {
+     widthIndex[j]=maxIndex[j]-minIndex[j]+1;
+   }
+
+   // check if its a monpole 
+   if (check_monopole(connList[i], dimCount, widthIndex, 
+                      &isLower, &poleDim, &periodicDim)) {
+     if (isLower) connL[poleDim]=ESMC_GRIDCONN_POLE;
+     else connU[poleDim]=ESMC_GRIDCONN_POLE;
+     //     printf("MONOPOLE poleDim=%d isLower=%d periodicDim=%d \n",poleDim, isLower, periodicDim);
+
+    } else if (check_bipole(connList[i], dimCount, widthIndex, 
+                            &isLower, &poleDim, &periodicDim)) {
+     if (isLower) connL[poleDim]=ESMC_GRIDCONN_BIPOLE;
+     else connU[poleDim]=ESMC_GRIDCONN_BIPOLE;
+     //printf("BIPOLE poleDim=%d isLower=%d periodicDim=%d \n",poleDim, isLower, periodicDim);
+   }
+ }
+
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully 
+}
+
+
+
+
+
+// Output is in interfaceInt, calling subroutine needs to deallacate list
+void _add_poles_to_conn(DistGrid *distgrid, 
+                        int *lwidth, int *uwidth, ESMC_GridConn *connL, ESMC_GridConn *connU, InterfaceInt **connListOut, int *rc) {
+  int localrc;
+  int widthIndex[ESMF_MAXDIM];
+  bool isLower;
+
+// Get some info
+ int dimCount=distgrid->getDimCount();
+ int const *minIndexPTile=distgrid->getMinIndexPDimPTile();
+ int const *maxIndexPTile=distgrid->getMaxIndexPDimPTile();
+ 
+ // Get connection info from distgrid
+ int connCount=distgrid->getConnectionCount();
+ int * const* connList=distgrid->getConnectionList();
+ int connSize=2+2*dimCount;
+ 
+ // Get min,max index 
+ // TODO: this is assuming 1 TILE FIX THIS
+ int tile=1;
+ int const *minIndex=minIndexPTile+(tile-1)*dimCount;
+ int const *maxIndex=maxIndexPTile+(tile-1)*dimCount;
+
+ // Compute width
+ for (int i=0; i<dimCount; i++) {
+   widthIndex[i]=(maxIndex[i]+uwidth[i])-(minIndex[i]-lwidth[i])+1;
+ }
+
+ // Count number of poles
+ int num_poles=0;
+ for (int i=0; i<dimCount; i++) {
+   if (connL[i]==ESMC_GRIDCONN_POLE) num_poles++;
+   if (connU[i]==ESMC_GRIDCONN_POLE) num_poles++;
+   if (connL[i]==ESMC_GRIDCONN_BIPOLE) num_poles++;
+   if (connU[i]==ESMC_GRIDCONN_BIPOLE) num_poles++;
+ }
+
+ // Allocate list with poles back in
+ int newConnCount=connCount+num_poles;
+ int *newConnList=new int[newConnCount*connSize];
+
+  // Copy old connections into list
+ int newPos=0;
+ for (int i=0; i<connCount; i++) {
+   for(int j=0; j<connSize; j++) {
+     newConnList[i*connSize+j]=connList[i][j];
+   }
+   newPos++;
+ }
+
+ // PeriodicDim
+ int periodicDim=0;
+
+ // Put in Lower poles
+ for (int i=0; i<dimCount; i++) {
+   if (connL[i]==ESMC_GRIDCONN_POLE) {
+     newConnList[newPos*connSize+0]=1;
+     newConnList[newPos*connSize+1]=1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+j]=0;
+     }
+     newConnList[newPos*connSize+2+periodicDim]=widthIndex[periodicDim]/2;
+     newConnList[newPos*connSize+2+i]=1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+dimCount+j]=j+1;
+     }
+     newConnList[newPos*connSize+2+dimCount+i]=-newConnList[newPos*connSize+2+dimCount+i];
+     newPos++;
+   } else if (connL[i]==ESMC_GRIDCONN_BIPOLE) {
+     newConnList[newPos*connSize+0]=1;
+     newConnList[newPos*connSize+1]=1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+j]=0;
+     }
+     newConnList[newPos*connSize+2+periodicDim]=widthIndex[periodicDim]+1;
+     newConnList[newPos*connSize+2+i]=1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+dimCount+j]=j+1;
+     }
+     newConnList[newPos*connSize+2+dimCount+i]=-newConnList[newPos*connSize+2+dimCount+i];
+     newConnList[newPos*connSize+2+dimCount+periodicDim]=-newConnList[newPos*connSize+2+dimCount+periodicDim];
+     newPos++;
+   }
+ }
+
+ // Put in upper poles
+ for (int i=0; i<dimCount; i++) {
+   if (connU[i]==ESMC_GRIDCONN_POLE) {
+     newConnList[newPos*connSize+0]=1;
+     newConnList[newPos*connSize+1]=1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+j]=0;
+     }
+     newConnList[newPos*connSize+2+periodicDim]=widthIndex[periodicDim]/2;
+     newConnList[newPos*connSize+2+i]=2*widthIndex[i]+1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+dimCount+j]=j+1;
+     }
+     newConnList[newPos*connSize+2+dimCount+i]=-newConnList[newPos*connSize+2+dimCount+i];
+     newPos++;
+   } else if (connU[i]==ESMC_GRIDCONN_BIPOLE) {
+     newConnList[newPos*connSize+0]=1;
+     newConnList[newPos*connSize+1]=1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+j]=0;
+     }
+     newConnList[newPos*connSize+2+periodicDim]=widthIndex[periodicDim]+1;
+     newConnList[newPos*connSize+2+i]=2*widthIndex[i]+1;
+     for(int j=0; j<dimCount; j++) {
+       newConnList[newPos*connSize+2+dimCount+j]=j+1;
+     }
+     newConnList[newPos*connSize+2+dimCount+i]=-newConnList[newPos*connSize+2+dimCount+i];
+     newConnList[newPos*connSize+2+dimCount+periodicDim]=-newConnList[newPos*connSize+2+dimCount+periodicDim];
+     newPos++;
+   }
+ }
+
+
+#if 0
+ printf("CONNECTIONS\n");
+ int k=0;
+ for (int i=0; i<newConnCount; i++) {
+   for (int j=0; j<connSize; j++) {
+     printf("%d ",newConnList[k]);
+     k++;
+   }
+   printf("\n");
+ }
+#endif
+
+ // Output connection info
+ if (newConnCount >0) {
+   int extent[2];
+   extent[0]=connSize;
+   extent[1]=newConnCount;
+   *connListOut=new InterfaceInt(newConnList, 2, extent);
+ } else {
+   *connListOut=NULL;
+ }
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully 
+}
+
+
+
+
 //-----------------------------------------------------------------------------
 
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getDistExclusiveUBound()"
+//BOPI
+// !IROUTINE:  Grid::getDistExclusiveUBound()"
+//
+// !INTERFACE:
+int Grid::getDistExclusiveUBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+                                 DistGrid *distgridArg, 
+                                 int localDEArg,     // (in)
+                                 int *uBndArg      // (out) needs to be of size > distDimCount
+  ){
+//
+// !DESCRIPTION:
+//  The exclusive upper bound for this localde
+// TODO: eventually this should return all the grid bounds, not just
+//       the distributed ones.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgridArg->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+  // Get some useful information
+  const int *localDeList = distgridArg->getDELayout()->getLocalDeList();
+  const int *indexCountPDimPDe = distgridArg->getIndexCountPDimPDe();
+
+  // Get the Global DE from the local DE
+  int de = localDeList[localDEArg];
+
+  // exlc. region for each DE ends at indexCountPDimPDe of the associated
+  // DistgridArg
+    for (int i=0; i<distDimCount; i++)
+      uBndArg[i]=indexCountPDimPDe[de*distDimCount+i];
+
+  // Set upper bound based on indexflag
+  if (indexflag==ESMF_INDEX_GLOBAL) {
+
+      for (int i=0; i<distDimCount; i++){
+
+        // obtain indexList for this DE and dim
+        const int *indexList =
+          distgridArg->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU, &rc))
+          return rc;
+
+        // make sure is contiguous         
+        const int contig=distgridArg->getContigFlagPDimPDe(de, i+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                              ESMCI_ERR_PASSTHRU, &rc)) return rc;
+        if (!contig) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                     "- doesn't handle non-contiguous DEs yet ", &rc);
+          return rc;
+        }
+
+        // shift bounds of exclusive region to match indexList[0]
+        uBndArg[i] += indexList[0] - 1;
+      } // i
+  }
+
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getDistExclusiveLBound()"
+//BOPI
+// !IROUTINE:  Grid::getDistExclusiveLBound()"
+//
+// !INTERFACE:
+int Grid::getDistExclusiveLBound(
+//
+// !RETURN VALUE:
+//   return code
+//
+// !ARGUMENTS:
+//
+                                 DistGrid *distgridArg, 
+                                 int localDEArg,     // (in)
+                                 int *lBndArg      // (out) needs to be of size > distDimCount
+  ){
+//
+// !DESCRIPTION:
+//  The exclusive lower bound for this localde.
+// TODO: eventually this should return all the grid bounds, not just
+//       the distributed ones.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc,localrc;
+
+  // initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+  
+  // Check status
+  if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      "- Grid not fully created", &rc);
+    return rc;
+  }
+
+
+  // Ensure localDEArg isn't out of range for this PET
+  if ((localDEArg < 0) || (localDEArg >=distgridArg->getDELayout()->getLocalDeCount())) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+          "- localDE outside range on this processor", &rc);
+        return rc;
+  }
+
+  // Set lower bound based on indexflag
+  if ((indexflag==ESMF_INDEX_DELOCAL) || (indexflag==ESMF_INDEX_USER)) {
+    for (int i=0; i<distDimCount; i++)
+      lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
+  } else {
+    // Get some useful information
+    const int *localDeList = distgridArg->getDELayout()->getLocalDeList();
+
+    // Get the Global DE from the local DE
+    int de = localDeList[localDEArg];
+
+    // Set Bound based on distgridArg info
+    for (int i=0; i<distDimCount; i++){
+        
+      // obtain indexList for this DE and dim
+      const int *indexList =
+        distgridArg->getIndexListPDimPLocalDe(localDEArg, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU, &rc))
+        return rc;
+      
+      // make sure this dimension is contiguous         
+      const int contig=distgridArg->getContigFlagPDimPDe(de, i+1, &localrc);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                                                ESMCI_ERR_PASSTHRU, &rc)) return rc;
+      if (!contig) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                     "- doesn't handle non-contiguous DEs yet ", &rc);
+        return rc;
+      }
+      
+      // Set lower bounds of exclusive region to match indexList[0]
+      lBndArg[i] = indexList[0];
+    } // i
+  }
+  
+  // tell the calling subroutine that we've had a successful outcome
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
 
 
 
 } // END ESMCI name space
 //-----------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 

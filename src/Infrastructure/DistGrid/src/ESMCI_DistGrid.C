@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.61 2011/06/30 04:01:31 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.62 2011/06/30 14:49:35 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.61 2011/06/30 04:01:31 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.62 2011/06/30 14:49:35 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -211,6 +211,10 @@ DistGrid *DistGrid::create(
         }
       }
     }
+
+     
+#if 0
+    // TURN OFF ERROR WITH CONNECTIONS ON Extra edge, BECAUSE GRID NEEDS TO DO IT
     // edges modified by firstExtra or lastExtra cannot also be connected
     if (connectionList){
       // there are connections
@@ -224,6 +228,7 @@ DistGrid *DistGrid::create(
         if (firstExtra){
           // there are possible modifications on the lower edge
           for (int j=0; j<dg->dimCount; j++){
+            if (positionVector[j]==0) continue; // BOB 
             if (positionVector[j] < 0){
               if (firstExtra->array[dg->dimCount*(tileA-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -242,6 +247,7 @@ DistGrid *DistGrid::create(
         if (lastExtra){
           // there are possible modifications on the upper edge
           for (int j=0; j<dg->dimCount; j++){
+            if (positionVector[j]==0) continue; // BOB 
             if (positionVector[j] < 0){
               if (lastExtra->array[dg->dimCount*(tileB-1)+j] != 0){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -250,6 +256,7 @@ DistGrid *DistGrid::create(
               }
             }else if (positionVector[j] > 0){
               if (lastExtra->array[dg->dimCount*(tileA-1)+j] != 0){
+                printf(" posVec[%d]=%d\n",j,positionVector[j]);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
                   "- connected edges cannot be modified", rc);
                 return ESMC_NULL_POINTER;
@@ -259,6 +266,7 @@ DistGrid *DistGrid::create(
         }
       }
     }
+#endif
     // prepare minIndex and maxIndex
     int *minIndexAlloc = new int[totalCountInterfaceInt];
     if (firstExtra)

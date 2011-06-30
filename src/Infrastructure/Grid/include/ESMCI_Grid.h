@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.79 2011/06/13 18:44:22 oehmke Exp $
+// $Id: ESMCI_Grid.h,v 1.80 2011/06/30 14:49:42 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -86,12 +86,13 @@ enum ESMC_GridDecompType {ESMC_GRID_INVALID=1,
 enum  ESMC_GridConn {ESMC_GRIDCONN_NONE=0,
                      ESMC_GRIDCONN_PERIODIC,
                      ESMC_GRIDCONN_POLE,
-                     ESMF_GRIDCONN_BIPOLE};
+                     ESMC_GRIDCONN_BIPOLE};
 
 #define ESMC_GRID_ARBDIM  -2
 
 // Start name space
 namespace ESMCI {  
+
 
 class Grid;
 class ProtoGrid;
@@ -184,7 +185,10 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
 
 
   ESMC_IndexFlag indexflag;
-  DistGrid *distgrid; // Main stagger loc (Cells) 
+  DistGrid *distgrid; // Main (cell) distgrid
+
+  DistGrid *distgrid_wo_poles; // Cell distgrid w/o poles
+
 
   DistGrid **staggerDistgridList; // [staggerloc]
 
@@ -336,8 +340,11 @@ template <class TYPE>
   bool isUBndNT(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
   // Temporary create sphere until I have topology setting worked out 
-  void setSphere() {connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE; forceConn=true;}
-  void clearSphere() {connL[0]=ESMC_GRIDCONN_NONE; connU[0]=ESMC_GRIDCONN_NONE; connL[1]=ESMC_GRIDCONN_NONE; connU[1]=ESMC_GRIDCONN_NONE; forceConn=false;}
+  void setSphere() {;}
+
+    //{connL[0]=ESMC_GRIDCONN_PERIODIC; connU[0]=ESMC_GRIDCONN_PERIODIC; connL[1]=ESMC_GRIDCONN_POLE; connU[1]=ESMC_GRIDCONN_POLE; forceConn=true;}
+  void clearSphere() {;}
+    //{connL[0]=ESMC_GRIDCONN_NONE; connU[0]=ESMC_GRIDCONN_NONE; connL[1]=ESMC_GRIDCONN_NONE; connU[1]=ESMC_GRIDCONN_NONE; forceConn=false;}
 
   // End of Temporary
   
@@ -466,6 +473,21 @@ template <class TYPE>
 		     int _localDE, 
 		     int *_LWidth // should be size>=grid dimCount
 		     );
+
+
+
+int getDistExclusiveLBound(
+                                 DistGrid *distgridArg, 
+                                 int localDEArg,     // (in)
+                                 int *lBndArg      // (out) needs to be of size > distDimCount
+                                 );
+
+int getDistExclusiveUBound(
+                                 DistGrid *distgridArg, 
+                                 int localDEArg,     // (in)
+                                 int *lBndArg      // (out) needs to be of size > distDimCount
+                                 );
+
 
 
 int getDistExclusiveLBound(

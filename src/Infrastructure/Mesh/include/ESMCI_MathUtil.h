@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.5 2011/04/05 19:00:36 oehmke Exp $
+// $Id: ESMCI_MathUtil.h,v 1.6 2011/06/30 14:49:50 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -45,6 +45,10 @@ namespace ESMCI {
 
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
   void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
+
+  void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn);
+
+  void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn);
 
 } // namespace
 

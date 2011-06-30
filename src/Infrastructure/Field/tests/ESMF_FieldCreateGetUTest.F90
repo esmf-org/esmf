@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.82 2011/06/30 14:39:26 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.83 2011/06/30 14:49:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2048,7 +2048,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2112,7 +2112,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2174,7 +2174,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2209,7 +2209,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2244,7 +2244,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -2278,7 +2278,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2313,7 +2313,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -2349,7 +2349,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -2428,7 +2428,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=minIndex, maxIndex=maxIndex, &
                                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -2569,7 +2569,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2625,7 +2625,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2681,7 +2681,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2717,7 +2717,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2753,7 +2753,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/4,1/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -2829,7 +2829,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxindex, &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=minIndex, maxIndex=maxindex, &
                                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -2981,7 +2981,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxindex, &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=minIndex, maxIndex=maxindex, &
                                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -3058,7 +3058,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3119,7 +3119,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3316,7 +3316,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3362,7 +3362,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3403,7 +3403,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3465,7 +3465,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3526,7 +3526,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3589,7 +3589,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3656,7 +3656,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                   regDecomp=(/2,2/), name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -3766,7 +3766,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=minIndex, maxIndex=maxIndex, &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=minIndex, maxIndex=maxIndex, &
                                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                                   regDecomp=regDecomp, name="testgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -7154,7 +7154,7 @@ contains
         ! only do this if there is 4 Pets
         if (petCount .eq. 4) then
            ! create grid with global indices
-           grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/16,20/), &
+           grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/16,20/), &
                                   regDecomp=(/2,2/), indexflag=ESMF_INDEX_GLOBAL , rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.338 2011/06/29 20:26:00 theurich Exp $
+#  $Id: common.mk,v 1.339 2011/06/30 14:49:34 oehmke Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2212,7 +2212,7 @@ tree_build_unit_tests: $(TESTS_BUILD)
 
 $(ESMF_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) $(ESMF_EXEOUT_OPTION) $(ESMF_UTEST_$(*)_OBJS) $(TESTS_OBJ) $< $(ESMF_F90ESMFLINKLIBS)
-	$(ESMF_RM) -f *.o *.mod
+#	$(ESMF_RM) -f *.o *.mod
 
 
 $(ESMF_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)

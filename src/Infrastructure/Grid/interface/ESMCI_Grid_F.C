@@ -123,6 +123,7 @@ extern "C" {
       destroyDELayoutPtr=ESMC_NULL_POINTER;
     }
 
+
     // call into C++
     *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
                                ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid,
@@ -2752,6 +2753,7 @@ extern "C" {
   void FTN(c_esmc_gridtest)(ESMCI::Grid **_grid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridvalidate()"
+    int localrc;
 
     //Initialize return code
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
@@ -2764,7 +2766,138 @@ extern "C" {
     }
 
 
-#if 1
+   int dimCount=2;
+
+   // Create ESMCI::InterfaceInts holding stagger padding
+   int extent[1];
+   extent[0]=dimCount;
+   int *minIndexIntIntArray=new int[dimCount];
+   minIndexIntIntArray[0]=1;
+   minIndexIntIntArray[1]=1;
+   ESMCI::InterfaceInt *minIndexIntInt=new ESMCI::InterfaceInt(minIndexIntIntArray,1,extent);
+   
+   extent[0]=dimCount;
+   int *maxIndexIntIntArray=new int[dimCount];
+   maxIndexIntIntArray[0]=20;
+   maxIndexIntIntArray[1]=20;
+   ESMCI::InterfaceInt *maxIndexIntInt=new ESMCI::InterfaceInt(maxIndexIntIntArray,1,extent);
+
+   extent[0]=dimCount;
+   int *regDecompIntIntArray=new int[dimCount];
+   regDecompIntIntArray[0]=4;
+   regDecompIntIntArray[1]=1;
+   ESMCI::InterfaceInt *regDecompIntInt=new ESMCI::InterfaceInt(regDecompIntIntArray,1,extent);
+   
+   ESMC_IndexFlag indexflag=ESMF_INDEX_GLOBAL;
+
+   ESMCI::DistGrid *distgrid=ESMCI::DistGrid::create(
+  minIndexIntInt,                 // (in)
+  maxIndexIntInt,                 // (in)
+  regDecompIntInt,                // (in)
+  (ESMCI::DecompFlag *)NULL,                 // (in)
+  0,                    // (in)
+  (ESMCI::InterfaceInt *)NULL,      // (in)
+  (ESMCI::InterfaceInt *)NULL,       // (in)
+  (ESMCI::InterfaceInt *)NULL,              // (in)
+  &indexflag,              // (in)
+  (ESMCI::InterfaceInt *)NULL,           // (in)
+  (ESMCI::DELayout *)NULL,                     // (in)
+  (ESMCI::VM *)NULL,                                 // (in)
+  &localrc);
+ if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+ int index[2];
+ 
+ for (int i=1; i<20; i++) { 
+   index[0]=4;
+   index[1]=i;
+   int id=distgrid->getSequenceIndexTile(
+                                        1,                        // in  - tile = {1, ..., tileCount}
+                                        index,                 // in  - tile-specific absolute index tuple
+                                        3,                        // in  - depth of recursive search
+                                        &localrc);                           // out - return code
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) return;
+   printf(" %d id=%d \n",i,id);
+ }
+    
+
+// Create ESMCI::InterfaceInts holding stagger padding
+ extent[0]=dimCount;
+ int *edgeLWidthIntIntArray=new int[dimCount];
+ edgeLWidthIntIntArray[0]=1;
+ edgeLWidthIntIntArray[1]=1;
+ ESMCI::InterfaceInt *edgeLWidthIntInt=new ESMCI::InterfaceInt(edgeLWidthIntIntArray,1,extent);
+
+ extent[0]=dimCount;
+ int *edgeUWidthIntIntArray=new int[dimCount];
+ edgeUWidthIntIntArray[0]=0;
+ edgeUWidthIntIntArray[1]=0;
+ ESMCI::InterfaceInt *edgeUWidthIntInt=new ESMCI::InterfaceInt(edgeUWidthIntIntArray,1,extent);
+
+ 
+ // Create stagger distgrid w no poles with this padding
+ //      staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
+ ESMCI::DistGrid *distgrid2=ESMCI::DistGrid::create(distgrid,
+                                                     edgeLWidthIntInt, 
+                                                     edgeUWidthIntInt, 
+                                                     &indexflag,
+                                                     NULL,    
+                                                     &localrc);
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+
+   printf("Number 2: \n");
+   int old_id=0;
+ for (int i=1; i<21; i++) { 
+   index[0]=4;
+   index[1]=i;
+   int id=distgrid2->getSequenceIndexTile(
+                                        1,                        // in  - tile = {1, ..., tileCount}
+                                        index,                 // in  - tile-specific absolute index tuple
+                                        3,                        // in  - depth of recursive search
+                                        &localrc);                           // out - return code
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) return;
+   printf(" %d id=%d delta=%d \n",i,id,id-old_id);
+   old_id=id;
+ }
+
+
+
+ 
+ // Create stagger distgrid w no poles with this padding
+ //      staggerDistgridList[staggerloc]=DistGrid::create(distgrid_wo_poles,
+ ESMCI::DistGrid *distgrid3=ESMCI::DistGrid::create(distgrid2,
+                                                    NULL,
+                                                    NULL,
+                                                     &indexflag,
+                                                     NULL,    
+                                                     &localrc);
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) return;
+
+
+   printf("Number 3: \n");
+
+ for (int i=1; i<21; i++) { 
+   index[0]=4;
+   index[1]=i;
+   int id=distgrid3->getSequenceIndexTile(
+                                        1,                        // in  - tile = {1, ..., tileCount}
+                                        index,                 // in  - tile-specific absolute index tuple
+                                        3,                        // in  - depth of recursive search
+                                        &localrc);                           // out - return code
+   if(ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                          ESMC_NOT_PRESENT_FILTER(rc))) return;
+   printf(" %d id=%d \n",i,id);
+ }
+
+
+
+#if 0
    // Test getItem
    ESMCI::Grid *grid;
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.12 2011/02/25 19:05:51 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.13 2011/06/30 14:49:48 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -52,6 +52,8 @@
 // using namespace ESMCI;
 
 namespace ESMCI {
+
+  extern bool grid_debug;
 
 // *** Convert a grid to a mesh.  The staggerLoc should describe
 // whether the mesh is at the dual location or coincident with the
@@ -114,7 +116,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  
  // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
  UInt sdim = grid.getCartCoordDimCount();
- if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
+ // if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
 
  mesh.set_spatial_dimension(sdim);
 
@@ -186,7 +188,6 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
    std::vector<UInt> owned_shared;
    std::vector<UInt> notowned_shared;
 
-
    // *** Create the Nodes ***
      // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
    ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
@@ -207,6 +208,8 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
        // get the local id of this Grid node
        int lid=gni->getLocalID(); 
 
+
+
 #ifdef G2M_DBG
 Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 #endif
@@ -226,6 +229,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        //       UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
        UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
+
        
        // If Shared add to list to use DistDir on
        if (gni->isShared()) {
@@ -237,7 +241,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
          if (lb == owned_shared.end() || *lb != gid)
            owned_shared.insert(lb, gid);
        }
-       
+
        // Put node into map
        nodemap[lid]=node;    
      }
@@ -258,6 +262,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
        // get the local id of this Grid node
        int lid=gni->getLocalID(); 
        
+
        // If Grid node is not already in the mesh then add 
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
        if (mi == mesh.map_end(MeshObj::NODE)) {
@@ -291,6 +296,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
      }
    } // gni
   
+
 
    // Use DistDir to fill node owners for non-local nodes 
    // TODO: Use nodes which are gni->isLocal() && gni->isShared() to get owners of
@@ -399,7 +405,6 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
       MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   }
 #endif
-
 
    // Create whatever fields the user wants
    std::vector<IOField<NodalField>*> nfields;

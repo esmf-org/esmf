@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.33 2011/06/30 05:58:54 theurich Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.34 2011/06/30 14:49:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,8 @@
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
  
 #ifdef ESMF_TESTEXHAUSTIVE
-      !------------------------------------------------------------------------
+#if 1
+     !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
       write(failMsg, *) "Test unsuccessful"
@@ -127,7 +128,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+#endif
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -143,6 +144,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 1
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -316,7 +318,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
+#endif
 #endif
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
@@ -394,9 +396,10 @@ contains
   src_ny = 50
 
   ! setup source grid
-  grid360=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
-                              rc=localrc)
+  grid360=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+                                  coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
+!                                  poleType=(/ESMF_POLETYPE_MONOPOLE,ESMF_POLETYPE_BIPOLE/), & 
+                                  rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -404,8 +407,8 @@ contains
 
 
   ! setup dest. grid
-  grid180=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  grid180=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -650,6 +653,7 @@ contains
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+!BOB          regridScheme=ESMF_REGRID_SCHEME_DCON3DWPOLE, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -675,6 +679,7 @@ contains
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+!BOB          regridScheme=ESMF_REGRID_SCHEME_DCON3DWPOLE, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -890,8 +895,8 @@ write(*,*) "LOCALRC=",localrc
   A_maxz = 10.0
 
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/A_nx,A_ny,A_nz/),regDecomp=(/petCount,1,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/A_nx,A_ny,A_nz/),regDecomp=(/petCount,1,1/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -900,8 +905,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/B_nx,B_ny,B_nz/),regDecomp=(/1,1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/B_nx,B_ny,B_nz/),regDecomp=(/1,1,petCount/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1353,8 +1358,8 @@ write(*,*) "LOCALRC=",localrc
   A_maxy = 10.0
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_CART,indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1363,8 +1368,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1774,8 +1779,8 @@ write(*,*) "LOCALRC=",localrc
   A_maxy = 10.0
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -1784,8 +1789,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                              coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -2232,8 +2237,8 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -2242,8 +2247,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -2684,10 +2689,10 @@ write(*,*) "LOCALRC=",localrc
   B_dx=360.0/B_nx
   B_dy=180.0/B_ny
 
-  
+
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -2696,8 +2701,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -3125,11 +3130,11 @@ write(*,*) "LOCALRC=",localrc
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
-  B_nx = 20
-  B_ny = 20
+  B_nx = 30
+  B_ny = 30
 
-  A_nx = 10
-  A_ny = 10
+  A_nx = 20
+  A_ny = 20
 
 
   ! Establish the coordinates of the grids
@@ -3146,8 +3151,8 @@ write(*,*) "LOCALRC=",localrc
   A_maxy = 10.0
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -3156,8 +3161,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_CART,indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -3513,8 +3518,8 @@ write(*,*) "LOCALRC=",localrc
   A_maxy = 10.0
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -3523,8 +3528,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -4173,8 +4178,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  dstGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/2,2/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/2,2/), &
+                                  coordSys=ESMF_COORDSYS_CART,indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -4467,8 +4472,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup src grid
-  srcGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/2,2/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  srcGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/2,2/), &
+                                coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -6096,8 +6101,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  dstGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/), &
-            regDecomp=(/2,2,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+  dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/), &
+              coordSys=ESMF_COORDSYS_CART, regDecomp=(/2,2,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
@@ -6410,8 +6415,8 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -6420,8 +6425,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -6765,8 +6770,8 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -6775,8 +6780,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -7126,8 +7131,8 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -7136,8 +7141,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -7488,8 +7493,8 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -7498,8 +7503,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -7771,7 +7776,7 @@ write(*,*) "LOCALRC=",localrc
 
 
  subroutine test_regridDGSph(rc)
-        integer, intent(out)  :: rc
+   integer, intent(out)  :: rc
   logical :: correct
   integer :: localrc
   type(ESMF_Grid) :: srcGrid
@@ -7809,7 +7814,7 @@ write(*,*) "LOCALRC=",localrc
 
   integer :: localPet, petCount
 
-  type(ESMF_DistGridConnection) :: connectionList(2) ! 2 connections
+  type(ESMF_DistGridConnection) :: connectionList(3) ! 3 connections
 
 
   ! result code
@@ -7868,6 +7873,15 @@ write(*,*) "LOCALRC=",localrc
     return
   endif
 
+  call ESMF_DistgridConnectionSet(connection=connectionList(3), &
+        tileIndexA=1,tileIndexB=1, &
+        positionVector=(/src_nx/2,1/), &
+        orientationVector=(/1,-2/), rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
   ! Create source distgrid
   srcDistgrid=ESMF_DistgridCreate(minIndex=(/1,1/), maxIndex=(/src_nx,src_ny/), regDecomp=(/petCount,1/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
@@ -7881,17 +7895,17 @@ write(*,*) "LOCALRC=",localrc
 
   ! setup source grid
   srcGrid=ESMF_GridCreate(distgrid=srcDistgrid, indexflag=ESMF_INDEX_GLOBAL, &
-                              rc=localrc)
+                          coordSys=ESMF_COORDSYS_SPH_DEG, &
+                          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
   endif
 
 
-
   ! setup dest. grid
-  dstGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -8200,14 +8214,14 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
    endif
-
+#if 0
   ! Free the srcDistgrid
   call ESMF_DistgridDestroy(srcDistgrid, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
    endif
-
+#endif
 
   call ESMF_GridDestroy(dstGrid, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -8302,8 +8316,8 @@ write(*,*) "LOCALRC=",localrc
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
@@ -8312,8 +8326,8 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+                                coordSys=ESMF_COORDSYS_SPH_DEG, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE

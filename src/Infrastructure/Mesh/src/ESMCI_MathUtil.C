@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.9 2011/04/05 19:00:38 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.10 2011/06/30 14:49:51 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.9 2011/04/05 19:00:38 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10 2011/06/30 14:49:51 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -537,6 +537,102 @@ void remove_0len_edges2D(int *num_p, double *p) {
 
 #undef MAX_W3PTVID_STR_LEN 
   }
+
+
+
+void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
+
+  // Define Cross product                                                                                                                    
+#define CROSS_PRODUCT2D(out,a,b) out=a[0]*b[1]-a[1]*b[0];
+
+  // init flags                                                            
+  *left_turn=false;
+  *right_turn=false;
+
+  // Loop through polygon                    
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=p+2*i;
+    double *pntip1=p+2*((i+1)%num_p);
+    double *pntip2=p+2*((i+2)%num_p);
+
+    // vector from pntip1 to pnti0                                                                                             
+    double v10[2];
+    v10[0]=pntip0[0]-pntip1[0];
+    v10[1]=pntip0[1]-pntip1[1];
+
+
+    // vector from pntip1 to pnti2                                                                            
+    double v12[2];
+    v12[0]=pntip2[0]-pntip1[0];
+    v12[1]=pntip2[1]-pntip1[1];
+
+    // Calc cross product                                                             
+    double cross;
+    CROSS_PRODUCT2D(cross,v12,v10);
+
+    if (cross > 0.0) {
+      *left_turn=true;
+    } else if (cross < 0.0) {
+      *right_turn=true;
+    }
+  }
+
+
+#undef CROSS_PRODUCT2D
+
+}
+
+
+
+void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
+
+  // Define Cross product                                                                                                                   
+#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+#define DOT_PRODUCT3D(a,b) a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+
+  // init flags                                                            
+  *left_turn=false;
+  *right_turn=false;
+
+  // Loop through polygon                    
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=p+3*i;
+    double *pntip1=p+3*((i+1)%num_p);
+    double *pntip2=p+3*((i+2)%num_p);
+
+    // vector from pntip1 to pnti0                                                                                             
+    double v10[3];
+    v10[0]=pntip0[0]-pntip1[0];
+    v10[1]=pntip0[1]-pntip1[1];
+    v10[2]=pntip0[2]-pntip1[2];
+
+
+    // vector from pntip1 to pnti2                                                                            
+    double v12[3];
+    v12[0]=pntip2[0]-pntip1[0];
+    v12[1]=pntip2[1]-pntip1[1];
+    v12[2]=pntip2[2]-pntip1[2];
+
+    // Calc cross product                                                             
+    double cross[3];
+    CROSS_PRODUCT3D(cross,v12,v10);
+
+    // dot cross product with vector from center of sphere
+    // to middle point (pntip1)
+    double dir=DOT_PRODUCT3D(cross,pntip1);
+
+    // Interpret direction
+    if (dir > 0.0) {
+      *left_turn=true;
+    } else if (dir < 0.0) {
+      *right_turn=true;
+    }
+  }
+
+
+#undef CROSS_PRODUCT3D
+
+}
 
 
 } // namespace

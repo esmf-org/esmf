@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.45 2011/06/29 20:03:43 rokuingh Exp $
+% $Id: Grid_options.tex,v 1.46 2011/06/30 14:49:40 oehmke Exp $
 
 \subsubsection{ESMF\_ARBDIM}
 \label{sec:opt:arbdim}
@@ -100,10 +100,15 @@ The type of this flag is:
 
 Valid values are:
 \begin{description}
+\item [ESMF\_GRIDMATCH\_INVALID:] Indicates a non-valid matching level. Returned
+      if an error occurs in the matching function. If a higher matching level
+      is returned then no error occurred.
 \item [ESMF\_GRIDMATCH\_NONE:] The lowest level of grid matching. 
       This indicates that the Grid's don't match at any of the higher levels. 
 \item [ESMF\_GRIDMATCH\_EXACT:] All the pieces of the Grid (e.g. distgrids, 
       coordinates, etc.) except the name, match between the two Grids. 
+\item [ESMF\_GRIDMATCH\_ALIAS:] Both Grid variables are aliases to the exact
+      same Grid object in memory. 
 \end{description}
 
 

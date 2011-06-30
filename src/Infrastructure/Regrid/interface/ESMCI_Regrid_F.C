@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.61 2011/06/06 20:32:14 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.62 2011/06/30 14:49:53 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
 #include "Mesh/include/ESMCI_Integrate.h"
 #include "Mesh/include/ESMCI_Interp.h"
 #include "Mesh/include/ESMCI_Extrapolation.h"
+#include "Mesh/include/ESMCI_MathUtil.h"
 
 #include <iostream>
 
@@ -58,6 +59,7 @@ namespace ESMCI {
 // prototypes from below
 bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts);
 bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
+void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise);
 
 // external C functions
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -91,8 +93,48 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
   try {
+    bool concave;
+    bool clockwise;
 
-    // Weights matrix
+    // Check mesh elements 
+    check_for_concave_or_clkwise(srcmesh, &concave, &clockwise);
+    
+    // Concave
+    if (concave) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+         "- Src mesh contains a concave element", &localrc)) throw localrc;
+    }
+
+    // Clockwise
+    if (clockwise) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+       "- Src mesh contains an element whos nodes are clockwise", &localrc)) throw localrc;
+    }
+
+    // Only check dst mesh elements for conservative because for others just nodes are used
+    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      // Check mesh elements 
+      check_for_concave_or_clkwise(dstmesh, &concave, &clockwise);
+      
+      // Concave
+      if (concave) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                "- Dst mesh contains a concave element", &localrc)) throw localrc;
+      }
+      
+      // Clockwise
+      if (clockwise) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                "- Dst mesh contains an element whos nodes are clockwise", &localrc)) throw localrc;
+      }
+    }
+
+
+    // Compute Weights matrix
     IWeights wts;
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
@@ -388,66 +430,6 @@ extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, 
 
 }
 
-#if 0
-
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
-
-    // Get  mask field
-  //  _field *mptr = mesh.Getfield("mask_1");
-
-  // Get mask Field
-  MEField<> *mptr = mesh.GetField("mask");
-
-  // Get end of weight iterator
-  WMat::WeightMap::iterator we = wts.end_row();
-
-  // get mesh node iterator
-  MeshDB::iterator ni=mesh.node_begin(), ne=mesh.node_end();
-
-  // Loop checking that all nodes have weights
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
-
-    // Skip non local nodes
-    if (!GetAttr(node).is_locally_owned()) continue;
-
-    // Skip masked elements
-    if (mptr != NULL) {
-      double *m=mptr->data(node);
-      if (*m > 0.5) continue;
-    }
-
-    // get node id
-    int id=node.get_id();
-
-    // Get beginning of row ids that are greater or equal to id
-    WMat::WeightMap::iterator wi = wts.lower_bound_id_row(id);
-
-    // See if we find the id    
-    bool found_id=false;
-    if (wi != we) {
-      const WMat::Entry &w = wi->first;
-      
-      // we found it
-      if (w.id==id) {
-        found_id=true;
-      } else if (w.id>id) {
-        // we went over and didn't find it
-        found_id=false;
-      } 
-    } 
-
-    // If not found, return saying so
-    if (!found_id) return false;
-  }
-
-  // Still here, so must have found them all
-  return true;
-
-}
-#endif
-
-
 bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
 
@@ -548,6 +530,93 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
   // Still here, so must have found them all
   return true;
 }
+
+
+void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
+  
+  // Declare polygon information
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+  int num_poly_nodes;
+  double poly_coords[MAX_NUM_POLY_COORDS];
+  
+  // Init variables
+  *concave=false;
+  *clockwise=false;
+
+  // Get coord field
+  MEField<> *cfield = mesh.GetCoordField();
+  
+  // Get dimensions
+  int sdim=mesh.spatial_dim();
+  int pdim=mesh.parametric_dim();
+    
+  // Compute area depending on dimensions
+  if (pdim==2) {
+    if (sdim==2) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        // Get the element
+        const MeshObj &elem = *ei; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get the coords
+        get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+        
+        // Get elem rotation
+        bool left_turn;
+        bool right_turn;
+        rot_2D_2D_cart(num_poly_nodes, poly_coords, &left_turn, &right_turn);
+        
+        // Look for errors
+        if (right_turn) {
+          if (left_turn) { 
+            *concave=true;
+            return;
+          } else {
+            *clockwise=true;
+            return;
+          }
+        }
+      }
+    } else if (sdim==3) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        // Get the element
+        const MeshObj &elem = *ei; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get the coords
+        get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+        
+        // Get elem rotation
+        bool left_turn;
+        bool right_turn;
+        rot_2D_3D_sph(num_poly_nodes, poly_coords, &left_turn, &right_turn);
+        
+        // Look for errors
+        if (right_turn) {
+          if (left_turn) { 
+            *concave=true;
+            return;
+          } else {
+            *clockwise=true;
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  // TODO: Check to see if 3D elements are in correct order.
+
+}
+
 
 
 #undef  ESMC_METHOD

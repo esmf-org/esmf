@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.121 2011/06/30 05:59:05 theurich Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.122 2011/06/30 14:49:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.121 2011/06/30 05:59:05 theurich Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.122 2011/06/30 14:49:47 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -182,8 +182,16 @@ program ESMF_GridCreateUTest
   correct=.true.
   rc=ESMF_SUCCESS
 
+  ! Check that match returns invalid
+  if (ESMF_GridMatch(grid,grid2,rc=localrc) /=ESMF_GRIDMATCH_INVALID) correct=.false.
+  !!  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE, Don't check because it should fail
+
   ! Create Grid 1
   grid=ESMF_GridCreate(distgrid=distgrid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check that match returns alias
+  if (ESMF_GridMatch(grid,grid,rc=localrc) /=ESMF_GRIDMATCH_ALIAS) correct=.false.
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Grid 2
@@ -2032,13 +2040,11 @@ print *, ' '
    endif
 
   ! destroy grid
-  call ESMF_GridDestroy(grid,rc=localrc)
+!  call ESMF_GridDestroy(grid,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
-
-
 
 
   !-----------------------------------------------------------------------------

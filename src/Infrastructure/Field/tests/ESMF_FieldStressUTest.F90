@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.17 2011/06/30 14:39:26 theurich Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.18 2011/06/30 14:49:39 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@ contains
         localrc = ESMF_SUCCESS
         rc = ESMF_SUCCESS
         do i = 1, n_loop
-            grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+            grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                       regDecomp=(/1,1/), name="landgrid", rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &

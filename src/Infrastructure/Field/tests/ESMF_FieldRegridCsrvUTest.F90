@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.23 2011/06/30 05:58:54 theurich Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.24 2011/06/30 14:49:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -261,8 +261,8 @@ contains
 
 
   ! setup source grid
-  srcGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+  srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+!                              coordSys=ESMF_COORDSYS_SPH_DEG, &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -271,8 +271,8 @@ contains
   endif
 
   ! setup dest. grid
-  dstGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+  dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -591,6 +591,17 @@ contains
 
 
   enddo    ! lDE
+
+
+#if 0
+  call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CORNER, &
+       isSphere=.true., isLatLonDeg=.true., filename="dstGrid", &
+       rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+#endif
 
 
   ! Regrid store
@@ -923,8 +934,8 @@ contains
 
 
   ! setup source grid
-  srcGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+  srcGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -933,8 +944,8 @@ contains
   endif
 
   ! setup dest. grid
-  dstGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+  dstGrid=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+                              coordSys=ESMF_COORDSYS_SPH_DEG, &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -1706,7 +1717,8 @@ contains
 
 
   ! setup source grid
-  srcGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+  srcGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+                              coordSys=ESMF_COORDSYS_CART, &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -1715,8 +1727,9 @@ contains
   endif
 
   ! setup dest. grid
-  dstGrid=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+  dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
+                              coordSys=ESMF_COORDSYS_CART, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
