@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.25 2011/06/24 14:25:50 rokuingh Exp $
+! $Id: ESMF_IOScrip.F90,v 1.26 2011/06/30 18:48:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -200,7 +200,7 @@
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
     return
@@ -274,7 +274,7 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 #endif
@@ -355,7 +355,7 @@ end subroutine ESMF_ScripInqUnits
       ! if units is not "degrees" or "radians" return errors
       call ESMF_StringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(ESMF_FAILURE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -400,7 +400,7 @@ end subroutine ESMF_ScripInqUnits
       ! if units is not "degrees" or "radians" return errors
       call ESMF_StringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(ESMF_FAILURE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -462,7 +462,7 @@ end subroutine ESMF_ScripInqUnits
       ! if units is not "degrees" or "radians" return errors
       call ESMF_StringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(ESMF_FAILURE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -507,7 +507,7 @@ end subroutine ESMF_ScripInqUnits
       ! if units is not "degrees" or "radians" return errors
       call ESMF_StringLowerCase(units(1:len))
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
-          call ESMF_LogSetError(ESMF_FAILURE, & 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -555,7 +555,7 @@ end subroutine ESMF_ScripInqUnits
     if(present(rc)) rc = ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
     return
@@ -656,13 +656,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       if (PetNo == 0) then
         ! Check if srcFile and dstFile exists
         if (.not. present(srcFile)) then
-             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
 		  msg="- The srcFile argument does not exist on PET0 ", &
                   ESMF_CONTEXT, rcToReturn=rc)
 	     return
         endif
         if (.not. present(dstFile)) then
-             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
 		  msg="- The dstFile argument does not exist on PET0 ",  &
                   ESMF_CONTEXT, rcToReturn=rc)
 	     return
@@ -1650,7 +1650,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     if (present(rc)) rc = ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 #endif
@@ -1755,7 +1755,7 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 #endif
@@ -1822,7 +1822,7 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
 #endif
@@ -1988,7 +1988,7 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
       ESMF_SRCLINE, trim(filename), &
       rc)) return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
     return
@@ -2075,7 +2075,7 @@ subroutine ESMF_EsmfGetVerts(ncid, filename, numElements, numNodePElement, numNo
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
     return
@@ -2117,7 +2117,7 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
        return
     end if
 #else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
                  msg="- ESMF_NETCDF not defined when lib was compiled", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
     return

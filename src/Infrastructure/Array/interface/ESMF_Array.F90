@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.156 2011/06/30 14:34:51 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.157 2011/06/30 18:45:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.156 2011/06/30 14:34:51 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.157 2011/06/30 18:45:48 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1398,7 +1398,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #elif ESMF_NETCDF
       piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
 #else
-      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1409,7 +1409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #ifdef ESMF_NETCDF
       piofmt = "nc4p"  ! parallel read/write of NETCDF4 (HDF5) files 
 #else
-      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg= "ESMF must be compiled with NETCDF support for this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1421,7 +1421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       piofmt = "nc4c"  ! parallel read/serial write of NetCDF4 (HDF5) 
                        ! files with data compression
 #else
-      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="ESMF must be compiled with NETCDF support for this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1433,19 +1433,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! binary format selected
       piofmt = "bin"
       if (present(variableName)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
         msg="The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
       if (present(timeslice)) then
-        call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
         msg="The input argument timeslice cannot be sepcified in ESMF_IOFMT_BIN mode",  &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
 #else
-      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1454,7 +1454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
 
       ! format option that is not supported
-      call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="this format is not currently supported by the ESMF IO layer", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1511,7 +1511,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported rank", &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported rank", &
               ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
@@ -1540,7 +1540,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported rank", &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported rank", &
               ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
@@ -1569,13 +1569,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
           case default
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported rank", &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported rank", &
               ESMF_CONTEXT, rcToReturn=rc)
             return
         end select
 
       case default
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Unsupported typekind", &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported typekind", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
 
@@ -1586,7 +1586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 #else
     ! Return indicating PIO not present
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="ESMF must be compiled with PIO support to support I/O methods", &
       ESMF_CONTEXT, rcToReturn=rc)
 #endif
@@ -1687,7 +1687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 #else
     ! Return indicating PIO not present
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
       msg="ESMF must be compiled with PIO support to support I/O methods", &
       ESMF_CONTEXT, rcToReturn=rc)
 #endif
