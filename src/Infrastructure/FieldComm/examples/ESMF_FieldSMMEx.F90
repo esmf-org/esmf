@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.29 2011/06/30 05:59:00 theurich Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.30 2011/06/30 14:39:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.29 2011/06/30 05:59:00 theurich Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.30 2011/06/30 14:39:28 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -126,7 +126,7 @@
     ! 1        4        8        12       16       ! bounds
     allocate(src_farray(fa_shape(1)) )
     src_farray = lpe+1
-    srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, &
+    srcArray = ESMF_ArrayCreate(distgrid, src_farray, &
 		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -139,7 +139,7 @@
     ! 1        4        8        12       16       ! bounds
     allocate(dst_farray(fa_shape(1)) )
     dst_farray = 0
-    dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, &
+    dstArray = ESMF_ArrayCreate(distgrid, dst_farray, &
 		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -273,7 +273,7 @@
 !BOC
     allocate(src_farray2(tlb(1):tub(1)) )
     src_farray2 = lpe+1
-    srcArray = ESMF_ArrayCreate(src_farray2, distgrid=distgrid, &
+    srcArray = ESMF_ArrayCreate(distgrid, src_farray2, &
 		  indexflag=ESMF_INDEX_GLOBAL, &
       rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

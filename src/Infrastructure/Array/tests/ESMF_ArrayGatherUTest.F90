@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.22 2011/06/30 05:58:30 theurich Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.23 2011/06/30 14:39:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_ArrayGatherUTest.F90,v 1.22 2011/06/30 05:58:30 theurich Exp $'
+    '$Id: ESMF_ArrayGatherUTest.F90,v 1.23 2011/06/30 14:39:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -152,7 +152,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        array = ESMF_ArrayCreate(arrayspec, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(distgrid, arrayspec, &
           totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -239,7 +239,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        array = ESMF_ArrayCreate(arrayspec, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(distgrid, arrayspec, &
           totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -326,7 +326,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        array = ESMF_ArrayCreate(arrayspec, distgrid=distgrid, &
+        array = ESMF_ArrayCreate(distgrid, arrayspec, &
           totalLWidth=totalLWidth, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

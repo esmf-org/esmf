@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMUTest.F90,v 1.23 2011/06/30 05:59:01 theurich Exp $
+! $Id: ESMF_FieldSMMUTest.F90,v 1.24 2011/06/30 14:39:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMUTest.F90,v 1.23 2011/06/30 05:59:01 theurich Exp $'
+    '$Id: ESMF_FieldSMMUTest.F90,v 1.24 2011/06/30 14:39:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -160,7 +160,7 @@ contains
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
         src_farray = lpe+1
-        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        srcArray = ESMF_ArrayCreate(distgrid, src_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -174,7 +174,7 @@ contains
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
-        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        dstArray = ESMF_ArrayCreate(distgrid, dst_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -307,7 +307,7 @@ contains
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
         src_farray = lpe+1
-        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        srcArray = ESMF_ArrayCreate(distgrid, src_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -327,7 +327,7 @@ contains
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
-        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        dstArray = ESMF_ArrayCreate(distgrid, dst_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -463,7 +463,7 @@ contains
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
         src_farray = lpe+1
-        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        srcArray = ESMF_ArrayCreate(distgrid, src_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -477,7 +477,7 @@ contains
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
-        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        dstArray = ESMF_ArrayCreate(distgrid, dst_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -597,7 +597,7 @@ contains
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
         src_farray = lpe+1
-        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        srcArray = ESMF_ArrayCreate(distgrid, src_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -611,7 +611,7 @@ contains
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
-        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        dstArray = ESMF_ArrayCreate(distgrid, dst_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -731,7 +731,7 @@ contains
         ! create src_farray, srcArray, and srcField
         allocate(src_farray(fa_shape(1)) )
         src_farray = lpe+1
-        srcArray = ESMF_ArrayCreate(src_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        srcArray = ESMF_ArrayCreate(distgrid, src_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -746,7 +746,7 @@ contains
         ! create dst_farray, dstArray, and dstField
         allocate(dst_farray(fa_shape(1)) )
         dst_farray = 0
-        dstArray = ESMF_ArrayCreate(dst_farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        dstArray = ESMF_ArrayCreate(distgrid, dst_farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

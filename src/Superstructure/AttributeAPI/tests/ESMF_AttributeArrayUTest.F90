@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.40 2011/06/30 05:59:44 theurich Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.41 2011/06/30 14:39:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.40 2011/06/30 05:59:44 theurich Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.41 2011/06/30 14:39:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -114,7 +114,7 @@ program ESMF_AttributeArrayUTest
       call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
       distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
         regDecomp=(/2,3/), rc=rc)
-      array = ESMF_ArrayCreate(arrayspec, distgrid, rc=rc)
+      array = ESMF_ArrayCreate(distgrid, arrayspec, rc=rc)
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------

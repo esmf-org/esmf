@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCoordUTest.F90,v 1.58 2011/06/30 05:59:05 theurich Exp $
+! $Id: ESMF_GridCoordUTest.F90,v 1.59 2011/06/30 14:39:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridCoordUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCoordUTest.F90,v 1.58 2011/06/30 05:59:05 theurich Exp $'
+    '$Id: ESMF_GridCoordUTest.F90,v 1.59 2011/06/30 14:39:31 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -330,7 +330,7 @@ program ESMF_GridCoordUTest
  
 
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpdistgrid, &
+  array2D=ESMF_ArrayCreate(tmpdistgrid, arrayspec2D, &
                            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -522,7 +522,7 @@ program ESMF_GridCoordUTest
  
   ! First make bad Array and make sure it fails
   ! Create Array 
-  array1D=ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=tmpdistgrid, &
+  array1D=ESMF_ArrayCreate(distgrid=tmpdistgrid, arrayspec=arrayspec1D, &
     distgridToArrayMap=(/0,1/),indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -537,7 +537,7 @@ program ESMF_GridCoordUTest
 
   ! Then make a good Array and make sure it passes
   ! Create Array 
-  array1D=ESMF_ArrayCreate(arrayspec=arrayspec1D, distgrid=tmpdistgrid, &
+  array1D=ESMF_ArrayCreate(distgrid=tmpdistgrid, arrayspec=arrayspec1D, &
     distgridToArrayMap=(/1,0/),indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -587,7 +587,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpDistgrid, &
+  array2D=ESMF_ArrayCreate(tmpDistgrid, arrayspec2D, &
             indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -643,7 +643,7 @@ program ESMF_GridCoordUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array with extra space
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpdistgrid, &
+  array2D=ESMF_ArrayCreate(tmpdistgrid, arrayspec2D, &
             indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

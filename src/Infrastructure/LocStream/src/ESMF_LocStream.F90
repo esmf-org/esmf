@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.63 2011/06/27 19:46:35 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.64 2011/06/30 14:39:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.63 2011/06/27 19:46:35 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.64 2011/06/30 14:39:33 theurich Exp $'
 
 !==============================================================================
 !
@@ -513,7 +513,7 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create Array
-    array=ESMF_ArrayCreate(arrayspec, distgrid=lstypep%distgrid, &
+    array=ESMF_ArrayCreate(lstypep%distgrid, arrayspec, &
                            indexflag=lstypep%indexflag, name=keyName, &
                            rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -812,7 +812,7 @@ contains
     lstypep => locstream%lstypep
 
    ! Create Array
-   array=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
+   array=ESMF_ArrayCreate(lstypep%distgrid, farray, &
                            datacopyflag=datacopyflag, indexflag=lstypep%indexflag,  &
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -902,7 +902,7 @@ contains
     lstypep => locstream%lstypep
 
    ! Create Array
-   array=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
+   array=ESMF_ArrayCreate(lstypep%distgrid, farray, &
                            datacopyflag=datacopyflag, indexflag=lstypep%indexflag,  &
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
@@ -992,7 +992,7 @@ contains
     lstypep => locstream%lstypep
 
    ! Create Array
-   array=ESMF_ArrayCreate(farray, distgrid=lstypep%distgrid, &
+   array=ESMF_ArrayCreate(lstypep%distgrid, farray, &
                            datacopyflag=datacopyflag, indexflag=lstypep%indexflag,  &
                            name=keyName, rc=localrc)
    if (ESMF_LogFoundError(localrc, &

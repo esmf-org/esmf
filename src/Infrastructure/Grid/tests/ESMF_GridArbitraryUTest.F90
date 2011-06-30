@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.33 2011/06/30 05:59:05 theurich Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.34 2011/06/30 14:39:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.33 2011/06/30 05:59:05 theurich Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.34 2011/06/30 14:39:31 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -340,7 +340,7 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Create Array 
-  array1D=ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, rc=localrc)
+  array1D=ESMF_ArrayCreate(distgrid, arrayspec1D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
@@ -511,7 +511,7 @@ program ESMF_GridArbitraryUTest
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=distgrid, rc=localrc)
+  array2D=ESMF_ArrayCreate(distgrid, arrayspec2D, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Set Coord From Array
@@ -958,7 +958,7 @@ program ESMF_GridArbitraryUTest
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  array1D = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array1D = ESMF_ArrayCreate(distgrid, arrayspec1D, indexflag=ESMF_INDEX_DELOCAL, &
 	   distgridToArrayMap=(/1,0/), rc=localrc);
 
   
@@ -1012,13 +1012,13 @@ program ESMF_GridArbitraryUTest
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  array1D = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array1D = ESMF_ArrayCreate(distgrid, arrayspec1D, indexflag=ESMF_INDEX_DELOCAL, &
 	     distgridToArrayMap=(/0,1/), rc=localrc);
 
-  array1D_1 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array1D_1 = ESMF_ArrayCreate(distgrid, arrayspec1D, indexflag=ESMF_INDEX_DELOCAL, &
 	   distgridToArrayMap=(/1,0/), rc=localrc);
 
-  array1D_2 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array1D_2 = ESMF_ArrayCreate(distgrid, arrayspec1D, indexflag=ESMF_INDEX_DELOCAL, &
 	   distgridToArrayMap=(/1,0/), rc=localrc);
 
 
@@ -1195,7 +1195,7 @@ program ESMF_GridArbitraryUTest
   call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  array2D = ESMF_ArrayCreate(arrayspec2D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array2D = ESMF_ArrayCreate(distgrid, arrayspec2D, indexflag=ESMF_INDEX_DELOCAL, &
 	    rc=localrc)
 
   ! get the dimension of the array
@@ -1220,10 +1220,10 @@ program ESMF_GridArbitraryUTest
   call ESMF_ArraySpecSet(arrayspec1D, rank=1, typekind=ESMF_TYPEKIND_R8, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  array1D_1 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array1D_1 = ESMF_ArrayCreate(distgrid, arrayspec1D, indexflag=ESMF_INDEX_DELOCAL, &
 	   distgridToArrayMap=(/1,0/), rc=localrc);
 
-  array1D_2 = ESMF_ArrayCreate(arrayspec1D, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+  array1D_2 = ESMF_ArrayCreate(distgrid, arrayspec1D, indexflag=ESMF_INDEX_DELOCAL, &
 	   distgridToArrayMap=(/1,0/), rc=localrc);
 
   ! Set coordinate Arrays

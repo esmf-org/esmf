@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.20 2011/06/30 13:44:22 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.21 2011/06/30 14:39:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.20 2011/06/30 13:44:22 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.21 2011/06/30 14:39:25 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -1619,8 +1619,7 @@ end subroutine ESMF_FieldEmptyCompTK
     ! the dimension of the computationalEdgeLWidth, computationslEdgeUWidth 
     ! are the dimension of the array, 
     distgridDimCount_norep = arrayRank - ungriddedDimCount 
-    array=ESMF_ArrayCreate(arrayspec=arrayspec, &                     
-              distgrid=distgrid, &                                                         
+    array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &                     
               distgridToArrayMap=distgridToArrayMap, &                   
               totalLWidth=totalLWidth, totalUWidth=totalUWidth, & 
               indexflag=indexflag, &                                                              
@@ -4022,7 +4021,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 @\
     ! Create Array with undistributed dimensions                                @\
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then @\
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
+        array = ESMF_ArrayCreate(distgrid, farray, & @\
                 indexflag=indexflag, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 undistLBound=undistLBound(1:fieldUndistDimCount), & @\
@@ -4034,7 +4033,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
                ESMF_ERR_PASSTHRU, & @\
                ESMF_CONTEXT, rcToReturn=rc)) return @\
     else @\
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, & @\
+        array = ESMF_ArrayCreate(distgrid, farray, & @\
                 indexflag=indexflag, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 undistLBound=undistLBound(1:fieldUndistDimCount), & @\
@@ -4447,7 +4446,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 @\
     ! Create Array with undistributed dimensions                                @\
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then @\
-        array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, datacopyflag=datacopyflag, & @\
+        array = ESMF_ArrayCreate(distgrid, farrayPtr, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 totalLWidth=localMaxHaloLWidth(1:gridDimCount_norep), & @\
                 totalUWidth=localMaxHaloUWidth(1:gridDimCount_norep), & @\
@@ -4456,7 +4455,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
                ESMF_ERR_PASSTHRU, & @\
                ESMF_CONTEXT, rcToReturn=rc)) return @\
     else @\
-        array = ESMF_ArrayCreate(farrayPtr, distgrid=distgrid, datacopyflag=datacopyflag, & @\
+        array = ESMF_ArrayCreate(distgrid, farrayPtr, datacopyflag=datacopyflag, & @\
                 distgridToArrayMap=distgridToArrayMap (1:distgridDimCount), & @\
                 rc=localrc) @\
         if (ESMF_LogFoundError(localrc, & @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridItemUTest.F90,v 1.25 2011/06/30 05:59:05 theurich Exp $
+! $Id: ESMF_GridItemUTest.F90,v 1.26 2011/06/30 14:39:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridItemUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridItemUTest.F90,v 1.25 2011/06/30 05:59:05 theurich Exp $'
+    '$Id: ESMF_GridItemUTest.F90,v 1.26 2011/06/30 14:39:31 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -292,7 +292,7 @@ program ESMF_GridItemUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpDistgrid, &
+  array2D=ESMF_ArrayCreate(tmpDistgrid, arrayspec2D, &
                            indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -392,7 +392,7 @@ program ESMF_GridItemUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Create Array 
-  array2D=ESMF_ArrayCreate(arrayspec2D, distgrid=tmpDistgrid, &
+  array2D=ESMF_ArrayCreate(tmpDistgrid, arrayspec2D, &
             indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

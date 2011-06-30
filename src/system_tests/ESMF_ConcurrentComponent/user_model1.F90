@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.18 2011/06/30 06:00:42 theurich Exp $
+! $Id: user_model1.F90,v 1.19 2011/06/30 14:39:36 theurich Exp $
 !
 ! System test for Concurrent Components.  User-code, component 1.
 
@@ -132,16 +132,16 @@
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        rawdata = ESMF_ArrayCreate(arrayspec, indexflag=ESMF_INDEX_GLOBAL, &
-            distgrid=distgrid, name="rawdata", rc=status)
+        rawdata = ESMF_ArrayCreate(distgrid, arrayspec, &
+          indexflag=ESMF_INDEX_GLOBAL, name="rawdata", rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_StateAdd(exportState, (/rawdata/), rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
   
-        sorted_data = ESMF_ArrayCreate(arrayspec, indexflag=ESMF_INDEX_GLOBAL, &
-            distgrid=distgrid, name="sorted_data1", rc=status)
+        sorted_data = ESMF_ArrayCreate(distgrid, arrayspec, &
+          indexflag=ESMF_INDEX_GLOBAL, name="sorted_data1", rc=status)
         if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         call ESMF_StateAdd(exportState, (/sorted_data/), rc=status)

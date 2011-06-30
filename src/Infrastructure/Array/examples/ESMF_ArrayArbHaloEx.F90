@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbHaloEx.F90,v 1.12 2011/06/30 05:58:28 theurich Exp $
+! $Id: ESMF_ArrayArbHaloEx.F90,v 1.13 2011/06/30 14:39:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -126,22 +126,22 @@ program ESMF_ArrayArbHaloEx
   allocate(farrayPtr1d(5+localPet+1)) !use explicit Fortran allocate statement
   
   if (localPet==0) then
-    array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
       haloSeqIndexList=(/1/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-    array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
       haloSeqIndexList=(/1,2/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-    array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
       haloSeqIndexList=(/1,2,3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
-    array = ESMF_ArrayCreate(farrayPtr1d, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid, farrayPtr1d, &
       haloSeqIndexList=(/1,2,3,4/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
@@ -239,22 +239,22 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC  
   if (localPet==0) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1,2/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1,2,3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1,2,3,4/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
@@ -315,24 +315,24 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   if (localPet==0) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1/), undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1,2/), undistLBound=(/1/), undistUBound=(/3/), &
       rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1,2,3/), undistLBound=(/1/), undistUBound=(/3/), &
       rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       haloSeqIndexList=(/1,2,3,4/), undistLBound=(/1/), undistUBound=(/3/), &
       rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -394,25 +394,25 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   if (localPet==0) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
-    array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3,4/), &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -469,25 +469,25 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   if (localPet==0) then
-    array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-    array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-    array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==3) then
-    array2 = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
+    array2 = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=(/1,2,3,4/), &
       undistLBound=(/1/), undistUBound=(/6/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

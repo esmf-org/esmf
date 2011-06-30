@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.48 2011/06/30 05:59:01 theurich Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.49 2011/06/30 14:39:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.48 2011/06/30 05:59:01 theurich Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.49 2011/06/30 14:39:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -153,7 +153,7 @@ contains
 
         allocate(farray(fa_shape(1)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        array = ESMF_ArrayCreate(distgrid, farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -242,7 +242,7 @@ contains
 
         allocate(farray(fa_shape(1), fa_shape(2)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        array = ESMF_ArrayCreate(distgrid, farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -330,7 +330,7 @@ contains
 
         allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        array = ESMF_ArrayCreate(distgrid, farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -421,7 +421,7 @@ contains
 
         allocate(farray(fa_shape(1), fa_shape(2)))
         farray = lpe
-        array = ESMF_ArrayCreate(farray, distgrid=distgrid, indexflag=ESMF_INDEX_DELOCAL, &
+        array = ESMF_ArrayCreate(distgrid, farray, indexflag=ESMF_INDEX_DELOCAL, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
