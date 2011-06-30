@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.99 2011/06/24 16:12:46 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.100 2011/06/30 19:47:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.99 2011/06/24 16:12:46 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.100 2011/06/30 19:47:11 w6ws Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2118,7 +2118,7 @@ contains
                 (convention.eq."GridSpec".and.purpose.eq."General").or. & @\
                 (convention.eq."CIM 1.5".and.purpose.eq."Model Component Simulation Description").or. & @\
                 (convention.eq."CIM 1.5".and.purpose.eq."Inputs Description"))) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
           msg="See ESMF Reference Manual for ESMF standard Attribute package convention and purpose values", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -2240,14 +2240,14 @@ contains
       !       children of the parent @\
  @\
       if (size(nestConvention).ne.size(nestPurpose)) then @\
-         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
            msg="number of items in nestConvention and nestPurpose must be the same", & @\
            ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
       endif @\
  @\
       if (size(nestAttPackInstanceCountList).ne.size(nestConvention)) then @\
-         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
            msg="number of items in nestAttPackInstanceCountList and nestConvention must be the same", & @\
            ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
@@ -2255,7 +2255,7 @@ contains
  @\
       if (present(nestCount)) then @\
         if (nestCount > size(nestConvention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
             msg="nestCount cannot be larger than size(nestConvention)", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -2265,7 +2265,7 @@ contains
         localNestCount = size(nestConvention) @\
       end if @\
       if (localNestCount .le. 0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                    msg="size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -2286,7 +2286,7 @@ contains
       enddo @\
  @\
       if (totalInstances.gt.size(nestAttPackInstanceNameList)) then @\
-         call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
            msg="size(nestAttPackInstanceNameList) not big enough for the number of instances specified in nestAttPackInstanceCountList", & @\
            ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
@@ -2381,13 +2381,13 @@ contains
  @\
       if (present(count)) then @\
         if (count > size(attrList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
             msg="count cannot be larger than size(attrList)", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
         if (count .le. 0) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
             msg="count is <= 0", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -2488,13 +2488,13 @@ contains
       if (present(attrList)) then @\
         if (present(count)) then @\
           if (count > size(attrList)) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
               msg="count cannot be larger than size(attrList)", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
           if (count .lt. 0) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
               msg="count is negative", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
@@ -2506,7 +2506,7 @@ contains
       end if @\
  @\
       if (size(nestConvention).ne.size(nestPurpose)) then @\
-         call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
            msg="number of items in nestConvention and nestPurpose must be the same", & @\
            ESMF_CONTEXT, rcToReturn=rc) @\
          return @\
@@ -2514,7 +2514,7 @@ contains
  @\
       if (present(nestCount)) then @\
         if (nestCount > size(nestConvention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & @\
             msg="nestCount cannot be larger than size(nestConvention)", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -2524,7 +2524,7 @@ contains
         localNestCount = size(nestConvention) @\
       end if @\
       if (localNestCount .le. 0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                    msg="size(nestConvention) and size(nestPurpose) or nestCount are <= 0", & @\
                     ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -2779,7 +2779,7 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -2819,7 +2819,7 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
                msg="Attribute not found and default value not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -2905,7 +2905,7 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -2962,7 +2962,7 @@ contains
           if(present(itemCount)) then @\
             itemCount = 0 @\
           endif @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
                msg="Attribute not found and default value not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
@@ -3061,7 +3061,7 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3103,7 +3103,7 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
                msg="Attribute not found and default values not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3192,7 +3192,7 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3249,7 +3249,7 @@ contains
           if(present(itemCount)) then @\
             itemCount = 0 @\
           endif @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
                msg="Attribute not found and default values not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3348,7 +3348,7 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3386,7 +3386,7 @@ contains
         if(present(defaultvalue)) then @\
           value = defaultvalue @\
         else @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
                msg="Attribute not found and default value not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3481,7 +3481,7 @@ contains
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3538,7 +3538,7 @@ contains
           if(present(itemCount)) then @\
             itemCount = 0 @\
           endif @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
                msg="Attribute not found and default values not given", & @\
                ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3706,7 +3706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -3746,7 +3746,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(typekind)) typekind = ESMF_NOKIND @\
         if (present(itemCount)) itemCount = 0 @\
         if (.not.present(isPresent).and..not.present(itemCount).and..not.present(typekind)) then @\
-          call ESMF_LogSetError(ESMF_RC_ATTR_NOTSET, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
              msg="Attribute not found and neither default values nor isPresent flag was given", & @\
              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4354,7 +4354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4453,7 +4453,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4545,7 +4545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                               msg="itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4556,7 +4556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                               msg="valueList is too small", & @\
                               ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -4565,7 +4565,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4659,7 +4659,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4752,7 +4752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                               msg="itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4763,7 +4763,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                               msg="valueList is too small", & @\
                               ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -4772,7 +4772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4867,7 +4867,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4961,7 +4961,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                               msg="itemCount cannot be larger than size(valueList)", & @\
                               ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -4972,7 +4972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if @\
  @\
       if (litemCount .le. 0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
                               msg="valueList is too small", & @\
                               ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -4988,7 +4988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
@@ -5126,7 +5126,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, & @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
             msg="both convention and purpose must be present or not", & @\
             ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
