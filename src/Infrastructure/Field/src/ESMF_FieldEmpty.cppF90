@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.22 2011/06/30 17:35:23 feiliu Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.23 2011/06/30 19:27:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.22 2011/06/30 17:35:23 feiliu Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.23 2011/06/30 19:27:08 w6ws Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -281,7 +281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
      status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
       msg="FieldEmptySet - cannot replace an existing Grid in a Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -378,7 +378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
      status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
       msg="FieldEmptySet - cannot replace an existing Mesh in a Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -460,7 +460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
      status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
       msg="FieldEmptySet - cannot replace an existing LocStream in a Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -551,7 +551,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
      status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
       msg="FieldEmptySet - cannot replace an existing XGrid in a Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -766,7 +766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return   
 
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then 
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
         msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & 
         ESMF_CONTEXT, rcToReturn=rc)  
       return 
@@ -793,7 +793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (decompType .eq. ESMF_GRID_ARBITRARY) then 
         if ((present(indexflag) .or. present(totalLWidth)) .or. (present(totalUWidth))) then 
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
                  msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & 
                  ESMF_CONTEXT, rcToReturn=rc)  
            return 
@@ -807,7 +807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present(indexflag)) then
         if(.not. (g_indexflag .eq. indexflag)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
                msg="- user specified indexflag must be identical with Grid indexflag", &  
                  ESMF_CONTEXT, rcToReturn=rc)   
           return
@@ -829,7 +829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        geomtype == ESMF_GEOMTYPE_XGRID) then 
 
       if ((present(indexflag) .or. present(totalLWidth)) .or. (present(totalUWidth))) then 
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
           msg="- indexflag, totalLWidth or totalUWidth are not allowed for Mesh, LS, XGrid", & 
           ESMF_CONTEXT, rcToReturn=rc)  
         return 
@@ -1001,7 +1001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return   
 
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then 
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
         msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & 
         ESMF_CONTEXT, rcToReturn=rc)  
       return 
@@ -1027,7 +1027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
       if(ungridded_ldimcount /= ungridded_udimcount) then
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
           msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
           ESMF_CONTEXT, rcToReturn=rc) 
         return
@@ -1223,7 +1223,7 @@ end subroutine ESMF_FieldEmptyCompTK
     ! Error Check Input  
     if (present(gridToFieldMap)) then   
         if (size(gridToFieldMap) .ne. gridDimCount) then  
-           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
              msg="- gridToFieldMap size must equal to grid_rank", &  
              ESMF_CONTEXT, rcToReturn=rc)   
             return  
@@ -1276,7 +1276,7 @@ end subroutine ESMF_FieldEmptyCompTK
                   do j=1,arbdim
                     if (distgridToGridMap(j) .ne. i) then
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then
-                            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+                            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
   msg="- Arb. grid dimensions have to be either all replicated or not replicated", &  
   ESMF_CONTEXT, rcToReturn=rc)
                             return
@@ -1294,7 +1294,7 @@ end subroutine ESMF_FieldEmptyCompTK
     endif
 
     if(fieldDimCount .lt. gridDimCount_norep) then  
-      call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
         msg="- Field rank must be greater than or equal to its gridded rank", &  
         ESMF_CONTEXT, rcToReturn=rc)   
       return
@@ -1303,7 +1303,7 @@ end subroutine ESMF_FieldEmptyCompTK
     if(fieldDimCount .gt. gridDimCount_norep) then
       if( (.not. present(ungriddedLBound)) .or. &
           (.not. present(ungriddedUBound)) ) then
-        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
           msg="- ungridded bounds must be present when Field has ungridded dimension(s)", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1315,7 +1315,7 @@ end subroutine ESMF_FieldEmptyCompTK
  
     if (present(ungriddedLBound)) then   
        if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
                msg="- ungriddedLBound size must equal to array_rank-grid_rank", &  
                ESMF_CONTEXT, rcToReturn=rc)   
           return  
@@ -1324,7 +1324,7 @@ end subroutine ESMF_FieldEmptyCompTK
  
     if (present(ungriddedUBound)) then   
        if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
                  msg="- ungriddedUBound size must equal to array_rank-grid_rank", &  
                  ESMF_CONTEXT, rcToReturn=rc)   
           return  
@@ -1333,7 +1333,7 @@ end subroutine ESMF_FieldEmptyCompTK
  
     if (present(totalLWidth)) then   
         if (size(totalLWidth) .ne. gridDimCount_norep) then  
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
               msg="- totalLWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rcToReturn=rc)   
             return  
@@ -1342,7 +1342,7 @@ end subroutine ESMF_FieldEmptyCompTK
  
     if (present(totalUWidth)) then   
        if (size(totalUWidth) .ne. gridDimCount_norep) then  
-           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
               msg="- totalUWidth must equal to grid dimCount", &  
                 ESMF_CONTEXT, rcToReturn=rc)   
            return  
@@ -1358,14 +1358,14 @@ end subroutine ESMF_FieldEmptyCompTK
     do i = 1, gridDimCount
        if(localGridToFieldMap(i) .lt. 0 .and. &
          localGridToFieldMap(i) .gt. fieldDimCount) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
              msg="- gridToFieldMap element must be within range 0...array rank", &
              ESMF_CONTEXT, rcToReturn=rc)
            return
        endif
        if(localGridToFieldMap(i) /= 0) then
            if(flipflop(localGridToFieldMap(i))) then
-             call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="- gridToFieldMap element must be unique", &
                ESMF_CONTEXT, rcToReturn=rc)
              return
@@ -1819,7 +1819,7 @@ end subroutine ESMF_FieldEmptyCompTK
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if(lDeCount .lt. 1) then
-      call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
       msg="- the number of local DEs in array is less than 1 ", &
       ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -1835,7 +1835,7 @@ end subroutine ESMF_FieldEmptyCompTK
     do i = 2, lDeCount
       do j = 1, dimCount
         if(tlw(j, i) /= tlw(j,1) .or. tuw(j,i) /= tuw(j,1)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
           msg="- totalWidth in Array varies with localDE, not supported by Field", &
           ESMF_CONTEXT, rcToReturn=rc)
           return
@@ -2049,7 +2049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
 @\
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then @\
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
         msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & @\
         ESMF_CONTEXT, rcToReturn=rc)  @\
       return @\
@@ -2075,7 +2075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   @\
       if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if (present(totalLWidth) .or. present(totalUWidth)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
             msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
             ESMF_CONTEXT, rcToReturn=rc)  @\
           return @\
@@ -2083,7 +2083,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
     else @\
       if (present(totalLWidth) .or. present(totalUWidth)) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
           msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
           ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
@@ -2238,7 +2238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return   @\
 @\
     if(status /= ESMF_FIELDSTATUS_GRIDSET) then @\
-      call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
         msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & @\
         ESMF_CONTEXT, rcToReturn=rc)  @\
       return @\
@@ -2264,7 +2264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   @\
       if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if (present(totalLWidth) .or. present(totalUWidth)) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
             msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
             ESMF_CONTEXT, rcToReturn=rc)  @\
           return @\
@@ -2272,7 +2272,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
     else @\
       if (present(totalLWidth) .or. present(totalUWidth)) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
           msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
           ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
@@ -2460,7 +2460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if ((present(totalLWidth)) .or. (present(totalUWidth))) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
                  msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
@@ -2471,7 +2471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
-           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
                  msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
@@ -2647,7 +2647,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     if (decompType .eq. ESMF_GRID_ARBITRARY) then @\
         if ((present(totalLWidth)) .or. (present(totalUWidth))) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
                  msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
@@ -2658,7 +2658,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
  	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
-           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &  @\
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
                  msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
@@ -3695,7 +3695,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 @\
     ! make sure the input field has a EMPTY status @\
     if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &   @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &   @\
              msg="- input Field must be empty", &  @\
                ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -3713,7 +3713,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
         ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
     if(.not. (indexflag .eq. g_indexflag)) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &   @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   @\
              msg="- user specified indexflag must be identical with Grid indexflag", &  @\
                ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -3733,14 +3733,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
       ! return .true. for the associated() test but return 0 in size(). @\
       fpointer => farray @\
       if(.not. associated(fpointer,farray)) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &  @\
           msg="- farray is not associated with memory allocation)", & @\
           ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
       endif @\
 @\
       if (size(fpointer)==0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &  @\
           msg="- farray is not associated with memory allocation)", & @\
           ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
@@ -3772,7 +3772,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     grid_repdimcount = 0 @\
     if (present(gridToFieldMap)) then  @\
          if (size(gridToFieldMap) .ne. gridDimCount) then @\
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
           msg="- gridToFieldMap size must equal to grid_rank", & @\
             ESMF_CONTEXT, rcToReturn=rc)  @\
           return @\
@@ -3823,7 +3823,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
                   do j=1,arbdim @\
                     if (distgridToGridMap(j) .ne. i) then @\
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then @\
-                            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &    @\
+                            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &    @\
                                 msg="- Arb. grid dimensions have to be either all replicated or not replicated", &   @\
                                 ESMF_CONTEXT, rcToReturn=rc) @\
                             return @\
@@ -3841,7 +3841,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     endif @\
 @\
     if(fieldDimCount .lt. gridDimCount_norep) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
             msg="- farray rank must be greater than or equal to grid rank", & @\
               ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
@@ -3850,7 +3850,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 !    if(fieldDimCount .gt. gridDimCount_norep) then @\
 !      if( (.not. present(ungriddedLBound)) .or. & @\
 !          (.not. present(ungriddedUBound)) ) then @\
-!        call ESMF_LogSetError(ESMF_RC_ARG_VALUE, & @\
+!        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, & @\
 !         "- ungridded bounds must be present when Field has ungridded dimension(s)", & @\
 !           ESMF_CONTEXT, rcToReturn=rc) @\
 !        return @\
@@ -3864,7 +3864,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     ! Error Check Input @\
     if (present(ungriddedLBound)) then  @\
          if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                 msg="- ungriddedLBound size must equal to array_rank-grid_rank", & @\
                 ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -3873,7 +3873,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 @\
     if (present(ungriddedUBound)) then  @\
          if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                 msg="- ungriddedUBound size must equal to array_rank-grid_rank", & @\
                 ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -3882,7 +3882,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 @\
     if (present(totalLWidth)) then  @\
          if (size(totalLWidth) .ne. gridDimCount_norep) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                 msg="- totalLWidth must equal to gridded dimCount", & @\
                 ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -3891,7 +3891,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 @\
     if (present(totalUWidth)) then  @\
          if (size(totalUWidth) .ne. gridDimCount_norep) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                 msg="- totalUWidth must equal to gridded dimCount", & @\
                 ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -3907,14 +3907,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     do i = 1, gridDimCount @\
        if(localGridToFieldMap(i) .lt. 0 .or. & @\
          localGridToFieldMap(i) .gt. fieldDimCount) then @\
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &  @\
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &  @\
                  msg="- gridToFieldMap element must be within range 0...array rank", & @\
                    ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
        endif @\
        if(localGridToFieldMap(i) /= 0) then @\
 	   if(flipflop(localGridToFieldMap(i))) then @\
-	       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &  @\
+	       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &  @\
 	    	 msg="- gridToFieldMap element must be unique", & @\
 	    	   ESMF_CONTEXT, rcToReturn=rc)  @\
 	       return @\
@@ -4220,7 +4220,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 @\
     ! make sure the input field has a EMPTY status @\
     if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &   @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &   @\
              msg="- input Field must be empty", &  @\
                ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -4251,14 +4251,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
       ! return .true. for the associated() test but return 0 in size(). @\
       fpointer => farrayPtr @\
       if(.not. associated(fpointer,farrayPtr)) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &  @\
           msg="- farrayPtr is not associated with memory allocation)", & @\
           ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
       endif @\
 @\
       if (size(fpointer)==0) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &  @\
           msg="- farrayPtr is not associated with memory allocation)", & @\
           ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
@@ -4287,7 +4287,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     grid_repdimcount = 0 @\
     if (present(gridToFieldMap)) then  @\
          if (size(gridToFieldMap) .ne. gridDimCount) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                   msg="- gridToFieldMap size must equal to grid_rank", & @\
                     ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -4340,7 +4340,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
                   do j=1,arbdim @\
                     if (distgridToGridMap(j) .ne. i) then @\
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then @\
-                            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &    @\
+                            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &    @\
                                 msg="- Arb. grid dimensions have to be either all replicated or not replicated", &   @\
                                 ESMF_CONTEXT, rcToReturn=rc) @\
                             return @\
@@ -4358,7 +4358,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     endif @\
 @\
     if(fieldDimCount .lt. gridDimCount_norep) then @\
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
             msg="- farrayPtr rank must be greater than or equal to grid rank", & @\
               ESMF_CONTEXT, rcToReturn=rc)  @\
         return @\
@@ -4369,7 +4369,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 @\
     if (present(totalLWidth)) then  @\
          if (size(totalLWidth) .ne. gridDimCount_norep) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                   msg="- totalLWidth must equal to gridded dimCount", & @\
                     ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -4378,7 +4378,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 @\
     if (present(totalUWidth)) then  @\
          if (size(totalUWidth) .ne. gridDimCount_norep) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &  @\
                   msg="- totalUWidth must equal to gridded dimCount", & @\
                     ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
@@ -4394,14 +4394,14 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     do i = 1, gridDimCount @\
         if(localGridToFieldMap(i) .lt. 0 .or. & @\
           localGridToFieldMap(i) .gt. fieldDimCount) then @\
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &  @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &  @\
                   msg="- gridToFieldMap element must be within range 0...array rank", & @\
                     ESMF_CONTEXT, rcToReturn=rc)  @\
             return @\
         endif @\
         if(localGridToFieldMap(i) /= 0) then @\
            if(flipflop(localGridToFieldMap(i))) then @\
-               call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &  @\
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &  @\
                      msg="- gridToFieldMap element must be unique", & @\
                        ESMF_CONTEXT, rcToReturn=rc)  @\
                return @\

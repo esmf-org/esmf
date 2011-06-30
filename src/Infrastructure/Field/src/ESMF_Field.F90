@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.365 2011/06/29 15:39:18 feiliu Exp $
+! $Id: ESMF_Field.F90,v 1.366 2011/06/30 19:27:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.365 2011/06/29 15:39:18 feiliu Exp $'
+    '$Id: ESMF_Field.F90,v 1.366 2011/06/30 19:27:08 w6ws Exp $'
 
 !==============================================================================
 !
@@ -233,7 +233,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
       if (.not.associated(field%ftypep)) then 
-         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed Field: ftypep unassociated", &
              ESMF_CONTEXT, rcToReturn=rc)
          return
@@ -248,7 +248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       if (basestatus .ne. ESMF_STATUS_READY) then
-         call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed Field: fieldstatus not ready", &
              ESMF_CONTEXT, rcToReturn=rc)
          return
@@ -283,7 +283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_GeomBaseGet(ftypep%geombase, dimCount=gridrank, &
                             distgrid=gridDistGrid, localDECount=localDECount, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                 msg="Cannot retrieve distgrid, gridrank, localDECount from ftypep%grid", &
                  ESMF_CONTEXT, rcToReturn=rc)
              return
@@ -295,7 +295,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                exclusiveUBound=exclUBounds, &
                                rc=localrc)
               if (localrc .ne. ESMF_SUCCESS) then
-                 call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                     msg="Cannot retrieve exclusive bounds from ftypep%grid", &
                      ESMF_CONTEXT, rcToReturn=rc)
                  return
@@ -306,7 +306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ftypep%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
           call ESMF_ArrayValidate(array=ftypep%array, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                 msg="Cannot validate ftypep%array", &
                  ESMF_CONTEXT, rcToReturn=rc)
              return
@@ -314,7 +314,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArrayGet(ftypep%array, dimCount=dimCount, localDECount=localDECount, &
               distgrid=arrayDistGrid, rank=arrayrank, rc=localrc)
           if (localrc .ne. ESMF_SUCCESS) then
-             call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                 msg="Cannot retrieve dimCount, localDECount, arrayDistGrid, arrayrank from ftypep%array", &
                  ESMF_CONTEXT, rcToReturn=rc)
              return
@@ -323,7 +323,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Verify the distgrids in array and grid match.
           if(ESMF_DistGridMatch(gridDistGrid, arrayDistGrid, rc=localrc) &
             < ESMF_DISTGRIDMATCH_EXACT) then
-              call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                  msg="grid DistGrid does not match array DistGrid", &
                   ESMF_CONTEXT, rcToReturn=rc)
               return
@@ -341,7 +341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   distgridToPackedArrayMap=distgridToPackedArrayMap, &
                   rc=localrc)
              if (localrc .ne. ESMF_SUCCESS) then
-                 call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                  msg="Cannot retrieve distgridToPackedArrayMap from ftypep%array", &
                  ESMF_CONTEXT, rcToReturn=rc)
                 return
@@ -354,7 +354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             enddo
 
             if ( arrayrank .lt. gridrank_norep) then
-                call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
                    msg="grid rank + ungridded Bound rank not equal to array rank", &
                     ESMF_CONTEXT, rcToReturn=rc)
                 return

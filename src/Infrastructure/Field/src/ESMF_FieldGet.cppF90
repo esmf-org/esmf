@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.88 2011/06/30 15:26:41 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.89 2011/06/30 19:27:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.88 2011/06/30 15:26:41 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.89 2011/06/30 19:27:08 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -896,7 +896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     call ESMF_GeomBaseGet(field%ftypep%geombase, dimCount=gridrank, rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg="Cannot retrieve gridrank from ftypep%grid", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
@@ -905,14 +905,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localDeCount=localDeCount, &
         rc=localrc)
     if (localrc .ne. ESMF_SUCCESS) then
-       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg="Cannot retrieve fieldrank from ftypep%array", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
     endif 
 
     if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
-       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
           msg="localDe must be present when localDeCount is greater than 1", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
@@ -925,7 +925,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(exclusiveLBound)) then
         if(size(exclusiveLBound) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of exclusiveLBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -933,7 +933,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(exclusiveUBound)) then
         if(size(exclusiveUBound) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of exclusiveUBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -941,7 +941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(exclusiveCount)) then
         if(size(exclusiveCount) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of exclusiveCount must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -949,7 +949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(computationalLBound)) then
         if(size(computationalLBound) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of computationalLBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -957,7 +957,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(computationalUBound)) then
         if(size(computationalUBound) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of computationalUBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -965,7 +965,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(computationalCount)) then
         if(size(computationalCount) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of computationalCount must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -973,7 +973,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(totalLBound)) then
         if(size(totalLBound) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of totalLBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -981,7 +981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(totalUBound)) then
         if(size(totalUBound) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of totalUBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -989,7 +989,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(totalCount)) then
         if(size(totalCount) .ne. fieldrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="the size of totalCount must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -1864,7 +1864,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! default localDe    
     if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
-       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
           msg="localDe must be present when localDeCount is greater than 1", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
@@ -1884,7 +1884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Validate input arguments
     if(present(gridToFieldMap) ) then
         if(size(gridToFieldMap) .ne. gridrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="gridToFieldMap size must equal to grid dimension count", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -1912,14 +1912,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     flipflop = .false.  
     do i = 1, gridrank
        if(l_g2fm(i) .lt. 0 .and. l_g2fm(i) .gt. arrayrank) then  
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &   
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &   
                  msg="- gridToFieldMap element must be within range 0...array rank", &  
                    ESMF_CONTEXT, rcToReturn=rc)   
            return  
        endif  
        if(l_g2fm(i) /= 0) then
            if(flipflop(l_g2fm(i))) then  
-               call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &   
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &   
                      msg="- gridToFieldMap element must be unique", &  
                        ESMF_CONTEXT, rcToReturn=rc)   
                return  
@@ -1944,7 +1944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if(uglb_size .ne. ugub_size) then
-       call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
           msg="ungriddedLBound and ungriddedUBound must have same size", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
@@ -1962,7 +1962,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check argument validity
     if(present(totalLBound)) then
         if(size(totalLBound) .ne. arrayrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="totalLBound size must equal to the desired array rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -1970,7 +1970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(totalUBound)) then
         if(size(totalUBound) .ne. arrayrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="totalUBound size must equal to the desired array rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -1978,7 +1978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     if(present(totalCount)) then
         if(size(totalCount) .ne. arrayrank) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="totalCount size must equal to the desired array rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -1987,7 +1987,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(totalLWidth) ) then
         if(size(totalLWidth) .ne. gridrank_norep) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="totalLWidth size must equal to gridded dimension count", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
@@ -1996,7 +1996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(totalUWidth) ) then
         if(size(totalUWidth) .ne. gridrank_norep) then
-           call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
               msg="totalUWidth size must equal to gridded dimension count", &
                ESMF_CONTEXT, rcToReturn=rc)
            return

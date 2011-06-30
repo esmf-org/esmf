@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.76 2011/06/30 14:49:37 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.77 2011/06/30 19:27:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.76 2011/06/30 14:49:37 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.77 2011/06/30 19:27:08 w6ws Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -207,7 +207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
                  checkflag=checkflag, rc=localrc)
         else
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="Supplied combination of optional Fields not supported", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
@@ -431,7 +431,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (srcgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridStore on XGrid is not supported in this overloaded method", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -442,7 +442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (dstgeomtype .eq. ESMF_GEOMTYPE_XGRID) then
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridStore on XGrid is not supported in this overloaded method", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -472,7 +472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              (lregridScheme .ne. ESMF_REGRID_SCHEME_FULLTOREG3D)) then           
            if (present(polemethod)) then
               if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for NON-ESMF_REGRID_SCHEME_FULL3D", & 
                   ESMF_CONTEXT, rcToReturn=rc) 
                  return
@@ -484,7 +484,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
               if (present(polemethod)) then
                  if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                     msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
                     ESMF_CONTEXT, rcToReturn=rc) 
                    return
@@ -503,13 +503,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
            if (.not. present(regridPoleNPnts)) then
-                       call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridPoleNPnts must be specified if polemethod is ESMF_POLEMETHOD_NPNTAVG", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
            else 
              if (regridPoleNPnts < 1) then
-               call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- RegridPoleNPnts must be >=1 ", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -583,7 +583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
 	    if (srcStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently do conservative regrid on a stagger other then center", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -595,7 +595,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (gridDimCount .ne. 2) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on 2D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -629,14 +629,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
               if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
                  return	  
               endif
           else
               if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- S can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
                  return	  
@@ -656,7 +656,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! Only Center stagger is supported right now until we figure out what the
             ! control volume for the others should be
 	    if (dstStaggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently do conservative regrid on a stagger other then center", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -668,7 +668,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (gridDimCount .ne. 2) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on 2D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -701,14 +701,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
               if (dstMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can currently only do conservative regridding on a mesh built on elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
               endif
           else
               if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- D can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
@@ -741,7 +741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
                  ! Make sure the staggerlocs match
                  if (srcStaggerloc .ne. fracStaggerloc) then
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                          msg="- srcFracField staggerloc must match srcField staggerloc", &
                          ESMF_CONTEXT, rcToReturn=rc)
                     return
@@ -760,7 +760,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
                  ! Make sure the locs match
                  if (srcMeshLoc .ne. fracMeshLoc) then
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                          msg="- srcFracField staggerloc must match srcField staggerloc", &
                          ESMF_CONTEXT, rcToReturn=rc)
                     return
@@ -788,7 +788,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
                  ! Make sure the staggerlocs match
                  if (dstStaggerloc .ne. fracStaggerloc) then
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                          msg="- dstFracField Field staggerloc must match dstField staggerloc", &
                          ESMF_CONTEXT, rcToReturn=rc)
                     return
@@ -806,7 +806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
                  ! Make sure the locs match
                  if (dstMeshLoc .ne. fracMeshLoc) then
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                          msg="- srcFracField staggerloc must match srcField staggerloc", &
                          ESMF_CONTEXT, rcToReturn=rc)
                     return
@@ -955,7 +955,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do i = 1, ngrid_b
                 if(ESMF_GridMatch(srcGrid, gridB(i))>=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
-                        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
                            ESMF_CONTEXT, rcToReturn=rc) 
                         return
@@ -968,7 +968,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             enddo 
 
             if(.not. found) then
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                    msg="- cannot Locate src Field Grid in XGrid", &
                    ESMF_CONTEXT, rcToReturn=rc) 
                 return
@@ -989,13 +989,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     srcSide = ESMF_XGRIDSIDE_BALANCED
                     srcIdx = 1
                 else
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                            msg="- XGrid in srcField doesn't match the input XGrid", &
                            ESMF_CONTEXT, rcToReturn=rc) 
                     return
                 endif
             else
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                        msg="- src Field is not built on Grid or XGrid", &
                        ESMF_CONTEXT, rcToReturn=rc) 
                 return
@@ -1026,7 +1026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do i = 1, ngrid_b
                 if(ESMF_GridMatch(dstGrid, gridB(i))>=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
-                        call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
                            ESMF_CONTEXT, rcToReturn=rc) 
                         return
@@ -1039,7 +1039,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             enddo 
 
             if(.not. found) then
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                    msg="- cannot Locate dst Field Grid in XGrid", &
                    ESMF_CONTEXT, rcToReturn=rc) 
                 return
@@ -1060,13 +1060,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     dstSide = ESMF_XGRIDSIDE_BALANCED
                     dstIdx = 1
                 else
-                    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                            msg="- XGrid in dstField doesn't match the input XGrid", &
                            ESMF_CONTEXT, rcToReturn=rc) 
                     return
                 endif
             else
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
                        msg="- src Field is not built on Grid or XGrid", &
                        ESMF_CONTEXT, rcToReturn=rc) 
                 return
@@ -1075,7 +1075,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! src and dst Fields should not be on the same side
         if ( srcSide == dstSide ) then
-            call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                msg="- src and dst Fields should not be on same side of the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
@@ -1180,7 +1180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 	! Check typekind
         if (typekind .ne. ESMF_TYPEKIND_R8) then
-           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- Area calculation is only supported for Fields of typekind=ESMF_TYPEKIND_R8", & 
               ESMF_CONTEXT, rcToReturn=rc) 
            return
@@ -1217,7 +1217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Only Center stagger is supported right now until we figure out what the
           ! control volume for the others should be
 	  if (staggerloc .ne. ESMF_STAGGERLOC_CENTER) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently calculate area on a stagger other then center", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -1229,7 +1229,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           if (gridDimCount .ne. 2) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can currently only calculate area on 2D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
                 return
@@ -1258,7 +1258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  if (meshloc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently calculate area on a mesh location other than elements", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -1433,7 +1433,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        ! Error if decompType is ARBITRARY
        if (decompType .eq. ESMF_GRID_ARBITRARY) then
-             call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                  msg="- can't currently regrid an arbitrarily distributed Grid", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
@@ -1457,7 +1457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            ! loop and make sure they aren't too small in any dimension
            do i=1,dimCount
               if (ec(i) .lt. 2) then
-                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, & 
+                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
               msg="- can't currently regrid a grid that contains a DE of width less than 2", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
