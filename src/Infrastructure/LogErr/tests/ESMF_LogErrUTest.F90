@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.79 2011/06/29 01:48:32 w6ws Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.80 2011/06/30 05:17:33 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.79 2011/06/29 01:48:32 w6ws Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.80 2011/06/30 05:17:33 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -78,6 +78,7 @@
       integer :: log8unit
       logical :: was_found
       logical :: trace_flag
+      type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
 #endif
 
 
@@ -901,6 +902,83 @@ if (time_diff < zero) stop 1
       call ESMF_LogWrite (logmsgflag=ESMF_LOGMSG_TRACE,  &
           msg="NOTRACE set, should NOT be in log",  &
           rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogSet logmsgabort setting
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogSet with logmsgabort Test"
+      call ESMF_LogSet (logmsgabort=(/ESMF_LOGMSG_ERROR/),  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort getting
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort Test"
+      logabort_flags => null ()
+      call ESMF_LogGet (logmsgabort=logabort_flags, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort return association 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort set association Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (logabort_flags) )
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort return size 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (logabort_flags) == 1)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort return values 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE,  &
+           logabort_flags(1) == ESMF_LOGMSG_ERROR )
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogSet logmsgabort clear
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogSet with logmsgabort Test"
+      call ESMF_LogSet (logmsgabort=ESMF_LOGMSG_NONE, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort getting
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort cleared Test"
+      if (associated (logabort_flags)) deallocate (logabort_flags)
+      logabort_flags => null ()
+      call ESMF_LogGet (logmsgabort=logabort_flags, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort return association 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort cleared association Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (logabort_flags) )
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogGet logmsgabort return size 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogGet with logmsgabort cleared size Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (logabort_flags) == 0)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.45 2011/06/24 15:04:06 rokuingh Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.46 2011/06/30 05:17:32 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -150,7 +150,7 @@
     ! This is an example setting a property of a Log that is not the default.
     ! It was opened in a previous example, and the handle for it must be
     ! passed in the argument list.
-    call ESMF_LogSet(log=alog, halt=ESMF_LOG_HALT_ON_ERROR, rc=rc2)
+    call ESMF_LogSet(log=alog, logmsgabort=(/ESMF_LOGMSG_ERROR/), rc=rc2)
 !EOC
 
     if (rc2.NE.ESMF_SUCCESS) then
