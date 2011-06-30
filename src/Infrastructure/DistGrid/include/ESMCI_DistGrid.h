@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.40 2011/06/09 23:51:21 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.41 2011/06/30 03:52:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ namespace ESMCI {
   enum DecompFlag {DECOMP_INVALID=0, DECOMP_DEFAULT, DECOMP_HOMOGEN,
     DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC};
 
-  enum DistGridMatchType {DISTGRIDMATCH_INVALID=0, DISTGRIDMATCH_NONE,
+  enum DistGridMatch_Flag {DISTGRIDMATCH_INVALID=0, DISTGRIDMATCH_NONE,
     DISTGRIDMATCH_EXACT, DISTGRIDMATCH_ALIAS};
 
   // classes
@@ -188,7 +188,7 @@ namespace ESMCI {
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
-    static DistGridMatchType match(DistGrid *distgrid1, DistGrid *distgrid2,
+    static DistGridMatch_Flag match(DistGrid *distgrid1, DistGrid *distgrid2,
       int *rc=NULL);
     int print() const;
     int validate() const;

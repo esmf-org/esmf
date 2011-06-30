@@ -1,4 +1,4 @@
-% $Id: DistGrid_options.tex,v 1.1 2011/06/03 05:18:31 theurich Exp $
+% $Id: DistGrid_options.tex,v 1.2 2011/06/30 03:52:57 theurich Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,13 +8,17 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsubsection{ESMF\_DistGridMatchType}
-\label{sec:opt:distgridmatchtype}
+\subsubsection{ESMF\_DISTGRIDMATCH}
+\label{const:distgridmatch}
 
 {\sf DESCRIPTION:\\}
 Indicates the level to which two DistGrid variables match.
 
-\medskip
+The type of this flag is:
+
+{\tt type(ESMF\_DistGridMatch\_Flag)}
+
+The valid values are:
 \begin{description}
 \item [ESMF\_DISTGRIDMATCH\_INVALID:] Indicates a non-valid matching level.
 \item [ESMF\_DISTGRIDMATCH\_NONE:] The lowest valid level of DistGrid matching. 

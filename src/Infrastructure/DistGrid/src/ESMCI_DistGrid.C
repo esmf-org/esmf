@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.59 2011/06/22 21:55:29 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.60 2011/06/30 03:53:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.59 2011/06/22 21:55:29 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.60 2011/06/30 03:53:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2357,7 +2357,7 @@ int DistGrid::fillIndexListPDimPDe(
 // !IROUTINE:  ESMCI::DistGrid::match
 //
 // !INTERFACE:
-DistGridMatchType DistGrid::match(
+DistGridMatch_Flag DistGrid::match(
 //
 // !RETURN VALUE:
 //    bool according to match
@@ -2379,7 +2379,7 @@ DistGridMatchType DistGrid::match(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   // initialize return value
-  DistGridMatchType matchResult = DISTGRIDMATCH_INVALID;
+  DistGridMatch_Flag matchResult = DISTGRIDMATCH_INVALID;
   
   // return with errors for NULL pointer
   if (distgrid1 == NULL){

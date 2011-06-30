@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.69 2011/06/29 00:03:52 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.70 2011/06/30 03:53:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.69 2011/06/29 00:03:52 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.70 2011/06/30 03:53:05 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.69 2011/06/29 00:03:52 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.70 2011/06/30 03:53:05 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1849,7 +1849,7 @@ end function ESMF_MeshCreateFromScrip
 !EOPI
 !------------------------------------------------------------------------------
     integer                       :: localrc      ! local return code
-    type(ESMF_DistGridMatchType)  :: matchResultNode, matchResultElem
+    type(ESMF_DistGridMatch_Flag) :: matchResultNode, matchResultElem
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
