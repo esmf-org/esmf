@@ -1,4 +1,4 @@
-! $Id: ESMF_Container.F90,v 1.23 2011/06/21 01:51:22 w6ws Exp $
+! $Id: ESMF_Container.F90,v 1.24 2011/06/30 19:32:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_ContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Container.F90,v 1.23 2011/06/21 01:51:22 w6ws Exp $'
+    '$Id: ESMF_Container.F90,v 1.24 2011/06/30 19:32:22 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -680,7 +680,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     if (associated(itemList)) then
       if (size(itemList) < itemC) then
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
           msg="itemList is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
         return  ! bail out
@@ -786,7 +786,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(itemList)) then
       if (associated(itemList)) then
         if (size(itemList) < itemC) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
             msg="itemList is too small", &
             ESMF_CONTEXT, rcToReturn=rc)
           return  ! bail out
@@ -1324,7 +1324,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(garbageList)) then
       if (associated(garbageList)) then
         if (size(garbageList) < garbageC) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
             msg="garbageList is too small", &
             ESMF_CONTEXT, rcToReturn=rc)
           return  ! bail out
