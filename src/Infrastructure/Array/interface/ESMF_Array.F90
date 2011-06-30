@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.157 2011/06/30 18:45:48 w6ws Exp $
+! $Id: ESMF_Array.F90,v 1.158 2011/06/30 21:30:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.157 2011/06/30 18:45:48 w6ws Exp $'
+    '$Id: ESMF_Array.F90,v 1.158 2011/06/30 21:30:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -232,13 +232,12 @@ contains
   subroutine ESMF_ArrayReduce(array, result, reduceflag, rootPET, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(inout)           :: array
-    real(ESMF_KIND_R8),         intent(out),  optional  :: result
-    type(ESMF_Reduce_Flag),      intent(in)              :: reduceflag
-    integer,                    intent(in)              :: rootPET
-    type(ESMF_VM),              intent(in),   optional  :: vm
-    integer,                    intent(out),  optional  :: rc  
-!         
+    type(ESMF_Array),       intent(inout)         :: array
+    real(ESMF_KIND_R8),     intent(out), optional :: result
+    type(ESMF_Reduce_Flag), intent(in)            :: reduceflag
+    integer,                intent(in)            :: rootPET
+    type(ESMF_VM),          intent(in),  optional :: vm
+    integer,                intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !     Fully reduce the entire Array into a single {\tt result} on {\tt rootPET}
@@ -298,13 +297,12 @@ contains
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(inout)           :: array
     real(ESMF_KIND_R8), target, intent(out),  optional  :: farray(:,:)
-    type(ESMF_Reduce_Flag),      intent(in)              :: reduceflag
+    type(ESMF_Reduce_Flag),     intent(in)              :: reduceflag
     integer,                    intent(in)              :: rootPET
     integer,                    intent(in)              :: dimList(:)
     integer,                    intent(in),   optional  :: tile
     type(ESMF_VM),              intent(in),   optional  :: vm
     integer,                    intent(out),  optional  :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Reduce the dimensions specified in {\tt dimList} of the Array object 
@@ -373,14 +371,12 @@ contains
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),   intent(inout)           :: array
+    type(ESMF_Array),   intent(inout)         :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),   optional  :: computationalLWidth(:,:)
-    integer,            intent(in),   optional  :: computationalUWidth(:,:)
-    character(len = *), intent(in),   optional  :: name
-    integer,            intent(out),  optional  :: rc
-
-!
+    integer,            intent(in),  optional :: computationalLWidth(:,:)
+    integer,            intent(in),  optional :: computationalUWidth(:,:)
+    character(len = *), intent(in),  optional :: name
+    integer,            intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -476,13 +472,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),   intent(inout)           :: array
-    integer,            intent(in)              :: localDe
+    type(ESMF_Array),   intent(inout)         :: array
+    integer,            intent(in)            :: localDe
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in),   optional  :: rimSeqIndex(:)
-    integer,            intent(out),  optional  :: rc
-
-!
+    integer,            intent(in),  optional :: rimSeqIndex(:)
+    integer,            intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -534,17 +528,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routesyncflag, finishedflag, cancelledflag, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in),   optional  :: srcArray
-    type(ESMF_Array),       intent(inout),optional  :: dstArray
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_Array),          intent(in),    optional :: srcArray
+    type(ESMF_Array),          intent(inout), optional :: dstArray
+    type(ESMF_RouteHandle),    intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_RouteSync_Flag),    intent(in),   optional  :: routesyncflag
-    logical,                intent(out),  optional  :: finishedflag
-    logical,                intent(out),  optional  :: cancelledflag
-    type(ESMF_Region_Flag), intent(in),   optional  :: zeroregion
-    logical,                intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
-!
+    type(ESMF_RouteSync_Flag), intent(in),    optional :: routesyncflag
+    logical,                   intent(out),   optional :: finishedflag
+    logical,                   intent(out),   optional :: cancelledflag
+    type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
+    logical,                   intent(in),    optional :: checkflag
+    integer,                   intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -700,10 +693,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySMMRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc
-!
+    integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -752,14 +744,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),       intent(in)              :: srcArray
-!   type(ESMF_Array),       intent(inout)           :: dstArray
-!   type(ESMF_RouteHandle), intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>), target, intent(in)    :: factorList(:)
-!   integer,                intent(in)              :: factorIndexList(:,:)
+!   type(ESMF_Array),                 intent(in)            :: srcArray
+!   type(ESMF_Array),                 intent(inout)         :: dstArray
+!   type(ESMF_RouteHandle),           intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), target, intent(in)            :: factorList(:)
+!   integer,                          intent(in)            :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                intent(out),  optional  :: rc
-!
+!   integer,                          intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -878,13 +869,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
-    type(ESMF_Array),           intent(inout)           :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer(ESMF_KIND_I4), target, intent(in)           :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_Array),              intent(in)            :: srcArray
+    type(ESMF_Array),              intent(inout)         :: dstArray
+    type(ESMF_RouteHandle),        intent(inout)         :: routehandle
+    integer(ESMF_KIND_I4), target, intent(in)            :: factorList(:)
+    integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -945,13 +936,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
-    type(ESMF_Array),           intent(inout)           :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer(ESMF_KIND_I8), target, intent(in)           :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_Array),              intent(in)            :: srcArray
+    type(ESMF_Array),              intent(inout)         :: dstArray
+    type(ESMF_RouteHandle),        intent(inout)         :: routehandle
+    integer(ESMF_KIND_I8), target, intent(in)            :: factorList(:)
+    integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1012,13 +1003,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
-    type(ESMF_Array),           intent(inout)           :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_Array),           intent(in)            :: srcArray
+    type(ESMF_Array),           intent(inout)         :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
+    real(ESMF_KIND_R4), target, intent(in)            :: factorList(:)
+    integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1079,13 +1070,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
-    type(ESMF_Array),           intent(inout)           :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_Array),           intent(in)            :: srcArray
+    type(ESMF_Array),           intent(inout)         :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
+    real(ESMF_KIND_R8), target, intent(in)            :: factorList(:)
+    integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1145,12 +1136,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)              :: srcArray
-    type(ESMF_Array),           intent(inout)           :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    type(ESMF_Array),       intent(in)            :: srcArray
+    type(ESMF_Array),       intent(inout)         :: dstArray
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
-!
+    integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1257,11 +1247,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayValidate(array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array), intent(in)              :: array
+    type(ESMF_Array), intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,          intent(out),  optional  :: rc  
-!         
-!
+    integer,          intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1309,18 +1297,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayWrite}
 !
 ! !INTERFACE:
-  subroutine ESMF_ArrayWrite(array, file, &
+  subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
      variableName, append, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),     intent(inout)          :: array
-    character(*),         intent(in)             :: file
-    character(*),         intent(in),  optional  :: variableName
-    logical,              intent(in),  optional  :: append
-    integer,              intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
-    integer,              intent(out), optional  :: rc
-!
+    type(ESMF_Array),     intent(inout)         :: array
+    character(*),         intent(in)            :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(*),         intent(in),  optional :: variableName
+    logical,              intent(in),  optional :: append
+    integer,              intent(in),  optional :: timeslice
+    type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Write Array data into a file. For this API to be functional, the 

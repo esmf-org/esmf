@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGather.cppF90,v 1.28 2011/03/08 05:36:15 w6ws Exp $
+! $Id: ESMF_ArrayGather.cppF90,v 1.29 2011/06/30 21:30:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -73,7 +73,7 @@ module ESMF_ArrayGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGather.cppF90,v 1.28 2011/03/08 05:36:15 w6ws Exp $'
+    '$Id: ESMF_ArrayGather.cppF90,v 1.29 2011/06/30 21:30:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -131,8 +131,6 @@ contains
 !   integer,                  intent(in),  optional :: tile @\
 !   type(ESMF_VM),            intent(in),  optional :: vm @\
 !   integer,                  intent(out), optional :: rc @\
-! @\
-! @\
 ! @\
 ! !STATUS: @\
 ! \apiStatusCompatible @\

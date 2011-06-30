@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.70 2011/06/30 18:45:48 w6ws Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.71 2011/06/30 21:30:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.70 2011/06/30 18:45:48 w6ws Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.71 2011/06/30 21:30:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -175,6 +175,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: localDeList(:)
     character(len=*),              intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
+!         
+! !STATUS:
+! \apiStatusCompatible
 !         
 ! !DESCRIPTION:
 !     Get internal information.
@@ -813,8 +816,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: localDe
     type(ESMF_LocalArray),  intent(inout)         :: localarray
     integer,                intent(out), optional :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -918,7 +919,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        target, intent(out)           :: totalElementMask(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Get internal information.
@@ -957,7 +957,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        target, intent(out)           :: totalElementMask(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Get internal information.
@@ -996,7 +995,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        target, intent(out)           :: totalElementMask(:,:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Get internal information.
@@ -1036,7 +1034,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        target, intent(out),  optional :: haloLDepth(:)
     integer,        target, intent(out),  optional :: haloUDepth(:)
     integer,                intent(out),  optional :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Get Fortran pointer to DE-local memory regions in Array object.
@@ -1098,7 +1095,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,        target, intent(out), optional :: pioDofList(:)
     integer,                intent(out), optional :: pioDofCount
     integer,                intent(out), optional :: rc
-!         
 !
 ! !DESCRIPTION:
 !   Construct PIO DOF list from Array for localDe.

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatter.cppF90,v 1.31 2011/03/08 05:36:15 w6ws Exp $
+! $Id: ESMF_ArrayScatter.cppF90,v 1.32 2011/06/30 21:30:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_ArrayScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayScatter.cppF90,v 1.31 2011/03/08 05:36:15 w6ws Exp $'
+    '$Id: ESMF_ArrayScatter.cppF90,v 1.32 2011/06/30 21:30:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -136,8 +136,6 @@ contains
 !   integer,                   intent(in),  optional :: tile @\
 !   type(ESMF_VM),             intent(in),  optional :: vm @\
 !   integer,                   intent(out), optional :: rc @\
-! @\
-! @\
 ! @\
 ! !STATUS: @\
 ! \apiStatusCompatible @\
@@ -344,7 +342,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in)              :: rootPET
     type(ESMF_VM),          intent(in),   optional  :: vm
     integer,                intent(out),  optional  :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
@@ -408,7 +405,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommHandle),  intent(inout)           :: commhandle
     type(ESMF_VM),          intent(in),   optional  :: vm
     integer,                intent(out),  optional  :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
@@ -477,7 +473,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in)              :: de
     type(ESMF_VM),          intent(in),   optional  :: vm
     integer,                intent(out),  optional  :: rc  
-!         
 !
 ! !DESCRIPTION:
 !     Scatter the data of an {\tt ESMF\_LocalArray} located on {\tt rootPET} 
