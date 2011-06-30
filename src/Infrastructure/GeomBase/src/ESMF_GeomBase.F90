@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.18 2011/06/28 22:02:03 rokuingh Exp $
+! $Id: ESMF_GeomBase.F90,v 1.19 2011/06/30 13:44:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
     type(ESMF_Mesh) :: mesh
     type(ESMF_LocStream) :: locstream
     type(ESMF_XGrid) :: xgrid
-    type(ESMF_XGridSide) :: xgridside
+    type(ESMF_XGridSide_Flag) :: xgridside
     integer :: xgridIndex 
 
   end type
@@ -156,7 +156,7 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.18 2011/06/28 22:02:03 rokuingh Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.19 2011/06/30 13:44:20 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -646,7 +646,7 @@ end interface
 !
 ! !ARGUMENTS:
        type(ESMF_XGrid),     intent(in)            :: xgrid
-       type(ESMF_XGridSide), intent(in), optional  :: XGridSide
+       type(ESMF_XGridSide_Flag), intent(in), optional  :: XGridSide
        integer,              intent(in), optional  :: gridIndex
        integer,              intent(out),optional  :: rc
 !
@@ -670,7 +670,7 @@ end interface
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc ! local error status
     integer :: localGridIndex
-    type(ESMF_XGridSide) :: localXGridSide
+    type(ESMF_XGridSide_Flag) :: localXGridSide
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -683,7 +683,7 @@ end interface
     if (present(XGridSide)) then
        localXGridSide=xgridSide
     else
-       localXGridSide=ESMF_XGRID_BALANCED
+       localXGridSide=ESMF_XGRIDSIDE_BALANCED
     endif
 
     if (present(gridIndex)) then
@@ -794,7 +794,7 @@ end interface
       type(ESMF_MeshLoc),    intent(out), optional :: meshloc
       type(ESMF_LocStream),  intent(out), optional :: locstream
       type(ESMF_XGrid),      intent(out), optional :: xgrid
-      type(ESMF_XGridSide),  intent(out), optional :: xgridside
+      type(ESMF_XGridSide_Flag),  intent(out), optional :: xgridside
       integer,               intent(out), optional :: gridIndex
       integer,               intent(out), optional :: rc
 

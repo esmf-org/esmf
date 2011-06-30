@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.27 2011/06/30 05:59:38 theurich Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.28 2011/06/30 13:44:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -30,10 +30,6 @@
 ! !USES:
     use ESMF_TestMod     ! test methods
     use ESMF
-    use ESMF_XGridMod
-    use ESMF_XGridCreateMod
-    use ESMF_XGridGetMod
-
     implicit none
 
 !------------------------------------------------------------------------------
@@ -302,17 +298,17 @@ contains
                 ESMF_CONTEXT, rcToReturn=rc)) return
         enddo
 
-        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=1, &
+        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
+        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=2, &
             distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
+        call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_B, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &

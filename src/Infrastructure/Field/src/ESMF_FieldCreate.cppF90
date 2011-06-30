@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.112 2011/06/28 22:02:01 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.113 2011/06/30 13:44:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.112 2011/06/28 22:02:01 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.113 2011/06/30 13:44:22 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -3952,7 +3952,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGTKR(xgrid, xgridSide, gridIndex, typekind, &
+  function ESMF_FieldCreateXGTKR(xgrid, xgridside, gridindex, typekind, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -3961,8 +3961,8 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid),     intent(in)            :: xgrid
-    type(ESMF_XGridSide), intent(in),  optional :: xgridSide
-    integer,              intent(in),  optional :: gridIndex
+    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+    integer,              intent(in),  optional :: gridindex
     type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -3980,12 +3980,12 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 ! \begin{description}
 ! \item [xgrid] 
 !       {\tt ESMF\_XGrid} object. 
-! \item [{[xgridSide]}] 
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
-!       defaults to ESMF\_XGRID\_BALANCED.
-! \item [{[xgridIndex]}] 
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+! \item [{[xgridside]}] 
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+! \item [{[gridindex]}] 
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1. 
 ! \item[typekind]
 !      The typekind of the Field.
@@ -4090,7 +4090,7 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArraySpec(xgrid, xgridSide, gridIndex, &
+  function ESMF_FieldCreateXGArraySpec(xgrid, xgridside, gridindex, &
     arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -4098,15 +4098,15 @@ end function ESMF_FieldCreateXGTKR
     type(ESMF_Field) :: ESMF_FieldCreateXGArraySpec
 !
 ! !ARGUMENTS:
-    type(ESMF_XGrid),     intent(in)            :: xgrid
-    type(ESMF_XGridSide), intent(in),  optional :: xgridSide
-    integer,              intent(in),  optional :: gridIndex
-    type(ESMF_ArraySpec), intent(in)            :: arrayspec     
-    integer,              intent(in),  optional :: gridToFieldMap(:)    
-    integer,              intent(in),  optional :: ungriddedLBound(:)
-    integer,              intent(in),  optional :: ungriddedUBound(:)
-    character (len=*),    intent(in),  optional :: name 
-    integer,              intent(out), optional :: rc              
+    type(ESMF_XGrid),          intent(in)            :: xgrid
+    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridSide
+    integer,                   intent(in),  optional :: gridIndex
+    type(ESMF_ArraySpec),      intent(in)            :: arrayspec     
+    integer,                   intent(in),  optional :: gridToFieldMap(:)    
+    integer,                   intent(in),  optional :: ungriddedLBound(:)
+    integer,                   intent(in),  optional :: ungriddedUBound(:)
+    character (len=*),         intent(in),  optional :: name 
+    integer,                   intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -4118,12 +4118,12 @@ end function ESMF_FieldCreateXGTKR
 ! \begin{description}
 ! \item [xgrid] 
 !       {\tt ESMF\_XGrid} object. 
-! \item [{[xgridSide]}] 
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
-!       defaults to ESMF\_XGRID\_BALANCED.
-! \item [{[xgridIndex]}] 
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+! \item [{[xgridside]}] 
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+! \item [{[gridindex]}] 
+!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1. 
 ! \item [arrayspec]
 !       Data type and kind specification. 
@@ -4214,7 +4214,7 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArray(xgrid, xgridSide, gridIndex, array, &
+  function ESMF_FieldCreateXGArray(xgrid, xgridside, gridindex, array, &
     datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -4223,8 +4223,8 @@ end function ESMF_FieldCreateXGTKR
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid),     intent(in)            :: xgrid
-    type(ESMF_XGridSide), intent(in),  optional :: xgridSide
-    integer,              intent(in),  optional :: gridIndex
+    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+    integer,              intent(in),  optional :: gridindex
     type(ESMF_Array),     intent(in)            :: array              
     type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag       
     integer,              intent(in),  optional :: gridToFieldMap(:)    
@@ -4244,12 +4244,12 @@ end function ESMF_FieldCreateXGTKR
 ! \begin{description}
 ! \item [xgrid] 
 !       {\tt ESMF\_XGrid} object. 
-! \item [{[xgridSide]}] 
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
-!       defaults to ESMF\_XGRID\_BALANCED.
-! \item [{[xgridIndex]}] 
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+! \item [{[xgridside]}] 
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+! \item [{[gridindex]}] 
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1. 
 ! \item [array]
 !       {\tt ESMF\_Array} object.
@@ -4344,7 +4344,7 @@ end function ESMF_FieldCreateXGTKR
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateXGData<rank><type><kind>(xgrid, & @\
-!   xgridSide, gridIndex, farray, indexflag, datacopyflag,     & @\
+!   xgridside, gridindex, farray, indexflag, datacopyflag,     & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, name,& @\
 !   rc) @\
 ! @\
@@ -4353,8 +4353,8 @@ end function ESMF_FieldCreateXGTKR
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_XGrid),     intent(in)              :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional    :: xgridSide @\
-!   integer,              intent(in), optional    :: gridIndex @\
+!   type(ESMF_XGridSide_Flag), intent(in), optional    :: xgridside @\
+!   integer,              intent(in), optional    :: gridindex @\
 !   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
 !   type(ESMF_Index_Flag), intent(in)              :: indexflag @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional    :: datacopyflag @\
@@ -4373,12 +4373,12 @@ end function ESMF_FieldCreateXGTKR
 ! \begin{description} @\
 ! \item [xgrid] @\
 !       {\tt ESMF\_XGrid} object. @\
-! \item [{[xgridSide]}] @\
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
-!       defaults to ESMF\_XGRID\_BALANCED. @\
-! \item [{[xgridIndex]}] @\
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on @\
+! \item [{[xgridside]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
+! \item [{[gridindex]}] @\
+!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
 !       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the Field @\
@@ -4446,7 +4446,7 @@ end function ESMF_FieldCreateXGTKR
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateXGData" @\
   function ESMF_FieldCreateXGData##mrank##D##mtypekind(xgrid, & @\
-    xgridSide, gridIndex, farray, indexflag, datacopyflag, & @\
+    xgridside, gridindex, farray, indexflag, datacopyflag, & @\
     gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 @\
     ! return value @\
@@ -4454,11 +4454,11 @@ end function ESMF_FieldCreateXGTKR
 @\
     ! input arguments @\
     type(ESMF_XGrid), intent(in)                      :: xgrid @\
-    type(ESMF_XGridSide), intent(in), optional        :: xgridSide @\
-    integer, intent(in), optional                     :: gridIndex @\
+    type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside @\
+    integer, intent(in), optional                     :: gridindex @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_Index_Flag), intent(in)                  :: indexflag @\
-    type(ESMF_DataCopy_Flag), intent(in), optional         :: datacopyflag @\
+    type(ESMF_Index_Flag), intent(in)                 :: indexflag @\
+    type(ESMF_DataCopy_Flag), intent(in), optional    :: datacopyflag @\
     integer, intent(in), optional                     :: gridToFieldMap(:)     @\
     integer, intent(in), optional                     :: ungriddedLBound(:) @\
     integer, intent(in), optional                     :: ungriddedUBound(:) @\
@@ -4512,16 +4512,16 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
-! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridSide, & @\
-!   gridIndex, farrayPtr, datacopyflag, gridToFieldMap, name, rc) @\
+! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridside, & @\
+!   gridindex, farrayPtr, datacopyflag, gridToFieldMap, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_XGrid), intent(in) :: xgrid @\
-!   type(ESMF_XGridSide), intent(in), optional :: xgridSide @\
-!   integer,              intent(in), optional :: gridIndex @\
+!   type(ESMF_XGridSide_Flag), intent(in), optional :: xgridside @\
+!   integer,              intent(in), optional :: gridindex @\
 !   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
 !   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
@@ -4538,12 +4538,12 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! \begin{description} @\
 ! \item [xgrid] @\
 !       {\tt ESMF\_XGrid} object. @\
-! \item [{[xgridSide]}] @\
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA, @\
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then @\
-!       defaults to ESMF\_XGRID\_BALANCED. @\
-! \item [{[xgridIndex]}] @\
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on @\
+! \item [{[xgridside]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
+! \item [{[gridindex]}] @\
+!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
 !       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [farrayPtr] @\
 !       Native fortran data pointer to be copied/referenced in the Field @\
@@ -4590,7 +4590,7 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateXGDataPtr" @\
   function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind(xgrid, & @\
-    xgridSide, gridIndex, farrayPtr, datacopyflag, gridToFieldMap, & @\
+    xgridside, gridindex, farrayPtr, datacopyflag, gridToFieldMap, & @\
     name, rc) @\
 @\
     ! return value @\
@@ -4598,8 +4598,8 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 @\
     ! input arguments @\
     type(ESMF_XGrid), intent(in) :: xgrid @\
-    type(ESMF_XGridSide), intent(in), optional  :: xgridSide @\
-    integer, intent(in), optional               :: gridIndex @\
+    type(ESMF_XGridSide_Flag), intent(in), optional  :: xgridside @\
+    integer, intent(in), optional               :: gridindex @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\

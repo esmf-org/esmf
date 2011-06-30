@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.28 2011/06/29 16:05:58 rokuingh Exp $
+! $Id: ESMF_XGrid.F90,v 1.29 2011/06/30 13:46:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,15 +64,15 @@ module ESMF_XGridMod
 ! ! Definition of the XGrid class.
 
   ! defines the side relative to an XGrid, SIDEA, SIDEB, or BALANCED
-  type ESMF_XGridSide
+  type ESMF_XGridSide_Flag
     sequence
     integer                     :: side
-  end type ESMF_XGridSide
+  end type ESMF_XGridSide_Flag
 
-  type(ESMF_XGridSide), parameter :: &
-    ESMF_XGRID_SIDEA=ESMF_XGridSide(0), &
-    ESMF_XGRID_SIDEB=ESMF_XGridSide(1), &
-    ESMF_XGRID_BALANCED=ESMF_XGridSide(2)
+  type(ESMF_XGridSide_Flag), parameter :: &
+    ESMF_XGRIDSIDE_A=ESMF_XGridSide_Flag(0), &
+    ESMF_XGRIDSIDE_B=ESMF_XGridSide_Flag(1), &
+    ESMF_XGRIDSIDE_BALANCED=ESMF_XGridSide_Flag(2)
 
   ! package the collapsed indices and weights matrices
   type ESMF_XGridSpec
@@ -115,8 +115,8 @@ module ESMF_XGridMod
   public ESMF_XGrid
   public ESMF_XGridType
   public ESMF_XGridSpec
-  public ESMF_XGridSide, ESMF_XGRID_SIDEA, ESMF_XGRID_SIDEB, &
-    ESMF_XGRID_BALANCED
+  public ESMF_XGridSide_Flag, ESMF_XGRIDSIDE_A, ESMF_XGRIDSIDE_B, &
+    ESMF_XGRIDSIDE_BALANCED
 
 !------------------------------------------------------------------------------
 !
@@ -143,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.28 2011/06/29 16:05:58 rokuingh Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.29 2011/06/30 13:46:10 feiliu Exp $'
 
 !==============================================================================
 !
@@ -472,8 +472,8 @@ contains
    subroutine ESMF_XGridSideAssign(dval, sval)
 !
 ! !ARGUMENTS:
- type(ESMF_XGridSide), intent(out) :: dval
- type(ESMF_XGridSide), intent(in) :: sval
+ type(ESMF_XGridSide_Flag), intent(out) :: dval
+ type(ESMF_XGridSide_Flag), intent(in) :: sval
 !
 ! !DESCRIPTION:
 !      Set one xgrid side structure equal to another
@@ -1268,7 +1268,7 @@ contains
 
 ! !ARGUMENTS:
 
-      type (ESMF_XGridSide), intent(in) :: &
+      type (ESMF_XGridSide_Flag), intent(in) :: &
         XGridSide1,      &! Two xgrid sides to compare for
         XGridSide2        ! equality
 
@@ -1302,7 +1302,7 @@ contains
 
 ! !ARGUMENTS:
 
-      type (ESMF_XGridSide), intent(in) :: &
+      type (ESMF_XGridSide_Flag), intent(in) :: &
          XGridSide1,      &! Two XGridSide Statuses to compare for
          XGridSide2        ! inequality
 

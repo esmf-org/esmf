@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.32 2011/06/30 05:59:36 theurich Exp $
+! $Id: ESMF_XGridEx.F90,v 1.33 2011/06/30 13:46:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -523,18 +523,18 @@
 
 !BOC
     call ESMF_XGridGet(xgrid, &
-        xgridSide=ESMF_XGRID_SIDEA, & ! side of the XGrid to query
+        xgridSide=ESMF_XGRIDSIDE_A, & ! side of the XGrid to query
         gridIndex=1, &              ! index of the distgrid
         distgrid=distgrid, &        ! the distgrid returned
         rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		endflag=ESMF_END_ABORT)
-    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEA, gridIndex=2, &
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=2, &
         distgrid=distgrid, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		endflag=ESMF_END_ABORT)
-    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRID_SIDEB, gridIndex=1, &
+    call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_B, gridIndex=1, &
         distgrid=distgrid, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		endflag=ESMF_END_ABORT)

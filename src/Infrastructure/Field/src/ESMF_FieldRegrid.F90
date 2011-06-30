@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.74 2011/06/29 16:05:52 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.75 2011/06/30 13:44:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.74 2011/06/29 16:05:52 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.75 2011/06/30 13:44:22 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -906,7 +906,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_XGrid)     :: srcXGrid, dstXGrid        
 
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
-        type(ESMF_XGridSide) :: srcSide, dstSide
+        type(ESMF_XGridSide_Flag) :: srcSide, dstSide
         type(ESMF_Grid), allocatable :: gridA(:), gridB(:)
         type(ESMF_Grid)      :: srcGrid
         type(ESMF_Grid)      :: dstGrid
@@ -947,7 +947,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do i = 1, ngrid_a
                 if(ESMF_GridMatch(srcGrid, gridA(i))==ESMF_GRIDMATCH_EXACT) then
                     srcIdx = i
-                    srcSide = ESMF_XGRID_SIDEA
+                    srcSide = ESMF_XGRIDSIDE_A
                     found = .true.
                     exit
                 endif
@@ -961,7 +961,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                         return
                     endif
                     srcIdx = i
-                    srcSide = ESMF_XGRID_SIDEB
+                    srcSide = ESMF_XGRIDSIDE_B
                     found = .true.
                     exit
                 endif
@@ -986,7 +986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                 if(match) then
-                    srcSide = ESMF_XGRID_BALANCED
+                    srcSide = ESMF_XGRIDSIDE_BALANCED
                     srcIdx = 1
                 else
                     call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -1018,7 +1018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do i = 1, ngrid_a
                 if(ESMF_GridMatch(dstGrid, gridA(i))==ESMF_GRIDMATCH_EXACT) then
                     dstIdx = i
-                    dstSide = ESMF_XGRID_SIDEA
+                    dstSide = ESMF_XGRIDSIDE_A
                     found = .true.
                     exit
                 endif
@@ -1032,7 +1032,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                         return
                     endif
                     dstIdx = i
-                    dstSide = ESMF_XGRID_SIDEB
+                    dstSide = ESMF_XGRIDSIDE_B
                     found = .true.
                     exit
                 endif
@@ -1057,7 +1057,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
                 if(match) then
-                    dstSide = ESMF_XGRID_BALANCED
+                    dstSide = ESMF_XGRIDSIDE_BALANCED
                     dstIdx = 1
                 else
                     call ESMF_LogSetError(ESMF_RC_ARG_BAD, &

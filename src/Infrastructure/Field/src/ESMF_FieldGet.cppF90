@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.86 2011/06/30 01:04:43 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.87 2011/06/30 13:44:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.86 2011/06/30 01:04:43 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.87 2011/06/30 13:44:22 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -113,8 +113,8 @@ contains
   ! Private name; call using ESMF_FieldGet()
   subroutine ESMF_FieldGetDefault(field, keywordEnforcer, arrayspec, &
     status, geomtype, grid, mesh, locstream, xgrid, array, &
-    typekind, dimCount, rank, staggerloc, meshloc, xgridSide, &
-    gridIndex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    typekind, dimCount, rank, staggerloc, meshloc, xgridside, &
+    gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     totalLWidth, totalUWidth, localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
@@ -133,8 +133,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rank
     type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
     type(ESMF_MeshLoc),    intent(out), optional :: meshloc 
-    type(ESMF_XGridSide),  intent(out), optional :: xgridSide 
-    integer,               intent(out), optional :: gridIndex
+    type(ESMF_XGridSide_Flag),  intent(out), optional :: xgridside 
+    integer,               intent(out), optional :: gridindex
     integer,               intent(out), optional :: gridToFieldMap(:)    
     integer,               intent(out), optional :: ungriddedLBound(:)
     integer,               intent(out), optional :: ungriddedUBound(:)
@@ -211,7 +211,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
-! \item [{[xgridSide]}]
+! \item [{[xgridside]}]
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException
 !        The side of the XGrid that the Field was created on (either ESMF\_XGRID\_SIDEA,
@@ -219,7 +219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \end{sloppypar}
 ! \item [{[gridIndex]}]
 !       \apiStatusCompatibleException
-!       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which 
+!       If xgridside is ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which 
 !       Grid/Mesh on that side the Field was created on. 
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -1592,14 +1592,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
     subroutine ESMF_FieldGetXGAllocBounds(xgrid, &
-        xgridSide, gridIndex, localDe, gridToFieldMap, &
+        xgridside, gridindex, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_XGrid),     intent(in)            :: xgrid
-    type(ESMF_XGridSide), intent(in),  optional :: xgridSide
-    integer,              intent(in),  optional :: gridIndex
+    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+    integer,              intent(in),  optional :: gridindex
     integer,              intent(in),  optional :: localDe
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -1621,12 +1621,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [xgrid]
 !        {\tt ESMF\_XGrid} object.
-! \item [{[xgridSide]}]
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
-!       defaults to ESMF\_XGRID\_BALANCED.
-! \item [{[xgridIndex]}]
-!       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+! \item [{[xgridside]}]
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+! \item [{[gridindex]}]
+!       If xgridside is ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1.
 ! \item [{[localDe]}]
 !       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.

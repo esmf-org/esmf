@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.33 2011/06/27 21:28:39 theurich Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.34 2011/06/30 13:46:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.33 2011/06/27 21:28:39 theurich Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.34 2011/06/30 13:46:10 feiliu Exp $'
 
 !==============================================================================
 !
@@ -277,7 +277,7 @@ integer, intent(out), optional              :: rc
 !           unstructured grid and its storage.
 !     \item [{[offline]}]
 !           Turn on offline XGrid creation and will use user supplied Sparse
-!           MatMul, area, centroid informtion.
+!           MatMul, area, centroid information.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.

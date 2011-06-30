@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.21 2011/05/19 22:42:50 svasquez Exp $
+! $Id: ESMF_XGridGet.F90,v 1.22 2011/06/30 13:46:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.21 2011/05/19 22:42:50 svasquez Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.22 2011/06/30 13:46:10 feiliu Exp $'
 
 !==============================================================================
 !
@@ -422,9 +422,9 @@ subroutine ESMF_XGridGetSMMSpec(xgrid, sparseMat, srcSide, srcGridIndex, &
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                 :: xgrid
 type(ESMF_XGridSpec), intent(out)            :: sparseMat
-type(ESMF_XGridSide), intent(in)             :: srcSide
+type(ESMF_XGridSide_Flag), intent(in)        :: srcSide
 integer, intent(in)                          :: srcGridIndex
-type(ESMF_XGridSide), intent(in)             :: dstSide
+type(ESMF_XGridSide_Flag), intent(in)        :: dstSide
 integer, intent(in)                          :: dstGridIndex
 integer, intent(out), optional               :: rc 
 !
@@ -439,16 +439,16 @@ integer, intent(out), optional               :: rc
 !       Distgrid whose sequence index list is an overlap between gridIndex-th Grid
 !       on xgridSide and the xgrid object.
 !     \item [{[srcSide]}] 
-!       Side of the XGrid from (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED).
+!       Side of the XGrid from (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED).
 !     \item [{[srcGridIndex]}] 
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side.
 !     \item [{[dstSide]}] 
-!       Side of the XGrid from (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED).
+!       Side of the XGrid from (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED).
 !     \item [{[dstGridIndex]}] 
-!       If xgridSide is  ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which Grid on
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
@@ -467,19 +467,19 @@ integer, intent(out), optional               :: rc
 
     xgtypep => xgrid%xgtypep
 
-    if(srcSide .eq. ESMF_XGRID_SIDEA .and. dstSide .eq. ESMF_XGRID_BALANCED) then
+    if(srcSide .eq. ESMF_XGRIDSIDE_A .and. dstSide .eq. ESMF_XGRIDSIDE_BALANCED) then
         sparseMat = xgtypep%SparseMatA2X(srcGridIndex)
     endif
 
-    if(srcSide .eq. ESMF_XGRID_SIDEB .and. dstSide .eq. ESMF_XGRID_BALANCED) then
+    if(srcSide .eq. ESMF_XGRIDSIDE_B .and. dstSide .eq. ESMF_XGRIDSIDE_BALANCED) then
         sparseMat = xgtypep%SparseMatB2X(srcGridIndex)
     endif
 
-    if(srcSide .eq. ESMF_XGRID_BALANCED .and. dstSide .eq. ESMF_XGRID_SIDEA) then
+    if(srcSide .eq. ESMF_XGRIDSIDE_BALANCED .and. dstSide .eq. ESMF_XGRIDSIDE_A) then
         sparseMat = xgtypep%SparseMatX2A(dstGridIndex)
     endif
 
-    if(srcSide .eq. ESMF_XGRID_BALANCED .and. dstSide .eq. ESMF_XGRID_sideB) then
+    if(srcSide .eq. ESMF_XGRIDSIDE_BALANCED .and. dstSide .eq. ESMF_XGRIDSIDE_B) then
         sparseMat = xgtypep%SparseMatX2B(dstGridIndex)
     endif
 
@@ -497,15 +497,15 @@ end subroutine ESMF_XGridGetSMMSpec
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
 
-subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridSide, gridIndex, &
+subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridside, gridindex, &
     rc) 
 
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                 :: xgrid
 type(ESMF_DistGrid), intent(out)             :: distgrid
-type(ESMF_XGridSide), intent(in), optional   :: xgridSide
-integer, intent(in), optional                :: gridIndex
+type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside
+integer, intent(in), optional                :: gridindex
 integer, intent(out), optional               :: rc 
 !
 ! !DESCRIPTION:
@@ -518,14 +518,14 @@ integer, intent(out), optional               :: rc
 !     \item [distgrid]
 !       Distgrid whose sequence index list is an overlap between gridIndex-th Grid
 !       on xgridSide and the xgrid object.
-!     \item [{[xgridSide]}] 
+!     \item [{[xgridside]}] 
 !       \begin{sloppypar}
-!       Which side of the XGrid to retrieve the distgrid from (either ESMF\_XGRID\_SIDEA,
-!       ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). If not passed in then
-!       defaults to ESMF\_XGRID\_BALANCED.
+!       Which side of the XGrid to retrieve the distgrid from (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
 !       \end{sloppypar}
-!     \item [{[xgridIndex]}] 
-!       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index 
+!     \item [{[gridindex]}] 
+!       If xgridSide is ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index 
 !       selects the Distgrid associated with the Grid on
 !       that side. If not provided, defaults to 1. 
 !     \item [{[rc]}]
@@ -536,7 +536,7 @@ integer, intent(out), optional               :: rc
 !EOP
 
     type(ESMF_XGridType), pointer :: xgtypep
-    type(ESMF_XGridSide)          :: l_xgridSide
+    type(ESMF_XGridSide_Flag)     :: l_xgridSide
     integer                       :: l_gridIndex
 
     ! Initialize return code   
@@ -550,7 +550,7 @@ integer, intent(out), optional               :: rc
     if(present(xgridSide)) then
         l_xgridSide = xgridSide
     else                   
-        l_xgridSide = ESMF_XGRID_BALANCED
+        l_xgridSide = ESMF_XGRIDSIDE_BALANCED
     endif
 
     if(present(gridIndex)) then
@@ -566,11 +566,11 @@ integer, intent(out), optional               :: rc
         return
     endif
 
-    if(l_xgridSide .eq. ESMF_XGRID_BALANCED) then
+    if(l_xgridSide .eq. ESMF_XGRIDSIDE_BALANCED) then
         distgrid = xgtypep%distgridM
     endif
 
-    if(l_xgridSide .eq. ESMF_XGRID_SIDEA) then
+    if(l_xgridSide .eq. ESMF_XGRIDSIDE_A) then
         if(l_gridIndex .gt. size(xgtypep%distgridA, 1)) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
 msg="- gridIndex cannot be greater than the size of distgridA in the XGrid", &
@@ -580,7 +580,7 @@ msg="- gridIndex cannot be greater than the size of distgridA in the XGrid", &
         distgrid = xgtypep%distgridA(l_gridIndex)
     endif
 
-    if(l_xgridSide .eq. ESMF_XGRID_SIDEB) then
+    if(l_xgridSide .eq. ESMF_XGRIDSIDE_B) then
         if(l_gridIndex .gt. size(xgtypep%distgridB, 1)) then
             call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
 msg="- gridIndex cannot be greater than the size of distgridB in the XGrid", &
