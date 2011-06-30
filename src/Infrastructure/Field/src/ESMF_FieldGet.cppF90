@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.85 2011/06/27 19:46:24 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.86 2011/06/30 01:04:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.85 2011/06/27 19:46:24 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.86 2011/06/30 01:04:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -145,7 +145,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \apiStatusCompatibleWithExceptions
 !
 ! !DESCRIPTION:
 ! Query an {\tt ESMF\_Field} for various things.  All arguments after
@@ -176,10 +176,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
 ! \item [{[mesh]}]
+!       \apiStatusCompatibleException
 !       {\tt ESMF\_Mesh}.
 ! \item [{[locstream]}]
+!       \apiStatusCompatibleException
 !       {\tt ESMF\_LocStream}.
 ! \item [{[xgrid]}]
+!       \apiStatusCompatibleException
 !       {\tt ESMF\_XGrid}.
 ! \item [{[array]}]
 !       {\tt ESMF\_Array}.
@@ -203,18 +206,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Section \ref{sec:opt:staggerloc}.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
+!       \apiStatusCompatibleException
 !       The part of the mesh to build the Field on. Can be either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
 ! \item [{[xgridSide]}]
 !       \begin{sloppypar}
+!       \apiStatusCompatibleException
 !        The side of the XGrid that the Field was created on (either ESMF\_XGRID\_SIDEA,
 !        ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). 
 !       \end{sloppypar}
 ! \item [{[gridIndex]}]
-!        If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which 
-!        Grid/Mesh on that side the Field was created on. 
+!       \apiStatusCompatibleException
+!       If xgridSide is ESMF\_XGRID\_SIDEA or ESMF\_XGRID\_SIDEB then this index tells which 
+!       Grid/Mesh on that side the Field was created on. 
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
