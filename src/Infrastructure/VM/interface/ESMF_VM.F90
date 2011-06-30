@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.143 2011/06/27 19:46:39 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.144 2011/06/30 18:01:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.143 2011/06/27 19:46:39 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.144 2011/06/30 18:01:39 theurich Exp $"
 
 !==============================================================================
 
@@ -546,6 +546,7 @@ module ESMF_VMMod
 !   if (vm1 == vm2) then ... endif
 !             OR
 !   result = (vm1 == vm2)
+!
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -588,6 +589,7 @@ module ESMF_VMMod
 !   if (vm1 /= vm2) then ... endif
 !             OR
 !   result = (vm1 /= vm2)
+!
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -716,16 +718,16 @@ contains
 !
 ! !INTERFACE:
 !  subroutine ESMF_VMAllFullReduce(vm, sendData, recvData, &
-!    count, reduceflag,  syncflag, commhandle, rc)
+!    count, reduceflag, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                    intent(in)            :: vm
 !    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
 !    <type>(ESMF_KIND_<kind>),         intent(out)           :: recvData
 !    integer,                          intent(in)            :: count
-!    type(ESMF_Reduce_Flag),            intent(in)            :: reduceflag
+!    type(ESMF_Reduce_Flag),           intent(in)            :: reduceflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -805,9 +807,9 @@ contains
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer(ESMF_KIND_I4),         intent(out)           :: recvData
     integer,                       intent(in)            :: count
-    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -866,9 +868,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R4),         intent(out)           :: recvData
     integer,                    intent(in)            :: count
-    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),     intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -927,9 +929,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R8),         intent(out)           :: recvData
     integer,                    intent(in)            :: count
-    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),     intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -986,7 +988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
 !    integer,                          intent(in)            :: count
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -1059,7 +1061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -1129,7 +1131,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1199,7 +1201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1269,7 +1271,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Logical), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1338,7 +1340,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: recvCounts(:)
 !    integer,                          intent(in)            :: recvOffsets(:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -1423,7 +1425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: recvCounts(:)
     integer,                       intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -1483,7 +1485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1543,7 +1545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1597,12 +1599,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
 !    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
 !    integer,                          intent(in)            :: count
-!    type(ESMF_Reduce_Flag),            intent(in)            :: reduceflag
+!    type(ESMF_Reduce_Flag),           intent(in)            :: reduceflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
-!         
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1680,9 +1681,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
-    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -1740,9 +1741,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM),                 intent(in)            :: vm
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData
-    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !
@@ -1798,9 +1799,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
-    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),     intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1859,9 +1860,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
-    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),     intent(in)            :: reduceflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -1922,7 +1923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: recvCounts(:)
 !    integer,                          intent(in)            :: recvOffsets(:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -2011,7 +2012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: recvCounts(:)
     integer,                       intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -2072,7 +2073,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2133,7 +2134,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCounts(:)
     integer,                    intent(in)            :: recvOffsets(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2240,7 +2241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -2316,7 +2317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -2388,7 +2389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2460,7 +2461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2531,7 +2532,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -2598,12 +2599,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),           intent(in)             :: vm
-    character(*), target,    intent(inout)          :: bcstData
-    integer,                 intent(in)             :: count
-    integer,                 intent(in)             :: rootPet
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*), target,    intent(inout)         :: bcstData
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !         
@@ -2669,12 +2670,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),           intent(in)             :: vm
-    character(*), target,    intent(inout)          :: bcstData(:)
-    integer,                 intent(in)             :: count
-    integer,                 intent(in)             :: rootPet
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*), target,    intent(inout)         :: bcstData(:)
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !         
@@ -2740,12 +2741,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),           intent(in)             :: vm
-    character(*), target,    intent(inout)          :: bcstData(:,:)
-    integer,                 intent(in)             :: count
-    integer,                 intent(in)             :: rootPet
+    type(ESMF_VM),           intent(in)            :: vm
+    character(*), target,    intent(inout)         :: bcstData(:,:)
+    integer,                 intent(in)            :: count
+    integer,                 intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !         
@@ -2814,7 +2815,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CommHandle), intent(in)            :: commhandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc
-!         
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2871,7 +2871,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM), intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: rc
-!         
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2926,7 +2925,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -3003,7 +3002,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -3074,7 +3073,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -3145,7 +3144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -3216,7 +3215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -3393,13 +3392,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvCounts, recvOffsets, rootPet, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),              intent(in)             :: vm
-    real(ESMF_KIND_R4), target, intent(in)             :: sendData(:)
-    integer,                    intent(in)             :: sendCount
-    real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)
-    integer,                    intent(in)             :: recvCounts(:)
-    integer,                    intent(in)             :: recvOffsets(:)
-    integer,                    intent(in)             :: rootPet
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCount
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+    integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: rc
 !         
@@ -3439,13 +3438,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     recvCounts, recvOffsets, rootPet, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),              intent(in)             :: vm
-    real(ESMF_KIND_R8), target, intent(in)             :: sendData(:)
-    integer,                    intent(in)             :: sendCount
-    real(ESMF_KIND_R8), target, intent(out)            :: recvData(:)
-    integer,                    intent(in)             :: recvCounts(:)
-    integer,                    intent(in)             :: recvOffsets(:)
-    integer,                    intent(in)             :: rootPet
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCount
+    real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+    integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: rc
 !         
@@ -3485,15 +3484,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),      intent(in)              :: vm
+    type(ESMF_VM),      intent(in)            :: vm
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(out),  optional  :: localPet
-    integer,            intent(out),  optional  :: petCount
-    integer,            intent(out),  optional  :: peCount
-    integer,            intent(out),  optional  :: mpiCommunicator
-    logical,            intent(out),  optional  :: pthreadsEnabledFlag
-    logical,            intent(out),  optional  :: openMPEnabledFlag
-    integer,            intent(out),  optional  :: rc
+    integer,            intent(out), optional :: localPet
+    integer,            intent(out), optional :: petCount
+    integer,            intent(out), optional :: peCount
+    integer,            intent(out), optional :: mpiCommunicator
+    logical,            intent(out), optional :: pthreadsEnabledFlag
+    logical,            intent(out), optional :: openMPEnabledFlag
+    integer,            intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3803,8 +3802,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     threadCount, threadId, vas, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(in)             :: vm
-    integer,       intent(in)             :: pet
+    type(ESMF_VM), intent(in)            :: vm
+    integer,       intent(in)            :: pet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,       intent(out), optional :: peCount
     integer,       intent(out), optional :: ssiId
@@ -3939,7 +3938,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                       intent(in)            :: count
 !    integer,                       intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),         intent(out), optional :: commhandle
 !    integer,                       intent(out), optional :: rc           
 !
@@ -4006,12 +4005,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),                 intent(in)             :: vm
-    integer(ESMF_KIND_I4), target, intent(out)            :: recvData(:)  
-    integer,                       intent(in)             :: count
-    integer,                       intent(in)             :: srcPet
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)  
+    integer,                       intent(in)            :: count
+    integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc           
 !
@@ -4078,12 +4077,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),              intent(in)             :: vm
-    real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)  
-    integer,                    intent(in)             :: count
-    integer,                    intent(in)             :: srcPet
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)  
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -4155,7 +4154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -4227,7 +4226,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -4299,7 +4298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc           
 !
@@ -4371,7 +4370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !
@@ -4435,14 +4434,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    reduceflag, rootPet, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_VM),                    intent(in)             :: vm
-!    <type>(ESMF_KIND_<kind>), target, intent(in)             :: sendData(:)
-!    <type>(ESMF_KIND_<kind>), target, intent(out)            :: recvData(:)
-!    integer,                          intent(in)             :: count
-!    type(ESMF_Reduce_Flag),            intent(in)             :: reduceflag
-!    integer,                          intent(in)             :: rootPet
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: count
+!    type(ESMF_Reduce_Flag),           intent(in)            :: reduceflag
+!    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -4524,10 +4523,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
     integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
     integer,                       intent(in)            :: count
-    type(ESMF_Reduce_Flag),         intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),        intent(in)            :: reduceflag
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -4582,14 +4581,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rootPet, keywordEnforcer, syncflag, commhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),              intent(in)             :: vm
-    real(ESMF_KIND_R4), target, intent(in)             :: sendData(:)
-    real(ESMF_KIND_R4), target, intent(out)            :: recvData(:)
-    integer,                    intent(in)             :: count
-    type(ESMF_Reduce_Flag),      intent(in)             :: reduceflag
-    integer,                    intent(in)             :: rootPet
+    type(ESMF_VM),              intent(in)            :: vm
+    real(ESMF_KIND_R4), target, intent(in)            :: sendData(:)
+    real(ESMF_KIND_R4), target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: count
+    type(ESMF_Reduce_Flag),     intent(in)            :: reduceflag
+    integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4648,10 +4647,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: sendData(:)
     real(ESMF_KIND_R8), target, intent(out)           :: recvData(:)
     integer,                    intent(in)            :: count
-    type(ESMF_Reduce_Flag),      intent(in)            :: reduceflag
+    type(ESMF_Reduce_Flag),     intent(in)            :: reduceflag
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4709,7 +4708,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: rootPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc
 !
@@ -4786,7 +4785,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc
 !         
@@ -4857,7 +4856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4928,7 +4927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -4999,7 +4998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: rootPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc
 !         
@@ -5265,7 +5264,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: count
 !    integer,                          intent(in)            :: dstPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
 !
@@ -5327,7 +5326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: count
     integer,                       intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc           
 !EOPI
@@ -5398,7 +5397,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5470,7 +5469,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5542,7 +5541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: count
     integer,                    intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5614,7 +5613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc           
 !
@@ -5686,7 +5685,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: count
     integer,                 intent(in)            :: dstPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc
 !
@@ -5758,7 +5757,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    integer,                          intent(in)            :: recvCount
 !    integer,                          intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
 !    type(ESMF_CommHandle),            intent(out), optional :: commhandle
 !    integer,                          intent(out), optional :: rc           
 !
@@ -5840,7 +5839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: recvCount
     integer,                       intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
     type(ESMF_CommHandle),         intent(out), optional :: commhandle
     integer,                       intent(out), optional :: rc           
 !
@@ -5916,7 +5915,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -5992,7 +5991,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -6068,7 +6067,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(in)            :: recvCount
     integer,                    intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
     type(ESMF_CommHandle),      intent(out), optional :: commhandle
     integer,                    intent(out), optional :: rc           
 !
@@ -6144,7 +6143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(in)            :: recvCount
     integer,                 intent(in)            :: srcPet
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),  optional :: syncflag
     type(ESMF_CommHandle),   intent(out), optional :: commhandle
     integer,                 intent(out), optional :: rc           
 !
@@ -6837,12 +6836,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VMPlan), intent(inout)         :: vmplan
-    type(ESMF_VM),     intent(in)            :: vm
-    integer,           intent(in)            :: npetlist
-    integer,           intent(in)            :: petlist(:)
-    type(ESMF_Context_Flag), intent(in)       :: contextflag
-    integer,           intent(out), optional :: rc           
+    type(ESMF_VMPlan),       intent(inout)         :: vmplan
+    type(ESMF_VM),           intent(in)            :: vm
+    integer,                 intent(in)            :: npetlist
+    integer,                 intent(in)            :: petlist(:)
+    type(ESMF_Context_Flag), intent(in)            :: contextflag
+    integer,                 intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Construct a default plan.\newline
