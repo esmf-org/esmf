@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.18 2011/06/22 20:53:22 w6ws Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.19 2011/06/30 05:10:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.18 2011/06/22 20:53:22 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.19 2011/06/30 05:10:11 theurich Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -699,7 +699,7 @@ void IO_NetCDF::destruct(void) {
 
     DistGrid*	distGrid = DistGrid::create(
                                minIndex, maxIndex,
-                               (InterfaceInt*)NULL, (DecompFlag*)NULL, 0,
+                               (InterfaceInt*)NULL, (Decomp_Flag*)NULL, 0,
                                (InterfaceInt*)NULL, (InterfaceInt*)NULL,
                                (InterfaceInt*)NULL, (ESMC_IndexFlag*)NULL,
                                (InterfaceInt*)NULL, 
