@@ -1,4 +1,4 @@
-! $Id: ESMF_DirectCouplingSTest.F90,v 1.23 2011/06/28 21:03:35 rokuingh Exp $
+! $Id: ESMF_DirectCouplingSTest.F90,v 1.24 2011/06/30 06:00:46 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -102,7 +102,7 @@ program ESMF_DirectCouplingSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   ! Application components

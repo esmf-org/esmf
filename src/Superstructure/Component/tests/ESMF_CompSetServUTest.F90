@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.28 2011/06/24 21:46:03 rokuingh Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.29 2011/06/30 05:59:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 !
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     use SetServCode   ! "user" code
     implicit none
     

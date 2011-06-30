@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.16 2011/06/24 17:43:46 rokuingh Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.17 2011/06/30 05:58:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -26,14 +26,14 @@ program ESMF_ArrayHaloUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_Mod
+  use ESMF
 
   implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.16 2011/06/24 17:43:46 rokuingh Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.17 2011/06/30 05:58:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

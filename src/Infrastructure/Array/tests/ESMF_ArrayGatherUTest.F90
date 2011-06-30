@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.21 2011/06/22 15:07:00 rokuingh Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.22 2011/06/30 05:58:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,14 +29,14 @@ program ESMF_ArrayGatherUTest
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
   
     implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_ArrayGatherUTest.F90,v 1.21 2011/06/22 15:07:00 rokuingh Exp $'
+    '$Id: ESMF_ArrayGatherUTest.F90,v 1.22 2011/06/30 05:58:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"

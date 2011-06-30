@@ -1,4 +1,4 @@
-! $Id: UserCodeMod.F90,v 1.14 2011/01/05 20:05:42 svasquez Exp $
+! $Id: UserCodeMod.F90,v 1.15 2011/06/30 05:58:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -12,7 +12,7 @@
 
     module UserCodeMod
 
-    use ESMF_Mod
+    use ESMF
 
     implicit none
     private :: countX, countY, haloWidth, nPEsX, nPEsY, distgridX, distgridY

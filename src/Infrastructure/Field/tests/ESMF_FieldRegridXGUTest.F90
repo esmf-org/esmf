@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.42 2011/06/24 20:30:06 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.43 2011/06/30 05:58:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
 
     implicit none
 

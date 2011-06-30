@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.43 2011/06/24 20:30:24 rokuingh Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.44 2011/06/30 06:01:28 theurich Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -19,7 +19,7 @@
     program DELayoutRowReduce
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     
     implicit none

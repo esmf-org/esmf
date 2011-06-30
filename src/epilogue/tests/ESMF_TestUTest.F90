@@ -1,4 +1,4 @@
-! $Id: ESMF_TestUTest.F90,v 1.8 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_TestUTest.F90,v 1.9 2011/06/30 06:00:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ program ESMF_TestUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_Mod
+  use ESMF
 
   implicit none
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_LAPACKUTest.F90,v 1.12 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_LAPACKUTest.F90,v 1.13 2011/06/30 06:00:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@ program ESMF_LAPACKUTest
 
 #include "ESMF.h"
 
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
   implicit none
 

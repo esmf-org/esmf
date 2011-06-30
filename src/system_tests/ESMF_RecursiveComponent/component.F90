@@ -1,4 +1,4 @@
-! $Id: component.F90,v 1.15 2011/06/27 22:31:55 rokuingh Exp $
+! $Id: component.F90,v 1.16 2011/06/30 06:01:27 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -6,7 +6,7 @@
 module componentMod
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
     

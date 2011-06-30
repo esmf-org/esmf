@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.15 2011/06/27 22:31:31 rokuingh Exp $
+! $Id: user_coupler.F90,v 1.16 2011/06/30 06:00:56 theurich Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -18,7 +18,7 @@
 
     ! ESMF Framework module
     use ESMF_TestMod
-    use ESMF_Mod
+    use ESMF
     
     implicit none
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.44 2011/06/24 15:03:53 rokuingh Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.45 2011/06/30 05:58:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 program ESMF_DistGridEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

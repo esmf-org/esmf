@@ -22,7 +22,7 @@ program ESMF_LocStreamEx
 !
 
       ! Use ESMF framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! Parameters

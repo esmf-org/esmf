@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeEx.F90,v 1.24 2011/06/29 15:04:28 eschwab Exp $
+! $Id: ESMF_AttributeEx.F90,v 1.25 2011/06/30 05:59:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@ program ESMF_AttributeEx
 
 !BOC
       ! Use ESMF framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! Local variables  

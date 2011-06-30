@@ -1,4 +1,4 @@
-! $Id: user_modelB.F90,v 1.5 2011/06/29 19:21:31 w6ws Exp $
+! $Id: user_modelB.F90,v 1.6 2011/06/30 06:00:48 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -17,7 +17,7 @@ module user_modelB
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   implicit none

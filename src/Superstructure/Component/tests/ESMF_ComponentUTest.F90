@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.22 2011/06/24 21:46:03 rokuingh Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.23 2011/06/30 05:59:47 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -18,7 +18,7 @@
     program ESMF_ComponentUTest
     
 !   ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     
     implicit none

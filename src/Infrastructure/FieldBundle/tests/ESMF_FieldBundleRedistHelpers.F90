@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistHelpers.F90,v 1.14 2011/06/24 16:12:26 rokuingh Exp $
+! $Id: ESMF_FieldBundleRedistHelpers.F90,v 1.15 2011/06/30 05:58:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 
 module ESMF_FieldBundleRedistHelpers
 
-   use ESMF_Mod
+   use ESMF
 
    public Create2DIGrids, Create3DIGrids
    public CreateFields, CreateFieldBundle, AddFieldBundle

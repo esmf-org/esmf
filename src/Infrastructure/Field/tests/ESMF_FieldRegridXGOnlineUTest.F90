@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.11 2011/06/24 20:30:06 rokuingh Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.12 2011/06/30 05:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
 
     implicit none
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.29 2011/06/24 16:51:54 rokuingh Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.30 2011/06/30 05:58:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 program ESMF_DELayoutEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

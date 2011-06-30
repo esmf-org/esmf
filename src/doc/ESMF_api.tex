@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.48 2011/06/23 18:14:15 rokuingh Exp $
+% $Id: ESMF_api.tex,v 1.49 2011/06/30 06:00:08 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@ procedures.  We use the Fortran features of generic functions and
 optional arguments extensively to simplify our interfaces.
 
 The modules for ESMF are bundled together and can be accessed with a 
-single {\tt USE} statement, {\tt USE ESMF\_Mod}.
+single {\tt USE} statement, {\tt USE ESMF}.
 
 \subsection{Standard Methods and Interface Rules}
 
@@ -88,9 +88,9 @@ name {\tt 'temp'}.
 
 \begin{verbatim}
 
-USE ESMF_Mod
+use ESMF
 
-type (ESMF_Field) :: field
+type(ESMF_Field) :: field
 
 field = ESMF_FieldCreate('temp')
 

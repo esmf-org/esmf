@@ -1,4 +1,4 @@
-! $Id: ESMF_CompFortranAndCSTest.F90,v 1.31 2011/06/28 21:03:28 rokuingh Exp $
+! $Id: ESMF_CompFortranAndCSTest.F90,v 1.32 2011/06/30 06:00:39 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_SYSTEM_TEST        String used by test script to count system tests.
@@ -47,7 +47,7 @@ program ESMF_CompFortranAndC
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
   use ESMF_CompMod
 
@@ -58,7 +58,7 @@ program ESMF_CompFortranAndC
   ! Explicit interface for
   interface
     subroutine my_SetServicesInC(gcomp, rc)
-      use ESMF_Mod
+      use ESMF
       type(ESMF_GridComp) :: gcomp
       integer, intent(out) :: rc
     end subroutine my_SetServicesInC

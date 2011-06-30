@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.39 2011/06/28 22:02:05 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.40 2011/06/30 06:00:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 program ESMF_RegridWeightGen
 
 ! !USES:
-      use ESMF_Mod
+      use ESMF
       use ESMF_IOScripMod
 
       implicit none

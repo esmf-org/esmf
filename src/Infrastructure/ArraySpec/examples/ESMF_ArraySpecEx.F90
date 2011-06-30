@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.20 2011/06/24 16:12:15 rokuingh Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.21 2011/06/30 05:58:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !-----------------------------------------------------------------------------
 
       ! ESMF Framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! local variables 

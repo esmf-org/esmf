@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldFromUserEx.F90,v 1.20 2011/06/24 15:03:55 rokuingh Exp $
+! $Id: ESMF_FieldFromUserEx.F90,v 1.21 2011/06/30 05:58:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use UserCodeMod
     implicit none
     

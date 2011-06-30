@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.55 2011/06/28 21:02:48 rokuingh Exp $
+! $Id: ESMF_CplEx.F90,v 1.56 2011/06/30 05:59:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
     module ESMF_CouplerEx
     
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     implicit none
     public CPL_SetServices
 
@@ -253,7 +253,7 @@
     program ESMF_AppMainEx
     
 !   ! The ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     
     ! User supplied modules
     use ESMF_CouplerEx, only: CPL_SetServices

@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.14 2011/06/27 22:30:48 rokuingh Exp $
+! $Id: ESMF_ModUTest.F90,v 1.15 2011/06/30 05:59:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.14 2011/06/27 22:30:48 rokuingh Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.15 2011/06/30 05:59:51 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -97,7 +97,7 @@ contains
 ! NEX_noUTest
 
   subroutine all_types ()
-    use ESMF_Mod
+    use ESMF
     type(ESMF_Alarm) :: alarm
     type(ESMF_Array) :: array
     type(ESMF_ArrayBundle) :: arraybundle
@@ -139,7 +139,7 @@ contains
 ! NEX_noUTest
 
   subroutine alarm_type (dummy)
-    use ESMF_Mod, only: ESMF_Alarm
+    use ESMF, only: ESMF_Alarm
     type(ESMF_Alarm), intent(in), optional :: dummy
     failMsg = "Alarm type fail"
     name = "Alarm type"
@@ -151,7 +151,7 @@ contains
 ! NEX_noUTest
 
   subroutine array_type (dummy)
-    use ESMF_Mod, only: ESMF_Array
+    use ESMF, only: ESMF_Array
     type(ESMF_Array), intent(in), optional :: dummy
     failMsg = "Array type fail"
     name = "Array type"
@@ -163,7 +163,7 @@ contains
 ! NEX_noUTest
 
   subroutine arraybundle_type (dummy)
-    use ESMF_Mod, only: ESMF_ArrayBundle
+    use ESMF, only: ESMF_ArrayBundle
     type(ESMF_ArrayBundle), intent(in), optional :: dummy
     failMsg = "ArrayBundle type fail"
     name = "ArrayBundle type"
@@ -175,7 +175,7 @@ contains
 ! NEX_noUTest
 
   subroutine arrayspec_type (dummy)
-    use ESMF_Mod, only: ESMF_ArraySpec
+    use ESMF, only: ESMF_ArraySpec
     type(ESMF_ArraySpec), intent(in), optional :: dummy
     failMsg = "ArraySpec type fail"
     name = "ArraySpec type"
@@ -187,7 +187,7 @@ contains
 ! NEX_noUTest
 
   subroutine calendar_type (dummy)
-    use ESMF_Mod, only: ESMF_Calendar
+    use ESMF, only: ESMF_Calendar
     type(ESMF_Calendar), intent(in), optional :: dummy
     failMsg = "Calendar kind fail"
     name = "Calendar kind"
@@ -199,7 +199,7 @@ contains
 ! NEX_noUTest
 
   subroutine clock_type (dummy)
-    use ESMF_Mod, only: ESMF_Clock
+    use ESMF, only: ESMF_Clock
     type(ESMF_Clock), intent(in), optional :: dummy
     failMsg = "Clock type fail"
     name = "Clock type"
@@ -211,7 +211,7 @@ contains
 ! NEX_noUTest
 
   subroutine config_type (dummy)
-    use ESMF_Mod, only: ESMF_Config
+    use ESMF, only: ESMF_Config
     type(ESMF_Config), intent(in), optional :: dummy
     failMsg = "Config type fail"
     name = "Config type"
@@ -223,7 +223,7 @@ contains
 ! NEX_noUTest
 
   subroutine context_type (dummy)
-    use ESMF_Mod, only: ESMF_Context_Flag
+    use ESMF, only: ESMF_Context_Flag
     type(ESMF_Context_Flag), intent(in), optional :: dummy
     failMsg = "ContextFlag type fail"
     name = "ContextFlag type"
@@ -235,7 +235,7 @@ contains
 ! NEX_noUTest
 
   subroutine cplcomp_type (dummy)
-    use ESMF_Mod, only: ESMF_CplComp
+    use ESMF, only: ESMF_CplComp
     type(ESMF_CplComp), intent(in), optional :: dummy
     failMsg = "CplComp type fail"
     name = "CplComp type"
@@ -247,7 +247,7 @@ contains
 ! NEX_noUTest
 
   subroutine delayout_type (dummy)
-    use ESMF_Mod, only: ESMF_DELayout
+    use ESMF, only: ESMF_DELayout
     type(ESMF_DELayout), intent(in), optional :: dummy
     failMsg = "DELayout type fail"
     name = "DELayout type"
@@ -259,7 +259,7 @@ contains
 ! NEX_noUTest
 
   subroutine distgrid_type (dummy)
-    use ESMF_Mod, only: ESMF_DistGrid
+    use ESMF, only: ESMF_DistGrid
     type(ESMF_DistGrid), intent(in), optional :: dummy
     failMsg = "DistGrid type fail"
     name = "DistGrid type"
@@ -271,7 +271,7 @@ contains
 ! NEX_noUTest
 
   subroutine field_type (dummy)
-    use ESMF_Mod, only: ESMF_Field
+    use ESMF, only: ESMF_Field
     type(ESMF_Field), intent(in), optional :: dummy
     failMsg = "Field type fail"
     name = "Field type"
@@ -283,7 +283,7 @@ contains
 ! NEX_noUTest
 
   subroutine fieldbundle_type (dummy)
-    use ESMF_Mod, only: ESMF_FieldBundle
+    use ESMF, only: ESMF_FieldBundle
     type(ESMF_FieldBundle), intent(in), optional :: dummy
     failMsg = "FieldBundle type fail"
     name = "FieldBundle type"
@@ -295,7 +295,7 @@ contains
 ! NEX_noUTest
 
   subroutine geom_type (dummy)
-    use ESMF_Mod, only: ESMF_GeomType_Flag
+    use ESMF, only: ESMF_GeomType_Flag
     type(ESMF_GeomType_Flag), intent(in), optional :: dummy
     failMsg = "Geom type fail"
     name = "Geom type"
@@ -306,7 +306,7 @@ contains
 ! NEX_noUTest
 
   subroutine grid_type (dummy)
-    use ESMF_Mod, only: ESMF_Grid
+    use ESMF, only: ESMF_Grid
     type(ESMF_Grid), intent(in), optional :: dummy
     failMsg = "Grid type fail"
     name = "Grid type"
@@ -318,7 +318,7 @@ contains
 ! NEX_noUTest
 
   subroutine gridcomp_type (dummy)
-    use ESMF_Mod, only: ESMF_GridComp
+    use ESMF, only: ESMF_GridComp
     type(ESMF_GridComp), intent(in), optional :: dummy
     failMsg = "GridComp type fail"  
     name = "GridComp type"  
@@ -330,7 +330,7 @@ contains
 ! NEX_noUTest
 
   subroutine gridconn_type (dummy)
-    use ESMF_Mod, only: ESMF_GridConn_Flag
+    use ESMF, only: ESMF_GridConn_Flag
     type(ESMF_GridConn_Flag), intent(in), optional :: dummy
     failMsg = "GridConn type fail"  
     name = "GridConn type"  
@@ -342,7 +342,7 @@ contains
 ! NEX_noUTest
 
   subroutine localarray_type (dummy)
-    use ESMF_Mod, only: ESMF_LocalArray
+    use ESMF, only: ESMF_LocalArray
     type(ESMF_LocalArray), intent(in), optional :: dummy
     failMsg = "LocalArray type fail"  
     name = "LocalArray type"  
@@ -354,7 +354,7 @@ contains
 ! NEX_noUTest
 
   subroutine locstream_type (dummy)
-    use ESMF_Mod, only: ESMF_LocStream
+    use ESMF, only: ESMF_LocStream
     type(ESMF_LocStream), intent(in), optional :: dummy
     failMsg = "LocStream type fail"  
     name = "LocStream type"  
@@ -366,7 +366,7 @@ contains
 ! NEX_noUTest
 
   subroutine log_type (dummy)
-    use ESMF_Mod, only: ESMF_Log
+    use ESMF, only: ESMF_Log
     type(ESMF_Log), intent(in), optional :: dummy
     failMsg = "Log type fail"  
     name = "Log type"  
@@ -378,7 +378,7 @@ contains
 ! NEX_noUTest
 
   subroutine mesh_type (dummy)
-    use ESMF_Mod, only: ESMF_Mesh
+    use ESMF, only: ESMF_Mesh
     type(ESMF_Mesh), intent(in), optional :: dummy
     failMsg = "Mesh type fail"  
     name = "Mesh type"  
@@ -390,7 +390,7 @@ contains
 ! NEX_noUTest
 
   subroutine method_type (dummy)
-    use ESMF_Mod, only: ESMF_Method_Flag
+    use ESMF, only: ESMF_Method_Flag
     type(ESMF_Method_Flag), intent(in), optional :: dummy
     failMsg = "Method type fail"  
     name = "Method type"  
@@ -402,7 +402,7 @@ contains
 ! NEX_noUTest
 
   subroutine regrid_type (dummy)
-    use ESMF_Mod, only: ESMF_RegridMethod_Flag
+    use ESMF, only: ESMF_RegridMethod_Flag
     type(ESMF_RegridMethod_Flag), intent(in), optional :: dummy
     failMsg = "RegridMethod type fail"  
     name = "RegridMethod type"  
@@ -414,7 +414,7 @@ contains
 ! NEX_noUTest
 
   subroutine routehandle_type (dummy)
-    use ESMF_Mod, only: ESMF_RouteHandle
+    use ESMF, only: ESMF_RouteHandle
     type(ESMF_RouteHandle), intent(in), optional :: dummy
     failMsg = "RouteHandle type fail"  
     name = "RouteHandle type"  
@@ -426,7 +426,7 @@ contains
 ! NEX_noUTest
 
   subroutine stagger_type (dummy)
-    use ESMF_Mod, only: ESMF_StaggerLoc
+    use ESMF, only: ESMF_StaggerLoc
     type(ESMF_StaggerLoc), intent(in), optional :: dummy
     failMsg = "StaggerLoc type fail"  
     name = "StaggerLoc type"  
@@ -438,7 +438,7 @@ contains
 ! NEX_noUTest
 
   subroutine state_type (dummy)
-    use ESMF_Mod, only: ESMF_State
+    use ESMF, only: ESMF_State
     type(ESMF_State), intent(in), optional :: dummy
     failMsg = "State type fail"  
     name = "State type"  
@@ -450,7 +450,7 @@ contains
 ! NEX_noUTest
 
   subroutine term_type (dummy)
-    use ESMF_Mod, only: ESMF_End_Flag
+    use ESMF, only: ESMF_End_Flag
     type(ESMF_End_Flag), intent(in), optional :: dummy
     failMsg = "EndFlag type fail"  
     name = "EndFlag type"  
@@ -462,7 +462,7 @@ contains
 ! NEX_noUTest
 
   subroutine time_type (dummy)
-    use ESMF_Mod, only: ESMF_Time
+    use ESMF, only: ESMF_Time
     type(ESMF_Time), intent(in), optional :: dummy
     failMsg = "Time type fail"  
     name = "Time type"  
@@ -474,7 +474,7 @@ contains
 ! NEX_noUTest
 
   subroutine timeint_type (dummy)
-    use ESMF_Mod, only: ESMF_TimeInterval
+    use ESMF, only: ESMF_TimeInterval
     type(ESMF_TimeInterval), intent(in), optional :: dummy
     failMsg = "TimeInterval type fail"  
     name = "TimeInterval type"  
@@ -486,7 +486,7 @@ contains
 ! NEX_noUTest
 
   subroutine vm_type (dummy)
-    use ESMF_Mod, only: ESMF_VM
+    use ESMF, only: ESMF_VM
     type(ESMF_VM), intent(in), optional :: dummy
     failMsg = "VM type fail"  
     name = "VM type"  

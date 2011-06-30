@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.48 2011/06/24 15:04:11 rokuingh Exp $
+! $Id: ESMF_TimeEx.F90,v 1.49 2011/06/30 05:59:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !-----------------------------------------------------------------------------
 
       ! ESMF Framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! instantiate two times

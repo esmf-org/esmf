@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.35 2011/06/29 19:21:28 w6ws Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.36 2011/06/30 06:00:44 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -67,7 +67,7 @@ program ESMF_ConcurrentEnsembleSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use user_modelA, only : usermA_register

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.108 2011/06/24 15:03:55 rokuingh Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.109 2011/06/30 05:58:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 #include "ESMF.h"
     ! ESMF Framework module
     use ESMF_TestMod
-    use ESMF_Mod
+    use ESMF
     implicit none
     
     ! Local variables

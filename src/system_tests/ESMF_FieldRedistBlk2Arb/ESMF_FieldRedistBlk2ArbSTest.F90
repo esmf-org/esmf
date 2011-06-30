@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.25 2011/06/24 15:05:23 rokuingh Exp $
+! $Id: ESMF_FieldRedistBlk2ArbSTest.F90,v 1.26 2011/06/30 06:01:07 theurich Exp $
 !
 ! System test FieldRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -28,7 +28,7 @@
      program Blk2ArbFldRedist
 
      ! ESMF Framework module
-     use ESMF_Mod
+     use ESMF
      use ESMF_TestMod
     
      implicit none

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.24 2011/06/23 22:54:44 rokuingh Exp $
+! $Id: ESMF_RegridEx.F90,v 1.25 2011/06/30 05:59:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
 
     implicit none
     

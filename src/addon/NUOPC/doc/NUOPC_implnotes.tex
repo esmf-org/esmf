@@ -1,11 +1,11 @@
-% $Id: NUOPC_implnotes.tex,v 1.3 2011/04/28 22:47:20 theurich Exp $
+% $Id: NUOPC_implnotes.tex,v 1.4 2011/06/30 06:00:01 theurich Exp $
 
 The NUOPC Layer is implemented in Fortran on top of the public ESMF Fortran API.
 
 The NUOPC utility routines form a very straight forward Fortran API. The interface is defined using only native Fortran types and ESMF derived types. In order to access the NUOPC Layer utility API user code must include the following two {\tt use} lines:
 
 \begin{verbatim}
-  use ESMF_Mod
+  use ESMF
   use NUOPC
 \end{verbatim}
 

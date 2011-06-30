@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.22 2011/06/28 05:19:39 theurich Exp $
+! $Id: ESMF_SetServCode.F90,v 1.23 2011/06/30 05:59:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 !
 ! !USES:
 
-    use ESMF_Mod
+    use ESMF
     implicit none
     
     public SetVM

@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.22 2011/06/29 19:21:23 w6ws Exp $
+! $Id: user_FortranComponent.F90,v 1.23 2011/06/30 06:00:39 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -15,7 +15,7 @@
 module user_FortranComponent
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
     

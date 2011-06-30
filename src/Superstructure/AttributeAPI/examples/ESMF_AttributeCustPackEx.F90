@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCustPackEx.F90,v 1.1 2011/06/29 14:52:59 eschwab Exp $
+! $Id: ESMF_AttributeCustPackEx.F90,v 1.2 2011/06/30 05:59:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeCustPackEx
 
 
       ! Use ESMF framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! Local variables  

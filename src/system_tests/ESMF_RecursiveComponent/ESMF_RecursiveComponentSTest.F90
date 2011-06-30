@@ -1,4 +1,4 @@
-! $Id: ESMF_RecursiveComponentSTest.F90,v 1.22 2011/06/28 21:04:04 rokuingh Exp $
+! $Id: ESMF_RecursiveComponentSTest.F90,v 1.23 2011/06/30 06:01:27 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -43,7 +43,7 @@ program ESMF_RecursiveComponentSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   ! Application components

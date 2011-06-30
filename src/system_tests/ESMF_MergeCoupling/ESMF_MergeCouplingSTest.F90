@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.29 2011/06/29 19:21:56 w6ws Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.30 2011/06/30 06:01:25 theurich Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -18,7 +18,7 @@
     program MergeCoupling
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.19 2011/06/24 15:04:14 rokuingh Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.20 2011/06/30 05:59:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 
 program ESMF_VMUserMpiEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
 #ifndef ESMF_MPIUNI     

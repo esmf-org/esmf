@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.10 2011/06/27 22:30:54 rokuingh Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.11 2011/06/30 05:59:59 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -18,7 +18,7 @@
 module ESMF_WebServUserModel
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
   use ESMF_IO_NetCDFMod
 
@@ -222,7 +222,7 @@ end module ESMF_WebServUserModel
 program ESMF_WebServComponentUTest
     
 !   ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     use ESMF_WebServMod
     use ESMF_WebServUserModel

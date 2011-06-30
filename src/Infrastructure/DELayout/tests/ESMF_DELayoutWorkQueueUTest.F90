@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.27 2011/06/27 22:30:31 rokuingh Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.28 2011/06/30 05:58:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 
 module ESMF_DELayoutWQUTest_mod
 
-  use ESMF_Mod
+  use ESMF
 
   implicit none
   
@@ -160,7 +160,7 @@ program ESMF_DELayoutWQUTest
   !---------------------------------------------------------------------------
   ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_Mod
+  use ESMF
 
   use ESMF_DELayoutWQUTest_mod
 

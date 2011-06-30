@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.11 2011/06/28 21:03:00 rokuingh Exp $
+! $Id: NUOPC_Connector.F90,v 1.12 2011/06/30 06:00:03 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -8,7 +8,7 @@ module NUOPC_Connector
   ! Generic Coupler Component.
   !-----------------------------------------------------------------------------
 
-  use ESMF_Mod
+  use ESMF
   use NUOPC
 
   implicit none

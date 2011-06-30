@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.9 2011/06/27 22:30:53 rokuingh Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.10 2011/06/30 05:59:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 module ESMF_WebServUserModel
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
 
@@ -132,7 +132,7 @@ end module ESMF_WebServUserModel
 !BOC
 program WebServicesEx
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_WebServMod
   use ESMF_WebServUserModel
 

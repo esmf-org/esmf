@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.6 2011/06/25 01:18:30 rokuingh Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.7 2011/06/30 06:00:03 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
 
@@ -8,7 +8,7 @@ module NUOPC_DriverExplicitAtmOcn
   ! Generic Driver Component for ATM and OCN with explicit time stepping
   !-----------------------------------------------------------------------------
 
-  use ESMF_Mod
+  use ESMF
   use NUOPC
   use NUOPC_DriverExplicit, only: &
     DrivEx_routine_SS             => routine_SetServices, &

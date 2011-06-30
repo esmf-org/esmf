@@ -1,10 +1,10 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.4 2011/05/18 04:16:50 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.5 2011/06/30 06:00:03 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
 module NUOPC_FieldDictionaryDef
 
-  use ESMF_Mod
+  use ESMF
 
   implicit none
   

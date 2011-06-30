@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.12 2011/02/23 20:19:38 w6ws Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.13 2011/06/30 06:01:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
   use ESMF_TestHarnessGridMod
   use ESMF_TestHarnessDistMod
 
-  use ESMF_Mod
+  use ESMF
 
   implicit none
   private

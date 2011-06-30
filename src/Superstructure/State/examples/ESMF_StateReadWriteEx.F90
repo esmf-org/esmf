@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.16 2011/06/28 21:02:53 rokuingh Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.17 2011/06/30 05:59:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
 !BOC
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     implicit none
 
     ! Local variables

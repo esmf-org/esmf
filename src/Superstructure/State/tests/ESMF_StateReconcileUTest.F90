@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.43 2011/06/29 17:45:06 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.44 2011/06/30 05:59:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -13,7 +13,7 @@
 
 
 module ESMF_StateReconcileUTest_Mod
-use ESMF_Mod
+use ESMF
 implicit none
 
 contains
@@ -149,7 +149,7 @@ program ESMF_StateReconcileUTest
 #include "ESMF_Macros.inc"
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     use ESMF_StateReconcileUTest_Mod
     implicit none

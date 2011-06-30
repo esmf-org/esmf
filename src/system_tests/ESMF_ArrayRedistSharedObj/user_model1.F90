@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.11 2011/06/29 19:21:13 w6ws Exp $
+! $Id: user_model1.F90,v 1.12 2011/06/30 06:00:29 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -15,7 +15,7 @@
 module user_model1
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
     
@@ -216,7 +216,7 @@ end module user_model1
 !\end{verbatim}
 
 subroutine userm1_setvm(comp, rc)
-  use ESMF_Mod
+  use ESMF
   use user_model1
   type(ESMF_GridComp) :: comp
   integer, intent(out) :: rc
@@ -224,7 +224,7 @@ subroutine userm1_setvm(comp, rc)
 end subroutine
 
 subroutine userm1_reg(comp, rc)
-  use ESMF_Mod
+  use ESMF
   use user_model1
   type(ESMF_GridComp) :: comp
   integer, intent(out) :: rc

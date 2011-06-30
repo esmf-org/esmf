@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.12 2011/06/27 22:30:36 rokuingh Exp $
+! $Id: CplCompTemplate.F90,v 1.13 2011/06/30 05:59:39 theurich Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -16,7 +16,7 @@
     module UserCplCompMod
     
 !   ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     
     implicit none
     private

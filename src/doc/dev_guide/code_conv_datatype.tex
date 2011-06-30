@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.7 2011/06/24 16:12:53 rokuingh Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.8 2011/06/30 06:00:10 theurich Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -116,7 +116,7 @@ Finally, there are .eq. and .ne. operators defined to compare {\tt ESMF\_Logical
 
 \begin{verbatim}
                subroutine ESMF_SomeRoutine(myFlag)
-                 use ESMF_Mod
+                 use ESMF
                  implicit none
 		 
                  logical, intent(inout) :: myFlag

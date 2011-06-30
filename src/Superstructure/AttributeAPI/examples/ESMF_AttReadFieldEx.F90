@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.18 2011/06/24 15:04:19 rokuingh Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.19 2011/06/30 05:59:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@ program ESMF_AttReadFieldEx
 
 !BOC
       ! ESMF Framework module
-      use ESMF_Mod
+      use ESMF
       implicit none
 
       ! local variables

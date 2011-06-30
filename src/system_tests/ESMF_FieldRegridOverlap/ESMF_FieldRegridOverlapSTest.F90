@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.20 2011/06/28 21:03:59 rokuingh Exp $
+! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.21 2011/06/30 06:01:22 theurich Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -32,7 +32,7 @@
 #include "ESMF.h"
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

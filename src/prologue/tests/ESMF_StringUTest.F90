@@ -1,4 +1,4 @@
-! $Id: ESMF_StringUTest.F90,v 1.12 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_StringUTest.F90,v 1.13 2011/06/30 06:00:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
     
 #include "ESMF.h"
 
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     implicit none
 
@@ -104,7 +104,7 @@
     
 
 subroutine f90ints(i1, i2, i3, i4, rc)
-    use ESMF_Mod
+    use ESMF
     implicit none
 
     integer :: i1, i2, i3, i4
@@ -136,7 +136,7 @@ subroutine f90ints(i1, i2, i3, i4, rc)
 end subroutine f90ints
 
 subroutine f90string2(i1, i2, fstr, i3, i4, rc)
-    use ESMF_Mod
+    use ESMF
     implicit none
 
     character(len=*) :: fstr
@@ -165,7 +165,7 @@ subroutine f90string2(i1, i2, fstr, i3, i4, rc)
 end subroutine f90string2
 
 subroutine f90string3(i1, fstr, i2, fstr2, i3, i4, rc)
-    use ESMF_Mod
+    use ESMF
     implicit none
 
     character(len=*) :: fstr, fstr2

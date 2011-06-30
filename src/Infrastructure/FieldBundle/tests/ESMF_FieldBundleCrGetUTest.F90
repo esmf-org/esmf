@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.29 2011/06/23 18:13:54 rokuingh Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.30 2011/06/30 05:58:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     use ESMF_FieldGetMod
 
     implicit none

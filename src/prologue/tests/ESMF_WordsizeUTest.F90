@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.19 2011/01/05 20:05:48 svasquez Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.20 2011/06/30 06:00:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
     
 #include "ESMF.h"
 
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     implicit none
 

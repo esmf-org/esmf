@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.66 2011/06/24 19:15:19 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.67 2011/06/30 06:01:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 
   use ESMF_TestHarnessReportMod
 
-  use ESMF_Mod
+  use ESMF
   use ESMF_RegridMod
   use ESMF_FieldMod
   use ESMF_GridUtilMod

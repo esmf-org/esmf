@@ -22,7 +22,7 @@
 ! See the following code fragments for examples of how to output a Field.
 !
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   implicit none
     
   ! Local variables

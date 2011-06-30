@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.19 2011/06/24 15:03:44 rokuingh Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.20 2011/06/30 05:58:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@
 
 program ESMF_ArrayScatterGatherEx
 
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

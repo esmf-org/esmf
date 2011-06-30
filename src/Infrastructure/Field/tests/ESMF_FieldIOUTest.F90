@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.25 2011/06/22 15:07:24 rokuingh Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.26 2011/06/30 05:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@ program ESMF_FieldIOUTest
 !-----------------------------------------------------------------------------
 ! !USES:
   use ESMF_TestMod     ! test methods
-  use ESMF_Mod
+  use ESMF
 
   implicit none
 

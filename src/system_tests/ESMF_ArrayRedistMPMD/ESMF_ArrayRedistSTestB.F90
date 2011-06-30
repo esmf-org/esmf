@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestB.F90,v 1.25 2011/06/28 21:03:14 rokuingh Exp $
+! $Id: ESMF_ArrayRedistSTestB.F90,v 1.26 2011/06/30 06:00:26 theurich Exp $
 !
 !-------------------------------------------------------------------------
 ! ESMF_ArrayRedistSTestA.F90 sets string used by test script to count system tests.
@@ -51,7 +51,7 @@ program ESMF_ArrayRedistSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
 #ifdef MODEL1

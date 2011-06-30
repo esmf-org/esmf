@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.25 2011/06/24 15:04:20 rokuingh Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.26 2011/06/30 05:59:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@ program ESMF_InternalStateEx
 ! !USES:
 !BOC
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   implicit none
   
   type(ESMF_GridComp) :: comp

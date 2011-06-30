@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesSTest.F90,v 1.7 2011/06/27 22:31:58 rokuingh Exp $
+! $Id: ESMF_WebServicesSTest.F90,v 1.8 2011/06/30 06:01:32 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -16,7 +16,7 @@
 module ESMF_WebServUserModel
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
   use ESMF_IO_NetCDFMod
 
@@ -144,7 +144,7 @@ program ESMF_WebServicesSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
   use ESMF_WebServMod
   use ESMF_WebServUserModel

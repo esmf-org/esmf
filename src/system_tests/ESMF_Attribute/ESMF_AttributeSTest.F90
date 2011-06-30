@@ -16,7 +16,7 @@ program ESMF_AttributeSTest
 #include "ESMF_Macros.inc"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use user_model1, only : userm1_setvm, userm1_register

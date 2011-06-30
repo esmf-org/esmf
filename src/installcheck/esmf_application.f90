@@ -3,7 +3,7 @@
 program esmf_application
 
   ! modules
-  use ESMF_Mod
+  use ESMF
   
   implicit none
   

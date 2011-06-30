@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.26 2011/06/28 21:03:19 rokuingh Exp $
+! $Id: ESMF_ArrayScatterGatherSTest.F90,v 1.27 2011/06/30 06:00:31 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -59,7 +59,7 @@ program ESMF_ArrayScatterGatherSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use user_model1, only : userm1_setvm, userm1_register

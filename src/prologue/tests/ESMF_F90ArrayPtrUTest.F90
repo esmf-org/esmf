@@ -1,4 +1,4 @@
-! $Id: ESMF_F90ArrayPtrUTest.F90,v 1.14 2011/04/25 15:22:25 rokuingh Exp $
+! $Id: ESMF_F90ArrayPtrUTest.F90,v 1.15 2011/06/30 06:00:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
     
 #include "ESMF.h"
 
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
     implicit none
 

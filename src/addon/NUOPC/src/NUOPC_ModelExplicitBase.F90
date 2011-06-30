@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.5 2011/06/27 22:30:56 rokuingh Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.6 2011/06/30 06:00:03 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -8,7 +8,7 @@ module NUOPC_ModelExplicitBase
   ! Generic Model Component for explicit integration
   !-----------------------------------------------------------------------------
 
-  use ESMF_Mod
+  use ESMF
   use NUOPC
 
   implicit none

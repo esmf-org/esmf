@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.36 2011/06/28 04:55:41 theurich Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.37 2011/06/30 05:59:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 !
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     implicit none
     
 !   ! Local variables

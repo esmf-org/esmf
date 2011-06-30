@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.8 2011/06/27 22:30:56 rokuingh Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.9 2011/06/30 06:00:03 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -8,7 +8,7 @@ module NUOPC_ModelExplicit
   ! Generic Model Component for explicit integration
   !-----------------------------------------------------------------------------
 
-  use ESMF_Mod
+  use ESMF
   use NUOPC
   use NUOPC_ModelExplicitBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &

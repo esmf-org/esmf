@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.64 2011/06/24 16:12:37 rokuingh Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.65 2011/06/30 05:59:11 theurich Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -24,7 +24,7 @@
     use ESMF_ArraySpecMod
     use ESMF_LocalArrayMod
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     implicit none
 
     ! Local variables

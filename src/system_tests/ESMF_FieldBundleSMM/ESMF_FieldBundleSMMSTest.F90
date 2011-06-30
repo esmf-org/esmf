@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.24 2011/06/28 21:03:38 rokuingh Exp $
+! $Id: ESMF_FieldBundleSMMSTest.F90,v 1.25 2011/06/30 06:00:54 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -40,7 +40,7 @@ program ESMF_FieldBundleSMMSTest
 #include "ESMF.h"
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_TestMod
 
   use user_model1, only : userm1_setvm, userm1_register

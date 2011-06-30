@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.26 2011/05/13 17:08:09 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.27 2011/06/30 05:59:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     use ESMF_XGridMod
     use ESMF_XGridCreateMod
     use ESMF_XGridGetMod

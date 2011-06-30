@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.23 2011/06/23 18:13:53 rokuingh Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.24 2011/06/30 05:58:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 !-----------------------------------------------------------------------------
 ! !USES:
     use ESMF_TestMod     ! test methods
-    use ESMF_Mod
+    use ESMF
     use ESMF_GridUtilMod
     use ESMF_LogErrMod
 

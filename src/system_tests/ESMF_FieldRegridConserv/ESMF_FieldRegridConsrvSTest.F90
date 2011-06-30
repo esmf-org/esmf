@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.26 2011/06/28 21:03:50 rokuingh Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.27 2011/06/30 06:01:12 theurich Exp $
 !
 ! System test code FieldRegridConserv
 
@@ -27,7 +27,7 @@
     program FieldRegridConserv
 
     ! ESMF Framework module
-    use ESMF_Mod
+    use ESMF
     use ESMF_TestMod
 
     use user_model1, only : userm1_register

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.3 2011/06/27 22:30:38 rokuingh Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.4 2011/06/30 05:59:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 !==============================================================================
 
 module producerMod
-  use ESMF_Mod
+  use ESMF
   implicit none
   private
   
@@ -80,7 +80,7 @@ end module
 
 
 module consumerMod
-  use ESMF_Mod
+  use ESMF
   implicit none
   private
   
@@ -133,7 +133,7 @@ program ESMF_AttachMethodsEx
 !-----------------------------------------------------------------------------
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use producerMod
   use consumerMod
   implicit none

@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.15 2011/06/29 23:05:23 theurich Exp $
+! $Id: NUOPC.F90,v 1.16 2011/06/30 06:00:03 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -8,7 +8,7 @@ module NUOPC
   ! Generic code collection
   !-----------------------------------------------------------------------------
 
-  use ESMF_Mod
+  use ESMF
   use NUOPC_FieldDictionaryDef
 
   implicit none

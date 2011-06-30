@@ -1,4 +1,4 @@
-! $Id: ESMF_ConfigUTest.F90,v 1.42 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $
+! $Id: ESMF_ConfigUTest.F90,v 1.43 2011/06/30 05:58:43 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -36,7 +36,7 @@
 module config_subrs
 
         use ESMF_TestMod
-        use ESMF_Mod
+        use ESMF
         implicit none
 
         public
@@ -1388,7 +1388,7 @@ end module config_subrs
 
 !USES
       use ESMF_TestMod     ! test methods
-      use ESMF_Mod
+      use ESMF
       use config_subrs
 
       implicit none
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.42 2011/02/10 19:55:47 ESRL\ryan.okuinghttons Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.43 2011/06/30 05:58:43 theurich Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0

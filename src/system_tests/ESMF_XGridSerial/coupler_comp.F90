@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.7 2011/06/27 22:32:02 rokuingh Exp $
+! $Id: coupler_comp.F90,v 1.8 2011/06/30 06:01:36 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -15,7 +15,7 @@
 module coupler_comp
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
   use ESMF_XGridMod
   use ESMF_XGridCreateMod
     

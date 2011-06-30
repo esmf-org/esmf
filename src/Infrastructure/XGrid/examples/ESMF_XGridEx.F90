@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.31 2011/06/24 17:43:57 rokuingh Exp $
+! $Id: ESMF_XGridEx.F90,v 1.32 2011/06/30 05:59:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 #include "ESMF.h"
     ! ESMF Framework module
     use ESMF_TestMod
-    use ESMF_Mod
+    use ESMF
     use ESMF_XGridMod
     use ESMF_XGridCreateMod
     implicit none

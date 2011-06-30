@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.32 2011/06/24 16:12:48 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.33 2011/06/30 05:59:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,13 +29,13 @@ program ESMF_AttributeArrayBundleUTest
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF_Mod         ! the ESMF Framework
+      use ESMF         ! the ESMF Framework
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.32 2011/06/24 16:12:48 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.33 2011/06/30 05:59:44 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: modelBComp.F90,v 1.13 2011/06/29 19:21:29 w6ws Exp $
+! $Id: modelBComp.F90,v 1.14 2011/06/30 06:00:46 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -6,7 +6,7 @@
 module modelBCompMod
 
   ! ESMF Framework module
-  use ESMF_Mod
+  use ESMF
 
   implicit none
     
