@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.73 2011/06/27 21:28:27 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.74 2011/06/30 14:32:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.73 2011/06/27 21:28:27 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.74 2011/06/30 14:32:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -413,7 +413,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -517,7 +516,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -602,6 +600,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         
 ! !RETURN VALUE:
     type(ESMF_ArrayBundle) :: ESMF_ArrayBundleCreate
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Create an {\tt ESMF\_ArrayBundle} object from a list of existing Arrays.
@@ -788,7 +789,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGetItem()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Query scalar information about a specific arrayName
+! !IROUTINE: ESMF_ArrayBundleGet - Get information about an Array by name
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
@@ -803,7 +804,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: arrayCount
     logical,                intent(out), optional :: isPresent
     integer,                intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -881,7 +881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGetList()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Access a list of Arrays matching arrayName
+! !IROUTINE: ESMF_ArrayBundleGet - Get a list of Arrays by name
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
@@ -895,12 +895,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get the list of Arrays from ArrayBundle that match arrayName.
+!   Get the list of Arrays from ArrayBundle that match {\tt arrayName}.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -964,7 +963,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGetListAll()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Access a list of all Arrays
+! !IROUTINE: ESMF_ArrayBundleGet - Get general (not Array name specific) information
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
@@ -980,12 +979,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),       intent(out), optional :: name
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!   Get the list of all Arrays and Array names bundled in an ArrayBundle.
+!   Get general, i.e. not Array name specific information from the ArrayBundle.
 !
 !   \begin{description}
 !   \item [arraybundle]
@@ -1094,11 +1092,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
+    logical,                intent(in),   optional :: checkflag
+    integer,                intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1167,9 +1165,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayBundleHaloRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc
+    integer,                intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1219,13 +1217,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       keywordEnforcer, startregion, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)                :: arraybundle
-    type(ESMF_RouteHandle), intent(inout)                :: routehandle
+    type(ESMF_ArrayBundle),     intent(inout)         :: arraybundle
+    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_StartRegion_Flag),intent(in),optional::startregion
-    integer,                intent(in),         optional :: haloLDepth(:)
-    integer,                intent(in),         optional :: haloUDepth(:)
-    integer,                intent(out),        optional :: rc
+    type(ESMF_StartRegion_Flag),intent(in),  optional :: startregion
+    integer,                    intent(in),  optional :: haloLDepth(:)
+    integer,                    intent(in),  optional :: haloUDepth(:)
+    integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1246,7 +1244,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   effective halo region from the inside. Setting this flag to
 !   {\tt ESMF\_STARTREGION\_COMPUTATIONAL} means that only elements outside 
 !   the computational region for each Array are considered for potential
-!   destination elements for halo. The default is {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
+!   destination elements for halo. The default is
+!   {\tt ESMF\_STARTREGION\_EXCLUSIVE}.
 !
 !   The {\tt haloLDepth} and {\tt haloUDepth} arguments allow to reduce
 !   the extent of the effective halo region. Starting at the region specified
@@ -1354,9 +1353,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayBundlePrint(arraybundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)              :: arraybundle
+    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc  
+    integer,                intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1409,17 +1408,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayBundleRead}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleRead(arraybundle, file, &
+  subroutine ESMF_ArrayBundleRead(arraybundle, file, keywordEnforcer, &
     singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)             :: arraybundle
     character(*),           intent(in)             :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: singleFile
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
-!         
-!
 !
 ! !DESCRIPTION:
 !   Read Array data to an ArrayBundle object from file(s).
@@ -1536,13 +1534,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, keywordEnforcer, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in),     optional  :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout),  optional  :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)             :: routehandle
+    type(ESMF_ArrayBundle), intent(in),    optional :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout), optional :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                intent(in),     optional  :: checkflag
-    integer,                intent(out),    optional  :: rc
-!
+    logical,                intent(in),    optional :: checkflag
+    integer,                intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1629,10 +1626,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayBundleRedistRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc
-!
+    integer,                intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1688,7 +1684,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
 !   integer,                  intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1770,13 +1765,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer(ESMF_KIND_I4),  intent(in)              :: factor
+    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
+    integer(ESMF_KIND_I4),  intent(in)             :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional  :: rc
+    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1832,13 +1827,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    integer(ESMF_KIND_I8),  intent(in)              :: factor
+    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
+    integer(ESMF_KIND_I8),  intent(in)             :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional  :: rc
+    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1894,13 +1889,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    real(ESMF_KIND_R4),     intent(in)              :: factor
+    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
+    real(ESMF_KIND_R4),     intent(in)             :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional  :: rc
+    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1956,13 +1951,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
-    real(ESMF_KIND_R8),     intent(in)              :: factor
+    type(ESMF_ArrayBundle), intent(in)             :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout)          :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
+    real(ESMF_KIND_R8),     intent(in)             :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),   optional  :: srcToDstTransposeMap(:)
-    integer,                intent(out),  optional  :: rc
+    integer,                intent(in),   optional :: srcToDstTransposeMap(:)
+    integer,                intent(out),  optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2024,7 +2019,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: srcToDstTransposeMap(:)
     integer,                intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2144,7 +2138,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2233,7 +2226,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: multiflag
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2338,14 +2330,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, keywordEnforcer, zeroregion, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in),    optional  :: srcArrayBundle
-    type(ESMF_ArrayBundle), intent(inout), optional  :: dstArrayBundle
-    type(ESMF_RouteHandle), intent(inout)            :: routehandle
+    type(ESMF_ArrayBundle), intent(in),    optional :: srcArrayBundle
+    type(ESMF_ArrayBundle), intent(inout), optional :: dstArrayBundle
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Region_Flag),  intent(in),    optional  :: zeroregion
-    logical,                intent(in),    optional  :: checkflag
-    integer,                intent(out),   optional  :: rc
-!
+    type(ESMF_Region_Flag), intent(in),    optional :: zeroregion
+    logical,                intent(in),    optional :: checkflag
+    integer,                intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2444,10 +2435,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayBundleSMMRelease(routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out),  optional  :: rc
-!
+    integer,                intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2496,14 +2486,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   dstArrayBundle, routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_ArrayBundle),       intent(in)            :: srcArrayBundle
-!   type(ESMF_ArrayBundle),       intent(inout)         :: dstArrayBundle
-!   type(ESMF_RouteHandle),       intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), target, intent(in)        :: factorList(:)
-!   integer,                      intent(in)            :: factorIndexList(:,:)
+!   type(ESMF_ArrayBundle),           intent(in)            :: srcArrayBundle
+!   type(ESMF_ArrayBundle),           intent(inout)         :: dstArrayBundle
+!   type(ESMF_RouteHandle),           intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), target, intent(in)            :: factorList(:)
+!   integer,                          intent(in)            :: factorIndexList(:,:)
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                      intent(out), optional :: rc
-!
+!   integer,                          intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2611,13 +2600,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)          :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)       :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)       :: routehandle
-    integer(ESMF_KIND_I4), target, intent(in)       :: factorList(:)
-    integer,                    intent(in)          :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle),        intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle),        intent(inout)         :: routehandle
+    integer(ESMF_KIND_I4), target, intent(in)            :: factorList(:)
+    integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2678,13 +2667,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    integer(ESMF_KIND_I8), target, intent(in)           :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),        intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle),        intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle),        intent(inout)         :: routehandle
+    integer(ESMF_KIND_I8), target, intent(in)            :: factorList(:)
+    integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                       intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2745,13 +2734,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    real(ESMF_KIND_R4), target, intent(in)              :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
+    real(ESMF_KIND_R4), target, intent(in)            :: factorList(:)
+    integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2812,13 +2801,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, factorList, factorIndexList, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
-    real(ESMF_KIND_R8), target, intent(in)              :: factorList(:)
-    integer,                    intent(in)              :: factorIndexList(:,:)
+    type(ESMF_ArrayBundle),     intent(in)            :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)         :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
+    real(ESMF_KIND_R8), target, intent(in)            :: factorList(:)
+    integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
+    integer,                    intent(out), optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -2879,12 +2868,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     routehandle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle),     intent(in)              :: srcArrayBundle
-    type(ESMF_ArrayBundle),     intent(inout)           :: dstArrayBundle
-    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    type(ESMF_ArrayBundle),     intent(in)             :: srcArrayBundle
+    type(ESMF_ArrayBundle),     intent(inout)          :: dstArrayBundle
+    type(ESMF_RouteHandle),     intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(out),  optional  :: rc
-!
+    integer,                    intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2977,24 +2965,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleValidate - Validate ArrayBundle internals
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleValidate(arraybundle, rc)
+  subroutine ESMF_ArrayBundleValidate(arraybundle, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
-!         
 !
 ! !DESCRIPTION:
-!      Validates that the {\tt ArrayBundle} is internally consistent.
-!      The method returns an error code if problems are found.  
+!   Validates that the {\tt ArrayBundle} is internally consistent.
+!   The method returns an error code if problems are found.  
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[arraybundle] 
-!          Specified {\tt ESMF\_ArrayBundle} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle] 
+!     Specified {\tt ESMF\_ArrayBundle} object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -3030,18 +3018,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:ArrayBundleWrite}
 
 ! !INTERFACE:
-  subroutine ESMF_ArrayBundleWrite(arraybundle, file, &
+  subroutine ESMF_ArrayBundleWrite(arraybundle, file, keywordEnforcer, &
     singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
     character(*),           intent(in)              :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional  :: singleFile
     integer,                intent(in),   optional  :: timeslice
     type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
     integer,                intent(out),  optional  :: rc  
-!         
-!
 !
 ! !DESCRIPTION:
 !   Write the Arrays into a file. For this API to be functional,
@@ -3174,36 +3161,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ArrayBundleGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_ArrayBundleGetInit(arraybundle) 
+  function ESMF_ArrayBundleGetInit(arraybundle) 
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_ArrayBundleGetInit   
+    ESMF_INIT_TYPE :: ESMF_ArrayBundleGetInit   
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayBundle), intent(in), optional :: arraybundle
+    type(ESMF_ArrayBundle), intent(in), optional :: arraybundle
 !
 ! !DESCRIPTION:
-!      Access deep object init code.
+!   Access deep object init code.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [arraybundle]
-!           ArrayBundle object.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [arraybundle]
+!     ArrayBundle object.
+!   \end{description}
 !
 !EOPI
-
+!------------------------------------------------------------------------------
     if (present(arraybundle)) then
       ESMF_ArrayBundleGetInit = ESMF_INIT_GET(arraybundle)
     else
       ESMF_ArrayBundleGetInit = ESMF_INIT_CREATED
     endif
 
-    end function ESMF_ArrayBundleGetInit
+  end function ESMF_ArrayBundleGetInit
 !------------------------------------------------------------------------------
 
 
-! -------------------------- ESMF-public method -------------------------------
+! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleSetInitCreated()"
 !BOPI
@@ -3213,20 +3200,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayBundleSetInitCreated(arraybundle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
-    integer,                intent(out),  optional  :: rc  
-!         
+    type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
+    integer,                intent(out),  optional :: rc  
 !
 ! !DESCRIPTION:
-!      Set init code in ArrayBundle object to "CREATED".
+!   Set init code in ArrayBundle object to "CREATED".
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[arraybundle] 
-!          Specified {\tt ESMF\_ArrayBundle} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle] 
+!     Specified {\tt ESMF\_ArrayBundle} object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -3256,20 +3242,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayBundleSetThisNull(arraybundle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(inout)           :: arraybundle
-    integer,                intent(out),  optional  :: rc  
-!         
+    type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
+    integer,                intent(out),  optional :: rc  
 !
 ! !DESCRIPTION:
-!      Set Array this member to ESMF_NULL_POINTER.
+!   Set Array this member to ESMF_NULL_POINTER.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[arraybundle] 
-!          Specified {\tt ESMF\_ArrayBundle} object.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[arraybundle] 
+!     Specified {\tt ESMF\_ArrayBundle} object.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
