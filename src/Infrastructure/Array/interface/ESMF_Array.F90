@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.155 2011/06/27 21:11:42 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.156 2011/06/30 14:34:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.155 2011/06/27 21:11:42 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.156 2011/06/30 14:34:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1598,7 +1598,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayWriteC"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayWriteC - Write Array data into a file
 ! \label{api:ArrayWrite}
 !
@@ -1659,7 +1659,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                   ! local return code
