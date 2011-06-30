@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.119 2011/06/30 17:35:25 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.120 2011/06/30 19:37:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.119 2011/06/30 17:35:25 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.120 2011/06/30 19:37:36 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -571,7 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! There are garbage after ContainerAdd, figure out which fields are added
       ! error checking
       if(garbageSize .gt. fieldCount) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - there are more garbage in garbageList than fields in FieldList", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -583,7 +583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         allocate(addedList(fieldCount - garbageSize), stat=localrc)
         if(localrc /= 0) then
-          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg = " - cannot allocate addedList", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
@@ -1003,7 +1003,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
 
     if (.not.associated(fieldbundle%this)) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg="Uninitialized or already destroyed FieldBundle: this pointer unassociated", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1186,7 +1186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(fieldCount)) then
       if(fieldCount .gt. 1) then
         if(present(field)) then
-          call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg = " - field argument cannot be specified when fieldCount is greater than 1", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
@@ -1267,7 +1267,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(size(fieldList) .lt. fieldCount) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
       msg=" - Input argument fieldList size is too small", &
       ESMF_CONTEXT, rcToReturn=rc) 
       return
@@ -1275,7 +1275,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(l_fieldList(fieldCount), stat=localrc)
     if(localrc /= ESMF_SUCCESS) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - cannot allocate l_fieldList internally", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1383,7 +1383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! geomBase
     if(present(geomtype)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - fieldbundle does not have a geombase object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1396,7 +1396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(grid)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - fieldbundle does not have a geombase object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1409,7 +1409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(xgrid)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - fieldbundle does not have a geombase object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1422,7 +1422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(mesh)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - fieldbundle does not have a geombase object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1435,7 +1435,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(locstream)) then
       if(this%status /= ESMF_FBSTATUS_GRIDSET) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - fieldbundle does not have a geombase object stored", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1457,7 +1457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(l_fieldList(l_fieldCount), stat=localrc)
     if(localrc /= ESMF_SUCCESS) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - cannot allocate l_fieldList internally", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1470,7 +1470,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(fieldList)) then
       if(size(fieldList) .lt. l_fieldCount) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - Input fieldList size is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1481,7 +1481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Special call to get name out of Base class
     if (present(fieldNameList)) then
       if(size(fieldNameList) .lt. l_fieldCount) then
-        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
           msg = " - Input fieldNameList size is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
@@ -1566,7 +1566,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(fieldIndex .lt. 1 .or. fieldIndex .gt. l_fieldCount) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - fieldIndex must be between 1 and fieldCount in the FieldBundle", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1574,7 +1574,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(l_fieldList(l_fieldCount), stat=localrc)
     if(localrc /= ESMF_SUCCESS) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - cannot allocate l_fieldList internally", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1916,7 +1916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(l_fieldList(l_fieldCount), stat=localrc)
     if(localrc /= ESMF_SUCCESS) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - cannot allocate l_fieldList internally", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -2396,7 +2396,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -2476,7 +2476,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -2556,7 +2556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -2636,7 +2636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -2806,7 +2806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -2815,7 +2815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! TODO:
         ! internal grids match
         !if(ESMF_GridMatch(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
-        !    call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+        !    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         !       "src and dst FieldBundle must have matching grid", &
         !        ESMF_CONTEXT, rcToReturn=rc)
         !    return
@@ -3124,7 +3124,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of Fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -4202,7 +4202,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -4281,7 +4281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -4360,7 +4360,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -4439,7 +4439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -4601,7 +4601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         if(sfcount /= dfcount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
                msg="src and dst FieldBundle must have same number of fields", &
                 ESMF_CONTEXT, rcToReturn=rc)
             return
@@ -4610,7 +4610,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! TODO:
         ! internal grids match
         !if(ESMF_GridMatch(srcFieldBundle%btypep%grid, dstFieldBundle%btypep%grid) then
-        !    call ESMF_LogSetError(ESMF_RC_ARG_VALUE, &
+        !    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         !       "src and dst FieldBundle must have matching grid", &
         !        ESMF_CONTEXT, rcToReturn=rc)
         !    return
@@ -5269,7 +5269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 
     ! should never call this method when it's not GRIDSET
     if(fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) then
-      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
         msg = " - cannot remove a gemobase from a fieldbundle that is empty", &
         ESMF_CONTEXT, rcToReturn=rc)
       return

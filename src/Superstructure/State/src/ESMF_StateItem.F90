@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.10 2011/06/23 15:54:37 rokuingh Exp $
+! $Id: ESMF_StateItem.F90,v 1.11 2011/06/30 19:40:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -431,7 +431,7 @@ contains
           return
       endif
     case default
-      call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_BAD, &
         msg="- unsupported StateItemType", &
         ESMF_CONTEXT, rcToReturn=rc)
       name = '(unknown)'

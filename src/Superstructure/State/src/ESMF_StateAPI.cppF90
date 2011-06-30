@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.14 2011/06/30 14:54:32 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.15 2011/06/30 19:40:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.14 2011/06/30 14:54:32 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.15 2011/06/30 19:40:44 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1094,7 +1094,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
         if (.not.associated(state%statep)) then 
-          call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed State: statep unassociated", &
             ESMF_CONTEXT, rcToReturn=rc)
           return

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.8 2011/06/28 21:02:55 rokuingh Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.9 2011/06/30 19:40:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.8 2011/06/28 21:02:55 rokuingh Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.9 2011/06/30 19:40:44 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -600,7 +600,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         ! State is added to the original State, this code is not going to  @\
         ! detect that loop. @\
         if (associated(stypep, mname(i)%statep)) then @\
-           call ESMF_LogSetError(ESMF_RC_ARG_BAD, & @\
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
               msg="Cannot add a State to itself", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
           return @\

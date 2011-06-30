@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.100 2011/06/23 20:35:41 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.101 2011/06/30 19:40:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.100 2011/06/23 20:35:41 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.101 2011/06/30 19:40:44 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -631,7 +631,7 @@
            ! of the buffer, we've already written over memory that is not ours.
            ! but better late than never??
            if (offset > lbufsize) then
-               call ESMF_LogSetError(ESMF_RC_INTNRL_INCONS, &
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_INTNRL_INCONS, &
                          msg="Too many objects in State for Reconcile to handle", &
                                         ESMF_CONTEXT, rcToReturn=rc)
            endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.8 2011/06/08 22:37:34 theurich Exp $
+! $Id: ESMF_StateContainer.F90,v 1.9 2011/06/30 19:40:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_StateContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.8 2011/06/08 22:37:34 theurich Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.9 2011/06/30 19:40:44 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -481,7 +481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     if (associated(itemList)) then
       if (size(itemList) < itemC) then
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
           msg="itemList is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
         return  ! bail out
@@ -586,7 +586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     if (associated(itemList)) then
       if (size(itemList) < itemC) then
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
           msg="itemList is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
         return  ! bail out
@@ -796,7 +796,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
     if (associated(garbageList)) then
       if (size(garbageList) < garbageC) then
-        call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
           msg="garbageList is too small", &
           ESMF_CONTEXT, rcToReturn=rc)
         return  ! bail out
