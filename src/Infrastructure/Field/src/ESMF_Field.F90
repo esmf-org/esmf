@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.366 2011/06/30 19:27:08 w6ws Exp $
+! $Id: ESMF_Field.F90,v 1.367 2011/06/30 20:13:56 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -17,8 +17,7 @@ module ESMF_FieldMod
 !
 !==============================================================================
 !
-! This file contains the Field class definition and all Field
-! class method.
+! This file contains the Field class definition and Field class methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -138,14 +137,11 @@ module ESMF_FieldMod
    public ESMF_FieldDeserialize
    public ESMF_FieldInitialize         ! Default initiailze field member variables
 
-!
-!
-!EOPI
-   
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.366 2011/06/30 19:27:08 w6ws Exp $'
+    '$Id: ESMF_Field.F90,v 1.367 2011/06/30 20:13:56 feiliu Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.83 2011/06/30 14:49:38 oehmke Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.84 2011/06/30 20:13:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2467,7 +2467,7 @@ contains
             fsize(i) = max(cc(g2fm(i))+mhlw(i)+mhuw(i), ec(g2fm(i)))
         enddo
 
-        call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, staggerloc=staggerloc, &
             gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -2988,7 +2988,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, staggerloc=staggerloc, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             totalCount=fsize, rc=localrc)
@@ -3125,7 +3125,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
+        call ESMF_GridGetFieldBounds(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3228,7 +3228,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
+        call ESMF_GridGetFieldBounds(grid, localDe=0, totalLBound=tlb, totalUBound=tub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3909,11 +3909,11 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 ! Cannot use the following numbers, cause overflow on most systems due to memory requirement
-!        call ESMF_FieldGet(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/10,23/), &
+!        call ESMF_GridGetFieldBounds(grid, ungriddedLBound=(/1,2/), ungriddedUBound=(/10,23/), &
 !            totalLWidth=(/2,3,4,5,6/), totalUWidth=(/10,11,12,13,14/), &
 !            totalCount=fsize, &
 !            rc=localrc)
-        call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
             totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,2,1/), &
             totalCount=fsize, &
@@ -3976,7 +3976,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, ungriddedLBound=(/1,2/), &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, ungriddedLBound=(/1,2/), &
             ungriddedUBound=(/2,3/), &
             totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,2,1/), &
             totalLBound=flb, totalUBound=fub, &
@@ -4080,7 +4080,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -4269,7 +4269,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=localStaggerLoc, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -4498,7 +4498,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=localStaggerLoc, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -4718,7 +4718,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, staggerloc=staggerloc, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, staggerloc=staggerloc, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -4898,7 +4898,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -5138,7 +5138,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -5380,7 +5380,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -5607,7 +5607,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -5858,7 +5858,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -6090,7 +6090,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -6318,7 +6318,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             gridToFieldMap=gridToFieldMap, &
@@ -6563,7 +6563,7 @@ contains
         endif
 
 
-        call ESMF_FieldGet(grid, localDe=0, &
+        call ESMF_GridGetFieldBounds(grid, localDe=0, &
             staggerloc=staggerloc,&
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &

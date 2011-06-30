@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.43 2011/06/30 14:39:23 theurich Exp $
+! $Id: ESMF_FieldEx.F90,v 1.44 2011/06/30 20:13:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
            distgrid=distgrid3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldGet(grid=grid3d, localDe=0, &
+    call ESMF_GridGetFieldBounds(grid=grid3d, localDe=0, &
         staggerloc=ESMF_STAGGERLOC_CENTER, totalCount=fa_shape, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -517,7 +517,7 @@
 !  The examples here are designed to help a user to get up to speed with
 !  creating Fields for typical use.
 !
-!  This example introduces a helper method, part of the {\tt ESMF\_FieldGet}
+!  This example introduces a helper method, the {\tt ESMF\_GridGetFieldBounds}
 !  interface that facilitates the computation of Fortran data array bounds
 !  and shape to assist {\tt ESMF\_FieldEmptyComplete} finalizing a Field from a
 !  instrinsic Fortran data array and a Grid.
@@ -530,7 +530,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! use FieldGet to retrieve total counts 
-    call ESMF_FieldGet(grid2d, localDe=0, &
+    call ESMF_GridGetFieldBounds(grid2d, localDe=0, &
         staggerloc=ESMF_STAGGERLOC_CENTER, totalCount=ftc, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -558,7 +558,7 @@
 ! gridToFieldMap.
 !
 ! We first create a 5D DistGrid and a 5D Grid based on the DistGrid; then
-! {\tt ESMF\_FieldGet} computes the shape of a 7D array in fsize. We can then
+! {\tt ESMF\_GridGetFieldBounds} computes the shape of a 7D array in fsize. We can then
 ! create a 7D Field from the 5D Grid and the 7D Fortran data array with
 ! other assimilating parameters.
 !EOE
@@ -574,7 +574,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! use FieldGet to retrieve total counts 
-    call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
+    call ESMF_GridGetFieldBounds(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
         ungriddedUBound=(/4,5/), &
         totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
@@ -602,7 +602,7 @@
 !  Fortran array is sometimes more convenient than using the shape directly.
 !EOE
 !BOC
-    call ESMF_FieldGet(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
+    call ESMF_GridGetFieldBounds(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
         ungriddedUBound=(/4,5/), &
         totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &

@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.60 2011/06/30 15:34:24 rokuingh Exp $
+% $Id: Field_refdoc.ctex,v 1.61 2011/06/30 20:13:48 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -108,6 +108,13 @@
 \input{../Infrastructure/Field/doc/ESMF_FieldPr_fapi}
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldWr_fapi}
+#endif
+
+\subsection{Class API: Field Utilities}
+#ifdef STANDALONE
+\input{ESMF_FieldGetAllocBounds_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/ESMF_FieldGetAllocBounds_fapi}
 #endif
 
 \subsection{Class API: Field Communications}
