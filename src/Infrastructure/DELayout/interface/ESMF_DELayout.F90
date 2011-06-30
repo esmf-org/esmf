@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.98 2011/06/30 17:50:38 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.99 2011/06/30 18:07:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.98 2011/06/30 17:50:38 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.99 2011/06/30 18:07:59 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -884,13 +884,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Not implemented features
     if (present(connectionWeightDimList)) then
-      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
         msg="- connectionWeightDimList not implemented", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     if (present(cyclicFlagDimList)) then
-      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
         msg="- cyclicFlagDimList not implemented", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
@@ -1076,13 +1076,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Not implemented features
 !    if (present(compCapacity)) then
-!      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+!      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
 !        msg="- compCapacity query not implemented", &
 !        ESMF_CONTEXT, rcToReturn=rc)
 !      return
 !    endif
 !    if (present(commCapacity)) then
-!      call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+!      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_IMPL, &
 !        msg="- commCapacity query not implemented", &
 !        ESMF_CONTEXT, rcToReturn=rc)
 !      return

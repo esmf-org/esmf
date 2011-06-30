@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.78 2011/06/24 14:25:46 rokuingh Exp $
+! $Id: ESMF_Config.F90,v 1.79 2011/06/30 18:09:59 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2439,7 +2439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     duplicate = .true.
                     logmsg = "Duplicate label '" // trim(label) // &
                                   "' found in attributes file"
-                    call ESMF_LogSetError(ESMF_RC_DUP_NAME, msg=logmsg, &
+                    call ESMF_LogSetError(rcToCheck=ESMF_RC_DUP_NAME, msg=logmsg, &
                                              ESMF_CONTEXT, rcToReturn=rc)
                     localrc = ESMF_RC_DUP_NAME
                   endif

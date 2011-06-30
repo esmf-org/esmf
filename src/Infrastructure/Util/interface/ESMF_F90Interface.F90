@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.15 2011/06/08 17:32:18 theurich Exp $
+! $Id: ESMF_F90Interface.F90,v 1.16 2011/06/30 18:03:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@ contains
     if (present(farray2D).and.associated(farray2D)) checkCount = checkCount + 1
     if (present(farray3D).and.associated(farray3D)) checkCount = checkCount + 1
     if (checkCount>1) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
         msg="too many farrayXD arguments were specified.", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
