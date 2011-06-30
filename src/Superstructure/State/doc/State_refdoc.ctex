@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.27 2011/06/15 17:26:05 w6ws Exp $
+% $Id: State_refdoc.ctex,v 1.28 2011/06/30 15:34:35 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@
 \input{../Superstructure/State/doc/State_desc}
 #endif
 
-\subsection{State Options}
+\subsection{Constants}
 #ifdef STANDALONE
 \input{State_options}
 #elif defined(CONSTITUENT)

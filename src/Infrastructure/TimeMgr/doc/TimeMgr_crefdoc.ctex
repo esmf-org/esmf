@@ -1,4 +1,4 @@
-% $Id: TimeMgr_crefdoc.ctex,v 1.11 2010/10/14 23:45:35 theurich Exp $ 
+% $Id: TimeMgr_crefdoc.ctex,v 1.12 2011/06/30 15:34:30 rokuingh Exp $ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE
@@ -78,7 +78,7 @@
 \input{../Infrastructure/TimeMgr/doc/Calendar_cdesc}
 #endif
 
-\subsection{Calendar Options}
+\subsection{Constants}
 #ifdef STANDALONE
 \input{Calendar_coptions}
 #elif defined(CONSTITUENT)
@@ -211,7 +211,7 @@
 \input{../Infrastructure/TimeMgr/doc/Clock_cdesc}
 #endif
 
-%\subsection{Clock Options}
+%\subsection{Constants}
 #ifdef STANDALONE
 %\input{Clock_options}
 #elif defined(CONSTITUENT)
@@ -254,7 +254,7 @@
 %\input{../Infrastructure/TimeMgr/doc/Alarm_cdesc}
 #endif
 
-%\subsection{Alarm Options}
+%\subsection{Constants}
 #ifdef STANDALONE
 %\input{Alarm_options}
 #elif defined(CONSTITUENT)

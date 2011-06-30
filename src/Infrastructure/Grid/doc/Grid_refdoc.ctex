@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.24 2011/01/05 20:05:43 svasquez Exp $
+% $Id: Grid_refdoc.ctex,v 1.25 2011/06/30 15:34:25 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
 \input{../Infrastructure/Grid/doc/Grid_desc}
 #endif
 
-\subsection{Grid Options}
+\subsection{Constants}
 #ifdef STANDALONE
 \input{Grid_options}
 #elif defined(CONSTITUENT)

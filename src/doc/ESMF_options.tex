@@ -1,6 +1,15 @@
-% $Id: ESMF_options.tex,v 1.66 2011/06/30 00:09:06 theurich Exp $
+% $Id: ESMF_options.tex,v 1.67 2011/06/30 15:34:37 rokuingh Exp $
 
 \section{Constants}
+
+\subsection{ESMF\_ALARMLIST}
+This flag is documented in section \ref{const:alarmlist}.
+
+\subsection{ESMF\_ARBDIM}
+THis flag is documented in seciton \ref{sec:opt:arbdim}.
+
+\subsection{ESMF\_CALKIND}
+This flag is documented in section \ref{opt:calkindflag}.
 
 \subsection{ESMF\_COMPTYPE}
 \label{const:comptype}
@@ -47,6 +56,9 @@ Valid values are:
          the MPI communicator, the number of PETs, the PET labeling, 
          communication attributes, threading-level.
 \end{description}
+
+\subsection{ESMF\_COORDSYS}
+This flag is documented in section \ref{sec:opt:coordsys}.
 
 \subsection{ESMF\_COPY}
 \label{const:copy}
@@ -111,9 +123,21 @@ Valid values are:
       Divide elements over DEs. Assign the rest of this division to the last DE.
 \end{description}
 
+\subsection{ESMF\_DIRECTION}
+This flag is documented in section \ref{const:direction}.
+
+\subsection{ESMF\_DISTGRIDMATCH}
+This flag is documented in section \ref{const:distgridmatch}.
+
 \subsection{ESMF\_END}
 
-Please see section \ref{app:endflag} for documentation on this flag.
+This flag is documented in section \ref{app:endflag}.
+
+\subsection{ESMF\_FIELDSTATUS}
+This flag is documented in section \ref{opt:fieldstatus}.
+
+\subsection{ESMF\_FILEFORMAT}
+This flag is documented in section \ref{sec:mesh:opt:fileformat}.
 
 \subsection{ESMF\_GEOMTYPE}
 \label{const:geomtype}
@@ -137,6 +161,18 @@ Valid values are:
 \item [ESMF\_TYPEKIND\_LOCSTREAM]
       An ESMF\_LocStream, a disconnected series of points with associated key values
 \end{description}
+
+\section{ESMF\_GRIDCONN}
+This flag is documented in section \ref{sec:opt:gridconn}.
+
+\subsection{ESMF\_GRIDITEM}
+This flag is documented in section \ref{sec:opt:griditem}.
+
+\subsection{ESMF\_GRIDMATCH}
+This flag is documented in section \ref{sec:opt:gridmatchtype}.
+
+\subsection{ESMF\_GRIDSTATUS}
+This flag is documented in section \ref{sec:opt:gridstatus}.
 
 \subsection{ESMF\_INDEX}
 \label{const:indexflag}
@@ -217,6 +253,15 @@ The named constants are:
 %      Kind-parameter for 16 byte compled.
 \end{description}
 
+\subsection{ESMF\_LOGKIND}
+This flag is documented in section \ref{opt:logkindflag}.
+
+\subsection{ESMF\_LOGMSG}
+This flag is documented in section \ref{opt:logmsgflag}.
+
+\subsection{ESMF\_MeshElemType}
+This flag is documented in section \ref{sec:mesh:opt:elemtype}.
+
 \subsection{ESMF\_METHOD}
 \label{const:method}
 
@@ -240,6 +285,15 @@ Valid values are:
 \item [ESMF\_WRITERESTART]
       WriteRestart method.
 \end{description}
+
+\subsection{ESMF\_PIN}
+This flag is documented in section \ref{opt:depinflag}.
+
+\subsection{ESMF\_POLEMETHOD}
+This flag is documented in section \ref{opt:polemethod}.
+
+\subsection{ESMF\_POLEKIND}
+This flag is documented in section \ref{sec:opt:polekind}.
 
 \subsection{ESMF\_REDUCE}
 \label{const:reduce}
@@ -278,6 +332,9 @@ Valid values are:
 \item [ESMF\_REGION\_EMPTY]
       The empty region contains no elements.
 \end{description}
+
+\subsection{ESMF\_REGRIDMETHOD}
+This flag is documented in section \ref{opt:regridmethod}.
 
 \subsection{ESMF\_ROUTESYNC}
 \label{const:routesync}
@@ -327,6 +384,12 @@ Valid values are:
          Cancel outstanding transfers for a precomputed communication pattern.
 \end{description}
 
+\subsection{ESMF\_SERVICEREPLY}
+This flag is documented in section \ref{const:servicereply_flag}.
+
+\subsection{ESMF\_STAGGERLOC}
+This flag is documented in section \ref{sec:opt:staggerloc}.
+
 \subsection{ESMF\_STARTREGION}
 \label{const:startregion}
 {\sf DESCRIPTION:\\}
@@ -344,6 +407,11 @@ Valid values are:
       User defined region, greater or equal to the exclusive region.
 \end{description}
 
+\subsection{ESMF\_STATEINTENT}
+This flag is documented in section \ref{const:stateintent}.
+
+\subsection{ESMF\_STATEITEM}
+This flag is documented in section \ref{const:stateitem}.
 
 \subsection{ESMF\_SYNC}
 \label{const:sync}
@@ -529,3 +597,6 @@ The following named constants define the precise version of ESMF in use.
       Constant of type {\tt character} holding the exact release version string
       (e.g. "5.2.0r").
 \end{description}
+
+\subsection{ESMF\_XGRIDSIDE}
+This flag is documented in section \ref{opt:xgridoptions}.

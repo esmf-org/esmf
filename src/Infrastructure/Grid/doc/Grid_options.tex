@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.46 2011/06/30 14:49:40 oehmke Exp $
+% $Id: Grid_options.tex,v 1.47 2011/06/30 15:34:25 rokuingh Exp $
 
 \subsubsection{ESMF\_ARBDIM}
 \label{sec:opt:arbdim}
@@ -6,7 +6,7 @@
 {\sf DESCRIPTION:\\}
 A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
 
-\subsubsection{ESMF\_CoordSys}
+\subsubsection{ESMF\_COORDSYS}
 \label{sec:opt:coordsys}
 
 {\sf DESCRIPTION:\\}
@@ -18,7 +18,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_CoordSys\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_COORDSYS\_CART] Cartesian coordinate system. 
 
@@ -28,7 +28,7 @@ Valid values are:
 \end{description}
 
 
-\subsubsection{ESMF\_GridConn\_Flag}
+\subsubsection{ESMF\_GRIDCONN}
 \label{sec:opt:gridconn}
 
 {\sf DESCRIPTION:\\}
@@ -47,7 +47,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_GridConn\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_GRIDCONN\_NONE] No connection.
 
@@ -75,7 +75,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_GridItem\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{tabular}{|l|c|c|c|c||}
 \hline
 \hline
@@ -98,7 +98,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_GridMatch\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_GRIDMATCH\_INVALID:] Indicates a non-valid matching level. Returned
       if an error occurs in the matching function. If a higher matching level
@@ -110,7 +110,6 @@ Valid values are:
 \item [ESMF\_GRIDMATCH\_ALIAS:] Both Grid variables are aliases to the exact
       same Grid object in memory. 
 \end{description}
-
 
 
 \subsubsection{ESMF\_GRIDSTATUS}
@@ -126,7 +125,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_GridStatus\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_GRIDSTATUS\_EMPTY:] Status after a Grid has been created with 
       {\tt ESMF\_GridCreateEmpty}.  A Grid object container is allocated but
@@ -140,7 +139,6 @@ Valid values are:
 \end{description}
 
 
-
 \subsubsection{ESMF\_POLEKIND}
 \label{sec:opt:polekind}
 
@@ -152,7 +150,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_PoleKind\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_POLEKIND\_NONE] No connection at pole.
 
@@ -163,7 +161,6 @@ element i+n/2.
 \item [ESMF\_POLEKIND\_BIPOLE] This edge is connected to itself. Given
 that the edge is n elements long, element i is connected to element n-i-1.
 \end{description}
-
 
 
 \subsubsection{ESMF\_STAGGERLOC}
