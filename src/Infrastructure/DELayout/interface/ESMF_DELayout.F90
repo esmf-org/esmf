@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.97 2011/06/27 17:59:39 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.98 2011/06/30 17:50:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.97 2011/06/27 17:59:39 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.98 2011/06/30 17:50:38 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -418,16 +418,15 @@ contains
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                      intent(in), optional  :: deCount
-    integer, target,              intent(in), optional  :: deGrouping(:)
-    type(ESMF_Pin_Flag),          intent(in), optional  :: pinflag
-    integer, target,              intent(in), optional  :: petList(:)
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer,                      intent(in),  optional :: deCount
+    integer, target,              intent(in),  optional :: deGrouping(:)
+    type(ESMF_Pin_Flag),          intent(in),  optional :: pinflag
+    integer, target,              intent(in),  optional :: petList(:)
+    type(ESMF_VM),                intent(in),  optional :: vm
+    integer,                      intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -541,13 +540,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     integer,                      intent(in)            :: petMap(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Pin_Flag),          intent(in), optional  :: pinflag
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    type(ESMF_Pin_Flag),          intent(in),  optional :: pinflag
+    type(ESMF_VM),                intent(in),  optional :: vm
+    integer,                      intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -633,18 +631,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                      intent(in), optional  :: deCount
+    integer,                      intent(in),  optional :: deCount
     integer,                      intent(in)            :: compWeights(:)
     integer,                      intent(in)            :: commWeights(:,:)
-    integer, target,              intent(in), optional  :: deGrouping(:)
-    type(ESMF_Pin_Flag),          intent(in), optional  :: pinflag
-    integer, target,              intent(in), optional  :: petList(:)
-    type(ESMF_VM),                intent(in), optional  :: vm
-    integer,                      intent(out),optional  :: rc
+    integer, target,              intent(in),  optional :: deGrouping(:)
+    type(ESMF_Pin_Flag),          intent(in),  optional :: pinflag
+    integer, target,              intent(in),  optional :: petList(:)
+    type(ESMF_VM),                intent(in),  optional :: vm
+    integer,                      intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateHintWeights
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -774,12 +771,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     connectionWeightDimList, cyclicFlagDimList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),      intent(in)              :: vmObject
-    integer, target,    intent(in),   optional  :: deCountList(:)
-    integer, target,    intent(in),   optional  :: petList(:)
-    integer,            intent(in),   optional  :: connectionWeightDimList(:)
-    type(ESMF_Logical), intent(in),   optional  :: cyclicFlagDimList(:)
-    integer,            intent(out),  optional  :: rc
+    type(ESMF_VM),      intent(in)            :: vmObject
+    integer, target,    intent(in),  optional :: deCountList(:)
+    integer, target,    intent(in),  optional :: petList(:)
+    integer,            intent(in),  optional :: connectionWeightDimList(:)
+    type(ESMF_Logical), intent(in),  optional :: cyclicFlagDimList(:)
+    integer,            intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutCreateDeprecated
@@ -928,11 +925,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_DELayoutDestroy(delayout, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(inout)           :: delayout
+    type(ESMF_DELayout),  intent(inout)          :: delayout
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc  
-!         
-!
+    integer,              intent(out),  optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -989,21 +984,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     vasLocalDeCount, vasLocalDeList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),      intent(in)              :: delayout
+    type(ESMF_DELayout),      intent(in)            :: delayout
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_VM),            intent(out),  optional  :: vm
-    integer,                  intent(out),  optional  :: deCount
-    integer, target,          intent(out),  optional  :: petMap(:)
-    integer, target,          intent(out),  optional  :: vasMap(:)
-    logical,                  intent(out),  optional  :: oneToOneFlag
-    type(ESMF_Pin_Flag),      intent(out),  optional  :: pinflag
-    integer,                  intent(out),  optional  :: localDeCount
-    integer, target,          intent(out),  optional  :: localDeList(:)
-    integer,                  intent(out),  optional  :: vasLocalDeCount
-    integer, target,          intent(out),  optional  :: vasLocalDeList(:)
-    integer,                  intent(out),  optional  :: rc  
-!         
-!
+    type(ESMF_VM),            intent(out), optional :: vm
+    integer,                  intent(out), optional :: deCount
+    integer, target,          intent(out), optional :: petMap(:)
+    integer, target,          intent(out), optional :: vasMap(:)
+    logical,                  intent(out), optional :: oneToOneFlag
+    type(ESMF_Pin_Flag),      intent(out), optional :: pinflag
+    integer,                  intent(out), optional :: localDeCount
+    integer, target,          intent(out), optional :: localDeList(:)
+    integer,                  intent(out), optional :: vasLocalDeCount
+    integer, target,          intent(out), optional :: vasLocalDeList(:)
+    integer,                  intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1157,17 +1150,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localDeList, localDe, oneToOneFlag, logRectFlag, deCountPerDim, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(out),  optional  :: deCount
-    integer,              intent(out),  optional  :: dimCount
-    integer,              intent(out),  optional  :: localDeCount
-    integer, target,      intent(out),  optional  :: localDeList(:)
-    integer,              intent(out),  optional  :: localDe
-    type(ESMF_Logical),   intent(out),  optional  :: oneToOneFlag
-    type(ESMF_Logical),   intent(out),  optional  :: logRectFlag
-    integer, target,      intent(out),  optional  :: deCountPerDim(:)
-    integer,              intent(out),  optional  :: rc  
-!         
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(out), optional :: deCount
+    integer,              intent(out), optional :: dimCount
+    integer,              intent(out), optional :: localDeCount
+    integer, target,      intent(out), optional :: localDeList(:)
+    integer,              intent(out), optional :: localDe
+    type(ESMF_Logical),   intent(out), optional :: oneToOneFlag
+    type(ESMF_Logical),   intent(out), optional :: logRectFlag
+    integer, target,      intent(out), optional :: deCountPerDim(:)
+    integer,              intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !     Get internal decomposition information.
@@ -1262,15 +1254,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     connectionList, connectionWeightList, pid, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
-    integer, target,      intent(out),  optional  :: coord(:)
-    integer,              intent(out),  optional  :: connectionCount
-    integer, target,      intent(out),  optional  :: connectionList(:)
-    integer, target,      intent(out),  optional  :: connectionWeightList(:)
-    integer,              intent(out),  optional  :: pid
-    integer,              intent(out),  optional  :: rc  
-!         
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(in)            :: de
+    integer, target,      intent(out), optional :: coord(:)
+    integer,              intent(out), optional :: connectionCount
+    integer, target,      intent(out), optional :: connectionList(:)
+    integer, target,      intent(out), optional :: connectionWeightList(:)
+    integer,              intent(out), optional :: pid
+    integer,              intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !     Get DE specific internal information about the decomposition.
@@ -1366,13 +1357,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deMatchCount, deMatchList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
-    type(ESMF_DELayout),  intent(in)              :: delayoutMatch
-    integer,              intent(out),  optional  :: deMatchCount
-    integer, target,      intent(out),  optional  :: deMatchList(:)
-    integer,              intent(out),  optional  :: rc  
-!         
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(in)            :: de
+    type(ESMF_DELayout),  intent(in)            :: delayoutMatch
+    integer,              intent(out), optional :: deMatchCount
+    integer, target,      intent(out), optional :: deMatchList(:)
+    integer,              intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !     Match the virtual address space of the specified DE in a DELayout with that
@@ -1448,13 +1438,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     petMatchCount, petMatchList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
-    type(ESMF_VM),        intent(in)              :: vmMatch
-    integer,              intent(out),  optional  :: petMatchCount
-    integer, target,      intent(out),  optional  :: petMatchList(:)
-    integer,              intent(out),  optional  :: rc  
-!         
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(in)            :: de
+    type(ESMF_VM),        intent(in)            :: vmMatch
+    integer,              intent(out), optional :: petMatchCount
+    integer, target,      intent(out), optional :: petMatchList(:)
+    integer,              intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !     Match the virtual address space of the specified DE in a DELayout with that
@@ -1529,11 +1518,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_DELayoutPrint(delayout, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
+    type(ESMF_DELayout),  intent(in)            :: delayout
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc  
-!         
-!
+    integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1588,12 +1575,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive subroutine ESMF_DELayoutServiceComplete(delayout, keywordEnforcer, de, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(in)            :: de
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc  
-!         
-!
+    integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1646,14 +1631,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive function ESMF_DELayoutServiceOffer(delayout, keywordEnforcer, de, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(in)            :: de
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc
+    integer,              intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_ServiceReply_Flag)                  :: ESMF_DELayoutServiceOffer
-!
+    type(ESMF_ServiceReply_Flag) :: ESMF_DELayoutServiceOffer
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1720,11 +1704,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_DELayoutValidate(delayout, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
+    type(ESMF_DELayout),  intent(in)            :: delayout
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc  
-!         
-!
+    integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1775,13 +1757,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     petMatchCount, petMatchList, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout),  intent(in)              :: delayout
-    integer,              intent(in)              :: de
-    type(ESMF_VM),        intent(in)              :: vmMatch
-    integer,              intent(out),  optional  :: petMatchCount
-    integer, target,      intent(out),  optional  :: petMatchList(:)
-    integer,              intent(out),  optional  :: rc  
-!         
+    type(ESMF_DELayout),  intent(in)            :: delayout
+    integer,              intent(in)            :: de
+    type(ESMF_VM),        intent(in)            :: vmMatch
+    integer,              intent(out), optional :: petMatchCount
+    integer, target,      intent(out), optional :: petMatchList(:)
+    integer,              intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !     Match the virtual address space of the specified DE in the DELayout with 
@@ -1853,15 +1834,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutSerialize - Serialize delayout info into a byte stream
 !
 ! !INTERFACE:
-  subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, inquireflag, rc) 
+  subroutine ESMF_DELayoutSerialize(delayout, buffer, length, offset, &
+    inquireflag, rc) 
 !
 ! !ARGUMENTS:
-    type(ESMF_DELayout), intent(in) :: delayout 
-    character, pointer, dimension(:) :: buffer
-    integer, intent(inout) :: length
-    integer, intent(inout) :: offset
-    type(ESMF_InquireFlag), intent(in), optional :: inquireflag
-    integer, intent(out), optional :: rc 
+    type(ESMF_DELayout),    intent(in)            :: delayout 
+    character,              pointer               :: buffer(:)
+    integer,                intent(inout)         :: length
+    integer,                intent(inout)         :: offset
+    type(ESMF_InquireFlag), intent(in),  optional :: inquireflag
+    integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_DELayout} object and adds all the information needed
@@ -1931,13 +1913,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_DELayoutDeserialize(buffer, offset, rc) 
 !
+! !ARGUMENTS:
+    character, pointer               :: buffer(:)
+    integer,   intent(inout)         :: offset
+    integer,   intent(out), optional :: rc 
+!
 ! !RETURN VALUE:
     type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
-!
-! !ARGUMENTS:
-    character, pointer, dimension(:) :: buffer
-    integer, intent(inout) :: offset
-    integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
@@ -1991,11 +1973,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_DELayoutGetInit(delayout) 
 !
-! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
-!
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in), optional :: delayout
+!
+! !RETURN VALUE:
+    ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
 !
 ! !DESCRIPTION:
 !      Access deep object init code.
@@ -2030,7 +2012,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(inout)           :: delayout
     integer,              intent(out),  optional  :: rc  
-!         
 !
 ! !DESCRIPTION:
 !      Set init code in DELayout object to "CREATED".
