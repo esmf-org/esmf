@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.130 2011/06/30 21:53:41 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.131 2011/06/30 23:31:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.130 2011/06/30 21:53:41 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.131 2011/06/30 23:31:05 w6ws Exp $'
 
 !==============================================================================
 !
@@ -972,12 +972,6 @@
 !     isofrac", YYYY format returns at least 4 digits; years <= 999 are
 !     padded on the left with zeroes and years >= 10000 return the number
 !     of digits required. \\
-!
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.124 2011/06/30 21:53:41 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.125 2011/06/30 23:31:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.124 2011/06/30 21:53:41 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.125 2011/06/30 23:31:05 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1332,12 +1332,6 @@
 !     Prints out an {\tt ESMF\_Clock}'s properties to {\tt stdout}, in
 !     support of testing and debugging.  The options control the type of
 !     information and level of detail. \\
-! 
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
 !
 !     The arguments are:
 !     \begin{description}
