@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGather.cppF90,v 1.26 2011/05/23 20:47:43 feiliu Exp $
+! $Id: ESMF_FieldGather.cppF90,v 1.27 2011/06/30 16:16:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldGatherMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGather.cppF90,v 1.26 2011/05/23 20:47:43 feiliu Exp $'
+      '$Id: ESMF_FieldGather.cppF90,v 1.27 2011/06/30 16:16:16 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldGather
@@ -74,11 +74,11 @@ contains
 ! @\
 ! !INTERFACE: @\
 ! subroutine ESMF_FieldGather<rank><type><kind>(field, farray, & @\
-!   rootPet, keywordEnforcer, tile, vm, rc) @\
+!   rootPet, tile, vm, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),           intent(in)              :: field @\
-!   mtype (ESMF_KIND_##mtypekind),intent(in), target    :: farray(mdim) @\
+!   <type>(ESMF_KIND_<kind>),   intent(out), target     :: farray(<rank>) @\
 !   integer,                    intent(in)              :: rootPet @\
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,                    intent(in),   optional  :: tile @\
