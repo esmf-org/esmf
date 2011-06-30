@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.139 2011/06/21 20:00:44 svasquez Exp $
+! $Id: ESMF_Calendar.F90,v 1.140 2011/06/30 21:53:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.139 2011/06/21 20:00:44 svasquez Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.140 2011/06/30 21:53:41 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -865,7 +865,7 @@
         daysPerYear, daysPerYearDn, daysPerYearDd, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(in)            :: calendar
+      type(ESMF_Calendar),    intent(in)            :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_CalKind_Flag),intent(out), optional :: calkindflag
       integer,                intent(out), optional :: daysPerMonth(:)
@@ -1203,17 +1203,13 @@
 ! !IROUTINE:  ESMF_CalendarPrint - Print the contents of a Calendar
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarPrint(calendar, keywordEnforcer, options, rc)
+      subroutine ESMF_CalendarPrint(calendar, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(in)            :: calendar
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),   intent(in),  optional :: options
       integer,             intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints out an {\tt ESMF\_Calendar}'s properties to {\tt stdio}, 
@@ -1417,7 +1413,7 @@
         daysPerYear, daysPerYearDn, daysPerYearDd, name, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),   intent(inout)         :: calendar
+      type(ESMF_Calendar),  intent(inout)         :: calendar
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(in),  optional :: daysPerMonth(:)
       integer(ESMF_KIND_I4),intent(in),  optional :: secondsPerDay
@@ -1533,16 +1529,12 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSetDefault()
-      subroutine ESMF_CalendarSetDefaultKind(calkindflag, keywordEnforcer, rc)
+      subroutine ESMF_CalendarSetDefaultKind(calkindflag, rc)
 
 ! !ARGUMENTS:
       type(ESMF_CalKind_Flag), intent(in)            :: calkindflag
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                 intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Sets the default {\tt calendar} to the given type.  Subsequent Time
@@ -1581,16 +1573,12 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSetDefault()
-      subroutine ESMF_CalendarSetDefaultCal(calendar, keywordEnforcer, rc)
+      subroutine ESMF_CalendarSetDefaultCal(calendar, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(inout)         :: calendar
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_Calendar),     intent(in)            :: calendar
       integer,                 intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Sets the default {\tt calendar} to the one given.  Subsequent Time

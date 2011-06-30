@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.111 2011/06/21 21:44:05 svasquez Exp $
+! $Id: ESMF_Alarm.F90,v 1.112 2011/06/30 21:53:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.111 2011/06/21 21:44:05 svasquez Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.112 2011/06/30 21:53:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1037,17 +1037,13 @@
 ! !IROUTINE:  ESMF_AlarmPrint - Print out an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmPrint(alarm, keywordEnforcer, options, rc)
+      subroutine ESMF_AlarmPrint(alarm, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm),  intent(in)            :: alarm
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints out an {\tt ESMF\_Alarm}'s properties to {\tt stdout}, in support
@@ -1432,7 +1428,7 @@
 !     There is an implicit limitation that in order to properly reverse
 !     timestep through a ring end time in {\tt ESMF\_DIRECTION\_REVERSE}, that
 !     time must have already been traversed in the forward direction.
-!     This is due to the fact that the Time Manager cannot predict when
+!     This is due to the fact that an {\tt ESMF\_Alarm} cannot predict when
 !     user code will call {\tt ESMF\_AlarmRingerOff()}.  An error message
 !     will be logged when this limitation is not satisfied.
 !

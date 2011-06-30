@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.129 2011/06/21 04:19:19 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.130 2011/06/30 21:53:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.129 2011/06/21 04:19:19 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.130 2011/06/30 21:53:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -957,17 +957,13 @@
 ! !IROUTINE:  ESMF_TimePrint - Print the contents of a Time 
 
 ! !INTERFACE:
-      subroutine ESMF_TimePrint(time, keywordEnforcer, options, rc)
+      subroutine ESMF_TimePrint(time, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(in)            :: time
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints out the contents of an {\tt ESMF\_Time} to {\tt stdout}, in
@@ -1359,17 +1355,13 @@
 ! !IROUTINE:  ESMF_TimeValidate - Validate a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeValidate(time, keywordEnforcer, options, rc)
+      subroutine ESMF_TimeValidate(time, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time),   intent(in)            :: time
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Checks whether an {\tt ESMF\_Time} is valid.

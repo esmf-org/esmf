@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.122 2011/06/21 21:25:20 svasquez Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.123 2011/06/30 21:53:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.122 2011/06/21 21:25:20 svasquez Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.123 2011/06/30 21:53:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1052,9 +1052,6 @@
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
 !
-!     See {\tt ../include/ESMC\_BaseTime.h} and
-!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
-!     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
 !     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
@@ -1280,9 +1277,6 @@
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
 !
-!     See {\tt ../include/ESMC\_BaseTime.h} and
-!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
-!     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
 !     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
@@ -1516,9 +1510,6 @@
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
 !
-!     See {\tt ../include/ESMC\_BaseTime.h} and
-!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
-!     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
 !     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
@@ -1754,9 +1745,6 @@
 !     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
 !       {\tt seconds = 86400}.
 !
-!     See {\tt ../include/ESMC\_BaseTime.h} and
-!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
-!     
 !     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
 !     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO} and
 !     ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimeIntervalPrint()}.
@@ -1965,18 +1953,13 @@
 ! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalPrint(timeinterval, keywordEnforcer, &
-        options, rc)
+      subroutine ESMF_TimeIntervalPrint(timeinterval, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*),       intent(in),  optional :: options
       integer,                 intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints out the contents of an {\tt ESMF\_TimeInterval} to {\tt stdout},

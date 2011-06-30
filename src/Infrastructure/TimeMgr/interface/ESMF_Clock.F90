@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.123 2011/06/24 16:52:13 rokuingh Exp $
+! $Id: ESMF_Clock.F90,v 1.124 2011/06/30 21:53:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.123 2011/06/24 16:52:13 rokuingh Exp $'
+      '$Id: ESMF_Clock.F90,v 1.124 2011/06/30 21:53:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1320,17 +1320,13 @@
 ! !IROUTINE:  ESMF_ClockPrint - Print the contents of a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockPrint(clock, keywordEnforcer, options, rc)
+      subroutine ESMF_ClockPrint(clock, options, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),  intent(in)            :: clock
-      type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=*), intent(in),  optional :: options
       integer,           intent(out), optional :: rc
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Prints out an {\tt ESMF\_Clock}'s properties to {\tt stdout}, in
