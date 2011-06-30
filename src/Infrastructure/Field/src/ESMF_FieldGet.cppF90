@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.87 2011/06/30 13:44:22 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.88 2011/06/30 15:26:41 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.87 2011/06/30 13:44:22 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.88 2011/06/30 15:26:41 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -214,8 +214,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[xgridside]}]
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException
-!        The side of the XGrid that the Field was created on (either ESMF\_XGRID\_SIDEA,
-!        ESMF\_XGRID\_SIDEB, or ESMF\_XGRID\_BALANCED). 
+!        The side of the XGrid that the Field was created on (either ESMF\_XGRIDSIDE\_A,
+!        ESMF\_XGRIDSIDE\_B, or ESMF\_XGRID\_BALANCED). 
 !       \end{sloppypar}
 ! \item [{[gridIndex]}]
 !       \apiStatusCompatibleException
