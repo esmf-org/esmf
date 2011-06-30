@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.118 2011/06/29 16:05:53 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.119 2011/06/30 17:35:25 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.118 2011/06/29 16:05:53 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.119 2011/06/30 17:35:25 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1310,18 +1310,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       fieldCount, fieldList, fieldNameList, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+    type(ESMF_FieldBundle),  intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_GeomType_Flag),    intent(out), optional :: geomtype
-    type(ESMF_Grid),        intent(out), optional :: grid
-    type(ESMF_LocStream),   intent(out), optional :: locstream
-    type(ESMF_Mesh),        intent(out), optional :: mesh
-    type(ESMF_XGrid),       intent(out), optional :: xgrid
-    integer,                intent(out), optional :: fieldCount
-    type(ESMF_Field),       intent(out), optional :: fieldList(:)
-    character(len=*),       intent(out), optional :: fieldNameList(:)
-    character(len=*),       intent(out), optional :: name
-    integer,                intent(out), optional :: rc
+    type(ESMF_GeomType_Flag),intent(out), optional :: geomtype
+    type(ESMF_Grid),         intent(out), optional :: grid
+    type(ESMF_LocStream),    intent(out), optional :: locstream
+    type(ESMF_Mesh),         intent(out), optional :: mesh
+    type(ESMF_XGrid),        intent(out), optional :: xgrid
+    integer,                 intent(out), optional :: fieldCount
+    type(ESMF_Field),        intent(out), optional :: fieldList(:)
+    character(len=*),        intent(out), optional :: fieldNameList(:)
+    character(len=*),        intent(out), optional :: name
+    integer,                 intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -1951,11 +1951,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRead(fieldbundle, file, &
-    singleFile, iofmt, rc)
+    keywordEnforcer, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)             :: fieldbundle
     character(*),           intent(in)             :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                intent(in),  optional  :: singleFile
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
@@ -2864,7 +2865,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
         type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_Region_Flag),  intent(in),    optional  :: zeroregion
+        type(ESMF_Region_Flag), intent(in),    optional  :: zeroregion
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
 !
@@ -4702,11 +4703,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundleWrite(fieldbundle, file, &
-    singleFile, timeslice, iofmt, rc)
+    keywordEnforcer, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)              :: fieldbundle
     character(*),           intent(in)              :: file
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                intent(in),   optional  :: singleFile
     integer,                intent(in),   optional  :: timeslice
     type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.16 2011/06/27 19:46:28 rokuingh Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.17 2011/06/30 17:35:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.16 2011/06/27 19:46:28 rokuingh Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.17 2011/06/30 17:35:27 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -106,7 +106,7 @@ contains
     type(ESMF_Field),       intent(inout)           :: field
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
-    type(ESMF_RouteSync_Flag),    intent(in),   optional  :: routesyncflag
+    type(ESMF_RouteSync_Flag), intent(in), optional :: routesyncflag
     logical,                intent(out),  optional  :: finishedflag
     logical,                intent(in),   optional  :: checkflag
     integer,                intent(out),  optional  :: rc
@@ -258,8 +258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),       intent(inout)                :: field
     type(ESMF_RouteHandle), intent(inout)                :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_StartRegion_Flag), intent(in), &
-                            optional :: startregion
+    type(ESMF_StartRegion_Flag), intent(in),    optional :: startregion
     integer,                intent(in),         optional :: haloLDepth(:)
     integer,                intent(in),         optional :: haloUDepth(:)
     integer,                intent(out),        optional :: rc

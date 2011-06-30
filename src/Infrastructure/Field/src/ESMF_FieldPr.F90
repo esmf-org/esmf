@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.46 2011/06/24 14:25:48 rokuingh Exp $
+! $Id: ESMF_FieldPr.F90,v 1.47 2011/06/30 17:35:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -220,12 +220,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
       subroutine ESMF_FieldRead(field, file, &
-        timeslice, iofmt, rc)
+        keywordEnforcer, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field),     intent(inout)          :: field 
       character(*),         intent(in)             :: file 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(in),  optional  :: timeslice
       type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt 
       integer,              intent(out), optional  :: rc

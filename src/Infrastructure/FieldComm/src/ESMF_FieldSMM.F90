@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.30 2011/06/27 19:46:28 rokuingh Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.31 2011/06/30 17:35:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.30 2011/06/27 19:46:28 rokuingh Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.31 2011/06/30 17:35:27 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -86,7 +86,7 @@ contains
         type(ESMF_Field),       intent(inout),optional  :: dstField
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_Region_Flag),  intent(in),   optional  :: zeroregion
+        type(ESMF_Region_Flag),  intent(in),   optional :: zeroregion
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
@@ -265,7 +265,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(inout)         :: srcField  
+!   type(ESMF_Field),         intent(in)            :: srcField  
 !   type(ESMF_Field),         intent(inout)         :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
@@ -626,7 +626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(inout)         :: srcField  
+!   type(ESMF_Field),         intent(in)            :: srcField  
 !   type(ESMF_Field),         intent(inout)         :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
