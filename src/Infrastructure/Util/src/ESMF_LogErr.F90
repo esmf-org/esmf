@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.97 2011/06/30 05:17:30 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.98 2011/06/30 14:44:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9,6 +9,7 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_LogErr.F90"
 !
 !     ESMF LogErr Module
       module ESMF_LogErrMod
