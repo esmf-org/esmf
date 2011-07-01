@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.121 2011/07/01 16:07:08 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.122 2011/07/01 21:10:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.121 2011/07/01 16:07:08 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.122 2011/07/01 21:10:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -255,7 +255,7 @@ module ESMF_FieldBundleMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldBundleAssignment(=) - fieldbundle assignment
+! !IROUTINE: ESMF_FieldBundleAssignment(=) - FieldBundle assignment
 !
 ! !INTERFACE:
 !   interface assignment(=)
@@ -287,7 +287,7 @@ module ESMF_FieldBundleMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldBundleOperator(==) - fieldbundle equality operator
+! !IROUTINE: ESMF_FieldBundleOperator(==) - FieldBundle equality operator
 !
 ! !INTERFACE:
   interface operator(==)
@@ -332,13 +332,13 @@ module ESMF_FieldBundleMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldBundleOperator(/=) - fieldbundle not equal operator
+! !IROUTINE: ESMF_FieldBundleOperator(/=) - FieldBundle not equal operator
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (fieldbundle1 == fieldbundle2) then ... endif
+!   if (fieldbundle1 /= fieldbundle2) then ... endif
 !             OR
-!   result = (fieldbundle1 == fieldbundle2)
+!   result = (fieldbundle1 /= fieldbundle2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -491,7 +491,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: multiflag
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -740,7 +739,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -965,7 +963,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleDestroy()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleDestroy - Destroy a FieldBundle
+! !IROUTINE: ESMF_FieldBundleDestroy - Release resources associated with a FieldBundle
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundleDestroy(fieldbundle, keywordEnforcer, rc)
@@ -1133,7 +1131,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(out), optional :: isPresent
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -1225,7 +1222,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),       intent(out)           :: fieldList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1322,7 +1318,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),        intent(out), optional :: fieldNameList(:)
     character(len=*),        intent(out), optional :: name
     integer,                 intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1527,7 +1522,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
-!
 ! !DESCRIPTION:
 !   Get the fieldIndex-th Field in FieldBundle. The order of the Field in FieldBundle
 !   is not guranteed. If this call is used iteratively, then any Add, Replace, Remove
@@ -1611,7 +1605,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1719,7 +1712,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -1770,7 +1762,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),   optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1877,8 +1868,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_FieldBundle), intent(in)              :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc  
-!         
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -1960,8 +1949,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     logical,                intent(in),  optional  :: singleFile
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
-!         
-!
 !
 ! !DESCRIPTION:
 !   Read field data to a FieldBundle object from file(s).
@@ -2084,7 +2071,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2221,7 +2207,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2275,7 +2260,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(in),   optional :: srcToDstTransposeMap(:)
 !   integer,                intent(out),  optional :: rc 
-! 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2685,7 +2669,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                intent(in),   optional :: srcToDstTransposeMap(:)
 !   integer,                intent(out),  optional :: rc 
-! 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -2869,7 +2852,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -2963,7 +2945,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -3024,7 +3005,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
     type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
     integer,                   intent(out),   optional :: rc
-!
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
@@ -3311,7 +3291,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -3424,7 +3403,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional :: multiflag
     logical,                intent(in),  optional :: relaxedflag
     integer,                intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3845,10 +3823,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_FieldBundle), intent(inout), optional  :: dstFieldBundle
         type(ESMF_RouteHandle), intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_Region_Flag),  intent(in),    optional  :: zeroregion
+        type(ESMF_Region_Flag), intent(in),    optional  :: zeroregion
         logical,                intent(in),    optional  :: checkflag
         integer,                intent(out),   optional  :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -3999,7 +3976,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -4053,7 +4029,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(in),           :: factorIndexList(:,:) 
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional :: rc 
-! 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -4486,7 +4461,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                  intent(out), optional :: rc 
-! 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -4713,8 +4687,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     integer,                intent(in),   optional  :: timeslice
     type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
     integer,                intent(out),  optional  :: rc  
-!         
-!
 !
 ! !DESCRIPTION:
 !   Write the Fields into a file. For this API to be functional,
