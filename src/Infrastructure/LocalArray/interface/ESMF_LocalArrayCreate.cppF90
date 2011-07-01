@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.55 2011/06/30 18:14:28 w6ws Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.56 2011/07/01 03:56:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.55 2011/06/30 18:14:28 w6ws Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.56 2011/07/01 03:56:40 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -228,8 +228,6 @@ end interface
 !   type(ESMF_LocalArray) :: localarray1
 !   type(ESMF_LocalArray) :: localarray2
 !
-!
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -265,8 +263,6 @@ end interface
 ! !ARGUMENTS:
 !   type(ESMF_LocalArray), intent(in) :: localarray1
 !   type(ESMF_LocalArray), intent(in) :: localarray2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -311,8 +307,6 @@ end interface
 ! !ARGUMENTS:
 !   type(ESMF_LocalArray), intent(in) :: localarray1
 !   type(ESMF_LocalArray), intent(in) :: localarray2
-!
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -478,14 +472,16 @@ end function
     type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByTKR
 !
 ! !ARGUMENTS:
-    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
-    integer,              intent(in)            :: rank
+    type(ESMF_TypeKind_Flag), intent(in)            :: typekind
+    integer,                  intent(in)            :: rank
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(in),  optional :: totalCount(:)
-    integer,              intent(in),  optional :: totalLBound(:)
-    integer,              intent(in),  optional :: totalUBound(:)
-    integer,              intent(out), optional :: rc 
+    integer,                  intent(in),  optional :: totalCount(:)
+    integer,                  intent(in),  optional :: totalLBound(:)
+    integer,                  intent(in),  optional :: totalUBound(:)
+    integer,                  intent(out), optional :: rc 
 !
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -639,6 +635,8 @@ end function
     integer,              intent(in),  optional :: totalUBound(:)
     integer,              intent(out), optional :: rc 
 !
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -716,8 +714,6 @@ end function
     type(ESMF_LocalArray), intent(in)            :: localarray
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc 
-
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -785,6 +781,9 @@ end function
 !   integer,             intent(in),  optional :: totalLBound(:) @\
 !   integer,             intent(in),  optional :: totalUBound(:) @\
 !   integer,             intent(out), optional :: rc   @\
+! @\
+! !STATUS: @\
+! \apiStatusCompatible @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on a Fortran array pointer. @\
@@ -1020,7 +1019,6 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
 	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out),  optional  :: rc
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -1114,13 +1112,13 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     totalUBound, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_LocalArray), intent(inout)         :: array
-    integer, dimension(:), intent(in)            :: totalCount
-    type(ESMF_TypeKind_Flag),   intent(in)            :: typekind
-    integer,               intent(in)            :: rank
-    integer, dimension(:), intent(in)            :: totalLBound
-    integer, dimension(:), intent(in)            :: totalUBound
-    integer,               intent(out), optional :: rc 
+    type(ESMF_LocalArray),    intent(inout)         :: array
+    integer, dimension(:),    intent(in)            :: totalCount
+    type(ESMF_TypeKind_Flag), intent(in)            :: typekind
+    integer,                  intent(in)            :: rank
+    integer, dimension(:),    intent(in)            :: totalLBound
+    integer, dimension(:),    intent(in)            :: totalUBound
+    integer,                  intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Take a partially created {\tt ESMF\_LocalArray} and T/K/R information and

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.31 2011/06/30 18:14:28 w6ws Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.32 2011/07/01 03:56:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,7 +43,6 @@ module ESMF_LocalArrayGetMod
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
 !   integer,             intent(out), optional :: rc @\
-! @\
 ! @\
 ! !STATUS: @\
 ! \apiStatusCompatible @\
@@ -211,7 +210,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.31 2011/06/30 18:14:28 w6ws Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.32 2011/07/01 03:56:40 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -274,14 +273,13 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_LocalArray),      intent(in)            :: localarray
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_TypeKind_Flag),        intent(out), optional :: typekind
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_TypeKind_Flag),   intent(out), optional :: typekind
     integer,                    intent(out), optional :: rank
     integer,                    intent(out), optional :: totalCount(:)
     integer,                    intent(out), optional :: totalLBound(:)
     integer,                    intent(out), optional :: totalUBound(:)
     integer,                    intent(out), optional :: rc             
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
