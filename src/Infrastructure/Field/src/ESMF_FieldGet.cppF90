@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.91 2011/07/01 16:07:06 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.92 2011/07/01 21:52:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.91 2011/07/01 16:07:06 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.92 2011/07/01 21:52:06 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -147,9 +147,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Query an {\tt ESMF\_Field} for various things.  All arguments after
 ! the {\tt field} are optional.  To select individual items use the
 ! named\_argument=value syntax. For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:field_get_default}.
-
 !
 ! The arguments are:
 ! \begin{description}
@@ -160,15 +159,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       of the Field object.
 ! \item [{[status]}]
 !       \begin{sloppypar}
-!       The status of the Field. It can take one of the following returned values: 
-!       {\tt ESMF\_FIELDSTATUS\_EMPTY}
-!       (the Field is empty without a GeomBase or Array),
-!       {\tt ESMF\_FIELDSTATUS\_GRIDSET} (the Field has a GeomBase internally), 
-!       {\tt ESMF\_FIELDSTATUS\_COMPLETE} (the Field has a GeomBase and an Array internally).
-!       \end{sloppypar}
+!       The status of the Field. See section \ref{const:fieldstatus} for a
+!       complete list of values.
 ! \item [{[geomtype]}]
-!       Specifies the type of geometry on which the Field is built. Please see Section~\ref{const:geomtype} for 
-!       the range of values.
+!       The type of geometry on which the Field is built. See
+!       section~\ref{const:geomtype} for the range of values.
 ! \item [{[grid]}]
 !       {\tt ESMF\_Grid}.
 ! \item [{[mesh]}]
@@ -183,23 +178,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[array]}]
 !       {\tt ESMF\_Array}.
 ! \item [{[typekind]}]
-!       TypeKind specifier for Field.
+!       TypeKind specifier for Field. See section \ref{const:typekind} for a
+!       complete list of values.
 ! \item [{[dimCount]}]
 !       Number of geometrical dimensions in {\tt field}.
 !       For an detailed discussion of this parameter, please see 
-!       Section \ref{sec:field:usage:createArbGrid} and
-!       Section \ref{sec:field:usage:createArbGridRep}. 
+!       section \ref{sec:field:usage:createArbGrid} and
+!       section \ref{sec:field:usage:createArbGridRep}. 
 ! \item [{[rank]}]
 !       Number of dimensions in the physical memory of the {\tt field} data. It is 
 !       identical to dimCount when the corresponding grid is a non-arbitrary grid.
 !       It is less than dimCount when the grid is arbitrarily distributed.
 !       For an detailed discussion of this parameter, please see 
-!       Section \ref{sec:field:usage:createArbGrid} and
-!       Section \ref{sec:field:usage:createArbGridRep}. 
+!       section \ref{sec:field:usage:createArbGrid} and
+!       section \ref{sec:field:usage:createArbGridRep}. 
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
-!       Section \ref{const:staggerloc}.
+!       section \ref{const:staggerloc}.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException
@@ -210,13 +206,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[xgridside]}]
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException
-!        The side of the XGrid that the Field was created on (either ESMF\_XGRIDSIDE\_A,
-!        ESMF\_XGRIDSIDE\_B, or ESMF\_XGRID\_BALANCED). 
+!       The side of the XGrid that the Field was created on. See section 
+!       \ref{const:xgridside} for a complete list of values.
 !       \end{sloppypar}
 ! \item [{[gridIndex]}]
 !       \apiStatusCompatibleException
-!       If xgridside is ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which 
-!       Grid/Mesh on that side the Field was created on. 
+!       If xgridside is {\tt ESMF\_XGRIDSIDE\_A} or {\tt ESMF\_XGRIDSIDE\_B}
+!       then this index tells which Grid/Mesh on that side the Field was
+!       created on. 
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -630,7 +627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Get a Fortran pointer to DE-local memory allocation within {\tt field}. @\
 ! For convenience DE-local bounds can be queried at the same time. @\
 ! For an example and @\
-! associated documentation using this method see Section @\
+! associated documentation using this method see section @\
 ! \ref{sec:field:usage:field_get_dataptr}. @\
 ! @\
 ! The arguments are: @\
@@ -823,35 +820,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     Please see section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
 !     {\tt exclusiveUBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     Please see section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[exclusiveCount]}]
 !     Upon return this holds the number of items, {\tt exclusiveUBound-exclusiveLBound+1}, 
 !     in the exclusive region per dimension.
 !     {\tt exclusiveCount} must
 !     be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     Please see section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the stagger region.
 !     {\tt computationalLBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     Please see section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the stagger region.
 !     {\tt computationalUBound} must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     Please see section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[computationalCount]}]
 !     Upon return this holds the number of items in the computational region per dimension
 !     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
 !      must be allocated to be of size equal to the field rank.
-!     Please see Section~\ref{sec:grid:usage:bounds} for a description
+!     Please see section~\ref{sec:grid:usage:bounds} for a description
 !     of the regions and their associated bounds and counts. 
 ! \item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.

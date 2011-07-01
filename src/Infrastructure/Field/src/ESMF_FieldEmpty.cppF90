@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.25 2011/07/01 21:24:11 theurich Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.26 2011/07/01 21:52:06 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.25 2011/07/01 21:24:11 theurich Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.26 2011/07/01 21:52:06 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -172,8 +172,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for a list of valid indexflag options.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{const:staggerloc}.
-!       To create a custom stagger location see Section
+!       predefined values see section \ref{const:staggerloc}.
+!       To create a custom stagger location see section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item [{[gridToFieldMap]}]
@@ -384,7 +384,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{sloppypar}
 !
 ! For an example and
-! associated documentation using this method see Section
+! associated documentation using this method see section
 ! \ref{sec:field:usage:partial_creation}.
 ! 
 ! 
@@ -406,8 +406,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for a list of valid indexflag options.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{const:staggerloc}.
-!       To create a custom stagger location see Section
+!       predefined values see section \ref{const:staggerloc}.
+!       To create a custom stagger location see section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item [{[gridToFieldMap]}]
@@ -1195,8 +1195,8 @@ end subroutine ESMF_FieldEmptyCompTK
 !       values are {\tt ESMF\_DATACOPY\_VALUE} or {\tt ESMF\_DATACOPY\_REFERENCE} (default).
 ! \item [staggerloc] 
 !       Stagger location of data in grid cells.  For valid 
-!       predefined values see Section \ref{const:staggerloc}.
-!       To create a custom stagger location see Section
+!       predefined values see section \ref{const:staggerloc}.
+!       To create a custom stagger location see section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item [gridToFieldMap]
@@ -1419,7 +1419,7 @@ end subroutine ESMF_FieldEmptyCompTK
 ! the retrieved data pointer is not allowed. @\
 ! @\
 ! For an example and @\
-! associated documentation using this method see Section @\
+! associated documentation using this method see section @\
 ! \ref{sec:field:usage:create_empty}. @\
 ! @\
 ! @\
@@ -1845,8 +1845,8 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{const:staggerloc}. @\
-!       To create a custom stagger location see Section @\
+!       predefined values see section \ref{const:staggerloc}. @\
+!       To create a custom stagger location see section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
@@ -2053,8 +2053,8 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{const:staggerloc}. @\
-!       To create a custom stagger location see Section @\
+!       predefined values see section \ref{const:staggerloc}. @\
+!       To create a custom stagger location see section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
@@ -3045,7 +3045,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. For an example and @\
-! associated documentation using this method see Section  @\
+! associated documentation using this method see section  @\
 ! \ref{sec:field:usage:partial_creation}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried but deallocating @\
@@ -3596,7 +3596,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. For an example and @\
-! associated documentation using this method see Section  @\
+! associated documentation using this method see section  @\
 ! \ref{sec:field:usage:partial_creation}. @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
@@ -4014,7 +4014,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! it. The empty {\tt ESMF\_Field} can be completed in one more step or two more steps by
 ! the {\tt ESMF\_FieldEmptySet} and {\tt ESMF\_FieldEmptyComplete} methods.
 ! Attributes can be added to an empty Field object. For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:create_empty} and \ref{sec:field:usage:partial_creation}.
 ! \end{sloppypar}
 !
@@ -4102,7 +4102,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 !
 ! For an example and
-! associated documentation using this method see Section
+! associated documentation using this method see section
 ! \ref{sec:field:usage:partial_creation}.
 ! \end{sloppypar}
 !
@@ -4119,8 +4119,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_Grid} to be set in the {\tt ESMF\_Field}.
 ! \item [{[StaggerLoc]}] 
 !       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{const:staggerloc}.
-!       To create a custom stagger location see Section
+!       predefined values see section \ref{const:staggerloc}.
+!       To create a custom stagger location see section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item [{[rc]}] 
@@ -4389,7 +4389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
 ! \item [{[xgridside]}] 
 !       Side of XGrid to retrieve a DistGrid.  For valid
-!       predefined values see Section \ref{sec:const:xgridside}.
+!       predefined values see section \ref{sec:const:xgridside}.
 !       The default value is {\tt ESMF\_XGRIDSIDE\_BALANCED}.
 ! \item [{[gridindex]}] 
 !       Index to specify which DistGrid when on side A or side B. 
