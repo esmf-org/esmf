@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.33 2011/06/24 15:04:04 rokuingh Exp $
+% $Id: LogErr_desc.tex,v 1.34 2011/07/01 22:19:53 w6ws Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,13 +28,14 @@ another value.  The {\tt ESMF\_LogFlush()} method is automatically called when
 the program exits by any means (program completion, halt on error, or when the
 Log is closed).
 
-The user has the capability to halt the program on an error or on a warning by
-using the {\tt ESMF\_LogSet()} method with the {\tt halt} property.  When the 
-{\tt halt} property is set to {\tt ESMF\_LOG\_HALT\_ON\_WARNING}, the program will 
-stop on any and all warning or errors.  When the {\tt halt} property is set to 
-{\tt ESMF\_LOG\_HALT\_ON\_ERROR}, the program will only halt only on errors.  Lastly,
-the user can choose to never halt by setting the {\tt halt} property to 
-{\tt ESMF\_LOG\_HALT\_NEVER}; this is the default.
+The user has the capability to abort the program on conditions such as
+an error or on a warning by using the {\tt ESMF\_LogSet()} method with
+the {\tt logmsgAbort} argument.  For example if the  {\tt logmsgAbort} array
+is set to {\tt (ESMF\_LOGMSG\_ERROR,ESMF\_LOGMSG\_WARNING)}, the program will 
+stop on any and all warning or errors.  When the {\tt logmsgAbort} argument
+is set to  {\tt ESMF\_LOGMSG\_ERROR}, the program will only abort on
+errors.  Lastly, the user can choose to never abort by using
+{\tt ESMF\_LOGMSG\_NONE}; this is the default.
 
 Log will automatically put the PET number into the Log.  Also, the user can 
 either specify {\tt ESMF\_LOGKIND\_SINGLE} which writes all the entries to a single 
@@ -50,7 +51,7 @@ switch off the Log capability.  All the Log methods have no effect
 in the {\tt ESMF\_LOGKIND\_NONE} mode.
 
 \begin{sloppypar}
-A tracing capability may be enabled by setting the {\tt trace} flag
+A tracing capability may be enabled by setting the {\tt trace} flag by
 using the {\tt ESMF\_LogSet()} method.  When tracing is enabled, calls to
 methods such as {\tt ESMF\_LogFoundError}, {\tt ESMF\_LogFoundAllocError},
 and {\tt ESMF\_LogFoundDeallocError} are logged in the default log file.
