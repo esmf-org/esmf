@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.101 2011/07/01 18:29:45 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.102 2011/07/01 18:34:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.101 2011/07/01 18:29:45 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.102 2011/07/01 18:34:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -460,7 +460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
-!          \ref{const:pinflag} for a list of valid pinning options.
+!          \ref{const:pin_flag} for a list of valid pinning options.
 !     \item[{[petList]}]
 !          List specifying PETs to be used by this DELayout. This can be used
 !          to control the PET overlap between DELayouts within the same
@@ -572,7 +572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
-!          \ref{const:pinflag} for a list of valid pinning options.
+!          \ref{const:pin_flag} for a list of valid pinning options.
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object. The VM of the current context is the
 !          typical and default value.
@@ -683,7 +683,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
-!          \ref{const:pinflag} for a list of valid pinning options.
+!          \ref{const:pin_flag} for a list of valid pinning options.
 !     \item[{[petList]}]
 !          List specifying PETs to be used by this DELayout. This can be used
 !          to control the PET overlap between DELayouts within the same
@@ -1027,7 +1027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt .FALSE.} otherwise.
 !     \item[{[pinflag]}]
 !        Upon return this flag will indicate the type of DE pinning. 
-!        See section \ref{const:pinflag} for a list of valid pinning 
+!        See section \ref{const:pin_flag} for a list of valid pinning 
 !        options.
 !     \item[{[localDeCount]}]
 !        Upon return this holds the number of DEs associated with the local PET.
@@ -1648,6 +1648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     together with {\tt ESMF\_DELayoutServiceComplete()} provides the
 !     synchronization primitives between the PETs of an ESMF multi-threaded VM
 !     necessary for dynamic load balancing via a work queue approach.
+!
 !     The calling PET will either receive {\tt ESMF\_SERVICEREPLY\_ACCEPT} if
 !     the service offer has been accepted by DELayout or 
 !     {\tt ESMF\_SERVICEREPLY\_DENY} if the service offer was denied. The 
@@ -1655,7 +1656,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     the DELayout keeps track of the number of service offers issued for each
 !     DE by each PET and accepts only one PET's offer for each offer increment.
 !     This requires that all PETs use {\tt ESMF\_DELayoutServiceOffer()} in 
-!     unison.
+!     unison. See section \ref{const:servicereply_flag} for the potential return
+!     values.
 !     \end{sloppypar}
 !
 !     The arguments are:
