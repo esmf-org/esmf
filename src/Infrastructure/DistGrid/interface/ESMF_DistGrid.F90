@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.97 2011/06/30 20:06:53 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.98 2011/07/01 20:30:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.97 2011/06/30 20:06:53 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.98 2011/07/01 20:30:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -669,12 +669,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The default is a zero vector.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -787,12 +789,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Extra elements on the edge of the last DEs along each dimension.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -926,12 +930,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1112,12 +1118,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1272,12 +1280,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.
@@ -1448,12 +1458,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          argument.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.
@@ -1605,13 +1617,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          sequence is given by the column major order of the {\tt regDecompPTile}
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndexPTile} and
-!          {\tt maxIndexPTile} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          Indicates whether the indices provided by the {\tt minIndex} and
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1797,12 +1811,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with the correct number of DEs. If
@@ -1938,12 +1954,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.
@@ -2082,12 +2100,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
 !          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are to be interpreted to form a flat
-!          pseudo global index space ({\tt ESMF\_INDEX\_GLOBAL}) or are to be 
-!          taken as tile local ({\tt ESMF\_INDEX\_DELOCAL}), which is the default.
+!          {\tt maxIndex} arguments are to be interpreted to form a global
+!          index space or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
+!          See section \ref{const:indexflag} for a complete list of options.
 !     \item[{[connectionList]}]
 !          List of {\tt ESMF\_DistGridConnection} objects, defining connections
 !          between DistGrid tiles in index space.
+!          See section \ref{api:DistGridConnectionSet} for the associated Set()
+!          method.
 !     \item[fastAxis]
 !          Integer value indicating along which axis fast communication is
 !          requested. This hint will be used during DELayout creation.

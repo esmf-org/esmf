@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.11 2011/06/30 18:27:17 w6ws Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.12 2011/07/01 20:30:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -186,6 +186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
+!   \label{api:DistGridConnectionSet}
 !   Set an {\tt ESMF\_DistGridConnection} object to represent a connection 
 !   according to the provided index space information.
 !
