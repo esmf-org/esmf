@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.28 2011/06/30 15:34:35 rokuingh Exp $
+% $Id: State_refdoc.ctex,v 1.29 2011/07/01 05:11:28 w6ws Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -101,10 +101,12 @@
 \input{ESMF_StateAPI_fapi}
 \input{ESMF_StateReconcile_fapi}
 \input{ESMF_StateVa_fapi}
+\input{ESMF_StateWr_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_StateAPI_fapi}
 \input{../Superstructure/State/doc/ESMF_StateReconcile_fapi}
 \input{../Superstructure/State/doc/ESMF_StateVa_fapi}
+\input{../Superstructure/State/doc/ESMF_StateWr_fapi}
 #endif
 
 %TODO:FIELDINTEGRATION Restore StateGet methods
