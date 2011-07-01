@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.43 2011/06/30 05:59:16 theurich Exp $
+! $Id: ESMF_MeshEx.F90,v 1.44 2011/07/01 16:07:29 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ program ESMF_MeshEx
 ! It is IMPORTANT to note, that the entries in this list are NOT the global ids of the nodes, but are indices into the PET local lists of
 ! node info used in the Mesh Create. In other words, the element connectivity isn't specified in terms of the global list of nodes, but instead
 ! is specified in terms of the locally described node info. One other important point about connectivities is that the order of the nodes in the 
-! connectivity list of an element is important. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating the correct order of
+! connectivity list of an element is important. Please see Section~\ref{const:meshelemtype} for diagrams illustrating the correct order of
 ! nodes in an element. 
 !
 ! \begin{sloppypar}

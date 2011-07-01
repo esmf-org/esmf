@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.56 2011/06/30 05:59:23 theurich Exp $
+! $Id: ESMF_ClockEx.F90,v 1.57 2011/07/01 16:07:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 
 !BOC
       ! initialize ESMF framework
-      call ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN, &
+      call ESMF_Initialize(defaultCalKind=ESMF_CALKIND_GREGORIAN, &
         defaultlogfilename="ClockEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC

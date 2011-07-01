@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetAllocBounds.F90,v 1.1 2011/06/30 20:13:56 feiliu Exp $
+! $Id: ESMF_FieldGetAllocBounds.F90,v 1.2 2011/07/01 16:07:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ module ESMF_FieldGetAllocBoundsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.1 2011/06/30 20:13:56 feiliu Exp $'
+    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.2 2011/07/01 16:07:06 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -138,7 +138,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
-!       Section \ref{sec:opt:staggerloc}.
+!       Section \ref{const:staggerloc}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension

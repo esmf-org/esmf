@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.79 2011/06/24 15:04:24 rokuingh Exp $
+! $Id: ESMF_Init.F90,v 1.80 2011/07/01 16:07:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,14 +94,14 @@
 ! !IROUTINE:  ESMF_Initialize - Initialize ESMF
 !
 ! !INTERFACE:
-      subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalendar, &
+      subroutine ESMF_Initialize(keywordEnforcer, defaultConfigFileName, defaultCalKind, &
         defaultLogFileName, logkindflag, mpiCommunicator,  &
         ioUnitLBound, ioUnitUBound, vm, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogKind_Flag),      intent(in),  optional :: logkindflag
       integer,                 intent(in),  optional :: mpiCommunicator
@@ -158,16 +158,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [{[defaultConfigFilename]}]
 !           Name of the default configuration file for the entire application.
-!     \item [{[defaultCalendar]}]
+!     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
-!           See section \ref{opt:calkindflag} for a list of valid options.
+!           See section \ref{const:calkindflag} for a list of valid options.
 !           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
 !     \item [{[logkindflag]}]
 !           Sets the default Log Type to be used by ESMF Log Manager.
-!           See section \ref{opt:logkindflag} for a list of valid options.
+!           See section \ref{const:logkindflag} for a list of valid options.
 !           If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
@@ -203,7 +203,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! initialize the framework
       call ESMF_FrameworkInternalInit(lang=ESMF_MAIN_F90, &
         defaultConfigFileName=defaultConfigFileName, &
-        defaultCalendar=defaultCalendar, defaultLogFileName=defaultLogFileName,&
+        defaultCalKind=defaultCalKind, defaultLogFileName=defaultLogFileName,&
         logkindflag=logkindflag, mpiCommunicator=mpiCommunicator, &
         ioUnitLBound=ioUnitLBound, ioUnitUBound=ioUnitUBound,  &
         rc=localrc)
@@ -237,13 +237,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
-        defaultCalendar, defaultLogFileName, logkindflag, &
+        defaultCalKind, defaultLogFileName, logkindflag, &
         mpiCommunicator, ioUnitLBound, ioUnitUBound, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
       character(len=*),        intent(in),  optional :: defaultConfigFileName
-      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalendar     
+      type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind     
       character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_LogKind_Flag),      intent(in),  optional :: logkindflag  
       integer,                 intent(in),  optional :: mpiCommunicator
@@ -262,7 +262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           related to initialization, such as starting MPI.
 !     \item [{[defaultConfigFilename]}]
 !           Name of the default config file for the entire application.
-!     \item [{[defaultCalendar]}]
+!     \item [{[defaultCalKind]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CALKIND\_NOCALENDAR}.
 !     \item [{[defaultLogFileName]}]
@@ -385,7 +385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Initialize the default time manager calendar
-      call ESMF_CalendarInitialize(calkindflag=defaultCalendar, rc=status)
+      call ESMF_CalendarInitialize(calkindflag=defaultCalKind, rc=status)
       if (status .ne. ESMF_SUCCESS) then
          print *, "Error initializing the default time manager calendar"
       return
@@ -462,7 +462,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Specify mode of termination. The default is {\tt ESMF\_END\_NORMAL}
 !           which waits for all PETs of the global VM to reach 
 !           {\tt ESMF\_Finalize()} before termination. See section 
-!           \ref{app:endflag} for a complete list and description of
+!           \ref{const:endflag} for a complete list and description of
 !           valid flags.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.

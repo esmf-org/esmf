@@ -1,13 +1,7 @@
-% $Id: Grid_options.tex,v 1.47 2011/06/30 15:34:25 rokuingh Exp $
-
-\subsubsection{ESMF\_ARBDIM}
-\label{sec:opt:arbdim}
-
-{\sf DESCRIPTION:\\}
-A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
+% $Id: Grid_options.tex,v 1.48 2011/07/01 16:07:09 rokuingh Exp $
 
 \subsubsection{ESMF\_COORDSYS}
-\label{sec:opt:coordsys}
+\label{const:coordsys}
 
 {\sf DESCRIPTION:\\}
  A set of values which indicates in which system the coordinates in the Grid are. This value is useful both to indicate to 
@@ -29,7 +23,7 @@ The valid values are:
 
 
 \subsubsection{ESMF\_GRIDCONN}
-\label{sec:opt:gridconn}
+\label{const:gridconn}
 
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
@@ -63,7 +57,7 @@ that the edge is n elements long, element i is connected to element n-i-1.
 
 
 \subsubsection{ESMF\_GRIDITEM}
-\label{sec:opt:griditem}
+\label{const:griditem}
 
 {\sf DESCRIPTION:\\}
 The ESMF Grid can contain other kinds of data besides coordinates. 
@@ -89,7 +83,7 @@ Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\
 
 
 \subsubsection{ESMF\_GRIDMATCH}
-\label{sec:opt:gridmatchtype}
+\label{const:gridmatch}
 
 {\sf DESCRIPTION:\\}
  This type is used to indicate the level to which two grids match.
@@ -113,7 +107,7 @@ The valid values are:
 
 
 \subsubsection{ESMF\_GRIDSTATUS}
-\label{sec:opt:gridstatus}
+\label{const:gridstatus}
 
 {\sf DESCRIPTION:\\}
 The ESMF Grid class can exist in two states. These states are
@@ -140,7 +134,7 @@ The valid values are:
 
 
 \subsubsection{ESMF\_POLEKIND}
-\label{sec:opt:polekind}
+\label{const:polekind}
 
 {\sf DESCRIPTION:\\}
 This type describes the type of connection that occurs at the pole when a Grid is 
@@ -164,7 +158,7 @@ that the edge is n elements long, element i is connected to element n-i-1.
 
 
 \subsubsection{ESMF\_STAGGERLOC}
-\label{sec:opt:staggerloc}
+\label{const:staggerloc}
 
  {\sf DESCRIPTION:\\}
  In the ESMF Grid class, data can be located at different positions in a

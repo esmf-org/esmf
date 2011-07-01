@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.23 2011/06/30 19:27:08 w6ws Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.24 2011/07/01 16:07:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.23 2011/06/30 19:27:08 w6ws Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.24 2011/07/01 16:07:06 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -253,7 +253,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_Grid} to be set in the {\tt ESMF\_Field}.
 ! \item [{[StaggerLoc]}] 
 !       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{sec:opt:staggerloc}.
+!       predefined values see Section \ref{const:staggerloc}.
 !       To create a custom stagger location see Section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
@@ -523,7 +523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
 ! \item [{[xgridside]}] 
 !       Side of XGrid to retrieve a DistGrid.  For valid
-!       predefined values see Section \ref{sec:opt:xgridoptions}.
+!       predefined values see Section \ref{sec:const:xgridside}.
 !       The default value is {\tt ESMF\_XGRIDSIDE\_BALANCED}.
 ! \item [{[gridindex]}] 
 !       Index to specify which DistGrid when on side A or side B. 
@@ -679,7 +679,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for a list of valid indexflag options.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{sec:opt:staggerloc}.
+!       predefined values see Section \ref{const:staggerloc}.
 !       To create a custom stagger location see Section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
@@ -913,7 +913,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for a list of valid indexflag options.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{sec:opt:staggerloc}.
+!       predefined values see Section \ref{const:staggerloc}.
 !       To create a custom stagger location see Section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
@@ -1702,7 +1702,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !       values are {\tt ESMF\_DATACOPY\_VALUE} or {\tt ESMF\_DATACOPY\_REFERENCE} (default).
 ! \item [staggerloc] 
 !       Stagger location of data in grid cells.  For valid 
-!       predefined values see Section \ref{sec:opt:staggerloc}.
+!       predefined values see Section \ref{const:staggerloc}.
 !       To create a custom stagger location see Section
 !       \ref{sec:usage:staggerloc:adv}. The default
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
@@ -2352,7 +2352,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{sec:opt:staggerloc}. @\
+!       predefined values see Section \ref{const:staggerloc}. @\
 !       To create a custom stagger location see Section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
@@ -2560,7 +2560,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[staggerloc]}] @\
 !       Stagger location of data in grid cells.  For valid  @\
-!       predefined values see Section \ref{sec:opt:staggerloc}. @\
+!       predefined values see Section \ref{const:staggerloc}. @\
 !       To create a custom stagger location see Section @\
 !       \ref{sec:usage:staggerloc:adv}. The default @\
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\

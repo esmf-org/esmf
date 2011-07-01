@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.90 2011/06/30 20:13:56 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.91 2011/07/01 16:07:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.90 2011/06/30 20:13:56 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.91 2011/07/01 16:07:06 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -199,7 +199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
-!       Section \ref{sec:opt:staggerloc}.
+!       Section \ref{const:staggerloc}.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException

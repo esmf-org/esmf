@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.99 2011/06/30 18:07:59 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.100 2011/07/01 16:07:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.99 2011/06/30 18:07:59 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.100 2011/07/01 16:07:02 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -460,7 +460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
-!          \ref{opt:depinflag} for a list of valid pinning options.
+!          \ref{const:depinflag} for a list of valid pinning options.
 !     \item[{[petList]}]
 !          List specifying PETs to be used by this DELayout. This can be used
 !          to control the PET overlap between DELayouts within the same
@@ -572,7 +572,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
-!          \ref{opt:depinflag} for a list of valid pinning options.
+!          \ref{const:depinflag} for a list of valid pinning options.
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object. The VM of the current context is the
 !          typical and default value.
@@ -683,7 +683,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          This flag specifies which type of resource DEs are pinned to. 
 !          The default is to pin DEs to PETs. Alternatively it is
 !          also possible to pin DEs to VASs. See section 
-!          \ref{opt:depinflag} for a list of valid pinning options.
+!          \ref{const:depinflag} for a list of valid pinning options.
 !     \item[{[petList]}]
 !          List specifying PETs to be used by this DELayout. This can be used
 !          to control the PET overlap between DELayouts within the same
@@ -1027,7 +1027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt .FALSE.} otherwise.
 !     \item[{[pinflag]}]
 !        Upon return this flag will indicate the type of DE pinning. 
-!        See section \ref{opt:depinflag} for a list of valid pinning 
+!        See section \ref{const:depinflag} for a list of valid pinning 
 !        options.
 !     \item[{[localDeCount]}]
 !        Upon return this holds the number of DEs associated with the local PET.

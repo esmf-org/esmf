@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.132 2011/06/30 05:59:24 theurich Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.133 2011/07/01 16:07:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.132 2011/06/30 05:59:24 theurich Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.133 2011/07/01 16:07:35 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1452,7 +1452,7 @@
         	timeDiff =  currentTime - previousTime 
 
                 ! Note: this timeInterval comparison depends on
-                ! ESMF_Initialize(defaultCalendar=ESMF_CALKIND_GREGORIAN) 
+                ! ESMF_Initialize(defaultCalKind=ESMF_CALKIND_GREGORIAN) 
                 ! being set so the timeIntervals' (timeStep) magnitude can 
                 ! be determined.
         	if((timeDiff.ne.timeStep).and.(testResults.eq.0)) then	

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.98 2011/06/30 05:59:03 theurich Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.99 2011/07/01 16:07:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -322,7 +322,7 @@ endif
 ! {\tt connflagDim1}, {\tt connflagDim2}, and {\tt connflagDim3} which specify the
 ! tile connectivitay. Each of these consists of a two element array of 
 ! type {\tt ESMF\_GridConn\_Flag}. The two elements specify the connectivity using 
-! predefined tags. See section \ref{sec:opt:gridconn} for a list of valid
+! predefined tags. See section \ref{const:gridconn} for a list of valid
 ! values for {\tt ESMF\_GridConn\_Flag}. The first entry specifies the low end of 
 ! the dimension, while the second specifies the high end.
 !
@@ -1110,7 +1110,7 @@ endif
 ! at the cell center, at the cell corners, or at the cell faces, in 2D, 3D, and
 ! higher dimensions. (Note that any Arakawa stagger can be constructed
 ! of a set of Grid stagger locations.)  There are predefined stagger locations
-! (see Section~\ref{sec:opt:staggerloc}), or,
+! (see Section~\ref{const:staggerloc}), or,
 ! should the user wish to specify their own, there
 ! is also a set of methods for generating custom locations 
 ! (See Section~\ref{sec:usage:staggerloc:adv}).
@@ -1460,7 +1460,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 ! data as they see fit, the user should be aware that
 ! this data may also be used by other parts of ESMF (e.g. the 
 ! ESMF\_GRIDITEM\_MASK item is used in regridding). 
-! Please see Section~\ref{sec:opt:griditem} for a list of valid
+! Please see Section~\ref{const:griditem} for a list of valid
 ! items.
 !
 ! Like coordinates items are also created on stagger locations.
@@ -2498,7 +2498,7 @@ endif
 !\subsubsection{Specify custom stagger locations}
 !\label{sec:usage:staggerloc:adv}
 !
-! Although ESMF provides a set of predefined stagger locations (See Section~\ref{sec:opt:staggerloc}),
+! Although ESMF provides a set of predefined stagger locations (See Section~\ref{const:staggerloc}),
 ! the user may need one outside this set. This section describes the construction of
 ! custom stagger locations. 
 !

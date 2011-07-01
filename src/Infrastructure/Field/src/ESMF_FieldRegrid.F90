@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.77 2011/06/30 19:27:08 w6ws Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.78 2011/07/01 16:07:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.77 2011/06/30 19:27:08 w6ws Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.78 2011/07/01 16:07:06 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -374,7 +374,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           to construct on the source Grid for regridding. Only valid when 
 !           {\tt regridScheme} is set to 
 !           {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see 
-!           Section~\ref{opt:polemethod} for a list of
+!           Section~\ref{const:polemethod} for a list of
 !           valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
 !     \item [{[regridPoleNPnts]}]
 !           If {\tt polemethod} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.

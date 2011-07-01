@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.41 2011/06/30 14:49:55 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.42 2011/07/01 16:07:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@ program ESMF_RegridWeightGen
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
-      call ESMF_Initialize (defaultCalendar=ESMF_CALKIND_GREGORIAN, &
+      call ESMF_Initialize (defaultCalKind=ESMF_CALKIND_GREGORIAN, &
 			defaultlogfilename="RegridWeightGen.Log", &
                     	logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)

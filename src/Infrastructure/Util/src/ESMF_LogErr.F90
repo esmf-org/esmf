@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.98 2011/06/30 14:44:11 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.99 2011/07/01 16:07:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -166,15 +166,15 @@ type ESMF_LogPrivate
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
     integer                                         ::  errorMaskCount= 0
     integer, dimension(:), pointer                  ::  errorMask(:)  => null ()
-    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgflag(:) => null ()
-    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgabort(:)=> null ()
+    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:) => null ()
+    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)=> null ()
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
     integer                                         ::  errorMaskCount
     integer, dimension(:), pointer                  ::  errorMask(:)
-    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgflag(:)
-    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgabort(:)
+    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:)
+    type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)
 #endif                                          
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -441,7 +441,7 @@ contains
 !       s%errorMask(:)=>Null()
        nullify(s%errorMask)
        s%errorMaskCount=0
-       s%logmsgflag => null ()
+       s%logmsgList => null ()
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogPrivateInit
 
@@ -1217,7 +1217,7 @@ end function ESMF_LogFoundError
 
 ! !INTERFACE: 
       subroutine ESMF_LogGet(log, verbose, flush, rootOnly,    &
-                             logmsgabort, logkindflag, stream, &
+                             logmsgAbort, logkindflag, stream, &
                              maxElements, trace, rc)
 !
 ! !ARGUMENTS:
@@ -1226,7 +1226,7 @@ end function ESMF_LogFoundError
       type(ESMF_Logical), intent(out), optional  :: verbose	       
       type(ESMF_Logical), intent(out), optional  :: flush	       
       type(ESMF_Logical), intent(out), optional  :: rootOnly	       
-      type(ESMF_LogMsg_Flag), pointer, optional  :: logmsgabort(:)
+      type(ESMF_LogMsg_Flag), pointer, optional  :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag     	
       integer, intent(out),optional              :: stream      	
       integer, intent(out),optional              :: maxElements
@@ -1249,7 +1249,7 @@ end function ESMF_LogFoundError
 !            Flush flag.
 !      \item [{[rootOnly]}]
 !	     Root only flag.
-!      \item [{[logmsgabort]}]
+!      \item [{[logmsgAbort]}]
 !            Returns an array containing current message halt settings.
 !            If the array is not pre-allocated, {\tt ESMF\_LogGet} will
 !            allocate an array of the correct size.  If no message types
@@ -1323,25 +1323,25 @@ end function ESMF_LogFoundError
 
       ! Return an array with the current values.  If the user has not
       ! pre-allocated an array, do the allocation here.
-	if (present(logmsgabort)) then
-          if (associated (alog%logmsgabort)) then
-            lma_size = size (alog%logmsgabort)
+	if (present(logmsgAbort)) then
+          if (associated (alog%logmsgAbort)) then
+            lma_size = size (alog%logmsgAbort)
           else
             lma_size = 0
           end if
 
-          if (associated (logmsgabort)) then
-            if (size (logmsgabort) < lma_size) then
+          if (associated (logmsgAbort)) then
+            if (size (logmsgAbort) < lma_size) then
               if (ESMF_LogFoundError (ESMF_RC_ARG_SIZE,   &
-                  msg='logmsgabort array size too small', &
+                  msg='logmsgAbort array size too small', &
                   ESMF_CONTEXT, rcToReturn=rc)) return
             end if
           else
-            allocate (logmsgabort(lma_size), stat=memstat)
+            allocate (logmsgAbort(lma_size), stat=memstat)
           end if
 
-          if (associated (alog%logmsgabort)) then
-            logmsgabort = alog%logmsgabort(:lma_size)
+          if (associated (alog%logmsgAbort)) then
+            logmsgAbort = alog%logmsgAbort(:lma_size)
           end if
         endif
 
@@ -1427,7 +1427,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [filename]
 !            Name of log file to be opened.
 !      \item [{[logkindflag]}]
-!            Set the logkindflag. See section \ref{opt:logkindflag} for a list of
+!            Set the logkindflag. See section \ref{const:logkindflag} for a list of
 !            valid options.
 !            If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
 !      \item [{[rc]}]
@@ -1495,7 +1495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     alog%flushed = ESMF_FALSE
     alog%dirty = ESMF_FALSE
     alog%FileIsOpen=ESMF_FALSE
-    alog%logmsgabort => null ()
+    alog%logmsgAbort => null ()
     nullify(alog%errorMask)
     alog%errorMaskCount=0
     if (present(logkindflag)) then
@@ -1597,7 +1597,7 @@ end subroutine ESMF_LogOpen
 
 ! !INTERFACE: 
 	subroutine ESMF_LogSet(keywordEnforcer, log, verbose, flush, rootOnly,  &
-                               logmsgabort, stream, maxElements, logmsgflag,  &
+                               logmsgAbort, stream, maxElements, logmsgList,  &
                                errorMask, trace, rc)
 !
 ! !ARGUMENTS:
@@ -1607,10 +1607,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,             intent(in),    optional :: verbose		   
       logical,             intent(in),    optional :: flush		   
       logical,             intent(in),    optional :: rootOnly		   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgabort(:)		   
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgAbort(:)		   
       integer,             intent(in),    optional :: stream		   
       integer,             intent(in),    optional :: maxElements 	   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgflag(:) 	   
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgList(:) 	   
       integer,             intent(in),    optional :: errorMask(:)
       logical,             intent(in),    optional :: trace	   
       integer,             intent(out),   optional :: rc  		   
@@ -1632,7 +1632,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Verbose flag.
 !      \item [{[rootOnly]}]
 !	     Root only flag.
-!      \item [{[logmsgabort]}]
+!      \item [{[logmsgAbort]}]
 !            Sets ESMF halt when certain message types are issued.  The array
 !            can contain any combination of:
 !            \begin{description}
@@ -1651,10 +1651,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            \end{description}
 !      \item [{[maxElements]}]
 !            Maximum number of elements in the Log.
-!      \item [{[logmsgflag]}]
+!      \item [{[logmsgList]}]
 !            An array of message types that will be logged.  Log write requests
 !            not matching the list will be ignored.  By default all messages
-!            will be logged.   See section \ref{opt:logmsgflag} for a list of
+!            will be logged.   See section \ref{const:logmsgflag} for a list of
 !            valid message types.  In addition, the following named constants
 !            may be used:
 !            \begin{description}
@@ -1719,10 +1719,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rootOnly)) then
         alog%rootOnly=rootOnly
       endif
-      if (present(logmsgabort)) then
-        if (associated (alog%logmsgabort)) deallocate (alog%logmsgabort)
-        allocate (alog%logmsgabort(size (logmsgabort)))
-        alog%logmsgabort = logmsgabort
+      if (present(logmsgAbort)) then
+        if (associated (alog%logmsgAbort)) deallocate (alog%logmsgAbort)
+        allocate (alog%logmsgAbort(size (logmsgAbort)))
+        alog%logmsgAbort = logmsgAbort
       endif
       if (present(stream)) then
         alog%stream=stream
@@ -1765,11 +1765,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       endif
 
-      if (present (logmsgflag)) then
-        if (associated (alog%logmsgflag))  &
-          deallocate (alog%logmsgflag)
-          allocate (alog%logmsgflag(size (logmsgflag)))
-          alog%logmsgflag = logmsgflag
+      if (present (logmsgList)) then
+        if (associated (alog%logmsgList))  &
+          deallocate (alog%logmsgList)
+          allocate (alog%logmsgList(size (logmsgList)))
+          alog%logmsgList = logmsgList
       end if
 
       if (present (trace)) then
@@ -1907,13 +1907,13 @@ end subroutine ESMF_LogSetError
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-      recursive subroutine ESMF_LogWrite(msg, logmsgflag, keywordEnforcer,  &
+      recursive subroutine ESMF_LogWrite(msg, logmsgList, keywordEnforcer,  &
                                          line, file, method, log, rc)
 !
 !
 ! !ARGUMENTS:
       character(len=*),   intent(in)              :: msg	    
-      type(ESMF_LogMsg_Flag), intent(in)          :: logmsgflag    
+      type(ESMF_LogMsg_Flag), intent(in)          :: logmsgList    
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,            intent(in),    optional :: line	    
       character(len=*),   intent(in),    optional :: file	    
@@ -1927,7 +1927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
-!      A message is passed in along with the {\tt logmsgflag}, {\tt line}, 
+!      A message is passed in along with the {\tt logmsgList}, {\tt line}, 
 !      {\tt file} and {\tt method}.  If the write to the {\tt ESMF\_Log}
 !      is successful, the function will return a logical {\tt true}.  This 
 !      function is the base function used by all the other {\tt ESMF\_Log} 
@@ -1938,8 +1938,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !      \item [msg]
 !            User-provided message string.
-!      \item [logmsgflag]
-!            The type of message.  See Section~\ref{opt:logmsgflag} for
+!      \item [logmsgList]
+!            The type of message.  See Section~\ref{const:logmsgflag} for
 !            possible values.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
@@ -2001,14 +2001,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
         endif
 
-        if (associated (alog%logmsgflag)) then
-          do, i=1, size (alog%logmsgflag)
-             if (logmsgflag == alog%logmsgflag(i)) then
+        if (associated (alog%logmsgList)) then
+          do, i=1, size (alog%logmsgList)
+             if (logmsgList == alog%logmsgList(i)) then
                exit
              end if
           end do
 
-          if (i > size (alog%logmsgflag)) then
+          if (i > size (alog%logmsgList)) then
             if (present (rc)) rc=ESMF_SUCCESS
             return
           end if
@@ -2037,11 +2037,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		alog%LOG_ENTRY(index)%fileflag = .TRUE.
 		alog%LOG_ENTRY(index)%file = tfile
     	endif
-    	select case (logmsgflag%mtype)
+    	select case (logmsgList%mtype)
         case (:0, size (ESMF_LogMsgString)+1:)
             alog%LOG_ENTRY(index)%lt="INTERNAL ERROR"
         case default
-            alog%LOG_ENTRY(index)%lt= ESMF_LogMsgString(logmsgflag%mtype)
+            alog%LOG_ENTRY(index)%lt= ESMF_LogMsgString(logmsgList%mtype)
     	end select	
     	alog%LOG_ENTRY(alog%fIndex)%d = d
     	alog%LOG_ENTRY(alog%fIndex)%h = h
@@ -2051,9 +2051,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     	alog%LOG_ENTRY(alog%fIndex)%msg = msg
 	alog%flushed = ESMF_FALSE
 
-        if (associated (alog%logmsgabort)) then
-          do, i=1, size (alog%logmsgabort)
-            if (logmsgflag%mtype == alog%logmsgabort(i)%mtype) then
+        if (associated (alog%logmsgAbort)) then
+          do, i=1, size (alog%logmsgAbort)
+            if (logmsgList%mtype == alog%logmsgAbort(i)%mtype) then
               alog%stopprogram=.true.
               call ESMF_LogClose(ESMF_LogDefault, rc=rc2)
               exit

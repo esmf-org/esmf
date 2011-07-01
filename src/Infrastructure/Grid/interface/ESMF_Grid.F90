@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.238 2011/06/30 19:09:27 w6ws Exp $
+! $Id: ESMF_Grid.F90,v 1.239 2011/07/01 16:07:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -302,7 +302,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.238 2011/06/30 19:09:27 w6ws Exp $'
+      '$Id: ESMF_Grid.F90,v 1.239 2011/07/01 16:07:13 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1200,7 +1200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !       Grid to allocate coordinate storage in.  
 ! \item[{[staggerloc]}]
-!      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      The stagger location to add. Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[staggerEdgeLWidth]}] 
 !      This array should be the same dimCount as the grid. It specifies the lower corner of the stagger
@@ -1358,7 +1358,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\begin{description}
 !\item[{staggerloc}]
 !    The stagger location into which to copy the arrays. 
-!    Please see Section~\ref{sec:opt:staggerloc} for a list 
+!    Please see Section~\ref{const:staggerloc} for a list 
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{arrayList}]
@@ -1520,9 +1520,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !       Grid to allocate coordinate storage in.  
 ! \item[{itemflag}]
-!      The grid item to add. Please see Section~\ref{sec:opt:griditem} for a list of valid items. 
+!      The grid item to add. Please see Section~\ref{const:griditem} for a list of valid items. 
 ! \item[{[staggerloc]}]
-!      The stagger location to add. Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      The stagger location to add. Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[itemTypeKind]}]
 !      The typekind of the  item to add. 
@@ -1709,7 +1709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Grid object to commit.
 !     \item[{status}]
 !          Grid status to commit to.  For valid values see section
-!          \ref{sec:opt:gridstatus}. [CURRENTLY NOT IMPLEMENTED]  
+!          \ref{const:gridstatus}. [CURRENTLY NOT IMPLEMENTED]  
 !     \item[{[defaultFlag]}]
 !          Indicates whether to use default values to achieve the desired
 !          grid status. The default value is {\tt ESMF\_NO\_DEFAULTS}.  
@@ -1980,7 +1980,7 @@ end subroutine ESMF_GridConvertIndex
 !     The grid to get the information from to create the Array.
 !\item[{staggerloc}]
 !     The stagger location to build the Array for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[typekind]}] 
@@ -2232,7 +2232,7 @@ end subroutine ESMF_GridConvertIndex
 !     The grid to get the information from to create the Array.
 !\item[{staggerloc}]
 !     The stagger location to build the Array for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 !\item[staggerDistgrid]
@@ -3327,7 +3327,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
@@ -3335,7 +3335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
@@ -3343,11 +3343,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -3615,7 +3615,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
@@ -3623,7 +3623,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
@@ -3631,11 +3631,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
@@ -3892,7 +3892,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connflagDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
@@ -3900,7 +3900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connflagDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
@@ -3908,11 +3908,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -3927,7 +3927,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -3938,7 +3938,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -3949,7 +3949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -4130,7 +4130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       grid in sequence. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_CART.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -4372,7 +4372,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       distributed.  
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_CART.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -4391,7 +4391,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      {\tt coordDimMap(i,1)} is /ESMF\_ARBDIM/ if the ith dimension of the grid is
 !      arbitrarily distributed, or {\tt i} if the ith dimension is not distributed.
 !      Note that if j is bigger than {\tt coordDimCount(i)} then it's ignored.
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[name]}]
 !     {\tt ESMF\_Grid} name.
 ! \item[{[rc]}]
@@ -5746,7 +5746,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
 !      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
 !      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{sec:opt:polekind} for a full list of options. If not specified,                            
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
 !      The periodic dimension. If not specified, defaults to 1.                                                
@@ -5754,7 +5754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The dimension at who's ends the poles are located. If not specified defaults to 2.         
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -6021,7 +6021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
 !      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
 !      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{sec:opt:polekind} for a full list of options. If not specified,                            
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
 !      The periodic dimension. If not specified, defaults to 1.                                                
@@ -6029,7 +6029,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The dimension at who's ends the poles are located. If not specified defaults to 2.         
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
@@ -6283,7 +6283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
 !      the connection that occurs at the minimum end of the index dimension. polekindflag(2)                       
 !      the connection that occurs at the maximum end of the index dimension. Please see                        
-!      Section~\ref{sec:opt:polekind} for a full list of options. If not specified,                            
+!      Section~\ref{const:polekind} for a full list of options. If not specified,                            
 !      the default is {\tt ESMF\_POLETYPE\_MONOPOLE} for both.                                                 
 ! \item[{[periodicDim]}]                                                                                       
 !      The periodic dimension. If not specified, defaults to 1.                                                
@@ -6291,7 +6291,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The dimension at who's ends the poles are located. If not specified defaults to 2.         
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -6306,7 +6306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -6317,7 +6317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -6328,7 +6328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -6525,7 +6525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If not specified  then grid is 2D. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -6787,7 +6787,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The upper extent of the grid array.
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
@@ -7034,7 +7034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      where arbIndexCount is the input argument specified below
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -7049,7 +7049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -7060,7 +7060,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -7071,7 +7071,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -7266,7 +7266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If not specified  then grid is 2D. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -7516,7 +7516,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The upper extent of the grid array.
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
@@ -7753,7 +7753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      where arbIndexCount is the input argument specified below
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -7768,7 +7768,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -7779,7 +7779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -7790,7 +7790,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -7992,7 +7992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim2]}] 
@@ -8001,7 +8001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim3]}] 
@@ -8010,7 +8010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
@@ -8018,7 +8018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
@@ -8026,7 +8026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
@@ -8034,7 +8034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
@@ -9010,7 +9010,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim2]}] 
@@ -9019,7 +9019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim3]}] 
@@ -9028,7 +9028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
@@ -9036,7 +9036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
@@ -9044,7 +9044,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
@@ -9052,7 +9052,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
@@ -9907,7 +9907,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim2]}] 
@@ -9916,7 +9916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim3]}] 
@@ -9925,7 +9925,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
@@ -9933,7 +9933,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
@@ -9941,7 +9941,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
@@ -9949,7 +9949,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
@@ -9983,7 +9983,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -9994,7 +9994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -10005,7 +10005,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -10591,7 +10591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
@@ -10599,7 +10599,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
@@ -10607,11 +10607,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -10885,7 +10885,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
@@ -10893,7 +10893,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
@@ -10901,11 +10901,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !      The type/kind of the grid coordinate data. 
@@ -11168,7 +11168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connDim2]}] 
 !      Fortran array describing the index dimension 2 connections.
@@ -11176,7 +11176,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[connDim3]}] 
 !      Fortran array describing the index dimension 3 connections.
@@ -11184,11 +11184,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -11203,7 +11203,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_GRID\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -11214,7 +11214,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -11225,7 +11225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_GRID\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_GRID\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -11501,7 +11501,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    see Section~\ref{const:indexflag} for the list of options. 
 ! \item[{[status]}]
 !    Flag indicating the status of the Grid. Please
-!    see Section~\ref{sec:opt:gridstatus} for the list of options. 
+!    see Section~\ref{const:gridstatus} for the list of options. 
 !\item[{[name]}]
 !   {\tt ESMF\_Grid} name.
 !\item[{[rc]}]
@@ -11936,7 +11936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Grid to get the information from.
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations.
 !\item[{[localDe]}]
 !     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
@@ -12089,7 +12089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Grid to get the information from.
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. 
 !\item[{[distgrid]}]
 !   The structure describing the distribution of this staggerloc in this grid. 
@@ -12168,7 +12168,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The tile number to get the data from. Tile numbers range from 1 to TileCount. 
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. 
 !\item[{[minIndex]}]
 !     Upon return this holds the global lower index of this stagger location.
@@ -12318,7 +12318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
@@ -12430,7 +12430,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
@@ -12720,7 +12720,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
@@ -13009,7 +13009,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
@@ -13306,7 +13306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
@@ -13597,7 +13597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
@@ -13886,7 +13886,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{[localDE]}]
@@ -14162,7 +14162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The coordinate dimension to get the data from (e.g. 1=x).
 !     \item[{staggerloc}]
 !          The stagger location from which to get the arrays. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{array}]
 !          An array into which to put the coordinate infomation. 
@@ -14260,7 +14260,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{index}]
@@ -14345,7 +14345,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{index}]
@@ -14442,7 +14442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The coordinate dimension to get the information for (e.g. 1=x). 
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
 !\item[{[localDE]}]
@@ -14663,11 +14663,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
@@ -14776,11 +14776,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
@@ -15034,11 +15034,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
@@ -15294,11 +15294,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
@@ -15553,11 +15553,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
@@ -15810,11 +15810,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
@@ -16070,11 +16070,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
@@ -16330,11 +16330,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
@@ -16587,11 +16587,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
@@ -16849,11 +16849,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{grid}]
 !          Grid to get the information from.
 !     \item[{itemflag}]
-!          The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !     \item[{staggerloc}]
 !          The stagger location to get the information for. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
@@ -17098,11 +17098,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[{itemflag}]
-!          The item from which to get the arrays. Please see Section~\ref{sec:opt:griditem} for a 
+!          The item from which to get the arrays. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
 !     \item[{staggerloc}]
 !          The stagger location from which to get the arrays. 
-!          Please see Section~\ref{sec:opt:staggerloc} for a list 
+!          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{array}]
 !          An array into which to put the item infomation. 
@@ -17198,11 +17198,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\item[{grid}]
 !    Grid to get the information from.
 !\item[{itemflag}]
-!     The item to get the information for. Please see Section~\ref{sec:opt:griditem} for a 
+!     The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !\item[{staggerloc}]
 !     The stagger location to get the information for. 
-!     Please see Section~\ref{sec:opt:staggerloc} for a list 
+!     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
 !\item[{localDE}]
@@ -17543,7 +17543,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !  Check if {\tt grid1} and {\tt grid2} match. Returns a range of values of type
 !  ESMF\_GridMatch indicating how closely the Grids match. For a description of
-!  the possible return values, please see~\ref{sec:opt:gridmatchtype}. 
+!  the possible return values, please see~\ref{const:gridmatch}. 
 !  Please also note that this call returns the match for the piece of the Grids on
 !  the local PET only. It's entirely possible for this call to return a different match
 !  on different PETs for the same Grids. The user is responsible for computing the 
@@ -17663,7 +17663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       grid in sequence. 
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
-!     For a full list of options, please see Section~\ref{sec:opt:coordsys}. 
+!     For a full list of options, please see Section~\ref{const:coordsys}. 
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
 ! \item[{[coordTypeKind]}] 
 !     The type/kind of the grid coordinate data. 
@@ -17881,7 +17881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    The coordinate dimension to put the data in (e.g. 1=x).
 !\item[{staggerloc}]
 !    The stagger location into which to copy the arrays. 
-!    Please see Section~\ref{sec:opt:staggerloc} for a list 
+!    Please see Section~\ref{const:staggerloc} for a list 
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{array}]
@@ -18041,7 +18041,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim2]}] 
@@ -18050,7 +18050,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim3]}] 
@@ -18059,7 +18059,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !      [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
@@ -18067,7 +18067,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 !      [CURRENTLY NOT IMPLEMENTED]
@@ -18076,7 +18076,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 !      [CURRENTLY NOT IMPLEMENTED]
@@ -18086,7 +18086,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
 !      If not present, the default is the edge.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 !      [CURRENTLY NOT IMPLEMENTED]
@@ -19051,7 +19051,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim2]}] 
@@ -19060,7 +19060,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim3]}] 
@@ -19069,7 +19069,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
@@ -19077,7 +19077,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
@@ -19085,7 +19085,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
@@ -19093,7 +19093,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
@@ -19936,7 +19936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 1.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim2]}] 
@@ -19945,7 +19945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 2.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[connflagDim3]}] 
@@ -19954,7 +19954,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The second element represents the maximum end of dimension 3.
 !      If array is only one element long, then that element is used
 !      for both the minimum and maximum end. 
-!      Please see Section~\ref{sec:opt:gridconn} for a list of valid 
+!      Please see Section~\ref{const:gridconn} for a list of valid 
 !      options. If not present, defaults to ESMF\_GRIDCONN\_NONE. 
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc1]}] 
@@ -19962,7 +19962,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 1.
 !      The second element represents the maximum end of dimension 1.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc2]}] 
@@ -19970,7 +19970,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 2.
 !      The second element represents the maximum end of dimension 2.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[poleStaggerLoc3]}] 
@@ -19978,7 +19978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The first element represents the minimum end of dimension 3.
 !      The second element represents the maximum end of dimension 3.
 !      If a pole, this describes which staggerlocation is at the pole at each end.
-!      Please see Section~\ref{sec:opt:staggerloc} for a list 
+!      Please see Section~\ref{const:staggerloc} for a list 
 !      of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     [CURRENTLY NOT IMPLEMENTED]
 ! \item[{[bipolePos1]}] 
@@ -20012,7 +20012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if the first dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=1)
-!      Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!      Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep2]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     second coordinate component array. The values specify which
@@ -20023,7 +20023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=2)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[coordDep3]}] 
 !     The size of the array specifies the number of dimensions of the 
 !     third coordinate component array. The values specify which
@@ -20034,7 +20034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     is not distributed (if exists).  
 !     If not present the default is /ESMF\_ARBDIM/ if this dimension
 !     is arbitararily distributed, or /n/ if not distributed (i.e. n=3)
-!     Please see Section~\ref{sec:opt:arbdim} for a definition of ESMF\_ARBDIM.        
+!     Please see Section~\ref{const:arbdim} for a definition of ESMF\_ARBDIM.        
 ! \item[{[distDim]}]
 !       This array specifies which dimensions are arbitrarily distributed.
 !       The size of the array specifies the total distributed dimensions.
@@ -20498,11 +20498,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\item[{grid}]
 !    The grid in which to set the array.
 !\item[{itemflag}]
-!    The item into which to copy the arrays. Please see Section~\ref{sec:opt:griditem} for a 
+!    The item into which to copy the arrays. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.   
 !\item[{staggerloc}]
 !    The stagger location into which to copy the arrays. 
-!    Please see Section~\ref{sec:opt:staggerloc} for a list 
+!    Please see Section~\ref{const:staggerloc} for a list 
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
 !\item[{array}]

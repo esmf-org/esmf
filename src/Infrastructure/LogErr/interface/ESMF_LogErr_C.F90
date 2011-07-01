@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.18 2011/06/24 14:25:58 rokuingh Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.19 2011/07/01 16:07:21 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,10 +22,10 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.18 2011/06/24 14:25:58 rokuingh Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.19 2011/07/01 16:07:21 rokuingh Exp $'
 !==============================================================================
 
-  subroutine f_esmf_logwrite0(msg,logmsgflag,rc)
+  subroutine f_esmf_logwrite0(msg,logmsgList,rc)
     use ESMF_UtilTypesMod    ! ESMF base class
     use ESMF_BaseMod         ! ESMF base class
     use ESMF_LogErrMod
@@ -33,17 +33,17 @@
     implicit none
     
     character(len=*), intent(in)                :: msg
-    type(ESMF_LogMsg_Flag), intent(in)              :: logmsgflag
+    type(ESMF_LogMsg_Flag), intent(in)              :: logmsgList
     integer, intent(out)                        :: rc
 
     ! Initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LogWrite(msg, logmsgflag, rc=rc)
+    call ESMF_LogWrite(msg, logmsgList, rc=rc)
 
   end subroutine f_esmf_logwrite0
 
-  subroutine f_esmf_logwrite1(msg,logmsgflag,line,file,method,rc)
+  subroutine f_esmf_logwrite1(msg,logmsgList,line,file,method,rc)
     use ESMF_UtilTypesMod    ! ESMF base class
     use ESMF_BaseMod         ! ESMF base class
     use ESMF_LogErrMod
@@ -51,7 +51,7 @@
     implicit none
 
     character(len=*), intent(in)                :: msg
-    type(ESMF_LogMsg_Flag), intent(in)              :: logmsgflag
+    type(ESMF_LogMsg_Flag), intent(in)              :: logmsgList
     integer, intent(in)                         :: line
     character(len=*), intent(in)                :: file
     character(len=*), intent(in)                :: method
@@ -60,7 +60,7 @@
     ! Initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    call ESMF_LogWrite(msg, logmsgflag,  &
+    call ESMF_LogWrite(msg, logmsgList,  &
                        line=line, file=file, method=method, rc=rc)
 
   end subroutine f_esmf_logwrite1

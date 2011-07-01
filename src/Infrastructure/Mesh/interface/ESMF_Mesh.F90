@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.71 2011/06/30 19:13:24 w6ws Exp $
+! $Id: ESMF_Mesh.F90,v 1.72 2011/07/01 16:07:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.71 2011/06/30 19:13:24 w6ws Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.72 2011/07/01 16:07:30 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.71 2011/06/30 19:13:24 w6ws Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.72 2011/07/01 16:07:30 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -523,7 +523,7 @@ contains
 !   \item[elementTypes] 
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
-!          Section~\ref{sec:mesh:opt:elemtype} for the list of options. This input consists of 
+!          Section~\ref{const:meshelemtype} for the list of options. This input consists of 
 !          a 1D array the size of the number of elements on this PET.  
 !   \item[elementConn] 
 !         An array containing the indexes of the sets of nodes to be connected together to form the
@@ -534,7 +534,7 @@ contains
 !         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. passed into the
 !         {\tt ESMF\_MeshAddNodes()} call on this PET. It is also
 !         important to note that the order of the nodes in an element connectivity list
-!         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
+!         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
 !         the correct order of nodes in a element. This input consists of a 1D array with 
 !         a total size equal to the sum of the number of nodes in each element on
 !         this PET. The number of nodes in each element is implied by its element type in 
@@ -882,7 +882,7 @@ contains
 !   \item[elementTypes] 
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
-!          Section~\ref{sec:mesh:opt:elemtype} for the list of options. This input consists of 
+!          Section~\ref{const:meshelemtype} for the list of options. This input consists of 
 !          a 1D array the size of the number of elements on this PET.  
 !   \item[elementConn] 
 !         An array containing the indexes of the sets of nodes to be connected together to form the
@@ -892,7 +892,7 @@ contains
 !         In other words, an entry of 1 indicates that this element contains the node
 !         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. It is also
 !         important to note that the order of the nodes in an element connectivity list
-!         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
+!         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
 !         the correct order of nodes in a element. This input consists of a 1D array with 
 !         a total size equal to the sum of the number of nodes contained in each element on
 !         this PET. The number of nodes in each element is implied by its element type in 
@@ -1015,7 +1015,7 @@ contains
 !   \item [filename]
 !         The name of the grid file
 !   \item[filetypeflag] 
-!         The file type of the grid file to be read, please see Section~\ref{sec:mesh:opt:fileformat}
+!         The file type of the grid file to be read, please see Section~\ref{const:fileformat}
 !         for a list of valid options. 
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which

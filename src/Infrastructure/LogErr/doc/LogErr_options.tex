@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.24 2011/06/30 15:34:27 rokuingh Exp $
+% $Id: LogErr_options.tex,v 1.25 2011/07/01 16:07:17 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,8 +8,20 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
+\subsubsection{ESMF\_LOG\_ERRMSG}
+
+A named constant that is used with the
+{\tt ESMF\_LogFoundError()} routine to indicated that an
+ESMF interface returned in error.
+
+\subsubsection{ESMF\_LOGERR\_PASSTHRU}
+
+A named constant that is used with the
+{\tt ESMF\_LogFoundError()} routine to pass a return code through
+to a Log message.
+
 \subsubsection{ESMF\_LOGKIND}
-\label{opt:logkindflag}
+\label{const:logkindflag}
 
 {\sf DESCRIPTION:\\}
 Specifies a single log file, multiple log files (one per PET), or no log files.
@@ -29,14 +41,14 @@ The valid values are:
 \end{description}
 
 \subsubsection{ESMF\_LOGMSG}
-\label{opt:logmsgflag}
+\label{const:logmsgflag}
 
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
 Specifies what message level --- e.g., informational, warning, 
 error --- will be written to log files.  This may be used both when
 writing the message with {\tt ESMF\_LogWrite()}, and when setting the
-{\tt logmsgflag} option with {\tt ESMF\_LogSet()}.
+{\tt logmsgList} option with {\tt ESMF\_LogSet()}.
 \end{sloppypar}
 
 The type of this flag is:
