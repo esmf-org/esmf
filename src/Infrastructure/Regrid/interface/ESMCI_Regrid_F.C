@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.62 2011/06/30 14:49:53 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.63 2011/07/01 13:16:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -93,6 +93,8 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
   try {
+
+#if 0
     bool concave;
     bool clockwise;
 
@@ -132,7 +134,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                 "- Dst mesh contains an element whos nodes are clockwise", &localrc)) throw localrc;
       }
     }
-
+#endif
 
     // Compute Weights matrix
     IWeights wts;
