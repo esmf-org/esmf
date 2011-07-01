@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.145 2011/06/30 19:24:31 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.146 2011/07/01 18:17:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.145 2011/06/30 19:24:31 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.146 2011/07/01 18:17:01 theurich Exp $"
 
 !==============================================================================
 
@@ -767,14 +767,10 @@ contains
 !   \item[reduceflag] 
 !        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -1020,14 +1016,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[count] 
 !        Number of elements to be gathered from each PET. Must be the
 !        same on all PETs.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -1382,14 +1374,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking the start of
 !        element sequence to be received from source PET.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -1641,14 +1629,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[reduceflag] 
 !        Reduction operation. See section \ref{const:reduce} for a list of 
 !        valid reduce operations.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -1968,14 +1952,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[recvOffsets] 
 !        Offsets in units of elements in {\tt recvData} marking to start of
 !        element sequence to be received by local PET from source PET.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -2276,14 +2256,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being broadcast.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -2960,14 +2936,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        the same on all PETs.
 !   \item[rootPet] 
 !        PET on which data is gathereds.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -3969,14 +3941,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements to be received.
 !   \item[srcPet] 
 !        Sending PET.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -4483,14 +4451,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        valid reduce operations.
 !   \item[rootPet] 
 !        PET on which reduced data is returned.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -4743,14 +4707,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Must be the same on all PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being scattered.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -5285,14 +5245,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements to be send.
 !   \item[dstPet] 
 !        Receiving PET.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
@@ -5795,14 +5751,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        Number of elements to be received.
 !   \item[srcPet] 
 !        PET that holds {\tt sendData}.
-!   \item[{[syncflag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_SYNC\_BLOCKING}]
-!             (default) Block until local operation has completed.
-!        \item[{\tt ESMF\_SYNC\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
 !   \item[{[commhandle]}]
 !        If present, a communication handle will be returned in case of a 
 !        non-blocking request (see argument {\tt syncflag}). The
