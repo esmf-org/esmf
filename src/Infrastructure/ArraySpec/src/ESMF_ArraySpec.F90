@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.56 2011/06/30 18:11:08 w6ws Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.57 2011/07/01 04:16:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.56 2011/06/30 18:11:08 w6ws Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.57 2011/07/01 04:16:17 theurich Exp $'
 
 !==============================================================================
 
@@ -112,7 +112,6 @@ module ESMF_ArraySpecMod
 ! !ARGUMENTS:
 !   type(ESMF_ArraySpec) :: arrayspec1
 !   type(ESMF_ArraySpec) :: arrayspec2
-! 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -156,7 +155,6 @@ module ESMF_ArraySpecMod
 !   type(ESMF_ArraySpec), intent(in) :: arrayspec1
 !   type(ESMF_ArraySpec), intent(in) :: arrayspec2
 !
-!
 ! !STATUS:
 ! \apiStatusCompatible
 !
@@ -195,7 +193,6 @@ module ESMF_ArraySpecMod
 ! !ARGUMENTS:
 !   type(ESMF_ArraySpec), intent(in) :: arrayspec1
 !   type(ESMF_ArraySpec), intent(in) :: arrayspec2
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -307,11 +304,11 @@ contains
   subroutine ESMF_ArraySpecGet(arrayspec, keywordEnforcer, rank, typekind, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in)            :: arrayspec
+    type(ESMF_ArraySpec),     intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out), optional :: rank
-    type(ESMF_TypeKind_Flag),  intent(out), optional :: typekind
-    integer,              intent(out), optional :: rc
+    integer,                  intent(out), optional :: rank
+    type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+    integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -360,11 +357,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySpecPrint(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in)              :: arrayspec
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out), optional   :: rc
-!         
-!
+    integer,              intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -411,11 +406,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySpecSet(arrayspec, rank, typekind, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(out)           :: arrayspec
-    integer,              intent(in)            :: rank
-    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
+    type(ESMF_ArraySpec),     intent(out)           :: arrayspec
+    integer,                  intent(in)            :: rank
+    type(ESMF_TypeKind_Flag), intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out), optional :: rc
+    integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -477,9 +472,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArraySpecValidate(arrayspec, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArraySpec), intent(in)              :: arrayspec
+    type(ESMF_ArraySpec), intent(in)            :: arrayspec
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,              intent(out),  optional  :: rc  
+    integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
