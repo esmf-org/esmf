@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.6 2011/06/30 06:00:36 theurich Exp $
+! $Id: user_model3.F90,v 1.7 2011/07/01 05:06:35 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -97,7 +97,7 @@ module user_model3
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP
-    type(ESMF_Field)            :: Ozone, SST
+    type(ESMF_Field)            :: Ozone, UM
     type(ESMF_FieldBundle)      :: fieldbundle
     
     ! Initialize return code
@@ -118,16 +118,16 @@ module user_model3
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeSet(comp, 'ShortName', &
-                           'HiGEM AtmosDynCore', &
+                           'EarthSys_AtmosDynCore', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'LongName', &
-                           'Dynamical core of HiGEM_Atmos', &
+                           'Dynamical core of EarthSys_Atmos', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-10-31T23:59:59Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'AtmosDynamicalCore', convention=convCIM, purpose=purpComp, rc=rc)
+      'atmosphere', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Contact)
@@ -137,10 +137,10 @@ module user_model3
      'Jane Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Meteorology University of DEF', &
+     'Department of Meteorology, University of ABC', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'jane.doe@udef.edu', &
+     'jane.doe@earthatm.org', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Contact', &
@@ -173,10 +173,14 @@ module user_model3
     call ESMF_AttributeSet(Ozone, 'CouplingPurpose', 'Boundary', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'CouplingSource', &
-                                  'Global_O3_mon', &
+                                  'EarthSys_AtmosDynCore', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'CouplingTarget', &
-                                  'HiGEM_Atmos', &
+                                  'EarthSys_Atmos', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Ozone, 'Description', &
+                                  'Global Ozone concentration ' // &
+                                  'monitoring in the atmosphere.', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'SpatialRegriddingMethod', &
                                   'Conservative-Second-Order', &
@@ -191,38 +195,33 @@ module user_model3
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! SST Field
-    SST = ESMF_FieldEmptyCreate(name='SST', rc=rc)
-    call ESMF_AttributeAdd(SST, convention=convCIM, purpose=purpField,rc=rc)
+    ! UM Field
+    UM = ESMF_FieldEmptyCreate(name='UM', rc=rc)
+    call ESMF_AttributeAdd(UM, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! SST CF-Extended Attributes
-    call ESMF_AttributeSet(SST, 'ShortName', 'SST', &
+    ! UM CF-Extended Attributes
+    call ESMF_AttributeSet(UM, 'ShortName', 'UM_Initial_1960', &
+         convention=convCIM, purpose=purpField, rc=rc)
+
+    ! UM CIM Attributes
+    call ESMF_AttributeSet(UM, 'CouplingPurpose', &
+                               'Initial', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(UM, 'CouplingSource', &
+                               'EarthSys_AtmosDynCore', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(UM, 'CouplingTarget', &
+                               'EarthSys_Atmos', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(UM, 'Description', &
+                               'Initialization file holding start ' // &
+                               'data for 0000UTC 1st Jan 1960.', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(UM, 'TimeTransformationType', 'Exact', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
-
-    ! SST CIM Attributes
-    call ESMF_AttributeSet(SST, 'CouplingPurpose', 'Initial', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'CouplingSource', &
-                                'seasonal_oxidant_conc', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'CouplingTarget', &
-                                'HiGEM_Atmos', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'SpatialRegriddingMethod', &
-                                'Non-Conservative', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'SpatialRegriddingDimension', &
-                                '2D', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'Frequency', '5 Months', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SST, 'TimeTransformationType', &
-                                'TimeAverage', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) return
-
+   
     ! Create a FieldBundle for the two Fields
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle3", rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -230,7 +229,7 @@ module user_model3
     ! Add the Fields to the FieldBundle (this will link the Attribute
     ! hierarchies of the FieldBundle and Fields)
     call ESMF_FieldBundleAdd(fieldbundle, (/Ozone/), rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, (/SST/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/UM/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Link the Attributes from the FieldBundle to the export State

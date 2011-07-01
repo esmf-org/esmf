@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.6 2011/06/30 06:00:36 theurich Exp $
+! $Id: user_model4.F90,v 1.7 2011/07/01 05:06:35 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -97,7 +97,7 @@ module user_model4
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP
-    type(ESMF_Field)            :: SO2, NOx
+    type(ESMF_Field)            :: SOA, POM
     type(ESMF_FieldBundle)      :: fieldbundle
     
     ! Initialize return code
@@ -118,16 +118,16 @@ module user_model4
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeSet(comp, 'ShortName', &
-                           'POP2', &
+                           'EarthSys_OceanBioGeoChem', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'LongName', &
-                           'Parallel Ocean Program', &
+                           'Ocean biogeochemistry component of EarthSys', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2010-06-10T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'Ocean', convention=convCIM, purpose=purpComp, rc=rc)
+      'ocnBgchem', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Funder)
@@ -137,10 +137,10 @@ module user_model4
      'Sally Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Oceanography University of DEF', &
+     'Department of Oceanography, University of GHI', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'sally.doe@udef.edu', &
+     'sally.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Funder', &
@@ -153,66 +153,78 @@ module user_model4
     convCIM = 'CIM 1.5'
     purpField = 'Inputs Description'
 
-    ! SO2 Field
-    SO2 = ESMF_FieldEmptyCreate(name='SO2', rc=rc)
-    call ESMF_AttributeAdd(SO2, convention=convCIM, purpose=purpField,rc=rc)
+    ! SOA Field
+    SOA = ESMF_FieldEmptyCreate(name='SOA', rc=rc)
+    call ESMF_AttributeAdd(SOA, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! SO2 CF-Extended Attributes
-    call ESMF_AttributeSet(SO2, 'ShortName', 'SO2', &
+    ! SOA CF-Extended Attributes
+    call ESMF_AttributeSet(SOA, 'ShortName', 'SOA', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(SOA, 'LongName', 'Secondary organic aerosols', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! SO2 CIM Attributes
-    call ESMF_AttributeSet(SO2, 'CouplingPurpose', 'Boundary', &
+    ! SOA CIM Attributes
+    call ESMF_AttributeSet(SOA, 'CouplingPurpose', 'Boundary', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'CouplingSource', &
-                                'POP2 Ocean', &
+    call ESMF_AttributeSet(SOA, 'CouplingSource', &
+                                'EarthSys_OceanBioGeoChem', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'CouplingTarget', &
-                                'HiGEM_Atmos', &
+    call ESMF_AttributeSet(SOA, 'CouplingTarget', &
+                                'EarthSys_Ocean', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'SpatialRegriddingMethod', &
+    call ESMF_AttributeSet(SOA, 'Description', &
+                                'Secondary organic aerosols in the ' // &
+                                'ocean.', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(SOA, 'SpatialRegriddingMethod', &
                                 'Cubic', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'SpatialRegriddingDimension', &
+    call ESMF_AttributeSet(SOA, 'SpatialRegriddingDimension', &
                                 '3D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'Frequency', '2 Years', &
+    call ESMF_AttributeSet(SOA, 'Frequency', '2 Years', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(SO2, 'TimeTransformationType', &
+    call ESMF_AttributeSet(SOA, 'TimeTransformationType', &
                                 'Exact', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     
-    ! NOx Field
-    NOx = ESMF_FieldEmptyCreate(name='NOx', rc=rc)
-    call ESMF_AttributeAdd(NOx, convention=convCIM, purpose=purpField,rc=rc)
+    ! POM Field
+    POM = ESMF_FieldEmptyCreate(name='POM', rc=rc)
+    call ESMF_AttributeAdd(POM, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! NOx CF-Extended Attributes
-    call ESMF_AttributeSet(NOx, 'ShortName', 'NOx', &
+    ! POM CF-Extended Attributes
+    call ESMF_AttributeSet(POM, 'ShortName', 'POM', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(POM, 'LongName', 'Particulate organic matter', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! NOx CIM Attributes
-    call ESMF_AttributeSet(NOx, 'CouplingPurpose', 'Initial', &
+    ! POM CIM Attributes
+    call ESMF_AttributeSet(POM, 'CouplingPurpose', 'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'CouplingSource', &
-                                 'POP2 Ocean', &
+    call ESMF_AttributeSet(POM, 'CouplingSource', &
+                                'EarthSys_OceanBioGeoChem Ocean', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'CouplingTarget', &
-                                'HiGEM_Atmos', &
+    call ESMF_AttributeSet(POM, 'CouplingTarget', &
+                                'EarthSys_Ocean', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'SpatialRegriddingMethod', &
+    call ESMF_AttributeSet(POM, 'Description', &
+                                'Particulate organic matter in ' // &
+                                'the ocean.', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(POM, 'SpatialRegriddingMethod', &
                                 'Linear', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'SpatialRegriddingDimension', &
+    call ESMF_AttributeSet(POM, 'SpatialRegriddingDimension', &
                                 '1D', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'Frequency', '45 Seconds', &
+    call ESMF_AttributeSet(POM, 'Frequency', '45 Seconds', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(NOx, 'TimeTransformationType', &
+    call ESMF_AttributeSet(POM, 'TimeTransformationType', &
                                 'TimeAccumulation', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -223,8 +235,8 @@ module user_model4
       
     ! Add the Fields to the FieldBundle (this will connect the Attribute
     ! hierarchies of the FieldBundle and Fields)
-    call ESMF_FieldBundleAdd(fieldbundle, (/SO2/), rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, (/NOx/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/SOA/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/POM/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Link the Attributes from the FieldBundle to the export State

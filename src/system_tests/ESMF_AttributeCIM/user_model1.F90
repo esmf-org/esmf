@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.21 2011/06/30 06:00:36 theurich Exp $
+! $Id: user_model1.F90,v 1.22 2011/07/01 05:06:35 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -97,7 +97,7 @@ module user_model1
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP
-    type(ESMF_Field)            :: DMS_emi, UM
+    type(ESMF_Field)            :: OH, Orog
     type(ESMF_FieldBundle)      :: fieldbundle
     
     ! Initialize return code
@@ -120,16 +120,16 @@ module user_model1
       purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttributeSet(comp, 'ShortName', 'HiGEM_Atmos', &
+    call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys_Atmos', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'LongName', &
-                           'Atmosphere component of the HiGEM model', &
+                           'Atmosphere component of the EarthSys model', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-12-31T23:59:59Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'CloudSimulator', convention=convCIM, purpose=purpComp, rc=rc)
+      'Atmosphere', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Principal Investigator)
@@ -139,10 +139,10 @@ module user_model1
      'John Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Meteorology University of ABC', &
+     'Department of Meteorology, University of ABC', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'john.doe@uabc.edu', &
+     'john.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Author', &
@@ -155,64 +155,80 @@ module user_model1
     convCIM = 'CIM 1.5'
     purpField = 'Inputs Description'
 
-    ! DMS_emi Field
-    DMS_emi = ESMF_FieldEmptyCreate(name='DMS_emi', rc=rc)
-    call ESMF_AttributeAdd(DMS_emi, convention=convCIM, purpose=purpField,rc=rc)
+    ! OH Field
+    OH = ESMF_FieldEmptyCreate(name='OH', rc=rc)
+    call ESMF_AttributeAdd(OH, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! DMS_emi ESMF-General Attribute
-    call ESMF_AttributeSet(DMS_emi, 'Intent', 'Export', &
+    ! OH CF-Extended Attributes
+    call ESMF_AttributeSet(OH, 'ShortName', 'OH_Conc_1900', &
          convention=convCIM, purpose=purpField, rc=rc)
-
-    ! DMS_emi CF-Extended Attributes
-    call ESMF_AttributeSet(DMS_emi, 'ShortName', 'DMS_emi', &
+    call ESMF_AttributeSet(OH, 'StandardName', &
+                               'OH_Concentrations', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'StandardName', 'DMS_emissions', &
+    call ESMF_AttributeSet(OH, 'LongName', &
+                               'seasonal_oxidant_conc', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'LongName', 'DMS emissions', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'Units', 'unknown', &
-         convention=convCIM, purpose=purpField, rc=rc)
-
-    ! DMS_emi CIM Attributes
-    call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', &
-                                    'Ancillary', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'CouplingSource', &
-                                    'DMS_emi', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'CouplingTarget', &
-                                    'HiGEM_AtmosChem', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                    'Conservative-First-Order', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 Minutes', &
-         convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'TimeTransformationType', &
-                                    'TimeAverage', &
+    call ESMF_AttributeSet(OH, 'Units', 'unknown', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! UM Field
-    UM = ESMF_FieldEmptyCreate(name='UM', rc=rc)
-    call ESMF_AttributeAdd(UM, convention=convCIM, purpose=purpField,rc=rc)
+    ! OH CIM Attributes
+    call ESMF_AttributeSet(OH, 'CouplingPurpose', 'Boundary', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'CouplingSource', &
+                               'EarthSys_Atmos', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'CouplingTarget', &
+                               'EarthSys_AtmosDynCore', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'Description', &
+                               'Seasonal oxidant concentration in ' // &
+                               'the atmosphere.', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'SpatialRegriddingMethod', &
+                               'Near-Neighbor', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'SpatialRegriddingDimension', &
+                               '2D', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'Frequency', '10 Hours', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(OH, 'TimeTransformationType', &
+                               'TimeInterpolation', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+    
+    ! Orog Field
+    Orog = ESMF_FieldEmptyCreate(name='Orog', rc=rc)
+    call ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField,rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! UM CF-Extended Attributes
-    call ESMF_AttributeSet(UM, 'ShortName', 'UM_Initial_1960', &
+    ! Orog CF-Extended Attributes
+    call ESMF_AttributeSet(Orog, 'ShortName', 'UM_Orog_n320', &
          convention=convCIM, purpose=purpField, rc=rc)
-    ! UM CIM Attributes
-    call ESMF_AttributeSet(UM, 'CouplingPurpose', &
-                               'Initial', &
+    call ESMF_AttributeSet(Orog, 'StandardName', 'Height', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(UM, 'CouplingSource', &
-                               'Ocean Biogeo Chemistry', &
+    call ESMF_AttributeSet(Orog, 'LongName', 'Orography', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(UM, 'CouplingTarget', &
-                               'HiGEM_AtmosChem', &
+    call ESMF_AttributeSet(Orog, 'Units', 'unknown', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(UM, 'TimeTransformationType', 'Exact', &
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Orog CIM Attributes
+    call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'Initial', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'CouplingSource', &
+                                 'EarthSys_Atmos', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'CouplingTarget', &
+                                 'EarthSys_AtmosDynCore', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'Description', &
+                                 'Orography/height data in meters at ' // &
+                                 'n320 resolution.', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'TimeTransformationType', 'Exact', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -222,8 +238,8 @@ module user_model1
       
     ! Add the Fields to the FieldBundle (this will link the Attribute
     ! hierarchies of the FieldBundle and Fields)
-    call ESMF_FieldBundleAdd(fieldbundle, (/DMS_emi/), rc=rc)
-    call ESMF_FieldBundleAdd(fieldbundle, (/UM/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/OH/), rc=rc)
+    call ESMF_FieldBundleAdd(fieldbundle, (/Orog/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Link the Attributes from the FieldBundle to the export State

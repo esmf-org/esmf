@@ -163,20 +163,20 @@ module user_coupler
       attrList=compPropAtt, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttributeSet(comp, 'ShortName', 'HiGEM', &
+    call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys', &
       convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(comp, 'LongName', &
-                           'UK High Resolution Global Environment Model', &
+                           'Earth System High Resolution Global Model', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'Description', &
-      'HiGEM brings together expertise from NERC, the UK academic ' // &
-      'community and the Met Office in a concerted UK effort to ' // &
-      'develop coupled climate models with increased horizontal ' // &
-      'resolutions. Increasing the horizontal resolution of coupled ' // &
-      'climate models will allow us to capture climate processes and ' // &
+      'EarthSys brings together expertise from the global ' // &
+      'community in a concerted effort to develop coupled ' // &
+      'climate models with increased horizontal resolutions.  ' // &
+      'Increasing the horizontal resolution of coupled climate ' // &
+      'models will allow us to capture climate processes and ' // &
       'weather systems in much greater detail.', &
-      convention=convCIM, purpose=purpComp, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(comp, 'Version', &
       '2.0', &
@@ -185,22 +185,22 @@ module user_coupler
       '2009-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'AerosolEmissionAndConc', convention=convCIM, purpose=purpComp, rc=rc)
+      'aerosol', convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
-      'www.nerc.ac.uk', convention=convCIM, purpose=purpComp, rc=rc)
+      'www.earthsys.org', convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'MetadataVersion', &
       '1.2', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Simulation run attributes
     call ESMF_AttributeSet(comp, 'SimulationShortName', &
-      'SMS.f09_g16.X.bluefire', &
+      'SMS.f09_g16.X.hector', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationLongName', &
-      'HiGEM - Earth System Modeling Framework Earth System Model 1.0', &
+      'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationRationale', &
-'HiGEM-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationStartDate', &
      '1960-01-01T00:00:00Z', &
@@ -218,14 +218,8 @@ module user_coupler
      'HadGEM1 Atmosphere', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'PreviousVersionDescription', &
-     'Horizontal resolution increased to 1.25 x 0.83 degrees; ' // &
-     'Timestep reduced from 30 minutes to 20 minutes; ' // &
-     'Magnitude of polar filtering in the advection scheme reduced; ' // &
-     'Vertical velocity threshold at which targeted moisture diffusion ' // &
-     'is triggered was increased from 0.1m/s to 0.4m/s; ' // &
-     'Snow-free sea-ice albedo reduced from 0.61 to 0.57; ' // &
-     'Total ocean current included in the calculation of surface ' // &
-     'fluxes of heat, moisture, and momentum.', &
+     'Horizontal resolution increased to 1.20 x 0.80 degrees; ' // &
+     'Timestep reduced from 30 minutes to 15 minutes.', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -272,7 +266,7 @@ module user_coupler
      'branch', &
       convention=convCIM, purpose=purpProp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationURL', &
-     'http://higem.nerc.ac.uk', &
+     'http://earthsys.org/simulations', &
       convention=convCIM, purpose=purpProp, rc=rc)
     call ESMF_AttributeSet(comp, 'Visualization', &
      'true', &
@@ -284,33 +278,32 @@ module user_coupler
 
     ! Responsible party attributes (for Principal Investigator)
     call ESMF_AttributeSet(comp, 'Name', &
-     'Gerard Devine', &
+     'John Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'Abbreviation', &
-     'GMD', &
+     'JD', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Meteorology University of Reading Earley Gate, ' // &
-     'Reading Devine', &
+     'Department of Meteorology, University of ABC', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'g.m.devine@reading.ac.uk', &
+     'john.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'PI', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
-     'www.epcc.ed.ac.uk', &
+     'www.earthsys.org', &
       convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Author)
     call ESMF_AttributeSet(comp, 'Name', &
-     'CESM Atmosphere Model Working Group', &
+     'EarthSys Atmosphere Model Working Group', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'Abbreviation', &
-     'AMWG', &
+     'EAMWG', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'NameType', &
@@ -318,12 +311,12 @@ module user_coupler
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Climate and Global Dynamics Division, National Center for ' // &
-     'Atmospheric Research, Boulder, Colorado', &
+     'Climate Division, International Center for ' // &
+     'Atmospheric Research', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'hannay@ucar.edu', &
+     'info@earthsys.org', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
@@ -331,7 +324,7 @@ module user_coupler
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.cesm.ucar.edu/working_groups/Atmosphere', &
+     'http://www.earthsys.org/working_groups/Atmosphere', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -341,18 +334,14 @@ module user_coupler
 
     ! Citation attributes
     call ESMF_AttributeSet(comp, 'ShortTitle', &
-     'Shaffrey_2009', &
+     'Doe_2009', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'LongTitle', &
-     'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
-     'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
-     'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
-     'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
-     'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
-     'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
-     'The New U.K. High Resolution Global Environment Model - Model ' // &
-     'description and basic evaluation. Journal of Climate, 22 (8). ' // &
-     '1861-1896.', &
+     'Doe, J.A.; Norton, A.B.; ' // &
+     'Clark, G.H.; Davies, I.J.. 2009 EarthSys: ' // &
+     'The Earth System High Resolution Global Atmosphere Model - Model ' // &
+     'description and basic evaluation. Journal of Climate, 15 (2). ' // &
+     '1261-1296.', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'Date', &
      '2009-03-05', &
@@ -361,10 +350,10 @@ module user_coupler
      'Online Refereed', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'DOI', &
-     'doi:10.1175/2008JCLI2508.1', &
+     'doi:17.1035/2009JCLI4508.1', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.ecmwf.int', &
+     'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
