@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.115 2011/06/29 14:47:15 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.116 2011/07/01 05:02:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.115 2011/06/29 14:47:15 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.116 2011/07/01 05:02:03 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -380,6 +380,8 @@ int Attribute::count=0;
       localrc = AttPackAddAttribute("CouplingSource", "CIM 1.5",
                             "Inputs Description", object);
       localrc = AttPackAddAttribute("CouplingTarget", "CIM 1.5",
+                            "Inputs Description", object);
+      localrc = AttPackAddAttribute("Description", "CIM 1.5",
                             "Inputs Description", object);
       localrc = AttPackAddAttribute("Frequency", "CIM 1.5",
                             "Inputs Description", object);
@@ -4723,6 +4725,7 @@ if (attrRoot == ESMF_TRUE) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
 
+#if 0
   // <composition><coupling> (all CIM fields within all child components, 
   // written only in top-level component (e.g. coupler))
   if (callCount == 1) { // for top-level component only
@@ -4741,6 +4744,7 @@ if (attrRoot == ESMF_TRUE) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
   }
+#endif
 
   // <childComponent> tree
   for(int i=0; i<linkList.size(); i++) {
@@ -4786,9 +4790,18 @@ if (attrRoot == ESMF_TRUE) {
                           "Write items > 1 - Not yet implemented", &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
-    localrc = io_xml->writeElement("type", "", indent, 2,
-                                   "open", "true", 
-                                   "value", value.c_str());
+    localrc = io_xml->writeStartElement("type", "", indent, 2,
+                                        "open", "true", 
+                                        "value", value.c_str());
+    localrc = io_xml->writeStartElement("controlledVocabulary","", ++indent, 0);
+    // TODO:  make new att for ModelTypeCV ? (DRS_CMIP5_componentType, metafor)
+    localrc = io_xml->writeElement("name", "DRS_CMIP5_componentType", 
+                                   ++indent, 0);
+    localrc = io_xml->writeElement("server", 
+               "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", indent, 0);
+    localrc = io_xml->writeEndElement("controlledVocabulary", --indent);
+    localrc = io_xml->writeEndElement("type", --indent);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute ModelType in standard attribute package "
       "(convention='CIM 1.5', purpose='Model Component Simulation Description')"
@@ -4922,6 +4935,7 @@ if (attrRoot == ESMF_TRUE) {
   int localrc;
   char msgbuf[4*ESMF_MAXSTR];
   Attribute *attpack = NULL;
+  bool inObjectTree, inThisCompTreeOnly, inNestedAttPacks;
 
   vector<string> valuevector;
   string value;
@@ -4988,6 +5002,16 @@ if (attrRoot == ESMF_TRUE) {
   localrc = io_xml->writeElement("realCalendar", "", 3, 0);
   localrc = io_xml->writeEndElement("calendar", 2);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+  // <input> -- for all CIM fields within all child components, 
+  // written only here in the one top-level <simulationRun> document)
+  if (AttPackIsSet("CIM 1.5", "Inputs Description", "field", 
+                   inObjectTree=true, 
+                   inThisCompTreeOnly=false,  // look at all child comps
+                   inNestedAttPacks=false)) { // only look at CIM/Inputs atts,
+                                              // not nested CF atts
+    localrc = AttributeWriteCIMinput(io_xml);
+  }
 
   localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
   localrc = io_xml->writeStartElement("openDateRange", "", 3, 0);
@@ -5958,6 +5982,7 @@ if (attrRoot == ESMF_TRUE) {
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMcitation
+#if 0
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteCIMcomposition"
@@ -6233,6 +6258,293 @@ if (attrRoot == ESMF_TRUE) {
   return ESMF_SUCCESS;
 
  } // end AttributeWriteCIMcomposition
+#endif
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteCIMinput"
+//BOPI
+// !IROUTINE:  AttributeWriteCIMinput - Write contents of a CIM {\tt Attribute} package input node (fields from all components in tree)
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteCIMinput(
+// // !RETURN VALUE: //    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      IO_XML *io_xml) const {      //  in - io pointer to write
+//
+// !DESCRIPTION:
+//    Print the contents of a CIM {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  int localrc;
+  char msgbuf[4*ESMF_MAXSTR];
+  Attribute *attpack = NULL, *ap;
+  bool inNestedAttPacks;
+
+  vector<string> valuevector, value2vector;
+  string value, value2;
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // write out all CIM fields in component tree
+  for(int i=0; i<linkList.size(); i++) {
+    for(int j=0; j<linkList.at(i)->packList.size(); j++) {
+      attpack = linkList.at(i)->packList.at(j);
+      if (!(attpack->attrConvention.compare("CIM 1.5")==0 &&
+            attpack->attrPurpose.compare("Inputs Description")==0 &&
+            attpack->attrObject.compare("field")==0))
+        continue; // skip non-CIM fields
+
+      // if no attributes set in this attpack, skip it ...
+      if (!(attpack->AttPackIsSet(inNestedAttPacks=false))) continue;
+
+      // otherwise, write it out ...
+
+      if (attpack->AttributeIsSet("CouplingPurpose")) {
+        localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        // map ESMF values {Ancillary, Boundary, Initial} to CIM 1.5 enum
+        // values {ancillaryFile, boundaryCondition, initialCondition}
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value == "ancillary") {
+          value = "ancillaryFile";
+        } else if (value == "boundary") {
+          value = "boundaryCondition";
+        } else if (value == "initial") {
+          value = "initialCondition";
+        } else {
+          ESMC_LogDefault.Write("Attribute CouplingPurpose in "
+            "standard attribute package (convention='CIM 1.5', "
+            "purpose='Inputs Description') must be one of "
+            "{Ancillary, Boundary, Initial} "
+            "to produce valid CIM XML output.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+        localrc = io_xml->writeStartElement("input", "", 3, 2,
+                     "fullySpecified", "true", "purpose", value.c_str());
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        // Output starting <input> element, to match ending element
+        // </input>, but with a blank purpose="" attr. This will produce an
+        // invalid CIM 1.5 file, yet keep it well-formed XML.  Better than 
+        // outputting no <input></input> pair, which would produce far
+        // more validation errors, confusing a user as to what the real 
+        // problem is -- that attribute CouplingPurpose is not set.
+        localrc = io_xml->writeStartElement("input", "", 3, 2,
+                     "fullySpecified", "true", "purpose", "");
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.Write("Attribute CouplingPurpose in "
+          "standard attribute package (convention='CIM 1.5', "
+          "purpose='Inputs Description') "
+          "required to be set, when other attributes in this package are set, "
+          "to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
+      }
+      if (attpack->AttributeIsSet("Description")) {
+        localrc = attpack->AttributeGet("Description", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeElement("description", value, 4, 0);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+
+      if (attpack->AttributeIsSet("Frequency")) {
+        localrc = attpack->AttributeGet("Frequency", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+
+        // parse frequency value and units
+        char s[2*ESMF_MAXSTR], empty[]="", *freq, *units;
+        strcpy(s, value.c_str());
+        freq = strtok(s, " ");
+        units = strtok(NULL, " ");
+        if (freq == NULL || units == NULL) {
+          ESMC_LogDefault.Write("Attribute InputFrequency, in CIM 1.5/Inputs "
+            "Description standard attribute package, must have both a time "
+            "value and a units specification, e.g. '15 Minutes'.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+          // prevent Xerces crash upon null ptr exception throw (with F90 main)
+          if (freq == NULL) freq = empty;
+          if (units == NULL) units = empty;
+        }
+        // CIM 1.5 enum: {seconds, minutes, hours, days, months, years,
+        //                decades, centuries}
+        value = units;
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value != "seconds" && value != "minutes" && value != "hours" &&
+            value != "days" && value != "months" && value != "years" &&
+            value != "decades" && value != "centuries") {
+          ESMC_LogDefault.Write("Attribute InputFrequency, in CIM 1.5/Inputs "
+            "Description standard attribute package, must have units as one of "
+            "{Seconds, Minutes, Hours, Days, Months, Years, "
+            "Decades, Centuries}, to produce valid CIM XML output.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+        localrc = io_xml->writeStartElement("timeProfile", "", 4, 2,
+                              "units", value.c_str(), "variableRate", "false");
+        localrc = io_xml->writeElement("rate", freq, 5, 0);
+        localrc = io_xml->writeEndElement("timeProfile", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
+          attpack->AttributeIsSet("SpatialRegriddingDimension")) {
+
+        if (attpack->AttributeIsSet("SpatialRegriddingDimension")) {
+          localrc = attpack->AttributeGet("SpatialRegriddingDimension",&valuevector);
+          if (valuevector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value = valuevector.at(0);
+          // CIM 1.5 enum: {1D, 2D, 3D}
+          transform(value.begin(), value.end(), value.begin(), ::toupper);
+          if (value != "1D" && value != "2D" && value != "3D") {
+            ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension, in "
+              "CIM 1.5/Inputs Description standard attribute package, must "
+              "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
+              ESMC_LOG_WARN, ESMC_CONTEXT);
+          }
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
+                             "spatialRegriddingDimension", value.c_str()); 
+        } else {
+          // Output starting <spatialRegridding> element, to match ending 
+          // element </spatialRegridding>, but without a
+          // spatialRegriddingDimension="" xml attribute.
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 0);
+        }
+        if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
+          localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
+          if (value2vector.size() > 1) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", &localrc);
+            return ESMF_FAILURE;}
+          value2 = value2vector.at(0);
+          // CIM 1.5 enum: {linear, near-neighbour, 
+          //                cubic, conservative-first-order,
+          //                conservative-second-order,
+          //                conservative, non-conservative}
+          transform(value2.begin(), value2.end(), value2.begin(), ::tolower);
+          if (value2 == "near-neighbor") value2 = "near-neighbour";
+          if (value2 != "linear" && value2 != "near-neighbour" && 
+              value2 != "cubic" && value2 != "conservative-first-order" && 
+              value2 != "conservative-second-order" && 
+              value2 != "conservative" && value2 != "non-conservative") {
+            ESMC_LogDefault.Write("Attribute SpatialRegriddingMethod, in "
+              "CIM 1.5/Inputs Description standard attribute package, must be "
+              "one of {Linear, Near-Neighbor, Cubic, "
+              "Conservative-First-Order, Conservative-Second-Order, "
+              "Conservative, Non-Conservative} to produce valid CIM "
+              "XML output.",
+              ESMC_LOG_WARN, ESMC_CONTEXT);
+          }
+          localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
+                                       value2.c_str(), 5, 0);
+        }
+        localrc = io_xml->writeEndElement("spatialRegridding", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      if (attpack->AttributeIsSet("TimeTransformationType")) {
+        localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("timeTransformation", "", 4, 0);
+        localrc = io_xml->writeElement("mappingType", "", 5, 2,
+                                       "open", "true", 
+                                       "value", value.c_str());
+        localrc = io_xml->writeEndElement("timeTransformation", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      if (attpack->AttributeIsSet("CouplingSource")) {
+        localrc = attpack->AttributeGet("CouplingSource", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
+        localrc = io_xml->writeStartElement("reference", "", 6, 0);
+        localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeEndElement("reference", 6);
+        localrc = io_xml->writeEndElement("dataSource", 5);
+        localrc = io_xml->writeEndElement("couplingSource", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        ESMC_LogDefault.Write("Attribute CouplingSource in "
+          "standard attribute package (convention='CIM 1.5', "
+          "purpose='Inputs Description') "
+          "required to be set, when other attributes in this package are set, "
+          "to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
+      }
+      if (attpack->AttributeIsSet("CouplingTarget")) {
+        localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
+        localrc = io_xml->writeStartElement("reference", "", 6, 0);
+        localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeEndElement("reference", 6);
+        localrc = io_xml->writeEndElement("dataSource", 5);
+        localrc = io_xml->writeEndElement("couplingTarget", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      } else {
+        ESMC_LogDefault.Write("Attribute CouplingTarget in "
+          "standard attribute package (convention='CIM 1.5', "
+          "purpose='Inputs Description') "
+          "required to be set, when other attributes in this package are set, "
+          "to produce valid CIM XML output.",
+          ESMC_LOG_WARN, ESMC_CONTEXT);
+      }
+      if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
+           (ap->parent->AttributeIsSet("ShortName"))) {
+        localrc = ap->parent->AttributeGet("ShortName", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+        localrc = io_xml->writeStartElement("connection", "", 4, 0);
+        localrc = io_xml->writeStartElement("connectionTarget", "", 5, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 6, 0);
+        localrc = io_xml->writeStartElement("reference", "", 7, 0);
+        localrc = io_xml->writeElement("name", value, 8, 0);
+        localrc = io_xml->writeEndElement("reference", 7);
+        localrc = io_xml->writeEndElement("dataSource", 6);
+        localrc = io_xml->writeEndElement("connectionTarget", 5);
+        localrc = io_xml->writeEndElement("connection", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      }
+      localrc = io_xml->writeEndElement("input", 3);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
+    // recurse through ESMF objects
+    localrc = linkList.at(i)->AttributeWriteCIMinput(io_xml);
+  }
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteCIMinput
 #if 0
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
