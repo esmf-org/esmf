@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetAllocBounds.F90,v 1.2 2011/07/01 16:07:06 rokuingh Exp $
+! $Id: ESMF_FieldGetAllocBounds.F90,v 1.3 2011/07/01 23:34:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ module ESMF_FieldGetAllocBoundsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.2 2011/07/01 16:07:06 rokuingh Exp $'
+    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.3 2011/07/01 23:34:35 theurich Exp $'
 
 !==============================================================================
 !
@@ -124,7 +124,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
 ! {\tt ESMF\_Grid} and the Fortran data array. For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
 !
 ! The arguments are:
@@ -138,7 +138,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
-!       Section \ref{const:staggerloc}.
+!       section \ref{const:staggerloc}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -153,7 +153,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\tt field}.  
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
@@ -191,19 +191,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[totalLBound]}]
 !       \begin{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
 !       \end{sloppypar}
 !       The relative lower bounds of Fortran data array to be used
 ! \item [{[totalUBound]}]
 !       \begin{sloppypar}
 !       The relative upper bounds of Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
 !       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
 !
 ! \item[{[rc]}]
@@ -262,13 +262,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_LocStreamGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from a LocStream and Fortran array
 
 ! !INTERFACE:
-    subroutine ESMF_LocStreamGetFieldBounds(locstream, &
+    subroutine ESMF_LocStreamGetFieldBounds(locstream, keywordEnforcer, &
         localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)            :: locstream     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: localDe
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -283,7 +284,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
 ! {\tt ESMF\_LocStream} and the Fortran data array.  For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
 !
 ! The arguments are:
@@ -340,7 +341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_LocStream} and Fortran data array.
 !       This is an output variable from this user interface.
 !
 ! \item[{[rc]}]
@@ -391,13 +392,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from a Mesh and a Fortran array
 
 ! !INTERFACE:
-    subroutine ESMF_MeshGetFieldBounds(mesh, localDe, &
-        gridToFieldMap, &
+    subroutine ESMF_MeshGetFieldBounds(mesh, keywordEnforcer, &
+        localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)            :: mesh     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(in),  optional :: localDe
     integer,         intent(in),  optional :: gridToFieldMap(:)    
     integer,         intent(in),  optional :: ungriddedLBound(:)
@@ -412,7 +414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
 ! {\tt ESMF\_Mesh} and the Fortran data array. For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
 !
 ! The arguments are:
@@ -470,7 +472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Mesh} and Fortran data array.
 !       This is an output variable from this user interface.
 !
 ! \item[{[rc]}]
@@ -520,13 +522,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_XGridGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from an XGrid and a Fortran array
 
 ! !INTERFACE:
-    subroutine ESMF_XGridGetFieldBounds(xgrid, &
+    subroutine ESMF_XGridGetFieldBounds(xgrid, keywordEnforcer, &
         xgridside, gridindex, localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
     
 ! !ARGUMENTS:
     type(ESMF_XGrid),          intent(in)            :: xgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
     integer,                   intent(in),  optional :: gridindex
     integer,                   intent(in),  optional :: localDe
@@ -543,7 +546,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
 ! {\tt ESMF\_XGrid} and the Fortran data array.  For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
 !
 ! The arguments are:
@@ -682,7 +685,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Compute the lower and upper bounds of Fortran data array that can later
 ! be used in FieldCreate interface to create a {\tt ESMF\_Field} from a
 ! {\tt ESMF\_Grid} and the Fortran data array. For an example and
-! associated documentation using this method see Section 
+! associated documentation using this method see section 
 ! \ref{sec:field:usage:create_5dgrid_7dptr_2dungridded}.
 !
 ! The arguments are:
@@ -753,7 +756,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \end{sloppypar}
 ! \item [{[totalCount]}]
 !       Number of elements need to be allocated for Fortran data array to be used
-!       later in {tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
+!       later in {\tt ESMF\_FieldCreate} from {\tt ESMF\_Grid} and Fortran data array.
 !       This is an output variable from this user interface.
 !
 ! \item[{[rc]}]
