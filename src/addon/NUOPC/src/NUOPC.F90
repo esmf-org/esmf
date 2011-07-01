@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.16 2011/06/30 06:00:03 theurich Exp $
+! $Id: NUOPC.F90,v 1.17 2011/07/01 23:06:17 w6ws Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -1246,7 +1246,7 @@ module NUOPC
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    call ESMF_StateReplace(state, field, rc=rc)
+    call ESMF_StateReplace(state, (/field/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
