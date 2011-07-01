@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.28 2011/06/30 05:59:44 theurich Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.29 2011/07/01 19:21:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.28 2011/06/30 05:59:44 theurich Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.29 2011/07/01 19:21:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -87,7 +87,7 @@ program ESMF_AttributeXMLUTest
   !    <responsibleParty>
   !       <gmd:CI_ResponsibleParty>
   !         <gmd:individualName>
-  !           <gco:CharacterString>Gerard Devine</gco:CharacterString>
+  !           <gco:CharacterString>John Doe</gco:CharacterString>
   !         </gmd:individualName>
   !         <gmd:contactInfo>
   !           <gmd:CI_Contact>
@@ -95,12 +95,12 @@ program ESMF_AttributeXMLUTest
   !               <gmd:CI_Address>
   !                 <gmd:deliveryPoint>
   !                   <gco:CharacterString>
-  !                     Department of Meteorology University of Reading Earley Gate, Reading Devine
+  !                     Department of Meteorology, University of ABC
   !                   </gco:CharacterString>
   !                 </gmd:deliveryPoint>
   !                 <gmd:electronicMailAddress>
   !                   <gco:CharacterString>
-  !                     g.m.devine@reading.ac.uk
+  !                     john.doe@earthsys.org
   !                   </gco:CharacterString>
   !                 </gmd:electronicMailAddress>
   !               </gmd:CI_Address>
@@ -109,7 +109,7 @@ program ESMF_AttributeXMLUTest
   !               <gmd:CI_OnlineResource>
   !                 <gmd:linkage>
   !                   <gmd:URL>
-  !                     www.nerc.ac.uk
+  !                     www.earthsys.org
   !                   </gmd:URL>
   !                 </gmd:linkage>
   !               </gmd:CI_OnlineResource>
@@ -121,7 +121,7 @@ program ESMF_AttributeXMLUTest
   !           </gmd:CI_RoleCode>
   !         </gmd:role>
   !       </gmd:CI_ResponsibleParty>
-  !       <abbreviation>GD</abbreviation>
+  !       <abbreviation>JD</abbreviation>
   !     </responsibleParty>
   !-------------------------------------------------------------------------
 
@@ -201,7 +201,7 @@ program ESMF_AttributeXMLUTest
     ! Set the attribute values within the 2 child nodes in the tree; child 1
     !  physical address
     call ESMF_AttributeSet(gridcomp, 'gco:CharacterString', &
-      'Department of Meteorology University of Reading Earley Gate, Reading', &
+      'Department of Meteorology, University of ABC', &
         convention='CIM', purpose='gmd:deliveryPoint', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 1st child attribute node test"
@@ -212,7 +212,7 @@ program ESMF_AttributeXMLUTest
     ! Set the attribute values within the 2 child nodes in the tree; child 2
     !  email address
     call ESMF_AttributeSet(gridcomp, 'gco:CharacterString', &
-      'g.m.devine@reading.ac.uk', &
+      'john.doe@earthsys.org', &
         convention='CIM', purpose='gmd:electronicMailAddress', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 2nd child attribute node test"
@@ -287,7 +287,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the attribute value within the child node in the tree: URL
     call ESMF_AttributeSet(gridcomp, 'gmd:URL', &
-      'www.reading.ac.uk', &
+      'www.earthsys.org', &
       convention='CIM', purpose='gmd:linkage', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 3rd child attribute node test"
@@ -390,7 +390,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the attribute value within the child node in the tree: individualName
     call ESMF_AttributeSet(gridcomp, 'gco:CharacterString', &
-      'Gerard Devine', &
+      'John Doe', &
       convention='CIM', purpose='gmd:individualName', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 4th child attribute node test"
@@ -484,7 +484,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the attribute value within the child node in the tree: abbreviation
-    call ESMF_AttributeSet(gridcomp, 'abbreviation', 'GD', &
+    call ESMF_AttributeSet(gridcomp, 'abbreviation', 'JD', &
       convention='CIM', purpose='responsibleParty', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 6th child attribute node test"
@@ -495,7 +495,7 @@ program ESMF_AttributeXMLUTest
     ! set XML comment (not actually part of compter-readable file -- filtered
     ! out by parsers -- only for human readability)
     call ESMF_AttributeSet(gridcomp, 'description', &
-      'responsibleParty uri :: c8594af0-283f-11df-a0dc-001de019e26d', &
+      'responsibleParty uri :: d8397bf0-223f-31df-b0dc-001ce029e16b', &
       convention='CIM', purpose='responsibleParty', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 7th child attribute node test"
@@ -581,7 +581,7 @@ program ESMF_AttributeXMLUTest
     !EX__UTest
     ! Set the 1st attribute value within the 1st CIM RP package
     ordinal = 1
-    call ESMF_AttributeSet(gridcomp2, 'Name', 'Bugs Bunny', &
+    call ESMF_AttributeSet(gridcomp2, 'Name', 'Jane Doe', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -595,7 +595,7 @@ program ESMF_AttributeXMLUTest
     !EX__UTest
     ! Set the 1st attribute value within the 2nd CIM RP package
     ordinal = 2
-    call ESMF_AttributeSet(gridcomp2, 'Name', 'Pink Panther', &
+    call ESMF_AttributeSet(gridcomp2, 'Name', 'Sally Doe', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -664,7 +664,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set the 1st attribute value within the last CIM RP package
-    call ESMF_AttributeSet(gridcomp2, 'Name', 'Gerard Devine', &
+    call ESMF_AttributeSet(gridcomp2, 'Name', 'John Doe', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
@@ -677,7 +677,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
-      'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
+      'Department of Meteorology, University of ABC', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 2nd attribute value in last CIM RP package test"
@@ -687,7 +687,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 3rd attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'EmailAddress', &
-                                       'g.m.devine@reading.ac.uk', &
+                                      'john.doe@earthsys.org', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 3rd attribute value in last CIM RP package test"
@@ -697,7 +697,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 4th attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'URL', &
-                                     'www.nerc.ac.uk', &
+                                      'www.earthsys.org', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 4th attribute value in last CIM RP package test"
@@ -731,15 +731,15 @@ program ESMF_AttributeXMLUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
   !-------------------------------------------------------------------------
-  !   <CIMRecord> attribute representation and output test for
-  !   <modelComponent> with <composition> (fields), <simulationRun>, and
+  !   <CIMDocument> attribute representation and output test for
+  !   <modelComponent>, <simulationRun>, including <input>s (fields) and
   !   <platform>. Uses built-in, standard CIM packages.
   !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Construct a gridded component ESMF object that will be decorated with
-    ! Attributes to output <CIMRecord>s
+    ! Attributes to output <CIMDocument>s
     gridcomp3 = ESMF_GridCompCreate(name="gridded_comp_cim", petList=(/0/), &
                  rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -763,7 +763,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'ShortName', 'HiGEM', &
+    call ESMF_AttributeSet(gridcomp3, 'ShortName', 'EarthSys_Atmos', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -775,7 +775,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'LongName', 'UK High Resolution Global Environment Model', &
+    call ESMF_AttributeSet(gridcomp3, 'LongName', 'Earth System High Resolution Global Model', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -788,11 +788,11 @@ program ESMF_AttributeXMLUTest
     ! Set the 3rd <modelComponent> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'Description',  &
-      'HiGEM brings together expertise from NERC, the UK academic ' // &
-      'community and the Met Office in a concerted UK effort to ' // &
-      'develop coupled climate models with increased horizontal ' // &
-      'resolutions. Increasing the horizontal resolution of coupled ' // &
-      'climate models will allow us to capture climate processes and ' // &
+      'EarthSys brings together expertise from the global ' // &
+      'community in a concerted effort to develop coupled ' // &
+      'climate models with increased horizontal resolutions.  ' // &
+      'Increasing the horizontal resolution of coupled climate ' // &
+      'models will allow us to capture climate processes and ' // &
       'weather systems in much greater detail.', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
@@ -817,7 +817,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 5th <modelComponent> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'ModelType', 'AerosolEmissionAndConc', &
+    call ESMF_AttributeSet(gridcomp3, 'ModelType', 'aerosol', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -831,7 +831,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st <simulationRun> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'SimulationShortName', '1.1_HiGEM_Sim', &
+    call ESMF_AttributeSet(gridcomp3, 'SimulationShortName', '1.1_EarthSys_Sim', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -843,7 +843,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd <simulationRun> attribute value within the CIM component
     !   package
-    call ESMF_AttributeSet(gridcomp3, 'SimulationLongName', 'HiGEM Simulation for Experiment 1.1', &
+    call ESMF_AttributeSet(gridcomp3, 'SimulationLongName', 'EarthSys Simulation for Experiment 1.1', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -856,7 +856,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 3rd <simulationRun> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationRationale', &
-     'HiGEM simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
+     'EarthSys simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -896,7 +896,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st <documentGenealogy> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'PreviousVersion', &
-      'HadGEM1 Atmosphere', &
+      'EarthSys1 Atmosphere', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -909,14 +909,8 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd <documentGenealogy> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'PreviousVersionDescription', &
-      'Horizontal resolution increased to 1.25 x 0.83 degrees;&#13; ' // &
-      'Timestep reduced from 30 minutes to 20 minutes;&#13; ' // &
-      'Magnitude of polar filtering in the advection scheme reduced;&#13; ' // &
-      'Vertical velocity threshold at which targeted moisture diffusion ' // &
-      'is triggered was increased from 0.1m/s to 0.4m/s;&#13; ' // &
-      'Snow-free sea-ice albedo reduced from 0.61 to 0.57;&#13; ' // &
-      'Total ocean current included in the calculation of surface ' // &
-      'fluxes of heat, moisture, and momentum.', &
+     'Horizontal resolution increased to 1.20 x 0.80 degrees; ' // &
+     'Timestep reduced from 30 minutes to 15 minutes.', &
                            convention='CIM 1.5', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
@@ -946,7 +940,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd <componentProperty> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyLongName', &
-      'TimeStep', &
+      'Clock time step', &
                       convention='CIM 1.5', &
                       purpose='Scientific Property Description', &
                       rc=rc)
@@ -1122,7 +1116,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st <citation> attribute value within the CIM citation
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ShortTitle', &
-      'Shaffrey_2009', &
+      'Doe_2009', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
                            rc=rc)
@@ -1135,15 +1129,11 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd <citation> attribute value within the CIM citation
     !   package
     call ESMF_AttributeSet(gridcomp3, 'LongTitle', &
-      'Shaffrey, L.C.; Norton, W.A.; Vidale, P.L.; Demory, M.E.; ' // &
-      'Donners, J.; Cole, J.W.; Wilson, S.S.; Slingo, J.M.; ' // &
-      'Steenman-Clark, L.; Stevens, I.; Stevens, D.P.; Roberts, M.J.; ' // &
-      'Clayton, A.; Johns, T.C.; Martin, G.M.; Harle, J.D.; New, A.L.; ' // &
-      'Jrrar, A.; Connolley, W.M.; King, J.C.; Woodage, J.; Slingo, A.; ' // &
-      'Clark, D.B.; Davies, T.M.; Iwi, A.M.. 2009 UK-HiGEM: ' // &
-      'The New U.K. High Resolution Global Environment Model - ' // &
-      'Model description and basic evaluation. Journal of Climate, ' // &
-      '22 (8). 1861-1896.', &
+     'Doe, J.A.; Norton, A.B.; ' // &
+     'Clark, G.H.; Davies, I.J.. 2009 EarthSys: ' // &
+     'The Earth System High Resolution Global Atmosphere Model - Model ' // &
+     'description and basic evaluation. Journal of Climate, 15 (2). ' // &
+     '1261-1296.', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
                            rc=rc)
@@ -1182,7 +1172,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 5th <citation> attribute value within the CIM citation
     !   package
     call ESMF_AttributeSet(gridcomp3, 'DOI', &
-      'doi:10.1175/2008JCLI2508.1', &
+      'doi:17.1035/2009JCLI4508.1', &
                            convention='ISO 19115', &
                            purpose='Citation Description', &
                            rc=rc)
@@ -1196,8 +1186,8 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st attribute value within the CIM RP package
     ! This sets <gmd:individualName> and <gmd:role> codeListValue='author'
-    !call ESMF_AttributeSet(gridcomp3, 'PrincipalInvestigator','Gerard Devine', &
-    call ESMF_AttributeSet(gridcomp3, 'Name','Gerard Devine', &
+    !call ESMF_AttributeSet(gridcomp3, 'PrincipalInvestigator','John Doe', &
+    call ESMF_AttributeSet(gridcomp3, 'Name','John Doe', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 1st attribute value in last CIM RP package test"
@@ -1207,7 +1197,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 2nd attribute value within the CIM RP package
     call ESMF_AttributeSet(gridcomp3, 'PhysicalAddress', &
-      'Department of Meteorology University of Reading Earley Gate, Reading Devine', &
+      'Department of Meteorology, University of ABC', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 2nd attribute value in last CIM RP package test"
@@ -1217,7 +1207,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 3rd attribute value within the CIM RP package
     call ESMF_AttributeSet(gridcomp3, 'EmailAddress', &
-                                       'g.m.devine@reading.ac.uk', &
+                                       'john.doe@earthsys.org', &
       convention='ISO 19115', purpose='Responsible Party Description', rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set 3rd attribute value in last CIM RP package test"
@@ -1233,11 +1223,11 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    ! <coupling>
+    ! <input>
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Construct a field ESMF object that will be decorated with
-    ! Attributes to output within <coupling>s in a <modelComponent>
+    ! Attributes to output within <input>s in a <simulationRun>
     field1 = ESMF_FieldEmptyCreate(name="DMS_emi", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a field to decorate with Attributes test"
@@ -1256,49 +1246,68 @@ program ESMF_AttributeXMLUTest
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 1st <coupling> attribute value within the CIM field
+    ! Set the 1st <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'ShortName', 'DMS_emi', &
                            convention='CIM 1.5', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 1st <couling> attribute value in CIM field package test"
+    write(name, *) "Set 1st <input> attribute value in CIM field package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 2nd <coupling> attribute value within the CIM field
+    ! Set the 2nd <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'CouplingPurpose', 'Boundary', &
                            convention='CIM 1.5', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 2nd <couling> attribute value in CIM field package test"
+    write(name, *) "Set 2nd <input> attribute value in CIM field package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
-    !-------------------------------------------------------------------------
-    ! 3rd through 7th attributes are not well defined yet in CIM sample file
-    !-------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 8th <coupling> attribute value within the CIM field
+    ! Set the 3rd <input> attribute value within the CIM field
     !   package
-    call ESMF_AttributeSet(field1, 'SpatialRegriddingMethod', &
-     'conservative-first-order', &
+    call ESMF_AttributeSet(field1, 'CouplingSource', 'EarthSys_Atmos', &
                            convention='CIM 1.5', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 8th <couling> attribute value in CIM field package test"
+    write(name, *) "Set 3rd <input> attribute value in CIM field package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 9th <coupling> attribute value within the CIM field
+    ! Set the 4th <input> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'CouplingTarget', 'EarthSys_AtmosDynCore', &
+                           convention='CIM 1.5', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 4th <input> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 5th <input> attribute value within the CIM field
+    !   package
+    call ESMF_AttributeSet(field1, 'SpatialRegriddingMethod', &
+     'Conservative-First-Order', &
+                           convention='CIM 1.5', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set 5th <input> attribute value in CIM field package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set the 6th <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'SpatialRegriddingDimension', &
      '2D', &
@@ -1306,12 +1315,12 @@ program ESMF_AttributeXMLUTest
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 9th <couling> attribute value in CIM field package test"
+    write(name, *) "Set 6th <input> attribute value in CIM field package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 10th <coupling> attribute value within the CIM field
+    ! Set the 7th <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'Frequency', &
      '15 Minutes', &
@@ -1319,12 +1328,12 @@ program ESMF_AttributeXMLUTest
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 10th <couling> attribute value in CIM field package test"
+    write(name, *) "Set 7th <input> attribute value in CIM field package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !EX_UTest
-    ! Set the 11th <coupling> attribute value within the CIM field
+    ! Set the 8th <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'TimeTransformationType', &
      'TimeAverage', &
@@ -1332,7 +1341,7 @@ program ESMF_AttributeXMLUTest
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set 11th <couling> attribute value in CIM field package test"
+    write(name, *) "Set 8th <input> attribute value in CIM field package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------

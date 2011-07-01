@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.6 2011/06/30 05:59:44 theurich Exp $
+! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.7 2011/07/01 19:21:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -218,10 +218,10 @@ module ESMF_AttributeUpdate2UTestMod
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeSet(comp, 'ShortName', &
-      'HiGEM_Atmos', &
+      'EarthSys_Atmos', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'LongName', &
-      'Atmosphere component of the HiGEM model', &
+      'Atmosphere component of the EarthSys model', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-02-02T02:03:04Z', &
@@ -233,13 +233,13 @@ module ESMF_AttributeUpdate2UTestMod
 
     ! Responsible party attributes (for Principal Investigator)
     call ESMF_AttributeSet(comp, 'Name', &
-      'Gerard Devine', &
+      'John Doe', &
         convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Meteorology University of Reading Earley Gate, Reading UK',&
+     'Department of Meteorology, University of ABC',&
         convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-      'g.m.devine@reading.ac.uk', &
+      'john.doe@earthsys.org', &
         convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
       'PI', &
@@ -248,15 +248,15 @@ module ESMF_AttributeUpdate2UTestMod
 
     ! Responsible party attributes (for Center)
     call ESMF_AttributeSet(comp, 'Name', &
-     'Department of Meteorology University of Reading', &
+     'Department of Meteorology, University of ABC', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Reading, Berkshire, United Kingdom', &
+     'Colorado, USA', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'info@reading.ac.uk', &
+     'info@earthsys.org', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
@@ -264,7 +264,7 @@ module ESMF_AttributeUpdate2UTestMod
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
-     'www.epcc.ed.ac.uk', &
+     'www.earthsys.org', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -330,7 +330,7 @@ module ESMF_AttributeUpdate2UTestMod
       attPackInstanceNameCount=attPackInstCount, rc=rc)
 
     call ESMF_AttributeSet(comp, 'Name', &
-     'NOAA', &
+     'University of CBA', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=attPackInstNames(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return
@@ -456,7 +456,7 @@ program ESMF_AttributeUpdate2UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.6 2011/06/30 05:59:44 theurich Exp $'
+    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.7 2011/07/01 19:21:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -567,7 +567,7 @@ program ESMF_AttributeUpdate2UTest
       attPackInstanceName=attPackInstNames(2), rc=rc)  ! in 2nd RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a GridComp test"
-    call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='NOAA'), &
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='University of CBA'), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
@@ -575,7 +575,7 @@ program ESMF_AttributeUpdate2UTest
       convention=convISO, purpose=purpRP, rc=rc)  ! in 1st RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a GridComp test"
-    call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='Gerard Devine'), &
+    call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='John Doe'), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
