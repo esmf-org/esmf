@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.52 2011/06/24 16:12:38 rokuingh Exp $
+! $Id: ESMF_Util.F90,v 1.53 2011/07/01 18:04:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.52 2011/06/24 16:12:38 rokuingh Exp $'
+               '$Id: ESMF_Util.F90,v 1.53 2011/07/01 18:04:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -585,89 +585,19 @@
 ! Command line interfaces
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilGetArgC"
-!BOP
-! !IROUTINE:  ESMF_UtilGetArgC - Return number of command line arguments
-!
-! !INTERFACE:
-  subroutine ESMF_UtilGetArgC (count, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-    integer, intent(out)           :: count
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer, intent(out), optional :: rc
-!
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-! This method returns the number of command line arguments specified
-! when the process was started.
-!
-! The number of arguments returned does not include the name of the
-! command itself - which is typically returned as argument zero.
-!
-! The arguments are:
-! \begin{description}
-! \item [count]
-! Count of command line arguments.
-! \item [{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-! Some MPI implementations do not consistently provide command line
-! arguments on PETs other than PET 0.  It is therefore recommended
-! that PET 0 call this method and broadcast the results to the other
-! PETs by using the {\tt ESMF\_VMBroadcast()} method.
-!EOP
-    integer :: argc
-
-#if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
-! Fortran 2003 version (default and preferred)
-
-    argc = command_argument_count ()
-
-#elif defined (ESMF_NEEDSPXFGETARG)
-! POSIX Fortran bindings (1003.9-1992)
-
-    integer, external :: ipxfargc
-
-    argc = ipxfargc ()
-
-#else
-! Non-Standard, but implemented by many compilers.
-
-    integer, external :: iargc
-
-    argc = iargc ()
-
-#endif
-
-    count = argc
-
-    if (present (rc)) then
-      rc = ESMF_SUCCESS
-    end if
-
-  end subroutine ESMF_UtilGetArgC
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilGetArg"
 !BOP
 ! !IROUTINE:  ESMF_UtilGetArg - Return a command line argument
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilGetArg (argindex, keywordEnforcer, argvalue, arglength, rc)
+  subroutine ESMF_UtilGetArg(argindex, keywordEnforcer, argvalue, arglength, rc)
 !
 ! !ARGUMENTS:
-    integer,      intent(in) :: argindex
+    integer,      intent(in)            :: argindex
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*), intent(out), optional :: argvalue
     integer,      intent(out), optional :: arglength
     integer,      intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -677,7 +607,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! when the process was started.  This argument is the same as an
 ! equivalent C++ program would find in the argv array.
 !
+! Some MPI implementations do not consistently provide command line
+! arguments on PETs other than PET 0.  It is therefore recommended
+! that PET 0 call this method and broadcast the results to the other
+! PETs by using the {\tt ESMF\_VMBroadcast()} method.
+!
 ! The arguments are:
+!
 ! \begin{description}
 ! \item [{argindex}]
 ! A non-negative index into the command line argument {\tt argv} array.
@@ -695,11 +631,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!
-! Some MPI implementations do not consistently provide command line
-! arguments on PETs other than PET 0.  It is therefore recommended
-! that PET 0 call this method and broadcast the results to the other
-! PETs by using the {\tt ESMF\_VMBroadcast()} method.
 !EOP
 !------------------------------------------------------------------------- 
 #if defined (ESMF_NEEDSPXFGETARG) || defined (ESMF_NEEDSGETARG)
@@ -825,19 +756,88 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilGetArgC"
+!BOP
+! !IROUTINE:  ESMF_UtilGetArgC - Return number of command line arguments
+!
+! !INTERFACE:
+  subroutine ESMF_UtilGetArgC(count, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    integer, intent(out)           :: count
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer, intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+! This method returns the number of command line arguments specified
+! when the process was started.
+!
+! The number of arguments returned does not include the name of the
+! command itself - which is typically returned as argument zero.
+!
+! Some MPI implementations do not consistently provide command line
+! arguments on PETs other than PET 0.  It is therefore recommended
+! that PET 0 call this method and broadcast the results to the other
+! PETs by using the {\tt ESMF\_VMBroadcast()} method.
+!
+! The arguments are:
+!
+! \begin{description}
+! \item [count]
+! Count of command line arguments.
+! \item [{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+    integer :: argc
+
+#if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
+! Fortran 2003 version (default and preferred)
+
+    argc = command_argument_count ()
+
+#elif defined (ESMF_NEEDSPXFGETARG)
+! POSIX Fortran bindings (1003.9-1992)
+
+    integer, external :: ipxfargc
+
+    argc = ipxfargc ()
+
+#else
+! Non-Standard, but implemented by many compilers.
+
+    integer, external :: iargc
+
+    argc = iargc ()
+
+#endif
+
+    count = argc
+
+    if (present (rc)) then
+      rc = ESMF_SUCCESS
+    end if
+
+  end subroutine ESMF_UtilGetArgC
+
+!------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilGetArgIndex"
 !BOP
 ! !IROUTINE:  ESMF_UtilGetArgIndex - Return the index of a command line argument
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilGetArgIndex (argvalue, keywordEnforcer, argindex, rc)
+  subroutine ESMF_UtilGetArgIndex(argvalue, keywordEnforcer, argindex, rc)
 !
 ! !ARGUMENTS:
-    character(*), intent(in) :: argvalue
+    character(*), intent(in)            :: argvalue
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,      intent(out), optional :: argindex
     integer,      intent(out), optional :: rc
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -848,7 +848,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! (e.g., -esmf\_path) so that its associated value argument could be
 ! obtained by adding 1 to the argindex and calling {\tt ESMF\_UtilGetArg()}.
 !
+! Some MPI implementations do not consistently provide command line
+! arguments on PETs other than PET 0.  It is therefore recommended
+! that PET 0 call this method and broadcast the results to the other
+! PETs by using the {\tt ESMF\_VMBroadcast()} method.
+!
 ! The arguments are:
+!
 ! \begin{description}
 ! \item [argvalue]
 ! A character string which will be searched for in the command line
@@ -860,11 +866,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!
-! Some MPI implementations do not consistently provide command line
-! arguments on PETs other than PET 0.  It is therefore recommended
-! that PET 0 call this method and broadcast the results to the other
-! PETs by using the {\tt ESMF\_VMBroadcast()} method.
 !EOP
 !------------------------------------------------------------------------- 
 

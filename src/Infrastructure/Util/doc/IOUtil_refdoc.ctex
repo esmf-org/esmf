@@ -1,4 +1,4 @@
-% $Id: IOUtil_refdoc.ctex,v 1.6 2011/01/05 20:05:46 svasquez Exp $
+% $Id: IOUtil_refdoc.ctex,v 1.7 2011/07/01 18:04:44 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -87,10 +87,11 @@
 
 \subsection{Utility API}
 #ifdef STANDALONE
+\input{ESMF_Util_fapi}
 \input{ESMF_IOUtil_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Util/doc/ESMF_IOUtil_fapi}
 \input{../Infrastructure/Util/doc/ESMF_Util_fapi}
+\input{../Infrastructure/Util/doc/ESMF_IOUtil_fapi}
 #endif
 
 %#ifdef STANDALONE

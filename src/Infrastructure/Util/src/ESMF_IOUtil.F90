@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.15 2011/06/09 05:12:55 w6ws Exp $
+! $Id: ESMF_IOUtil.F90,v 1.16 2011/07/01 18:04:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.15 2011/06/09 05:12:55 w6ws Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.16 2011/07/01 18:04:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -107,14 +107,12 @@ module ESMF_IOUtilMod
 ! !IROUTINE: ESMF_UtilIOUnitFlush - Flush output on a unit number
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilIOUnitFlush (unit, keywordEnforcer, rc)
+  subroutine ESMF_UtilIOUnitFlush(unit, keywordEnforcer, rc)
 !
 ! !PARAMETERS:
-    integer, intent(in) :: unit
+    integer, intent(in)            :: unit
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
-
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -128,7 +126,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[unit]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
-!       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
     integer :: localrc
@@ -173,14 +171,12 @@ ESMF_IOFlushMacro(unit, localstat)
 ! !IROUTINE:  ESMF_UtilIOUnitGet - Scan for a free I/O unit number
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilIOUnitGet (unit, keywordEnforcer, rc)
+  subroutine ESMF_UtilIOUnitGet(unit, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    integer, intent(out) :: unit
+    integer, intent(out)           :: unit
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
-
-!
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -205,7 +201,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[unit]
 !       A Fortran I/O unit number.
 !     \item[{[rc]}]
-!       Return code; Returns either {\tt ESMF\_SUCCESS} or {\tt ESMF\_FAILURE}.
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
 
@@ -236,13 +232,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  !IROUTINE:  ESMF_UtilIOUnitInit - Initialize ESMF Fortran I/O unit number range
 !
 ! !INTERFACE:
-  subroutine ESMF_UtilIOUnitInit (lower, upper, rc)
+  subroutine ESMF_UtilIOUnitInit(lower, upper, rc)
 !
 ! !ARGUMENTS:
     integer, intent(in),  optional :: lower
     integer, intent(in),  optional :: upper
     integer, intent(out), optional :: rc
-
 !
 ! !DESCRIPTION:
 !   Initialize non-default range for Fortran I/O unit numbers used
