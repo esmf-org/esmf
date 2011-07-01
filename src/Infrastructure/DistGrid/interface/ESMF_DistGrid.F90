@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.98 2011/07/01 20:30:23 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.99 2011/07/01 20:35:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.98 2011/07/01 20:30:23 theurich Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.99 2011/07/01 20:35:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -917,7 +917,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
-!          \ref{const:decompflag} for a list of valid decomposition flag options.
+!          \ref{const:decompflag} for a list of valid decomposition options.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
 !          decomposition. The default is a zero vector.
@@ -1267,7 +1267,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          List of decomposition flags indicating how each dimension of the
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. See section
-!          \ref{const:decompflag} for a list of valid decomposition flag options.
+!          \ref{const:decompflag} for a list of valid decomposition options.
 !     \item[{[regDecompFirstExtra]}]
 !          Extra elements on the first DEs along each dimension in a regular
 !          decomposition. The default is a zero vector.
@@ -1947,7 +1947,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          tile is to be divided between the DEs. The default setting
 !          is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions for all tiles. 
 !          See section \ref{const:decompflag} for a list of valid decomposition
-!          flag options. The second index indicates the tile number.
+!          options. The second index indicates the tile number.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order of the {\tt regDecomp}
