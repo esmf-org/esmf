@@ -1,4 +1,4 @@
-% $Id: FieldBundle_refdoc.ctex,v 1.9 2011/06/15 14:50:15 feiliu Exp $
+% $Id: FieldBundle_refdoc.ctex,v 1.10 2011/07/01 21:09:48 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -14,7 +14,7 @@
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{FieldBundles Design}
-\newcommand{\myauthors}{Nancy Collins}
+\newcommand{\myauthors}{Fei Liu}
 #endif
 
 #ifdef STANDALONE
