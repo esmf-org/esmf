@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.221 2011/06/30 19:43:19 w6ws Exp $
+! $Id: ESMF_Comp.F90,v 1.222 2011/07/01 04:40:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -132,10 +132,6 @@ module ESMF_CompMod
       ESMF_INIT_DEFINED)
 
 !------------------------------------------------------------------------------
-! ! ESMF Phase number
-  integer, parameter :: ESMF_SINGLEPHASE = 1    ! deprecated!!!!
-
-!------------------------------------------------------------------------------
 ! ! wrapper for Component objects going across F90/C++ boundary
   type ESMF_CWrap
 #ifndef ESMF_SEQUENCE_BUG
@@ -230,8 +226,6 @@ module ESMF_CompMod
   public ESMF_METHOD_WRITERESTARTIC, ESMF_METHOD_READRESTARTIC
   public ESMF_SETVM, ESMF_SETSERVICES
   
-  public ESMF_SINGLEPHASE     ! deprecated!!!!
-  
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
   public ESMF_CompClass, ESMF_CWrap
@@ -273,7 +267,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.221 2011/06/30 19:43:19 w6ws Exp $'
+    '$Id: ESMF_Comp.F90,v 1.222 2011/07/01 04:40:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
