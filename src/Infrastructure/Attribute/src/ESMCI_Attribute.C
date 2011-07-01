@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.116 2011/07/01 05:02:03 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.117 2011/07/01 19:21:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.116 2011/07/01 05:02:03 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.117 2011/07/01 19:21:51 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -6560,7 +6560,7 @@ if (attrRoot == ESMF_TRUE) {
 //
 // !ARGUMENTS:
       IO_XML *io_xml,   //  in - io pointer to write
-      ESMC_CIMRecordType cimRecType) const {
+      ESMC_CIMDocumentType cimDocType) const {
 //
 // !DESCRIPTION:
 //    Print the contents of a CIM {\tt Attribute}.  Expected to be
@@ -6579,7 +6579,7 @@ if (attrRoot == ESMF_TRUE) {
   attpack = AttPackGet("CIM 1.5", "Model Component Simulation Description",
                        "comp", &ordinal);
   while (attpack != NULL) {
-    localrc = attpack->AttributeWriteCIMbuffer(io_xml, cimRecType);
+    localrc = attpack->AttributeWriteCIMbuffer(io_xml, cimDocType);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
         "AttributeWriteCIMtraverse failed AttributeWriteCIMbuffer", &localrc);
@@ -6596,7 +6596,7 @@ if (attrRoot == ESMF_TRUE) {
   // recurse across all linked ESMF objects (e.g. child components, states,
   // fieldBundles, fields, grids, arrays)
   for(i=0; i<linkList.size(); i++)
-    localrc = linkList.at(i)->AttributeWriteCIMtraverse(io_xml, cimRecType);
+    localrc = linkList.at(i)->AttributeWriteCIMtraverse(io_xml, cimDocType);
 
   return ESMF_SUCCESS;
 
