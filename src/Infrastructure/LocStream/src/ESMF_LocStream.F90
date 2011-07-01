@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.65 2011/06/30 19:15:44 w6ws Exp $
+! $Id: ESMF_LocStream.F90,v 1.66 2011/07/01 20:46:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.65 2011/06/30 19:15:44 w6ws Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.66 2011/07/01 20:46:05 theurich Exp $'
 
 !==============================================================================
 !
@@ -308,9 +308,9 @@ end interface
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (locstream1 == locstream2) then ... endif
+!   if (locstream1 /= locstream2) then ... endif
 !             OR
-!   result = (locstream1 == locstream2)
+!   result = (locstream1 /= locstream2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -452,12 +452,12 @@ contains
                keyUnits, keyLongName, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Locstream), intent(in)            :: locstream
-    character (len=*),    intent(in)            :: keyName
-    type(ESMF_TypeKind_Flag),  intent(in), optional  :: keyTypeKind
-    character (len=*),    intent(in), optional  :: keyUnits 
-    character (len=*),    intent(in), optional  :: keyLongName 
-    integer, intent(out), optional :: rc
+    type(ESMF_Locstream),     intent(in)            :: locstream
+    character (len=*),        intent(in)            :: keyName
+    type(ESMF_TypeKind_Flag), intent(in),  optional :: keyTypeKind
+    character (len=*),        intent(in),  optional :: keyUnits 
+    character (len=*),        intent(in),  optional :: keyLongName 
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Add a key to a locstream. Once a key has been added its internal data
