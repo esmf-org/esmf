@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.10 2011/07/01 21:52:05 w6ws Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.11 2011/07/01 22:08:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.10 2011/07/01 21:52:05 w6ws Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.11 2011/07/01 22:08:54 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -635,8 +635,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           end if @\
           ! TODO - should check to make sure sip%otype @\
           ! is compatible, or should be changed. @\
-          ! TODO - maybe should do a StateItemDestruct/StateItemConstruct
-          ! sequence.  But for now, just reuse the existing entry.
+          ! TODO - maybe should do a StateItemDestruct/StateItemConstruct @\
+          ! sequence.  But for now, just reuse the existing entry. @\
         else @\
           ! can do add or addrep.  Or replace w/relaxed @\
           if (.not. localaddflag .and. (localrepflag .and. .not. localrelaxflag)) then @\
