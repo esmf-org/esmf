@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.72 2011/07/01 16:07:30 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.73 2011/07/01 20:41:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.72 2011/07/01 16:07:30 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.73 2011/07/01 20:41:37 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.72 2011/07/01 16:07:30 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.73 2011/07/01 20:41:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -347,9 +347,9 @@ module ESMF_MeshMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (mesh1 == mesh2) then ... endif
+!   if (mesh1 /= mesh2) then ... endif
 !             OR
-!   result = (mesh1 == mesh2)
+!   result = (mesh1 /= mesh2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -999,11 +999,11 @@ contains
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
-    character(len=*), intent(in)              :: filename
-    type(ESMF_FileFormat_Flag), intent(in)     :: filetypeflag
-    logical, intent(in), optional             :: convert3D
-    logical, intent(in), optional             :: convertToDual
-    integer, intent(out), optional            :: rc
+    character(len=*),           intent(in)            :: filename
+    type(ESMF_FileFormat_Flag), intent(in)            :: filetypeflag
+    logical,                    intent(in),  optional :: convert3D
+    logical,                    intent(in),  optional :: convertToDual
+    integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
 !   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
@@ -1825,9 +1825,9 @@ end function ESMF_MeshCreateFromScrip
     logical :: ESMF_MeshMatch
       
 ! !ARGUMENTS:
-    type(ESMF_Mesh),  intent(in)              :: mesh1
-    type(ESMF_Mesh),  intent(in)              :: mesh2
-    integer,          intent(out),  optional  :: rc  
+    type(ESMF_Mesh),  intent(in)             :: mesh1
+    type(ESMF_Mesh),  intent(in)             :: mesh2
+    integer,          intent(out),  optional :: rc  
 !         
 !
 ! !DESCRIPTION:
