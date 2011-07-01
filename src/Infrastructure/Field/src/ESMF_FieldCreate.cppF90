@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.115 2011/07/01 16:07:06 rokuingh Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.116 2011/07/01 21:24:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.115 2011/07/01 16:07:06 rokuingh Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.116 2011/07/01 21:24:11 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -208,9 +208,9 @@ module ESMF_FieldCreateMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (field1 == field2) then ... endif
+!   if (field1 /= field2) then ... endif
 !             OR
-!   result = (field1 == field2)
+!   result = (field1 /= field2)
 ! !RETURN VALUE:
 !   logical :: result
 !
@@ -341,134 +341,6 @@ contains
 
   end function ESMF_FieldNE
 !-------------------------------------------------------------------------------
-
-
-! ESMF_FieldCreateBa
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldDestroy"
-!BOP
-! !IROUTINE: ESMF_FieldDestroy - Release resources associated with a Field
-! !INTERFACE:
-  subroutine ESMF_FieldDestroy(field, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_Field), intent(inout)          :: field       
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,          intent(out),  optional :: rc     
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-! Releases resources associated with the {\tt ESMF\_Field}.  If an 
-! {\tt ESMF\_Grid} is associated with {\tt field}, it will not be released.  If 
-! {\tt field} is not released with this call, it will be released by the
-! automatic garbage collection facility in the scope of the Component 
-! that created {\tt field}.
-! 
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       {\tt ESMF\_Field} object.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    ! Local variables
-    integer :: localrc                         
-
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! check input variables
-    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-    if (.not.associated(field%ftypep)) then 
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-        msg="Uninitialized or already destroyed Field: ftypep unassociated", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif 
-
-    ! Destruct all field internals and then free field memory.
-    call ESMF_FieldDestruct(field%ftypep, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    nullify(field%ftypep)
-
-    ESMF_INIT_SET_DELETED(field)
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldDestroy
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldDestruct"
-!BOPI
-! !IROUTINE:   ESMF_FieldDestruct - Release Field memory allocated internally
-!
-! !INTERFACE:
-  subroutine ESMF_FieldDestruct(ftype, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_FieldType), pointer :: ftype        
-    integer, intent(out), optional :: rc         
-!
-! !DESCRIPTION:
-! Releases all resources except the {\tt ESMF\_Field} itself.
-!
-! The arguments are:
-! \begin{description}
-! \item [ftype]
-!       Pointer to an {\tt ESMF\_Field} object.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-!------------------------------------------------------------------------------
-    integer :: localrc
-    type(ESMF_Status) :: basestatus
-
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    call ESMF_BaseGetStatus(ftype%base, basestatus, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-        
-    if (basestatus .eq. ESMF_STATUS_READY) then
-      if((ftype%is_proxy .or. ftype%array_internal) .and. &
-        ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-          call ESMF_ArrayDestroy(ftype%array, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-                                
-          ftype%status = ESMF_FIELDSTATUS_UNINIT  ! mark invalid
-          
-      endif
-    endif
-
-    ! mark object invalid
-    call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if  (present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldDestruct
-!------------------------------------------------------------------------------
 
 ! ESMF_FieldCreateGe
 !------------------------------------------------------------------------------
@@ -4646,6 +4518,131 @@ TypeKindRankDeclarationMacro(FieldCreateXGDataPtr)
 !------------------------------------------------------------------------------
 
 
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldDestroy"
+!BOP
+! !IROUTINE: ESMF_FieldDestroy - Release resources associated with a Field
+! !INTERFACE:
+  subroutine ESMF_FieldDestroy(field, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout)          :: field       
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(out),  optional :: rc     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+! Releases resources associated with the {\tt ESMF\_Field}.  If an 
+! {\tt ESMF\_Grid} is associated with {\tt field}, it will not be released.  If 
+! {\tt field} is not released with this call, it will be released by the
+! automatic garbage collection facility in the scope of the Component 
+! that created {\tt field}.
+! 
+! The arguments are:
+! \begin{description}
+! \item [field]
+!       {\tt ESMF\_Field} object.
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! Local variables
+    integer :: localrc                         
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+
+    if (.not.associated(field%ftypep)) then 
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+        msg="Uninitialized or already destroyed Field: ftypep unassociated", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif 
+
+    ! Destruct all field internals and then free field memory.
+    call ESMF_FieldDestruct(field%ftypep, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    nullify(field%ftypep)
+
+    ESMF_INIT_SET_DELETED(field)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldDestroy
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldDestruct"
+!BOPI
+! !IROUTINE:   ESMF_FieldDestruct - Release Field memory allocated internally
+!
+! !INTERFACE:
+  subroutine ESMF_FieldDestruct(ftype, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldType), pointer :: ftype        
+    integer, intent(out), optional :: rc         
+!
+! !DESCRIPTION:
+! Releases all resources except the {\tt ESMF\_Field} itself.
+!
+! The arguments are:
+! \begin{description}
+! \item [ftype]
+!       Pointer to an {\tt ESMF\_Field} object.
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc
+    type(ESMF_Status) :: basestatus
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_BaseGetStatus(ftype%base, basestatus, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    if (basestatus .eq. ESMF_STATUS_READY) then
+      if((ftype%is_proxy .or. ftype%array_internal) .and. &
+        ftype%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
+          call ESMF_ArrayDestroy(ftype%array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+                                
+          ftype%status = ESMF_FIELDSTATUS_UNINIT  ! mark invalid
+          
+      endif
+    endif
+
+    ! mark object invalid
+    call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_INVALID, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if  (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldDestruct
+!------------------------------------------------------------------------------
 
 
 end module ESMF_FieldCreateMod

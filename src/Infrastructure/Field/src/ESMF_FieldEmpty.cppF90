@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.24 2011/07/01 16:07:06 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.25 2011/07/01 21:24:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.24 2011/07/01 16:07:06 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.25 2011/07/01 21:24:11 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -120,513 +120,6 @@ module ESMF_FieldEmptyMod
 !EOPI
 
 contains
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldEmptyCreate"
-!BOP
-! !IROUTINE: ESMF_FieldEmptyCreate- Create an empty Field
-
-! !INTERFACE:
-  function ESMF_FieldEmptyCreate(keywordEnforcer, name, rc)
-!
-! !RETURN VALUE:
-    type(ESMF_Field) :: ESMF_FieldEmptyCreate
-!
-! !ARGUMENTS:
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character (len = *), intent(in),  optional :: name  
-    integer,             intent(out), optional :: rc               
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-! \begin{sloppypar}
-! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
-! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
-! it. The empty {\tt ESMF\_Field} can be completed in one more step or two more steps by
-! the {\tt ESMF\_FieldEmptySet} and {\tt ESMF\_FieldEmptyComplete} methods.
-! Attributes can be added to an empty Field object. For an example and
-! associated documentation using this method see Section 
-! \ref{sec:field:usage:create_empty} and \ref{sec:field:usage:partial_creation}.
-! \end{sloppypar}
-!
-!
-! The arguments are:
-! \begin{description}
-! \item [{[name]}] 
-!       Field name. 
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-    integer :: localrc                     
-    
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    nullify(ftype)
-    nullify(ESMF_FieldEmptyCreate%ftypep)
-
-    allocate(ftype, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldInitialize(ftype, rc=localrc) 
-    if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Call field construction method
-    call ESMF_FieldConstructEmpty(ftype, name, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Set return values.
-    ESMF_FieldEmptyCreate%ftypep => ftype
-    
-    ! Add reference to this object into ESMF garbage collection table
-    ! Only call this in those Create() methods that call Construct()
-    call c_ESMC_VMAddFObject(ESMF_FieldEmptyCreate, ESMF_ID_FIELD%objectID)
-
-    ESMF_INIT_SET_CREATED(ESMF_FieldEmptyCreate)
-
-    call ESMF_FieldValidate(ESMF_FieldEmptyCreate, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(rc)) rc = ESMF_SUCCESS
-
-  end function ESMF_FieldEmptyCreate
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldEmptySetGrid"
-!BOP
-! !IROUTINE: ESMF_FieldEmptySet - Set a Grid in an empty Field
-
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetGrid(field, grid, keywordEnforcer, StaggerLoc, rc)
-
-!
-! !ARGUMENTS:
-  type(ESMF_Field), intent(inout)       :: field
-  type(ESMF_Grid), intent(in)           :: grid
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_STAGGERLOC), intent(in), optional :: StaggerLoc
-  integer, intent(out), optional        :: rc
-!
-! !STATUS:
-! \apiStatusCompatible
-!
-! !DESCRIPTION:
-! \begin{sloppypar}
-! Set a grid and an optional staggerloc (default to center stagger 
-! {\tt ESMF\_STAGGERLOC\_CENTER}) in an empty {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains 
-! the {\tt ESMF\_Grid} internally but holds no data. 
-! The status of the field changes from
-! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-!
-! For an example and
-! associated documentation using this method see Section
-! \ref{sec:field:usage:partial_creation}.
-! \end{sloppypar}
-!
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_Grid} internally but holds no data. 
-!       The status of the field changes from
-!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-! \item [grid]
-!       {\tt ESMF\_Grid} to be set in the {\tt ESMF\_Field}.
-! \item [{[StaggerLoc]}] 
-!       Stagger location of data in grid cells.  For valid
-!       predefined values see Section \ref{const:staggerloc}.
-!       To create a custom stagger location see Section
-!       \ref{sec:usage:staggerloc:adv}. The default
-!       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-
-  type(ESMF_STAGGERLOC)                 :: l_staggerloc
-  type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus_Flag)           :: status
-  integer                               :: localrc
-  type(ESMF_Logical)                    :: linkChange
-
-  if(present(rc)) rc = ESMF_RC_NOT_IMPL
-  localrc = ESMF_RC_NOT_IMPL
-
-  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-  call ESMF_FieldGet(field, status=status, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
-     status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-      msg="FieldEmptySet - cannot replace an existing Grid in a Field", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-  endif
-
-  l_staggerloc = ESMF_STAGGERLOC_CENTER
-  if(present(staggerloc)) l_staggerloc = staggerloc
-
-  geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  ! link the Attribute hierarchies
-  linkChange = ESMF_TRUE
-  call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc))  return
-
-  field%ftypep%geombase = geombase
-  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
-
-  if(present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldEmptySetGrid
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldEmptySetMesh"
-!BOP
-! !IROUTINE: ESMF_FieldEmptySet - Set a Mesh in an empty Field
-
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetMesh(field, mesh, keywordEnforcer, meshloc,  rc)
-
-!
-! !ARGUMENTS:
-  type(ESMF_Field), intent(inout)       :: field
-  type(ESMF_Mesh), intent(in)           :: mesh
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_MeshLoc), intent(in), optional :: meshloc
-  integer, intent(out), optional        :: rc
-!
-! !DESCRIPTION:
-! \begin{sloppypar}
-! Set a mesh and an optional meshloc (default to center stagger 
-! {\tt ESMF\_MESHLOC\_NODE}) in an empty {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains
-! the {\tt ESMF\_Mesh} internally but holds no data. 
-! The status of the field changes from
-! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-!
-! \end{sloppypar}
-!
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_Mesh} internally but holds no data. 
-!       The status of the field changes from
-!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-! \item [mesh]
-!       {\tt ESMF\_Mesh} to be set in the {\tt ESMF\_Field}.
-! \item [{[location]}] 
-!       \begin{sloppypar}
-!       Which part of the mesh to build the Field on. Can be set to either
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
-!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
-!       \end{sloppypar}
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-
-  type(ESMF_MeshLoc)                    :: l_meshloc
-  type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus_Flag)                :: status
-  integer                               :: localrc
-
-  if(present(rc)) rc = ESMF_RC_NOT_IMPL
-  localrc = ESMF_RC_NOT_IMPL
-
-  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
-
-  call ESMF_FieldGet(field, status=status, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
-     status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-      msg="FieldEmptySet - cannot replace an existing Mesh in a Field", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-  endif
-
-  l_meshloc = ESMF_MESHLOC_NODE
-  if(present(meshloc)) l_meshloc = meshloc
-
-  geombase=ESMF_GeomBaseCreate(mesh, l_meshloc, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  field%ftypep%geombase = geombase
-  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
-
-  if(present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldEmptySetMesh
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldEmptySetLocStream"
-!BOP
-! !IROUTINE: ESMF_FieldEmptySet - Set a LocStream in an empty Field
-
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetLocStream(field, locstream, keywordEnforcer, rc)
-
-!
-! !ARGUMENTS:
-  type(ESMF_Field), intent(inout)            :: field
-  type(ESMF_LocStream), intent(in)           :: locstream
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  integer, intent(out), optional        :: rc
-!
-! !DESCRIPTION:
-! \begin{sloppypar}
-! Set a {\tt ESMF\_LocStream} in an empty {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains
-! the {\tt ESMF\_LocStream} internally but holds no data. 
-! The status of the field changes from
-! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-!
-! \end{sloppypar}
-!
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_LocStream} internally but holds no data. 
-!       The status of the field changes from
-!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-! \item [locstream]
-!       {\tt ESMF\_LocStream} to be set in the {\tt ESMF\_Field}.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-
-  type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus_Flag)                :: status
-  integer                               :: localrc
-
-  if(present(rc)) rc = ESMF_RC_NOT_IMPL
-  localrc = ESMF_RC_NOT_IMPL
-
-  ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc)
-
-  call ESMF_FieldGet(field, status=status, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
-     status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-      msg="FieldEmptySet - cannot replace an existing LocStream in a Field", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-  endif
-
-  geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  field%ftypep%geombase = geombase
-  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
-
-  if(present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldEmptySetLocStream
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldEmptySetXGrid"
-!BOP
-! !IROUTINE: ESMF_FieldEmptySet - Set an XGrid in an empty Field
-
-! !INTERFACE:
-  ! Private name; call using ESMF_FieldEmptySet()
-  subroutine ESMF_FieldEmptySetXGrid(field, xgrid, keywordEnforcer, xgridside, gridindex, rc)
-
-!
-! !ARGUMENTS:
-  type(ESMF_Field), intent(inout)            :: field
-  type(ESMF_XGrid), intent(in)               :: xgrid
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-  type(ESMF_XGridSide_Flag), intent(in), optional :: xgridside
-  integer, intent(in), optional              :: gridindex
-  integer, intent(out), optional             :: rc
-!
-! !DESCRIPTION:
-! \begin{sloppypar}
-! Set a xgrid and optional xgridside (default to balanced side 
-! {\tt ESMF\_XGRIDSIDE\_Balanced}) and gridindex (default to 1) 
-! in an empty {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must be empty for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains
-! the {\tt ESMF\_XGrid} internally but holds no data. 
-! The status of the field changes from
-! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-!
-! \end{sloppypar}
-!
-!
-! The arguments are:
-! \begin{description}
-! \item [field]
-!       Empty {\tt ESMF\_Field}. After this
-!       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_XGrid} internally but holds no data. 
-!       The status of the field changes from
-!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
-! \item [xgrid]
-!       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
-! \item [{[xgridside]}] 
-!       Side of XGrid to retrieve a DistGrid.  For valid
-!       predefined values see Section \ref{sec:const:xgridside}.
-!       The default value is {\tt ESMF\_XGRIDSIDE\_BALANCED}.
-! \item [{[gridindex]}] 
-!       Index to specify which DistGrid when on side A or side B. 
-!       The default value is 1.
-! \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-
-  type(ESMF_XGridSide_Flag)                  :: l_xgridside
-  type(ESMF_GEOMBASE)                   :: geombase
-  type(ESMF_FieldStatus_Flag)                :: status
-  integer                               :: localrc, l_gridindex
-
-  if(present(rc)) rc = ESMF_RC_NOT_IMPL
-  localrc = ESMF_RC_NOT_IMPL
-
-  ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
-
-  call ESMF_FieldGet(field, status=status, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
-     status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-      msg="FieldEmptySet - cannot replace an existing XGrid in a Field", &
-      ESMF_CONTEXT, rcToReturn=rc)
-    return
-  endif
-
-  l_xgridside = ESMF_XGRIDSIDE_BALANCED
-  if(present(xgridside)) l_xgridside = xgridside
-  l_gridindex = 1
-  if(present(gridindex)) l_gridindex = gridindex
-
-  geombase=ESMF_GeomBaseCreate(xgrid, l_xgridside, l_gridindex, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
-  field%ftypep%geombase = geombase
-  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
-
-  if(present(rc)) rc = ESMF_SUCCESS
-
-  end subroutine ESMF_FieldEmptySetXGrid
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_FieldConstructEmpty"
-!BOPI
-! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no GeomBase or Array
-!
-! !INTERFACE:
-  subroutine ESMF_FieldConstructEmpty(ftypep, name, rc)
-!
-! !ARGUMENTS:     
-    type(ESMF_FieldType), pointer :: ftypep
-    character (len = *), intent(in), optional :: name  
-    integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-! Constructs an empty {\tt ESMF\_Field}.
-!
-! The arguments are:
-! \begin{description}
-! \item [ftypep]
-!       Pointer to an {\tt ESMF\_Field} object.
-! \item [{[name]}]
-!       Field name.
-! \item [{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-!------------------------------------------------------------------------------
-    ! Local variables
-    integer :: localrc
-
-    ! Initialize
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Construct a default name if one is not given
-    call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    call ESMF_BaseSetStatus(ftypep%base, ESMF_STATUS_READY, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Initialize field contents
-    ftypep%status = ESMF_FIELDSTATUS_EMPTY
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-  end subroutine ESMF_FieldConstructEmpty
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -4492,6 +3985,514 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(FieldEmptyCompGBPtr)
+
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptyCreate"
+!BOP
+! !IROUTINE: ESMF_FieldEmptyCreate - Create an empty Field
+
+! !INTERFACE:
+  function ESMF_FieldEmptyCreate(keywordEnforcer, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Field) :: ESMF_FieldEmptyCreate
+!
+! !ARGUMENTS:
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character (len = *), intent(in),  optional :: name  
+    integer,             intent(out), optional :: rc               
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+! \begin{sloppypar}
+! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
+! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+! it. The empty {\tt ESMF\_Field} can be completed in one more step or two more steps by
+! the {\tt ESMF\_FieldEmptySet} and {\tt ESMF\_FieldEmptyComplete} methods.
+! Attributes can be added to an empty Field object. For an example and
+! associated documentation using this method see Section 
+! \ref{sec:field:usage:create_empty} and \ref{sec:field:usage:partial_creation}.
+! \end{sloppypar}
+!
+!
+! The arguments are:
+! \begin{description}
+! \item [{[name]}] 
+!       Field name. 
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
+    integer :: localrc                     
+    
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    nullify(ftype)
+    nullify(ESMF_FieldEmptyCreate%ftypep)
+
+    allocate(ftype, stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldInitialize(ftype, rc=localrc) 
+    if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call field construction method
+    call ESMF_FieldConstructEmpty(ftype, name, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return values.
+    ESMF_FieldEmptyCreate%ftypep => ftype
+    
+    ! Add reference to this object into ESMF garbage collection table
+    ! Only call this in those Create() methods that call Construct()
+    call c_ESMC_VMAddFObject(ESMF_FieldEmptyCreate, ESMF_ID_FIELD%objectID)
+
+    ESMF_INIT_SET_CREATED(ESMF_FieldEmptyCreate)
+
+    call ESMF_FieldValidate(ESMF_FieldEmptyCreate, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_FieldEmptyCreate
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptySetGrid"
+!BOP
+! !IROUTINE: ESMF_FieldEmptySet - Set a Grid in an empty Field
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldEmptySet()
+  subroutine ESMF_FieldEmptySetGrid(field, grid, keywordEnforcer, StaggerLoc, rc)
+
+!
+! !ARGUMENTS:
+  type(ESMF_Field), intent(inout)       :: field
+  type(ESMF_Grid), intent(in)           :: grid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_STAGGERLOC), intent(in), optional :: StaggerLoc
+  integer, intent(out), optional        :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+! \begin{sloppypar}
+! Set a grid and an optional staggerloc (default to center stagger 
+! {\tt ESMF\_STAGGERLOC\_CENTER}) in an empty {\tt ESMF\_Field}. The 
+! {\tt ESMF\_Field} must be empty for this to succeed. After this 
+! operation, the {\tt ESMF\_Field} contains 
+! the {\tt ESMF\_Grid} internally but holds no data. 
+! The status of the field changes from
+! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+!
+! For an example and
+! associated documentation using this method see Section
+! \ref{sec:field:usage:partial_creation}.
+! \end{sloppypar}
+!
+!
+! The arguments are:
+! \begin{description}
+! \item [field]
+!       Empty {\tt ESMF\_Field}. After this
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_Grid} internally but holds no data. 
+!       The status of the field changes from
+!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+! \item [grid]
+!       {\tt ESMF\_Grid} to be set in the {\tt ESMF\_Field}.
+! \item [{[StaggerLoc]}] 
+!       Stagger location of data in grid cells.  For valid
+!       predefined values see Section \ref{const:staggerloc}.
+!       To create a custom stagger location see Section
+!       \ref{sec:usage:staggerloc:adv}. The default
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+  type(ESMF_STAGGERLOC)                 :: l_staggerloc
+  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_FieldStatus_Flag)           :: status
+  integer                               :: localrc
+  type(ESMF_Logical)                    :: linkChange
+
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+  call ESMF_FieldGet(field, status=status, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
+     status == ESMF_FIELDSTATUS_COMPLETE ) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+      msg="FieldEmptySet - cannot replace an existing Grid in a Field", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  l_staggerloc = ESMF_STAGGERLOC_CENTER
+  if(present(staggerloc)) l_staggerloc = staggerloc
+
+  geombase=ESMF_GeomBaseCreate(grid,l_staggerloc, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! link the Attribute hierarchies
+  linkChange = ESMF_TRUE
+  call c_ESMC_AttributeLink(field%ftypep%base, grid, linkChange, localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc))  return
+
+  field%ftypep%geombase = geombase
+  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldEmptySetGrid
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptySetMesh"
+!BOP
+! !IROUTINE: ESMF_FieldEmptySet - Set a Mesh in an empty Field
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldEmptySet()
+  subroutine ESMF_FieldEmptySetMesh(field, mesh, keywordEnforcer, meshloc,  rc)
+
+!
+! !ARGUMENTS:
+  type(ESMF_Field), intent(inout)       :: field
+  type(ESMF_Mesh), intent(in)           :: mesh
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_MeshLoc), intent(in), optional :: meshloc
+  integer, intent(out), optional        :: rc
+!
+! !DESCRIPTION:
+! \begin{sloppypar}
+! Set a mesh and an optional meshloc (default to center stagger 
+! {\tt ESMF\_MESHLOC\_NODE}) in an empty {\tt ESMF\_Field}. The 
+! {\tt ESMF\_Field} must be empty for this to succeed. After this 
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_Mesh} internally but holds no data. 
+! The status of the field changes from
+! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+!
+! \end{sloppypar}
+!
+!
+! The arguments are:
+! \begin{description}
+! \item [field]
+!       Empty {\tt ESMF\_Field}. After this
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_Mesh} internally but holds no data. 
+!       The status of the field changes from
+!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+! \item [mesh]
+!       {\tt ESMF\_Mesh} to be set in the {\tt ESMF\_Field}.
+! \item [{[location]}] 
+!       \begin{sloppypar}
+!       Which part of the mesh to build the Field on. Can be set to either
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
+!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+  type(ESMF_MeshLoc)                    :: l_meshloc
+  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_FieldStatus_Flag)                :: status
+  integer                               :: localrc
+
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
+
+  call ESMF_FieldGet(field, status=status, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
+     status == ESMF_FIELDSTATUS_COMPLETE ) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+      msg="FieldEmptySet - cannot replace an existing Mesh in a Field", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  l_meshloc = ESMF_MESHLOC_NODE
+  if(present(meshloc)) l_meshloc = meshloc
+
+  geombase=ESMF_GeomBaseCreate(mesh, l_meshloc, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  field%ftypep%geombase = geombase
+  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldEmptySetMesh
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptySetLocStream"
+!BOP
+! !IROUTINE: ESMF_FieldEmptySet - Set a LocStream in an empty Field
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldEmptySet()
+  subroutine ESMF_FieldEmptySetLocStream(field, locstream, keywordEnforcer, rc)
+
+!
+! !ARGUMENTS:
+  type(ESMF_Field), intent(inout)            :: field
+  type(ESMF_LocStream), intent(in)           :: locstream
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer, intent(out), optional        :: rc
+!
+! !DESCRIPTION:
+! \begin{sloppypar}
+! Set a {\tt ESMF\_LocStream} in an empty {\tt ESMF\_Field}. The 
+! {\tt ESMF\_Field} must be empty for this to succeed. After this 
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_LocStream} internally but holds no data. 
+! The status of the field changes from
+! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+!
+! \end{sloppypar}
+!
+!
+! The arguments are:
+! \begin{description}
+! \item [field]
+!       Empty {\tt ESMF\_Field}. After this
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_LocStream} internally but holds no data. 
+!       The status of the field changes from
+!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+! \item [locstream]
+!       {\tt ESMF\_LocStream} to be set in the {\tt ESMF\_Field}.
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_FieldStatus_Flag)                :: status
+  integer                               :: localrc
+
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit, locstream, rc)
+
+  call ESMF_FieldGet(field, status=status, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
+     status == ESMF_FIELDSTATUS_COMPLETE ) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+      msg="FieldEmptySet - cannot replace an existing LocStream in a Field", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  geombase=ESMF_GeomBaseCreate(locstream, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  field%ftypep%geombase = geombase
+  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldEmptySetLocStream
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldEmptySetXGrid"
+!BOP
+! !IROUTINE: ESMF_FieldEmptySet - Set an XGrid in an empty Field
+
+! !INTERFACE:
+  ! Private name; call using ESMF_FieldEmptySet()
+  subroutine ESMF_FieldEmptySetXGrid(field, xgrid, keywordEnforcer, xgridside, gridindex, rc)
+
+!
+! !ARGUMENTS:
+  type(ESMF_Field), intent(inout)            :: field
+  type(ESMF_XGrid), intent(in)               :: xgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_XGridSide_Flag), intent(in), optional :: xgridside
+  integer, intent(in), optional              :: gridindex
+  integer, intent(out), optional             :: rc
+!
+! !DESCRIPTION:
+! \begin{sloppypar}
+! Set a xgrid and optional xgridside (default to balanced side 
+! {\tt ESMF\_XGRIDSIDE\_Balanced}) and gridindex (default to 1) 
+! in an empty {\tt ESMF\_Field}. The 
+! {\tt ESMF\_Field} must be empty for this to succeed. After this 
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_XGrid} internally but holds no data. 
+! The status of the field changes from
+! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+!
+! \end{sloppypar}
+!
+!
+! The arguments are:
+! \begin{description}
+! \item [field]
+!       Empty {\tt ESMF\_Field}. After this
+!       operation, the {\tt ESMF\_Field} contains
+!       the {\tt ESMF\_XGrid} internally but holds no data. 
+!       The status of the field changes from
+!       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+! \item [xgrid]
+!       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
+! \item [{[xgridside]}] 
+!       Side of XGrid to retrieve a DistGrid.  For valid
+!       predefined values see Section \ref{sec:const:xgridside}.
+!       The default value is {\tt ESMF\_XGRIDSIDE\_BALANCED}.
+! \item [{[gridindex]}] 
+!       Index to specify which DistGrid when on side A or side B. 
+!       The default value is 1.
+! \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+  type(ESMF_XGridSide_Flag)                  :: l_xgridside
+  type(ESMF_GEOMBASE)                   :: geombase
+  type(ESMF_FieldStatus_Flag)                :: status
+  integer                               :: localrc, l_gridindex
+
+  if(present(rc)) rc = ESMF_RC_NOT_IMPL
+  localrc = ESMF_RC_NOT_IMPL
+
+  ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+
+  call ESMF_FieldGet(field, status=status, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(status == ESMF_FIELDSTATUS_GRIDSET .or. &
+     status == ESMF_FIELDSTATUS_COMPLETE ) then
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+      msg="FieldEmptySet - cannot replace an existing XGrid in a Field", &
+      ESMF_CONTEXT, rcToReturn=rc)
+    return
+  endif
+
+  l_xgridside = ESMF_XGRIDSIDE_BALANCED
+  if(present(xgridside)) l_xgridside = xgridside
+  l_gridindex = 1
+  if(present(gridindex)) l_gridindex = gridindex
+
+  geombase=ESMF_GeomBaseCreate(xgrid, l_xgridside, l_gridindex, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  field%ftypep%geombase = geombase
+  field%ftypep%status = ESMF_FIELDSTATUS_GRIDSET
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_FieldEmptySetXGrid
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldConstructEmpty"
+!BOPI
+! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no GeomBase or Array
+!
+! !INTERFACE:
+  subroutine ESMF_FieldConstructEmpty(ftypep, name, rc)
+!
+! !ARGUMENTS:     
+    type(ESMF_FieldType), pointer :: ftypep
+    character (len = *), intent(in), optional :: name  
+    integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+! Constructs an empty {\tt ESMF\_Field}.
+!
+! The arguments are:
+! \begin{description}
+! \item [ftypep]
+!       Pointer to an {\tt ESMF\_Field} object.
+! \item [{[name]}]
+!       Field name.
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOPI
+!------------------------------------------------------------------------------
+    ! Local variables
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Construct a default name if one is not given
+    call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_BaseSetStatus(ftypep%base, ESMF_STATUS_READY, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Initialize field contents
+    ftypep%status = ESMF_FIELDSTATUS_EMPTY
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_FieldConstructEmpty
+!------------------------------------------------------------------------------
 
 
 end module ESMF_FieldEmptyMod
