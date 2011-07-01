@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.100 2011/06/30 19:47:11 w6ws Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.101 2011/07/01 20:34:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.100 2011/06/30 19:47:11 w6ws Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.101 2011/07/01 20:34:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -899,30 +899,13 @@ contains
 !           An {\tt ESMF} object
 !     \item [copyflag]
 !           A flag to determine if the copy is to be by reference, value,
-!           or both
+!           or both.  This flag is documented in section \ref{const:copy}.
 !     \item [atttreeflag]
 !           A flag to determine if the copy is supposed to descend the 
-!           Attribute hierarchy
+!           Attribute hierarchy. This flag is documented in section \ref{const:atttree}.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
-!
-!     NOTE:  Not all combinations of copy flags are enabled at this time.  See
-!            the reference manual for an overview of the options available for 
-!            {\tt ESMF\_AttributeCopy()}.
-!            The options for {\tt copyflag} include:
-!            \begin{enumerate}
-!              \item ESMF\_COPY\_ALIAS will copy the top base level
-!		     Attributes by value, and all others by reference
-!              \item ESMF\_COPY\_REFERENCE will copy all Attributes by reference
-!              \item ESMF\_COPY\_VALUE will copy all Attributes by value
-!            \end{enumerate}
-!            The options for {\tt atttreeflag} include:
-!            \begin{enumerate}
-!              \item ESMF\_ATTTREE\_OFF will only descend the first base level 
-!                    of the Attribute hierarchy
-!              \item ESMF\_ATTTREE\_ON will descend the entire Attribute hierarchy
-!            \end{enumerate}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1138,19 +1121,11 @@ contains
 !           The Attribute count for <object>
 !     \item [{[attcountflag]}]
 !           The flag to specify which attribute count to return, the 
-!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE (see below)
+!           default is ESMF\_ATTGETCOUNT\_ATTRIBUTE.  This flag is documented
+!           in section \ref{const:attgetcount}.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
-!
-!     NOTE:  The options for {\tt attcountflag} include:
-!            \begin{enumerate}
-!              \item ESMF\_ATTGETCOUNT\_ATTRIBUTE will get the number of single Attributes
-!              \item ESMF\_ATTGETCOUNT\_ATTPACK will get the number of Attribute packages
-!              \item ESMF\_ATTGETCOUNT\_ATTLINK will get the number of Attribute links
-!              \item ESMF\_ATTGETCOUNT\_TOTAL will get the total number of Attributes
-!            \end{enumerate}
-!
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -2045,16 +2020,11 @@ contains
 !           The purpose of the Attribute package
 !     \item [{[attwriteflag]}]
 !           The flag to specify which format is desired for the write, the 
-!           default is tab-delimited
+!           default is ESMF\_ATTWRITE\_TAB.  This flag is documented in
+!           section \ref{const:attwrite}.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
-!
-!     NOTE:  The options for {\tt attwriteflag} include:
-!            \begin{enumerate}
-!              \item ESMF\_ATTWRITE\_XML will write in xml format
-!              \item ESMF\_ATTWRITE\_TAB will write in tab-delimited format
-!            \end{enumerate}
 !
 !EOP
 !------------------------------------------------------------------------------

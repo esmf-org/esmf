@@ -1,0 +1,60 @@
+% $Id: Attribute_options.tex,v 1.1 2011/07/01 20:34:00 rokuingh Exp $
+
+\subsubsection{ESMF\_ATTGETCOUNT}
+\label{const:attgetcount}
+
+{\sf DESCRIPTION:\\}
+Indicates whether or not to descend the Attribute hierarchy for the present operation.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttGetCountFlag)}
+
+The valid values are:
+\begin{description}
+	\item[ESMF\_ATTGETCOUNT\_ATTRIBUTE]
+	This option will allow the routine to return the number of single Attributes.
+	\item[ESMF\_ATTGETCOUNT\_ATTPACK]
+	This option will allow the routine to return the number of Attribute packages.
+	\item[ESMF\_ATTGETCOUNT\_ATTLINK]
+	This option will allow the routine to return the number of Attribute links.
+	\item[ESMF\_ATTGETCOUNT\_TOTAL]
+	This option will allow the routine to return the total number of Attributes.
+\end{description}
+
+\subsubsection{ESMF\_ATTTREE}
+\label{const:atttree}
+
+{\sf DESCRIPTION:\\}
+Indicates whether or not to descend the Attribute hierarchy for the present operation.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttTreeFlag)}
+
+The valid values are:
+\begin{description}
+	\item[ESMF\_ATTTREE\_OFF]
+	This option will allow the routine to only descend the first base level of the Attribute hierarchy.
+	\item[ESMF\_ATTTREE\_ON]
+	This option will allow the routine to descend the entire Attribute hierarchy.
+\end{description}
+
+\subsubsection{ESMF\_ATTWRITE}
+\label{const:attwrite}
+
+{\sf DESCRIPTION:\\}
+Indicates which file format to use in the write operation.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttWriteFlag)}
+
+The valid values are:
+\begin{description}
+	\item[ESMF\_ATTWRITE\_XML]
+	This option will allow the routine to write in xml format.
+	\item[ESMF\_ATTWRITE\_TAB]
+	This option will allow the routine to write in tab-delimited format.
+\end{description}
+

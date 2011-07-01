@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.72 2011/07/01 18:34:26 theurich Exp $
+% $Id: ESMF_options.tex,v 1.73 2011/07/01 20:34:05 rokuingh Exp $
 
 \section{Constants}
 
@@ -10,6 +10,34 @@ This flag is documented in section \ref{const:alarmlist}.
 
 {\sf DESCRIPTION:\\}
 A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
+
+\subsection{ESMF\_ATTGETCOUNT}
+This flag is documented in section \ref{const:attgetcount}.
+
+
+\subsection{ESMF\_ATTRECONCILE}
+\label{const:attreconcile}
+{\sf DESCRIPTION:\\}
+Indicate whether or not to handle metadata (Attributes) in {\tt ESMF\_StateReconcile()}.
+
+The type of this flag is:
+
+{\tt type(ESMF\_AttReconcileFlag)}
+
+The valid values are:
+\begin{description}
+	\item[ESMF\_ATTRECONCILE\_ON]
+	Attribute reconciliation will be turned on.
+	\item[ESMF\_ATTRECONCILE\_OFF]
+	Attribute reconciliation will be turned off.
+\end{description}
+
+
+\subsection{ESMF\_ATTTREE}
+This flag is documented in section \ref{const:atttree}.
+
+\subsection{ESMF\_ATTWRITE}
+This flag is documented in section \ref{const:attwrite}.
 
 \subsection{ESMF\_CALKIND}
 This flag is documented in section \ref{const:calkindflag}.
@@ -23,7 +51,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_CompType\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 	\item[ESMF\_COMPTYPE\_GRID]
 	A {\tt ESMF\_GridComp} object. 
@@ -42,7 +70,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Context\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 
 \item [ESMF\_CONTEXT\_OWN\_VM]
@@ -72,7 +100,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Copy\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 	\item[ESMF\_COPY\_VALUE]
 	All data and pointers are copied to the destination object, nothing is referenced.
@@ -91,7 +119,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_DataCopy\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_DATACOPY\_VALUE]
       Copy the data item to another buffer.
@@ -108,7 +136,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Decomp\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_DECOMP\_CYCLIC]
       Decompose elements cyclically across DEs.
@@ -153,7 +181,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_GeomType\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_GEOMTYPE\_GRID]
       An ESMF\_Grid, a structured grid composed of one or more logically rectangular tiles
@@ -186,7 +214,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Index\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_INDEX\_DELOCAL]
       Indicates that DE-local index space starts at lower bound 1 for each DE.
@@ -206,7 +234,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_IOFmtFlag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_IOFMT\_BIN]
       Binary format.
@@ -278,7 +306,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Method\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_FINALIZE]
       Finalize method.
@@ -310,7 +338,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Reduce\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
    \item [ESMF\_REDUCE\_SUM]
          Use arithmetic sum to add all data elements.
@@ -329,7 +357,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Region\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_REGION\_TOTAL]
       Total allocated memory.
@@ -353,7 +381,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_RouteSync\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 
 \item [ESMF\_ROUTESYNC\_BLOCKING]
@@ -405,7 +433,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_StartRegion\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 \item [ESMF\_STARTREGION\_EXCLUSIVE]
       Region of elements that are exclusively owned by the local DE.
@@ -444,7 +472,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_Sync\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 
 \item [ESMF\_SYNC\_BLOCKING]
@@ -562,7 +590,7 @@ The type of this flag is:
 
 {\tt type(ESMF\_UnmappedAction\_Flag)}
 
-Valid values are:
+The valid values are:
 \begin{description}
 	\item[ESMF\_UNMAPPEDACTION\_ERROR]
 	An error is issued when there exist destination points in a regridding

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.101 2011/06/30 19:40:44 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.102 2011/07/01 20:34:04 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.101 2011/06/30 19:40:44 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.102 2011/07/01 20:34:04 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -171,17 +171,12 @@
 !     \item[{[vm]}]
 !       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.  By default, it set to the current vm.
 !     \item[{[attreconflag]}]
-!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation
+!       Flag to tell if Attribute reconciliation is to be done as well as data reconciliation.
+!       This flag is documented in section \ref{const:attreconcile}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!     NOTE:  The options for {\tt attreconflag} include:
-!            \begin{enumerate}
-!              \item ESMF\_ATTRECONCILE\_ON will allow reconciliation of metadata (Attributes)
-!              \item ESMF\_ATTRECONCILE\_OFF is the default behavior, this option turns off
-!                                            the metadata reconciliation
-!            \end{enumerate}
 !EOP
     integer :: localrc
     type(ESMF_VM) :: localvm
