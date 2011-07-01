@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMC_ReturnCodes.h,v 1.5 2011/07/01 16:07:37 rokuingh Exp $
+$Id: ESMC_ReturnCodes.h,v 1.6 2011/07/01 16:17:05 rokuingh Exp $
 
   Earth System Modeling Framework
   Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -18,8 +18,6 @@ $Id: ESMC_ReturnCodes.h,v 1.5 2011/07/01 16:07:37 rokuingh Exp $
 #ifndef ESMC_RETURNCODES_H
 #define ESMC_RETURNCODES_H
 
-// Don't fiddle with the formatting below as it affects the documentation
-// in Appendix B for the return codes.
 #if 0
 //BOP
 \begin{verbatim}
