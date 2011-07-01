@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.102 2011/06/30 05:59:56 theurich Exp $
+! $Id: ESMF_StateUTest.F90,v 1.103 2011/07/01 21:52:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.102 2011/06/30 05:59:56 theurich Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.103 2011/07/01 21:52:06 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -55,12 +55,6 @@
       type(ESMF_DistGrid)   :: distgrid
       type(ESMF_Array)      :: array, array2, arrayGDP, testarray
 
-      type(ESMF_Array)      :: array10, array11, array12
-      type(ESMF_ArrayBundle):: abund10, abund11
-      type(ESMF_Array)      :: alist10(1), alist11(1)
-      type(ESMF_Field)      :: field10, field11, field12
-      type(ESMF_State)      :: state10, state11, state12
-
 #if defined (ESMF_TESTEXHAUSTIVE)
       integer :: itemcount
       type(ESMF_FieldBundle) :: bundle2inner(1)
@@ -69,6 +63,14 @@
       type(ESMF_ArraySpec)   :: aspec
       type(ESMF_Field)       :: fields(5)
       type(ESMF_FieldBundle) :: fbundle
+
+      type(ESMF_Array)      :: array10, array11, array12
+      type(ESMF_ArrayBundle):: abund10, abund11
+      type(ESMF_Array)      :: alist10(1), alist11(1)
+      type(ESMF_Field)      :: field10, field11, field12
+      type(ESMF_State)      :: state10, state11, state12
+
+      type(ESMF_State)      :: state20
 
       integer :: i
 #endif
@@ -329,7 +331,7 @@
 
       !EX_UTest
       ! Replace the existing item
-      call ESMF_StateReplace (state1, bundle1, rc=rc)
+      call ESMF_StateReplace (state1, (/bundle1/), rc=rc)
       write(name, *) "Replacing a FieldBundle with a second FieldBundle in a State Test"
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -676,7 +678,7 @@
       ! Replace a FieldBundle to the outer State which has the same name
       ! as a FieldBundle in the nested State.
       call ESMF_StateReplace(state1, &
-                         fieldBundle=bundle2inner(1),  &
+                         fieldBundleList=bundle2inner,  &
                          rc=rc)
       write(failMsg, *) ""
       write(name, *) "Adding a FieldBundle to a outer State test"
@@ -800,7 +802,7 @@
 
       !EX_UTest
       ! Test replacement where none exists (should fail)
-      call ESMF_StateReplace (state10, array10, rc=rc)
+      call ESMF_StateReplace (state10, (/array10/), rc=rc)
       write (failmsg, *) "Replaced an Array which did not exist"
       write (name, *) "Replace an Array which does not exist test"
       call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
@@ -827,7 +829,7 @@
 
       !EX_UTest
       ! Test replacing the 1st Array with the 2nd one
-      call ESMF_StateReplace (state10, array11, rc=rc)
+      call ESMF_StateReplace (state10, (/array11/), rc=rc)
       write (failmsg, *) "Replacing a pre-existing Array in a State"
       write (name, *) "Replace an Array which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -848,7 +850,7 @@
 
       !EX_UTest
       ! Test replacement where none exists (should fail)
-      call ESMF_StateReplace (state10, abund10, rc=rc)
+      call ESMF_StateReplace (state10, (/abund10/), rc=rc)
       write (failmsg, *) "Replaced an ArrayBundle which did not exist"
       write (name, *) "Replace an ArrayBundle which does not exist test"
       call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
@@ -875,7 +877,7 @@
 
       !EX_UTest
       ! Test replacing the 1st ArrayBundle with the 2nd one
-      call ESMF_StateReplace (state10, abund11, rc=rc)
+      call ESMF_StateReplace (state10, (/abund11/), rc=rc)
       write (failmsg, *) "Replacing a pre-existing ArrayBundle in a State"
       write (name, *) "Replace an ArrayBundle which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -897,7 +899,7 @@
 
       !EX_UTest
       ! Test replacement where none exists (should fail)
-      call ESMF_StateReplace (state10, field10, rc=rc)
+      call ESMF_StateReplace (state10, (/field10/), rc=rc)
       write (failmsg, *) "Replaced a Field which did not exist"
       write (name, *) "Replace a Field which does not exist test"
       call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
@@ -923,7 +925,7 @@
 
       !EX_UTest
       ! Test replacing the 1st Field with the 2nd one
-      call ESMF_StateReplace (state10, field11, rc=rc)
+      call ESMF_StateReplace (state10, (/field11/), rc=rc)
       write (failmsg, *) "Replacing a pre-existing Field in a State"
       write (name, *) "Replace a Field which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -951,7 +953,7 @@
 
       !EX_UTest
       ! Test replacement where none exists (should fail)
-      call ESMF_StateReplace (state10, nestedState=state11, rc=rc)
+      call ESMF_StateReplace (state10, nestedStateList=(/state11/), rc=rc)
       write (failmsg, *) "Replacing a State which did not exist"
       write (name, *) "Replace a State which does not exist test"
       call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
@@ -977,7 +979,7 @@
 
       !EX_UTest
       ! Test replacing the 1st State with the 2nd one
-      call ESMF_StateReplace (state10, nestedState=state12, rc=rc)
+      call ESMF_StateReplace (state10, nestedStateList=(/state12/), rc=rc)
       write (failmsg, *) "Replacing a pre-existing nested State in a State"
       write (name, *) "Replace a State which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
@@ -1090,6 +1092,43 @@
       call ESMF_StateRemove (state10, itemName='stateContainer2/testbundle', rc=rc)
       write (failmsg, *) "Removing an existing FieldBundle from the State"
       write (name, *) "Remove a nested State FieldBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAddReplace on Array
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test create an empty State
+      state20 = ESMF_StateCreate (name="stateContainer",  &
+        stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+      write (failmsg, *) "Creating state20 for AddReplacement"
+      write (name, *) "Creating state20 for AddReplacement test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test AddReplace where none exists
+      call ESMF_StateAddReplace (state20, (/array10/), rc=rc)
+      write (failmsg, *) "AddReplacing an Array which did not exist"
+      write (name, *) "AddReplace an Array which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacing in the Array with itself
+      call ESMF_StateAddReplace (state20, (/array10/), rc=rc)
+      write (failmsg, *) "AddReplacing an Array into a State"
+      write (name, *) "AddReplace an Array with itself test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test replacing the 1st Array with a 2nd one with same name
+      call ESMF_StateReplace (state20, (/array11/), rc=rc)
+      write (failmsg, *) "Replacing a pre-existing Array in a State"
+      write (name, *) "Replace an Array which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 

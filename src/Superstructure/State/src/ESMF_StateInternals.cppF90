@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.9 2011/06/30 19:40:44 w6ws Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.10 2011/07/01 21:52:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.9 2011/06/30 19:40:44 w6ws Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.10 2011/07/01 21:52:05 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -617,6 +617,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         ! See if this name is already in the state @\
         exists = ESMF_StateClassFindData (stypep, itemname, expected=.false., & @\
             dataitem=sip, rc=localrc) @\
+        ! print *, ESMF_METHOD, ': ESMF_StateClassFindData returned ', exists @\
         if (ESMF_LogFoundError(localrc, & @\
             ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -626,7 +627,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
  @\
         if (exists) then @\
           ! can do addrep or replace.  Or add w/relaxed @\
-          if (localaddflag .and. .not. localrelaxflag) then @\
+          if (.not. localrepflag .and. (localaddflag .and. .not. localrelaxflag)) then @\
             errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not replacable" @\
             if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
                 msg = trim (errmsg), & @\
@@ -634,9 +635,11 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
           end if @\
           ! TODO - should check to make sure sip%otype @\
           ! is compatible, or should be changed. @\
+          ! TODO - maybe should do a StateItemDestruct/StateItemConstruct
+          ! sequence.  But for now, just reuse the existing entry.
         else @\
           ! can do add or addrep.  Or replace w/relaxed @\
-          if (localrepflag .and. .not. localrelaxflag) then @\
+          if (.not. localaddflag .and. (localrepflag .and. .not. localrelaxflag)) then @\
             errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not found" @\
             if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
                 msg = trim (errmsg), & @\
