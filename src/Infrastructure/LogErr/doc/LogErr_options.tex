@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.27 2011/07/01 20:57:51 rokuingh Exp $
+% $Id: LogErr_options.tex,v 1.28 2011/07/01 21:59:47 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -14,9 +14,10 @@
 The valid values are:
 \begin{description}
 	\item [ESMF\_LOGERR\_PASSTHRU]
-		A named constant that is used for the {\tt msg} argument in any {\tt ESMF\_Log} 
-		routine to pass a return code through to a Log message.  The message indicated 
-		by this named constant is {\it Passing error in return code}.
+		A named character constant, with a predefined generic error message, 
+		that can be used for the {\tt msg} argument in any {\tt ESMF\_Log} 
+		routine.  The message indicated 
+		by this named constant is ``{\it Passing error in return code}."
 \end{description}
 
 \subsubsection{ESMF\_LOGKIND}
@@ -64,12 +65,17 @@ The valid values are:
          Write or allow error messages.
    \item [ESMF\_LOGMSG\_TRACE]
          Write or allow trace messages, when tracing is turned on.
-	\item [ESMF\_LOGERR\_PASSTHRU]
-		A named constant that is used for the {\tt msg} argument in any {\tt ESMF\_Log} 
-		routine to pass a return code through to a Log message.  The message indicated 
-		by this named constant is {\it Passing error in return code}.
 \end{description}
 
+Valid predefined named array constant values are:
 
+\begin{description}
+	\item [ESMF\_LOGMSG\_ALL]
+		Write or allow ALL informational messages.
+	\item [ESMF\_LOGMSG\_NONE]
+		Write or allow NO informational messages.
+	\item [ESMF\_LOGMSG\_NOTRACE]
+		Write or allow ALL informational message EXCEPT trace messages.
+\end{description}
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.99 2011/07/01 16:07:38 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.100 2011/07/01 21:59:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1633,16 +1633,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[rootOnly]}]
 !	     Root only flag.
 !      \item [{[logmsgAbort]}]
-!            Sets ESMF halt when certain message types are issued.  The array
-!            can contain any combination of:
-!            \begin{description}
-!              \item {\tt ESMF\_LOGMSG\_ERROR};
-!              \item {\tt ESMF\_LOGMSG\_WARNING};
-!              \item {\tt ESMF\_LOGMSG\_INFO};
-!              \item {\tt ESMF\_LOGMSG\_TRACE};
-!            \end{description}
-!            The constants {\tt ESMF\_LOGMSG\_ALL} and {\tt ESMF\_LOGMSG\_NONE}
-!            may also be used.
+!            Sets the condition on which ESMF aborts.  The array
+!            can contain any combination of ESMF\_LOGMSG named constants.  These
+!            named constants are described in section \ref{const:logmsgflag}.
 !      \item [{[stream]}]
 !            The type of stream, with the following valid values and meanings:
 !            \begin{description}
@@ -1654,15 +1647,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[logmsgList]}]
 !            An array of message types that will be logged.  Log write requests
 !            not matching the list will be ignored.  By default all messages
-!            will be logged.   See section \ref{const:logmsgflag} for a list of
-!            valid message types.  In addition, the following named constants
-!            may be used:
-!            \begin{description}
-!              \item {\tt ESMF\_LOGMSG\_ALL} - Log all message types including trace messages;
-!              \item {\tt ESMF\_LOGMSG\_NONE} - Log no message types;
-!              \item {\tt ESMF\_LOGMSG\_NOTRACE} - Log all message types except trace messages;
-!            \end{description}
-!            If an empty array is provided, no messages will be logged.  
+!            will be logged.  If an empty array is provided, no messages will be logged.
+!            See section \ref{const:logmsgflag} for a list of
+!            valid message types.  
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
 !      \item [{[trace]}]
