@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.18 2011/07/01 16:07:52 rokuingh Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.19 2011/07/01 21:53:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_StateAPIMod
       
       public ESMF_StateDestruct    ! for ESMF garbage collection
 
-      public ESMF_StateAdd
+      public ESMF_StateAdd, ESMF_StateAddReplace
       public ESMF_StateGet
       public ESMF_StateIsReconcileNeeded
 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.18 2011/07/01 16:07:52 rokuingh Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.19 2011/07/01 21:53:05 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -152,27 +152,19 @@ module ESMF_StateAPIMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddReplace -- Add/replace items to a State
+! !IROUTINE: ESMF_StateAddRplace -- Add/replace items to a State
 
 ! !INTERFACE:
   interface ESMF_StateAddReplace
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-!    module procedure ESMF_StateAddRpOneArray
-!    module procedure ESMF_StateAddRpArrayList
-
-!    module procedure ESMF_StateAddRpOneArrayBundle
-!    module procedure ESMF_StateAddRpArrayBundleList
-
-!    module procedure ESMF_StateAddRpOneField
-!    module procedure ESMF_StateAddRpFieldList
-
-!    module procedure ESMF_StateAddRpOneFieldBundle
-!    module procedure ESMF_StateAddRpFieldBundleList
-
-!    module procedure ESMF_StateAddRpOneState
-!    module procedure ESMF_StateAddRpStateList
+    module procedure ESMF_StateAddRpArrayList
+    module procedure ESMF_StateAddRpArrayBundleList
+    module procedure ESMF_StateAddRpFieldList
+    module procedure ESMF_StateAddRpFieldBundleList
+    module procedure ESMF_StateAddRpRoutehandleList
+    module procedure ESMF_StateAddRpStateList
 
 
 ! !DESCRIPTION: 
@@ -717,10 +709,10 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ! \item[<itemList>]
 !     The list of items to be added.
 !     This is a reference only; when
-!     the {\tt ESMF\_State} is destroyed the <itemList> contained in it will
-!     not be destroyed.   Also, the <itemList> cannot be safely 
+!     the {\tt ESMF\_State} is destroyed the <itemList> items contained within it will
+!     not be destroyed.   Also, the items in the <itemList> cannot be safely 
 !     destroyed before the {\tt ESMF\_State} is destroyed.
-!     Since <itemList>s can be added to multiple containers, it remains
+!     Since <itemList> items can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
 !     destruction when they are no longer in use.
 ! \item[{[rc]}]
@@ -784,7 +776,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
       enddo @\
  @\
-      ! set the import and export Attributes on any Field connected to this State @\
+      ! set the import and export Attributes on any item connected to this State @\
       lobject = #mnameatt @\
       lvalue1 = 'Import'  @\
       lvalue2 = 'Export' @\
@@ -885,6 +877,210 @@ StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundle
 !------------------------------------------------------------------------------
 StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddReplace - Add or replace a list of items to a State
+!
+! !INTERFACE:
+!  subroutine ESMF_StateAddReplace(state, <itemList>, rc)
+!
+! !ARGUMENTS:
+!    type(ESMF_State), intent(inout)          :: state 
+!    <itemList>, see below for supported values
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,          intent(out),  optional :: rc     
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+! Add or replace a list of items to an {\tt ESMF\_State}.
+!    
+!    Supported values for <itemList> are:   
+!    \begin{description}
+!    \item type(ESMF\_Array), intent(in)             :: arrayList(:)
+!    \item type(ESMF\_ArrayBundle), intent(in)       :: arraybundleList(:)
+!    \item type(ESMF\_Field), intent(in)             :: fieldList(:)
+!    \item type(ESMF\_FieldBundle), intent(in)       :: fieldbundleList(:)
+!    \item type(ESMF\_RouteHandle), intent(in)       :: routehandleList(:)
+!    \item type(ESMF\_State), intent(in)             :: stateList(:)
+!    \end{description}
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!     An {\tt ESMF\_State} to which the <itemList> will be added or replaced.
+! \item[<itemList>]
+!     The list of items to be added or replaced.
+!     This is a reference only; when
+!     the {\tt ESMF\_State} is destroyed the <itemList> items contained within it will
+!     not be destroyed.   Also, the items in the <itemList> cannot be safely 
+!     destroyed before the {\tt ESMF\_State} is destroyed.
+!     Since <itemList> items can be added to multiple containers, it remains
+!     the responsibility of the user to manage their
+!     destruction when they are no longer in use.
+! \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+#define StateAddRepListMacro(mtype, mentryname, mname, mnameatt, mnameattbase) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateAddRpList" @\
+!BOPI @\
+! !IROUTINE: ESMF_StateAddReplace - Add a list of items to a State @\
+! @\
+! !INTERFACE: @\
+  ! Private name; call using ESMF_StateAddReplace()  @\
+  subroutine ESMF_StateAddRp##mentryname##List(state, mname,  & @\
+                                    keywordEnforcer, rc) @\
+! @\
+! !ARGUMENTS: @\
+    type(ESMF_State), intent(inout)          :: state  @\
+    type(mtype),      intent(in)             :: mname(:) @\
+    type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
+    integer,          intent(out),  optional :: rc      @\
+!EOPI @\
+!------------------------------------------------------------------------------ @\
+      integer :: localrc, i @\
+      integer :: localcount @\
+      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+      type(ESMF_Logical) :: linkChange @\
+ @\
+      ! Initialize return code; assume routine not implemented @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      localrc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc) @\
+      call ESMF_StateValidate(state, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, & @\
+         ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+                                   @\
+      localcount = size (mname) @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc) @\
+      do i=1, localcount @\
+          ESMF_INIT_CHECK_DEEP(ESMF_##mentryname##GetInit,mname(i),rc) @\
+      enddo @\
+ @\
+      call ESMF_StateClsAdd (state%statep, mname, & @\
+          addflag=.true., replaceflag=.true., rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc))  return @\
+ @\
+      ! link the Attribute hierarchies @\
+      linkChange = ESMF_TRUE @\
+      do i=1, localcount @\
+         call c_ESMC_AttributeLink(state%statep%base, & @\
+            mnameattbase, linkChange, localrc) @\
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+                    ESMF_CONTEXT, rcToReturn=rc))  return @\
+      enddo @\
+ @\
+      ! set the import and export Attributes on any item connected to this State @\
+      lobject = #mnameatt @\
+      lvalue1 = 'Import'  @\
+      lvalue2 = 'Export' @\
+      lname  = 'VariableIntent' @\
+      if (state%statep%st == ESMF_STATEINTENT_IMPORT) then @\
+        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
+          trim (lobject), trim (lname), trim (lvalue1), localrc) @\
+        if (ESMF_LogFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, & @\
+          rcToReturn=rc)) return @\
+      else if (state%statep%st == ESMF_STATEINTENT_EXPORT) then @\
+        call c_ESMC_AttributeSetObjChrInTree(state%statep%base,  & @\
+          trim (lobject), trim (lname), trim (lvalue2), localrc) @\
+        if (ESMF_LogFoundError(localrc, & @\
+          ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, & @\
+          rcToReturn=rc)) return @\
+      endif @\
+       @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+  end subroutine ESMF_StateAddRp##mentryname##List
+
+!------------------------------------------------------------------------------
+StateAddRepListMacro(ESMF_Array,Array,arrayList,array,arrayList(i))
+StateAddRepListMacro(ESMF_ArrayBundle,ArrayBundle,arraybundleList,array,arraybundleList(i))
+StateAddRepListMacro(ESMF_Field,Field,fieldList,field,fieldList(i)%ftypep%base)
+StateAddRepListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundleList(i)%this%base)
+
+!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateAddRpRouteHandleList"
+!BOPI
+! !IROUTINE: ESMF_StateAdd - Add or replace a list of RouteHandles to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddReplace()   
+      subroutine ESMF_StateAddRpRouteHandleList(state, routehandleList,  &
+                                              keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout)      :: state 
+      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
+      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
+      integer,       intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!     Add or replace multiple {\tt ESMF\_RouteHandle}s to an {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      An {\tt ESMF\_State} object.
+!     \item[routehandleList]
+!      The list (Fortran array) of {\tt ESMF\_RouteHandle}s to be added and replaced.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle}s cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the responsibility of the user to manage the
+!      destruction of objects when they are no longer in use.
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc,i
+      integer :: localcount
+
+      ! check input variables
+      localcount = size(routehandleList)
+
+      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+      do i=1,localcount
+         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
+      enddo
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_StateClsAdd (state%statep,  routehandleList,  &
+          addflag=.true., replaceflag=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc))  return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+      end subroutine ESMF_StateAddRpRouteHandleList
+
+!------------------------------------------------------------------------------
+StateAddRepListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -1952,9 +2148,6 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
       logical,          intent(in),  optional :: nestedFlag
       integer,          intent(out), optional :: rc 
 !
-! !STATUS:
-! \apiStatusCompatible
-!
 ! !DESCRIPTION:
 !     Prints information about the {\tt state} to {\tt stdout}.
 !
@@ -2070,15 +2263,15 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
        case (ESMF_STATEINTENT_EXPORT%state)
          msgbuf = "Export State"
        case (ESMF_STATEINTENT_UNSPECIFIED%state)
-         msgbuf = "Unspecified direction"
+         msgbuf = "Unspecified intent direction"
        case (ESMF_STATEINTENT_INVALID%state)
-         call ESMF_LogWrite(msg="Uninitialized or already destroyed State", &
-             logmsgList=ESMF_LOGMSG_INFO)
+         msgbuf = "Uninitialized or already destroyed State"
          if (present (rc1)) rc1 = ESMF_SUCCESS
          return
        case default
-         call ESMF_LogWrite ("error: unknown state",  &
-             logmsgList=ESMF_LOGMSG_INFO)
+         msgbuf = "error: unknown state"
+         if (present (rc1)) rc1 = ESMF_SUCCESS
+         return
        end select
 
        siwrap => null ()
