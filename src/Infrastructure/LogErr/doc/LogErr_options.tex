@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.26 2011/07/01 17:56:11 rokuingh Exp $
+% $Id: LogErr_options.tex,v 1.27 2011/07/01 20:57:51 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,12 +8,16 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\subsubsection{ESMF\_LOGERR\_PASSTHRU}
-\label{const:logerrpassthru}
+\subsubsection{ESMF\_LOGERR}
+\label{const:logerr}
 
-A named constant that is used with the
-{\tt ESMF\_LogFoundError()} routine to pass a return code through
-to a Log message.
+The valid values are:
+\begin{description}
+	\item [ESMF\_LOGERR\_PASSTHRU]
+		A named constant that is used for the {\tt msg} argument in any {\tt ESMF\_Log} 
+		routine to pass a return code through to a Log message.  The message indicated 
+		by this named constant is {\it Passing error in return code}.
+\end{description}
 
 \subsubsection{ESMF\_LOGKIND}
 \label{const:logkindflag}
@@ -60,6 +64,10 @@ The valid values are:
          Write or allow error messages.
    \item [ESMF\_LOGMSG\_TRACE]
          Write or allow trace messages, when tracing is turned on.
+	\item [ESMF\_LOGERR\_PASSTHRU]
+		A named constant that is used for the {\tt msg} argument in any {\tt ESMF\_Log} 
+		routine to pass a return code through to a Log message.  The message indicated 
+		by this named constant is {\it Passing error in return code}.
 \end{description}
 
 
