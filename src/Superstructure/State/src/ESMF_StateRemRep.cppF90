@@ -1,0 +1,298 @@
+! $Id: ESMF_StateRemRep.cppF90,v 1.1 2011/07/01 05:44:41 w6ws Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!==============================================================================
+!
+^define ESMF_FILENAME "ESMF_StateRemRep.cppF90"
+!
+!     ESMF StateRemRep module
+module ESMF_StateRemRepMod
+!
+!==============================================================================
+!
+! This file contains the State user API methods for Remove and Replace.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+!------------------------------------------------------------------------------
+^include "ESMF.h"
+
+! The following macro is used to get around the first pass preprocessing,
+! which treats the string concatenation operator // as an inline comment.
+^define CONCAT /
+
+!------------------------------------------------------------------------------
+!BOPI
+! !MODULE: ESMF_StateRemRepMod - Data exchange between components
+!
+! !DESCRIPTION:
+!
+! The code in this file implements the Fortran implementations 
+!  of the {\tt StateRemove} and {\tt StateReplace} methods.
+!
+!
+! !USES:
+      use ESMF_InitMacrosMod
+      use ESMF_LogErrMod
+      use ESMF_UtilTypesMod
+      use ESMF_ContainerMod
+      
+      use ESMF_ArrayMod
+      use ESMF_ArrayBundleMod
+      use ESMF_FieldMod
+      use ESMF_FieldBundleMod
+      use ESMF_StateAPIMod
+      use ESMF_StateTypesMod
+      use ESMF_StateInternalsMod
+
+      implicit none
+      
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+      private
+      
+!------------------------------------------------------------------------------
+
+! !PUBLIC MEMBER FUNCTIONS:
+
+      public :: ESMF_StateRemove
+      public :: ESMF_StateReplace
+      
+!EOPI
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_StateRemRep.cppF90,v 1.1 2011/07/01 05:44:41 w6ws Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_StateReplace -- Replace items in a State
+
+! !INTERFACE:
+  interface ESMF_StateReplace
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_StateRepOneArray
+    module procedure ESMF_StateRepOneArrayBundle
+    module procedure ESMF_StateRepOneField
+    module procedure ESMF_StateRepOneFieldBundle
+    module procedure ESMF_StateRepOneState
+
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+! types of {\tt ESMF\_StateReplace} functions.   
+!  
+!EOPI 
+  end interface
+!------------------------------------------------------------------------------
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+contains
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+!-------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateRemove"
+!BOP
+! !IROUTINE: ESMF_StateRemove - Remove an item from a State
+!
+! !INTERFACE:
+  subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)          :: state
+    character(*),     intent(in)             :: itemName
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(out),  optional :: rc
+!     
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!      Remove an existing reference to an item from a {\tt State}.
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!      The {\tt ESMF\_State} within which {\tt itemName} will be replaced.
+! \item[itemName]
+!      The name of the item to be removed.  This is a reference only.
+!      The item itself is unchanged.
+!
+!      If the {\tt state} contains nested {\tt ESMF\_State}s,
+!      the {\tt itemName} argument may specify a fully qualified name
+!      to remove the desired item with a single call.  This is performed
+!      using the ``/'' character to separate the names of the intermediate
+!      State names leading to the desired item.  (E.g.,
+!      {\tt itemName=``state1/state12/item''}.
+!
+!      Since items could potentially be referenced by multiple containers,
+!      it remains the responsibility of the user to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+    type(ESMF_StateItem),  pointer :: dataitem
+    type(ESMF_StateClass), pointer :: localstatep
+    logical :: exists
+    integer :: localrc
+    character(len=ESMF_MAXSTR) :: errmsg
+    integer :: ipos, iposnext
+    integer :: memstat
+
+    ! Initialize return code; assume failure until success is certain
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! check input variables
+    ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+    localstatep => null ()
+    exists = ESMF_StateClassFindData (state%statep,  &
+                                       dataname=itemName, expected=.true., &
+                                       dataitem=dataitem,  &
+                                       dataState=localstatep,  &
+                                       rc=localrc)
+    if (.not. exists) then
+        errmsg = "can not find " CONCAT/ trim (itemname) CONCAT/ " for removal"
+        if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    ipos = 1
+    do
+      iposnext = index (itemname(ipos:), '/')
+      if (iposnext == 0) exit
+      ipos = ipos + iposnext
+    end do
+
+    select case (dataitem%otype%ot)
+    case (ESMF_STATEITEM_STATE%ot)
+      localrc = ESMF_RC_NOT_IMPL
+    case default
+      call ESMF_ContainerRemove (localstatep%stateContainer,  &
+          itemNameList=(/ itemname(ipos:len (itemname)) /), rc=localrc)
+    end select
+
+    if (present(rc)) rc = localrc
+
+  end subroutine ESMF_StateRemove
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateReplace - Replace a single item to a State
+!
+! !INTERFACE:
+!  subroutine ESMF_StateReplace(state, <item>, rc)
+!
+! !ARGUMENTS:
+!    type(ESMF_State), intent(inout)          :: state
+!    <item>, see below for supported values
+!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    integer,          intent(out),  optional :: rc
+!     
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+!      Replace an existing reference to a single <item> to an existing 
+!      {\tt state}.  The name of the <item> must be unique within the
+!      {\tt state}.  
+!
+!      Supported values for <item> are:
+!      \begin{description}
+!      \item type(ESMF\_Array), intent(in)            :: array
+!      \item type(ESMF\_ArrayBundle), intent(in)      :: arraybundle
+!      \item type(ESMF\_Field), intent(in)            :: field
+!      \item type(ESMF\_FieldBundle), intent(in)      :: fieldbundle
+!      \item type(ESMF\_State), intent(in)            :: nestedState
+!      \end{description}
+!
+! The arguments are:
+! \begin{description}
+! \item[state]
+!      The {\tt ESMF\_State} to which <item>s will be replaced.
+! \item[<item>]
+!      The replacement <item>.  This is a reference only; when
+!      the {\tt state} is destroyed the <item>s contained in it will
+!      not be destroyed.   Also, the <item> cannot be safely 
+!      destroyed before the {\tt state} is destroyed.
+!      Since <item>s can be added to multiple containers, it remains
+!      the responsibility of the user to manage their
+!      destruction when they are no longer in use.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!EOP
+!------------------------------------------------------------------------------
+
+#define StateReplaceMacro(mtype, mentry, mname) \
+!------------------------------------------------------------------------------ @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateReplace" @\
+!BOPI @\
+! !IROUTINE: ESMF_StateReplace - Replace an Array in a State @\
+! @\
+! !INTERFACE: @\
+  ! Private name; call using ESMF_StateReplace()    @\
+  subroutine ESMF_StateRep##mentry (state, mname, keywordEnforcer, rc) @\
+! @\
+! !ARGUMENTS: @\
+    type(ESMF_State),  intent(inout)          :: state @\
+    type(ESMF_##mtype),intent(in)             :: mname @\
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    integer,           intent(out),  optional :: rc @\
+!EOPI @\
+!------------------------------------------------------------------------------ @\
+ @\
+    integer :: localrc @\
+    character(ESMF_MAXSTR) :: itemname @\
+ @\
+!    call ESMF_##mtype##Get (mname, name=itemname, rc=localrc) @\
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+!     ESMF_CONTEXT, rcToReturn=rc)) return @\
+! @\
+!    call ESMF_StateRemove (state, itemName=itemname, rc=localrc) @\
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+!     ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+    call ESMF_StateAdd (state, mname,       & @\
+                        proxyflag=.false.,  & @\
+                        replaceflag=.true., & @\
+                        rc=rc) @\
+ @\
+  end subroutine ESMF_StateRep##mentry
+
+StateReplaceMacro(Array,OneArray,array)
+StateReplaceMacro(ArrayBundle,OneArrayBundle,arraybundle)
+StateReplaceMacro(Field,OneField,field)
+StateReplaceMacro(FieldBundle,OneFieldBundle,fieldbundle)
+StateReplaceMacro(State,OneState,nestedState)
+
+!------------------------------------------------------------------------------
+
+end module ESMF_StateRemRepMod

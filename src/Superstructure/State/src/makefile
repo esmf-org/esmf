@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.25 2011/07/01 05:11:00 w6ws Exp $
+# $Id: makefile,v 1.26 2011/07/01 05:44:41 w6ws Exp $
 
 ALL: build_here 
 
-AUTOGEN   = ESMF_StateInternals.F90 ESMF_StateAPI.F90
+AUTOGEN   = ESMF_StateInternals.F90 ESMF_StateRemRep.F90 ESMF_StateAPI.F90
 # ESMF_StateGet.F90
 #TODO:FIELDINTEGRATION Restore StateGet
 
