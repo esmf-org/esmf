@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.62 2011/06/30 14:49:35 oehmke Exp $
+// $Id: ESMCI_DistGrid.C,v 1.63 2011/07/02 04:35:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.62 2011/06/30 14:49:35 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63 2011/07/02 04:35:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3588,7 +3588,8 @@ int DistGrid::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < sizeof(DistGrid)) {
+  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset)
+    < sizeof(DistGrid)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
       "Buffer too short to add a DistGrid object", &rc);
     return rc;
@@ -3610,7 +3611,7 @@ int DistGrid::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ip = (int *)(buffer + *offset);
-  if (inquireflag != ESMF_INQUIREONLY) {
+  if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = dimCount;
     *ip++ = tileCount;
     for (int i=0; i<dimCount*tileCount; i++){
@@ -3619,11 +3620,11 @@ int DistGrid::serialize(
     }
     for (int i=0; i<tileCount; i++)
       *ip++ = elementCountPTile[i];
-  } else
+  }else
     ip += 2 + 2*dimCount*tileCount + tileCount;
 
   int deCount = delayout->getDeCount();
-  if (inquireflag != ESMF_INQUIREONLY) {
+  if (inquireflag != ESMF_INQUIREONLY){
     for (int i=0; i<dimCount*deCount; i++){
       *ip++ = minIndexPDimPDe[i];
       *ip++ = maxIndexPDimPDe[i];
@@ -3639,10 +3640,17 @@ int DistGrid::serialize(
       *ip++ = collocationPDim[i];
       *ip++ = collocationTable[i];
     }
+  }else
+    ip += 4*dimCount*deCount + 2*deCount + 1 + 2*dimCount;
+
+  if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = connectionCount;
-  } else
-    ip += 4*dimCount*deCount + 2*deCount + 1 + 2*dimCount + 1;
-  
+    for (int i=0; i<connectionCount; i++)
+      for (int j=0; j<2*dimCount+2; j++)
+        *ip++ = connectionList[i][j];
+  }else
+    ip += 1 + connectionCount*(2*dimCount+2);
+    
   if (inquireflag != ESMF_INQUIREONLY){
     if (regDecomp){
       *ip++ = dimCount;
@@ -3752,6 +3760,11 @@ DistGrid *DistGrid::deserialize(
   }
   a->connectionCount = *ip++;
   a->connectionList = new int*[a->connectionCount];
+  for (int i=0; i<a->connectionCount; i++){
+    a->connectionList[i] = new int[2*a->dimCount+2];
+    for (int j=0; j<2*a->dimCount+2; j++)
+      a->connectionList[i][j] = *ip++;
+  }
   // reset all xxPLocalDe variables on proxy object
   a->indexListPDimPLocalDe = new int*[0];
   a->arbSeqIndexListPCollPLocalDe = new int**[a->diffCollocationCount];
