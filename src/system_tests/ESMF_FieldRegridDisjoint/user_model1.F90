@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.10 2011/06/30 06:01:13 theurich Exp $
+! $Id: user_model1.F90,v 1.11 2011/07/02 05:54:37 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -90,7 +90,7 @@
         dx = (max(1)-min(1))/(counts(1)-1)
         dy = (max(2)-min(2))/(counts(2)-1)
 
-        grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+        grid1 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=counts, &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             indexflag=ESMF_INDEX_GLOBAL, &
             regDecomp=(/1, npets/), name="source grid", rc=rc)

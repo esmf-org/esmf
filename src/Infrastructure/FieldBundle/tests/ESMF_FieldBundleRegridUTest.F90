@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.18 2011/06/30 05:58:58 theurich Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.19 2011/07/02 05:54:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.18 2011/06/30 05:58:58 theurich Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.19 2011/07/02 05:54:00 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -154,7 +154,7 @@ contains
         src_ny = 50
       
         ! setup source grid
-        grid360=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+        grid360=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
                                     indexflag=ESMF_INDEX_GLOBAL, &
                                     rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
@@ -164,7 +164,7 @@ contains
       
       
         ! setup dest. grid
-        grid180=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+        grid180=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
                                     indexflag=ESMF_INDEX_GLOBAL, &
                                     rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
@@ -637,7 +637,7 @@ contains
 
   
   ! setup source grid
-  gridA=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
+  gridA=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/A_nx,A_ny/),regDecomp=(/petCount,1/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -647,7 +647,7 @@ contains
 
 
   ! setup dest. grid
-  gridB=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
+  gridB=ESMF_GridCreate1PeriDim(minIndex=(/1,1/),maxIndex=(/B_nx,B_ny/),regDecomp=(/1,petCount/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /=ESMF_SUCCESS) then

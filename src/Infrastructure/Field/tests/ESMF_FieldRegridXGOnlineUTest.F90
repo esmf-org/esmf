@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.13 2011/06/30 14:49:39 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.14 2011/07/02 05:53:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -491,7 +491,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if PROBLEM_WITH_PROXY
+#if 1
     ! make sure serialize and deserialize works
     call checkProxy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1201,7 +1201,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if PROBLEM_WITH_PROXY
+#if 1
     call checkProxy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

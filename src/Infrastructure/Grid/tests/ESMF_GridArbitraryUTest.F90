@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.34 2011/06/30 14:39:31 theurich Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.35 2011/07/02 05:54:08 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.34 2011/06/30 14:39:31 theurich Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.35 2011/07/02 05:54:08 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1095,7 +1095,7 @@ program ESMF_GridArbitraryUTest
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
-  ! Fourth grid, using GridEmptyCreate() and GridSetCommitShapeTile() to create a 2D arb. grid
+  ! Fourth grid, using GridEmptyCreate() and GridEmptyComplete() to create a 2D arb. grid
   !------------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Create an empty grid then set the values"
@@ -1106,7 +1106,7 @@ program ESMF_GridArbitraryUTest
   grid = ESMF_GridEmptyCreate(rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  call ESMF_GridEmptyComplete(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount,rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -1157,7 +1157,7 @@ program ESMF_GridArbitraryUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  ! Fifth Grid: Use GridEmptyCreate() and GridSetCommitShapeTile() to create grid with undistributed dimension
+  ! Fifth Grid: Use GridEmptyCreate() and GridEmptyComplete() to create grid with undistributed dimension
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Create an empty grid then set the values with undistributed dimension and non-default distdim"
@@ -1168,7 +1168,7 @@ program ESMF_GridArbitraryUTest
   grid = ESMF_GridEmptyCreate(rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  call ESMF_GridEmptyComplete(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
 	distDim=(/1,3/), coordDep2=(/ESMF_ARBDIM, 2/), rc=rc)
@@ -1384,7 +1384,7 @@ program ESMF_GridArbitraryUTest
   
 
   !-----------------------------------------------------------------------------
-  ! Test set 9: Use GridEmptyCreate() and GridSetCommitShapeTile() to create grid with undistributed dimension
+  ! Test set 9: Use GridEmptyCreate() and GridEmptyComplete() to create grid with undistributed dimension
   ! with one PET with 0 elements
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -1396,7 +1396,7 @@ program ESMF_GridArbitraryUTest
   grid = ESMF_GridEmptyCreate(rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridSetCommitShapeTile(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
+  call ESMF_GridEmptyComplete(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
 	distDim=(/1,3/), coordDep2=(/ESMF_ARBDIM, 2/), rc=rc)

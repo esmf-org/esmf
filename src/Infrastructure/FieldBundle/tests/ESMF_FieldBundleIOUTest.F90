@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Grid can be created
-  grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+  grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
     name="landgrid", rc=rc)
   write(failMsg, *) ""

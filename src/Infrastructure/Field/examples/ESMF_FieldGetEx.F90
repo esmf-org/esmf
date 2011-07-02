@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetEx.F90,v 1.22 2011/06/30 05:58:53 theurich Exp $
+! $Id: ESMF_FieldGetEx.F90,v 1.23 2011/07/02 05:53:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@
 
     ! create a 3D data Field from Grid and Array
     ! create a Grid 
-    grid3d = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/xdim,ydim,zdim/), &
+    grid3d = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), maxIndex=(/xdim,ydim,zdim/), &
                               regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.48 2011/06/30 05:58:53 theurich Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.49 2011/07/02 05:53:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.48 2011/06/30 05:58:53 theurich Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.49 2011/07/02 05:53:55 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -109,15 +109,13 @@ program ESMF_FieldRegridEx
   dst_dy = 0.5 / (REAL(dst_ny)+1.)
 
   ! if petCount >1, setup petMap
-  gridSrc=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridSrc=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/src_nx,src_ny/),regDecomp=(/petCount,1/), &
+                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  gridDst=ESMF_GridCreateShapeTile(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
-                              gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-                              indexflag=ESMF_INDEX_GLOBAL, &
+  gridDst=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
+                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 

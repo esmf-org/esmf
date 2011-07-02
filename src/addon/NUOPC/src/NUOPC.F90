@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.17 2011/07/01 23:06:17 w6ws Exp $
+! $Id: NUOPC.F90,v 1.18 2011/07/02 05:54:19 oehmke Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -1415,7 +1415,7 @@ module NUOPC
     dx = (x_max-x_min)/i_count
     dy = (y_max-y_min)/j_count
 
-    grid = ESMF_GridCreateShapeTile(maxIndex=(/i_count,j_count/), &
+    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_count,j_count/), &
       coordDep1=(/1/), coordDep2=(/2/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)

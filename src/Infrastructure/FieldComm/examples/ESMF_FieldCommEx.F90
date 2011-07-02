@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.48 2011/06/30 05:59:00 theurich Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.49 2011/07/02 05:54:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.48 2011/06/30 05:59:00 theurich Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.49 2011/07/02 05:54:01 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -101,7 +101,7 @@
 
     ! Create a 2D Grid and use this grid to create a Field
     ! farray is the Fortran data array that contains data on each PET.
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
         regDecomp=(/2,2/), &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -162,7 +162,7 @@
 !BOC 
     ! Create a 2D Grid and use this grid to create a Field
     ! farray is the Fortran data array that contains data on each PET.
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
         regDecomp=(/2,2/), &
         name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

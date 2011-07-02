@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.20 2011/06/30 06:00:53 theurich Exp $
+! $Id: ESMF_FieldBundleRedistBlk2BlkSTest.F90,v 1.21 2011/07/02 05:54:26 oehmke Exp $
 !
 ! System test FieldBundleRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX
@@ -135,14 +135,14 @@ program Blk2BlkBunRedist
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     
     ! create src and dst grids
-    grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+    grid1 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=counts, &
         coordDep1=(/1/), coordDep2=(/2/), &
         regDecomp=(/2, npets/2/), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    grid2 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+    grid2 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=counts, &
         coordDep1=(/1/), coordDep2=(/2/), &
         regDecomp=(/npets/2, 2/), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.21 2011/06/30 05:59:44 theurich Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.22 2011/07/02 05:54:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -202,7 +202,7 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
@@ -531,7 +531,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.21 2011/06/30 05:59:44 theurich Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.22 2011/07/02 05:54:18 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 

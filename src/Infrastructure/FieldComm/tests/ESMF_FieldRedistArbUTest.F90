@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.15 2011/06/30 05:59:01 theurich Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.16 2011/07/02 05:54:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -144,7 +144,7 @@
   correct=.true.
   rc=ESMF_SUCCESS
   
-  srcgrid2D = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, &
+  srcgrid2D = ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R4, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
     arbIndexList=localIndices, arbIndexCount=localCount, &
     name="srcgrid2D", rc=rc)
@@ -180,7 +180,7 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  srcgrid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, &
+  srcgrid = ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R4, &
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
     arbIndexList=localIndices, arbIndexCount=localCount, &
     name="srcgrid", rc=rc)
@@ -254,7 +254,7 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   correct=.true.
   rc=ESMF_SUCCESS
-  dstgrid2D = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  dstgrid2D = ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1/), maxIndex=(/xdim, ydim/), &
     arbIndexList=localIndices1, arbIndexCount=localCount1, &
     name="dstgrid2D", rc=rc)
@@ -275,7 +275,7 @@
   correct=.true.
   rc=ESMF_SUCCESS
 
-  dstgrid = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+  dstgrid = ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R8, &
     minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
     arbIndexList=localIndices1, arbIndexCount=localCount1, &
     name="dstgrid", rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.44 2011/06/30 13:44:26 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.45 2011/07/02 05:53:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -159,7 +159,7 @@ contains
 
         gridNameA(1) = 'srcGrid 1'
         gridNameA(2) = 'srcGrid 2'
-        sideA(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+        sideA(1) = ESMF_GridCreateNoPeriDim(maxIndex=(/2,2/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             regDecomp=(/1,2/), &
@@ -167,7 +167,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/2,1/), &
+        sideA(2) = ESMF_GridCreateNoPeriDim(maxIndex=(/2,1/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             regDecomp=(/2,1/), &
@@ -220,7 +220,7 @@ contains
         if(lpet == 0) coordY = centroidA2Y
 
         gridNameB(1) = 'dstGrid 1'
-        sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+        sideB(1) = ESMF_GridCreateNoPeriDim(maxIndex=(/2,2/), &
             coordDep1=(/1/), coordDep2=(/2/), &
             regDecomp=(/1,2/), &
             name=gridNameB(1), rc=localrc)
@@ -638,7 +638,7 @@ contains
 
         gridNameA(1) = 'srcGrid 1'
         gridNameA(2) = 'srcGrid 2'
-        sideA(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+        sideA(1) = ESMF_GridCreateNoPeriDim(maxIndex=(/2,2/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             regDecomp=(/1,2/), &
@@ -646,7 +646,7 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-        sideA(2) = ESMF_GridCreateShapeTile(maxIndex=(/2,1/), &
+        sideA(2) = ESMF_GridCreateNoPeriDim(maxIndex=(/2,1/), &
             coordDep1=(/1/), &
             coordDep2=(/2/), &
             regDecomp=(/2,1/), &
@@ -695,7 +695,7 @@ contains
         if(lpet == 0) coordY = centroidA2Y
 
         gridNameB(1) = 'dstGrid 1'
-        sideB(1) = ESMF_GridCreateShapeTile(maxIndex=(/2,2/), &
+        sideB(1) = ESMF_GridCreateNoPeriDim(maxIndex=(/2,2/), &
             coordDep1=(/1/), coordDep2=(/2/), &
             regDecomp=(/1,2/), &
             name=gridNameB(1), rc=localrc)
@@ -1112,7 +1112,7 @@ contains
     
     !------------- ATM --------------
     ! atm grid, horizontally decomposed
-    grid_atm = ESMF_GridCreateShapeTile(maxIndex=(/atm_nx, atm_ny/), &
+    grid_atm = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -1180,7 +1180,7 @@ contains
 
     !------------- OCN --------------
     ! ocn grid, horizontally decomposed
-    grid_ocn = ESMF_GridCreateShapeTile(maxIndex=(/ocn_nx, ocn_ny/), &
+    grid_ocn = ESMF_GridCreateNoPeriDim(maxIndex=(/ocn_nx, ocn_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -1414,7 +1414,7 @@ contains
     
     !------------- ATM --------------
     ! atm grid, horizontally decomposed
-    grid_atm = ESMF_GridCreateShapeTile(maxIndex=(/atm_nx, atm_ny/), &
+    grid_atm = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -1482,7 +1482,7 @@ contains
 
     !------------- OCN --------------
     ! ocn grid, horizontally decomposed
-    grid_ocn = ESMF_GridCreateShapeTile(maxIndex=(/ocn_nx, ocn_ny/), &
+    grid_ocn = ESMF_GridCreateNoPeriDim(maxIndex=(/ocn_nx, ocn_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -1712,7 +1712,7 @@ contains
     
     !------------- ATM --------------
     ! atm grid, horizontally decomposed
-    grid_atm = ESMF_GridCreateShapeTile(maxIndex=(/atm_nx, atm_ny/), &
+    grid_atm = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -1780,7 +1780,7 @@ contains
 
     !------------- OCN --------------
     ! ocn grid, horizontally decomposed
-    grid_ocn = ESMF_GridCreateShapeTile(maxIndex=(/ocn_nx, ocn_ny/), &
+    grid_ocn = ESMF_GridCreateNoPeriDim(maxIndex=(/ocn_nx, ocn_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -2022,7 +2022,7 @@ contains
     
     !------------- ATM --------------
     ! atm grid, horizontally decomposed
-    grid_atm = ESMF_GridCreateShapeTile(maxIndex=(/atm_nx, atm_ny/), &
+    grid_atm = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -2090,7 +2090,7 @@ contains
 
     !------------- OCN --------------
     ! ocn grid, horizontally decomposed
-    grid_ocn = ESMF_GridCreateShapeTile(maxIndex=(/ocn_nx, ocn_ny/), &
+    grid_ocn = ESMF_GridCreateNoPeriDim(maxIndex=(/ocn_nx, ocn_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       regDecomp=(/npet, 1/), &
@@ -2348,7 +2348,7 @@ contains
     
     !------------- ATM --------------
     ! atm grid, horizontally decomposed
-    grid_atm = ESMF_GridCreateShapeTile(maxIndex=(/atm_nx, atm_ny/), &
+    grid_atm = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
       regDecomp=(/npet, 1/), &
@@ -2414,7 +2414,7 @@ contains
 
     !------------- OCN --------------
     ! ocn grid, horizontally decomposed
-    grid_ocn = ESMF_GridCreateShapeTile(maxIndex=(/ocn_nx, ocn_ny/), &
+    grid_ocn = ESMF_GridCreateNoPeriDim(maxIndex=(/ocn_nx, ocn_ny/), &
       indexflag=ESMF_INDEX_GLOBAL, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
       regDecomp=(/npet, 1/), &

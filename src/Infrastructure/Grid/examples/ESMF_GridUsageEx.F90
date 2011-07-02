@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.99 2011/07/01 16:07:11 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.100 2011/07/02 05:54:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -74,17 +74,12 @@ program ESMF_GridCreateEx
 !
 !\subsubsection{Create single-tile Grid shortcut method}
 
-! The method {\tt ESMF\_GridCreateNoPeriDim()} is a shortcut
+! The set of methods {\tt ESMF\_GridCreateNoPeriDim()}, {\tt ESMF\_GridCreate1PeriDim()},
+! {\tt ESMF\_GridCreate2PeriDim()}, {\tt ESMF\_GridCreate()} are shortcuts
 ! for building single tile logically rectangular Grids up to 
 ! three dimensions.
-! It is partially implemented.  The user can specify Grid
-! size, dimension and distribution, but cannot specify tile edge
-! connectivities yet.  The default is that Grid edges are
-! not connected.  Once completed, this method will enable users
-! to create many common grid shapes, including
-! rectangle, bipole sphere, and tripole sphere. 
 !
-! In v5.1.0, the {\tt ESMF\_GridCreateNoPeriDim()} method supports 
+! In v5.1.0, these methods support 
 ! all three types of distributions described in 
 ! Section~\ref{sec:desc:dist}: regular, irregular and arbitrary.
 !
@@ -394,7 +389,6 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 #endif
 
 
-
 !BOE
 !\subsubsection{Create a 2D regularly distributed rectilinear Grid
 !                  with uniformly spaced coordinates}
@@ -433,6 +427,7 @@ if (petCount .le. 6) then
          ! Define a regular distribution
          maxIndex=(/10,20/), & ! define index space
          regDecomp=(/2,3/),  & ! define how to divide among DEs
+         coordSys=ESMF_COORDSYS_CART, &
          ! Specify mapping of coords dim to Grid dim
          coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
          coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
@@ -477,6 +472,99 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    do j=lbnd(1),ubnd(1)
         coordY(j) = j*10.0
+   enddo
+!EOC
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+endif
+
+
+
+!BOE
+!\subsubsection{Create a periodic 2D regularly distributed rectilinear Grid}
+! \label{example:2DPeriRegUniGrid}
+!
+! The following is an example of creating a simple rectilinear grid 
+! with a periodic dimension and loading in a set of coordinates. It illustrates a straightforward use
+! of the {\tt ESMF\_GridCreate1PeriDim()} call described in the previous section. 
+! This code creates a 10x20 2D grid with uniformly spaced coordinates varying from (1,1) to (360,180).
+! The grid is partitioned using a regular distribution. The first dimension
+! is divided into two pieces, and the second dimension is divided into 3.
+! This example assumes that the code is being run with a 1-1 mapping between 
+! PETs and DEs because we are only accessing the first DE on each PET (localDE=0).
+! Because we have 6 DEs (2x3), this example would only work when run on 6 PETs. 
+! The Grid is created with global indices. After Grid creation the
+! local bounds and native Fortran arrays are retrieved and the
+! coordinates are set by the user. 
+!
+!EOE
+
+! Don't run without correct number of procs
+if (petCount .le. 6) then
+
+!BOC
+   !-------------------------------------------------------------------
+   ! Create the Grid:  Allocate space for the Grid object, define the
+   ! topology and distribution of the Grid, and specify that it 
+   ! will have global indices.  Note that here a single periodic connection
+   ! is specified by the argument name. In this call the minIndex hasn't 
+   ! been set, so it defaults to (1,1,...). The default is to 
+   ! divide the index range as equally as possible among the DEs
+   ! specified in regDecomp. This behavior can be changed by 
+   ! specifying decompFlag. 
+   !-------------------------------------------------------------------
+   grid2D=ESMF_GridCreate1PeriDim(          &
+         ! Define a regular distribution
+         maxIndex=(/360,180/), & ! define index space
+         regDecomp=(/2,3/),  & ! define how to divide among DEs
+         coordSys=ESMF_COORDSYS_CART, &
+         ! Specify mapping of coords dim to Grid dim
+         coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
+         coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
+         indexflag=ESMF_INDEX_GLOBAL, &
+         rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Allocate coordinate storage and associate it with the center
+   ! stagger location.  Since no coordinate values are specified in
+   ! this call no coordinate values are set yet.
+   !-------------------------------------------------------------------
+   call ESMF_GridAddCoord(grid2D,  & 
+          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Get the pointer to the first coordinate array and the bounds
+   ! of its global indices on the local DE.   
+   !-------------------------------------------------------------------
+   call ESMF_GridGetCoord(grid2D, coordDim=1, localDE=0, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, &
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          farrayPtr=coordX, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Calculate and set coordinates in the first dimension [10-100].
+   !-------------------------------------------------------------------
+   do i=lbnd(1),ubnd(1)
+        coordX(i) = i*1.0
+   enddo
+
+   !-------------------------------------------------------------------
+   ! Get the pointer to the second coordinate array and the bounds of
+   ! its global indices on the local DE.
+   !-------------------------------------------------------------------
+   call ESMF_GridGetCoord(grid2D, coordDim=2, localDE=0, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, &
+          computationalLBound=lbnd, computationalUBound=ubnd, &
+          farrayPtr=coordY, rc=rc)
+
+   !-------------------------------------------------------------------
+   ! Calculate and set coordinates in the second dimension [10-200]
+   !-------------------------------------------------------------------
+   do j=lbnd(1),ubnd(1)
+        coordY(j) = j*1.0
    enddo
 !EOC
    !-------------------------------------------------------------------
@@ -1028,23 +1116,23 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
 
-#if 0
-!BOEI
+#if 1
+!BOE
 !\subsubsection{Create an empty Grid in a parent Component 
 ! for completion in a child Component}\label{sec:usage:setcommit}
 !
 ! \begin{sloppypar}
 ! ESMF Grids can be created incrementally. To do this,
 ! the user first calls {\tt ESMF\_GridEmptyCreate()} to allocate the shell of
-! a Grid. Next, we use the {\tt ESMF\_GridSetCommitShapeTile()}
+! a Grid. Next, we use the {\tt ESMF\_GridEmptyComplete()}
 ! call that fills in the Grid and does an internal commit to make it usable.
 ! For consistency's sake the {\tt ESMF\_GridSetCommitShapeTile()}
 ! call must occur on the same or a subset of the PETs as the
 !  {\tt ESMF\_GridEmptyCreate()} call. The 
-! {\tt ESMF\_GridSetCommitShapeTile()} call uses the VM for
+! {\tt ESMF\_GridEmptyComplete()} call uses the VM for
 ! the context in which it's executed and the "empty" Grid contains
 ! no information about the VM in which its create was run.  This
-! means that if the {\tt ESMF\_GridSetCommitShapeTile()} call occurs
+! means that if the {\tt ESMF\_GridEmptyComplete()} call occurs
 ! in a subset of the PETs in which the {\tt ESMF\_GridEmptyCreate()} was 
 ! executed that the Grid is created only in that subset. Inside the subset
 ! the Grid will be fine, but outside the subset the Grid objects will
@@ -1052,9 +1140,9 @@ endif
 ! incremental technique to create a rectangular 10x20 Grid with coordinates at
 ! the center and corner stagger locations. 
 ! \end{sloppypar}
-!EOEI
+!EOE
 
-!BOCI
+!BOC
 !---------------------------------------------------------------------------
 ! IN THE PARENT COMPONENT:
 ! Create an empty Grid in the parent component for use in a child component.
@@ -1069,7 +1157,7 @@ endif
 ! Set the Grid topology.  Here we define an irregularly distributed 
 ! rectangular Grid.
 !---------------------------------------------------------------------------
-   call ESMF_GridSetCommitShapeTile(grid2D,             &
+   call ESMF_GridEmptyComplete(grid2D,             &
                           countsPerDEDim1=(/6,4/),      &
                           countsPerDEDim2=(/10,3,7/), rc=rc)
 
@@ -1083,7 +1171,7 @@ endif
 !---------------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 
-!EOCI
+!EOC
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------

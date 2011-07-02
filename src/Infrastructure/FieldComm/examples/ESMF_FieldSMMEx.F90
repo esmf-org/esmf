@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.31 2011/06/30 21:37:48 feiliu Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.32 2011/07/02 05:54:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.31 2011/06/30 21:37:48 feiliu Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.32 2011/07/02 05:54:01 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -306,7 +306,7 @@
 !BOC
 
     ! Create the destination Grid
-    dstGrid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/3,4/), &
+    dstGrid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/3,4/), &
       indexflag = ESMF_INDEX_GLOBAL, &
       regDecomp = (/1,4/), &
       rc=rc)

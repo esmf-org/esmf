@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.20 2011/06/30 06:00:51 theurich Exp $
+! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.21 2011/07/02 05:54:24 oehmke Exp $
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX
@@ -109,7 +109,7 @@ program Blk2ArbBunRedist
 
      ! make two identical grids, except one is distributed in the normal
      ! block style and the second is distributed in arbitrary style
-     grid1 = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=counts, &
+     grid1 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=counts, &
                             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &  
                              name="source grid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
@@ -135,7 +135,7 @@ program Blk2ArbBunRedist
        j1 = j - counts(2)
      enddo
 
-     grid2 = ESMF_GridCreateShapeTile(coordTypeKind=ESMF_TYPEKIND_R8, &
+     grid2 = ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R8, &
        minIndex=(/1,1/), maxIndex=counts, &
        arbIndexList=myIndices,arbIndexCount=localCount, &
        name="arbgrid", rc=status)

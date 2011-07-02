@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.109 2011/06/30 05:58:52 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.110 2011/07/02 05:53:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
 !EOE
 
 !BOC
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.44 2011/06/30 20:13:50 feiliu Exp $
+! $Id: ESMF_FieldEx.F90,v 1.45 2011/07/02 05:53:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 
     ! create a 3D data Field from a Grid and Array.
     ! first create a Grid 
-    grid3d = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), &
+    grid3d = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), &
             maxIndex=(/xdim,ydim,zdim/), &
             regDecomp=(/2,2,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -231,7 +231,7 @@
 
 !BOC
     ! create a grid
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -286,7 +286,7 @@
 
 !BOC
     ! create a grid
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -340,7 +340,7 @@
 !EOE
 
 !BOC
-    grid2d = ESMF_GridCreateShapeTile(minIndex=(/1,1/), &
+    grid2d = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), &
           maxIndex=(/180,360/), regDecomp=(/2,2/), name="atmgrid", rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

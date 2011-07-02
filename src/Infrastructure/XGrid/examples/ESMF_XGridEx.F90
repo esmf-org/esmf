@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.33 2011/06/30 13:46:06 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.34 2011/07/02 05:54:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -97,7 +97,7 @@
 ! Grid class documentation.
 !EOE
 !BOC
-    sideA(1) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,2/), &
+    sideA(1) = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/2,2/), &
         coordDep1=(/1/), &
         coordDep2=(/2/), &
         name='source Grid 1 on side A', rc=localrc)
@@ -105,7 +105,7 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
 !BOC
-    sideA(2) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,1/), &
+    sideA(2) = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/2,1/), &
         coordDep1=(/1/), &
         coordDep2=(/2/), &
         name='source Grid 2 on side A', rc=localrc)
@@ -164,7 +164,7 @@
 ! coordinate with the Grid:
 !EOE
 !BOC
-    sideB(1) = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/2,2/), &
+    sideB(1) = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/2,2/), &
         coordDep1=(/1/), coordDep2=(/2/), &
         name='destination Grid on side B', rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &

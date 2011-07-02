@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.37 2011/06/30 05:59:42 theurich Exp $
+! $Id: ESMF_AttributeUpdateMod.F90,v 1.38 2011/07/02 05:54:16 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -207,7 +207,7 @@ module ESMF_AttributeUpdateMod
 
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
            rc=rc)
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)

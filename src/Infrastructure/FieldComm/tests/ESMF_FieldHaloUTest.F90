@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloUTest.F90,v 1.8 2011/06/30 05:59:01 theurich Exp $
+! $Id: ESMF_FieldHaloUTest.F90,v 1.9 2011/07/02 05:54:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_FieldHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloUTest.F90,v 1.8 2011/06/30 05:59:01 theurich Exp $'
+    '$Id: ESMF_FieldHaloUTest.F90,v 1.9 2011/07/02 05:54:03 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -90,7 +90,7 @@ program ESMF_FieldHaloUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "grid Create Test-1"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+  grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/1,4/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
@@ -360,7 +360,7 @@ call ESMF_FieldPrint(field)
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "grid Create Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+  grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
     regDecomp=(/2,2/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.16 2011/06/30 05:58:56 theurich Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.17 2011/07/02 05:53:58 oehmke Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -48,7 +48,7 @@
 !-------------------------------------------------------------------------
 !   !  Create several Fields and add them to a new FieldBundle.
  
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,200/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/100,200/), &
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.35 2011/06/30 05:58:58 theurich Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.36 2011/07/02 05:54:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.35 2011/06/30 05:58:58 theurich Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.36 2011/07/02 05:54:00 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -163,10 +163,10 @@
       rc=ESMF_SUCCESS
 
       ! Create a couple of grids
-      gridTst1=ESMF_GridCreateShapeTile(maxIndex=(/8,8/), regDecomp=(/2,2/), name="Grid", rc=localrc)
+      gridTst1=ESMF_GridCreateNoPeriDim(maxIndex=(/8,8/), regDecomp=(/2,2/), name="Grid", rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-      gridTst2=ESMF_GridCreateShapeTile(maxIndex=(/16,16/), regDecomp=(/2,2/), name="Grid", rc=localrc)
+      gridTst2=ESMF_GridCreateNoPeriDim(maxIndex=(/16,16/), regDecomp=(/2,2/), name="Grid", rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
       ! Set ArraySpec
@@ -1532,7 +1532,7 @@
 
       !EX_UTest
       ! Creating a Grid
-      grid=ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/180,90/), &
+      grid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/180,90/), &
                                 regDecomp=(/2,2/), name="Grid", rc=rc)
 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1905,7 +1905,7 @@
       ! ESMF_FieldBundleDeleteField not implemented" is fixed.
       !------------------------------------------------------------------------
       !EX_UTest
-      grid5 = ESMF_GridCreateShapeTile(maxIndex=(/10,20/), rc=rc)
+      grid5 = ESMF_GridCreateNoPeriDim(maxIndex=(/10,20/), rc=rc)
       write(failMsg, *) "Creating a Grid"
       write(name, *) "Creating a Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

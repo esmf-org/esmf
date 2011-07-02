@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.16 2011/06/30 06:01:23 theurich Exp $
+! $Id: user_model1.F90,v 1.17 2011/07/02 05:54:41 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -114,7 +114,7 @@ module user_model1
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), & ! no stagger padding
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)

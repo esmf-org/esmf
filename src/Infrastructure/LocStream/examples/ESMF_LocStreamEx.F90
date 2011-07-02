@@ -302,8 +302,10 @@ program ESMF_LocStreamEx
    ! is  0 to 360 in longitude and -90 to 90 in latitude. Note that we 
    ! use indexflag=ESMF_INDEX_GLOBAL for the Grid creation. At this time 
    ! this is required for a Grid to be usable as a background Grid.
+   ! Note that here the points are treated as cartesian.
    !-------------------------------------------------------------------
-   grid=ESMF_GridCreateShapeTile(maxIndex=(/GridLonSize,GridLatSize/), &
+   grid=ESMF_GridCreateNoPeriDim(maxIndex=(/GridLonSize,GridLatSize/), &
+                                 coordSys=ESMF_COORDSYS_CART, &
                                  indexflag=ESMF_INDEX_GLOBAL, &
                                  rc=rc)
 

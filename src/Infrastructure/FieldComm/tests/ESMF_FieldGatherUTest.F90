@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.50 2011/06/30 21:37:50 feiliu Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.51 2011/07/02 05:54:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldGatherUTest.F90,v 1.50 2011/06/30 21:37:50 feiliu Exp $'
+    '$Id: ESMF_FieldGatherUTest.F90,v 1.51 2011/07/02 05:54:03 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -222,7 +222,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
             regDecomp=(/2,2/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             name="grid", rc=localrc)
@@ -310,7 +310,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/10,20,5/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), maxIndex=(/10,20,5/), &
             regDecomp=(/2,2,1/), &
             gridEdgeLWidth=(/0,0,0/), gridEdgeUWidth=(/0,0,0/), &
             name="grid", rc=localrc)
@@ -401,7 +401,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
             regDecomp=(/2,2/), &
             gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
             name="grid", rc=localrc)

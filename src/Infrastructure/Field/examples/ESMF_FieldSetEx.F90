@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.15 2011/06/30 05:58:53 theurich Exp $
+! $Id: ESMF_FieldSetEx.F90,v 1.16 2011/07/02 05:53:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -73,7 +73,7 @@
     ydim = 22
     zdim = 31
 
-    grid8 = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
+    grid8 = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -117,7 +117,7 @@
 !
 !EremoveOE
 !BremoveOC
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), maxIndex=(/4*xdim,ydim,zdim/), &
                               regDecomp=(/4,1,1/), name="grid", rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     

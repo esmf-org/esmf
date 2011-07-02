@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2011/06/30 06:00:54 theurich Exp $
+! $Id: user_model1.F90,v 1.15 2011/07/02 05:54:27 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -115,7 +115,7 @@ module user_model1
     ! Create the source FieldBundle and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/100,150/), &
+    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), &
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), & ! no stagger padding
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)

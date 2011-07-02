@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.67 2011/06/30 06:01:37 theurich Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.68 2011/07/02 05:54:43 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1535,8 +1535,9 @@ logical                       :: checkpoint = .FALSE.
 !                 gridEdgeUWidth =(/0,0/),  rc=localrc)
       allocate( maxI(Grid_info%grank) )
       maxI = Grid_info%gsize
-      Grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=maxI,         &
-                regDecomp=decompOrder,                                         &
+      Grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=maxI,         &
+                regDecomp=decompOrder, &
+                coordSys=ESMF_COORDSYS_CART,                                      &
                 indexflag=ESMF_INDEX_GLOBAL,                                   &
                 gridEdgeLWidth=(/ 0,0 /),                                      &
                 gridEdgeUWidth =(/0,0/),  rc=localrc)
@@ -1547,7 +1548,7 @@ logical                       :: checkpoint = .FALSE.
 !                 gridEdgeUWidth =(/0,0,0/),  rc=localrc)
       allocate( maxI(Grid_info%grank) )
       maxI = Grid_info%gsize
-      Grid = ESMF_GridCreateShapeTile(minIndex=(/1,1,1/), maxIndex=maxI,       &
+      Grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), maxIndex=maxI,       &
                 regDecomp=decompOrder,                                         &
                 indexflag=ESMF_INDEX_GLOBAL,                                   &
                 gridEdgeLWidth=(/0,0,0/),                                      &

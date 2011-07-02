@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.30 2011/06/30 05:58:58 theurich Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.31 2011/07/02 05:54:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@ contains
         rc = ESMF_SUCCESS
         localrc = ESMF_SUCCESS
 
-        grid = ESMF_GridCreateShapeTile(minIndex=(/1,1/), maxIndex=(/10,20/), &
+        grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
                                 gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
                                 regDecomp=(/2,2/), name="landgrid", rc=localrc)
         if (ESMF_LogFoundError(localrc, &
