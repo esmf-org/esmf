@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.42 2011/07/01 16:07:53 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.43 2011/07/04 05:11:23 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -648,7 +648,7 @@ program ESMF_RegridWeightGen
 	    indices=indices, weights=weights, &
             regridmethod = ESMF_REGRIDMETHOD_BILINEAR, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
-	    regridScheme = regridScheme, rc=rc)
+	    rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping"
       else if (trim(method) .eq. 'patch') then
@@ -658,7 +658,7 @@ program ESMF_RegridWeightGen
 	    indices=indices, weights=weights, &
             regridmethod = ESMF_REGRIDMETHOD_PATCH, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
-	    regridScheme = regridScheme, rc=rc)
+	    rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
       else if (trim(method) .eq. 'conserve') then
@@ -669,7 +669,7 @@ program ESMF_RegridWeightGen
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = ESMF_REGRIDMETHOD_CONSERVE, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
-	    regridScheme = regridScheme, rc=rc)
+	    rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Conservative remapping"
       else ! nothing recognizable so report error
@@ -829,7 +829,7 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
   endif
 
   ! compute areas
-  call ESMF_FieldRegridGetArea(areaField, regridScheme=regridScheme, rc=localrc)
+  call ESMF_FieldRegridGetArea(areaField, rc=localrc)
  if (localrc /=ESMF_SUCCESS) then
      rc=localrc
      return

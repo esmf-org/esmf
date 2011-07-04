@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.24 2011/06/30 14:49:38 oehmke Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.25 2011/07/04 05:11:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -609,7 +609,7 @@ contains
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -630,7 +630,7 @@ contains
 
   ! Get the integration weights
   call ESMF_FieldRegridGetArea(srcArea, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -638,7 +638,7 @@ contains
 
   ! Get the integration weights
   call ESMF_FieldRegridGetArea(dstArea, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -1330,7 +1330,7 @@ contains
           srcFracField=srcFracField, &
           unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -1351,7 +1351,7 @@ contains
 
   ! Get the integration weights
   call ESMF_FieldRegridGetArea(srcArea, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -1359,7 +1359,7 @@ contains
 
   ! Get the integration weights
   call ESMF_FieldRegridGetArea(dstArea, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -2104,7 +2104,7 @@ contains
           srcFracField=srcFracField, &
           unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
-          regridScheme=ESMF_REGRID_SCHEME_NATIVE, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -2125,7 +2125,7 @@ contains
 
   ! Get the integration weights
   call ESMF_FieldRegridGetArea(srcArea, &
-          regridScheme=ESMF_REGRID_SCHEME_NATIVE, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
@@ -2133,7 +2133,7 @@ contains
 
   ! Get the integration weights
   call ESMF_FieldRegridGetArea(dstArea, &
-          regridScheme=ESMF_REGRID_SCHEME_NATIVE, rc=localrc)
+          rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return

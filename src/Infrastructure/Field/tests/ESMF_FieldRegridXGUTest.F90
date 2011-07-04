@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.45 2011/07/02 05:53:56 oehmke Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.46 2011/07/04 05:11:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2492,7 +2492,6 @@ contains
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
-      regridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

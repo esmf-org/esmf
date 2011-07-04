@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.122 2011/07/01 21:10:24 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.123 2011/07/04 05:11:14 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.122 2011/07/01 21:10:24 theurich Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.123 2011/07/04 05:11:14 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -2990,7 +2990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
                                            srcMaskValues, dstMaskValues, &
                                            regridmethod, polemethod, &
-                                           regridPoleNPnts, regridScheme, &
+                                           regridPoleNPnts,  &
                                            unmappedaction, routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -3001,7 +3001,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
     type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
     integer,                   intent(in),    optional :: regridPoleNPnts
-    integer,                   intent(in),    optional :: regridScheme
     type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
     type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
     integer,                   intent(out),   optional :: rc
@@ -3058,9 +3057,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    This parameter indicates how many points should be averaged
 !    over. Must be specified if {\tt polemethod} is 
 !    {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
-!   \item [{[regridScheme]}]
-!     Whether to convert to spherical coordinates (ESMF\_REGRID\_SCHEME\_FULL3D), 
-!     or to leave in native coordinates (ESMF\_REGRID\_SCHEME\_NATIVE). 
 !   \item [{[routehandle]}]
 !     Handle to the precomputed Route.
 !   \item [{[rc]}]
@@ -3211,7 +3207,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                      srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
                      regridmethod=regridmethod, &
                      polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-                     regridScheme=regridScheme, &
                      unmappedaction=unmappedaction, &
                      routehandle=rh, &
                      indices=prev_indices, weights=prev_weights, &
@@ -3231,7 +3226,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
                   regridmethod=regridmethod, &
                   polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
-                  regridScheme=regridScheme, &
                   unmappedaction=unmappedaction, &
                   routehandle=rh,rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

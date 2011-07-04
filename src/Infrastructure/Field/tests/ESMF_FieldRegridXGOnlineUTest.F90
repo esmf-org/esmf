@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.14 2011/07/02 05:53:56 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.15 2011/07/04 05:11:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1160,7 +1160,6 @@ contains
       routehandle=rh_a2o, &
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
-      regridScheme=l_scheme, &
       srcFracField=srcFrac, dstFracField=dstFrac, & 
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1177,7 +1176,6 @@ contains
       routehandle=rh_o2a, &
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
-      regridScheme=l_scheme, &
       indices=indices, weights=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &

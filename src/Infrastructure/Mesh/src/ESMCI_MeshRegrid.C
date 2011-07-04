@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.25 2011/05/06 18:59:19 feiliu Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.26 2011/07/04 05:11:21 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.25 2011/05/06 18:59:19 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.26 2011/07/04 05:11:21 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -279,14 +279,18 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
            int *regridPoleType, int *regridPoleNPnts, 
            int *unmappedaction) {
 
+   // See if it could have a pole
+  bool maybe_pole=false;
+  if ((srcmesh.parametric_dim()==2) && 
+      (srcmesh.spatial_dim()==3)) maybe_pole=true; 
+
+
     // Pole constraints
     IWeights pole_constraints, stw;
     UInt constraint_id = srcmesh.DefineContext("pole_constraints");
 
     if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) { // No poles if conservative
-      if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
-          (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
-          (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
+      if (maybe_pole) {
 	if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
 	  for (UInt i = 1; i <= 7; ++i)
 	    MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
@@ -348,16 +352,14 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
      if(midmesh) interp.release_zz();
 
      // Factor out poles if they exist
-     if ((*regridScheme == ESMC_REGRID_SCHEME_FULL3D) ||
-          (*regridScheme == ESMC_REGRID_SCHEME_DCON3DWPOLE) ||
-         (*regridScheme == ESMC_REGRID_SCHEME_FULLTOREG3D)) {
-       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-         wts.GatherToCol(pole_constraints);
-         wts.AssimilateConstraints(pole_constraints);
-       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-         wts.GatherToRowSrc(pole_constraints);
-         wts.AssimilateConstraintsNPnts(pole_constraints);
-       }
+      if (maybe_pole) {
+        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+          wts.GatherToCol(pole_constraints);
+          wts.AssimilateConstraints(pole_constraints);
+        } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+          wts.GatherToRowSrc(pole_constraints);
+          wts.AssimilateConstraintsNPnts(pole_constraints);
+        }
     }
 
     return 1;

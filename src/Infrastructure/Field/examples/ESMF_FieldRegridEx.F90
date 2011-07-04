@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.49 2011/07/02 05:53:55 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.50 2011/07/04 05:11:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.49 2011/07/02 05:53:55 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.50 2011/07/04 05:11:09 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -266,8 +266,6 @@ program ESMF_FieldRegridEx
 ! \item Structured Grids composed of a single logically rectangular patch
 ! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
 ! \end{itemize}
-! In addition the user may use the {\tt ESMF\_REGRID\_SCHEME\_FULL3D}  option in {\tt ESMF\_FieldRegridStore()} to
-! map two single patch logically rectangular Grids onto the sphere and regrid between them in that representation. 
 !
 !
 ! In 3D ESMF supports regridding between any combination of the following:

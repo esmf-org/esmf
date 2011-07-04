@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.35 2011/07/02 05:53:55 oehmke Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.36 2011/07/04 05:11:09 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.35 2011/07/02 05:53:55 oehmke Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.36 2011/07/04 05:11:09 oehmke Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -304,17 +304,13 @@ program ESMF_FieldSphereRegridEx
 ! are then computed locally on each cell.  This matrix of weights is, finally,
 ! sent back to the destination grid's row decomposition and declared as a 
 ! sparse matrix.  This matrix is embedded in the routeHandle object.
-! the {\tt ESMF\_REGRID\_SCHEME\_FULL3D} option is used since the grid
-! represents a full sphere.  This causes the grids to be represented
-! as 3D manifolds, and avoids pole and branch cut issues usually
-! associated with regridding on the sphere.
 !EOE
 
 !BOC
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! The patch recovery interpolant
@@ -322,7 +318,7 @@ program ESMF_FieldSphereRegridEx
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField1, &
           routeHandle=routeHandle1, &
           regridmethod=ESMF_REGRIDMETHOD_PATCH, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+          rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif

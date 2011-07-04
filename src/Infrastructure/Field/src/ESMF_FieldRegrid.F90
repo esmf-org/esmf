@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.78 2011/07/01 16:07:06 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.79 2011/07/04 05:11:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.78 2011/07/01 16:07:06 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.79 2011/07/04 05:11:11 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -282,7 +282,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        srcMaskValues, dstMaskValues, &
                                        regridmethod, &
                                        polemethod, regridPoleNPnts, & 
-                                       regridScheme,unmappedaction, &
+                                       unmappedaction, &
                                        routehandle, indices, weights, & 
                                        srcFracField, dstFracField, rc)
 !
@@ -297,7 +297,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
       integer,                   intent(in),    optional :: regridPoleNPnts
-      integer,                   intent(in),    optional :: regridScheme
       type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
       type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4),     pointer,       optional :: indices(:,:)
@@ -381,11 +380,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           This parameter indicates how many points should be averaged
 !           over. Must be specified if {\tt polemethod} is 
 !           {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
-!     \item [{[regridScheme]}]
-!           Whether to convert to spherical coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
-!           or to leave in native coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -415,6 +409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer              :: srcIsSphere, dstIsSphere
         type(ESMF_RegridConserve) :: regridConserveG2M
         real(ESMF_KIND_R8), pointer :: fracFptr(:)
+
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -449,13 +444,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 
-        ! Will eventually determine scheme either as a parameter or from properties
-        ! of the source grid
-        if (present(regridScheme)) then
-          lregridScheme = regridScheme
-        else
-          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-        endif
+        ! Set this for now just to not have to remove it everywhere
+        ! TODO get rid of it. 
+        lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+
 
 
         ! Handle optional method argument
@@ -466,41 +458,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 
-        ! Handle optional pole argument
-        if ((lregridScheme .ne. ESMF_REGRID_SCHEME_FULL3D) .and. &
-             (lregridScheme .ne. ESMF_REGRID_SCHEME_DCON3DWPOLE) .and. &
-             (lregridScheme .ne. ESMF_REGRID_SCHEME_FULLTOREG3D)) then           
+       ! Handle pole method
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
            if (present(polemethod)) then
               if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for NON-ESMF_REGRID_SCHEME_FULL3D", & 
-                  ESMF_CONTEXT, rcToReturn=rc) 
+                      msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
+                      ESMF_CONTEXT, rcToReturn=rc) 
                  return
               endif
-           else     
-               localpolemethod=ESMF_POLEMETHOD_NONE
+           else    
+              localpolemethod=ESMF_POLEMETHOD_NONE
            endif
-        else
-           if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
-              if (present(polemethod)) then
-                 if (polemethod .ne. ESMF_POLEMETHOD_NONE) then
-                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                    msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
-                    ESMF_CONTEXT, rcToReturn=rc) 
-                   return
-                 endif
-              else    
-                 localpolemethod=ESMF_POLEMETHOD_NONE
-              endif
-           else 
-              if (present(polemethod)) then
-                 localpolemethod=polemethod
-              else    
-                 localpolemethod=ESMF_POLEMETHOD_ALLAVG
-              endif
+        else 
+           if (present(polemethod)) then
+              localpolemethod=polemethod
+           else    
+              localpolemethod=ESMF_POLEMETHOD_ALLAVG
            endif
         endif
-
+        
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
            if (.not. present(regridPoleNPnts)) then
                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
@@ -1124,14 +1101,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridGetArea()
-      subroutine ESMF_FieldRegridGetArea(areaField, MaskValues, regridScheme, rc)
+      subroutine ESMF_FieldRegridGetArea(areaField, MaskValues, rc)
 !
 ! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)                 :: areaField
       integer(ESMF_KIND_I4), intent(in), optional     :: MaskValues(:)
-      integer, intent(in), optional                   :: regridScheme
       integer, intent(out), optional                  :: rc 
 !
 ! !DESCRIPTION:
@@ -1187,13 +1163,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 
-        ! Will eventually determine scheme either as a parameter or from properties
-        ! of the source grid
-        if (present(regridScheme)) then
-          lregridScheme = regridScheme
-        else
-          lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-        endif
+        ! TODO: Get rid of this
+        lregridScheme = ESMF_REGRID_SCHEME_NATIVE
+          
 
         ! Set interpretation of grid based on regridScheme
         if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.24 2011/06/24 16:52:07 rokuingh Exp $
+! $Id: ESMF_GridUtil.F90,v 1.25 2011/07/04 05:11:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.24 2011/06/24 16:52:07 rokuingh Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.25 2011/07/04 05:11:18 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -404,8 +404,6 @@ module ESMF_GridUtilMod
            localIsLatLonDeg=0
        endif
     endif
-
-
 
     ! Make sure indexflag is ESMF_INDEX_GLOBAL
     if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
