@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.10 2011/07/02 05:54:38 oehmke Exp $
+! $Id: user_model2.F90,v 1.11 2011/07/04 05:48:49 oehmke Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -101,6 +101,7 @@
 
       ! Create Grid
       dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/), &
+                coordSys=ESMF_COORDSYS_CART, &
                 regDecomp=(/2,2/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
       if (localrc /=ESMF_SUCCESS) then
          rc=ESMF_FAILURE
