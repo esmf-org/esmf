@@ -1,4 +1,4 @@
-% $Id: Field_options.tex,v 1.12 2011/07/01 16:07:04 rokuingh Exp $
+% $Id: Field_options.tex,v 1.13 2011/07/05 21:49:26 rokuingh Exp $
 
 \subsubsection{ESMF\_FIELDSTATUS}
 \label{const:fieldstatus}
@@ -27,7 +27,7 @@ The valid values are:
 
 {\sf DESCRIPTION:\\}  
 \begin{sloppypar}
-When interpolating between two Grids which have been mapped to a sphere (using the {\tt ESMF\_REGRID\_SCHEME\_FULL3D} option to {\tt ESMF\_FieldRegridStore()}) these can be used to specify the type of artificial pole to create on the source Grid during interpolation. Creating the pole allows destination points above the top row or below the bottom row of the source Grid to still be mapped.
+When interpolating between two Grids which have been mapped to a sphere these can be used to specify the type of artificial pole to create on the source Grid during interpolation. Creating the pole allows destination points above the top row or below the bottom row of the source Grid to still be mapped.
 \end{sloppypar}
 
 The type of this flag is:

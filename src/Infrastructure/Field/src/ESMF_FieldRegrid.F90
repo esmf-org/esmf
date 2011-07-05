@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.80 2011/07/05 18:12:32 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.81 2011/07/05 21:49:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.80 2011/07/05 18:12:32 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.81 2011/07/05 21:49:28 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -367,16 +367,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
 !     \item [{[polemethod]}]
 !           Which type of artificial pole
-!           to construct on the source Grid for regridding. Only valid when 
-!           {\tt regridScheme} is set to 
-!           {\tt ESMF\_REGRID\_SCHEME\_FULL3D}.  Please see 
+!           to construct on the source Grid for regridding. Please see 
 !           Section~\ref{const:polemethod} for a list of
-!           valid options. If not specified, defaults to {\tt ESMF\_REGRIDPOLE\_ALLAVG}. 
+!           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
 !     \item [{[regridPoleNPnts]}]
-!           If {\tt polemethod} is {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
+!           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
 !           This parameter indicates how many points should be averaged
 !           over. Must be specified if {\tt polemethod} is 
-!           {\tt ESMF\_REGRIDPOLE\_NPNTAVG}.
+!           {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
