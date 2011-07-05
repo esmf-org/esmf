@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.11 2011/06/23 18:14:15 rokuingh Exp $
+% $Id: ESMC_api.tex,v 1.12 2011/07/05 19:54:43 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 
 The ESMF Application Programming Interface (API) is based on the
 object-oriented programming concept of a {\bf class}.  A class is a 
-software construct that's used for grouping a set of related variables 
+software construct that is used for grouping a set of related variables 
 together with the subroutines and functions that operate on them.  We 
 use classes in ESMF because they help to organize the code, and often 
 make it easier to maintain and understand.  A particular instance
@@ -40,23 +40,32 @@ hold across the entire API.  These are:
 
 \begin{itemize}
 
-\item {\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()}, for creating and 
-destroying classes.  The {\tt ESMC\_<Class>Create()} method allocates 
-memory for the class structure itself and for internal variables, and
-initializes variables where appropriate.  It is always written as a 
-C function that returns a derived type instance of the class.
+\item {\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()}, for
+creating and destroying objects of ESMC classes that require internal memory
+management (- called ESMF deep classes). The {\tt ESMC\_<Class>Create()} method
+allocates memory for the class structure itself and for internal variables, and
+initializes variables where appropriate.  It is always written as a Fortran
+function that returns a derived type instance of the class.
 
-\item {\tt ESMC\_<Class>Set()} and {\tt ESMC\_<Class>Get()}, for setting 
-and retrieving a particular item or flag.
+\item 
+\begin{sloppypar}
+{\tt ESMC\_<Class>Set()} and {\tt ESMC\_<Class>Get()}, for setting and 
+retrieving a particular item or flag.  In general, these methods are overloaded
+for all cases where the item can be manipulated as a name/value pair.  If
+identifying the item requires more than a name, or if the class is of
+sufficient complexity that overloading in this way would result in an
+overwhelming number of options, we define specific
+{\tt ESMC\_<Class>Set<Something>()} and {\tt ESMC\_<Class>Get<Something>()}
+interfaces.
+\end{sloppypar}
 
-\item {\tt ESMC\_<Class>Add()} and 
-{\tt ESMC\_<Class>Remove()} for manipulating 
-items that can be appended or inserted into a list of like
-items within a class.  For example, the {\tt ESMC\_StateAdd()}
-method adds another Field to the list of Fields contained
-in the State class.
+\item {\tt ESMC\_<Class>Add()}, {\tt ESMC\_<Class>AddReplace()},
+{\tt ESMC\_<Class>Remove()}, and {\tt ESMC\_<Class>Replace()}, for manipulating
+objects of ESMF container classes - such as {\tt ESMC_State} and
+{\tt ESMC_FieldBundle}. For example, the {\tt ESMC\_FieldBundleAdd()}
+method adds another Field to an existing FieldBundle object.
 
-\item {\tt ESMC\_<Class>Print()}, for printing the contents of a class to 
+\item {\tt ESMC\_<Class>Print()}, for printing the contents of an object to 
 standard out.  This method is mainly intended for debugging.
 
 \item {\tt ESMC\_<Class>ReadRestart()} and {\tt ESMC\_<Class>WriteRestart()}, 
@@ -67,46 +76,29 @@ values themselves.
 
 \item 
 \begin{sloppypar}
-{\tt ESMC\_<Class>Validate()}, for determining whether a class is
-internally consistent.  For example, {\tt ESMC\_FieldValidate()} checks 
-whether the Array and Grid associated with a Field are consistent.
+{\tt ESMC\_<Class>Validate()}, for determining whether a class is 
+internally consistent.  For example, {\tt ESMC\_FieldValidate()} validates
+the internal consistency of a Field object.
 \end{sloppypar}
+
 \end{itemize}
-
-{\bf EXAMPLE}
-
-In this simple example, an ESMF Field is created with the 
-name {\tt 'temp'}.  
-
-\begin{verbatim}
-
-#include "ESMC.h"
-
-ESMC_Field field;
-
-field = ESMC_FieldCreate("temp", &rc);
-
-\end{verbatim}
 
 \subsection{Deep and Shallow Classes}
 \label{sec:deepshallow}
 
-The ESMF contains two types of classes. 
+The ESMF contains two types of classes.
 
 {\bf Deep} classes require
 {\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()} calls.
-They take significant time to set up and should not be created
-in a time-critical portion of code.  Deep objects persist 
-even after the method in which they were created has returned.
-Most classes in ESMF, including Fields, FieldBundles, Arrays,
-ArrayBundles, Grids, and Clocks, fall into this category.
+They involve memory allocation take significant time to set up (involving
+memory management) and should not be created in a time-critical portion of code.
+Deep objects persist even after the method in which they were created has
+returned. Most classes in ESMF, including GridComp, CplComp, State, Fields, FieldBundles, Arrays, ArrayBundles, Grids, and Clocks, fall into this category.
 
-{\tt Shallow} classes do not require {\tt ESMC\_<Class>Create()}
- and {\tt ESMC\_<Class>Destroy()} calls.  They can simply be declared
+{\tt Shallow} classes do not possess {\tt ESMC\_<Class>Create()}
+and {\tt ESMC\_<Class>Destroy()} calls.  They are simply declared
 and their values set using an {\tt ESMC\_<Class>Set()} call.  
-Examples of shallow classes are Times, TimeIntervals, and 
-ArraySpecs.  Shallow classes do not take long to set up and can
-be declared and set within
+Examples of shallow classes are Time, TimeInterval, and ArraySpec.  Shallow classes do not take long to set up and can be declared and set within
 a time-critical code segment.  Shallow objects stop existing when
 the method in which they were declared has returned.  
 
