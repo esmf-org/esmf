@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.180 2011/06/29 22:53:28 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.181 2011/07/05 19:47:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.180 2011/06/29 22:53:28 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.181 2011/07/05 19:47:01 theurich Exp $'
 
 !==============================================================================
 !
@@ -792,8 +792,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return the {\tt ESMF\_Context\_Flag} for this {\tt ESMF\_GridComp}.
 !   See section \ref{const:contextflag} for a complete list of valid flags.
 ! \item[{[currentMethod]}]
-!   Return the current {\tt ESMF\_Method\_Flag} of the {\tt ESMF\_GridComp} execution.
-!   See section \ref{const:method}  for a complete list of valid options.
+!   Return the current {\tt ESMF\_Method\_Flag} of the {\tt ESMF\_GridComp}
+!   execution. See section \ref{const:method}  for a complete list of valid
+!   options.
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_GridComp} execution.
 ! \item[{[comptype]}]
@@ -879,8 +880,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
 ! \item[methodflag]
-!   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
-!   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
+!   One of a set of predefined Component methods - e.g.
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[phaseCount]
 !   The number of phases for {\tt methodflag}. The method has 1..phaseCount phases.
@@ -1553,12 +1555,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompSetEntryPoint - Set user routine as entry point for standard GridComp method
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompSetEntryPoint(gridcomp, method, userRoutine, &
+  subroutine ESMF_GridCompSetEntryPoint(gridcomp, methodflag, userRoutine, &
     keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_GridComp),    intent(inout)         :: gridcomp
-    type(ESMF_Method_Flag), intent(in)            :: method
+    type(ESMF_Method_Flag), intent(in)            :: methodflag
     interface
       subroutine userRoutine(gridcomp, importState, exportState, clock, rc)
         use ESMF_CompMod
@@ -1581,16 +1583,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
-! predefined Component {\tt method}s. After this call the {\tt userRoutine}
+! predefined Component {\tt methodflag}s. After this call the {\tt userRoutine}
 ! becomes accessible via the standard Component method API.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
-! \item[method]
-!   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
-!   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
+! \item[methodflag]
+!   One of a set of predefined Component methods - e.g.
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this Component 
@@ -1621,7 +1624,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
   
-    call c_ESMC_SetEntryPoint(gridcomp, method, userRoutine, phaseArg, localrc)
+    call c_ESMC_SetEntryPoint(gridcomp, methodflag, userRoutine, phaseArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.156 2011/06/29 22:53:28 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.157 2011/07/05 19:47:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.156 2011/06/29 22:53:28 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.157 2011/07/05 19:47:01 theurich Exp $'
 
 !==============================================================================
 !
@@ -1470,8 +1470,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   An {\tt ESMF\_CplComp} object.
 ! \item[methodflag]
-!   One of a set of predefined Component methods - e.g. {\tt ESMF\_INIT}, 
-!   {\tt ESMF\_RUN}, {\tt ESMF\_FINAL}. See section \ref{const:method} 
+!   One of a set of predefined Component methods - e.g.
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
 !   for a complete list of valid method options.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this {\tt methodflag}.
@@ -1502,7 +1503,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
   
-    call c_ESMC_SetEntryPoint(cplcomp, methodflag, userRoutine, phaseArg, localrc)
+    call c_ESMC_SetEntryPoint(cplcomp, methodflag, userRoutine, phaseArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
