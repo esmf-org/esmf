@@ -173,7 +173,7 @@
 !  coordinates.
 !----------------------------------------------------------------------------
 
-      grid = ESMF_GridCreateShapeTile(maxIndex=(/i_max, j_max/), &
+      grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_max, j_max/), &
                              name="source grid", rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
