@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.20 2011/07/04 05:11:16 oehmke Exp $
+! $Id: ESMF_FieldBundleRegridUTest.F90,v 1.21 2011/07/05 04:40:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldBundleRegridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.20 2011/07/04 05:11:16 oehmke Exp $'
+    '$Id: ESMF_FieldBundleRegridUTest.F90,v 1.21 2011/07/05 04:40:56 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -423,7 +423,7 @@ contains
         call ESMF_FieldBundleRegridStore(fieldBundle180, dstFieldBundle=dstFieldBundle360, &
                 routeHandle=routeHandle, &
                 regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
-                regridScheme=ESMF_REGRID_SCHEME_FULL3D, rc=localrc)
+                rc=localrc)
         if (localrc /=ESMF_SUCCESS) then
             rc=ESMF_FAILURE
             return
@@ -856,7 +856,6 @@ contains
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
-          regridScheme=ESMF_REGRID_SCHEME_FULL3D, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
