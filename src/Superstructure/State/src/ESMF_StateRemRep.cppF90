@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.2 2011/07/01 21:52:05 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.3 2011/07/05 20:55:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.2 2011/07/01 21:52:05 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.3 2011/07/05 20:55:38 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -319,7 +319,9 @@ contains
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Replace a list of items with a {\tt ESMF\_State}.
+! Replace a list of items with a {\tt ESMF\_State}.  If an item in
+! <itemlist> does not match any items already present in {\tt state}, an
+! error is returned.
 !    
 !    Supported values for <itemList> are:   
 !    \begin{description}
@@ -341,7 +343,7 @@ contains
 !     the {\tt ESMF\_State} is destroyed the <itemList> contained in it will
 !     not be destroyed.   Also, the items in the <itemList> cannot be safely 
 !     destroyed before the {\tt ESMF\_State} is destroyed.
-!     Since <itemList>s can be added to multiple containers, it remains
+!     Since <itemList> items can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
 !     destruction when they are no longer in use.
 ! \item[{[rc]}]

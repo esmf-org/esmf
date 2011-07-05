@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.19 2011/07/01 21:53:05 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.20 2011/07/05 20:55:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.19 2011/07/01 21:53:05 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.20 2011/07/05 20:55:38 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -690,7 +690,8 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Add a list of items to an {\tt ESMF\_State}.
+! Add a list of items to a {\tt ESMF\_State}. It is an error if any item in
+! <itemlist> already matches, by name, an item already contained in {\tt state}.
 !    
 !    Supported values for <itemList> are:   
 !    \begin{description}
@@ -895,7 +896,10 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-! Add or replace a list of items to an {\tt ESMF\_State}.
+! Add or replace a list of items to an {\tt ESMF\_State}.  If an item in
+! <itemlist> does not match any items already present in {\tt state}, it is
+! added.  Items with names already present in the {\tt state} replace the
+! existing item.
 !    
 !    Supported values for <itemList> are:   
 !    \begin{description}
