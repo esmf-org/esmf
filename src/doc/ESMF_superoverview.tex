@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.35 2011/01/05 20:05:48 svasquez Exp $
+% $Id: ESMF_superoverview.tex,v 1.36 2011/07/05 22:27:42 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ There are a small number of classes in the ESMF superstructure:
 
 \begin{itemize}
 \item {\bf Component}  An ESMF component has two parts, one that is 
-supplied by the ESMF and one that is supplied by the user.  The
+supplied by ESMF and one that is supplied by the user.  The
 part that is supplied by the framework is an ESMF derived type that
 is either a Gridded Component ({\bf GridComp}) or a Coupler 
 Component ({\bf CplComp}).  A Gridded Component typically represents
@@ -79,37 +79,32 @@ For example, a user-written initialization routine called
 initialize routine of an ESMF Gridded Component named ``myOcean'' 
 that represents an ocean model.
 
-\item {\bf State}  ESMF components exchange information with other 
-components only through States.  A State is an ESMF derived
+\item {\bf State}  ESMF Components exchange information with other 
+Components only through States.  A State is an ESMF derived
 type that can contain Fields, FieldBundles, Arrays, ArrayBundles,
 and other States.  A Component is associated with two States, an 
 {\bf Import State} and an {\bf Export State}.  Its Import State 
 holds the data that it receives from other Components.  
-Its Export State contains data that it can make available to 
+Its Export State contains data that it makes available to 
 other Components. 
-
-\item {\bf Application Driver} The Application Driver ({\bf AppDriver}) 
-is a small, generic driver program that contains the ``main'' 
-routine for an ESMF application.
 
 \end{itemize}
 
-An ESMF coupled application typically involves an AppDriver, a parent 
-Gridded Component, two or more child Gridded Components that require 
-an inter-component data exchange, and one or more Coupler 
+An ESMF coupled application typically involves a parent Gridded Component, 
+two or more child Gridded Components and one or more Coupler 
 Components. 
 
 The parent Gridded Component is responsible for creating the child 
 Gridded Components that are exchanging data, for creating the Coupler, 
 for creating the necessary Import and Export States, and for 
-setting up the desired sequencing.  The AppDriver ``main'' routine
+setting up the desired sequencing.  The application's ``main'' routine
 calls the parent Gridded Component's initialize, run, and finalize 
 methods in order to execute the application.  For each of these
 standard methods, the parent Gridded Component in turn calls the 
 corresponding methods in the child Gridded Components and the 
 Coupler Component.  For example, consider a simple coupled 
 ocean/atmosphere simulation.  When the initialize method of the 
-parent Gridded Component is called by the AppDriver, it in turn 
+parent Gridded Component is called by the application, it in turn 
 calls the initialize methods of its child atmosphere and ocean 
 Gridded Components, and the initialize method of an 
 ocean-to-atmosphere Coupler Component.  Figure \ref{fig:appunit}
@@ -186,7 +181,7 @@ the application.
 ``Atmosphere'' and an ``Ocean'' Gridded Component running sequentially with 
 an ``Atm-Ocean Coupler.''  The top-level ``Hurricane Model'' 
 Gridded Component contains the sequencing information and time 
-advancement loop.  The AppDriver, Coupler, and all Gridded Components 
+advancement loop.  The application driver, Coupler, and all Gridded Components 
 are distributed over nine PETs.}
 \label{fig:serial}
 \scalebox{1.0}{\includegraphics{ESMF_serial}}
@@ -199,7 +194,7 @@ are distributed over nine PETs.}
 ``Atmosphere'' and an ``Ocean'' Gridded Component running concurrently with 
 an ``Atm-Ocean Coupler.''  The top-level ``Hurricane Model'' 
 Gridded Component contains the sequencing information and time 
-advancement loop.  The AppDriver, Coupler, and top-level ``Hurricane
+advancement loop.  The application driver, Coupler, and top-level ``Hurricane
 Model'' Gridded Component are distributed over nine PETs.  The
 ``Atmosphere'' Gridded Component is distributed over three PETs and
 the ``Ocean'' Gridded Component is distributed over six PETs.}
