@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.79 2011/07/04 05:11:11 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.80 2011/07/05 18:12:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.79 2011/07/04 05:11:11 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.80 2011/07/05 18:12:32 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -101,7 +101,6 @@ contains
 ! !IROUTINE: ESMF_FieldRegrid - Compute a regridding operation
 !
 ! !INTERFACE:
-  !   Private name; call using ESMF_FieldRegrid()
       subroutine ESMF_FieldRegrid(srcField, dstField, &
                    routehandle, keywordEnforcer, zeroregion, checkflag, rc)
 !
@@ -110,7 +109,7 @@ contains
       type(ESMF_Field),       intent(inout), optional :: dstField
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Region_Flag),  intent(in),    optional :: zeroregion
+      type(ESMF_Region_Flag), intent(in),    optional :: zeroregion
       logical,                intent(in),    optional :: checkflag
       integer,                intent(out),   optional :: rc 
 !
@@ -285,8 +284,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        unmappedaction, &
                                        routehandle, indices, weights, & 
                                        srcFracField, dstFracField, rc)
-!
-! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
       type(ESMF_Field),          intent(in)              :: srcField
@@ -294,8 +291,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
       integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
-      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
-      type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
+      type(ESMF_RegridMethod_Flag),intent(in),  optional :: regridmethod
+      type(ESMF_PoleMethod_Flag),  intent(in),  optional :: polemethod
       integer,                   intent(in),    optional :: regridPoleNPnts
       type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
       type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
@@ -832,8 +829,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
                                        keywordEnforcer, routehandle, rc)
-!
-! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
       type(ESMF_XGrid),       intent(in)              :: xgrid

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.93 2011/07/01 22:42:39 theurich Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.94 2011/07/05 18:12:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.93 2011/07/01 22:42:39 theurich Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.94 2011/07/05 18:12:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -443,14 +443,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(gridToFieldMap)) then
+        if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
+            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+              msg="Cannot get gridToFieldMap", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
         gridToFieldMap = ftype%gridToFieldMap(1:size(gridToFieldMap))
     endif
 
     if (present(ungriddedLBound)) then
+        if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
+            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+              msg="Cannot get ungriddedLBound", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
         ungriddedLBound = ftype%ungriddedLBound(1:size(ungriddedLBound))
     endif
 
     if (present(ungriddedUBound)) then
+        if (ftype%status /= ESMF_FIELDSTATUS_COMPLETE) then
+            if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+              msg="Cannot get ungriddedUBound", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
         ungriddedUBound = ftype%ungriddedUBound(1:size(ungriddedUBound))
     endif
 
