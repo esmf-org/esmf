@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.12 2011/07/05 19:54:43 theurich Exp $
+% $Id: ESMC_api.tex,v 1.13 2011/07/05 20:14:21 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -333,17 +333,28 @@ to more than one data object at a time (e.g. the same Grid could
 be part of many Fields).  It is the user's responsibility to delete 
 these items when the last use of them is done.
 
-\subsection{Equality and Copying Objects}
+\subsection{Assignment, Equality, Copying and Comparing Objects}
 
-The equal sign operator in ESMF does not generate any special 
-behavior on the part of the framework.  If the user decides to set
-one object equal to another, the internal contents will simply be
-copied.  That means that if there is a pointer within the object
-being copied, the pointer will be replicated and the data pointed to 
-will be referenced by the object copy.  As a matter of style and 
-safety, users should try to avoid exploiting such implicit behavior.
-A preferable approach is to use a class creation or duplication 
-method.  Unfortunately, not all classes have duplication methods yet.
+The equal sign assignment has not been overloaded in ESMF, thus resulting in
+the standard C behavior. This behavior has been documented as the first
+entry in the API documentation section for each ESMF class. For deep ESMF
+objects the assignment results in setting an alias the the same ESMF object
+in memory. For shallow ESMF objects the assignment is essentially a equivalent
+to a copy of the object. For deep classes the equality operators have been
+overloaded to test for the alias condition as a counter part to the assignment
+behavior. This and the not equal operator are documented following the
+assignemnt in the class API documentation sections. 
+
+Deep object copies are implemented as a special variant of the
+{\tt ESMC\_<Class>Create()} methods. It takes an existing deep object as
+on of the required arguments. At this point not all deep classes have
+{\tt ESMC\_<Class>Create()} methods that allow object copy.
+
+Due to the complexity of deep classes there are many aspects when comparing two
+objects of the same class. ESMF provide {\tt ESMC\_<Class>Match()} methods,
+which are functions that return a class specific match flag. At this point not
+all deep classes have {\tt ESMC\_<Class>Match()} methods that allow deep object
+comparison.
 
 %\subsection{Attributes}
 %
