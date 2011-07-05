@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.101 2011/07/05 17:44:07 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.102 2011/07/05 21:39:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -638,7 +638,9 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!      This routine closes the file(s) associated with the {\tt log}.
+!      This routine closes the user log file(s) associated with {\tt log}.
+!      If the log is not explicitly closed, it will be closed by
+!      {\tt ESMF_Finalize}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -700,7 +702,7 @@ end subroutine ESMF_LogClose
 
 ! !DESCRIPTION:
 !      This routine finalizes the global Log.  The default Log will be flushed
-!      and the default Log will be closed.
+!      and closed.  All user logs will also be closed.
 !
 !      The arguments are:
 !      \begin{description}
@@ -749,8 +751,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!      This subroutine flushes the {\tt ESMF\_Log} buffer to its
-!      associated file.
+!      This subroutine flushes the file buffer associated with {\tt log}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -851,8 +852,7 @@ end subroutine ESMF_LogFlush
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogFoundAllocError()"
 !BOP
-! !IROUTINE: ESMF_LogFoundAllocError - Check Fortran status for allocation 
-!            error and write message
+! !IROUTINE: ESMF_LogFoundAllocError - Check Fortran allocation status error and write message
 
 ! !INTERFACE: 
       function ESMF_LogFoundAllocError(statusToCheck, keywordEnforcer,  &
@@ -878,7 +878,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!      This function returns a logical true when a Fortran status code
+!      This function returns {\tt .true.} when a Fortran status code
 !      returned from a memory allocation indicates an allocation error.
 !      An ESMF predefined memory allocation error message 
 !      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
@@ -895,7 +895,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
-!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!            using the preprocessor {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
 !            User-provided source file name. 
 !      \item [{[method]}]
@@ -965,8 +965,7 @@ end function ESMF_LogFoundAllocError
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LogFoundDeallocError()"
 !BOP
-! !IROUTINE: ESMF_LogFoundDeallocError - Check Fortran status for deallocation 
-!            error and write message
+! !IROUTINE: ESMF_LogFoundDeallocError - Check Fortran deallocation status error and write message
 
 ! !INTERFACE: 
       function ESMF_LogFoundDeallocError(statusToCheck, keywordEnforcer,  &
@@ -992,7 +991,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!      This function returns a logical true when a Fortran status code
+!      This function returns {\tt .true.} when a Fortran status code
 !      returned from a memory deallocation indicates an deallocation error.
 !      An ESMF predefined memory deallocation error message 
 !      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
@@ -1009,7 +1008,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
-!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!            using the preprocessor {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
 !            User-provided source file name. 
 !      \item [{[method]}]
@@ -1106,7 +1105,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!      This function returns a logical true for ESMF return codes that indicate
+!      This function returns {\tt .true.} for ESMF return codes that indicate
 !      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
 !      along with
 !      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
@@ -1121,7 +1120,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            User-provided message string.
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
-!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!            using the preprocessor {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
 !            User-provided source file name. 
 !      \item [{[method]}]
