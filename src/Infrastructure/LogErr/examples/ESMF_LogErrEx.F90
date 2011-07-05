@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.48 2011/07/01 16:07:19 rokuingh Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.49 2011/07/05 15:28:53 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@
 !EOC
 
     if (rc1.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOC
@@ -67,12 +67,12 @@
 !EOC
 
     if (rc2.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOC
     ! LogMsgSetError
-    call ESMF_LogSetError(ESMF_FAILURE, msg="Convergence failure", &
+    call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg="Convergence failure", &
                              rcToReturn=rc2)
     ! LogMsgFoundError
     call ESMF_TimeSet(time, calkindflag=ESMF_CALKIND_NOCALENDAR)
@@ -110,24 +110,25 @@
     end if
 
 !BOC
-    ! LogWrite; ESMF_CONTEXT expands into __LINE__,ESMF_FILENAME,ESMF_METHOD
-    call ESMF_LogWrite("Log Write 2", ESMF_LOGMSG_INFO, ESMF_CONTEXT, &
-                       log=alog, rc=rc2)
+    ! LogWrite
+    call ESMF_LogWrite("Log Write 2", ESMF_LOGMSG_INFO, &
+                       line=__LINE__, file=ESMF_FILENAME, &
+                       method=ESMF_METHOD, log=alog, rc=rc2)
 !EOC
 
     if (rc2.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOC
-    ! LogMsgSetError; ESMF_CONTEXT expands into
-    !   __LINE__,ESMF_FILENAME,ESMF_METHOD
-    call ESMF_LogSetError(ESMF_FAILURE,  msg="Interpolation Failure", &
-                             ESMF_CONTEXT, rcToReturn=rc2, log=alog)
+    ! LogMsgSetError
+    call ESMF_LogSetError(ESMF_RC_OBJ_BAD,  msg="Interpolation Failure", &
+                          line=__LINE__, file=ESMF_FILENAME, &
+                           method=ESMF_METHOD, rcToReturn=rc2, log=alog)
 !EOC
 
-    if (rc2.NE.ESMF_FAILURE) then
-        finalrc = ESMF_FAILURE
+    if (rc2.NE.ESMF_RC_OBJ_BAD) then
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOE
@@ -143,7 +144,7 @@
 !EOC
 
     if (rc3.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOC
@@ -154,7 +155,7 @@
 !EOC
 
     if (rc2.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOC
@@ -163,7 +164,7 @@
 !EOC
 
     if (rc3.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
 !BOC
@@ -172,7 +173,7 @@
 !EOC
 
     if (rc1.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
+        finalrc = ESMF_RC_OBJ_BAD
     end if
 
     if (finalrc.EQ.ESMF_SUCCESS) then
