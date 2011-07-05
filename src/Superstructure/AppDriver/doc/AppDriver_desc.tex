@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.26 2011/01/05 20:05:46 svasquez Exp $
+% $Id: AppDriver_desc.tex,v 1.27 2011/07/05 22:38:32 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -10,18 +10,16 @@
 
 %\subsection{Description}
 
-The ESMF Application Driver ({\tt ESMF\_AppDriver}), is a generic ESMF 
-driver program that contains a ``main.''  Simpler applications may be
-able to use an Application Driver without modification; for more
-complex applications, an Application Driver can be used as an extendable 
-template.
+Every ESMF application needs a driver code. Typically the driver layer is
+implemented as the "main" of the application, although this is not strictly an
+ESMF requirement. For most ESMF applications the task of the application driver
+will be very generic: Initialize ESMF, create a top level Component and call its
+Intialize, Run and Finalize methods, before destroying the top level Component
+again and calling ESMF Finalize.
 
-ESMF provides a number of different Application Drivers in the 
-
-{\tt \$ESMF\_DIR/src/Superstructure/AppDriver} directory.
-An appropriate one can be chosen depending on how the application
-is to be structured.  Options when deciding how to structure an 
-application include choices about:
+ESMF provides a number of different application driver templates in the
+{\tt \$ESMF\_DIR/src/Superstructure/AppDriver} directory. An appropriate one 
+can be chosen depending on how the application is to be structured:
 
 \begin{description}
 
