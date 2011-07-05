@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.240 2011/07/02 05:54:06 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.241 2011/07/05 22:24:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.240 2011/07/02 05:54:06 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.241 2011/07/05 22:24:28 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1592,11 +1592,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   	         ESMF_CONTEXT, rcToReturn=rc) 
           return
        endif
-       if (present(staggerloc) .and. staggerloc /= ESMF_STAGGERLOC_CENTER) then
-	  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+       if (present(staggerloc)) then
+         if (staggerloc /= ESMF_STAGGERLOC_CENTER) then
+	   call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                  msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &
   	         ESMF_CONTEXT, rcToReturn=rc) 
-          return
+           return
+         endif
        endif
 
        ! Call C++ Subroutine to do the create
