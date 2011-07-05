@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.80 2011/07/01 16:07:49 rokuingh Exp $
+! $Id: ESMF_Init.F90,v 1.81 2011/07/05 17:08:06 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      type(ESMF_LogKind_Flag),      intent(in),  optional :: logkindflag
+      type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
@@ -245,7 +245,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalKind_Flag), intent(in),  optional :: defaultCalKind     
       character(len=*),        intent(in),  optional :: defaultLogFileName
-      type(ESMF_LogKind_Flag),      intent(in),  optional :: logkindflag  
+      type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag  
       integer,                 intent(in),  optional :: mpiCommunicator
       integer,                 intent(in),  optional :: ioUnitLBound
       integer,                 intent(in),  optional :: ioUnitUBound
@@ -440,7 +440,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_End_Flag), intent(in), optional  :: endflag
-      integer, intent(out), optional                    :: rc
+      integer,             intent(out), optional :: rc
 
 !
 ! !STATUS:
