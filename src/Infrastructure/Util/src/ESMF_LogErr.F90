@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.100 2011/07/01 21:59:49 rokuingh Exp $
+! $Id: ESMF_LogErr.F90,v 1.101 2011/07/05 17:44:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -629,9 +629,9 @@ end function
       subroutine ESMF_LogClose(log, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Log), intent(inout)	     :: log
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,        intent(out),  optional :: rc
+      type(ESMF_Log), intent(inout)	        :: log
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+      integer,        intent(out), optional :: rc
 
 !
 ! !STATUS:
@@ -740,7 +740,7 @@ end subroutine ESMF_LogFinalize
 !
 !
 ! !ARGUMENTS:
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
       type(ESMF_Log), intent(inout), optional :: log
       integer,        intent(out),   optional :: rc
 
@@ -864,7 +864,7 @@ end subroutine ESMF_LogFlush
 !  
 ! !ARGUMENTS:
 !      
-      integer,          intent(in)               :: statusToCheck 	      
+      integer,          intent(in)              :: statusToCheck 	      
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in),    optional :: msg			      
       integer,          intent(in),    optional :: line  		      
@@ -1400,18 +1400,14 @@ end subroutine ESMF_LogInitialize
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(log, filename, keywordEnforcer, logkindflag, rc)
+    subroutine ESMF_LogOpen(log, filename, logkindflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log),     intent(inout)          :: log		   
-    character(len=*),   intent(in)             :: filename	   
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_LogKind_Flag), intent(in),   optional :: logkindflag 	    
-    integer,            intent(out),  optional :: rc		   
+    type(ESMF_Log),          intent(inout)         :: log		   
+    character(len=*),        intent(in)            :: filename	   
+    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag 	    
+    integer,                 intent(out), optional :: rc		   
 
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      This routine opens a file named {\tt filename} and associates
@@ -1596,13 +1592,12 @@ end subroutine ESMF_LogOpen
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSet(keywordEnforcer, log, verbose, flush, rootOnly,  &
-                               logmsgAbort, stream, maxElements, logmsgList,  &
-                               errorMask, trace, rc)
+	subroutine ESMF_LogSet(log, verbose, flush, rootOnly,  &
+                           logmsgAbort, stream, maxElements, logmsgList,  &
+                           errorMask, trace, rc)
 !
 ! !ARGUMENTS:
 !	
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Log),      intent(inout), optional :: log 		   
       logical,             intent(in),    optional :: verbose		   
       logical,             intent(in),    optional :: flush		   
@@ -1615,9 +1610,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,             intent(in),    optional :: trace	   
       integer,             intent(out),   optional :: rc  		   
 	
-!
-! !STATUS:
-! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !      This subroutine sets the properties for the Log object.
