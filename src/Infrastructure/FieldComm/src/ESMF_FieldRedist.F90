@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.37 2011/06/30 17:35:27 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.38 2011/07/05 18:08:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.37 2011/06/30 17:35:27 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.38 2011/07/05 18:08:37 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -247,12 +247,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(in)           :: srcField  
-!   type(ESMF_Field),         intent(inout)        :: dstField  
-!   type(ESMF_RouteHandle),   intent(inout)        :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)           :: factor 
+!   type(ESMF_Field),         intent(in)            :: srcField  
+!   type(ESMF_Field),         intent(inout)         :: dstField  
+!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor 
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in), optional :: srcToDstTransposeMap(:) 
+!   integer,                  intent(in), optional  :: srcToDstTransposeMap(:) 
 !   integer,                  intent(out), optional :: rc 
 ! 
 !
