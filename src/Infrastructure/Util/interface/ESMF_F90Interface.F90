@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.16 2011/06/30 18:03:36 w6ws Exp $
+! $Id: ESMF_F90Interface.F90,v 1.17 2011/07/05 21:47:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -232,9 +232,15 @@ contains
     
     ! check that only one of the array arguments is present
     checkCount = 0  ! reset
-    if (present(farray1D).and.associated(farray1D)) checkCount = checkCount + 1
-    if (present(farray2D).and.associated(farray2D)) checkCount = checkCount + 1
-    if (present(farray3D).and.associated(farray3D)) checkCount = checkCount + 1
+    if (present(farray1D)) then
+      if (associated(farray1D)) checkCount = checkCount + 1
+    endif
+    if (present(farray2D)) then
+      if (associated(farray2D)) checkCount = checkCount + 1
+    endif
+    if (present(farray3D)) then
+      if (associated(farray3D)) checkCount = checkCount + 1
+    endif
     if (checkCount>1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
         msg="too many farrayXD arguments were specified.", &
@@ -243,47 +249,53 @@ contains
     endif
 
     ! call into the C++ interface, depending on whether or not farray is present
-    if (present(farray1D).and.associated(farray1D)) then
-      if (transferOwnership) &
-        array%farray1D => farray1D
-      allocate(len(1))
-      len = shape(farray1D)
-      if (all(len .ne. 0)) then
-        call c_ESMC_InterfaceIntCreate1D(array, farray1D(1), len, localrc)
-      else
-        call c_ESMC_InterfaceIntCreate1D(array, 0, len, localrc)
+    if (present(farray1D)) then
+      if (associated(farray1D)) then
+        if (transferOwnership) &
+          array%farray1D => farray1D
+        allocate(len(1))
+        len = shape(farray1D)
+        if (all(len .ne. 0)) then
+          call c_ESMC_InterfaceIntCreate1D(array, farray1D(1), len, localrc)
+        else
+          call c_ESMC_InterfaceIntCreate1D(array, 0, len, localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(len)
       endif
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      deallocate(len)
     endif
-    if (present(farray2D).and.associated(farray2D)) then
-      if (transferOwnership) &
-        array%farray2D => farray2D
-      allocate(len(2))
-      len = shape(farray2D)
-      if (all(len .ne. 0)) then
-        call c_ESMC_InterfaceIntCreate2D(array, farray2D(1,1), len, localrc)
-      else
-        call c_ESMC_InterfaceIntCreate2D(array, 0, len, localrc)
+    if (present(farray2D)) then
+      if (associated(farray2D)) then
+        if (transferOwnership) &
+          array%farray2D => farray2D
+        allocate(len(2))
+        len = shape(farray2D)
+        if (all(len .ne. 0)) then
+          call c_ESMC_InterfaceIntCreate2D(array, farray2D(1,1), len, localrc)
+        else
+          call c_ESMC_InterfaceIntCreate2D(array, 0, len, localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(len)
       endif
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      deallocate(len)
     endif
-    if (present(farray3D).and.associated(farray3D)) then
-      if (transferOwnership) &
-        array%farray3D => farray3D
-      allocate(len(3))
-      len = shape(farray3D)
-      if (all(len .ne. 0)) then
-        call c_ESMC_InterfaceIntCreate3D(array, farray3D(1,1,1), len, localrc)
-      else
-        call c_ESMC_InterfaceIntCreate3D(array, 0, len, localrc)
+    if (present(farray3D)) then
+      if (associated(farray3D)) then
+        if (transferOwnership) &
+          array%farray3D => farray3D
+        allocate(len(3))
+        len = shape(farray3D)
+        if (all(len .ne. 0)) then
+          call c_ESMC_InterfaceIntCreate3D(array, farray3D(1,1,1), len, localrc)
+        else
+          call c_ESMC_InterfaceIntCreate3D(array, 0, len, localrc)
+        endif
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(len)
       endif
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      deallocate(len)
     endif
     
     ! set return value
