@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.135 2011/06/29 20:26:03 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.136 2011/07/05 22:08:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -159,13 +159,15 @@
       end type
 
       ! these work well for internal ESMF use, arguments, etc
-      type(ESMF_TypeKind_Flag), parameter :: &
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-                   ESMF_TYPEKIND_I1 = ESMF_TypeKind_Flag(1), &
+      type(ESMF_TypeKind_Flag), parameter :: &
+                   ESMF_TYPEKIND_I1 = ESMF_TypeKind_Flag(1)
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-                   ESMF_TYPEKIND_I2 = ESMF_TypeKind_Flag(2), &
+      type(ESMF_TypeKind_Flag), parameter :: &
+                   ESMF_TYPEKIND_I2 = ESMF_TypeKind_Flag(2)
 #endif
+      type(ESMF_TypeKind_Flag), parameter :: &
                    ESMF_TYPEKIND_I4 = ESMF_TypeKind_Flag(3), &
                    ESMF_TYPEKIND_I8 = ESMF_TypeKind_Flag(4), &
                    ESMF_TYPEKIND_R4 = ESMF_TypeKind_Flag(5), &
@@ -181,19 +183,24 @@
       ! these are the only Fortran kind parameters supported
       ! by ESMF.
 
-      integer, parameter :: &
 #ifndef ESMF_NO_INTEGER_1_BYTE 
-                   ESMF_KIND_I1 = selected_int_kind(2), &
+      integer, parameter :: &
+                   ESMF_KIND_I1 = selected_int_kind(2)
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
-                   ESMF_KIND_I2 = selected_int_kind(4), &
+      integer, parameter :: &
+                   ESMF_KIND_I2 = selected_int_kind(4)
 #endif
-                   ESMF_KIND_I4 = selected_int_kind(9), &
+      integer, parameter :: &
+                   ESMF_KIND_I4 = selected_int_kind(9)
 #ifndef ESMF_NEC_KIND_I8
-                   ESMF_KIND_I8 = selected_int_kind(18), &
+      integer, parameter :: &
+                   ESMF_KIND_I8 = selected_int_kind(18)
 #else
-                   ESMF_KIND_I8 = selected_int_kind(15), &
+      integer, parameter :: &
+                   ESMF_KIND_I8 = selected_int_kind(15)
 #endif
+      integer, parameter :: &
                    ESMF_KIND_R4 = selected_real_kind(3,25), &
                    ESMF_KIND_R8 = selected_real_kind(6,45), &
                    ESMF_KIND_C8 = selected_real_kind(3,25), &
