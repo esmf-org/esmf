@@ -1,4 +1,4 @@
-% $Id: LogErr_options.tex,v 1.28 2011/07/01 21:59:47 rokuingh Exp $
+% $Id: LogErr_options.tex,v 1.29 2011/07/06 21:22:30 rokuingh Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,10 +45,7 @@ The valid values are:
 
 {\sf DESCRIPTION:\\}
 \begin{sloppypar}
-Specifies what message level --- e.g., informational, warning, 
-error --- will be written to log files.  This may be used both when
-writing the message with {\tt ESMF\_LogWrite()}, and when setting the
-{\tt logmsgList} option with {\tt ESMF\_LogSet()}.
+Specifies a message level
 \end{sloppypar}
 
 The type of this flag is:
@@ -58,24 +55,24 @@ The type of this flag is:
 The valid values are:
 \begin{description}
    \item [ESMF\_LOGMSG\_INFO] 
-         Write or allow informational messages.
+         Informational messages
    \item [ESMF\_LOGMSG\_WARNING]
-         Write or allow warning messages.
+         Warning messages
    \item [ESMF\_LOGMSG\_ERROR]
-         Write or allow error messages.
+         Error messages
    \item [ESMF\_LOGMSG\_TRACE]
-         Write or allow trace messages, when tracing is turned on.
+         Trace messages
 \end{description}
 
 Valid predefined named array constant values are:
 
 \begin{description}
 	\item [ESMF\_LOGMSG\_ALL]
-		Write or allow ALL informational messages.
+		All messages
 	\item [ESMF\_LOGMSG\_NONE]
-		Write or allow NO informational messages.
+		No messages
 	\item [ESMF\_LOGMSG\_NOTRACE]
-		Write or allow ALL informational message EXCEPT trace messages.
+		All messages EXCEPT trace messages
 \end{description}
 
 

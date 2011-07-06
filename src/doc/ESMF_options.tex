@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.77 2011/07/05 19:46:59 theurich Exp $
+% $Id: ESMF_options.tex,v 1.78 2011/07/06 21:22:02 rokuingh Exp $
 
 \section{Master List of Constants}
 
@@ -9,7 +9,7 @@ This flag is documented in section \ref{const:alarmlist}.
 \label{const:arbdim}
 
 {\sf DESCRIPTION:\\}
-A constant value which is used to indicate that a particular dimension is arbitrarily distributed (e.g. in a coordDimMap). 
+An integer named constant which is used to indicate that a particular dimension is arbitrarily distributed.
 
 \subsection{ESMF\_ATTGETCOUNT}
 This flag is documented in section \ref{const:attgetcount}.
@@ -102,12 +102,12 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
+	\item[ESMF\_COPY\_ALIAS]
+	The destination of the copy becomes an alias of the source object.
+	\item[ESMF\_COPY\_REFERENCE]
+	All local data of the object is coped by value, and pointer valued data is referenced.
 	\item[ESMF\_COPY\_VALUE]
 	All data and pointers are copied to the destination object, nothing is referenced.
-	\item[ESMF\_COPY\_REFERENCE]
-	All data is copied as a reference from the destination to the source object.
-	\item[ESMF\_COPY\_ALIAS]
-	All local data of the object is coped by value, and pointer valued data is referenced.
 \end{description}
 
 \subsection{ESMF\_DATACOPY}
@@ -138,15 +138,15 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
+\item [ESMF\_DECOMP\_BALANCED]
+      Decompose elements as balanced as possible across DEs. The maximum 
+      difference in number of elements per DE is 1, with the extra elements on
+      the lower DEs.
 \item [ESMF\_DECOMP\_CYCLIC]
       Decompose elements cyclically across DEs.
 \item [ESMF\_DECOMP\_DEFAULT]
       Use default decomposition behavior. Currently equal to 
       {\tt ESMF\_DECOMP\_BALANCED}.
-\item [ESMF\_DECOMP\_BALANCED]
-      Decompose elements as homogenously as possible across DEs. The maximum 
-      difference in number of elements per DE is 1, with the extra elements on
-      the lower DEs.
 \item [ESMF\_DECOMP\_RESTFIRST]
       Divide elements over DEs. Assign the rest of this division to the first
       DE.
@@ -332,7 +332,7 @@ This flag is documented in section \ref{const:polekind}.
 \subsection{ESMF\_REDUCE}
 \label{const:reduce}
 {\sf DESCRIPTION:\\}
-Indicates reduce operation to a {\tt Reduce()} method.
+Indicates reduce operation
 
 The type of this flag is:
 
