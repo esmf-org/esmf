@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Grid.C,v 1.123 2011/06/30 14:49:45 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.124 2011/07/06 18:01:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.123 2011/06/30 14:49:45 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.124 2011/07/06 18:01:47 theurich Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -9049,6 +9049,10 @@ bool Grid::match(
   return true;
 }
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::getCartCoordDimCount()"
 int Grid::getCartCoordDimCount() {
   if (coordSys==ESMC_COORDSYS_CART) {
     return dimCount;
@@ -9066,7 +9070,7 @@ int Grid::getCartCoordDimCount() {
 }
 
 
-
+//-----------------------------------------------------------------------------
 // Check if the passed in connection is a monopole, if so return some info 
 // If isLower then is at the minimum end of the dimension, else is at the upper end.
 // PoleDimOut, periodicDimOut are 0-based
