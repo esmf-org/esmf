@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.48 2011/07/01 16:07:09 rokuingh Exp $
+% $Id: Grid_options.tex,v 1.49 2011/07/06 00:00:20 rokuingh Exp $
 
 \subsubsection{ESMF\_COORDSYS}
 \label{const:coordsys}
@@ -122,9 +122,9 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 \item [ESMF\_GRIDSTATUS\_EMPTY:] Status after a Grid has been created with 
-      {\tt ESMF\_GridCreateEmpty}.  A Grid object container is allocated but
+      {\tt ESMF\_GridEmptyCreate}.  A Grid object container is allocated but
       space for internal objects is not.  Topology information and coordinate
-      information is incomplete.  This object can be used in {\tt ESMF\_GridComplete()}
+      information is incomplete.  This object can be used in {\tt ESMF\_GridEmptyComplete()}
       methods in which additional information is added to the Grid.
 \item [ESMF\_GRIDSTATUS\_COMPLETE:] The Grid has a specific topology and
       distribution, but incomplete coordinate arrays.  The Grid can be used

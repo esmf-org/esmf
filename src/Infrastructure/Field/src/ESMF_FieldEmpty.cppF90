@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.26 2011/07/01 21:52:06 theurich Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.27 2011/07/06 00:00:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.26 2011/07/01 21:52:06 theurich Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.27 2011/07/06 00:00:18 rokuingh Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -4389,7 +4389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
 ! \item [{[xgridside]}] 
 !       Side of XGrid to retrieve a DistGrid.  For valid
-!       predefined values see section \ref{sec:const:xgridside}.
+!       predefined values see section \ref{const:xgridside}.
 !       The default value is {\tt ESMF\_XGRIDSIDE\_BALANCED}.
 ! \item [{[gridindex]}] 
 !       Index to specify which DistGrid when on side A or side B. 

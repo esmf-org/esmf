@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.73 2011/07/01 20:41:37 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.74 2011/07/06 00:00:33 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.73 2011/07/01 20:41:37 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.74 2011/07/06 00:00:33 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.73 2011/07/01 20:41:37 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.74 2011/07/06 00:00:33 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1570,7 +1570,7 @@ end function ESMF_MeshCreateFromScrip
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshDestroy"
 !BOP
-! !IROUTINE: ESMF_MeshDestroy - Destroy a Mesh
+! !IROUTINE: ESMF_MeshDestroy - Release resources associated with a Mesh
 !
 ! !INTERFACE:
       subroutine ESMF_MeshDestroy(mesh, rc)
@@ -1582,7 +1582,7 @@ end function ESMF_MeshCreateFromScrip
     integer,         intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
-!    Destroy the Mesh. This call removes all internal memory associated with {\tt mesh}. 
+!  This call removes internal memory associated with {\tt mesh}. 
 !  After this call {\tt mesh} will no longer be usable.
 !
 ! The arguments are:

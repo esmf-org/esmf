@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.30 2011/06/30 19:19:18 w6ws Exp $
+! $Id: ESMF_XGrid.F90,v 1.31 2011/07/06 00:00:35 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.30 2011/06/30 19:19:18 w6ws Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.31 2011/07/06 00:00:35 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -283,9 +283,9 @@ module ESMF_XGridMod
 !
 ! !INTERFACE:
   interface operator(/=)
-!   if (xgrid1 == xgrid2) then ... endif
+!   if (xgrid1 /= xgrid2) then ... endif
 !             OR
-!   result = (xgrid1 == xgrid2)
+!   result = (xgrid1 /= xgrid2)
 ! !RETURN VALUE:
 !   logical :: result
 !

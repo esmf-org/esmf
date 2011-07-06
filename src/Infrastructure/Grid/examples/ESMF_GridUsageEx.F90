@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.100 2011/07/02 05:54:05 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.101 2011/07/06 00:00:22 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -2359,9 +2359,9 @@ endif
 
 
 !removeBOE
-! \subsubsection{Create a Grid from existing Fortran arrays using the CreateEmpty/Set paradigm}
+! \subsubsection{Create a Grid from existing Fortran arrays using the EmptyCreate/Complete paradigm}
 !
-!  This example illustrates the use of the CreateEmpty/Set paradigm.
+!  This example illustrates the use of the EmptyCreate/Complete paradigm.
 !  It repeats the above example using this grid creation technique.
 !removeEOE
 

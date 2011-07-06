@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.241 2011/07/05 22:24:28 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.242 2011/07/06 00:00:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.241 2011/07/05 22:24:28 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.242 2011/07/06 00:00:24 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -379,7 +379,7 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCreateEmptyComplete -- Generic interface
+! !IROUTINE: ESMF_GridEmptyComplete -- Generic interface
 
 ! !INTERFACE:
 interface ESMF_GridEmptyComplete
@@ -2634,6 +2634,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        character (len=*),     intent(in),   optional  :: name
        integer,               intent(out),  optional  :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! This call allows the user to copy of an existing ESMF Grid, but with a new distribution. 
 ! All internal data from the old Grid (coords, items) is redistributed to the new Grid. 
@@ -3562,27 +3565,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateEdgeConnR
 !
 ! !ARGUMENTS:
-       integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
-       integer,               intent(in),  optional :: minIndex(:)
-       integer,               intent(in)            :: maxIndex(:)
+       integer,                  intent(in), optional :: regDecomp(:)
+       type(ESMF_Decomp_Flag),   intent(in), optional :: decompflag(:)
+       integer,                  intent(in), optional :: minIndex(:)
+       integer,                  intent(in)           :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
-       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
-       integer,               intent(in),  optional :: coordDep1(:)
-       integer,               intent(in),  optional :: coordDep2(:)
-       integer,               intent(in),  optional :: coordDep3(:)
-       integer,               intent(in),  optional :: gridEdgeLWidth(:)
-       integer,               intent(in),  optional :: gridEdgeUWidth(:)
-       integer,               intent(in),  optional :: gridAlign(:)
-       integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
-       integer,               intent(in),  optional :: petMap(:,:,:)
-       character (len=*),     intent(in),  optional :: name 
-       integer,               intent(out), optional :: rc
+       type(ESMF_GridConn_Flag), intent(in), optional :: connflagDim1(:)
+       type(ESMF_GridConn_Flag), intent(in), optional :: connflagDim2(:)
+       type(ESMF_GridConn_Flag), intent(in), optional :: connflagDim3(:)
+       type(ESMF_CoordSys_Flag), intent(in), optional :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in), optional :: coordTypeKind
+       integer,                  intent(in), optional :: coordDep1(:)
+       integer,                  intent(in), optional :: coordDep2(:)
+       integer,                  intent(in), optional :: coordDep3(:)
+       integer,                  intent(in), optional :: gridEdgeLWidth(:)
+       integer,                  intent(in), optional :: gridEdgeUWidth(:)
+       integer,                  intent(in), optional :: gridAlign(:)
+       integer,                  intent(in), optional :: gridMemLBound(:)
+       type(ESMF_Index_Flag),    intent(in), optional :: indexflag
+       integer,                  intent(in), optional :: petMap(:,:,:)
+       character (len=*),        intent(in), optional :: name 
+       integer,                  intent(out),optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -3843,22 +3846,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateEdgeConnA
 !
 ! !ARGUMENTS:
-       integer,               intent(in),  optional :: minIndex(:)
-       integer,               intent(in)            :: maxIndex(:)
-       integer,               intent(in)   	    :: arbIndexCount
-       integer,               intent(in)            :: arbIndexList(:,:)
+       integer,                  intent(in),  optional :: minIndex(:)
+       integer,                  intent(in)            :: maxIndex(:)
+       integer,                  intent(in)            :: arbIndexCount
+       integer,                  intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim1(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim2(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connflagDim3(:)
-       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
-       integer,               intent(in),  optional :: coordDep1(:)
-       integer,               intent(in),  optional :: coordDep2(:)
-       integer,               intent(in),  optional :: coordDep3(:)
-       integer,               intent(in),  optional :: distDim(:)
-       character (len=*),     intent(in),  optional :: name 
-       integer,               intent(out), optional :: rc
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connflagDim1(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connflagDim2(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connflagDim3(:)
+       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),  optional :: coordTypeKind
+       integer,                  intent(in),  optional :: coordDep1(:)
+       integer,                  intent(in),  optional :: coordDep2(:)
+       integer,                  intent(in),  optional :: coordDep3(:)
+       integer,                  intent(in),  optional :: distDim(:)
+       character (len=*),        intent(in),  optional :: name 
+       integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -4079,7 +4082,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFrmDistGrid(distgrid, &
-        keywordEnforcer, distgridToGridMap, &
+        distgridToGridMap, &
         coordSys, coordTypeKind, coordDimCount, coordDimMap, &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
         gridMemLBound, indexflag, name, rc)
@@ -4088,20 +4091,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGrid
 !
 ! !ARGUMENTS:
-       type(ESMF_DistGrid),   intent(in)             :: distgrid
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       integer,               intent(in),  optional  :: distgridToGridMap(:)
-       type(ESMF_CoordSys_Flag),   intent(in),  optional  :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),  optional  :: coordTypeKind
-       integer,               intent(in),  optional  :: coordDimCount(:)
-       integer,               intent(in),  optional  :: coordDimMap(:,:)
-       integer,               intent(in),  optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),  optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),  optional  :: gridAlign(:)
-       integer,               intent(in),  optional  :: gridMemLBound(:)
-       type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
-       character (len=*),     intent(in),  optional  :: name
-       integer,               intent(out), optional  :: rc
+       type(ESMF_DistGrid),      intent(in)             :: distgrid
+       integer,                  intent(in),  optional  :: distgridToGridMap(:)
+       type(ESMF_CoordSys_Flag), intent(in),  optional  :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),  optional  :: coordTypeKind
+       integer,                  intent(in),  optional  :: coordDimCount(:)
+       integer,                  intent(in),  optional  :: coordDimMap(:,:)
+       integer,                  intent(in),  optional  :: gridEdgeLWidth(:)
+       integer,                  intent(in),  optional  :: gridEdgeUWidth(:)
+       integer,                  intent(in),  optional  :: gridAlign(:)
+       integer,                  intent(in),  optional  :: gridMemLBound(:)
+       type(ESMF_Index_Flag),    intent(in),  optional  :: indexflag
+       character (len=*),        intent(in),  optional  :: name
+       integer,                  intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 ! This is the most general form of creation for an {\tt ESMF\_Grid}
@@ -4332,7 +4334,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
       function ESMF_GridCreateFrmDistGridArb(distgrid, &
-        indexArray, keywordEnforcer, distDim, &
+        indexArray, distDim, &
         coordSys, coordTypeKind, coordDimCount, coordDimMap, &
         name, rc)
 !
@@ -4340,16 +4342,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGridArb
 !
 ! !ARGUMENTS:
-       type(ESMF_DistGrid),   intent(in)              :: distgrid
-       integer,               intent(in)              :: indexArray(:,:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       integer,               intent(in),   optional  :: distDim(:)
-       type(ESMF_CoordSys_Flag),   intent(in),   optional  :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: coordDimCount(:)
-       integer,               intent(in),   optional  :: coordDimMap(:,:)
-       character (len=*),     intent(in),   optional  :: name
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_DistGrid),      intent(in)              :: distgrid
+       integer,                  intent(in)              :: indexArray(:,:)
+       integer,                  intent(in),   optional  :: distDim(:)
+       type(ESMF_CoordSys_Flag), intent(in),   optional  :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),   optional  :: coordTypeKind
+       integer,                  intent(in),   optional  :: coordDimCount(:)
+       integer,                  intent(in),   optional  :: coordDimMap(:,:)
+       character (len=*),        intent(in),   optional  :: name
+       integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 ! This is the lower level function to create an arbitrailiy distributed {\tt ESMF\_Grid}
@@ -10528,28 +10529,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
 ! !ARGUMENTS:
-       type (ESMF_Grid)                             :: grid
-       integer,               intent(in),  optional :: minIndex(:)
-       integer,               intent(in)            :: countsPerDEDim1(:)
-       integer,               intent(in)            :: countsPerDEDim2(:)
+       type (ESMF_Grid)                                :: grid
+       integer,                  intent(in),  optional :: minIndex(:)
+       integer,                  intent(in)            :: countsPerDEDim1(:)
+       integer,                  intent(in)            :: countsPerDEDim2(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       integer,               intent(in),  optional :: countsPerDEDim3(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim3(:)
-       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
-       integer,               intent(in),  optional :: coordDep1(:)
-       integer,               intent(in),  optional :: coordDep2(:)
-       integer,               intent(in),  optional :: coordDep3(:)
-       integer,               intent(in),  optional :: gridEdgeLWidth(:)
-       integer,               intent(in),  optional :: gridEdgeUWidth(:)
-       integer,               intent(in),  optional :: gridAlign(:)
-       integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
-       integer,               intent(in),  optional :: petMap(:,:,:)
-       character (len=*),     intent(in),  optional :: name 
-       integer,               intent(out), optional :: rc
+       integer,                  intent(in),  optional :: countsPerDEDim3(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim1(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim2(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim3(:)
+       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),  optional :: coordTypeKind
+       integer,                  intent(in),  optional :: coordDep1(:)
+       integer,                  intent(in),  optional :: coordDep2(:)
+       integer,                  intent(in),  optional :: coordDep3(:)
+       integer,                  intent(in),  optional :: gridEdgeLWidth(:)
+       integer,                  intent(in),  optional :: gridEdgeUWidth(:)
+       integer,                  intent(in),  optional :: gridAlign(:)
+       integer,                  intent(in),  optional :: gridMemLBound(:)
+       type(ESMF_Index_Flag),    intent(in),  optional :: indexflag
+       integer,                  intent(in),  optional :: petMap(:,:,:)
+       character (len=*),        intent(in),  optional :: name 
+       integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -10666,7 +10667,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       \begin{sloppypar}
@@ -10828,28 +10829,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !!
 ! !ARGUMENTS:
-       type (ESMF_Grid)                             :: grid
-       integer,               intent(in),  optional :: regDecomp(:)
-       type(ESMF_Decomp_Flag), intent(in),  optional :: decompflag(:)
-       integer,               intent(in),  optional :: minIndex(:)
-       integer,               intent(in)            :: maxIndex(:)
+       type (ESMF_Grid)                                :: grid
+       integer,                  intent(in),  optional :: regDecomp(:)
+       type(ESMF_Decomp_Flag),   intent(in),  optional :: decompflag(:)
+       integer,                  intent(in),  optional :: minIndex(:)
+       integer,                  intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim3(:)
-       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
-       integer,               intent(in),  optional :: coordDep1(:)
-       integer,               intent(in),  optional :: coordDep2(:)
-       integer,               intent(in),  optional :: coordDep3(:)
-       integer,               intent(in),  optional :: gridEdgeLWidth(:)
-       integer,               intent(in),  optional :: gridEdgeUWidth(:)
-       integer,               intent(in),  optional :: gridAlign(:)
-       integer,               intent(in),  optional :: gridMemLBound(:)
-       type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
-       integer,               intent(in),  optional :: petMap(:,:,:)
-       character (len=*),     intent(in),  optional :: name 
-       integer,               intent(out), optional :: rc
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim1(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim2(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim3(:)
+       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),  optional :: coordTypeKind
+       integer,                  intent(in),  optional :: coordDep1(:)
+       integer,                  intent(in),  optional :: coordDep2(:)
+       integer,                  intent(in),  optional :: coordDep3(:)
+       integer,                  intent(in),  optional :: gridEdgeLWidth(:)
+       integer,                  intent(in),  optional :: gridEdgeUWidth(:)
+       integer,                  intent(in),  optional :: gridAlign(:)
+       integer,                  intent(in),  optional :: gridMemLBound(:)
+       type(ESMF_Index_Flag),    intent(in),  optional :: indexflag
+       integer,                  intent(in),  optional :: petMap(:,:,:)
+       character (len=*),        intent(in),  optional :: name 
+       integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -10873,7 +10874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      List of decomposition flags indicating how each dimension of the
 !      tile is to be divided between the DEs. The default setting
 !      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
-!      Section~\ref{opt:decompflag} for a full description of the 
+!      Section~\ref{const:decompflag} for a full description of the 
 !      possible options. 
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
@@ -10960,7 +10961,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      by staggerMemLBound. 
 ! \item[{[indexflag]}]
 !      Indicates the indexing scheme to be used in the new Grid. Please see
-!      Section~\ref{opt:indexflag} for the list of options. If not present,
+!      Section~\ref{const:indexflag} for the list of options. If not present,
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[petMap]}]
 !       Sets the mapping of pets to the created DEs. This 3D
@@ -11115,23 +11116,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         distDim, name, rc)
 !!
 ! !ARGUMENTS:
-       type (ESMF_Grid)                             :: grid
-       integer,               intent(in),  optional :: minIndex(:)
-       integer,               intent(in)            :: maxIndex(:)
-       integer,               intent(in)   	    :: arbIndexCount
-       integer,               intent(in)            :: arbIndexList(:,:)
+       type (ESMF_Grid)                                :: grid
+       integer,                  intent(in),  optional :: minIndex(:)
+       integer,                  intent(in)            :: maxIndex(:)
+       integer,                  intent(in)            :: arbIndexCount
+       integer,                  intent(in)            :: arbIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim1(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim2(:)
-       type(ESMF_GridConn_Flag),   intent(in),  optional :: connDim3(:)
-       type(ESMF_CoordSys_Flag),   intent(in),  optional :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),  optional :: coordTypeKind
-       integer,               intent(in),  optional :: coordDep1(:)
-       integer,               intent(in),  optional :: coordDep2(:)
-       integer,               intent(in),  optional :: coordDep3(:)
-       integer,               intent(in),  optional :: distDim(:)
-       character (len=*),     intent(in),  optional :: name 
-       integer,               intent(out), optional :: rc
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim1(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim2(:)
+       type(ESMF_GridConn_Flag), intent(in),  optional :: connDim3(:)
+       type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),  optional :: coordTypeKind
+       integer,                  intent(in),  optional :: coordDep1(:)
+       integer,                  intent(in),  optional :: coordDep2(:)
+       integer,                  intent(in),  optional :: coordDep3(:)
+       integer,                  intent(in),  optional :: distDim(:)
+       character (len=*),        intent(in),  optional :: name 
+       integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -11370,6 +11371,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,               intent(out),  optional  :: rc
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 ! Partially create an {\tt ESMF\_Grid} object. This function allocates 
 ! an {\tt ESMF\_Grid} object, but doesn't allocate any coordinate storage or other
@@ -11424,27 +11428,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         indexFlag, status, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),       intent(in)            :: grid
+      type(ESMF_Grid),            intent(in)            :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TypeKind_Flag),   intent(out), optional :: coordTypeKind
-      integer,               intent(out), optional :: dimCount
-      integer,               intent(out), optional :: tileCount
-      integer,               intent(out), optional :: staggerlocCount
-      integer,               intent(out), optional :: localDECount
-      type(ESMF_DistGrid),   intent(out), optional :: distgrid
-      integer,       target, intent(out), optional :: distgridToGridMap(:)
-      integer,       target, intent(out), optional :: coordDimCount(:)
-      integer,       target, intent(out), optional :: coordDimMap(:,:)
-      integer,               intent(out), optional :: arbDim
-      integer,               intent(out), optional :: rank
-      integer,               intent(out), optional :: arbDimCount
-      integer,       target, intent(out), optional :: gridEdgeLWidth(:)
-      integer,       target, intent(out), optional :: gridEdgeUWidth(:)
-      integer,       target, intent(out), optional :: gridAlign(:)
-      type(ESMF_Index_Flag),  intent(out), optional :: indexflag
+      integer,                    intent(out), optional :: dimCount
+      integer,                    intent(out), optional :: tileCount
+      integer,                    intent(out), optional :: staggerlocCount
+      integer,                    intent(out), optional :: localDECount
+      type(ESMF_DistGrid),        intent(out), optional :: distgrid
+      integer,       target,      intent(out), optional :: distgridToGridMap(:)
+      integer,       target,      intent(out), optional :: coordDimCount(:)
+      integer,       target,      intent(out), optional :: coordDimMap(:,:)
+      integer,                    intent(out), optional :: arbDim
+      integer,                    intent(out), optional :: rank
+      integer,                    intent(out), optional :: arbDimCount
+      integer,       target,      intent(out), optional :: gridEdgeLWidth(:)
+      integer,       target,      intent(out), optional :: gridEdgeUWidth(:)
+      integer,       target,      intent(out), optional :: gridAlign(:)
+      type(ESMF_Index_Flag),      intent(out), optional :: indexflag
       type(ESMF_GridStatus_Flag), intent(out), optional :: status
-      character (len=*),     intent(out), optional :: name
-      integer,               intent(out), optional :: rc
+      character (len=*),          intent(out), optional :: name
+      integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -11653,11 +11657,11 @@ end subroutine ESMF_GridGetDefault
 
 !
 ! !Arguments:
-    type(ESMF_Grid),    intent(in)            :: grid
-	integer,        intent(in), optional  :: tileNo
-	integer,target, intent(out),optional  :: minIndex(:)
-	integer,target, intent(out)           :: maxIndex(:)
-	integer,        intent(out), optional :: rc
+    type(ESMF_Grid),  intent(in)            :: grid
+	integer,          intent(in),  optional :: tileNo
+	integer,target,   intent(out), optional :: minIndex(:)
+	integer,target,   intent(out)           :: maxIndex(:)
+	integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTON:
 !  This method gets the minimal index and maximal index of a given tile of the grid
@@ -12268,23 +12272,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),        intent(in)            :: grid
-!     integer,                intent(in)            :: coordDim
+!     type(ESMF_Grid),          intent(in)            :: grid
+!     integer,                  intent(in)            :: coordDim
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-!     integer,                intent(in),  optional :: localDE
+!     type (ESMF_StaggerLoc),   intent(in),  optional :: staggerloc
+!     integer,                  intent(in),  optional :: localDE
 !     <pointer argument>, see below for supported values
-!     integer,                intent(out), optional :: exclusiveLBound(:)
-!     integer,                intent(out), optional :: exclusiveUBound(:)
-!     integer,                intent(out), optional :: exclusiveCount(:)
-!     integer,                intent(out), optional :: computationalLBound(:)
-!     integer,                intent(out), optional :: computationalUBound(:)
-!     integer,                intent(out), optional :: computationalCount(:)
-!     integer,                intent(out), optional :: totalLBound(:)
-!     integer,                intent(out), optional :: totalUBound(:)
-!     integer,                intent(out), optional :: totalCount(:)
-!     type(ESMF_DataCopy_Flag),    intent(in),  optional :: datacopyflag
-!     integer,                intent(out), optional :: rc
+!     integer,                  intent(out), optional :: exclusiveLBound(:)
+!     integer,                  intent(out), optional :: exclusiveUBound(:)
+!     integer,                  intent(out), optional :: exclusiveCount(:)
+!     integer,                  intent(out), optional :: computationalLBound(:)
+!     integer,                  intent(out), optional :: computationalUBound(:)
+!     integer,                  intent(out), optional :: computationalCount(:)
+!     integer,                  intent(out), optional :: totalLBound(:)
+!     integer,                  intent(out), optional :: totalUBound(:)
+!     integer,                  intent(out), optional :: totalCount(:)
+!     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
+!     integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -14414,7 +14418,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in)            :: coordDim
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      integer,                intent(in),  optional  :: localDE
+      integer,                intent(in),  optional :: localDE
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -14425,6 +14429,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  This method gets information about the range of index space which a particular
@@ -14614,23 +14621,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),        intent(in)            :: grid
-!     type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
+!     type(ESMF_Grid),          intent(in)            :: grid
+!     type (ESMF_GridItem_Flag),intent(in)            :: itemflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-!     integer,                intent(in),  optional :: localDE
+!     type (ESMF_StaggerLoc),   intent(in),  optional :: staggerloc
+!     integer,                  intent(in),  optional :: localDE
 !     <pointer argument>, see below for supported values
-!     integer,                intent(out), optional :: exclusiveLBound(:)
-!     integer,                intent(out), optional :: exclusiveUBound(:)
-!     integer,                intent(out), optional :: exclusiveCount(:)
-!     integer,                intent(out), optional :: computationalLBound(:)
-!     integer,                intent(out), optional :: computationalUBound(:)
-!     integer,                intent(out), optional :: computationalCount(:)
-!     integer,                intent(out), optional :: totalLBound(:)
-!     integer,                intent(out), optional :: totalUBound(:)
-!     integer,                intent(out), optional :: totalCount(:)
-!     type(ESMF_DataCopy_Flag),    intent(in),  optional :: datacopyflag
-!     integer,                intent(out), optional :: rc
+!     integer,                  intent(out), optional :: exclusiveLBound(:)
+!     integer,                  intent(out), optional :: exclusiveUBound(:)
+!     integer,                  intent(out), optional :: exclusiveCount(:)
+!     integer,                  intent(out), optional :: computationalLBound(:)
+!     integer,                  intent(out), optional :: computationalUBound(:)
+!     integer,                  intent(out), optional :: computationalCount(:)
+!     integer,                  intent(out), optional :: totalLBound(:)
+!     integer,                  intent(out), optional :: totalUBound(:)
+!     integer,                  intent(out), optional :: totalCount(:)
+!     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
+!     integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -17079,12 +17086,12 @@ endif
         keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      type(ESMF_Array),       intent(out)           :: array
+      type(ESMF_Grid),           intent(in)            :: grid
+      type (ESMF_GridItem_Flag), intent(in)            :: itemflag
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
+      type(ESMF_Array),          intent(out)           :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: rc
+      integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -17166,21 +17173,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
+      type(ESMF_Grid),           intent(in)            :: grid
+      type (ESMF_GridItem_Flag), intent(in)            :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-      integer,                intent(in),  optional :: localDE
-      integer,        target, intent(out), optional :: exclusiveLBound(:)
-      integer,        target, intent(out), optional :: exclusiveUBound(:)
-      integer,        target, intent(out), optional :: exclusiveCount(:)
-      integer,        target, intent(out), optional :: computationalLBound(:)
-      integer,        target, intent(out), optional :: computationalUBound(:)
-      integer,        target, intent(out), optional :: computationalCount(:)
-      integer,        target, intent(out), optional :: totalLBound(:)
-      integer,        target, intent(out), optional :: totalUBound(:)
-      integer,        target, intent(out), optional :: totalCount(:)
-      integer,                intent(out), optional :: rc
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
+      integer,                   intent(in),  optional :: localDE
+      integer,        target,    intent(out), optional :: exclusiveLBound(:)
+      integer,        target,    intent(out), optional :: exclusiveUBound(:)
+      integer,        target,    intent(out), optional :: exclusiveCount(:)
+      integer,        target,    intent(out), optional :: computationalLBound(:)
+      integer,        target,    intent(out), optional :: computationalUBound(:)
+      integer,        target,    intent(out), optional :: computationalCount(:)
+      integer,        target,    intent(out), optional :: totalLBound(:)
+      integer,        target,    intent(out), optional :: totalUBound(:)
+      integer,        target,    intent(out), optional :: totalCount(:)
+      integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -17604,7 +17611,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetFromDistGrid"
 !BOPI
-! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with CreateEmpty 
+! !IROUTINE: ESMF_GridSet - Set the values in a Grid which has been created with EmptyCreate
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridSet()
@@ -17868,6 +17875,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Array),       intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the coordinate data
@@ -20479,12 +20489,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),        intent(in)            :: grid
-      type (ESMF_GridItem_Flag),   intent(in)            :: itemflag
-      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
-      type(ESMF_Array),       intent(in)            :: array
+      type(ESMF_Grid),           intent(in)            :: grid
+      type (ESMF_GridItem_Flag), intent(in)            :: itemflag
+      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc 
+      type(ESMF_Array),          intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(out), optional :: rc
+      integer,                   intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the item data

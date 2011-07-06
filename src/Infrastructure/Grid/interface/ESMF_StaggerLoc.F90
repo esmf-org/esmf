@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.25 2011/06/30 14:49:43 oehmke Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.26 2011/07/06 00:00:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.25 2011/06/30 14:49:43 oehmke Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.26 2011/07/06 00:00:25 rokuingh Exp $'
 
 
 !==============================================================================
@@ -241,12 +241,13 @@ end interface
 
 ! !INTERFACE:
   ! Private name; call using ESMF_StaggerLocSet() 
-     subroutine ESMF_StaggerLocSetAllDim(staggerloc,loc,rc)
+     subroutine ESMF_StaggerLocSetAllDim(staggerloc, loc, keywordenforcer, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(inout) :: staggerloc
-      integer, intent(in) :: loc(:)
-      integer, optional :: rc 
+      integer,                intent(in)    :: loc(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional                     :: rc 
 
 ! !STATUS:
 ! \apiStatusCompatible
@@ -303,13 +304,14 @@ end interface
 
 ! !INTERFACE:
   ! Private name; call using ESMF_StaggerLocSet() 
-      subroutine ESMF_StaggerLocSetDim(staggerloc,dim,loc,rc)
+      subroutine ESMF_StaggerLocSetDim(staggerloc, dim, loc, keywordenforcer, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StaggerLoc), intent(inout) :: staggerloc
-      integer, intent(in) :: dim
-      integer, intent(in) :: loc
-      integer, optional   :: rc 
+      integer,                intent(in)    :: dim
+      integer,                intent(in)    :: loc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional                     :: rc 
 
 ! !STATUS:
 ! \apiStatusCompatible
@@ -362,13 +364,14 @@ end interface
 ! !IROUTINE:  ESMF_StaggerLocString - Return a StaggerLoc as a string
 !
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocString(staggerloc, string, rc)
+      subroutine ESMF_StaggerLocString(staggerloc, string, keywordenforcer, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_StaggerLoc), intent(in) :: staggerloc
-      character (len = *), intent(out) :: string
-      integer, intent(out), optional :: rc
+      type(ESMF_StaggerLoc), intent(in)  :: staggerloc
+      character (len = *),   intent(out) :: string
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional,     intent(out) :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -616,18 +619,19 @@ end interface
                                  StaggerLoc2%staggerloc)
 
       end function ESMF_StaggerLocLessEqual
-
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocPrint"
 !BOP
 ! !IROUTINE: ESMF_StaggerLocPrint - Print information of a StaggerLoc object
 
 ! !INTERFACE:
-      subroutine ESMF_StaggerLocPrint(staggerloc, rc)
+      subroutine ESMF_StaggerLocPrint(staggerloc, keywordenforcer, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_StaggerLoc), intent(in) :: staggerloc
-      integer, intent(out), optional     :: rc 
+      type (ESMF_StaggerLoc), intent(in)  :: staggerloc
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, optional,      intent(out) :: rc 
 
 ! !STATUS:
 ! \apiStatusCompatible
