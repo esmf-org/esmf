@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.35 2011/06/30 19:19:18 w6ws Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.36 2011/07/06 15:52:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.35 2011/06/30 19:19:18 w6ws Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.36 2011/07/06 15:52:47 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -2062,11 +2062,15 @@ end subroutine ESMF_XGridConstructBaseObj
 ! !IROUTINE: ESMF_XGridDestroy - Release resources associated with an XGrid
 ! !INTERFACE:
 
-  subroutine ESMF_XGridDestroy(xgrid, rc)
+  subroutine ESMF_XGridDestroy(xgrid, keywordenforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid), intent(inout)          :: xgrid       
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc     
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 ! Destroys an {\tt ESMF\_XGrid}, releasing the resources associated

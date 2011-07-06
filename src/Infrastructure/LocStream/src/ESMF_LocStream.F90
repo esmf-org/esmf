@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.67 2011/07/06 00:00:31 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.68 2011/07/06 15:52:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.67 2011/07/06 00:00:31 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.68 2011/07/06 15:52:44 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -245,6 +245,9 @@ end interface
 !   type(ESMF_LocStream) :: locstream2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign locstream1 as an alias to the same ESMF LocStream object in memory
 !   as locstream2. If locstream2 is invalid, then locstream1 will be equally invalid after
@@ -278,6 +281,9 @@ end interface
 !   type(ESMF_LocStream), intent(in) :: locstream1
 !   type(ESMF_LocStream), intent(in) :: locstream2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether locstream1 and locstream2 are valid aliases to the same ESMF
@@ -318,6 +324,9 @@ end interface
 !   type(ESMF_LocStream), intent(in) :: locstream1
 !   type(ESMF_LocStream), intent(in) :: locstream2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether locstream1 and locstream2 are {\it not} valid aliases to the
@@ -1843,11 +1852,15 @@ contains
 ! !IROUTINE: ESMF_LocStreamDestroy - Release resources associated with a LocStream 
 
 ! !INTERFACE:
-      subroutine ESMF_LocStreamDestroy(locstream,rc)
+      subroutine ESMF_LocStreamDestroy(locstream, keywordenforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(inout)          :: locstream 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(out),  optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !     Deallocate an {\tt ESMF\_LocStream} object and appropriate 

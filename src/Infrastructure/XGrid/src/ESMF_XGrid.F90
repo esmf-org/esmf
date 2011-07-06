@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.31 2011/07/06 00:00:35 rokuingh Exp $
+! $Id: ESMF_XGrid.F90,v 1.32 2011/07/06 15:52:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.31 2011/07/06 00:00:35 rokuingh Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.32 2011/07/06 15:52:47 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -220,6 +220,9 @@ module ESMF_XGridMod
 !   type(ESMF_XGrid) :: xgrid2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign xgrid1 as an alias to the same ESMF XGrid object in memory
 !   as xgrid2. If xgrid2 is invalid, then xgrid1 will be equally invalid after
@@ -253,6 +256,9 @@ module ESMF_XGridMod
 !   type(ESMF_XGrid), intent(in) :: xgrid1
 !   type(ESMF_XGrid), intent(in) :: xgrid2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether xgrid1 and xgrid2 are valid aliases to the same ESMF
@@ -293,6 +299,9 @@ module ESMF_XGridMod
 !   type(ESMF_XGrid), intent(in) :: xgrid1
 !   type(ESMF_XGrid), intent(in) :: xgrid2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether xgrid1 and xgrid2 are {\it not} valid aliases to the

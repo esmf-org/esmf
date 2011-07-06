@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.74 2011/07/06 00:00:33 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.75 2011/07/06 15:52:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.74 2011/07/06 00:00:33 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.75 2011/07/06 15:52:46 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.74 2011/07/06 00:00:33 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.75 2011/07/06 15:52:46 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -284,6 +284,9 @@ module ESMF_MeshMod
 !   type(ESMF_Mesh) :: mesh2
 !
 !
+! !STATUS:
+! \apiStatusCompatible
+!
 ! !DESCRIPTION:
 !   Assign mesh1 as an alias to the same ESMF Mesh object in memory
 !   as mesh2. If mesh2 is invalid, then mesh1 will be equally invalid after
@@ -317,6 +320,9 @@ module ESMF_MeshMod
 !   type(ESMF_Mesh), intent(in) :: mesh1
 !   type(ESMF_Mesh), intent(in) :: mesh2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether mesh1 and mesh2 are valid aliases to the same ESMF
@@ -357,6 +363,9 @@ module ESMF_MeshMod
 !   type(ESMF_Mesh), intent(in) :: mesh1
 !   type(ESMF_Mesh), intent(in) :: mesh2
 !
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Test whether mesh1 and mesh2 are {\it not} valid aliases to the
@@ -1573,13 +1582,17 @@ end function ESMF_MeshCreateFromScrip
 ! !IROUTINE: ESMF_MeshDestroy - Release resources associated with a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshDestroy(mesh, rc)
+      subroutine ESMF_MeshDestroy(mesh, keywordenforcer, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(inout)          :: mesh
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out),  optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !  This call removes internal memory associated with {\tt mesh}. 
