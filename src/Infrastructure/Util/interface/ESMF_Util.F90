@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.53 2011/07/01 18:04:45 theurich Exp $
+! $Id: ESMF_Util.F90,v 1.54 2011/07/06 18:16:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.53 2011/07/01 18:04:45 theurich Exp $'
+               '$Id: ESMF_Util.F90,v 1.54 2011/07/06 18:16:43 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -885,14 +885,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     len_max = 0
     do, i=0, nargs
-      call ESMF_UtilGetArg (i, arglength=len_local)
+      call ESMF_UtilGetArg (i, arglength=len_local, rc=localrc)
+      if (ESMF_LogFoundError ( localrc,  &
+          ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
+        return
       len_max = max (len_max, len_local)
     end do
 
     ! Call subroutine so that a proper string length can be used for
     ! comparison.
 
-    call arg_search_worker (len_max, argindex_local)
+    call arg_search_worker (len_max, argindex_local, rc1=localrc)
+    if (ESMF_LogFoundError ( localrc,  &
+        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
+      return
     
     if (present (argindex)) &
       argindex = argindex_local
@@ -902,15 +908,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
   contains
 
-    subroutine arg_search_worker (len_max, argindex1)
+    subroutine arg_search_worker (len_max, argindex1, rc1)
       integer, intent(in)  :: len_max
       integer, intent(out) :: argindex1
+      integer, intent(out) :: rc1
 
       character(len_max) :: string
       integer :: i1
+      integer :: localrc1
 
       do, i1=0, nargs
-        call ESMF_UtilGetArg (i1, argvalue=string)
+        call ESMF_UtilGetArg (i1, argvalue=string, rc=localrc1)
+	if (ESMF_LogFoundError ( localrc1,  &
+            ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc1))  &
+          return
         if (string == argvalue) exit
       end do
 
