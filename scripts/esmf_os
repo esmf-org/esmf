@@ -4,6 +4,12 @@ esmf_os=`uname -s`
 if [ $esmf_os = UNICOS/mp ]; then
 esmf_os=Unicos
 fi
+if [ $esmf_os = Linux ]; then
+unicos_test=`ls /proc | grep -i cray`
+if [ -n "$unicos_test" ]; then
+esmf_os=Unicos
+fi
+fi
 cygwin_test=`echo $esmf_os | grep -i cygwin`
 if [ -n "$cygwin_test" ]; then
 esmf_os=Cygwin
