@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.341 2011/07/06 18:44:06 theurich Exp $
+#  $Id: common.mk,v 1.342 2011/07/06 18:53:27 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -266,6 +266,13 @@ endif
 endif
 endif
 
+ifeq ($(ESMF_OS),Unicos)
+# set ESMF_MACHINE for Unicos
+ifeq ($(ESMF_MACHINE),default)
+export ESMF_MACHINE := $(shell uname -m)
+endif
+endif
+
 ifeq ($(ESMF_ABI),default)
 # start with 64-bit default for all architectures
 export ESMF_ABI = 64
@@ -329,6 +336,11 @@ export ESMF_COMPILER = gfortran
 endif
 ifeq ($(ESMF_OS),MinGW)
 export ESMF_COMPILER = intel
+endif
+ifeq ($(ESMF_OS),Unicos)
+ifeq ($(ESMF_MACHINE),x86_64)
+export ESMF_COMPILER = pgi
+endif
 endif
 endif
 
