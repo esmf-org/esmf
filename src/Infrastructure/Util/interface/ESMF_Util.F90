@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.55 2011/07/06 19:17:17 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.56 2011/07/06 21:44:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.55 2011/07/06 19:17:17 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.56 2011/07/06 21:44:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -886,8 +886,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     len_max = 0
     do, i=0, nargs
       call ESMF_UtilGetArg (i, arglength=len_local, rc=localrc)
-      if (ESMF_LogFoundError ( localrc,  &
-          ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
+      if (ESMF_LogFoundError ( localrc,  ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT, rcToReturn=rc))  &
         return
       len_max = max (len_max, len_local)
     end do
@@ -919,8 +919,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       do, i1=0, nargs
         call ESMF_UtilGetArg (i1, argvalue=string, rc=localrc1)
-	if (ESMF_LogFoundError ( localrc1,  &
-            ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc1))  &
+	if (ESMF_LogFoundError ( localrc1, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc1))  &
           return
         if (string == argvalue) exit
       end do
