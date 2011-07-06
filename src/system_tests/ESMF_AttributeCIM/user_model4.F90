@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.7 2011/07/01 05:06:35 eschwab Exp $
+! $Id: user_model4.F90,v 1.8 2011/07/06 05:52:01 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -96,7 +96,7 @@ module user_model4
 
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
-    character(ESMF_MAXSTR)      :: convISO, purpRP
+    character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     type(ESMF_Field)            :: SOA, POM
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -130,21 +130,58 @@ module user_model4
       'ocnBgchem', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! Responsible party attributes (for Funder)
+    ! Responsible party attributes (for Author)
     convISO = 'ISO 19115'
     purpRP = 'Responsible Party Description'
     call ESMF_AttributeSet(comp, 'Name', &
-     'Sally Doe', &
+     'EarthSys Atmosphere Model Working Group', &
+      convention=convISO, purpose=purpRP, rc=rc)
+    call ESMF_AttributeSet(comp, 'Abbreviation', &
+     'EAMWG', &
+      convention=convISO, purpose=purpRP, rc=rc)
+    call ESMF_AttributeSet(comp, 'NameType', &
+     'Organization', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Oceanography, University of GHI', &
+     'Climate Division, International Center for ' // &
+     'Atmospheric Research', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'sally.doe@earthsys.org', &
+     'info@earthsys.org', &
       convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-     'Funder', &
+     'Author', &
       convention=convISO, purpose=purpRP, rc=rc)
+    call ESMF_AttributeSet(comp, 'URL', &
+     'http://www.earthsys.org/working_groups/Atmosphere', &
+      convention=convISO, purpose=purpRP, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Citation attributes
+    convISO = 'ISO 19115'
+    purpCitation = 'Citation Description'
+    call ESMF_AttributeSet(comp, 'ShortTitle', &
+     'Doe_2005', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'LongTitle', &
+     'Doe, J.A.; Doe, S.B.; ' // &
+     'Doe, J.C.; 2005 EarthSys: ' // &
+     'The Earth System High Resolution Global Model - ' // &
+     'Ocean Biogeochemistry model description . Journal of ' // &
+     'Earth Modeling, 11 (5). 1661-1696.', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'Date', &
+     '2005-07-09', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'PresentationForm', &
+     'Online Refereed', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'DOI', &
+     'doi:13.1031/2005JCLI4504.1', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'URL', &
+     'http://www.earthsys.org/publications', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create two Fields, and add CIM Attribute packages.

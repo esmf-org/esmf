@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.22 2011/07/01 05:06:35 eschwab Exp $
+! $Id: user_model2.F90,v 1.23 2011/07/06 05:52:01 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -96,7 +96,7 @@ module user_model2
 
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
-    character(ESMF_MAXSTR)      :: convISO, purpRP
+    character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     type(ESMF_Field)            :: DMS_emi, SST
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -146,6 +146,33 @@ module user_model2
       convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
+    ! Citation attributes
+    convISO = 'ISO 19115'
+    purpCitation = 'Citation Description'
+    call ESMF_AttributeSet(comp, 'ShortTitle', &
+     'Doe_2007', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'LongTitle', &
+     'Doe, J.A.; Doe, S.B.; ' // &
+     'Doe, J.C.; 2007 EarthSys: ' // &
+     'The Earth System High Resolution Global Atmosphere Model - ' // &
+     'Ocean model description . Journal of Earth Modeling, 13 (4). ' // &
+     '1461-1496.', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'Date', &
+     '2007-05-07', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'PresentationForm', &
+     'Online Refereed', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'DOI', &
+     'doi:15.1033/2007JCLI4506.1', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'URL', &
+     'http://www.earthsys.org/publications', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
@@ -186,7 +213,7 @@ module user_model2
                                     'atmosphere.', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                    'Conservative-First-Order', &
+                                    'Conservative', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 Minutes', &
          convention=convCIM, purpose=purpField, rc=rc)

@@ -185,7 +185,7 @@ module user_coupler
       '2009-01-01T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'aerosol', convention=convCIM, purpose=purpComp, rc=rc)
+      'model', convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'URL', &
       'www.earthsys.org', convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'MetadataVersion', &
@@ -297,34 +297,21 @@ module user_coupler
       convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! Responsible party attributes (for Author)
+    ! Responsible party attributes (for Funder)
     call ESMF_AttributeSet(comp, 'Name', &
-     'EarthSys Atmosphere Model Working Group', &
-      convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
-    call ESMF_AttributeSet(comp, 'Abbreviation', &
-     'EAMWG', &
-      convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
-    call ESMF_AttributeSet(comp, 'NameType', &
-     'Organization', &
+     'Sally Doe', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Climate Division, International Center for ' // &
-     'Atmospheric Research', &
+     'Department of Oceanography, University of GHI', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'info@earthsys.org', &
+     'sally.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-     'Author', &
-      convention=convISO, purpose=purpRP, &
-      attPackInstanceName=nestAttPackName(2),rc=rc)
-    call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.earthsys.org/working_groups/Atmosphere', &
+     'Funder', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -337,11 +324,11 @@ module user_coupler
      'Doe_2009', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'LongTitle', &
-     'Doe, J.A.; Norton, A.B.; ' // &
-     'Clark, G.H.; Davies, I.J.. 2009 EarthSys: ' // &
-     'The Earth System High Resolution Global Atmosphere Model - Model ' // &
-     'description and basic evaluation. Journal of Climate, 15 (2). ' // &
-     '1261-1296.', &
+     'Doe, J.A.; Doe, S.B.; ' // &
+     'Doe, J.C.; 2009 EarthSys: ' // &
+     'The Earth System High Resolution Global Model - ' // &
+     'Coupled Atmosphere-Ocean model description and basic evaluation. ' // &
+     'Journal of Earth Modeling, 15 (2). 1261-1296.', &
       convention=convISO, purpose=purpCitation, rc=rc)
     call ESMF_AttributeSet(comp, 'Date', &
      '2009-03-05', &

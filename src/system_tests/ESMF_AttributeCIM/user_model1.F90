@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.22 2011/07/01 05:06:35 eschwab Exp $
+! $Id: user_model1.F90,v 1.23 2011/07/06 05:52:01 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -96,7 +96,7 @@ module user_model1
 
     ! Local variables
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
-    character(ESMF_MAXSTR)      :: convISO, purpRP
+    character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     type(ESMF_Field)            :: OH, Orog
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -147,6 +147,33 @@ module user_model1
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
      'Author', &
       convention=convISO, purpose=purpRP, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Citation attributes
+    convISO = 'ISO 19115'
+    purpCitation = 'Citation Description'
+    call ESMF_AttributeSet(comp, 'ShortTitle', &
+     'Doe_2008', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'LongTitle', &
+     'Doe, J.A.; Doe, S.B.; ' // &
+     'Doe, J.C.; 2008 EarthSys: ' // &
+     'The Earth System High Resolution Global Atmosphere Model - ' // &
+     'Atmosphere model description . Journal of Earth Modeling, 14 (3). ' // &
+     '1361-1396.', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'Date', &
+     '2008-04-06', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'PresentationForm', &
+     'Online Refereed', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'DOI', &
+     'doi:16.1034/2008JCLI4507.1', &
+      convention=convISO, purpose=purpCitation, rc=rc)
+    call ESMF_AttributeSet(comp, 'URL', &
+     'http://www.earthsys.org/publications', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create two Fields, and add CIM Attribute packages.
