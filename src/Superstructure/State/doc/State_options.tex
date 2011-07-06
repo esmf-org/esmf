@@ -1,10 +1,10 @@
-% $Id: State_options.tex,v 1.19 2011/07/01 16:07:50 rokuingh Exp $
+% $Id: State_options.tex,v 1.20 2011/07/06 20:37:21 w6ws Exp $
 
 \subsubsection{ESMF\_STATEINTENT}
 \label{const:stateintent}
 
 {\sf DESCRIPTION:\\}
-Specifies whether an {\tt ESMF\_State} contains data to be imported
+Specifies whether a {\tt ESMF\_State} contains data to be imported
 into a component or exported from a component. 
 
 The type of this flag is:
@@ -17,7 +17,7 @@ The valid values are:
          Contains data to be imported into a component.
    \item [ESMF\_STATEINTENT\_EXPORT]
          Contains data to be exported out of a component.
-   \item [ESMF\_STATEINTENT\_INVALID]
+   \item [ESMF\_STATEINTENT\_UNSPECIFIED]
          Does not contain valid data.
 \end{description}
 
@@ -42,10 +42,10 @@ The valid values are:
          Refers to a {\tt ESMF\_Field} within an {\tt ESMF\_State}.
    \item [ESMF\_STATEITEM\_FIELDBUNDLE] 
          Refers to a {\tt ESMF\_FieldBundle} within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEITEM\_ROUTEHANDLE] 
+         Refers to a {\tt ESMF\_RouteHandle} within an {\tt ESMF\_State}.
    \item [ESMF\_STATEITEM\_STATE]
          Refers to a {\tt ESMF\_State} within an {\tt ESMF\_State}.
-   \item [ESMF\_STATEITEM\_UNKNOWN]
-         Object type within an {\tt ESMF\_State} is unknown.
 \end{description}
 
 
