@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.117 2011/07/01 19:21:51 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.118 2011/07/06 05:49:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.117 2011/07/01 19:21:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.118 2011/07/06 05:49:10 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4508,9 +4508,10 @@ if (attrRoot == ESMF_TRUE) {
   //
   // Write the CIM 1.5 XML file header
   //
-  localrc = io_xml->writeStartElement("CIMDocumentSet", "", 0, 6,
+  localrc = io_xml->writeStartElement("CIMDocumentSet", "", 0, 7,
          "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
          "xmlns:xlink", "http://www.w3.org/1999/xlink",
+         "xmlns:gml", "http://www.opengis.net/gml/3.2",
          "xmlns:gco", "http://www.isotc211.org/2005/gco",
          "xmlns:gmd", "http://www.isotc211.org/2005/gmd",
          "xmlns", "http://www.purl.org/org/esmetadata/cim/1.5/schemas",
@@ -6284,7 +6285,7 @@ if (attrRoot == ESMF_TRUE) {
   bool inNestedAttPacks;
 
   vector<string> valuevector, value2vector;
-  string value, value2;
+  string value, value2, couplingPurpose;
 
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -6314,11 +6315,11 @@ if (attrRoot == ESMF_TRUE) {
         // values {ancillaryFile, boundaryCondition, initialCondition}
         transform(value.begin(), value.end(), value.begin(), ::tolower);
         if (value == "ancillary") {
-          value = "ancillaryFile";
+          couplingPurpose = "ancillaryFile";
         } else if (value == "boundary") {
-          value = "boundaryCondition";
+          couplingPurpose = "boundaryCondition";
         } else if (value == "initial") {
-          value = "initialCondition";
+          couplingPurpose = "initialCondition";
         } else {
           ESMC_LogDefault.Write("Attribute CouplingPurpose in "
             "standard attribute package (convention='CIM 1.5', "
@@ -6328,7 +6329,8 @@ if (attrRoot == ESMF_TRUE) {
             ESMC_LOG_WARN, ESMC_CONTEXT);
         }
         localrc = io_xml->writeStartElement("input", "", 3, 2,
-                     "fullySpecified", "true", "purpose", value.c_str());
+                     "fullySpecified", "true", "purpose", 
+                     couplingPurpose.c_str());
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         // Output starting <input> element, to match ending element
@@ -6357,6 +6359,21 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeElement("description", value, 4, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
+      
+      if (couplingPurpose == "ancillaryFile") {
+        localrc = io_xml->writeStartElement("type", "", 4, 2, 
+                                     "open", "true", "value", "File");
+      } else {
+        localrc = io_xml->writeStartElement("type", "", 4, 2, 
+                                     "open", "true", "value", "Shared Memory");
+      }
+      localrc = io_xml->writeStartElement("controlledVocabulary","", 5, 0);
+      localrc = io_xml->writeElement("name", "CouplingType", 6, 0);
+      localrc = io_xml->writeElement("server", 
+                 "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 6, 0);
+      localrc = io_xml->writeEndElement("controlledVocabulary", 5);
+      localrc = io_xml->writeEndElement("type", 4);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
       if (attpack->AttributeIsSet("Frequency")) {
         localrc = attpack->AttributeGet("Frequency", &valuevector);
@@ -6481,6 +6498,11 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
         localrc = io_xml->writeElement("name", value, 7, 0);
+        if (couplingPurpose == "ancillaryFile") {
+          localrc = io_xml->writeElement("type", "dataObject", 7, 0);
+        } else {
+          localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
+        }
         localrc = io_xml->writeEndElement("reference", 6);
         localrc = io_xml->writeEndElement("dataSource", 5);
         localrc = io_xml->writeEndElement("couplingSource", 4);
@@ -6504,6 +6526,7 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
         localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
         localrc = io_xml->writeEndElement("reference", 6);
         localrc = io_xml->writeEndElement("dataSource", 5);
         localrc = io_xml->writeEndElement("couplingTarget", 4);
@@ -6529,6 +6552,7 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("dataSource", "", 6, 0);
         localrc = io_xml->writeStartElement("reference", "", 7, 0);
         localrc = io_xml->writeElement("name", value, 8, 0);
+        localrc = io_xml->writeElement("type", "componentProperty", 8, 0);
         localrc = io_xml->writeEndElement("reference", 7);
         localrc = io_xml->writeEndElement("dataSource", 6);
         localrc = io_xml->writeEndElement("connectionTarget", 5);
