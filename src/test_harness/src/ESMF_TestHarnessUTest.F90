@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.48 2011/06/30 06:01:37 theurich Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.49 2011/07/06 21:56:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -106,6 +106,7 @@
 
     ! get path info
     call ESMF_UtilGetArgIndex (argvalue="-path", argindex=argindex, rc=localrc)
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
     print '("argindex (-path) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc - 1)) then
       call ESMF_UtilGetArg (argindex=argindex+1, argvalue=srcPath(1), rc=localrc)
@@ -114,6 +115,7 @@
 
     ! get test case info
     call ESMF_UtilGetArgIndex (argvalue="-case", argindex=argindex, rc=localrc)
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
     print '("argindex (-case) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, argvalue=configFname(1), rc=localrc)
@@ -122,6 +124,7 @@
 
     ! get xml file info
     call ESMF_UtilGetArgIndex (argvalue="-xml", argindex=argindex, rc=localrc)
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
     print '("argindex (-xml) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, argvalue=xmlFname(1), rc=localrc)
@@ -130,7 +133,8 @@
     end if
 
     ! get no run info
-    call ESMF_UtilGetArgIndex (argvalue="-norun", argindex=argindex, rc=rc)
+    call ESMF_UtilGetArgIndex (argvalue="-norun", argindex=argindex, rc=localrc)
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
     if ((argindex >= 0) .AND. (argindex <= argc)) then
       runFlag(1) = 0
     end if
