@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.102 2011/07/01 20:34:04 rokuingh Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.103 2011/07/06 20:25:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.102 2011/07/01 20:34:04 rokuingh Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.103 2011/07/06 20:25:43 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -139,11 +139,10 @@
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-      subroutine ESMF_StateReconcile(state, keywordEnforcer, vm, attreconflag, rc)
+      subroutine ESMF_StateReconcile(state, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State),            intent(inout)         :: state
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
       type(ESMF_VM),               intent(in),  optional :: vm
       type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
       integer,                     intent(out), optional :: rc               
