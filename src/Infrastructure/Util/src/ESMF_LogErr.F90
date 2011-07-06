@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.102 2011/07/05 21:39:52 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.103 2011/07/06 02:19:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -640,7 +640,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 ! !DESCRIPTION:
 !      This routine closes the user log file(s) associated with {\tt log}.
 !      If the log is not explicitly closed, it will be closed by
-!      {\tt ESMF_Finalize}.
+!      {\tt ESMF\_Finalize}.
 !
 !      The arguments are:
 !      \begin{description}
