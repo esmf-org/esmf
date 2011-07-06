@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.90 2011/07/06 23:01:06 theurich Exp $ 
+# $Id: makefile,v 1.91 2011/07/06 23:46:55 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -48,8 +48,6 @@ DIRS      = ESMF_CompCreate \
 #           ESMF_FieldRegridConserv \ cover by Regrid
 #           ESMF_FieldRegridMulti \   cover by Regrid
 #           ESMF_FieldRegridOrder \   cover by Regrid
-#           ESMF_FieldHalo \
-#           ESMF_FieldHaloPer \
 
 
 CLEANDIRS   =
