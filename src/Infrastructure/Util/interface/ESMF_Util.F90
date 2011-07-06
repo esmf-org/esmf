@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.56 2011/07/06 21:44:15 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.57 2011/07/06 23:36:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.56 2011/07/06 21:44:15 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.57 2011/07/06 23:36:03 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -633,12 +633,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{description}
 !EOP
 !------------------------------------------------------------------------- 
-#if defined (ESMF_NEEDSPXFGETARG) || defined (ESMF_NEEDSGETARG)
     character(ESMF_MAXPATHLEN) :: localvalue
-    integer :: locallength
-#endif
     integer :: localargc, localrc
     integer :: localstat
+
+#if defined (ESMF_NEEDSPXFGETARG) || defined (ESMF_NEEDSGETARG)
+    integer :: locallength
+#endif
 
 #if defined (ESMF_NEEDSPXFGETARG)
     integer, external :: ipxfconst
@@ -662,9 +663,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #if !defined (ESMF_NEEDSPXFGETARG) && !defined (ESMF_NEEDSGETARG)
 ! Fortran 2003 version (default and preferred)
 
-    call get_command_argument (number=argindex,  &
+    ! test on argvalue presense in order to work around a g95
+    ! (version (g95 0.93!) Aug 17 2010) optional argument bug.
+    if (present (argvalue)) then
+      call get_command_argument (number=argindex,  &
                                value=argvalue, length=arglength,  &
                                status=localstat)
+    else
+      call get_command_argument (number=argindex,  &
+                               value=localvalue, length=arglength,  &
+                               status=localstat)
+    end if
 
     ! Convert Fortran status to ESMF rc
 
@@ -744,8 +753,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 #endif
 
-    if (ESMF_LogFoundError ( localrc,  &
-        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
+    if (ESMF_LogFoundError ( localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
       return
 
     if (present (rc)) then
