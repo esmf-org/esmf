@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.54 2011/07/06 18:16:43 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.55 2011/07/06 19:17:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.54 2011/07/06 18:16:43 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.55 2011/07/06 19:17:17 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -896,8 +896,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! comparison.
 
     call arg_search_worker (len_max, argindex_local, rc1=localrc)
-    if (ESMF_LogFoundError ( localrc,  &
-        ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc))  &
+    if (ESMF_LogFoundError ( localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
       return
     
     if (present (argindex)) &
