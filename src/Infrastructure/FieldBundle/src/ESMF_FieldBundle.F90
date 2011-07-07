@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.125 2011/07/05 21:49:30 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.126 2011/07/07 19:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.125 2011/07/05 21:49:30 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.126 2011/07/07 19:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2994,16 +2994,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                            unmappedaction, routehandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle),      intent(in)              :: srcFieldBundle
-    type(ESMF_FieldBundle),      intent(inout)           :: dstFieldBundle
-    integer(ESMF_KIND_I4),       intent(in),    optional :: srcMaskValues(:)
-    integer(ESMF_KIND_I4),       intent(in),    optional :: dstMaskValues(:)
-    type(ESMF_RegridMethod_Flag),intent(in),    optional :: regridmethod
-    type(ESMF_PoleMethod_Flag),  intent(in),    optional :: polemethod
-    integer,                     intent(in),    optional :: regridPoleNPnts
-    type(ESMF_UnmappedAction),   intent(in),    optional :: unmappedaction
-    type(ESMF_RouteHandle),      intent(inout), optional :: routehandle
-    integer,                     intent(out),   optional :: rc
+    type(ESMF_FieldBundle),         intent(in)              :: srcFieldBundle
+    type(ESMF_FieldBundle),         intent(inout)           :: dstFieldBundle
+    integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
+    integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
+    type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
+    type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
+    integer,                        intent(in),    optional :: regridPoleNPnts
+    type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
+    type(ESMF_RouteHandle),         intent(inout), optional :: routehandle
+    integer,                        intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and

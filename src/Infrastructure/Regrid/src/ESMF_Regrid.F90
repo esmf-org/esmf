@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.165 2011/06/30 19:22:20 w6ws Exp $
+! $Id: ESMF_Regrid.F90,v 1.166 2011/07/07 19:55:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.165 2011/06/30 19:22:20 w6ws Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.166 2011/07/07 19:55:57 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -259,7 +259,7 @@ end function my_xor
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
+      type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
@@ -303,7 +303,7 @@ end function my_xor
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
        type(ESMF_RegridConserve) :: localregridConserve
-       type(ESMF_UnmappedAction) :: localunmappedaction
+       type(ESMF_UnmappedAction_Flag) :: localunmappedaction
        logical :: isMemFreed
 
        ! Logic to determine if valid optional args are passed.  

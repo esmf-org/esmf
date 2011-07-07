@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.137 2011/07/07 05:19:12 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.138 2011/07/07 19:55:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -581,15 +581,15 @@
 !
 !
       ! What to do when a point can't be mapped
-      type ESMF_UnmappedAction
+      type ESMF_UnmappedAction_Flag
       sequence
 !  private
          integer :: unmappedaction
       end type
 
-      type(ESMF_UnmappedAction), parameter :: &
-           ESMF_UNMAPPEDACTION_ERROR    = ESMF_UnmappedAction(0), &
-           ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction(1)
+      type(ESMF_UnmappedAction_Flag), parameter :: &
+           ESMF_UNMAPPEDACTION_ERROR    = ESMF_UnmappedAction_Flag(0), &
+           ESMF_UNMAPPEDACTION_IGNORE   = ESMF_UnmappedAction_Flag(1)
 
 !------------------------------------------------------------------------------
       type ESMF_RegridMethod_Flag
@@ -771,7 +771,7 @@
 
       public ESMF_PointerPrint
 
-       public ESMF_UnmappedAction, ESMF_UNMAPPEDACTION_ERROR, &
+       public ESMF_UnmappedAction_Flag, ESMF_UNMAPPEDACTION_ERROR, &
                                    ESMF_UNMAPPEDACTION_IGNORE
 
       
@@ -1189,14 +1189,14 @@ end subroutine
 
 function ESMF_unmappedactioneq(uma1, uma2)
  logical ESMF_unmappedactioneq
- type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
+ type(ESMF_UnmappedAction_Flag), intent(in) :: uma1, uma2
 
  ESMF_unmappedactioneq = (uma1%unmappedaction == uma2%unmappedaction)
 end function
 
 function ESMF_unmappedactionne(uma1, uma2)
  logical ESMF_unmappedactionne
- type(ESMF_UNMAPPEDACTION), intent(in) :: uma1, uma2
+ type(ESMF_UnmappedAction_Flag), intent(in) :: uma1, uma2
 
  ESMF_unmappedactionne = (uma1%unmappedaction /= uma2%unmappedaction)
 end function

@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.75 2011/07/06 15:52:46 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.76 2011/07/07 19:55:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.75 2011/07/06 15:52:46 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.76 2011/07/07 19:55:55 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.75 2011/07/06 15:52:46 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.76 2011/07/07 19:55:55 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2214,13 +2214,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(in)                     :: mesh
-    type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
-    integer, intent(in)                             :: pntDim
-    integer, intent(in)                             :: pntCount
-    real(ESMF_KIND_R8), pointer                     :: pntList(:)
-    integer, pointer                                :: petList(:)
-    integer, intent(out), optional                  :: rc
+    type(ESMF_Mesh),                intent(in)           :: mesh
+    type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
+    integer,                        intent(in)           :: pntDim
+    integer,                        intent(in)           :: pntCount
+    real(ESMF_KIND_R8), pointer                          :: pntList(:)
+    integer,            pointer                          :: petList(:)
+    integer,                        intent(out),optional :: rc
 !
 ! !DESCRIPTION:
 !   Write a mesh to VTK file.
@@ -2247,7 +2247,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    type(ESMF_UnmappedAction) :: localunmappedaction
+    type(ESMF_UnmappedAction_Flag) :: localunmappedaction
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

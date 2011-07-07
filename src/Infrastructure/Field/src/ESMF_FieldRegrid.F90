@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.81 2011/07/05 21:49:28 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.82 2011/07/07 19:55:50 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.81 2011/07/05 21:49:28 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.82 2011/07/07 19:55:50 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -286,21 +286,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        srcFracField, dstFracField, rc)
 !      
 ! !ARGUMENTS:
-      type(ESMF_Field),          intent(in)              :: srcField
-      type(ESMF_Field),          intent(inout)           :: dstField
+      type(ESMF_Field),               intent(in)              :: srcField
+      type(ESMF_Field),               intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer(ESMF_KIND_I4),     intent(in),    optional :: srcMaskValues(:)
-      integer(ESMF_KIND_I4),     intent(in),    optional :: dstMaskValues(:)
-      type(ESMF_RegridMethod_Flag),intent(in),  optional :: regridmethod
-      type(ESMF_PoleMethod_Flag),  intent(in),  optional :: polemethod
-      integer,                   intent(in),    optional :: regridPoleNPnts
-      type(ESMF_UnmappedAction), intent(in),    optional :: unmappedaction
-      type(ESMF_RouteHandle),    intent(inout), optional :: routehandle
-      integer(ESMF_KIND_I4),     pointer,       optional :: indices(:,:)
-      real(ESMF_KIND_R8),        pointer,       optional :: weights(:)
-      type(ESMF_Field),          intent(inout), optional :: srcFracField
-      type(ESMF_Field),          intent(inout), optional :: dstFracField
-      integer,                   intent(out),   optional :: rc 
+      integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
+      integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
+      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
+      type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
+      integer,                        intent(in),    optional :: regridPoleNPnts
+      type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
+      type(ESMF_RouteHandle),         intent(inout), optional :: routehandle
+      integer(ESMF_KIND_I4),          pointer,       optional :: indices(:,:)
+      real(ESMF_KIND_R8),             pointer,       optional :: weights(:)
+      type(ESMF_Field),               intent(inout), optional :: srcFracField
+      type(ESMF_Field),               intent(inout), optional :: dstFracField
+      integer,                        intent(out),   optional :: rc 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
@@ -835,6 +838,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       integer,                intent(out),   optional :: rc 
+!
+! !STATUS:
+! \apiStatusCompatible
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}

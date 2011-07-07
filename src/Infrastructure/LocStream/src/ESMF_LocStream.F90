@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.68 2011/07/06 15:52:44 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.69 2011/07/07 19:55:54 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.68 2011/07/06 15:52:44 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.69 2011/07/07 19:55:54 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1042,13 +1042,13 @@ contains
 
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in)                :: locstream
-      character (len=*),    intent(in), optional      :: name
-      character (len=*),    intent(in)                :: coordKeyNames
-      type(ESMF_Grid),      intent(in)                :: background
-      integer(ESMF_KIND_I4), intent(in), optional     :: maskValues(:)
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
-      integer,              intent(out), optional     :: rc
+      type(ESMF_LocStream),           intent(in)            :: locstream
+      character (len=*),              intent(in),  optional :: name
+      character (len=*),              intent(in)            :: coordKeyNames
+      type(ESMF_Grid),                intent(in)            :: background
+      integer(ESMF_KIND_I4),          intent(in),  optional :: maskValues(:)
+      type(ESMF_UnmappedAction_Flag), intent(in),  optional :: unmappedaction
+      integer,                        intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1096,7 +1096,7 @@ contains
 !
 !EOP
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
-      type(ESMF_UnmappedAction) :: localunmappedaction
+      type(ESMF_UnmappedAction_Flag) :: localunmappedaction
       type(ESMF_Mesh) :: mesh
       type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string
@@ -1170,12 +1170,12 @@ contains
 
 !
 ! !ARGUMENTS:
-      type(ESMF_LocStream), intent(in)                :: locstream
-      character (len=*),    intent(in), optional      :: name
-      character (len=*),    intent(in)                :: coordKeyNames
-      type(ESMF_Mesh),      intent(in)                :: background
-      type(ESMF_UnmappedAction), intent(in), optional :: unmappedaction
-      integer,              intent(out), optional     :: rc
+      type(ESMF_LocStream),           intent(in)           :: locstream
+      character (len=*),              intent(in), optional :: name
+      character (len=*),              intent(in)           :: coordKeyNames
+      type(ESMF_Mesh),                intent(in)           :: background
+      type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
+      integer,                        intent(out),optional :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1214,7 +1214,7 @@ contains
 !
 !EOP
       type(ESMF_LocStreamType), pointer :: oldLStypep, newLStypep
-      type(ESMF_UnmappedAction) :: localunmappedaction
+      type(ESMF_UnmappedAction_Flag) :: localunmappedaction
       type(ESMF_DistGrid) :: newDistGrid
       type(ESMF_TypeKind_Flag) ::keyTypeKind
       character(len=ESMF_MAXSTR)    :: keytemp, string

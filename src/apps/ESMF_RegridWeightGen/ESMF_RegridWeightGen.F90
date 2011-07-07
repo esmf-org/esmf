@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.43 2011/07/04 05:11:23 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.44 2011/07/07 19:56:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2010, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_RegridWeightGen
       integer(ESMF_KIND_I4), pointer:: compactedIndices(:,:)
       real(ESMF_KIND_R8), pointer :: compactedWeights(:)
       logical :: ignoreUnmapped
-      type(ESMF_UnmappedAction) :: unmappedaction
+      type(ESMF_UnmappedAction_Flag) :: unmappedaction
 
       !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
