@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.43 2011/07/01 05:02:38 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.44 2011/07/07 04:53:52 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -118,11 +118,12 @@ There are many attributes that are used to describe components. There are curren
      {\tt ReleaseDate} & The date a model component was issued. & N/A \\
      {\tt ShortName*} & A version of the component name that contains acronyms. & N/A \\
      {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
+     {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
      {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A \\ 
      {\tt SimulationRationale} & The reason for performing a simulation. & N/A\\
      {\tt SimulationShortName} & The name of the simulation. & N/A \\
-     {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & N/A\\ 
+     {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A\\ 
      {\tt URL} & A URL associated with a model component. & N/A \\
      {\tt Version} & Version number of the component. & N/A \\
      \hline\hline
@@ -576,6 +577,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt ShortName}  & For component: a version of the component name that contains acronyms.  For field:  The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CIM Main, CF General\\
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & ISO Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
+     {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & CIM Main\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & CIM Main\\ 
      {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & CIM Main\\ 
      {\tt SimulationRationale} & The reason for performing a simulation. & CIM Main\\
