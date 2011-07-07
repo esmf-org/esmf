@@ -208,6 +208,9 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'SimulationDuration', &
      'P10Y', &
       convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'SimulationEndDate', &
+     '1970-01-01T00:00:00Z', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationNumberOfProcessingElements', &
      '16', &
       convention=convCIM, purpose=purpComp, rc=rc)
