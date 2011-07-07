@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.23 2011/07/06 05:52:01 eschwab Exp $
+! $Id: user_model2.F90,v 1.24 2011/07/07 04:52:32 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -155,7 +155,7 @@ module user_model2
     call ESMF_AttributeSet(comp, 'LongTitle', &
      'Doe, J.A.; Doe, S.B.; ' // &
      'Doe, J.C.; 2007 EarthSys: ' // &
-     'The Earth System High Resolution Global Atmosphere Model - ' // &
+     'The Earth System High Resolution Global Model - ' // &
      'Ocean model description . Journal of Earth Modeling, 13 (4). ' // &
      '1461-1496.', &
       convention=convISO, purpose=purpCitation, rc=rc)
