@@ -146,7 +146,7 @@ module user_coupler
                           
     ! copy all Attribute information into export State
     call ESMF_AttributeCopy(importState, exportState, &
-      ESMF_COPY_ALIAS, ESMF_ATTTREE_ON, rc=rc)
+      ESMF_COPY_REFERENCE, ESMF_ATTTREE_ON, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
   end subroutine user_run

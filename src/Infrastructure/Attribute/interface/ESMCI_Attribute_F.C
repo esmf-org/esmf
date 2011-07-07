@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.51 2011/06/09 18:32:40 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.52 2011/07/07 00:15:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.51 2011/06/09 18:32:40 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.52 2011/07/07 00:15:45 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2613,21 +2613,23 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     return;
   }
   
-  if (*attcopyflag == ESMC_ATTCOPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
+  if (*attcopyflag == ESMF_COPY_VALUE && *atttreeflag == ESMC_ATTTREE_OFF) {
       status = (**destination).root.AttributeCopyValue((**source).root);
       ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }
-  else if (*attcopyflag == ESMC_ATTCOPY_HYBRID) {
+  else if (*attcopyflag == ESMF_COPY_REFERENCE) {
       status = (**destination).root.AttributeCopyHybrid((**source).root);
       ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }
-  else if (*attcopyflag == ESMC_ATTCOPY_REFERENCE) {
+/* RLO - had to disable this because it no longer makes sense with new copy flag
+  else if (*attcopyflag == ESMF_COPY_ALIAS) {
       status = (**destination).root.AttributeMove(&((**source).root));
       ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_NOT_PRESENT_FILTER(rc));
   }
+*/
   else {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "invalid attribute copy flag combination", &status);

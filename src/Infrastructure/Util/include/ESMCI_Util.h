@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.41 2011/06/24 17:54:28 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.42 2011/07/07 00:15:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,9 +107,9 @@ enum ESMC_CommFlag { ESMF_COMM_BLOCKING=0,
                      ESMF_COMM_CANCEL};
 
 // Attribute reconcile type
-enum ESMC_AttCopyFlag { ESMC_ATTCOPY_HYBRID=0,
-                        ESMC_ATTCOPY_REFERENCE,
-                        ESMC_ATTCOPY_VALUE};
+enum ESMC_AttCopyFlag { ESMF_COPY_ALIAS=0,
+                        ESMF_COPY_REFERENCE,
+                        ESMF_COPY_VALUE};
 
 // attgetcount flag type
 enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
