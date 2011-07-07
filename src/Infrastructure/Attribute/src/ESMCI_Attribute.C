@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.118 2011/07/06 05:49:10 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.119 2011/07/07 04:51:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.118 2011/07/06 05:49:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.119 2011/07/07 04:51:31 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -505,6 +505,8 @@ int Attribute::count=0;
       //
       localrc = AttPackAddAttribute("SimulationDuration", "CIM 1.5",
                             "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationEndDate", "CIM 1.5",
+                            "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationLongName", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationNumberOfProcessingElements",
@@ -713,6 +715,7 @@ int Attribute::count=0;
   //  1 <simulationRun> in separate CIM document node
   //
   localrc = stdParent->AttPackAddAttribute("SimulationDuration");
+  localrc = stdParent->AttPackAddAttribute("SimulationEndDate");
   localrc = stdParent->AttPackAddAttribute("SimulationLongName");
   localrc = stdParent->AttPackAddAttribute("SimulationNumberOfProcessingElements");
   localrc = stdParent->AttPackAddAttribute("SimulationRationale");
@@ -4589,6 +4592,7 @@ if (attrRoot == ESMF_TRUE) {
   int localrc;
   Attribute *attpack = NULL;
   static int callCount=0;
+  int callCountBeforeRecursion;
   bool inObjectTree, inThisCompTreeOnly, inNestedAttPacks;
 
   vector<string> valuevector;
@@ -4748,6 +4752,7 @@ if (attrRoot == ESMF_TRUE) {
 #endif
 
   // <childComponent> tree
+  callCountBeforeRecursion = callCount;
   for(int i=0; i<linkList.size(); i++) {
     Attribute *ap;
     for(int j=0; j<linkList.at(i)->packList.size(); j++) {
@@ -4796,8 +4801,12 @@ if (attrRoot == ESMF_TRUE) {
                                         "value", value.c_str());
     localrc = io_xml->writeStartElement("controlledVocabulary","", ++indent, 0);
     // TODO:  make new att for ModelTypeCV ? (DRS_CMIP5_componentType, metafor)
-    localrc = io_xml->writeElement("name", "DRS_CMIP5_componentType", 
-                                   ++indent, 0);
+    if (callCountBeforeRecursion == 1) { // for top-level component only
+      localrc = io_xml->writeElement("name", "metafor", ++indent, 0);
+    } else { // for all child components
+       localrc = io_xml->writeElement("name", "DRS_CMIP5_componentType", 
+                                      ++indent, 0);
+    }
     localrc = io_xml->writeElement("server", 
                "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", indent, 0);
     localrc = io_xml->writeEndElement("controlledVocabulary", --indent);
@@ -5015,7 +5024,7 @@ if (attrRoot == ESMF_TRUE) {
   }
 
   localrc = io_xml->writeStartElement("dateRange", "", 2, 0);
-  localrc = io_xml->writeStartElement("openDateRange", "", 3, 0);
+  localrc = io_xml->writeStartElement("closedDateRange", "", 3, 0);
   if (attpack->AttributeIsSet("SimulationDuration")) {
     localrc = attpack->AttributeGet("SimulationDuration", &valuevector);
     if (valuevector.size() > 1) {
@@ -5024,6 +5033,16 @@ if (attrRoot == ESMF_TRUE) {
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("duration", value, 4, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  }
+  if (attpack->AttributeIsSet("SimulationEndDate")) {
+    localrc = attpack->AttributeGet("SimulationEndDate", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeElement("endDate", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationStartDate")) {
@@ -5035,8 +5054,14 @@ if (attrRoot == ESMF_TRUE) {
     value = valuevector.at(0);
     localrc = io_xml->writeElement("startDate", value, 4, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  } else {
+    ESMC_LogDefault.Write("Attribute SimulationStartDate in standard attribute "
+      "package (convention='CIM 1.5', "
+      "purpose='Model Component Simulation Description') "
+      "required to be set, to produce valid CIM XML output.",
+      ESMC_LOG_WARN, ESMC_CONTEXT);
   }
-  localrc = io_xml->writeEndElement("openDateRange", 3);
+  localrc = io_xml->writeEndElement("closedDateRange", 3);
   localrc = io_xml->writeEndElement("dateRange", 2);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
@@ -6497,6 +6522,8 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
+//        localrc = io_xml->writeElement("id", 
+//                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
         localrc = io_xml->writeElement("name", value, 7, 0);
         if (couplingPurpose == "ancillaryFile") {
           localrc = io_xml->writeElement("type", "dataObject", 7, 0);
@@ -6525,6 +6552,8 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
+//        localrc = io_xml->writeElement("id", 
+//                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
         localrc = io_xml->writeElement("name", value, 7, 0);
         localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
         localrc = io_xml->writeEndElement("reference", 6);
