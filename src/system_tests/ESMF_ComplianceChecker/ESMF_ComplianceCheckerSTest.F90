@@ -1,7 +1,7 @@
-! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.16 2011/07/01 16:07:58 rokuingh Exp $
+! $Id: ESMF_ComplianceCheckerSTest.F90,v 1.17 2011/07/07 01:37:30 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST  String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
@@ -30,16 +30,15 @@ program ESMF_ComplianceCheckerSTest
   implicit none
     
   ! Local variables
-  integer :: localPet, petCount, localrc, userrc, rc=ESMF_SUCCESS
-  type(ESMF_VM):: vm
-  type(ESMF_GridComp) :: comp1, comp2
-  type(ESMF_CplComp) :: cpl
-  type(ESMF_State) :: dummyState  
-  type(ESMF_Clock) :: dummyClock
+  integer                 :: localPet, petCount, localrc, userrc, rc
+  type(ESMF_VM)           :: vm
+  type(ESMF_GridComp)     :: comp1, comp2
+  type(ESMF_CplComp)      :: cpl
+  type(ESMF_State)        :: dummyState  
+  type(ESMF_Clock)        :: dummyClock
   type(ESMF_TimeInterval) :: timeStep
   type(ESMF_Time)         :: startTime
   type(ESMF_Time)         :: stopTime
-
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -49,6 +48,9 @@ program ESMF_ComplianceCheckerSTest
 
   ! individual test failure message, and final status msg
   character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+  ! initialize rc
+  rc=ESMF_SUCCESS
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -265,7 +267,6 @@ program ESMF_ComplianceCheckerSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-#if 0
   call ESMF_CplCompFinalize(cpl, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -273,7 +274,6 @@ program ESMF_ComplianceCheckerSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-#endif
 
   call ESMF_GridCompFinalize(comp1, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -284,6 +284,7 @@ program ESMF_ComplianceCheckerSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 #if 0
+  ! - don't call this because no Finalize was registred for comp2
   call ESMF_GridCompFinalize(comp2, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -303,17 +304,26 @@ program ESMF_ComplianceCheckerSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    
-#if 0
+  
   call ESMF_GridCompDestroy(comp2, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  
   call ESMF_CplCompDestroy(cpl, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-#endif
+
+  call ESMF_StateDestroy(dummyState, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  call ESMF_ClockDestroy(dummyClock, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   print *, "All Destroy routines done"
 
