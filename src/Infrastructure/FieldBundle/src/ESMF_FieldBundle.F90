@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.126 2011/07/07 19:55:52 rokuingh Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.127 2011/07/08 17:42:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.126 2011/07/07 19:55:52 rokuingh Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.127 2011/07/08 17:42:07 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1943,7 +1943,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(in)             :: fieldbundle
+    type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
     character(*),           intent(in)             :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                intent(in),  optional  :: singleFile
@@ -4615,7 +4615,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleValidate()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldBundleValidate - Validate fieldbundle internals
 
 ! !INTERFACE:
@@ -4638,7 +4638,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
 
