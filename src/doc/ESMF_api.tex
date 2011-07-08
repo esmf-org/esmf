@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.54 2011/07/08 19:59:30 svasquez Exp $
+% $Id: ESMF_api.tex,v 1.55 2011/07/08 20:20:16 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -40,12 +40,15 @@ hold across the entire API.  These are:
 
 \begin{itemize}
 
-\item {\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()}, for
+\item 
+\begin{sloppypar}
+{\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()}, for
 creating and destroying objects of ESMF classes that require internal memory
 management (- called ESMF deep classes). The {\tt ESMF\_<Class>Create()} method
 allocates memory for the class structure itself and for internal variables, and
 initializes variables where appropriate.  It is always written as a Fortran
 function that returns a derived type instance of the class.
+\end{sloppypar}
 
 \item 
 \begin{sloppypar}
@@ -354,10 +357,12 @@ overloaded to test for the alias condition as a counter part to the assignment
 behavior. This and the not equal operator are documented following the
 assignemnt in the class API documentation sections. 
 
+\begin{sloppypar}
 Deep object copies are implemented as a special variant of the
 {\tt ESMF\_<Class>Create()} methods. It takes an existing deep object as
 on of the required arguments. At this point not all deep classes have
 {\tt ESMF\_<Class>Create()} methods that allow object copy.
+\end{sloppypar}
 
 Due to the complexity of deep classes there are many aspects when comparing two
 objects of the same class. ESMF provide {\tt ESMF\_<Class>Match()} methods,
