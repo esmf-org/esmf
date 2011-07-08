@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIO.cppF90,v 1.44 2011/06/24 16:12:13 rokuingh Exp $
+! $Id: ESMF_ArrayIO.cppF90,v 1.45 2011/07/08 18:42:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_ArrayIOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayIO.cppF90,v 1.44 2011/06/24 16:12:13 rokuingh Exp $'
+    '$Id: ESMF_ArrayIO.cppF90,v 1.45 2011/07/08 18:42:00 theurich Exp $'
 
 !==============================================================================
 
@@ -203,7 +203,7 @@ contains
 ! subroutine ESMF_ArrayWriteIntl<rank><type><kind>(array, file, varname, appd_internal, piofmt, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Array),           intent(inout)           :: array @\
+!   type(ESMF_Array),           intent(in)              :: array @\
 !   character(*),               intent(in)              :: file @\
 !   character(*),               intent(in)              :: varname @\
 !   logical,                    intent(in)              :: appd_internal @\
@@ -243,7 +243,7 @@ contains
 ^define ESMF_METHOD "ESMF_ArrayWriteIntl" @\
   subroutine ESMF_ArrayWriteIntl##mrank##D##mtypekind(array, file, varname, appd_internal, time, piofmt, rc) @\
 @\
-    type(ESMF_Array),           intent(inout)           :: array @\
+    type(ESMF_Array),           intent(in)              :: array @\
     character(*),               intent(in)              :: file @\
     character(*),               intent(in)              :: varname @\
     logical,                    intent(in)              :: appd_internal @\

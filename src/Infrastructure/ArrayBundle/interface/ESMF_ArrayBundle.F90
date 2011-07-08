@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.74 2011/06/30 14:32:59 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.75 2011/07/08 18:42:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.74 2011/06/30 14:32:59 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.75 2011/07/08 18:42:02 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1412,7 +1412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     singleFile, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)             :: arraybundle
+    type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
     character(*),           intent(in)             :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: singleFile
