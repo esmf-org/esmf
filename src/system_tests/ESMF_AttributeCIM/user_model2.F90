@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.24 2011/07/07 04:52:32 eschwab Exp $
+! $Id: user_model2.F90,v 1.25 2011/07/08 02:20:32 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -195,7 +195,7 @@ module user_model2
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'LongName', 'DMS emissions', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(DMS_emi, 'Units', 'unknown', &
+    call ESMF_AttributeSet(DMS_emi, 'Units', 'kg/m2/s', &
          convention=convCIM, purpose=purpField, rc=rc)
 
     ! DMS_emi CIM Attributes
@@ -213,7 +213,7 @@ module user_model2
                                     'atmosphere.', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                    'Conservative', &
+                                    'Conservative-First-Order', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 Minutes', &
          convention=convCIM, purpose=purpField, rc=rc)
@@ -229,6 +229,8 @@ module user_model2
 
     ! SST CF-Extended Attributes
     call ESMF_AttributeSet(SST, 'ShortName', 'SST', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(SST, 'Units', 'K', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 

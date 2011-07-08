@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.8 2011/07/06 05:52:01 eschwab Exp $
+! $Id: user_model4.F90,v 1.9 2011/07/08 02:20:32 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -200,6 +200,8 @@ module user_model4
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(SOA, 'LongName', 'Secondary organic aerosols', &
          convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(SOA, 'Units', 'kg/m3', &
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! SOA CIM Attributes
@@ -238,6 +240,8 @@ module user_model4
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(POM, 'LongName', 'Particulate organic matter', &
          convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(POM, 'Units', 'mol/m3', &
+         convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! POM CIM Attributes
@@ -254,7 +258,7 @@ module user_model4
                                 'the ocean.', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(POM, 'SpatialRegriddingMethod', &
-                                'Linear', &
+                                'Conservative', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(POM, 'SpatialRegriddingDimension', &
                                 '1D', &

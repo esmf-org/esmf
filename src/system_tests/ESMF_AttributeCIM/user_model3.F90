@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.8 2011/07/06 05:52:01 eschwab Exp $
+! $Id: user_model3.F90,v 1.9 2011/07/08 02:20:32 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -192,7 +192,7 @@ module user_model3
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Ozone, 'LongName', 'Ozone', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Ozone, 'Units', 'unknown', &
+    call ESMF_AttributeSet(Ozone, 'Units', 'kg/m3', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -242,10 +242,14 @@ module user_model3
                                'EarthSys_Atmos', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(UM, 'Description', &
-                               'Initialization file holding start ' // &
+                               'Initialization start ' // &
                                'data for 0000UTC 1st Jan 1960.', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(UM, 'TimeTransformationType', 'Exact', &
+    call ESMF_AttributeSet(UM, 'SpatialRegriddingMethod', &
+                               'Linear', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(UM, 'TimeTransformationType', &
+                               'Exact', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
    

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.24 2011/07/07 04:52:32 eschwab Exp $
+! $Id: user_model1.F90,v 1.25 2011/07/08 02:20:32 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -196,7 +196,7 @@ module user_model1
     call ESMF_AttributeSet(OH, 'LongName', &
                                'seasonal_oxidant_conc', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(OH, 'Units', 'unknown', &
+    call ESMF_AttributeSet(OH, 'Units', 'kg/m3', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -238,7 +238,7 @@ module user_model1
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'LongName', 'Orography', &
          convention=convCIM, purpose=purpField, rc=rc)
-    call ESMF_AttributeSet(Orog, 'Units', 'unknown', &
+    call ESMF_AttributeSet(Orog, 'Units', 'm', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
@@ -254,6 +254,12 @@ module user_model1
     call ESMF_AttributeSet(Orog, 'Description', &
                                  'Orography/height data in meters at ' // &
                                  'n320 resolution.', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'SpatialRegriddingMethod', &
+                                 'Conservative', &
+         convention=convCIM, purpose=purpField, rc=rc)
+    call ESMF_AttributeSet(Orog, 'SpatialRegriddingDimension', &
+                                 '2D', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(Orog, 'TimeTransformationType', 'Exact', &
          convention=convCIM, purpose=purpField, rc=rc)
