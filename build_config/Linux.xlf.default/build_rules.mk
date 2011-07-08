@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2011/05/24 23:26:57 theurich Exp $
+# $Id: build_rules.mk,v 1.19 2011/07/08 19:24:51 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -128,3 +128,11 @@ ESMF_CXXLINKLIBS +=
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Disable WebService testing for now
+#
+# TODO: Remove this variable and associated infrastructure as soon as
+# TODO: WebService testing is robust enough to work on all systems.
+#
+ESMF_NOWEBSERVTESTING = TRUE

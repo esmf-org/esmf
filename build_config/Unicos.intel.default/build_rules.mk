@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2010/04/16 05:09:15 theurich Exp $
+# $Id: build_rules.mk,v 1.5 2011/07/08 19:24:53 theurich Exp $
 #
 # Linux.intel.default
 #
@@ -112,3 +112,11 @@ ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) 
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Disable WebService testing for now
+#
+# TODO: Remove this variable and associated infrastructure as soon as
+# TODO: WebService testing is robust enough to work on all systems.
+#
+ESMF_NOWEBSERVTESTING = TRUE

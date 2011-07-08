@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2011/03/14 16:35:33 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2011/07/08 19:24:54 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -133,7 +133,16 @@ ESMF_CXXLINKLIBS += -lrt -ldl
 else
 ESMF_CXXLINKLIBS += -pgf90libs
 endif
+
 ############################################################
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Disable WebService testing for now
+#
+# TODO: Remove this variable and associated infrastructure as soon as
+# TODO: WebService testing is robust enough to work on all systems.
+#
+ESMF_NOWEBSERVTESTING = TRUE
