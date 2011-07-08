@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.110 2011/05/20 22:43:58 svasquez Exp $
+% $Id: ESMF_refdoc.ctex,v 1.111 2011/07/08 23:09:38 svasquez Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -59,6 +59,7 @@
 
 \begin{document}
 
+\sloppy
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
