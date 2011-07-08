@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.44 2011/07/07 04:53:52 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.45 2011/07/08 02:13:02 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -119,8 +119,10 @@ There are many attributes that are used to describe components. There are curren
      {\tt ShortName*} & A version of the component name that contains acronyms. & N/A \\
      {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
      {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A\\ 
+     {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & N/A\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
      {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A \\ 
+     {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & N/A \\ 
      {\tt SimulationRationale} & The reason for performing a simulation. & N/A\\
      {\tt SimulationShortName} & The name of the simulation. & N/A \\
      {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A\\ 
@@ -578,8 +580,10 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & ISO Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
      {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & CIM Main\\ 
+     {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & CIM Main\\ 
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & CIM Main\\ 
      {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & CIM Main\\ 
+     {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & CIM Main\\ 
      {\tt SimulationRationale} & The reason for performing a simulation. & CIM Main\\
      {\tt SimulationStartDate} & The date in simulated time of the start of a model simulation. & CIM Main\\ 
      {\tt SimulationShortName} & The name of the simulation. & CIM Main\\

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.119 2011/07/07 04:51:31 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.120 2011/07/08 02:12:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.119 2011/07/07 04:51:31 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.120 2011/07/08 02:12:59 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -507,10 +507,14 @@ int Attribute::count=0;
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationEndDate", "CIM 1.5",
                             "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationEnsembleID", "CIM 1.5",
+                            "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationLongName", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationNumberOfProcessingElements",
                                                           "CIM 1.5",
+                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationProjectName", "CIM 1.5",
                             "Model Component Simulation Description", object);
       localrc = AttPackAddAttribute("SimulationRationale", "CIM 1.5",
                             "Model Component Simulation Description", object);
@@ -716,8 +720,10 @@ int Attribute::count=0;
   //
   localrc = stdParent->AttPackAddAttribute("SimulationDuration");
   localrc = stdParent->AttPackAddAttribute("SimulationEndDate");
+  localrc = stdParent->AttPackAddAttribute("SimulationEnsembleID");
   localrc = stdParent->AttPackAddAttribute("SimulationLongName");
   localrc = stdParent->AttPackAddAttribute("SimulationNumberOfProcessingElements");
+  localrc = stdParent->AttPackAddAttribute("SimulationProjectName");
   localrc = stdParent->AttPackAddAttribute("SimulationRationale");
   localrc = stdParent->AttPackAddAttribute("SimulationShortName");
   localrc = stdParent->AttPackAddAttribute("SimulationStartDate");
@@ -4971,6 +4977,24 @@ if (attrRoot == ESMF_TRUE) {
     localrc = io_xml->writeElement("rationale", value, 2, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
+  if (attpack->AttributeIsSet("SimulationProjectName")) {
+    localrc = attpack->AttributeGet("SimulationProjectName", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeStartElement("project", "", 2, 2, 
+                                        "open", "true", 
+                                        "value", value.c_str());
+    localrc = io_xml->writeStartElement("controlledVocabulary", "", 3, 0);
+    localrc = io_xml->writeElement("name", "project", 4, 0);
+    localrc = io_xml->writeElement("server", 
+               "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 4, 0);
+    localrc = io_xml->writeEndElement("controlledVocabulary", 3);
+    localrc = io_xml->writeEndElement("project", 2);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  }
   if (attpack->AttributeIsSet("SimulationShortName")) {
     localrc = attpack->AttributeGet("SimulationShortName", &valuevector);
     if (valuevector.size() > 1) {
@@ -5085,7 +5109,22 @@ if (attrRoot == ESMF_TRUE) {
   } else {
     localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
   }
-
+  if (attpack->AttributeIsSet("SimulationEnsembleID")) {
+    localrc = attpack->AttributeGet("SimulationEnsembleID", &valuevector);
+    if (valuevector.size() > 1) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", &localrc);
+    return ESMF_FAILURE;}
+    value = valuevector.at(0);
+    localrc = io_xml->writeStartElement("externalID", "", 2, 2, 
+                                        "open", "true", 
+                                        "value", value.c_str());
+    localrc = io_xml->writeStartElement("standard", "", 3, 0);
+    localrc = io_xml->writeElement("name", "DRS_CMIP5_ensembleType", 4, 0);
+    localrc = io_xml->writeEndElement("standard", 3);
+    localrc = io_xml->writeEndElement("externalID", 2);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  }
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
   Time dateTime(0, 0, 1, ESMC_NULL_POINTER, ESMC_CALKIND_GREGORIAN, 0);
@@ -6522,8 +6561,8 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
-//        localrc = io_xml->writeElement("id", 
-//                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
+        localrc = io_xml->writeElement("id", 
+                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
         localrc = io_xml->writeElement("name", value, 7, 0);
         if (couplingPurpose == "ancillaryFile") {
           localrc = io_xml->writeElement("type", "dataObject", 7, 0);
@@ -6552,8 +6591,8 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
-//        localrc = io_xml->writeElement("id", 
-//                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
+        localrc = io_xml->writeElement("id", 
+                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
         localrc = io_xml->writeElement("name", value, 7, 0);
         localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
         localrc = io_xml->writeEndElement("reference", 6);
