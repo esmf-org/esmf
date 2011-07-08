@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.78 2011/07/06 21:22:02 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.79 2011/07/08 20:33:27 svasquez Exp $
 
 \section{Master List of Constants}
 
@@ -373,9 +373,11 @@ This flag is documented in section \ref{opt:regridmethod}.
 \subsection{ESMF\_ROUTESYNC}
 \label{const:routesync}
 {\sf DESCRIPTION:\\}  
+\begin{sloppypar}
 Switch between blocking and non-blocking execution of RouteHandle based
 communication calls. Every RouteHandle based communication method contains
 an optional argument {\tt routesyncflag} that is of type {\tt ESMF\_RouteSync\_Flag}.
+\end{sloppypar}
 
 The type of this flag is:
 
@@ -510,11 +512,13 @@ The valid values are:
          practically identical to a subroutine call without extra 
          synchronization between the processes.
          
+\begin{sloppypar}
          In the case where some PETs of the component are running as
          threads in shared memory {\tt ESMF\_SYNC\_VASBLOCKING} becomes identical
          to {\tt ESMF\_SYNC\_BLOCKING} within thread groups, to prevent race
          conditions, while there is no synchronization between the thread
          groups.
+\end{sloppypar}
          
 \item [ESMF\_SYNC\_NONBLOCKING]
          {\em Communication calls:} The called method will not block but 
@@ -531,6 +535,7 @@ The valid values are:
          calling component methods and should only be used if the extra
          control, described below, is absolutely necessary.
          
+\begin{sloppypar}
          For non-threaded components (the ESMF default)
          calling a component method with {\tt ESMF\_SYNC\_NONBLOCKING}
          is identical to calling it with {\tt ESMF\_SYNC\_VASBLOCKING}. However,
@@ -538,6 +543,7 @@ The valid values are:
          {\tt ESMF\_GridCompWait()} or {\tt ESMF\_CplCompWait()} is
          required in order to deallocate memory internally allocated for the
          {\tt ESMF\_SYNC\_NONBLOCKING} mode.
+\end{sloppypar}
          
          For threaded components the calling PETs
          of the parent component will not be blocked and return immediately
