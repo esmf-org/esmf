@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.53 2011/07/05 20:27:59 theurich Exp $
+% $Id: ESMF_api.tex,v 1.54 2011/07/08 19:59:30 svasquez Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,11 +59,13 @@ overwhelming number of options, we define specific
 interfaces.
 \end{sloppypar}
 
+\begin{sloppypar}
 \item {\tt ESMF\_<Class>Add()}, {\tt ESMF\_<Class>AddReplace()},
 {\tt ESMF\_<Class>Remove()}, and {\tt ESMF\_<Class>Replace()}, for manipulating
 objects of ESMF container classes - such as {\tt ESMF\_State} and
 {\tt ESMF\_FieldBundle}. For example, the {\tt ESMF\_FieldBundleAdd()}
 method adds another Field to an existing FieldBundle object.
+\end{sloppypar}
 
 \item {\tt ESMF\_<Class>Print()}, for printing the contents of an object to 
 standard out.  This method is mainly intended for debugging.
@@ -322,6 +324,7 @@ and global DE numbers.
 The basic rule of allocation and deallocation for the ESMF is:
 whoever allocates it is responsible for deallocating it.
 
+\begin{sloppypar}
 ESMF methods that allocate their own space for data will
 deallocate that space when the object is destroyed. 
 Methods which accept a user-allocated buffer, for example
@@ -329,6 +332,7 @@ Methods which accept a user-allocated buffer, for example
 will not deallocate that buffer at the time the object is
 destroyed.  The user must deallocate the buffer
 when all use of it is complete.
+\end{sloppypar}
 
 Classes such as Fields, FieldBundles, and States may have Arrays, 
 Fields, Grids and FieldBundles created externally and associated with
