@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.27 2011/07/06 00:00:18 rokuingh Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.28 2011/07/08 22:18:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.27 2011/07/06 00:00:18 rokuingh Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.28 2011/07/08 22:18:17 svasquez Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -1630,11 +1630,11 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! The input {\tt ESMF\_Field} must have a status of  @\
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field} @\
 ! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.  @\
-! \end{sloppypar} @\
 ! @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -2031,9 +2031,12 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
+! \begin{sloppypar} @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! \end{sloppypar} @\
+! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -2358,9 +2361,11 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLS)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
+! \begin{sloppypar} @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -2630,9 +2635,11 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
+! \begin{sloppypar} @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -2915,9 +2922,11 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
 ! {\tt ESMF\_FieldEmptyCreate()} call. @\
 ! @\
+! \begin{sloppypar} @\
 ! The fortran data pointer inside {\tt ESMF\_Field} can be queried and deallocated when @\
 ! datacopyflag is {\tt ESMF\_DATACOPY\_REFERENCE}. Note that the {\tt ESMF\_FieldDestroy} call does not deallocate @\
 ! the fortran data pointer in this case. This gives user more flexibility over memory management. @\
+! \end{sloppypar} @\
 ! @\
 ! The arguments are: @\
 ! \begin{description} @\
@@ -4297,11 +4306,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item [field]
+! \begin{sloppypar}
 !       Empty {\tt ESMF\_Field}. After this
 !       operation, the {\tt ESMF\_Field} contains
 !       the {\tt ESMF\_LocStream} internally but holds no data. 
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+! \end{sloppypar}
 ! \item [locstream]
 !       {\tt ESMF\_LocStream} to be set in the {\tt ESMF\_Field}.
 ! \item [{[rc]}] 
@@ -4380,11 +4391,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item [field]
+! \begin{sloppypar}
 !       Empty {\tt ESMF\_Field}. After this
 !       operation, the {\tt ESMF\_Field} contains
 !       the {\tt ESMF\_XGrid} internally but holds no data. 
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
+! \end{sloppypar}
 ! \item [xgrid]
 !       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
 ! \item [{[xgridside]}] 
