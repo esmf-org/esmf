@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.20 2011/07/05 20:55:38 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.21 2011/07/08 18:31:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.20 2011/07/05 20:55:38 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.21 2011/07/08 18:31:40 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -2353,9 +2353,9 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
       subroutine ESMF_StateRead(state, fileName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State)                          :: state 
-      character (len=*),  intent(in)            :: fileName
-      integer,            intent(out), optional :: rc 
+      type(ESMF_State),  intent(inout)         :: state 
+      character (len=*), intent(in)            :: fileName
+      integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !     Currently limited to read in all Arrays from a netCDF file and add them

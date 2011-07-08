@@ -1,4 +1,4 @@
-! $Id: ESMF_StateWr.F90,v 1.1 2011/07/01 05:11:00 w6ws Exp $
+! $Id: ESMF_StateWr.F90,v 1.2 2011/07/08 18:31:40 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_StateWrMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateWr.F90,v 1.1 2011/07/01 05:11:00 w6ws Exp $'
+      '$Id: ESMF_StateWr.F90,v 1.2 2011/07/08 18:31:40 w6ws Exp $'
 
 !------------------------------------------------------------------------------
 
@@ -130,9 +130,9 @@ contains
       subroutine ESMF_StateWrite(state, fileName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State)                                :: state 
-      character (len=*),        intent(in)            :: fileName
-      integer,                  intent(out), optional :: rc 
+      type(ESMF_State),  intent(in)            :: state 
+      character (len=*), intent(in)            :: fileName
+      integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !     Currently limited to write out all Arrays of a State object to a
