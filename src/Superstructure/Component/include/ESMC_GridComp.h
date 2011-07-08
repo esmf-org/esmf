@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.37 2011/06/28 02:07:21 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.38 2011/07/08 21:03:41 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -356,10 +356,12 @@ int ESMC_GridCompSetEntryPoint(
 //  \item[comp]
 //    An {\tt ESMC\_GridComp} object. 
 //  \item[method]
+//  \begin{sloppypar}
 //    One of a set of predefined Component methods 
 //    - e.g. {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
 //    {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{opt:method}
 //    for a complete list of valid method options. 
+//  \end{sloppypar}
 //  \item[userRoutine]
 //    The user-supplied subroutine to be associated for this Component 
 //    {\tt method}. This subroutine does not have to be public. 
