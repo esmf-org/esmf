@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.182 2011/07/08 21:16:14 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.183 2011/07/08 21:27:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.182 2011/07/08 21:16:14 svasquez Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.183 2011/07/08 21:27:53 svasquez Exp $'
 
 !==============================================================================
 !
@@ -1593,10 +1593,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
 ! \item[methodflag]
+!   \begin{sloppypar}
 !   One of a set of predefined Component methods - e.g.
 !   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
 !   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
 !   for a complete list of valid method options.
+!   \end{sloppypar}
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this Component 
 !   {\tt method}. This subroutine does not have to be public.
