@@ -144,12 +144,12 @@ module user_coupler
     !   nestConvention(2) = 'ISO 19115'
     !   nestPurpose(2)    = 'Citation Description'
 
-    ! Specify the top-level Coupler Component to have 2 Responsible Party
+    ! Specify the top-level Coupler Component to have 3 Responsible Party
     !   sub-packages and 1 Citation sub-package
     nameCount = 0
     call ESMF_AttributeAdd(comp, convention=convCIM, &
       purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
-      nestAttPackInstanceCountList=(/2,1/), &
+      nestAttPackInstanceCountList=(/3,1/), &
       nestAttPackInstanceNameList=nestAttPackName, &
       nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -198,6 +198,12 @@ module user_coupler
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationLongName', &
       'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
+      convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'SimulationProjectName', &
+      'CMIP5', &
+      convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'SimulationEnsembleID', &
+      'a1b1c1', &
       convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'SimulationRationale', &
 'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
@@ -276,7 +282,7 @@ module user_coupler
       convention=convCIM, purpose=purpProp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! Set the values of the 2 Responsible Party sub-packages, created above
+    ! Set the values of the 3 Responsible Party sub-packages, created above
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Responsible party attributes (for Principal Investigator)
@@ -300,23 +306,50 @@ module user_coupler
       convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! Responsible party attributes (for Funder)
+    ! Responsible party attributes (for Contact)
     call ESMF_AttributeSet(comp, 'Name', &
-     'Sally Doe', &
+     'Samuel Doe', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
+    call ESMF_AttributeSet(comp, 'Abbreviation', &
+     'SD', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Oceanography, University of GHI', &
+     'Department of Meteorology, University of ABC', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'sally.doe@earthsys.org', &
+     'samuel.doe@earthsys.org', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-     'Funder', &
+     'Contact', &
       convention=convISO, purpose=purpRP, &
       attPackInstanceName=nestAttPackName(2),rc=rc)
+    call ESMF_AttributeSet(comp, 'URL', &
+     'www.earthsys.org', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Responsible party attributes (for Funder)
+    call ESMF_AttributeSet(comp, 'Name', &
+     'EarthSys Funding Office', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
+    call ESMF_AttributeSet(comp, 'PhysicalAddress', &
+     'Department of Oceanography, University of GHI', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
+    call ESMF_AttributeSet(comp, 'EmailAddress', &
+     'sally.doe@earthsys.org', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
+    call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
+     'Funder', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Set the values of the 1 Citation sub-package, created above
