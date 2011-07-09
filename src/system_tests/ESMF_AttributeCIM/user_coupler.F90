@@ -145,11 +145,11 @@ module user_coupler
     !   nestPurpose(2)    = 'Citation Description'
 
     ! Specify the top-level Coupler Component to have 3 Responsible Party
-    !   sub-packages and 1 Citation sub-package
+    !   sub-packages and 2 Citation sub-packages
     nameCount = 0
     call ESMF_AttributeAdd(comp, convention=convCIM, &
       purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
-      nestAttPackInstanceCountList=(/3,1/), &
+      nestAttPackInstanceCountList=(/3,2/), &
       nestAttPackInstanceNameList=nestAttPackName, &
       nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -352,10 +352,10 @@ module user_coupler
       attPackInstanceName=nestAttPackName(3),rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    ! Set the values of the 1 Citation sub-package, created above
+    ! Set the values of the 2 Citation sub-packages, created above
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
-    ! Citation attributes
+    ! Citation attributes (1st Citation attribute package)
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2009', &
       convention=convISO, purpose=purpCitation, rc=rc)
@@ -378,6 +378,44 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Citation attributes (2nd Citation attribute package)
+    !  note:  nestAttPackName(5) refers to the 2nd
+    !         nested Citation attribute package, after
+    !         the 3 Responsible Party packages and 
+    !         the 1st Citation package (nestAttPackName(4)).
+    !         nestAttPackName(x) is not needed (optional)
+    !         when referring to the 1st nested attribute package
+    !         of either a Responsible Party or a Citation.
+    call ESMF_AttributeSet(comp, 'ShortTitle', &
+     'Doe_2006', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
+    call ESMF_AttributeSet(comp, 'LongTitle', &
+     'Doe, J.A.; Doe, S.B.; ' // &
+     '2006 EarthSys: ' // &
+     'The Earth System High Resolution Global Model - ' // &
+     'Improvements in Atmosphere and Ocean modeling. ' // &
+     'Journal of Earth Modeling, 11 (3). 1021-1036.', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
+    call ESMF_AttributeSet(comp, 'Date', &
+     '2006-10-21', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
+    call ESMF_AttributeSet(comp, 'PresentationForm', &
+     'Online Refereed', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
+    call ESMF_AttributeSet(comp, 'DOI', &
+     'doi:11.1234/2006JCLI1357.1', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
+    call ESMF_AttributeSet(comp, 'URL', &
+     'http://www.earthsys.org/publications', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
   end subroutine user_init
