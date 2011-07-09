@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.9 2011/07/08 02:20:32 eschwab Exp $
+! $Id: user_model4.F90,v 1.10 2011/07/09 00:04:05 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,6 +123,9 @@ module user_model4
     call ESMF_AttributeSet(comp, 'LongName', &
                            'Ocean biogeochemistry component of EarthSys', &
       convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'Description', &
+      'The biogeochemistry component of the EarthSys ocean model.', &
+        convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2010-06-10T00:00:00Z', &
         convention=convCIM, purpose=purpComp, rc=rc)

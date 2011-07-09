@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.9 2011/07/08 02:20:32 eschwab Exp $
+! $Id: user_model3.F90,v 1.10 2011/07/09 00:04:05 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,6 +123,9 @@ module user_model3
     call ESMF_AttributeSet(comp, 'LongName', &
                            'Dynamical core of EarthSys_Atmos', &
       convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'Description', &
+      'The dynamical core of the EarthSys atmosphere model.', &
+        convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-10-31T23:59:59Z', &
         convention=convCIM, purpose=purpComp, rc=rc)

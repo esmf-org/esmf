@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.25 2011/07/08 02:20:32 eschwab Exp $
+! $Id: user_model2.F90,v 1.26 2011/07/09 00:04:05 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -122,6 +122,12 @@ module user_model2
     call ESMF_AttributeSet(comp, 'LongName', &
                            'Ocean component of EarthSys', &
       convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'Description', &
+      'The EarthSys ocean component uses a latitude-longitude grid ' // &
+      'with a zonal resolution of 2 degrees, and a meridional ' // &
+      'resolution of 2 degrees.  It has 30 evenly spaced levels in ' // &
+      'the vertical.  The timestep period is 1 hour.', &
+        convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2009-05-31T23:59:59Z', &
         convention=convCIM, purpose=purpComp, rc=rc)
