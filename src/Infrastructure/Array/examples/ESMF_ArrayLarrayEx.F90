@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.32 2011/06/30 05:58:28 theurich Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.33 2011/07/11 22:18:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -91,7 +91,8 @@ program ESMF_ArrayLarrayEx
 ! {\tt farrayP}s an {\tt ESMF\_LocalArray} object will be created on each PET.
 !EOE
 !BOC
-  larray = ESMF_LocalArrayCreate(farrayP, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
+  larray = ESMF_LocalArrayCreate(farrayP, &
+               datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -216,12 +217,12 @@ program ESMF_ArrayLarrayEx
   allocate(larrayList(2))   ! 2 DEs per PET
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 123.456d0
-  larrayList(1) = ESMF_LocalArrayCreate(farrayP, datacopyflag=ESMF_DATACOPY_REFERENCE, &
-    rc=rc) !1st DE
+  larrayList(1) = ESMF_LocalArrayCreate(farrayP, &
+    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc) !1st DE
   allocate(farrayP(4, 2))   ! without halo each DE is of size 4 x 2 
   farrayP = 456.789d0
-  larrayList(2) = ESMF_LocalArrayCreate(farrayP, datacopyflag=ESMF_DATACOPY_REFERENCE, &
-    rc=rc) !2nd DE  
+  larrayList(2) = ESMF_LocalArrayCreate(farrayP, &
+    datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc) !2nd DE  
 !EOC
 !BOE
 ! Notice that it is perfectly fine to {\em re}-use {\tt farrayP} for all
