@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.15 2011/07/05 20:27:59 theurich Exp $
+% $Id: ESMC_api.tex,v 1.16 2011/07/11 22:28:33 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -40,12 +40,15 @@ hold across the entire API.  These are:
 
 \begin{itemize}
 
-\item {\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()}, for
-creating and destroying objects of ESMC classes that require internal memory
+\item
+\begin{sloppypar}
+{\tt ESMC\_<Class>Create()} and {\tt ESMC\_<Class>Destroy()}, for
+creating and destroying objects of ESMF classes that require internal memory
 management (- called ESMF deep classes). The {\tt ESMC\_<Class>Create()} method
-allocates memory for the class structure itself and for internal variables, and
-initializes variables where appropriate.  It is always written as a Fortran
-function that returns a derived type instance of the class.
+allocates memory for the object itself and for internal variables, and
+initializes variables where appropriate.  It is always written as a
+function that returns a derived type instance of the class, i.e. an object.
+\end{sloppypar}
 
 \item 
 \begin{sloppypar}
@@ -133,7 +136,7 @@ highest level within ESMF.  {\tt <Type>} may be {\tt <Grid>}, for
 Gridded Components such as oceans or atmospheres, or
 {\tt <Cpl>}, for Coupler Components that are used to connect 
 them.  The content of these methods is not part of the ESMF.  
-Instead the methods call into associated Fortran subroutines within 
+Instead the methods call into associated subroutines within 
 user code.
 
 \end{itemize}
@@ -149,7 +152,7 @@ The main data classes offered by the ESMF C API, in order of increasing complexi
 \begin{itemize}
 \item {\bf Array} An ESMF Array is a distributed, multi-dimensional 
 array that can carry information such as its type, kind, rank, and 
-associated halo widths.  It contains a reference to a native Fortran array.
+associated halo widths.  It contains a reference to a native language array.
 \item {\bf Field}  A Field represents a physical scalar or vector field.
 It contains a reference to an Array along with grid information and metadata.
 \item {\bf State}  A State represents the collection of data that a 

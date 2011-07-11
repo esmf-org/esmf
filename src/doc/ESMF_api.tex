@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.55 2011/07/08 20:20:16 svasquez Exp $
+% $Id: ESMF_api.tex,v 1.56 2011/07/11 22:28:33 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,9 +45,9 @@ hold across the entire API.  These are:
 {\tt ESMF\_<Class>Create()} and {\tt ESMF\_<Class>Destroy()}, for
 creating and destroying objects of ESMF classes that require internal memory
 management (- called ESMF deep classes). The {\tt ESMF\_<Class>Create()} method
-allocates memory for the class structure itself and for internal variables, and
+allocates memory for the object itself and for internal variables, and
 initializes variables where appropriate.  It is always written as a Fortran
-function that returns a derived type instance of the class.
+function that returns a derived type instance of the class, i.e. an object.
 \end{sloppypar}
 
 \item 
@@ -132,14 +132,12 @@ methods that must bracket the use of ESMF within an application.
 They manage the resources required to run ESMF and shut it down
 gracefully.  ESMF does not support restarts in the same executable, i.e.
 {\tt ESMF\_Initialize()} should not be called after {\tt ESMF\_Finalize()}.
-\item {\tt ESMF\_<Type>CompInitialize()}, {\tt ESMF\_<Type>CompRun()}, and 
-
-{\tt ESMF\_<Type>CompFinalize()} are component methods that are used at the 
+\item {\tt ESMF\_<Type>CompInitialize()}, {\tt ESMF\_<Type>CompRun()}, and {\tt ESMF\_<Type>CompFinalize()} are component methods that are used at the 
 highest level within ESMF.  {\tt <Type>} may be {\tt <Grid>}, for 
 Gridded Components such as oceans or atmospheres, or
 {\tt <Cpl>}, for Coupler Components that are used to connect 
 them.  The content of these methods is not part of the ESMF.  
-Instead the methods call into associated Fortran subroutines within 
+Instead the methods call into associated subroutines within 
 user code.
 
 \end{itemize}
