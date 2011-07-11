@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.242 2011/07/06 00:00:24 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.243 2011/07/11 22:52:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.242 2011/07/06 00:00:24 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.243 2011/07/11 22:52:23 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -12272,23 +12272,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),          intent(in)            :: grid
-!     integer,                  intent(in)            :: coordDim
+!     type(ESMF_Grid),       intent(in)            :: grid
+!     integer,               intent(in)            :: coordDim
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc),   intent(in),  optional :: staggerloc
-!     integer,                  intent(in),  optional :: localDE
+!     type (ESMF_StaggerLoc) intent(in),  optional :: staggerloc
+!     integer,               intent(in),  optional :: localDE
 !     <pointer argument>, see below for supported values
-!     integer,                  intent(out), optional :: exclusiveLBound(:)
-!     integer,                  intent(out), optional :: exclusiveUBound(:)
-!     integer,                  intent(out), optional :: exclusiveCount(:)
-!     integer,                  intent(out), optional :: computationalLBound(:)
-!     integer,                  intent(out), optional :: computationalUBound(:)
-!     integer,                  intent(out), optional :: computationalCount(:)
-!     integer,                  intent(out), optional :: totalLBound(:)
-!     integer,                  intent(out), optional :: totalUBound(:)
-!     integer,                  intent(out), optional :: totalCount(:)
+!     integer,               intent(out), optional :: exclusiveLBound(:)
+!     integer,               intent(out), optional :: exclusiveUBound(:)
+!     integer,               intent(out), optional :: exclusiveCount(:)
+!     integer,               intent(out), optional :: computationalLBound(:)
+!     integer,               intent(out), optional :: computationalUBound(:)
+!     integer,               intent(out), optional :: computationalCount(:)
+!     integer,               intent(out), optional :: totalLBound(:)
+!     integer,               intent(out), optional :: totalUBound(:)
+!     integer,               intent(out), optional :: totalCount(:)
 !     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
-!     integer,                  intent(out), optional :: rc
+!     integer,               intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -14621,23 +14621,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),          intent(in)            :: grid
-!     type (ESMF_GridItem_Flag),intent(in)            :: itemflag
+!     type(ESMF_Grid),      intent(in)            :: grid
+!     type (ESMF_GridItem_Flag),intent(in)        :: itemflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc),   intent(in),  optional :: staggerloc
-!     integer,                  intent(in),  optional :: localDE
+!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+!     integer,              intent(in),  optional :: localDE
 !     <pointer argument>, see below for supported values
-!     integer,                  intent(out), optional :: exclusiveLBound(:)
-!     integer,                  intent(out), optional :: exclusiveUBound(:)
-!     integer,                  intent(out), optional :: exclusiveCount(:)
-!     integer,                  intent(out), optional :: computationalLBound(:)
-!     integer,                  intent(out), optional :: computationalUBound(:)
-!     integer,                  intent(out), optional :: computationalCount(:)
-!     integer,                  intent(out), optional :: totalLBound(:)
-!     integer,                  intent(out), optional :: totalUBound(:)
-!     integer,                  intent(out), optional :: totalCount(:)
+!     integer,              intent(out), optional :: exclusiveLBound(:)
+!     integer,              intent(out), optional :: exclusiveUBound(:)
+!     integer,              intent(out), optional :: exclusiveCount(:)
+!     integer,              intent(out), optional :: computationalLBound(:)
+!     integer,              intent(out), optional :: computationalUBound(:)
+!     integer,              intent(out), optional :: computationalCount(:)
+!     integer,              intent(out), optional :: totalLBound(:)
+!     integer,              intent(out), optional :: totalUBound(:)
+!     integer,              intent(out), optional :: totalCount(:)
 !     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
-!     integer,                  intent(out), optional :: rc
+!     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -17082,8 +17082,8 @@ endif
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
-      subroutine ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, array, &
-        keywordEnforcer, rc)
+      subroutine ESMF_GridGetItemIntoArray(grid, itemflag,  staggerloc, &
+        array, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),           intent(in)            :: grid
@@ -17173,21 +17173,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid),           intent(in)            :: grid
-      type (ESMF_GridItem_Flag), intent(in)            :: itemflag
+      type(ESMF_Grid),        intent(in)            :: grid
+      type (ESMF_GridItem_Flag), intent(in)         :: itemflag
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type (ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
-      integer,                   intent(in),  optional :: localDE
-      integer,        target,    intent(out), optional :: exclusiveLBound(:)
-      integer,        target,    intent(out), optional :: exclusiveUBound(:)
-      integer,        target,    intent(out), optional :: exclusiveCount(:)
-      integer,        target,    intent(out), optional :: computationalLBound(:)
-      integer,        target,    intent(out), optional :: computationalUBound(:)
-      integer,        target,    intent(out), optional :: computationalCount(:)
-      integer,        target,    intent(out), optional :: totalLBound(:)
-      integer,        target,    intent(out), optional :: totalUBound(:)
-      integer,        target,    intent(out), optional :: totalCount(:)
-      integer,                   intent(out), optional :: rc
+      type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
+      integer,                intent(in),  optional :: localDE
+      integer,        target, intent(out), optional :: exclusiveLBound(:)
+      integer,        target, intent(out), optional :: exclusiveUBound(:)
+      integer,        target, intent(out), optional :: exclusiveCount(:)
+      integer,        target, intent(out), optional :: computationalLBound(:)
+      integer,        target, intent(out), optional :: computationalUBound(:)
+      integer,        target, intent(out), optional :: computationalCount(:)
+      integer,        target, intent(out), optional :: totalLBound(:)
+      integer,        target, intent(out), optional :: totalUBound(:)
+      integer,        target, intent(out), optional :: totalCount(:)
+      integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
