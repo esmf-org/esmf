@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.158 2011/07/08 21:37:49 svasquez Exp $
+! $Id: ESMF_CplComp.F90,v 1.159 2011/07/11 21:16:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.158 2011/07/08 21:37:49 svasquez Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.159 2011/07/11 21:16:52 svasquez Exp $'
 
 !==============================================================================
 !
@@ -682,8 +682,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompGet(cplcomp, keywordEnforcer, configIsPresent, config, &
-    configFileIsPresent, configFile, clockIsPresent, clock, localPet, petCount, &
-    contextflag, currentMethod, currentPhase, vmIsPresent, vm, name, rc)
+    configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
+    petCount, contextflag, currentMethod, currentPhase, vmIsPresent, &
+    vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),      intent(in)            :: cplcomp
