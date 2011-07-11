@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.46 2011/07/11 20:54:55 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.47 2011/07/11 21:09:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -400,7 +400,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create an empty Field and complete it in
+!\subsubsection{Create an empty Field and complete it
 ! with FieldEmptySet and FieldEmptyComplete}
 !\label{sec:field:usage:partial_creation}
 !
