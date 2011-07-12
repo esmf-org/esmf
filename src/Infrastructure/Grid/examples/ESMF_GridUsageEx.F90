@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.101 2011/07/06 00:00:22 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.102 2011/07/12 19:25:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -514,13 +514,13 @@ if (petCount .le. 6) then
    ! been set, so it defaults to (1,1,...). The default is to 
    ! divide the index range as equally as possible among the DEs
    ! specified in regDecomp. This behavior can be changed by 
-   ! specifying decompFlag. 
+   ! specifying decompFlag. Since the coordinate system is
+   ! not specified, it defaults to ESMF_COORDSYS_SPH_DEG.
    !-------------------------------------------------------------------
    grid2D=ESMF_GridCreate1PeriDim(          &
          ! Define a regular distribution
          maxIndex=(/360,180/), & ! define index space
          regDecomp=(/2,3/),  & ! define how to divide among DEs
-         coordSys=ESMF_COORDSYS_CART, &
          ! Specify mapping of coords dim to Grid dim
          coordDep1=(/1/), & ! 1st coord is 1D and depends on 1st Grid dim
          coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
