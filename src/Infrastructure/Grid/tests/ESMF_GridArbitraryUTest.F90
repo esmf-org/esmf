@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.35 2011/07/02 05:54:08 oehmke Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.36 2011/07/13 04:11:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.35 2011/07/02 05:54:08 oehmke Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.36 2011/07/13 04:11:03 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -593,7 +593,7 @@ program ESMF_GridArbitraryUTest
   grid = ESMF_GridCreateNoPeriDim(coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
-    coordDep3=(/ESMF_ARBDIM,3/), name="arbgrid", rc=rc)
+    coordDep3=(/ESMF_DIM_ARB,3/), name="arbgrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 	
@@ -1171,7 +1171,7 @@ program ESMF_GridArbitraryUTest
   call ESMF_GridEmptyComplete(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
-	distDim=(/1,3/), coordDep2=(/ESMF_ARBDIM, 2/), rc=rc)
+	distDim=(/1,3/), coordDep2=(/ESMF_DIM_ARB, 2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! get info back from grid
@@ -1399,7 +1399,7 @@ program ESMF_GridArbitraryUTest
   call ESMF_GridEmptyComplete(grid, name="arbgrid", coordTypeKind=ESMF_TYPEKIND_R8, &
 	minIndex=(/1,1,1/), maxIndex=(/xdim, zdim, ydim/), &
 	arbIndexList=localIndices,arbIndexCount=localCount, &
-	distDim=(/1,3/), coordDep2=(/ESMF_ARBDIM, 2/), rc=rc)
+	distDim=(/1,3/), coordDep2=(/ESMF_DIM_ARB, 2/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! get info back from grid

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.102 2011/07/12 19:25:38 oehmke Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.103 2011/07/13 04:10:59 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1001,8 +1001,8 @@ endif
    !-------------------------------------------------------------------
    ! Create the Grid:  Allocate space for the Grid object.  
    ! the minIndex hasn't been set, so it defaults to (1,1,...). The
-   ! default coordDep1 and coordDep2 are (/ESMF_ARBDIM/) where 
-   ! ESMF_ARBDIM represents the collapsed dimension for the 
+   ! default coordDep1 and coordDep2 are (/ESMF_DIM_ARB/) where 
+   ! ESMF_DIM_ARB represents the collapsed dimension for the 
    ! arbitrarily distributed grid dimensions.  For the undistributed
    ! grid dimension, the default value for coordDep3 is (/3/).  The
    ! default values for coordDepX in the arbitrary distribution are
@@ -1367,7 +1367,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 
 !BOE
 ! For an arbitrarily distributed grid, the default value of a coordinate
-! array dimension is {\tt ESMF\_ARBDIM} if the index dimension is arbitrarily
+! array dimension is {\tt ESMF\_DIM\_ARB} if the index dimension is arbitrarily
 ! distributed and is {\tt n} where {\tt n} is the index dimension itself when it is not
 ! distributed. The following call is equivalent to the example in 
 ! Section \ref{example:ArbGridWithUndistDim} 
@@ -1378,8 +1378,8 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 	    maxIndex = (/xdim, ydim, zdim/), &
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount,	 &
- 	    coordDep1 = (/ESMF_ARBDIM/), &
-	    coordDep2 = (/ESMF_ARBDIM/), &
+ 	    coordDep1 = (/ESMF_DIM_ARB/), &
+	    coordDep2 = (/ESMF_DIM_ARB/), &
 	    coordDep3 = (/3/), &
             rc=rc)
 !EOC 
@@ -1401,9 +1401,9 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 	    maxIndex = (/xdim, ydim, zdim/), &
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount,	 &
- 	    coordDep1 = (/ESMF_ARBDIM, 3/), &
-	    coordDep2 = (/ESMF_ARBDIM, 3/), &
-	    coordDep3 = (/ESMF_ARBDIM, 3/), &
+ 	    coordDep1 = (/ESMF_DIM_ARB, 3/), &
+	    coordDep2 = (/ESMF_DIM_ARB, 3/), &
+	    coordDep3 = (/ESMF_DIM_ARB, 3/), &
             rc=rc)
 !EOC 
 
