@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.19 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC.F90,v 1.20 2011/07/19 23:54:18 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -333,24 +333,29 @@ module NUOPC
   subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                    :: comp
-    character(*), intent(inout)           :: cplList(:)
-    integer,      intent(inout)           :: cplListSize
-    integer,      intent(out), optional   :: rc
+    character(*), intent(out),   optional :: cplList(:)
+    integer,      intent(out),   optional :: cplListSize
+    integer,      intent(out),   optional :: rc
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)  :: defaultvalue
-    
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
-      itemCount=cplListSize, &
-      convention="NUOPC", purpose="General", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (present(cplList)) then
+      call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_AttributeGet(comp, name="CplList", &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------

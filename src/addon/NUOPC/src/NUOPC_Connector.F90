@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.13 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.14 2011/07/19 23:54:18 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -152,7 +152,7 @@ module NUOPC_Connector
     ! local variables
     type(ESMF_StateIntent_Flag)                  :: isType, esType
     integer                               :: isItemCount, esItemCount
-    character(ESMF_MAXSTR)                :: cplList(100) !TODO make dynamic
+    character(ESMF_MAXSTR), pointer       :: cplList(:)
     integer                               :: cplListSize, i, j
     character(ESMF_MAXSTR), pointer       :: importStdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: importStdItemNameList(:)
@@ -221,8 +221,23 @@ module NUOPC_Connector
     endif
     
     ! get the cplList Attribute
-    cplListSize=100
-    call NUOPC_CplCompAttributeGet(cplcomp, cplList, cplListSize, rc=rc)
+    call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    allocate(cplList(cplListSize), stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal cplList() failed.", &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -354,6 +369,8 @@ module NUOPC_Connector
         file=FILENAME)) &
         return  ! bail out
     endif
+
+    deallocate(cplList)
 
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
     if (associated(importStdItemNameList)) deallocate(importStdItemNameList)
