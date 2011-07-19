@@ -1,4 +1,4 @@
-! $Id: NUOPC_MediatorExplicit.F90,v 1.5 2011/06/30 06:00:03 theurich Exp $
+! $Id: NUOPC_MediatorExplicit.F90,v 1.6 2011/07/19 22:16:53 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_MediatorExplicit.F90"
 
@@ -37,7 +37,7 @@ module NUOPC_MediatorExplicit
     
     ! SetServices of generic component deriving from
     call ModelExB_routine_SS(gcomp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -45,7 +45,7 @@ module NUOPC_MediatorExplicit
     ! Override InitP2 -> compatibility checking
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP2, phase=2, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -53,7 +53,7 @@ module NUOPC_MediatorExplicit
     ! Override InitP3 -> data initialize callback + initial time stamping
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP3, phase=3, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -61,7 +61,7 @@ module NUOPC_MediatorExplicit
     ! Specialize Run -> checking import Fields
     call ESMF_MethodAdd(gcomp, label=ModelExB_label_CheckImport, &
       userRoutine=CheckImport, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -83,12 +83,12 @@ module NUOPC_MediatorExplicit
 
     ! set the internal clock to the parent clock
     call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! query if all import Fields are connected
     allConnected = NUOPC_StateIsAllConnected(importState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -141,12 +141,12 @@ module NUOPC_MediatorExplicit
     
     ! update timestamp on export Fields
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     call NUOPC_StateSetTimestamp(exportState, internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -168,14 +168,14 @@ module NUOPC_MediatorExplicit
     
     ! query the Component for its clock and importState
     call ESMF_GridCompGet(gcomp, clock=clock, importState=importState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
 
     ! check that Fields in the importState show correct timestamp
     allCurrent = NUOPC_StateIsCurrentTimestamp(importState, clock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out

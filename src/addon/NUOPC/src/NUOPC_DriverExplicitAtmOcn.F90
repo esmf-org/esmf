@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.7 2011/06/30 06:00:03 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.8 2011/07/19 22:16:53 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
 
@@ -57,7 +57,7 @@ module NUOPC_DriverExplicitAtmOcn
     
     ! NUOPC_DriverExplicit registers the generic methods
     call DrivEx_routine_SS(gcomp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -65,19 +65,19 @@ module NUOPC_DriverExplicitAtmOcn
     ! attach specializing method(s)
     call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelCount, &
       userRoutine=SetModelCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelServices, &
       userRoutine=SetModelServices, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     call ESMF_MethodAdd(gcomp, label=DrivEx_label_Finalize, &
       userRoutine=Finalize, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -98,7 +98,7 @@ module NUOPC_DriverExplicitAtmOcn
     ! query Component for super internal State
     nullify(superIS%wrap)
     call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -124,7 +124,7 @@ module NUOPC_DriverExplicitAtmOcn
     ! query Component for super internal State
     nullify(superIS%wrap)
     call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -138,7 +138,7 @@ module NUOPC_DriverExplicitAtmOcn
       rcToReturn=rc)) &
       return  ! bail out
     call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -219,7 +219,7 @@ module NUOPC_DriverExplicitAtmOcn
     ! query Component for this internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
