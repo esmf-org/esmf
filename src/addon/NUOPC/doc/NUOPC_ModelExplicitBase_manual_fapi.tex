@@ -32,18 +32,18 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: NUOPC\_ModelExplicit.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+\markboth{Left}{Source File: NUOPC\_ModelExplicitBase.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
 }
 
 \bigskip{\sf MODULE:}
-\begin{verbatim}  module NUOPC_ModelExplicit
+\begin{verbatim}  module NUOPC_ModelExplicitBase
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
 Model component that is driven by explicit time stepping. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
 
 \bigskip{\sf SUPER:}
-\begin{verbatim}  NUOPC_ModelExplicitBase
+\begin{verbatim}  ESMF_GridComp
 \end{verbatim}
 
 \bigskip{\sf USE DEPENDENCIES:}
@@ -66,26 +66,19 @@ Model component that is driven by explicit time stepping. Each time the {\tt Run
   \begin{itemize}
   \item Realize advertised Fields in import and export States by providing actual Fields.
   \end{itemize}  
-\item phase 2: {\sc Provided:}
-  \begin{itemize}
-  \item Set the model internal Clock. {\it Optional specialization:} {\tt label\_SetClock}
-  \item Check compatibility.
-  \end{itemize}  
-\item phase 3. {\sc Provided:}
-  \begin{itemize}
-  \item Initialize export Fields. {\it Optional specialization:} {\tt label\_DataInitialize}
-  \item Time stamp Fields in import and export States.
-  \end{itemize}    
+\item phase 2: {\sc Optional override}
+\item phase 3. {\sc Optional override}
 \end{itemize}
 
 \bigskip{\sf RUN:}
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
-  \item Check clocks and timestamps.
+  \item Check clocks.
+  \item Check Fields in import State. {\it Optional specialization:} {\tt label\_CheckImport}
   \item Advance model. {\it Required specialization:} {\tt label\_Advance}
   \item Update internal clock.
-  \item Timestamp Fields in export State.
+  \item Timestamp Fields in export State. {\it Optional specialization:} {\tt label\_TimestampExport}
   \end{itemize}    
 \end{itemize}
 

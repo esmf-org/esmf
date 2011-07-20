@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.4 2011/05/18 19:15:19 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.5 2011/07/20 20:01:24 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -77,9 +77,9 @@
 
 \subsection{Generic Component API: NUOPC\_DriverExplicit}
 #ifdef STANDALONE
-%\input{NUOPC_DriverExplicit_fapi}
+\input{NUOPC_DriverExplicit_manual_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_DriverExplicit_fapi}
+\input{../addon/NUOPC/doc/NUOPC_DriverExplicit_manual_fapi}
 #endif
 
 \subsection{Generic Component API: NUOPC\_DriverExplicitAtmOcn}
@@ -105,9 +105,9 @@
 
 \subsection{Generic Component API: NUOPC\_ModelExplicitBase}
 #ifdef STANDALONE
-%\input{NUOPC_ModelExplicitBase_manual_fapi}
+\input{NUOPC_ModelExplicitBase_manual_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_ModelExplicitBase_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_ModelExplicitBase_manual_fapi}
 #endif
 
 \subsection{Generic Component API: NUOPC\_MediatorExplicit}
