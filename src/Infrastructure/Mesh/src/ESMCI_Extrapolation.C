@@ -1,4 +1,4 @@
-// $Id: ESMCI_Extrapolation.C,v 1.13 2011/02/23 18:53:49 oehmke Exp $
+// $Id: ESMCI_Extrapolation.C,v 1.14 2011/07/20 20:19:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.13 2011/02/23 18:53:49 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Extrapolation.C,v 1.14 2011/07/20 20:19:20 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -840,9 +840,9 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
     // plus associated edge structures
     //// Allocate lists
     std::vector<UInt> ordered_node_ids;
-    ordered_node_ids.reserve(num_pole_elems);
+    ordered_node_ids.resize(num_pole_elems,0);
     std::vector<EEdge *> ordered_eedge;
-    ordered_eedge.reserve(num_pole_elems);
+    ordered_eedge.resize(num_pole_elems,NULL);
 
     //// Get map iterators
     EEdge_Map::iterator pemi=pole_edge_map.begin();
@@ -1356,11 +1356,11 @@ void MeshAddNorthPole(Mesh &mesh, UInt node_id,
     // plus associated edge structures
     //// Allocate lists
     std::vector<UInt> ordered_node_ids;
-    ordered_node_ids.reserve(num_pole_elems);
+    ordered_node_ids.resize(num_pole_elems,0);
     std::vector<MeshObj *> ordered_node_ptrs;
-    ordered_node_ptrs.reserve(num_pole_elems);
+    ordered_node_ptrs.resize(num_pole_elems,NULL);
     std::vector<EEdge *> ordered_eedge;
-    ordered_eedge.reserve(num_pole_elems);
+    ordered_eedge.resize(num_pole_elems,NULL);
 
     //// Get map iterators
     EEdge_Map::iterator pemi=pole_edge_map.begin();
