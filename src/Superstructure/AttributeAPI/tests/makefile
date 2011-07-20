@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2011/06/03 22:17:52 rokuingh Exp $ 
+# $Id: makefile,v 1.14 2011/07/20 20:33:37 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -32,6 +32,7 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeGridUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
+		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
 		RUN_ESMF_AttributeUpdate2UTest \
 		RUN_ESMF_AttributeXMLUTest \
 		RUN_ESMF_AttReadCplCompUTest \
@@ -158,6 +159,9 @@ RUN_ESMF_AttReadGridCompUTestUNI:
 RUN_ESMF_AttributeUpdateUTest:
 	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
 
+RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
+	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest
+
 RUN_ESMF_AttributeUpdate2UTest:
 	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
 
@@ -184,5 +188,3 @@ RUN_ESMF_AttributeStateUTest:
 
 RUN_ESMF_AttributeStateUTestUNI:
 	$(MAKE) TNAME=AttributeState NP=1 ftest
-
-
