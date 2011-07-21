@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Grid.C,v 1.124 2011/07/06 18:01:47 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.125 2011/07/21 21:40:31 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.124 2011/07/06 18:01:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.125 2011/07/21 21:40:31 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -6852,67 +6852,15 @@ int GridIter::getGlobalID(
   // if done then leave
   if (done) return -1;
 
-
-#if 0 // Wait on Gerhards getSequenceIndexLocalDe Fix
   // Convert to DE based
   for (int i=0; i<rank; i++) {
     deBasedInd[i]=curInd[i]-exLBndInd[i];
   }
-
-  //  printf("curDE=%d Ind=%d %d \n",curDE,deBasedInd[0],deBasedInd[1]);
-
+  
   // return sequence index
-  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
-
-  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
-#else
-
-#if 0
-  if (grid->isForceConn()) {
-    // Temporarily handle periodicity until GT's permenant solution
-    for (int i=0; i<rank; i++) {
-      deBasedInd[i]=curInd[i];
-      
-      if ((curInd[i]==lBndInd[i]) &&
-          (connL[i]==ESMC_GRIDCONN_PERIODIC) && 
-          grid->isLBndNT(curDE,i)) {
-        
-        deBasedInd[i]=maxInd[i];
-      } 
-      
-      if ((curInd[i]==uBndInd[i]) &&
-          (connU[i]==ESMC_GRIDCONN_PERIODIC) && 
-          grid->isUBndNT(curDE,i)) {
-        
-        deBasedInd[i]=minInd[i];
-      }
-    }
-
-    // NOTE THAT THIS ONLY WORKS FOR SINGLE TILE GRIDS WITH GLOBAL INDEXING
-    gid=staggerDistgrid->getSequenceIndexTile(1,deBasedInd,0,&localrc); 
-     
-  } else {
-#endif
-    // Convert to DE based
-    for (int i=0; i<rank; i++) {
-      deBasedInd[i]=curInd[i]-exLBndInd[i];
-    }
-      
-    // return sequence index
-    //    gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
-
-    gid=staggerDistgrid->getSequenceIndexTile(1,curInd,6,&localrc);
-
-
-
-    if (gid <0) printf("GI Gid=%d curDE=%d curInd=%d %d dstBInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
-
-#if 0
-
-  }
-#endif
-  //  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,curInd[0],curInd[1],localrc);
-#endif
+  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
+  
+  //    if (gid <0) printf("GI Gid=%d curDE=%d curInd=%d %d dstBInd=%d %d localrc=%d ESMC_SUCCESS=%d \n",gid,curDE,curInd[0],curInd[1],deBasedInd[0],deBasedInd[1],localrc,ESMF_SUCCESS);
 
   return gid;
 
@@ -7918,49 +7866,15 @@ int GridCellIter::getGlobalID(
   if (done) return -1;
 
 
-#if 0 // Wait on Gerhards getSequenceIndexLocalDe Fix
-  // Convert to DE based
-  for (int i=0; i<rank; i++) {
-    deBasedInd[i]=curInd[i]-exLBndInd[i];
-  }
-
-  // return sequence index
-  gid=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,&localrc);
-
-  if (gid <0) printf("Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
-#else
-
-#if 0  
-  if (grid->isForceConn()) {
-    // Temporarily handle periodicity until GT's permenant solution
-
-    // TODO: There is an assumption here that the center and the stagger that this iterator
-    // was created on have the same align. This problem will go away when we put in the 
-    // the topo stuff, becasue then we will be doing stuff relative to the bottom of the DE, but
-    // if this change doesn't happen, then need to take care of that. 
-    gid=centerDistgrid->getSequenceIndexTile(1,curInd,0,&localrc);
-  } else {
-#endif
-
-
     // Convert to DE based
     for (int i=0; i<rank; i++) {
       deBasedInd[i]=curInd[i]-exLBndInd[i];
     }
       
     // return sequence index
-    // gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
+    gid=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,6,&localrc);
 
-    gid=centerDistgrid->getSequenceIndexTile(1,curInd,6,&localrc);
-
-    if (gid <0) printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
-
-#if 0
-
-  }
-#endif
-#endif
-
+    // if (gid <0) printf("GCI Gid=%d curDE=%d Ind=%d %d localrc=%d \n",gid,curDE,deBasedInd[0],deBasedInd[1],localrc);
 
   // return sequence index
   return gid;
