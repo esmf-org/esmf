@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------
-!ESMF_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !BOP
@@ -77,28 +77,14 @@ program ESMF_AttributeSTest
   endif
 
 
-  if (petCount .lt. 6) then
-    ! Create the 2 model components and coupler on a single PET
-    cname1 = "user model 1"
-    ! use petList to define comp1 on PET 0
-    comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0/), rc=rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    cname2 = "Finite_Volume_Dynamical_Core"
-    ! use petList to define comp2 on PET 0
-    comp2 = ESMF_GridCompCreate(name=cname2, petList=(/0/), rc=rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    cplname = "user coupler"
-    ! use petList to define cplcomp on PET 0
-    cplcomp = ESMF_CplCompCreate(name=cplname, petList=(/0/), rc=rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+   ! Check for correct number of PETs
+  if ( petCount < 6 ) then
+     call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+         msg="This system test does not run on fewer than 6 PETs.",&
+         ESMF_CONTEXT, rcToReturn=rc)
+     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+   endif
 
-  else
     ! Create the 2 model components and coupler on 6 PETs
     cname1 = "user model 1"
     ! use petList to define comp1 on PETs 0,1,2
@@ -118,8 +104,6 @@ program ESMF_AttributeSTest
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

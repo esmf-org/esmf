@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2009/07/06 23:43:41 rokuingh Exp $ 
+# $Id: makefile,v 1.8.6.1 2011/07/22 16:50:30 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -17,8 +17,7 @@ SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
 SYSTEM_TESTS_RUN      = RUN_Attribute
 
-SYSTEM_TESTS_RUN_UNI  = RUN_AttributeUNI
-
+SYSTEM_TESTS_RUN_UNI  =
 
 ESMF_AttributeSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -33,6 +32,3 @@ CLOBBERDIRS =
 
 RUN_Attribute:
 	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=Attribute NP=6 stest
-
-RUN_AttributeUNI:
-	$(MAKE) TNAME=Attribute NP=1 stest
