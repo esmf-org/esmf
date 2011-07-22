@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.343 2011/07/07 01:44:11 theurich Exp $
+#  $Id: common.mk,v 1.343.2.1 2011/07/22 16:55:41 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2738,6 +2738,7 @@ doc:  chkdir_doc
 	@echo "=========================================" 
 	@if [ ! -d $(ESMF_DIR)/src/doc ] ; then \
           echo "*** This version of the ESMF source tree does not contain documentation files. Please see http://www.earthsystemmodeling.org/ for ESMF documentation." ; \
+          $(ESMF_RM) $(ESMF_DOCDIR) ; \
           $(MAKE) err; \
         fi;
 	cd $(ESMF_DIR)/src/doc ;\
