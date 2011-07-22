@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.49 2010/04/12 22:15:11 oehmke Exp $ 
+# $Id: makefile,v 1.50 2011/07/22 14:42:35 feiliu Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -13,12 +13,11 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldSphereRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldMeshRegridEx \
                  $(ESMF_EXDIR)/ESMF_FieldRepDimEx \
-                 $(ESMF_EXDIR)/ESMF_FieldArbGridEx
-#                 $(ESMF_EXDIR)/ESMF_FieldGetEx
-#                 $(ESMF_EXDIR)/ESMF_FieldSetEx
-#                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
-#                 $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
-#                 $(ESMF_EXDIR)/ESMF_FieldWriteEx
+                 $(ESMF_EXDIR)/ESMF_FieldArbGridEx \
+                 $(ESMF_EXDIR)/ESMF_FieldCommEx \
+                 $(ESMF_EXDIR)/ESMF_FieldRedistEx \
+                 $(ESMF_EXDIR)/ESMF_FieldSMMEx \
+                 $(ESMF_EXDIR)/ESMF_FieldHaloEx
 
 EXAMPLES_RUN = run_ESMF_FieldCreateEx \
                run_ESMF_FieldEx \
@@ -27,7 +26,11 @@ EXAMPLES_RUN = run_ESMF_FieldCreateEx \
                run_ESMF_FieldSphereRegridEx \
                run_ESMF_FieldMeshRegridEx \
                run_ESMF_FieldRepDimEx \
-               run_ESMF_FieldArbGridEx
+               run_ESMF_FieldArbGridEx \
+               run_ESMF_FieldCommEx \
+               run_ESMF_FieldRedistEx \
+               run_ESMF_FieldSMMEx \
+               run_ESMF_FieldHaloEx
 
 EXAMPLES_RUN_UNI = run_ESMF_FieldArbGridEx_uni
 
@@ -94,47 +97,30 @@ run_ESMF_FieldArbGridEx_uni:
 	$(MAKE) EXNAME=FieldArbGrid NP=1 exfrun
 
 #
-# ESMF_FieldGetEx
+# ESMF_FieldCommEx
 #
-run_ESMF_FieldGetEx:
-	$(MAKE) EXNAME=FieldGet NP=4 exfrun
-run_ESMF_FieldGetEx_uni:
-	echo "PASS: ESMF_FieldGetEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldGetEx.stdout
+run_ESMF_FieldCommEx:
+	$(MAKE) EXNAME=FieldComm NP=4 exfrun
+
 
 #
-# ESMF_FieldSetEx
+# ESMF_FieldRedistEx
 #
-run_ESMF_FieldSetEx:
-	$(MAKE) EXNAME=FieldSet NP=4 exfrun
-run_ESMF_FieldSetEx_uni:
-	echo "PASS: ESMF_FieldSetEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldSetEx.stdout
+run_ESMF_FieldRedistEx:
+	$(MAKE) EXNAME=FieldRedist NP=4 exfrun
+
 
 #
-# ESMF_FieldFromUserEx
+# ESMF_FieldSMMEx
 #
-ESMF_EXAMPLE_FieldFromUser_OBJS = UserCodeMod.o
-ESMF_FieldFromUserEx.o	: UserCodeMod.o
+run_ESMF_FieldSMMEx:
+	$(MAKE) EXNAME=FieldSMM NP=4 exfrun
 
-run_ESMF_FieldFromUserEx:
-	$(MAKE) EXNAME=FieldFromUser NP=6 exfrun
-
-run_ESMF_FieldFromUserEx_uni:
-	echo "PASS: ESMF_FieldFromUserEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
 
 #
-# ESMF_FieldGlobalEx
+# ESMF_FieldHaloEx
 #
-run_ESMF_FieldGlobalEx:
-	$(MAKE) EXNAME=FieldGlobal NP=6 exfrun
+run_ESMF_FieldHaloEx:
+	$(MAKE) EXNAME=FieldHalo NP=4 exfrun
 
-run_ESMF_FieldGlobalEx_uni:
-	echo "PASS: ESMF_FieldGlobalEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldGlobalEx.stdout
 
-#
-# ESMF_FieldWriteEx
-#
- run_ESMF_FieldWriteEx:
-	$(MAKE) EXNAME=FieldWrite NP=4 exfrun
-
- run_ESMF_FieldWriteEx_uni:
-	$(MAKE) EXNAME=FieldWrite NP=1 exfrun

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.85 2011/05/06 19:02:56 feiliu Exp $ 
+# $Id: makefile,v 1.86 2011/07/22 14:44:19 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,7 +7,7 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = \
-                $(ESMF_TESTDIR)/ESMF_FieldUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
@@ -16,7 +16,14 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldIOUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridXGUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridXGOnlineUTest \
-		$(ESMF_TESTDIR)/ESMF_FieldStressUTest
+		$(ESMF_TESTDIR)/ESMF_FieldStressUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldGatherUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldRedistUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldLSSMMUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldSMMUTest   \
+    $(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
+    $(ESMF_TESTDIR)/ESMF_FieldHaloUTest
                
 TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
@@ -27,14 +34,22 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldStressUTest \
 		RUN_ESMF_FieldRegridXGUTest \
 		RUN_ESMF_FieldRegridXGOnlineUTest \
-		RUN_ESMC_FieldUTest
+		RUN_ESMC_FieldUTest \
+    RUN_ESMF_FieldGatherUTest \
+    RUN_ESMF_FieldRedistUTest \
+    RUN_ESMF_FieldLSSMMUTest \
+    RUN_ESMF_FieldSMMUTest   \
+    RUN_ESMF_FieldRedistArbUTest \
+    RUN_ESMF_FieldMeshSMMUTest \
+    RUN_ESMF_FieldHaloUTest
 
 TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
                 RUN_ESMF_FieldRegridUTestUNI \
                 RUN_ESMF_FieldRegridCsrvUTestUNI \
                 RUN_ESMF_FieldArbGridUTestUNI \
                 RUN_ESMF_FieldRegridXGOnlineUTestUNI \
-                RUN_ESMC_FieldUTestUNI
+                RUN_ESMC_FieldUTestUNI \
+                RUN_ESMF_FieldRedistArbUTestUNI
 
 #
 # check ESMF_TESTHARNESS_FIELD for default, 
@@ -115,6 +130,34 @@ RUN_ESMF_FieldStressUTest:
 
 RUN_ESMF_FieldStressUTestUNI:
 	$(MAKE) TNAME=FieldStress NP=1 ftest
+
+#
+# FieldComm
+#
+
+RUN_ESMF_FieldGatherUTest:
+	$(MAKE) TNAME=FieldGather NP=4 ftest
+
+RUN_ESMF_FieldRedistUTest:
+	$(MAKE) TNAME=FieldRedist NP=4 ftest
+
+RUN_ESMF_FieldRedistArbUTest:
+	$(MAKE) TNAME=FieldRedistArb NP=4 ftest
+
+RUN_ESMF_FieldRedistArbUTestUNI:
+	$(MAKE) TNAME=FieldRedistArb NP=1 ftest
+
+RUN_ESMF_FieldLSSMMUTest:
+	$(MAKE) TNAME=FieldLSSMM NP=4 ftest
+
+RUN_ESMF_FieldMeshSMMUTest:
+	$(MAKE) TNAME=FieldMeshSMM NP=4 ftest
+
+RUN_ESMF_FieldSMMUTest:
+	$(MAKE) TNAME=FieldSMM NP=4 ftest
+
+RUN_ESMF_FieldHaloUTest:
+	$(MAKE) TNAME=FieldHalo NP=4 ftest
 
 #
 # TestHarness tests

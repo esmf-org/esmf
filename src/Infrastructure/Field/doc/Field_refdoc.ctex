@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.61 2011/06/30 20:13:48 feiliu Exp $
+% $Id: Field_refdoc.ctex,v 1.62 2011/07/22 14:45:22 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -60,10 +60,10 @@
 \input{ESMF_FieldRegridEx_fapi}
 \input{ESMF_FieldRegridMaskEx_fapi}
 \input{ESMF_FieldMeshRegridEx_fapi}
-\input{../../FieldComm/doc/ESMF_FieldCommEx_fapi}
-\input{../../FieldComm/doc/ESMF_FieldRedistEx_fapi}
-\input{../../FieldComm/doc/ESMF_FieldSMMEx_fapi}
-\input{../../FieldComm/doc/ESMF_FieldHaloEx_fapi}
+\input{ESMF_FieldCommEx_fapi}
+\input{ESMF_FieldRedistEx_fapi}
+\input{ESMF_FieldSMMEx_fapi}
+\input{ESMF_FieldHaloEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_usage}
 \input{../Infrastructure/Field/doc/ESMF_FieldEx_fapi}
@@ -73,10 +73,10 @@
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegridMaskEx_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldMeshRegridEx_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldCommEx_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldRedistEx_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldSMMEx_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldHaloEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldCommEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldRedistEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldSMMEx_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldHaloEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
