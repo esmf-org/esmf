@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.15 2011/07/04 05:11:13 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.15.2.1 2011/07/22 16:45:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -70,7 +70,7 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    call test_regrid2xg_online(10,10,14,14,0.1,0.1,0.06,0.06,tag='medium size test', &
+    call test_regrid2xg_online(10,10,14,14,0.1,0.1,0.06,0.06,tag='medium size test A1', &
       maxnpet=4, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
@@ -102,7 +102,7 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    call test_regrid2xg_online(80,80,40,40,0.5,0.5,1.,1.,tag='exact large test', &
+    call test_regrid2xg_online(80,80,40,40,0.5,0.5,1.,1.,tag='exact large test A2', &
       maxnpet=8, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
@@ -143,7 +143,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xgSph(10,20,20,20,1.,1.,0.5,1.,-165.,30.,-165.,30., &
-      maxnpet=8, tag='medium regional sphere cut', rc=rc)
+      maxnpet=8, tag='medium regional sphere cut B1', rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -167,7 +167,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xgSph(40,40,80,80,1.,1.,0.6,0.6,-165.,30.,-168.,25., &
-      tag='large regional sphere overlap', rc=rc)
+      tag='large regional sphere overlap B2', rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -183,7 +183,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xgSph(45,45,90,90,8.,4.,4.,2.,-180.,-90.,0.,-90., &
-      scheme=ESMF_REGRID_SCHEME_FULL3D, tag='large full sphere cut', rc=rc)
+      scheme=ESMF_REGRID_SCHEME_FULL3D, tag='large full sphere cut C1', rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid and regrid through xgrid, full spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -200,7 +200,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xgSph(60,60,90,90,6.,3.,4.,2.,-180.,-90.,0.,-90., &
-      scheme=ESMF_REGRID_SCHEME_FULL3D, tag='large full sphere latlonclip', rc=rc)
+      scheme=ESMF_REGRID_SCHEME_FULL3D, tag='large full sphere latlonclip C2', rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid and regrid through xgrid, full spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -244,15 +244,14 @@ contains
     integer                         :: gn(2), simax, dimax, l_minnpet, l_maxnpet
     real(ESMF_KIND_R8), pointer     :: atm(:,:), ocn(:,:), exf(:), xArea(:), xFrac(:)
     real(ESMF_KIND_R8), pointer     :: srcFracPtr(:,:), dstFracPtr(:,:)
-    real(ESMF_KIND_R8), pointer     :: srcArea(:,:), dstArea(:,:)
-    real(ESMF_KIND_R8), pointer     :: srcAreaTmp(:), dstAreaTmp(:)
+    real(ESMF_KIND_R8), pointer     :: srcAreaPtr(:,:), dstAreaPtr(:,:)
     type(ESMF_RouteHandle)          :: rh_a2o, rh_o2a, rh_a2x, rh_x2o, rh_o2x, rh_x2a
     type(ESMF_DistGrid)             :: distgridM, distgrid1, distgrid2
     type(ESMF_XGridSpec)            :: sparseMat(1)
 
     type(ESMF_Field)                :: fa_atm, fa_ocn, fa_xgrid
     type(ESMF_Field)                :: aa_atm, aa_ocn, aa_xgrid
-    type(ESMF_Field)                :: srcFrac, dstFrac
+    type(ESMF_Field)                :: srcFrac, dstFrac, srcArea, dstArea
     type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid
     real(ESMF_KIND_R8)              :: srcsum(3), allsrcsum(3), dstFlux_reg, dstFlux, error
     integer                         :: eleCount, totCount(1)
@@ -448,6 +447,16 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    srcArea = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dstArea = ESMF_FieldCreate(grid_ocn, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     call ESMF_FieldRegridStore(srcField=f_atm, dstField=f_ocn, &
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       routehandle=rh_a2o, &
@@ -491,13 +500,11 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 1
     ! make sure serialize and deserialize works
     call checkProxy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
 
     ! useful statistics
     call ESMF_XGridGet(xgrid, localDE=0, elementCount=eleCount, rc=localrc)
@@ -552,19 +559,27 @@ contains
     !print *, 'src: ', srcFracPtr(:,1)
     !print *, 'dst: ', dstFracPtr
 
-    allocate(srcAreaTmp(size(srcFracPtr,1)*size(srcFracPtr, 2)))
-    allocate(dstAreaTmp(size(dstFracPtr,1)*size(dstFracPtr, 2)))
-    allocate(srcArea(lbound(srcFracPtr,1):ubound(srcFracPtr, 1), &
-      lbound(srcFracPtr, 2):ubound(srcFracPtr, 2)))
-    allocate(dstArea(lbound(dstFracPtr,1):ubound(dstFracPtr, 1), &
-      lbound(dstFracPtr, 2):ubound(dstFracPtr, 2)))
-    mesh_atm = ESMF_GridToMesh(grid_atm, &
-      ESMF_STAGGERLOC_CORNER, 0, .false., &
-      regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+    call ESMF_FieldRegridGetArea(srcArea, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_MeshGetElemArea(mesh_atm, srcAreaTmp, rc=localrc)
+    call ESMF_FieldGet(srcArea, farrayPtr=srcAreaPtr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_FieldRegridGetArea(dstArea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldGet(dstArea, farrayPtr=dstAreaPtr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    mesh_atm = ESMF_GridToMesh(grid_atm, &
+      ESMF_STAGGERLOC_CORNER, 0, .false., &
+      regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -574,21 +589,6 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_MeshGetElemArea(mesh_ocn, dstAreaTmp, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-    do i = lbound(srcFracPtr,1), ubound(srcFracPtr, 1)
-      do j = lbound(srcFracPtr, 2), ubound(srcFracPtr, 2)
-        srcArea(i,j) = srcAreaTmp(i+j*(ubound(srcFracPtr, 1)-lbound(srcFracPtr,1)))
-      enddo
-    enddo
-    do i = lbound(dstFracPtr,1), ubound(dstFracPtr, 1)
-      do j = lbound(dstFracPtr, 2), ubound(dstFracPtr, 2)
-        dstArea(i,j) = dstAreaTmp(i+j*(ubound(dstFracPtr, 1)-lbound(dstFracPtr,1)))
-      enddo
-    enddo
 
     !----------------------------------------------------
     ! Compute flux integrals
@@ -600,7 +600,7 @@ contains
 
     if(lpet == 0) write(*, '(A, E17.10)') 'Total src flux: ', sum(atm)*atm_dx*atm_dy
     !if(atm_nx == 80 .or. (atm_nx == 4 .and. atm_ny == 6)) then
-    !  call display_flux2D(atm, srcArea, srcFracPtr)
+    !  call display_flux2D(atm, srcAreaPtr, srcFracPtr)
     !  call ESMF_FieldWrite(f_atm, file='src.nc', rc=localrc)
     !  if (ESMF_LogFoundError(localrc, &
     !      ESMF_ERR_PASSTHRU, &
@@ -634,9 +634,9 @@ contains
     srcsum = 0.
     do i = lbound(coordX,1), ubound(coordX,1)
       do j = lbound(coordY,1), ubound(coordY,1)
-        srcsum(1) = srcsum(1) + atm(i,j)*srcArea(i,j)*srcFracPtr(i,j)
-        srcsum(2) = srcsum(2) +          srcArea(i,j)*srcFracPtr(i,j)
-        srcsum(3) = srcsum(3) +          srcArea(i,j)
+        srcsum(1) = srcsum(1) + atm(i,j)*srcAreaPtr(i,j)*srcFracPtr(i,j)
+        srcsum(2) = srcsum(2) +          srcAreaPtr(i,j)*srcFracPtr(i,j)
+        srcsum(3) = srcsum(3) +          srcAreaPtr(i,j)
       enddo
     enddo
     call ESMF_VMAllReduce(vm, srcsum, allsrcsum, 3, ESMF_REDUCE_SUM, rc=localrc)
@@ -644,7 +644,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' src flux and area: ', allsrcsum
-    call compute_flux2D(vm, atm, srcArea, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -657,7 +657,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_flux2D(vm, ocn, dstArea, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -668,7 +668,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_flux2D(vm, atm, srcArea, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -739,7 +739,7 @@ contains
     !print *, 'x2o ocn', lpet, ocn
 
     ! Compute flux integrals
-    call compute_flux2D(vm, ocn, dstArea, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -780,19 +780,19 @@ contains
     if(lpet == 0) print *, ' recomputed xgrid flux and area: ', allsrcsum
     !call display_flux1D(exf, xArea, xFrac)
 
-    !call display_flux2D(atm, srcArea, srcFracPtr)
+    !call display_flux2D(atm, srcAreaPtr, srcFracPtr)
     call ESMF_FieldRegrid(f_xgrid, f_atm, routehandle=rh_x2a, &
       zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     !print *, 'x2a atm', lpet, atm
-    call compute_flux2D(vm, atm, srcArea, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' recomputed src flux and area: ', allsrcsum
-    !call display_flux2D(atm, srcArea, srcFracPtr)
+    !call display_flux2D(atm, srcAreaPtr, srcFracPtr)
 
     !----------------------------------------------------
     ! clean up
@@ -844,8 +844,6 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-!BOB    deallocate(srcArea, srcAreaTmp)
-!BOB    deallocate(dstArea, dstAreaTmp)
 !BOB    deallocate(xArea, xFrac)
 
     !----------------------------------------------------
@@ -908,18 +906,17 @@ contains
     real(ESMF_KIND_R8), pointer     :: atm(:,:), ocn(:,:), ptr_error(:,:), exf(:), xArea(:), xFrac(:)
     real(ESMF_KIND_R8), pointer     :: ocn_dir(:,:)
     real(ESMF_KIND_R8), pointer     :: srcFracPtr(:,:), dstFracPtr(:,:)
-    real(ESMF_KIND_R8), pointer     :: srcArea(:,:), dstArea(:,:)
-    real(ESMF_KIND_R8), pointer     :: srcAreaTmp(:), dstAreaTmp(:)
+    real(ESMF_KIND_R8), pointer     :: srcAreaPtr(:,:), dstAreaPtr(:,:)
     type(ESMF_RouteHandle)          :: rh_a2o, rh_o2a, rh_a2x, rh_x2o, rh_o2x, rh_x2a
     type(ESMF_DistGrid)             :: distgridM, distgrid1, distgrid2
     type(ESMF_XGridSpec)            :: sparseMat(1)
 
     type(ESMF_Field)                :: fa_atm, fa_ocn, fa_xgrid
     type(ESMF_Field)                :: aa_atm, aa_ocn, aa_xgrid
-    type(ESMF_Field)                :: srcFrac, dstFrac
+    type(ESMF_Field)                :: srcFrac, dstFrac, srcArea, dstArea
     type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid
     real(ESMF_KIND_R8)              :: srcsum(3), allsrcsum(3), scale
-    real(ESMF_KIND_R8)              :: dstFlux_reg, dstFlux, error
+    real(ESMF_KIND_R8)              :: dstFlux_reg, dstFlux, totalXArea, totalSrcArea, error
     integer                         :: l_scheme
 
     type(ESMF_VM)   :: vm
@@ -1152,6 +1149,16 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    srcArea = ESMF_FieldCreate(grid_atm, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    dstArea = ESMF_FieldCreate(grid_ocn, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     !----------------------------------------------------
     ! Call RegridStore here to compute SMM weights and indices and direct RHs
     !----------------------------------------------------
@@ -1199,12 +1206,10 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 1
     call checkProxy(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
 
     call ESMF_XGridGet(xgrid, distgridM=distgridM, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1259,19 +1264,27 @@ contains
     !print *, 'src: ', srcFracPtr(:,1)
     !print *, 'dst: ', dstFracPtr
 
-    allocate(srcAreaTmp(size(srcFracPtr,1)*size(srcFracPtr, 2)))
-    allocate(dstAreaTmp(size(dstFracPtr,1)*size(dstFracPtr, 2)))
-    allocate(srcArea(lbound(srcFracPtr,1):ubound(srcFracPtr, 1), &
-      lbound(srcFracPtr, 2):ubound(srcFracPtr, 2)))
-    allocate(dstArea(lbound(dstFracPtr,1):ubound(dstFracPtr, 1), &
-      lbound(dstFracPtr, 2):ubound(dstFracPtr, 2)))
-    mesh_atm = ESMF_GridToMesh(grid_atm, &
-      ESMF_STAGGERLOC_CORNER, 0, .false., &
-      regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+    call ESMF_FieldRegridGetArea(srcArea, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_MeshGetElemArea(mesh_atm, srcAreaTmp, rc=localrc)
+    call ESMF_FieldGet(srcArea, farrayPtr=srcAreaPtr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_FieldRegridGetArea(dstArea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldGet(dstArea, farrayPtr=dstAreaPtr, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    mesh_atm = ESMF_GridToMesh(grid_atm, &
+      ESMF_STAGGERLOC_CORNER, 0, .false., &
+      regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1281,21 +1294,6 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_MeshGetElemArea(mesh_ocn, dstAreaTmp, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-    do i = lbound(srcFracPtr,1), ubound(srcFracPtr, 1)
-      do j = lbound(srcFracPtr, 2), ubound(srcFracPtr, 2)
-        srcArea(i,j) = srcAreaTmp(i+j*(ubound(srcFracPtr, 1)-lbound(srcFracPtr,1)))
-      enddo
-    enddo
-    do i = lbound(dstFracPtr,1), ubound(dstFracPtr, 1)
-      do j = lbound(dstFracPtr, 2), ubound(dstFracPtr, 2)
-        dstArea(i,j) = dstAreaTmp(i+j*(ubound(dstFracPtr, 1)-lbound(dstFracPtr,1)))
-      enddo
-    enddo
 
     !----------------------------------------------------
     ! Compute flux integrals
@@ -1323,9 +1321,9 @@ contains
         !atm(i,j) = 0.5*sin(coordX(i)/(atm_nx*atm_dx)*2*3.14159)*cos(coordY(j)&
         !/(atm_ny*atm_dy)*4*3.14159)
         !atm(i,j) = i
-        srcsum(1) = srcsum(1) + atm(i,j)*srcArea(i,j)*srcFracPtr(i,j)
-        srcsum(2) = srcsum(2) +          srcArea(i,j)*srcFracPtr(i,j)
-        srcsum(3) = srcsum(2) +          srcArea(i,j)
+        srcsum(1) = srcsum(1) + atm(i,j)*srcAreaPtr(i,j)*srcFracPtr(i,j)
+        srcsum(2) = srcsum(2) +          srcAreaPtr(i,j)*srcFracPtr(i,j)
+        srcsum(3) = srcsum(3) +          srcAreaPtr(i,j)
       enddo
     enddo
     call ESMF_VMAllReduce(vm, srcsum, allsrcsum, 3, ESMF_REDUCE_SUM, rc=localrc)
@@ -1334,9 +1332,10 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     !print *, lpet, ' src flux and area: ', atm
     scale = 3.1415926535897932/180.
+    totalSrcArea = allsrcsum(3)
     if(lpet == 0) print *, ' src flux and area: ', allsrcsum, &
       (sin(scale*(atm_sy+atm_ny*atm_dy))-sin(scale*atm_sy))*(atm_nx*atm_dx)*scale
-    call compute_flux2D(vm, atm, srcArea, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1345,12 +1344,12 @@ contains
     !----------------------------------------------------
     ! call direct regrid
     !----------------------------------------------------
-    !call display_flux2D(atm, srcArea, srcFracPtr)
+    !call display_flux2D(atm, srcAreaPtr, srcFracPtr)
     call ESMF_FieldRegrid(srcField=f_atm, dstField=f_ocn, routehandle=rh_a2o, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_flux2D(vm, ocn, dstArea, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1358,13 +1357,13 @@ contains
     dstFlux_reg = allsrcsum(1)
     ocn_dir = ocn
 
-    !call display_flux2D(ocn, dstArea, dstFracPtr)
+    !call display_flux2D(ocn, dstAreaPtr, dstFracPtr)
     call ESMF_FieldRegrid(srcField=f_ocn, dstField=f_atm, routehandle=rh_o2a, &
       zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_flux2D(vm, atm, srcArea, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1431,6 +1430,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    totalXArea = allsrcsum(3)
     if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
     !call display_flux1D(exf, xArea, xFrac)
     call ESMF_XGridGet(xgrid, sparseMatA2X=sparseMat, rc=localrc)
@@ -1450,7 +1450,7 @@ contains
     !print *, 'x2o ocn', lpet, ocn
 
     ! Compute flux integrals
-    call compute_flux2D(vm, ocn, dstArea, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1471,7 +1471,7 @@ contains
     !      ESMF_CONTEXT, rcToReturn=rc)) return
     !endif
     error = abs(dstFlux - dstFlux_reg)/abs(dstFlux_reg) 
-    if(lpet == 0) write(*,'(A,3E18.10)') 'Verify: ', dstFlux_reg, dstFlux, error
+    if(lpet == 0) write(*,'(A,4E18.10)') 'Verify: ', dstFlux_reg, dstFlux, error, abs(totalXArea-totalSrcArea)/totalSrcArea
     if(error > 1.e-4) then
       print *, 'Regrid through XGrid doesnot agree with direct Regrid'
       if(present(rc)) rc = ESMF_RC_NOT_VALID
@@ -1504,19 +1504,19 @@ contains
     if(lpet == 0) print *, ' recomputed xgrid flux and area: ', allsrcsum
     !call display_flux1D(exf, xArea, xFrac)
 
-    !call display_flux2D(atm, srcArea, srcFracPtr)
+    !call display_flux2D(atm, srcAreaPtr, srcFracPtr)
     call ESMF_FieldRegrid(f_xgrid, f_atm, routehandle=rh_x2a, &
       zeroregion=ESMF_REGION_SELECT, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     !print *, 'x2a atm', lpet, atm
-    call compute_flux2D(vm, atm, srcArea, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' recomputed src flux and area: ', allsrcsum
-    !call display_flux2D(atm, srcArea, srcFracPtr)
+    !call display_flux2D(atm, srcAreaPtr, srcFracPtr)
 
     call init_src_sph(grid_atm, coordX, coordY, atm_nx, atm_ny, atm_dx, atm_dy, ptr_error, rc)
     if (ESMF_LogFoundError(localrc, &
@@ -1584,8 +1584,6 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-!BOB    deallocate(srcArea, srcAreaTmp)
-!BOB    deallocate(dstArea, dstAreaTmp)
 !BOB    deallocate(xArea, xFrac)
 
     !----------------------------------------------------
@@ -1781,7 +1779,7 @@ contains
       do j = lbound(coordY,1), ubound(coordY,1)
         src(i,j) = 0.5*sin(coordX(i)/(nx*dx)*3*3.14159)*cos(coordY(j)&
         /(ny*dy)*5*3.14159)+0.5
-        !src(i,j) = i
+        !src(i,j) = 2.
       enddo
     enddo
 
@@ -1834,9 +1832,9 @@ contains
 
     do i = lbound(coordX,1), ubound(coordX,1)
       do j = lbound(coordX,2), ubound(coordX,2)
-        src(i,j) = 0.5*sin(coordX(i,j)/(nx*dx)*3*3.14159)*cos(coordY(i,j)&
-        /(ny*dy)*5*3.14159)+0.5
-        !src(i,j) = i
+        !src(i,j) = 0.5*sin(coordX(i,j)/(nx*dx)*3*3.14159)*cos(coordY(i,j)&
+        !/(ny*dy)*5*3.14159)+10.5
+        src(i,j) = 2.
       enddo
     enddo
 
