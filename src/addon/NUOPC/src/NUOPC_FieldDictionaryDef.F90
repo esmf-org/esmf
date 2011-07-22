@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.5 2011/06/30 06:00:03 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.5.2.1 2011/07/22 17:15:12 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -90,7 +90,7 @@ module NUOPC_FieldDictionaryDef
     ! add fdEntry to the FieldDictionary
     call ESMF_ContainerAddUDT(fieldDictionary, &
       trim(fdEntry%wrap%standardName), fdEntry, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
   end subroutine
@@ -122,7 +122,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Air Pressure at Sea Level", &
       defaultShortName  = "pmsl", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -132,7 +132,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Air Sea Temperature Difference", &
       defaultShortName  = "astd", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -142,7 +142,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Bottom depth", &
       defaultShortName  = "bdpt", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -152,7 +152,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Bottom Friction Coefficient", &
       defaultShortName  = "bfrc", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -162,7 +162,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Eastward 10m Wind", &
       defaultShortName  = "wndu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -172,7 +172,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Eastward Northward Wave Radiation Stress", &
       defaultShortName  = "wsuv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -182,7 +182,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Eastward Stokes Drift Current", &
       defaultShortName  = "sdcu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -192,7 +192,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Eastward Wave Bottom Current", &
       defaultShortName  = "wbcu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -202,7 +202,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Eastward Wave Radiation Stress", &
       defaultShortName  = "wsuu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -212,7 +212,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Eastward Wave Radiation Stress Gradient", &
       defaultShortName  = "wsgu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -222,7 +222,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Isotropic Longwave Radiance in Air", &
       defaultShortName  = "rilw", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -232,7 +232,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Isotropic Shortwave Radiance in Air", &
       defaultShortName  = "risw", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -242,7 +242,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Magnitude of Surface Downward Stress", &
       defaultShortName  = "taum", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -252,7 +252,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Northward 10m Wind", &
       defaultShortName  = "wndv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -262,7 +262,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Northward Stokes Drift Current", &
       defaultShortName  = "sdcv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -272,7 +272,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Northward Wave Bottom Current", &
       defaultShortName  = "wbcv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -282,7 +282,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Northward Wave Radiation Stress", &
       defaultShortName  = "wsvv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -292,7 +292,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Northward Wave Radiation Stress Gradient", &
       defaultShortName  = "wsgv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -302,7 +302,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Precipitation Amount", &
       defaultShortName  = "prcp", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -312,7 +312,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Sea Surface Height Above Sea Level", &
       defaultShortName  = "ssh", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -322,7 +322,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Sea Surface Salinity", &
       defaultShortName  = "sss", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -332,7 +332,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Sea Surface Temperature", &
       defaultShortName  = "sst", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -342,7 +342,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Air Pressure", &
       defaultShortName  = "psfc", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -352,7 +352,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Eastward Sea Water Velocity", &
       defaultShortName  = "sscu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -362,7 +362,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Eastward Wave Induced Stress", &
       defaultShortName  = "wvsu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -372,7 +372,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Eastward Stress", &
       defaultShortName  = "tauu", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -382,7 +382,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Heat Flux", &
       defaultShortName  = "hfns", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -392,7 +392,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Latent Heat Flux", &
       defaultShortName  = "hfls", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -402,7 +402,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Moisture Flux", &
       defaultShortName  = "mfns", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -412,7 +412,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Northward Stress", &
       defaultShortName  = "tauv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -422,7 +422,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Sensible Heat Flux", &
       defaultShortName  = "hfss", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -432,7 +432,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward X Stress", &
       defaultShortName  = "taux", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -442,7 +442,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Downward Y Stress", &
       defaultShortName  = "tauy", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -452,7 +452,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Northward Sea Water Velocity", &
       defaultShortName  = "sscv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -462,7 +462,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Northward Wave Induced Stress", &
       defaultShortName  = "wvsv", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -472,7 +472,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Roughness Length", &
       defaultShortName  = "srl", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -482,7 +482,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Surface Total Wave Induced Stress", &
       defaultShortName  = "wvst", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -492,7 +492,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Wave Bottom Current Radian Frequency", &
       defaultShortName  = "wbcf", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -502,7 +502,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Wave Induced Charnock Parameter", &
       defaultShortName  = "chnk", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -512,7 +512,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "X 10m Wind", &
       defaultShortName  = "wndx", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
@@ -522,7 +522,7 @@ module NUOPC_FieldDictionaryDef
       defaultLongName   = "Y 10m Wind", &
       defaultShortName  = "wndy", &
       rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !EOT
