@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.12.2.1 2011/07/22 17:15:12 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.12.2.2 2011/07/22 17:24:49 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
