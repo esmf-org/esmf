@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.62 2011/07/22 14:45:22 feiliu Exp $
+% $Id: Field_refdoc.ctex,v 1.63 2011/07/22 17:43:53 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -119,19 +119,19 @@
 
 \subsection{Class API: Field Communications}
 #ifdef STANDALONE
-\input{../../FieldComm/doc/ESMF_FieldGather_fapi}
-\input{../../FieldComm/doc/ESMF_FieldHalo_fapi}
-\input{../../FieldComm/doc/ESMF_FieldRedist_fapi}
+\input{../../Field/doc/ESMF_FieldGather_fapi}
+\input{../../Field/doc/ESMF_FieldHalo_fapi}
+\input{../../Field/doc/ESMF_FieldRedist_fapi}
 \input{../../Field/doc/ESMF_FieldRegrid_fapi}
-\input{../../FieldComm/doc/ESMF_FieldScatter_fapi}
-\input{../../FieldComm/doc/ESMF_FieldSMM_fapi}
+\input{../../Field/doc/ESMF_FieldScatter_fapi}
+\input{../../Field/doc/ESMF_FieldSMM_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldGather_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldHalo_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldRedist_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldGather_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldHalo_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldRedist_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegrid_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldScatter_fapi}
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldSMM_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldScatter_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldSMM_fapi}
 #endif
 
 #ifdef STANDALONE
