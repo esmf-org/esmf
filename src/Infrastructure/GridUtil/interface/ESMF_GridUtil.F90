@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUtil.F90,v 1.25 2011/07/04 05:11:18 oehmke Exp $
+! $Id: ESMF_GridUtil.F90,v 1.25.2.1 2011/07/22 18:41:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridUtil.F90,v 1.25 2011/07/04 05:11:18 oehmke Exp $'
+    '$Id: ESMF_GridUtil.F90,v 1.25.2.1 2011/07/22 18:41:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -187,7 +187,7 @@ module ESMF_GridUtilMod
 ! !IROUTINE: ESMF_GridWriteVTK -- Write Grid and associated Arrays
 !
 ! !INTERFACE:
-    subroutine ESMF_GridWriteVTK(grid, staggerLoc, isSphere, isLatLonDeg, filename, &
+    subroutine ESMF_GridWriteVTK(grid, staggerLoc, filename, &
                                  array1, array2, array3, array4, array5,&
                                  array6, rc)
 !
@@ -195,8 +195,6 @@ module ESMF_GridUtilMod
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout)                :: grid
     type(ESMF_StaggerLoc), intent(in),optional    :: staggerLoc
-    logical, intent(in), optional                 :: isSphere
-    logical, intent(in), optional                 :: isLatLonDeg
     character(len = *), intent(in)                :: filename 
     type(ESMF_Array), intent(inout), optional     :: array1
     type(ESMF_Array), intent(inout), optional     :: array2
@@ -215,12 +213,6 @@ module ESMF_GridUtilMod
 !         grid to write
 !   \item[{[staggerLoc]}] 
 !         stagger of field
-!   \item [{[isSphere]}]
-!         If .true. then grid will be transformed to a 3d spherical manifold, if
-!         not specified defaults to false (not spherical). 
-!   \item [{[isLatLonDeg]}]
-!         If .true. then grid coordinates will be assumed to be latxlon in deg. If not specified, then
-!         the default depends isSphere and has the same value. (e.g. true if isSphere=true)
 !   \item[filename]
 !         File (stub) to write results to
 !   \item [{[array1-6]}]
@@ -233,40 +225,20 @@ module ESMF_GridUtilMod
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: minidx
-    integer                 :: lspherical
-    integer                 :: lisLatLonDeg
     integer                 :: tmp_staggerloc
     type(ESMF_Array)        :: arrayEmpty
+    integer                 :: lspherical
+    integer                 :: lisLatLonDeg
+
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_SUCCESS
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! set default spherical
+    ! These aren't used anymore, but just set them so they have a defined value
+    ! TODO: REMOVE THESE
     lspherical = 0
-    if (present(isSphere)) then
-       if (isSphere) then
-         lspherical = 1
-       else 
-         lspherical = 0
-       endif
-    endif
-
-
-    ! set default isLatLonDeg
-    if (present(isLatLonDeg)) then
-       if (isLatLonDeg) then
-         lisLatLonDeg = 1
-       else 
-         lisLatLonDeg = 0
-       endif
-    else
-       if (lspherical .eq. 1) then
-         lisLatLonDeg = 1
-       else 
-         lisLatLonDeg = 0
-       endif
-    endif
+    lisLatLonDeg = 0
 
 
     ! Set default staggerloc
@@ -405,12 +377,6 @@ module ESMF_GridUtilMod
        endif
     endif
 
-    ! Make sure indexflag is ESMF_INDEX_GLOBAL
-    if (.not. (indexflag .eq. ESMF_INDEX_GLOBAL)) then
-       if (ESMF_LogFoundError(ESMF_RC_ARG_WRONG, &
-msg=" - Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality", &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-    endif 
 
     ! convert mask values 
     maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
