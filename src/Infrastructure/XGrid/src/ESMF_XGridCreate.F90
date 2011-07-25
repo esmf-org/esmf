@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.38 2011/07/14 20:47:09 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.39 2011/07/25 17:51:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.38 2011/07/14 20:47:09 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.39 2011/07/25 17:51:52 feiliu Exp $'
 
 !==============================================================================
 !
@@ -249,7 +249,11 @@ integer, intent(out), optional              :: rc
 
 !
 ! !DESCRIPTION:
-!      Create an XGrid from user input
+!      Create an XGrid from user input: the list of Grids on side A and side B, 
+!  and other optional arguments. By default, XGrid is created online with user supplied
+!  list of Grids, i.e. the sparse matrix matmul coefficients are internally computed.
+!  User can also turn on offline creation of XGrid in which case, sparse matrix matmul
+!  coefficients are supplied by the user. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -398,8 +402,8 @@ integer, intent(out), optional              :: rc
     integer                       :: localrc, ngrid_a, ngrid_b, i, j
     real(ESMF_KIND_R8), pointer   :: area(:), centroid(:,:)
     type(ESMF_XGridType), pointer :: xgtype
-    type(ESMF_Mesh)               :: meshA, meshB, mesh
-    type(ESMF_Mesh)               :: meshAt, meshBt, tmpmesh
+    type(ESMF_Mesh)               :: meshA, meshB, mesh, tmpmesh
+    type(ESMF_Mesh), allocatable  :: meshAt(:), meshBt(:)
     type(ESMF_Pointer)            :: meshp
     type(ESMF_VM)                 :: vm
     integer(ESMF_KIND_I4), pointer:: indicies(:,:)
@@ -543,60 +547,56 @@ integer, intent(out), optional              :: rc
       enddo
     endif
 
+    ! allocate the temporary meshes
+    allocate(meshAt(ngrid_a), meshBt(ngrid_b), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+      msg="- Allocating temporary meshes for Xgrid creation", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     !TODO: Create the src/dst Mesh, take care of maskValues
-    meshA = ESMF_GridToMesh(sideA(l_sideAPriority(1)), &
+    meshAt(1) = ESMF_GridToMesh(sideA(l_sideAPriority(1)), &
       ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    meshA = meshAt(1)
 
     do i = 2, ngrid_a
-      meshAt = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
+      meshAt(i) = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
         ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       ! call into Rendezveus mesh
-      !meshA = ESMF_MeshMerge(meshA, meshAt, rc=localrc)
+      !meshA = ESMF_MeshMerge(meshA, meshAt(i), rc=localrc)
       !if (ESMF_LogFoundError(localrc, &
       !    ESMF_ERR_PASSTHRU, &
       !    ESMF_CONTEXT, rcToReturn=rc)) return
-      ! destroy the temporary mesh
-      call ESMF_MeshDestroy(meshAt, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    meshB = ESMF_GridToMesh(sideB(l_sideBPriority(1)), &
+    meshBt(1) = ESMF_GridToMesh(sideB(l_sideBPriority(1)), &
       ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    meshB = meshBt(1)
 
     do i = 2, ngrid_b
-      meshBt = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
+      meshBt(i) = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
         ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       ! call into Rendezveus mesh
-      !meshB = ESMF_MeshMerge(meshB, meshBt, rc=localrc)
+      !meshB = ESMF_MeshMerge(meshB, meshBt(i), rc=localrc)
       !if (ESMF_LogFoundError(localrc, &
       !    ESMF_ERR_PASSTHRU, &
       !    ESMF_CONTEXT, rcToReturn=rc)) return
-      ! destroy the temporary mesh
-      call ESMF_MeshDestroy(meshBt, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
-
-    ! TODO: compute the interpolation
 
     allocate(xgtype%sparseMatA2X(ngrid_a), &
       xgtype%sparseMatX2A(ngrid_a), &
@@ -650,17 +650,12 @@ integer, intent(out), optional              :: rc
     deallocate(indicies, weights)
 
     ! TODO: loop through sideA and sideB to compute the interpolation
-    ! Compute regrid weights in 4 directions? (2 directions have constant wgt matrix)
-    ! This time we don't need the middle mesh
+    ! Compute regrid weights in 4 directions? (2 directions have constant wgt matrix).
+    ! This time we don't need the midmesh which would just be the mesh that 
+    ! overlaps with sideA or sideB.
     compute_midmesh = 0
     do i = 1, ngrid_a
-      meshAt = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
-        ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
-        regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_esmc_xgridregrid_create(vm, meshAt, mesh, &
+      call c_esmc_xgridregrid_create(vm, meshAt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         l_sideAToXGridScheme, &
@@ -724,7 +719,7 @@ integer, intent(out), optional              :: rc
       !     xgtype%sparseMatX2A(i)%factorIndexList(2,j), &
       !     xgtype%sparseMatX2A(i)%factorList(j)
       !enddo
-      call c_esmc_xgridregrid_create(vm, mesh, meshAt, &
+      call c_esmc_xgridregrid_create(vm, mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         l_XGridToSideAScheme, &
@@ -745,10 +740,6 @@ integer, intent(out), optional              :: rc
       !     xgtype%sparseMatX2A(i)%factorIndexList(2,j), &
       !     xgtype%sparseMatX2A(i)%factorList(j)
       !enddo
-      call ESMF_MeshDestroy(meshAt, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
       !deallocate(sidemesharea, sidemeshfrac)
     enddo
     ! now do the B side
@@ -784,7 +775,7 @@ integer, intent(out), optional              :: rc
       ! weights must be all 1. in this case
     
       ! Now the reverse direction
-      call c_esmc_xgridregrid_create(vm, mesh, meshBt, &
+      call c_esmc_xgridregrid_create(vm, mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         l_sideBToXGridScheme, &
@@ -805,10 +796,6 @@ integer, intent(out), optional              :: rc
       !     '->', xgtype%sparseMatX2B(i)%factorIndexList(2,j), &
       !     xgtype%sparseMatX2B(i)%factorList(j)
       !enddo
-      call ESMF_MeshDestroy(meshBt, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
     xgtype%storeOverlay = .false.
@@ -843,6 +830,20 @@ integer, intent(out), optional              :: rc
     endif
 
     deallocate(l_sideAPriority, l_sideBPriority)
+
+    do i = 1, ngrid_a
+      call ESMF_MeshDestroy(meshAt(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    do i = 1, ngrid_b
+      call ESMF_MeshDestroy(meshBt(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
