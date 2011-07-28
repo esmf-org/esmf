@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.42 2011/07/07 00:15:47 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.43 2011/07/28 00:59:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -22,6 +22,7 @@
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
 
+#include <string>
 #include "ESMC_Util.h"
 
 //-----------------------------------------------------------------------------
@@ -180,6 +181,11 @@ void FTN(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
 void FTN(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
 
 }
+
+// generate a Globally Unique ID (GUID) in a platform independent way (e.g.
+//   does not require UUID library).
+int ESMC_InitializeGUID(void);
+int ESMC_GenerateGUID(std::string &guid);
 
 // general reduction operator value - MUST MATCH F90
 enum ESMC_Operation { ESMF_SUM=1, ESMF_MIN, ESMF_MAX};
