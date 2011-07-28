@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.10 2011/07/09 00:04:05 eschwab Exp $
+! $Id: user_model4.F90,v 1.11 2011/07/28 01:04:07 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -251,7 +251,7 @@ module user_model4
     call ESMF_AttributeSet(POM, 'CouplingPurpose', 'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(POM, 'CouplingSource', &
-                                'EarthSys_OceanBioGeoChem Ocean', &
+                                'EarthSys_OceanBioGeoChem', &
          convention=convCIM, purpose=purpField, rc=rc)
     call ESMF_AttributeSet(POM, 'CouplingTarget', &
                                 'EarthSys_Ocean', &
