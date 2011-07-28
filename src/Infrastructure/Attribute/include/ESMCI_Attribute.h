@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.54 2011/07/01 05:02:02 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.55 2011/07/28 01:03:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,6 +92,15 @@ class Attribute
     std::vector<ESMC_Logical>  vbp;       // vector of booleans (logical)
     std::vector<std::string>   vcpp;      // vector of strings
 
+    std::string attrGUID;                 // Globally Unique Identifier for
+                                          //  an Attribute or Attpack
+                                          //  (used in CIM XML output)
+
+    static Attribute *writeRoot;  // attribute on which AttributeWrite*()
+                                  // method was called; used for multiple
+                                  // nested recursions of the tree
+                                  // (e.g. for CIM output)
+
     int        id;         // unique identifier. used to generate unique 
                                   // default names.
                                   //    TODO: inherit from ESMC_Base class?
@@ -125,6 +134,9 @@ class Attribute
     Attribute *AttPackGet(const std::string &convention, 
       const std::string &purpose, const std::string &object,
       const std::string &attPackInstanceName) const;
+    Attribute *AttPackGet(const std::string &convention,
+      const std::string &purpose, const std::string &object,
+      const std::string &name, const std::string &value) const;
     int AttPackGet(const std::string &convention, 
       const std::string &purpose, const std::string &object,
       std::vector<std::string> &attPackInstanceNameList, 

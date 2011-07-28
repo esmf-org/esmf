@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.120 2011/07/08 02:12:59 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.121 2011/07/28 01:03:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,6 +37,7 @@
 
 #include <sstream>
 #include <cstring>
+#include <cstdlib>
 
 using std::string;
 using std::vector;
@@ -46,16 +47,21 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.120 2011/07/08 02:12:59 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.121 2011/07/28 01:03:29 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
+
+// initialize static pointer to Attribute on which AttributeWrite*()
+// method was called; used for multiple nested recursions of the tree
+// (e.g. for CIM output)
+Attribute *Attribute::writeRoot = ESMC_NULL_POINTER;
 
 // initialize static Attribute instance counter
 // TODO: inherit from ESMC_Base class
 //      -- but circular dependency exists
 //         with 'root' in ESMC_Base
-int Attribute::count=0;
+int Attribute::count = 0;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1071,6 +1077,59 @@ int Attribute::count=0;
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackGet"
 //BOPI
+// !IROUTINE:  AttPackGet - get an attpack
+//
+// !INTERFACE:
+      Attribute *Attribute::AttPackGet(
+// 
+// !RETURN VALUE:
+//    {\tt Attribute} pointer to requested object or NULL on early exit.
+// 
+// !ARGUMENTS:
+      const string &convention,      // in - attpack convention,
+      const string &purpose,         //      purpose, and
+      const string &object,          //      object to match
+      const string &name,            // in - Attribute name to match)
+      const string &value) const {   // in - Attribute value to match
+// 
+// !DESCRIPTION:
+//     Get an attpack of given convention, purpose and object type, and which
+//     contains an attribute of given name and value.  Recursively search
+//     through the ESMF object/attribute tree from the point of invocation.
+//
+//EOPI
+
+  Attribute *attpack = NULL;
+  vector<string> valuevector;
+
+  // first check if given attpack is set on *this* esmf object's attribute tree
+  string attPackInstanceName;
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
+  if (attpack != NULL) {
+    if (attpack->AttributeIsSet(name)) {
+      attpack->AttributeGet(name, &valuevector);
+      if (valuevector.size() == 1) {
+        if (value.compare(valuevector.at(0)) == 0) return attpack; // match !
+      }
+    }
+  }
+
+  // matching attribute not on *this* esmf object; look further down the
+  // esmf object tree -- recurse
+  for(int i=0; i<linkList.size(); i++) {
+    attpack = linkList.at(i)->AttPackGet(convention, purpose, object,
+                                         name, value);
+    if (attpack != NULL) return attpack;
+  }
+
+  // no match
+  return attpack;
+
+}  // end AttPackGet
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttPackGet"
+//BOPI
 // !IROUTINE:  AttPackGet - get attpack instance names associated with the given
 //                          convention, purpose, and object
 //
@@ -1162,6 +1221,7 @@ int Attribute::count=0;
   return attr;
 
 }  // end AttPackGetAttribute
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttPackIsPresent"
@@ -3501,7 +3561,8 @@ if (attrRoot == ESMF_TRUE) {
 
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // place file-read attributes into.
-  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, this, &localrc);
+  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, 
+                                      (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
@@ -3811,7 +3872,8 @@ if (attrRoot == ESMF_TRUE) {
 
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // write from
-  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, this, &localrc);
+  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, 
+                                      (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
@@ -3881,7 +3943,7 @@ if (attrRoot == ESMF_TRUE) {
   // Instantiate IO object to do the actual writing
   string fileName = basename + ".xml";
   IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, fileName.size(),fileName.c_str(),
-                              (ESMCI::Attribute*)this, &localrc);
+                                      (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   // Write ESMF header
@@ -4514,6 +4576,20 @@ if (attrRoot == ESMF_TRUE) {
 //-----------------------------------------------------------------------------
   int localrc;
 
+  // Initialize the GUID generator
+  // First call to AttributeWriteCIM() will initiate a new sequence of GUIDs
+  // used to fill <documentID>s and <id>s in the XML output.
+  static bool firstcall = true;
+  if (firstcall) {
+    firstcall = false;
+    localrc = ESMC_InitializeGUID();
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  }
+
+  // save this attribute pointer as the root of the tree to be written out,
+  // for later use in multiple nested recursions in producing the xml output
+  writeRoot = (ESMCI::Attribute*)this;
+
   //
   // Write the CIM 1.5 XML file header
   //
@@ -4825,10 +4901,10 @@ if (attrRoot == ESMF_TRUE) {
       ESMC_LOG_WARN, ESMC_CONTEXT);
   }
 
-  // TODO:  auto-generate documentID ?
-  localrc = io_xml->writeElement("documentID", 
-                                 "507a5b52-a91b-11df-a484-00163e9152a5", 
-                                 indent, 0);
+  // generate and save a GUID for this component, then output it
+  ESMC_GenerateGUID(attpack->attrGUID);
+  localrc = io_xml->writeElement("documentID", attpack->attrGUID, indent, 0);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("MetadataVersion")) {
     localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
@@ -5093,9 +5169,12 @@ if (attrRoot == ESMF_TRUE) {
   localrc = io_xml->writeStartElement("model", "", 2, 0);
   localrc = io_xml->writeElement("reference", "", 3, 0);
   localrc = io_xml->writeEndElement("model", 2);
-  // TODO:  auto-generate GUID?
-  localrc = io_xml->writeElement("documentID", 
-                                 "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
+
+  // generate a GUID for this simulationRun document, then output it
+  string GUID;
+  ESMC_GenerateGUID(GUID);
+  localrc = io_xml->writeElement("documentID", GUID, 2, 0);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   if (attpack->AttributeIsSet("MetadataVersion")) {
     localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
@@ -5370,9 +5449,11 @@ if (attrRoot == ESMF_TRUE) {
   //localrc = io_xml->writeEndElement("contact", 2);
   //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  // TODO:  auto-generate?
-  localrc = io_xml->writeElement("documentID", 
-                                 "507a5b52-a91b-11df-a484-00163e9152a5", 2, 0);
+  // generate a GUID for this platform document, then output it
+  string GUID;
+  ESMC_GenerateGUID(GUID);
+  localrc = io_xml->writeElement("documentID", GUID, 2, 0);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   // get CIM/Main package to retrieve MetadataVersion
   attpackMain = AttPackGet("CIM 1.5", "Model Component Simulation Description",
@@ -6558,11 +6639,32 @@ if (attrRoot == ESMF_TRUE) {
                       "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
+
         localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
-        localrc = io_xml->writeElement("id", 
-                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
+
+        // recursively search from top-level component for a
+        //   component attpack that has a ShortName value that matches the
+        // CouplingSource value, then output that component's GUID
+        ap = writeRoot->AttPackGet("CIM 1.5", 
+                "Model Component Simulation Description", "comp", 
+                "ShortName", value);
+        if (ap != NULL) {
+          localrc = io_xml->writeElement("id", ap->attrGUID, 7, 0);
+        } else {
+          // TODO:  output value of CouplingSource
+          ESMC_LogDefault.Write("The value of attribute CouplingSource in "
+            "standard attribute package (convention='CIM 1.5', "
+            "purpose='Inputs Description') "
+            "does not correspond to the value of any ShortName "
+            "attribute within a component attribute package "
+            "(convention='CIM 1.5', "
+            "purpose='Model Component Simulation Description'). "
+            "Skipping output of <couplingSource>...<id>.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+
         localrc = io_xml->writeElement("name", value, 7, 0);
         if (couplingPurpose == "ancillaryFile") {
           localrc = io_xml->writeElement("type", "dataObject", 7, 0);
@@ -6591,8 +6693,28 @@ if (attrRoot == ESMF_TRUE) {
         localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
-        localrc = io_xml->writeElement("id", 
-                                "507a5b52-a91b-11df-a484-00163e9152a5", 7, 0);
+
+        // recursively search from top-level component for a
+        //   component attpack that has a ShortName value that matches the
+        // CouplingTarget value, then output that component's GUID
+        ap = writeRoot->AttPackGet("CIM 1.5", 
+                "Model Component Simulation Description", "comp", 
+                "ShortName", value);
+        if (ap != NULL) {
+          localrc = io_xml->writeElement("id", ap->attrGUID, 7, 0);
+        } else {
+          // TODO:  output value of CouplingTarget
+          ESMC_LogDefault.Write("The value of attribute CouplingTarget in "
+            "standard attribute package (convention='CIM 1.5', "
+            "purpose='Inputs Description') "
+            "does not correspond to the value of any ShortName "
+            "attribute within a component attribute package "
+            "(convention='CIM 1.5', "
+            "purpose='Model Component Simulation Description'). "
+            "Skipping output of <couplingSource>...<id>.",
+            ESMC_LOG_WARN, ESMC_CONTEXT);
+        }
+
         localrc = io_xml->writeElement("name", value, 7, 0);
         localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
         localrc = io_xml->writeEndElement("reference", 6);
@@ -7427,6 +7549,7 @@ if (attrRoot == ESMF_TRUE) {
   vdp.reserve(0);
   vbp.reserve(0);
 
+  attrGUID = "";
   id = ++count;  // TODO: inherit from ESMC_Base class?
   
  } // end Attribute
@@ -7480,6 +7603,7 @@ if (attrRoot == ESMF_TRUE) {
   vdp.reserve(0);
   vbp.reserve(0);
 
+  attrGUID = "";
   id = ++count;  // TODO: inherit from ESMC_Base class?
   
 } // end Attribute
@@ -7571,6 +7695,7 @@ if (attrRoot == ESMF_TRUE) {
             }
         }
 
+  attrGUID = "";
   id = ++count;  // TODO: inherit from ESMC_Base class?
 
  } // end Attribute
