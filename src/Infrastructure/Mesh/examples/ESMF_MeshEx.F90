@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.44 2011/07/01 16:07:29 rokuingh Exp $
+! $Id: ESMF_MeshEx.F90,v 1.45 2011/07/29 22:49:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -749,8 +749,9 @@ program ESMF_MeshEx
 !BOE
 ! In addition to the SCRIP format, ESMF also supports a more general unstructured grid file format for describing meshes.
 ! In the ESMF file format, the node coordinates are defined in a separate array
-! {\tt nodeCoords} and indices to the {\tt nodeCoords} array are used in the element
-! connectivity array {\tt elementConn}.  While in the SCRIP format, the two are combined into 
+! {\tt nodeCoords}.  The indices to the {\tt nodeCoords} array are used in the element
+! connectivity array {\tt elementConn}, and they are 1-based.  
+! While in the SCRIP format, the two are combined into 
 ! {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} arrays.  The ESMF file format works
 ! better with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. 
 ! The ESMF format is also more general than the SCRIP format because it supports higher dimension coordinates and more general
