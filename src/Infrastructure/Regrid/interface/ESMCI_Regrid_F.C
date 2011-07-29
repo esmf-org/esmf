@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.64 2011/07/29 18:40:53 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.65 2011/07/29 18:42:00 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
   try {
 
-#if 1
+#if 0
     bool concave;
     bool clockwise;
 
