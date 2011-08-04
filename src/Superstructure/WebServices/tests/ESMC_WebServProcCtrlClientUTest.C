@@ -1,11 +1,11 @@
-/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.5 2011/08/04 21:18:22 ksaint Exp $ */
+/* $Id: ESMC_WebServProcCtrlClientUTest.C,v 1.1 2011/08/04 21:18:22 ksaint Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include "ESMCI_WebServCompSvrClient.h"
+#include "ESMCI_WebServProcCtrlClient.h"
 
 // ESMF header
 #include "ESMC.h"
@@ -89,10 +89,9 @@ int main(int    argc,
 	int	result = 0;
    char  name[80];
    char  failMsg[80];
-	int	portNum = 27060;
+	int	portNum = 27070;
 	int	clientId = 1001;
 	char	host[512] = { "" };
-
 
 
   //----------------------------------------------------------------------------
@@ -102,10 +101,22 @@ int main(int    argc,
 //	strcpy(runDir, argv[2]);
 	gethostname(host, sizeof(host) - 1);
 
-	ESMCI::ESMCI_WebServCompSvrClient		client(host, portNum, clientId);
+   //---------------------------------------------------------------------------
+   //NEX_disable_UTest
+   strcpy(name, "Instantiate Process Control Client");
+   strcpy(failMsg, "Instantiation Failed");
+
+	ESMCI::ESMCI_WebServProcCtrlClient		client(host, 
+                                                 portNum, 
+                                                 "ksaint", 
+                                                 "mickey");
+
+   ESMC_Test((client.getClientId() > 0), 
+             name, failMsg, &result, __FILE__, __LINE__, 0);
+   //---------------------------------------------------------------------------
 
    printf("\n");
-   printf("ESMF_WebServCompSvrClientUTest\n");
+   printf("ESMF_WebServProcCtrlClientUTest\n");
    printf("-----------------------------------------------------\n");
    printf("  date:  %s\n", getDateAndTime());
    printf("  host:  %s\n", host);
@@ -114,71 +125,86 @@ int main(int    argc,
    printf("-----------------------------------------------------\n");
    printf("\n");
 
+	//***
+	// Sleep for a few just to give the server a chance to startup
+	//***
+	printf("\n... Don't panic!  We're sleeping for 5 seconds...\n");
+	sleep(5);
+
+   //---------------------------------------------------------------------------
+   //NEX_disable_UTest
+   strcpy(name, "Call Component Service State");
+   strcpy(failMsg, "Returned ESMF_FAILURE");
+
+   int   currentState = client.state();
+printf("Current State: %d\n", currentState);
+printf("Current State: %s\n", client.getStateStr(currentState));
+
+   ESMC_Test((rc != ESMF_FAILURE), 
+		name, failMsg, &result, __FILE__, __LINE__, 0);
+   //---------------------------------------------------------------------------
+
+
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call Component Initialize");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
+	printf("Executing initialize...\n");
    rc = client.init();
+printf("Current State: %d\n", rc);
+printf("Current State: %s\n", client.getStateStr(rc));
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
    //---------------------------------------------------------------------------
 
-	printf("Waiting for initialize...\n");
-
-   int   currentState = client.state();
+   currentState = client.state();
    int   waitCount = 0;
 
+	printf("Waiting for initialize...\n");
    while (currentState == NET_ESMF_STAT_INITIALIZING)
    {
       sleep(1);
       ++waitCount;
       currentState = client.state();
    }
-
 	printf("Done Waiting... waited for %d seconds\n", waitCount);
-	printf("\n");
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call Component Run");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
+	printf("Executing run...\n");
    rc = client.run();
+printf("Current State: %d\n", rc);
+printf("Current State: %s\n", client.getStateStr(rc));
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
    //---------------------------------------------------------------------------
-
-	printf("Waiting for run...\n");
 
    currentState = client.state();
    waitCount = 0;
 
+	printf("Waiting for run...\n");
    while (currentState == NET_ESMF_STAT_RUNNING)
    {
       sleep(1);
       ++waitCount;
       currentState = client.state();
    }
-
 	printf("Done Waiting... waited for %d seconds\n", waitCount);
-	printf("\n");
 
+/*
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call Component Finalize");
    strcpy(failMsg, "Returned ESMF_FAILURE");
-
    rc = client.final();
-
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
    //---------------------------------------------------------------------------
 
 	printf("Waiting for finalize...\n");
-
    currentState = client.state();
    waitCount = 0;
 
@@ -188,59 +214,36 @@ int main(int    argc,
       ++waitCount;
       currentState = client.state();
    }
-
 	printf("Done Waiting... waited for %d seconds\n", waitCount);
-	printf("\n");
+*/
 
-   //---------------------------------------------------------------------------
-   //NEX_disable_UTest
-   strcpy(name, "Call Component Get State");
-   strcpy(failMsg, "Returned ESMF_FAILURE");
-
-   rc = client.state();
-
-   ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
-   //---------------------------------------------------------------------------
-
+/*
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call Component Files");
    strcpy(failMsg, "No files returned");
-
 	vector<string>	retFiles = client.files();
-
    ESMC_Test((retFiles.size()==0), 
 		name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
    //---------------------------------------------------------------------------
+*/
 
+/*
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call Component End");
    strcpy(failMsg, "Returned ESMF_FAILURE");
-
    rc = client.end();
-
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
    //---------------------------------------------------------------------------
-
-   //---------------------------------------------------------------------------
-   //NEX_disable_UTest
-   strcpy(name, "Call Component Exit");
-   strcpy(failMsg, "Returned ESMF_FAILURE");
-
-   rc = client.killServer();
-
-   ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
-   //---------------------------------------------------------------------------
-
+*/
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+   client.killServer();
+
 
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);

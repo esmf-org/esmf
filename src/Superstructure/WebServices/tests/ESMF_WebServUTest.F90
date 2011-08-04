@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.11 2011/06/30 05:59:59 theurich Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.12 2011/08/04 21:18:22 ksaint Exp $
 !
 ! Test code which creates a new Component.
 
@@ -98,26 +98,34 @@ module ESMF_WebServUserModel
     ! Initialize return code
     rc = ESMF_SUCCESS
 
+    print *
     print *, "User Comp1 Init starting: "
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
-    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
     write(name, *) "ESMF Initialize GridCompGet"
+
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
     write(name, *) "ESMF Initialize VMGet"
+
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
     
-    print *, "User Comp1 Init returning: "
+    print *, "User Comp1 Init returning"
+    print *
 
   end subroutine user_init
 
@@ -146,26 +154,34 @@ module ESMF_WebServUserModel
     ! Initialize return code
     rc = ESMF_SUCCESS
 
+    print *
     print *, "User Comp1 Run starting"
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
-    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
     write(name, *) "ESMF Run GridCompGet"
+
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
     write(name, *) "ESMF Run VMGet"
+
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     print *, "User Comp1 Run returning"
+    print *
 
   end subroutine user_run
 
@@ -192,26 +208,34 @@ module ESMF_WebServUserModel
     ! Initialize return code
     rc = ESMF_SUCCESS
 
+    print *
     print *, "User Comp1 Final starting"
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
-    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
     write(name, *) "ESMF Finalize GridCompGet"
+
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     write(failMsg, *) "Return not equal to ESMF_SUCCESS"
     write(name, *) "ESMF Finalize VMGet"
+
+    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
     print *, "User Comp1 Final returning"
+    print *
 
   end subroutine user_final
 
@@ -232,8 +256,11 @@ program ESMF_WebServComponentUTest
     ! Local variables
     integer                :: rc
     character(ESMF_MAXSTR) :: cname
+    character(ESMF_MAXSTR) :: cdesc
     type(ESMF_GridComp)    :: comp1
     integer                :: portNum
+    character(ESMF_MAXSTR) :: clientId
+    character(ESMF_MAXSTR) :: argBuffer
 
     ! local test variables
     character(ESMF_MAXSTR) :: failMsg
@@ -253,27 +280,40 @@ program ESMF_WebServComponentUTest
  
     !------------------------------------------------------------------------
     ! Setup data parameters for tests
-    cname = "Atmosphere - default context"
+    cname = "ATM"
+    cdesc = "Atmosphere - default context"
     comp1 = ESMF_GridCompCreate(name=cname, rc=rc)  
+
+    call getarg(1, argBuffer)
+    print *, "Arg 1: ", argBuffer
+    read(argBuffer,*) portNum
+    print *, "Port Num: ", portNum
+
+    call getarg(2, argBuffer)
+    print *, "Arg 2: ", argBuffer
+    read(argBuffer,*) clientId
+    print *, "Client ID: ", clientId
 
     call ESMF_GridCompSetServices(comp1, &
           userRoutine=ESMF_WebServUserModelRegister, rc=rc)
 
+    print *
+
     !------------------------------------------------------------------------
-    !NEX_UTest
+    !NEX_disable_UTest
     ! Verifing that a ESMF Component Web Service can be registered
     rc = ESMF_SUCCESS
-    portNum = 27060
-    call ESMF_WebServicesLoop(comp1, portNum, rc=rc)
+!!    portNum = 27060
+
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Web Services Loop"
+
+    call ESMF_WebServicesLoop(comp1, portNum=portNum, clientId=clientId, rc=rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *
+    !------------------------------------------------------------------------
  
-
-#ifdef ESMF_TESTEXHAUSTIVE
-
-
-#endif
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
