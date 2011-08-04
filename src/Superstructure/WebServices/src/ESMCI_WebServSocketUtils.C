@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServSocketUtils.C,v 1.5 2011/08/04 21:09:19 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,15 +33,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
+#include "ESMCI_WebServNetEsmf.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.5 2011/08/04 21:09:19 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -51,6 +53,89 @@ static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.4 2011/0
 
 namespace ESMCI
 {
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServGetRequestFromId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServGetRequestFromId()
+//
+// !INTERFACE:
+char*  ESMCI_WebServGetRequestFromId(
+//
+// !RETURN VALUE:
+//    char*  string value for the specified request id
+//
+// !ARGUMENTS:
+//
+  int  id      // request id for which the string value is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request string value based on a specified request id.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+   //printf("ESMCI_WebServProcCtrlClient::getRequestFromId()\n");
+
+   switch (id)
+   {
+   case NET_ESMF_EXIT:  return (char*)"EXIT";
+   case NET_ESMF_NEW:   return (char*)"NEW";
+   case NET_ESMF_INIT:  return (char*)"INIT";
+   case NET_ESMF_RUN:   return (char*)"RUN";
+   case NET_ESMF_FINAL: return (char*)"FINAL";
+   case NET_ESMF_STATE: return (char*)"STATE";
+   case NET_ESMF_FILES: return (char*)"FILES";
+   case NET_ESMF_END:   return (char*)"END";
+   case NET_ESMF_PING:  return (char*)"PING";
+   default:             return (char*)"UNKN";
+   }
+
+   return (char*)"UNKN";
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServGetRequestId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServGetRequestId()
+//
+// !INTERFACE:
+int  ESMCI_WebServGetRequestId(
+//
+// !RETURN VALUE:
+//    int  id of the request based on the specified string; ESMF_FAILURE
+//         if the id cannot be found
+//
+// !ARGUMENTS:
+//
+  const char  request[] // request string for which the id is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request id based on a specified string value.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+   //printf("ESMCI_WebServGetRequestId()\n");
+
+   if (strcmp(request, "EXIT")  == 0)  return NET_ESMF_EXIT;
+   if (strcmp(request, "NEW")   == 0)  return NET_ESMF_NEW;
+   if (strcmp(request, "INIT")  == 0)  return NET_ESMF_INIT;
+   if (strcmp(request, "RUN")   == 0)  return NET_ESMF_RUN;
+   if (strcmp(request, "FINAL") == 0)  return NET_ESMF_FINAL;
+   if (strcmp(request, "STATE") == 0)  return NET_ESMF_STATE;
+   if (strcmp(request, "FILES") == 0)  return NET_ESMF_FILES;
+   if (strcmp(request, "END")   == 0)  return NET_ESMF_END;
+   if (strcmp(request, "PING")  == 0)  return NET_ESMF_PING;
+
+   return ESMF_FAILURE;
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

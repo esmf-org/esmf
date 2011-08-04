@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmfClient.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServNetEsmfClient.C,v 1.5 2011/08/04 21:09:19 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -27,15 +27,6 @@
 
 #include "ESMCI_WebServNetEsmfClient.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
@@ -47,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServNetEsmfClient.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServNetEsmfClient.C,v 1.5 2011/08/04 21:09:19 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -213,7 +204,7 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 	//printf("ESMCI_WebServNetEsmfClient::sendRequest()\n");
 
 	int		localrc = 0;
-	char*		requestStr = getRequestFromId(request);
+	char*		requestStr = ESMCI_WebServGetRequestFromId(request);
 
 	if (strcmp(requestStr, "UNKN") == 0)
 	{
@@ -249,6 +240,96 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 
       	return ESMF_FAILURE;
 		}
+	}
+
+	return bytesWritten;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::sendData()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfClient::sendData()
+//
+// !INTERFACE:
+int  ESMCI_WebServNetEsmfClient::sendData(
+//
+// !RETURN VALUE:
+//    int  number of bytes written to the socket; ESMF_FAILURE if there is
+//         an error.
+//
+// !ARGUMENTS:
+//
+  int    length,		// (in) the length of the data to send
+  void*  data			// (in) the buffer containing the data to send
+  )
+//
+// !DESCRIPTION:
+//    Sends a packet of data to the service.  
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	//printf("ESMCI_WebServNetEsmfClient::sendData()\n");
+
+	int	localrc = 0;
+	int	bytesWritten = 0;
+
+	if ((length > 0)  &&  (data != NULL))
+	{
+		if ((bytesWritten = theSocket.write(length, data)) != length)
+		{
+      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+         	ESMC_RC_FILE_WRITE,
+         	"Error writing data to socket.",
+         	&localrc);
+
+      	return ESMF_FAILURE;
+		}
+	}
+
+	return bytesWritten;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::sendString()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServNetEsmfClient::sendString()
+//
+// !INTERFACE:
+int  ESMCI_WebServNetEsmfClient::sendString(
+//
+// !RETURN VALUE:
+//    int  number of bytes written to the socket; ESMF_FAILURE if there is 
+//         an error.
+//
+// !ARGUMENTS:
+//
+  const char*  data		// (in) the string containing the data to send
+  )
+//
+// !DESCRIPTION:
+//    Sends a string to the service.  
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	//printf("ESMCI_WebServNetEsmfClient::sendString()\n");
+
+	int	localrc = 0;
+	int	bytesWritten = 0;
+
+	if ((bytesWritten = theSocket.send(data)) <= 0)
+	{
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error writing string to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
 	}
 
 	return bytesWritten;
@@ -357,1062 +438,90 @@ void  ESMCI_WebServNetEsmfClient::disconnect(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::getRequestId()"
+#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::getStateStr()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::getRequestId()
+// !ROUTINE:  ESMCI_WebServNetEsmfClient::getStateStr()
 //
 // !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::getRequestId(
-//
-// !RETURN VALUE:
-//    int  id of the request based on the specified string; ESMF_FAILURE
-//         if the id cannot be found
-//
-// !ARGUMENTS:
-//
-  const char  request[] // request string for which the id is to be returned
-  )
-//
-// !DESCRIPTION:
-//    Looks up a request id based on a specified string value.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	//printf("ESMCI_WebServNetEsmfClient::getRequestId()\n");
-
-	if (strcmp(request, "EXIT")  == 0)	return NET_ESMF_EXIT;
-	if (strcmp(request, "NEW")   == 0)	return NET_ESMF_NEW;
-	if (strcmp(request, "INIT")  == 0)	return NET_ESMF_INIT;
-	if (strcmp(request, "RUN")   == 0)	return NET_ESMF_RUN;
-	if (strcmp(request, "FINAL") == 0)	return NET_ESMF_FINAL;
-	if (strcmp(request, "STATE") == 0)	return NET_ESMF_STATE;
-	if (strcmp(request, "FILES") == 0)	return NET_ESMF_FILES;
-	if (strcmp(request, "DATA")  == 0)	return NET_ESMF_DATA;
-	if (strcmp(request, "END")   == 0)	return NET_ESMF_END;
-	if (strcmp(request, "PING")  == 0)	return NET_ESMF_PING;
-
-	return ESMF_FAILURE;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::getRequestFromId()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::getRequestFromId()
-//
-// !INTERFACE:
-char*  ESMCI_WebServNetEsmfClient::getRequestFromId(
+char*  ESMCI_WebServNetEsmfClient::getStateStr(
 //
 // !RETURN VALUE:
 //    char*  string value for the specified request id
 //
 // !ARGUMENTS:
 //
-  int  id      // request id for which the string value is to be returned
+  int  state      // request id for which the string value is to be returned
   )
 //
 // !DESCRIPTION:
-//    Looks up a request string value based on a specified request id.
+//    Looks up a state string value based on a specified state value.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::getRequestFromId()\n");
+   //printf("ESMCI_WebServNetEsmfClient::getStateStr()\n");
 
-	switch (id)
-	{
-	case NET_ESMF_EXIT:	return (char*)"EXIT";
-	case NET_ESMF_NEW:	return (char*)"NEW";
-	case NET_ESMF_INIT:	return (char*)"INIT";
-	case NET_ESMF_RUN:	return (char*)"RUN";
-	case NET_ESMF_FINAL:	return (char*)"FINAL";
-	case NET_ESMF_STATE:	return (char*)"STATE";
-	case NET_ESMF_FILES:	return (char*)"FILES";
-	case NET_ESMF_DATA:	return (char*)"DATA";
-	case NET_ESMF_END:	return (char*)"END";
-	case NET_ESMF_PING:	return (char*)"PING";
-	default:					return (char*)"UNKN";
-	}
+   switch (state)
+   {
+   case NET_ESMF_STAT_IDLE:          return (char*)"PENDING";
+	case NET_ESMF_STAT_READY:         return (char*)"READY";
+	case NET_ESMF_STAT_BUSY:          return (char*)"BUSY";
+	case NET_ESMF_STAT_INITIALIZING:  return (char*)"INITIALIZING";
+	case NET_ESMF_STAT_RUNNING:       return (char*)"RUNNING";
+	case NET_ESMF_STAT_FINALIZING:    return (char*)"FINALIZING";
+	case NET_ESMF_STAT_INIT_DONE:     return (char*)"INIT_DONE";
+	case NET_ESMF_STAT_RUN_DONE:      return (char*)"RUN_DONE";
+	case NET_ESMF_STAT_FINAL_DONE:    return (char*)"FINAL_DONE";
+	case NET_ESMF_STAT_DONE:          return (char*)"DONE";
+	case NET_ESMF_STAT_SUBMITTED:     return (char*)"SUBMITTED";
+	case NET_ESMF_STAT_ERROR:         return (char*)"ERROR";
+   default:                          return (char*)"UNKN";
+   }
 
-	return (char*)"UNKN";
+   return (char*)"UNKN";
 }
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::newClient()"
+#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::getStateValue()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::newClient()
+// !ROUTINE:  ESMCI_WebServNetEsmfClient::getStateValue()
 //
 // !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::newClient(
+int  ESMCI_WebServNetEsmfClient::getStateValue(
 //
 // !RETURN VALUE:
-//   int  a unique identifier for this client on the component server; 
-//        ESMF_FAILURE if an error occurs
+//    int  net esmf state based on the specified string; ESMF_FAILURE
+//         if the id cannot be found
 //
 // !ARGUMENTS:
 //
-  const char*  clientName	// a name for the client
+  const char*  stateStr // request string for which the id is to be returned
   )
 //
 // !DESCRIPTION:
-//    Connects to the component server, makes a request to create a new
-//    client session, retrieves the new client id, and then disconnect from 
-//    the server.
+//    Looks up a state value id based on a specified string value.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	localrc = 0;
-	int	clientId = -1;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "New Client" request... sending along the client name
-	//***
-	strcpy(buf, clientName);
-	bufSize = strlen(clientName) + 1;
-
-	int	bytesSent = 0;
-	if ((bytesSent = sendRequest(NET_ESMF_NEW, bufSize, buf)) == ESMF_FAILURE)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending new client request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == bufSize)
-	{
-		//***
-		// Get the server response, which should be a new client id
-		//***
-		if (getResponse(NET_ESMF_NEW, bufSize, buf) == ESMF_FAILURE)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading new client response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			clientId = ntohl(*((unsigned int*)buf));
-			//printf("Client ID: %d\n", clientId);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return clientId;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::init()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::init()
-//
-// !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::init(
-//
-// !RETURN VALUE:
-//   int  the current state of the component service;
-//        ESMF_FAILURE if an error occurs
-//
-// !ARGUMENTS:
-//
-  int  clientId		// the idenfier of the client on the component server
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to initialize the
-//    component, retrieve the server status, and then disconnect from 
-//    the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "Initialize" request... along with the client identifier
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int				bytesSent;
-
-	if ((bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId)) <= 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending initialize request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == 4)
-	{
-		int				numFiles = 0;
-		unsigned int	netNumFiles = htonl(numFiles);
-		int				bytesWritten;
-
-		if ((bytesWritten = theSocket.write(4, &netNumFiles)) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending number of files to socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		//***
-		// Retrieve the response... which should be the server status
-		//***
-		if (getResponse(NET_ESMF_INIT, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading initialize response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			status = ntohl(*((unsigned int*)buf));
-			//printf("Status: %d\n", status);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return status;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::init()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::init()
-//
-// !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::init(
-//
-// !RETURN VALUE:
-//   int  the current state of the component service;
-//        ESMF_FAILURE if an error occurs
-//
-// !ARGUMENTS:
-//
-  int          clientId,	// the idenfier of the client on the component svr
-  const char*  filename		// the name of a file that contains input state data
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to initialize the
-//    component, retrieve the server status, and then disconnect from 
-//    the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "Initialize" request... along with the client identifier and
-	// the import state filename
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int				bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId)) <= 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending initialize request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == 4)
-	{
-		int				numFiles = 1;
-		unsigned int	netNumFiles = htonl(numFiles);
-		int				bytesWritten = 0;
-
-		if ((bytesWritten = theSocket.write(4, &netNumFiles)) != 4)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending number of files to socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		int	filenameSize = strlen(filename) + 1;
-		if ((bytesWritten = 
-				theSocket.write(filenameSize, (void*)filename)) != filenameSize)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending filename to socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		//***
-		// Retrieve the response... which should be the server status
-		//***
-		if (getResponse(NET_ESMF_INIT, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading initialize response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			status = ntohl(*((unsigned int*)buf));
-			//printf("Status: %d\n", status);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return status;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::run()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::run()
-//
-// !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::run(
-//
-// !RETURN VALUE:
-//   int  the current state of the component service;
-//        ESMF_FAILURE if an error occurs
-//
-// !ARGUMENTS:
-//
-  int  clientId		// the idenfier of the client on the component server
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to run the
-//    component, retrieve the server status, and then disconnect from 
-//    the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "Run" request... along with the client identifier
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int				bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_RUN, 4, &netClientId)) != 4)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending run request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == 4)
-	{
-		//***
-		// Retrieve the response... which should be the server status
-		//***
-		if (getResponse(NET_ESMF_RUN, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading run response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			status = ntohl(*((unsigned int*)buf));
-			//printf("Status: %d\n", status);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return status;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::final()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::final()
-//
-// !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::final(
-//
-// !RETURN VALUE:
-//   int  the current state of the component service;
-//        ESMF_FAILURE if an error occurs
-//
-// !ARGUMENTS:
-//
-  int  clientId		// the idenfier of the client on the component server
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to finalize the
-//    component, retrieve the server status, and then disconnect from 
-//    the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "Finalize" request... along with the client identifier
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int				bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_FINAL, 4, &netClientId)) != 4)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending finalize request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == 4)
-	{
-		//***
-		// Retrieve the response... which should be the server status
-		//***
-		if (getResponse(NET_ESMF_FINAL, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading finalize response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			status = ntohl(*((unsigned int*)buf));
-			//printf("Status: %d\n", status);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return status;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::state()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::state()
-//
-// !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::state(
-//
-// !RETURN VALUE:
-//   int  the current state of the component service;
-//        ESMF_FAILURE if an error occurs
-//
-// !ARGUMENTS:
-//
-  int  clientId		// the idenfier of the client on the component server
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to get the current 
-//    service state, retrieve the server status, and then disconnect from 
-//    the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "Get State" request... along with the client identifier
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int				bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_STATE, 4, &netClientId)) != 4)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending get state request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == 4)
-	{
-		//***
-		// Retrieve the response... which should be the server status
-		//***
-		if (getResponse(NET_ESMF_STATE, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading get state response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			status = ntohl(*((unsigned int*)buf));
-			// printf("Status: %d\n", status);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return status;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::files()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::files()
-//
-// !INTERFACE:
-vector<string>  ESMCI_WebServNetEsmfClient::files(
-//
-// !RETURN VALUE:
-//   vector<string>  a list of filenames that contain the export data
-//
-// !ARGUMENTS:
-//
-  int  clientId		// the idenfier of the client on the component server
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to get the export 
-//    filenames, retrieve the filenames and the component status, and then 
-//    disconnect from the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	vector<string>		dataFiles;
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return dataFiles;
-	}
-
-	//***
-	// Send the "Get Files" request... along with the client identifier
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int				bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_FILES, 4, &netClientId)) != 4)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending get files request to socket.",
-         &localrc);
-
-      return dataFiles;
-	}
-
-	if (bytesSent == 4)
-	{
-		//***
-		// Retrieve the response... which should include the number of export
-		// files, the export filenames (if any), and the component server status
-		//***
-		if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading get files response - number of files from socket.",
-         	&localrc);
-
-      	return dataFiles;
-		}
-
-		if (bufSize == 4)
-		{
-			char	fileType[1024];
-			char	fileName[1024];
-			int	numFiles = ntohl(*((unsigned int*)buf));
-			//printf("Num Files: %d\n", numFiles);
-
-			for (int i = 0; i < numFiles; ++i)
-			{
-				if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
-				{
-      			ESMC_LogDefault.ESMC_LogMsgFoundError(
-         			ESMC_RC_FILE_READ,
-         			"Error reading get files response - file type from socket.",
-         			&localrc);
-
-      			return dataFiles;
-				}
-				strcpy(fileType, buf);
-				//printf("File Type: %s\n", fileType);
-
-				if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
-				{
-      			ESMC_LogDefault.ESMC_LogMsgFoundError(
-         			ESMC_RC_FILE_READ,
-         			"Error reading get files response - filename from socket.",
-         			&localrc);
-
-      			return dataFiles;
-				}
-				strcpy(fileName, buf);
-				//printf("File Name: %s\n", fileName);
-
-				dataFiles.push_back(fileName);
-			}
-		}
-
-		if (getResponse(NET_ESMF_FILES, bufSize, buf) <= 0)
-		{
-    			ESMC_LogDefault.ESMC_LogMsgFoundError(
-       			ESMC_RC_FILE_READ,
-       			"Error reading get files response - status from socket.",
-       			&localrc);
-
-    			return dataFiles;
-		}
-		status = ntohl(*((unsigned int*)buf));
-		//printf("Status: %d\n", status);
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return dataFiles;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::getData()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::getData()
-//
-// !INTERFACE:
-string  ESMCI_WebServNetEsmfClient::getData(
-//
-// !RETURN VALUE:
-//   string  a string representation of the data value for the specified
-//           input parameters
-//
-// !ARGUMENTS:
-//
-  int      clientId,	// (in) the idenfier of the client on the component server
-  string   varName,	// (in) the variable name of the data to retrieve
-  string   time,		// (in) the timestamp of the data to retrieve
-  string   lat,		// (in) the latitude of the data to retrieve
-  string   lon,		// (in) the longitude of the data to retrieve
-  string&  dataValue	// (out) the string representation of the data value
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to get the data value 
-//    for the specified parameters, retrieve the data value, and then 
-//    disconnect from the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int		localrc = 0;
-	int		status = 0;
-	int		bufSize = 0;
-   char  	buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return "";
-	}
-
-	//***
-	// Send the "Get Data" request... along with the client identifier
-	//***
-	//printf("ESMCI_WebServNetEsmfClient::getData()\n");
-	unsigned int	netClientId = htonl(clientId);
-	int	bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_DATA, 4, &netClientId)) != 4)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending get data request to socket.",
-         &localrc);
-
-      return "";
-	}
-
-	if (bytesSent == 4)
-	{
-		int			bytesWritten = 0;
-
-		//***
-		// Send the variable name
-		//***
-		const char*	varNameChar = varName.c_str();
-		int			nameLen = strlen(varNameChar) + 1;
-
-		if ((bytesWritten = 
-				theSocket.write(nameLen, (void*)varNameChar)) != nameLen)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending variable name to socket.",
-         	&localrc);
-
-      	return "";
-		}
-
-		//***
-		// Send the time value
-		//***
-		const char*	timeChar = time.c_str();
-		int			timeLen = strlen(timeChar) + 1;
-
-		if ((bytesWritten = theSocket.write(timeLen, (void*)timeChar)) != timeLen)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending time value to socket.",
-         	&localrc);
-
-      	return "";
-		}
-
-		//***
-		// Send the latitude value
-		//***
-		const char*	latChar = lat.c_str();
-		int			latLen = strlen(latChar) + 1;
-
-		if ((bytesWritten = theSocket.write(latLen, (void*)latChar)) != latLen)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending latitude value to socket.",
-         	&localrc);
-
-      	return "";
-		}
-
-		//***
-		// Send the longitude value
-		//***
-		const char*	lonChar = lon.c_str();
-		int			lonLen = strlen(lonChar) + 1;
-
-		if ((bytesWritten = theSocket.write(lonLen, (void*)lonChar)) != lonLen)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error sending longitude value to socket.",
-         	&localrc);
-
-      	return "";
-		}
-
-		//***
-		// Retrieve the response... which should be the data value
-		//***
-		if (getResponse(NET_ESMF_DATA, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading get data response from socket.",
-         	&localrc);
-
-      	return "";
-		}
-
-		dataValue = buf;
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return dataValue;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServNetEsmfClient::end()"
-//BOPI
-// !ROUTINE:  ESMCI_WebServNetEsmfClient::end()
-//
-// !INTERFACE:
-int  ESMCI_WebServNetEsmfClient::end(
-//
-// !RETURN VALUE:
-//   int  the current state of the component service;
-//        ESMF_FAILURE if an error occurs
-//
-// !ARGUMENTS:
-//
-  int  clientId		// the idenfier of the client on the component server
-  )
-//
-// !DESCRIPTION:
-//    Connects to the component server, makes a request to end the client 
-//    session on the component server, retrieve the server status, and then 
-//    disconnect from the server.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	int	localrc = 0;
-	int	status = 0;
-	int	bufSize = 0;
-   char  buf[1024];
-
-	//***
-	// Connect to the component service
-	//***
-	if (connect() < 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		return ESMF_FAILURE;
-	}
-
-	//***
-	// Send the "End Client" request... along with the client identifier
-	//***
-	unsigned int	netClientId = htonl(clientId);
-	int	bytesSent = 0;
-
-	if ((bytesSent = sendRequest(NET_ESMF_END, 4, &netClientId)) != 4)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Error sending end client request to socket.",
-         &localrc);
-
-      return ESMF_FAILURE;
-	}
-
-	if (bytesSent == 4)
-	{
-		//***
-		// Retrieve the response... which should be the server status
-		//***
-		if (getResponse(NET_ESMF_END, bufSize, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Error reading end client response from socket.",
-         	&localrc);
-
-      	return ESMF_FAILURE;
-		}
-
-		if (bufSize == 4)
-		{
-			status = ntohl(*((unsigned int*)buf));
-			//printf("Status: %d\n", status);
-		}
-	}
-
-	//***
-	// Disconnect from the component service
-	//***
-	disconnect();
-
-	return status;
+   //printf("ESMCI_WebServNetEsmfClient::getStateValue()\n");
+
+	if (strcmp(stateStr, "PENDING") == 0)      return NET_ESMF_STAT_IDLE;
+	if (strcmp(stateStr, "READY") == 0)        return NET_ESMF_STAT_READY;
+	if (strcmp(stateStr, "BUSY") == 0)         return NET_ESMF_STAT_BUSY;
+	if (strcmp(stateStr, "INITIALIZING") == 0) return NET_ESMF_STAT_INITIALIZING;
+	if (strcmp(stateStr, "RUNNING") == 0)      return NET_ESMF_STAT_RUNNING;
+	if (strcmp(stateStr, "FINALIZING") == 0)   return NET_ESMF_STAT_FINALIZING;
+	if (strcmp(stateStr, "INIT_DONE") == 0)    return NET_ESMF_STAT_INIT_DONE;
+	if (strcmp(stateStr, "RUN_DONE") == 0)     return NET_ESMF_STAT_RUN_DONE;
+	if (strcmp(stateStr, "FINAL_DONE") == 0)   return NET_ESMF_STAT_FINAL_DONE;
+	if (strcmp(stateStr, "DONE") == 0)         return NET_ESMF_STAT_DONE;
+	if (strcmp(stateStr, "SUBMITTED") == 0)    return NET_ESMF_STAT_SUBMITTED;
+	if (strcmp(stateStr, "ERROR") == 0)        return NET_ESMF_STAT_ERROR;
+
+   return ESMF_FAILURE;
 }
 
 

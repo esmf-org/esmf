@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.23 2011/06/30 19:53:40 w6ws Exp $
+! $Id: ESMF_WebServ.F90,v 1.24 2011/08/04 21:09:19 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -323,13 +323,14 @@ contains
 ! !IROUTINE: ESMF_WebServRegisterSvc 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServRegisterSvc(comp, portNum, rc)
+  subroutine ESMF_WebServRegisterSvc(comp, portNum, clientId, rc)
 
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)  :: comp
-    integer              :: portNum
-    integer, intent(out) :: rc
+    type(ESMF_GridComp)        :: comp
+    integer                    :: portNum
+    character(len=ESMF_MAXSTR) :: clientId
+    integer, intent(out)       :: rc
 !
 !
 ! !DESCRIPTION:
@@ -353,7 +354,7 @@ contains
     integer                     :: localrc
     character(len=ESMF_MAXSTR)  :: compName
     character(len=ESMF_MAXSTR)  :: compDesc
-    character(len=ESMF_MAXSTR)  :: hostName
+!    character(len=ESMF_MAXSTR)  :: hostName
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -362,9 +363,9 @@ contains
     call ESMF_GridCompGet(comp, name=compName, rc=localrc)
 
     compDesc = ""
-    hostName = "localhost"
+!    hostName = "localhost"
 
-    call c_ESMC_RegisterComponent(compName, compDesc, hostName, portNum, &
+    call c_ESMC_RegisterComponent(compName, compDesc, clientId, portNum, &
                                   localrc)
 
     rc = localrc
@@ -380,13 +381,12 @@ contains
 ! !IROUTINE: ESMF_WebServUnregisterSvc 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServUnregisterSvc(comp, portNum, rc)
+  subroutine ESMF_WebServUnregisterSvc(clientId, rc)
 
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)  :: comp
-    integer              :: portNum
-    integer, intent(out) :: rc
+    character(len=ESMF_MAXSTR) :: clientId
+    integer, intent(out)       :: rc
 !
 !
 ! !DESCRIPTION:
@@ -408,18 +408,12 @@ contains
 !------------------------------------------------------------------------------
 
     integer                     :: localrc
-    character(len=ESMF_MAXSTR)  :: compName
-    character(len=ESMF_MAXSTR)  :: hostName
 
     ! Initialize return code
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call ESMF_GridCompGet(comp, name=compName, rc=localrc)
-
-    hostName = "localhost"
-
-    call c_ESMC_UnregisterComponent(compName, hostName, portNum, localrc)
+    call c_ESMC_UnregisterComponent(clientId, localrc)
 
     rc = localrc
 
@@ -474,7 +468,7 @@ contains
     localrc = ESMF_SUCCESS
 
     call c_ESMC_ComponentSvcLoop(comp, importState, exportState, clock, &
-                                 syncflag, phase, 27060, localrc)
+                                 syncflag, phase, portNum, localrc)
 
     rc = localrc
 
@@ -532,13 +526,14 @@ contains
 ! !IROUTINE: ESMF_WebServicesLoop 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServicesLoop(comp, portNum, rc)
+  subroutine ESMF_WebServicesLoop(comp, portNum, clientId, rc)
 
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                              :: comp
-    integer,                 intent(inout), optional :: portNum
-    integer,                 intent(out),   optional :: rc
+    type(ESMF_GridComp)                                 :: comp
+    integer,                    intent(inout), optional :: portNum
+    character(len=ESMF_MAXSTR), intent(in),    optional :: clientId
+    integer,                    intent(out),   optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -565,20 +560,27 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 
-    integer                 :: localrc
-    integer                 :: registrarrc
-    integer                 :: localPet, petCount
-    type(ESMF_VM)           :: vm
-    type(ESMF_State)        :: importState
-    type(ESMF_State)        :: exportState
-    type(ESMF_Clock)        :: clock
-    type(ESMF_Sync_Flag) :: syncflag
-    integer                 :: phase
+    integer                    :: localrc
+    integer                    :: registrarrc
+    integer                    :: localPet, petCount
+    type(ESMF_VM)              :: vm
+    type(ESMF_State)           :: importState
+    type(ESMF_State)           :: exportState
+    type(ESMF_Clock)           :: clock
+    type(ESMF_Sync_Flag)       :: syncflag
+    integer                    :: phase
+    character(len=ESMF_MAXSTR) :: clientIdVal
 
 
     ! Initialize return code
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
+
+    if (present(clientId)) then
+      clientIdVal = clientId
+    else
+      clientIdVal = ""
+    end if
 
     call ESMF_VMGetGlobal(vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -594,14 +596,16 @@ contains
 
        ! create and initialize data members 
        importState = ESMF_StateCreate(name="Import", &
-                                      stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
+                                      stateintent=ESMF_STATEINTENT_IMPORT, &
+                                      rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, &
          rcToReturn=rc)) &
           return
 
        exportState = ESMF_StateCreate(name="Export", &
-                                      stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
+                                      stateintent=ESMF_STATEINTENT_EXPORT, &
+                                      rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, &
          rcToReturn=rc)) &
@@ -617,23 +621,26 @@ contains
 
        if (portNum <= 0) then
           call ESMF_WebServGetPortNum(portNum=portNum, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
+       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) return
        endif
 
-       call ESMF_WebServRegisterSvc(comp, portNum=portNum, rc=registrarrc)
-          if (ESMF_LogFoundError(registrarrc, &
+       call ESMF_WebServRegisterSvc(comp, portNum=portNum, &
+             clientId=clientIdVal, rc=registrarrc)
+       if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) &
              print *, "Unable to Register Service... continuing"
 
+       print *, "KDS: Starting Service Loop"
+
        call ESMF_WebServSvcLoop(comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
              syncflag=syncflag, phase=phase, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
+       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) return
@@ -644,8 +651,8 @@ contains
              importState=importState, exportState=exportState, &
              clock=clock, phase=phase, procType="E", rc=localrc)
 
-       call ESMF_WebServUnregisterSvc(comp, portNum=portNum, rc=registrarrc)
-          if (ESMF_LogFoundError(registrarrc, &
+       call ESMF_WebServUnregisterSvc(clientId=clientIdVal, rc=registrarrc)
+       if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) &
@@ -656,7 +663,7 @@ contains
        call ESMF_WebServWaitForRequest(comp, importState=importState, &
              exportState=exportState, clock=clock, syncflag=syncflag, &
              phase=phase, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
+       if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
              rcToReturn=rc)) return

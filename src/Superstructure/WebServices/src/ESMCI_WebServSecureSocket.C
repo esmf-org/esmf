@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.7 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServSecureSocket.C,v 1.1 2011/08/04 21:09:19 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9,32 +9,30 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_WebServLowLevelSocket.C"
+#define ESMC_FILENAME "ESMCI_WebServSecureSocket.C"
 //==============================================================================
 //
-// ESMC WebServLowLevelSocket method implementation (body) file
+// ESMC WebServSecureSocket method implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ LowLevelSocket methods declared
-// in the companion file ESMCI_WebServLowLevelSocket.h.  This code
+// The code in this file implements the C++ SecureSocket methods declared
+// in the companion file ESMCI_WebServSecureSocket.h.  This code
 // provides some basic, low-level socket functionality to setup and
 // create sockets, and to send and receive data across the sockets.
 //
 //-----------------------------------------------------------------------------
 
 
-#include "ESMCI_WebServLowLevelSocket.h"
+#include "ESMCI_WebServSecureSocket.h"
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/socket.h>
 #include <netdb.h>
-#include <string.h>
 
-#include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_WebServSecureUtils.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
@@ -42,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.7 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServSecureSocket.C,v 1.1 2011/08/04 21:09:19 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -62,12 +60,12 @@ namespace ESMCI
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::ESMCI_WebServLowLevelSocket()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::ESMCI_WebServSecureSocket()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::ESMCI_WebServLowLevelSocket()
+// !ROUTINE:  ESMCI_WebServSecureSocket::ESMCI_WebServSecureSocket()
 // 
 // !INTERFACE:
-ESMCI_WebServLowLevelSocket::ESMCI_WebServLowLevelSocket(
+ESMCI_WebServSecureSocket::ESMCI_WebServSecureSocket(
 // 
 // 
 // !ARGUMENTS:
@@ -90,12 +88,12 @@ ESMCI_WebServLowLevelSocket::ESMCI_WebServLowLevelSocket(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::~ESMCI_WebServLowLevelSocket()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::~ESMCI_WebServSecureSocket()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::~ESMCI_WebServLowLevelSocket()
+// !ROUTINE:  ESMCI_WebServSecureSocket::~ESMCI_WebServSecureSocket()
 // 
 // !INTERFACE:
-ESMCI_WebServLowLevelSocket::~ESMCI_WebServLowLevelSocket(
+ESMCI_WebServSecureSocket::~ESMCI_WebServSecureSocket(
 // 
 // 
 // !ARGUMENTS:
@@ -115,12 +113,12 @@ ESMCI_WebServLowLevelSocket::~ESMCI_WebServLowLevelSocket(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::nonblock()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::nonblock()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::nonblock()
+// !ROUTINE:  ESMCI_WebServSecureSocket::nonblock()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::nonblock(
+int  ESMCI_WebServSecureSocket::nonblock(
 // 
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -138,7 +136,7 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::nonblock()\n");
+	//printf("SecureSocket::nonblock()\n");
 
 	int		localrc = ESMC_RC_NOT_IMPL;
 
@@ -183,12 +181,12 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::serverConnect()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::serverConnect()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::serverConnect()
+// !ROUTINE:  ESMCI_WebServSecureSocket::serverConnect()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::serverConnect(
+int  ESMCI_WebServSecureSocket::serverConnect(
 // 
 // !RETURN VALUE:
 //   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
@@ -206,8 +204,14 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 {
 	int	localrc = 0;
 
-	//printf("LowLevelSocket::serverConnect()\n");
+	//printf("SecureSocket::serverConnect()\n");
 	disconnect();
+
+	//***
+	// Initialize the SSL Context
+	//***
+	theContext = ESMCI_WebServInitContext("server.pem", "password");
+// KDS: TODO - add error handling
 
 	theTSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theTSock < 0)
@@ -280,15 +284,15 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::accept()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::accept()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::accept()
+// !ROUTINE:  ESMCI_WebServSecureSocket::accept()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::accept(
+int  ESMCI_WebServSecureSocket::accept(
 // 
 // !RETURN VALUE:
-//   int  return code - the socket id if success; ESMF_FAILURE for failure
+//   int  return code - ESMF_SUCCESS for success, ESMF_FAILURE for failure
 // 
 // !ARGUMENTS:
 // 
@@ -300,7 +304,7 @@ int  ESMCI_WebServLowLevelSocket::accept(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::accept()\n");
+	//printf("SecureSocket::accept()\n");
 	int	localrc = 0;
 
 	//***
@@ -337,18 +341,38 @@ int  ESMCI_WebServLowLevelSocket::accept(
 		return ESMF_FAILURE;
 	}
 
+	//***
+	// Setup the secure socket connection
+	//***
+	theSocketBuffer = BIO_new_socket(theSock, BIO_NOCLOSE);
+	theSecureSocket = SSL_new(theContext);
+	SSL_set_bio(theSecureSocket, theSocketBuffer, theSocketBuffer);
+
+	int	retValue = 0;
+	if ((retValue = SSL_accept(theSecureSocket)) <= 0)
+	{
+		disconnect();
+
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"SSL Socket accept failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
+	}
+
 	return theSock;
 }
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::clientConnect()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::clientConnect()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::clientConnect()
+// !ROUTINE:  ESMCI_WebServSecureSocket::clientConnect()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::clientConnect(
+int  ESMCI_WebServSecureSocket::clientConnect(
 // 
 // !RETURN VALUE:
 //   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
@@ -365,13 +389,19 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::clientConnect()\n");
+	//printf("SecureSocket::clientConnect()\n");
 	int	localrc = 0;
 
 	//***
 	// First, make sure that we're not already connected... if so, disconnect
 	//***
 	disconnect();
+
+	//***
+	// Initialize the SSL Context
+	//***
+	theContext = ESMCI_WebServInitContext("client.pem", "password");
+// KDS: TODO - add error handling
 
 	//***
 	// Create the client socket
@@ -419,18 +449,40 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 		return ESMF_FAILURE;
 	}
 
+	//***
+	// Setup the secure socket connection
+	//***
+	theSocketBuffer = BIO_new_socket(theSock, BIO_NOCLOSE);
+	theSecureSocket = SSL_new(theContext);
+	SSL_set_bio(theSecureSocket, theSocketBuffer, theSocketBuffer);
+
+	int	retValue = 0;
+	if ((retValue = SSL_connect(theSecureSocket)) <= 0)
+	{
+		disconnect();
+
+		ESMC_LogDefault.ESMC_LogMsgFoundError(
+			ESMC_RC_FILE_OPEN, 
+			"SSL Socket accept failed.", 
+			&localrc);
+
+		return ESMF_FAILURE;
+	}
+
+// KDS: TODO - Add check cert??
+
 	return theSock;
 }
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::close()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::close()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::close()
+// !ROUTINE:  ESMCI_WebServSecureSocket::close()
 // 
 // !INTERFACE:
-void  ESMCI_WebServLowLevelSocket::close(
+void  ESMCI_WebServSecureSocket::close(
 // 
 // !RETURN VALUE:
 // 
@@ -444,7 +496,7 @@ void  ESMCI_WebServLowLevelSocket::close(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::close()\n");
+	//printf("SecureSocket::close()\n");
 
 	if (theSock > 0)
 	{
@@ -456,12 +508,12 @@ void  ESMCI_WebServLowLevelSocket::close(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::disconnect()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::disconnect()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::disconnect()
+// !ROUTINE:  ESMCI_WebServSecureSocket::disconnect()
 // 
 // !INTERFACE:
-void  ESMCI_WebServLowLevelSocket::disconnect(
+void  ESMCI_WebServSecureSocket::disconnect(
 // 
 // !RETURN VALUE:
 // 
@@ -475,7 +527,7 @@ void  ESMCI_WebServLowLevelSocket::disconnect(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::disconnect()\n");
+	//printf("SecureSocket::disconnect()\n");
 
 	close();
 
@@ -489,12 +541,12 @@ void  ESMCI_WebServLowLevelSocket::disconnect(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::send()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::send()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::send()
+// !ROUTINE:  ESMCI_WebServSecureSocket::send()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::send(
+int  ESMCI_WebServSecureSocket::send(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) sent 
@@ -511,20 +563,20 @@ int  ESMCI_WebServLowLevelSocket::send(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::send()\n");
+	//printf("SecureSocket::send()\n");
 
-	return ESMCI::ESMCI_WebServSend(theSock, size, data);
+	return ESMCI::ESMCI_WebServSecureSend(theSecureSocket, size, data);
 }
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::recv()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::recv()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::recv()
+// !ROUTINE:  ESMCI_WebServSecureSocket::recv()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::recv(
+int  ESMCI_WebServSecureSocket::recv(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) received if successful, 0 if the peer
@@ -543,20 +595,20 @@ int  ESMCI_WebServLowLevelSocket::recv(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::recv()\n");
+	//printf("SecureSocket::recv()\n");
 
-	return ESMCI::ESMCI_WebServRecv(theSock, size, data);
+	return ESMCI::ESMCI_WebServSecureRecv(theSecureSocket, size, data);
 }
 
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::read()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::read()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::read()
+// !ROUTINE:  ESMCI_WebServSecureSocket::read()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::read(
+int  ESMCI_WebServSecureSocket::read(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) read (not including the packet header) 
@@ -577,7 +629,7 @@ int  ESMCI_WebServLowLevelSocket::read(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::read()\n");
+	//printf("SecureSocket::read()\n");
 
 	int	localrc = 0;
 
@@ -646,12 +698,12 @@ int  ESMCI_WebServLowLevelSocket::read(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::write()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::write()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::write()
+// !ROUTINE:  ESMCI_WebServSecureSocket::write()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::write(
+int  ESMCI_WebServSecureSocket::write(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) written (not including the packet
@@ -671,7 +723,7 @@ int  ESMCI_WebServLowLevelSocket::write(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::write()\n");
+	//printf("SecureSocket::write()\n");
 
 	int	localrc = 0;
 
@@ -713,12 +765,12 @@ int  ESMCI_WebServLowLevelSocket::write(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServLowLevelSocket::send()"
+#define ESMC_METHOD "ESMCI_WebServSecureSocket::send()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServLowLevelSocket::send()
+// !ROUTINE:  ESMCI_WebServSecureSocket::send()
 // 
 // !INTERFACE:
-int  ESMCI_WebServLowLevelSocket::send(
+int  ESMCI_WebServSecureSocket::send(
 // 
 // !RETURN VALUE:
 //   int  number of characters (bytes) written (not including the packet
@@ -737,7 +789,7 @@ int  ESMCI_WebServLowLevelSocket::send(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("LowLevelSocket::send2()\n");
+	//printf("SecureSocket::send2()\n");
 
 	return write(strlen(msg) + 1, (void*)msg);
 }
