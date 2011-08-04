@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2011/08/04 21:09:19 ksaint Exp $
+# $Id: makefile,v 1.6 2011/08/04 22:15:18 ksaint Exp $
 
 ALL: build_here 
 
@@ -15,12 +15,8 @@ SOURCEC	  = ESMCI_WebServNetEsmfClient.C \
              ESMCI_WebServRegistrarClient.C \
              ESMCI_WebServComponentSvr.C \
              ESMCI_WebServCompSvrClient.C \
-             ESMCI_WebServSecureServerSocket.C \
-             ESMCI_WebServSecureClientSocket.C \
              ESMCI_WebServSocketUtils.C \
-             ESMCI_WebServSecureUtils.C \
              ESMCI_WebServLowLevelSocket.C \
-             ESMCI_WebServSecureSocket.C \
              ESMCI_WebServCompSvrMgr.C \
              ESMCI_WebServGRAMClient.C \
              ESMCI_WebServForkClient.C \
@@ -30,14 +26,12 @@ SOURCEC	  = ESMCI_WebServNetEsmfClient.C \
 SOURCEF	  = ESMF_WebServ.F90 ESMF_WebServComponent_C.F90
 SOURCEH	  = ESMCI_WebServ.h
 STOREH    = ESMCI_WebServLowLevelSocket.h \
-STOREH    = ESMCI_WebServSecureSocket.h \
-            ESMCI_WebServServerSocket.h \
+STOREH    = ESMCI_WebServServerSocket.h \
             ESMCI_WebServClientSocket.h \
             ESMCI_WebServNetEsmf.h \
             ESMCI_WebServClientInfo.h \
             ESMCI_WebServCAMOutputFile.h \
             ESMCI_WebServCompSvrClient.h \
-            ESMCI_WebServSecureCompSvrClient.h \
             ESMCI_WebServProcCtrlClient.h \
             ESMCI_WebServPassThruSvr.h
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
