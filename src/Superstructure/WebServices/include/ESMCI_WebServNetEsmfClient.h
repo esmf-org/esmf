@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmfClient.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServNetEsmfClient.h,v 1.4 2011/08/04 21:12:48 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -56,30 +56,24 @@ namespace ESMCI
                                 int          port);
 	  ~ESMCI_WebServNetEsmfClient();
 
+     int    getStateValue(const char*  stateStr);
+     char*  getStateStr(int  id);
+
+  protected:
+
      // methods to setup the connection parameters
 	  void setHost(const char*  host);
 	  void setPort(int  port);
 
-     // methods to send client requests to the server
-     int  newClient(const char*  clientName);
-     int  init(int  clientId);
-     int  init(int  clientId, const char*  filename);
-     int  run(int  clientId);
-     int  final(int  clientId);
-     int  state(int  clientId);
-     vector<string>  files(int  clientId);
-	  string  getData(int      clientId, 
-                     string   varName, 
-                     string   time, 
-                     string   lat, 
-                     string   lon, 
-                     string&  dataValue);
-     int  end(int  clientId);
-   
      // low-level communications methods
 	  int  sendRequest(int    request,
                       int    length = 0,
                       void*  data = NULL);
+
+	  int  sendData(int    length,
+                   void*  data);
+
+	  int  sendString(const char*  data);
 
 	  int  getResponse(int    request,
                       int&   length,
@@ -88,11 +82,8 @@ namespace ESMCI
 	  int  connect();
 	  void disconnect();
 
-  private:
 
-     // methods to handle request ids
-	  int   getRequestId(const char  request[]);
-	  char* getRequestFromId(int  id);
+  private:
 
 	  char*			theHost;			// the name of the machine that hosts the svc
 	  int				thePort;			// the port number for the service

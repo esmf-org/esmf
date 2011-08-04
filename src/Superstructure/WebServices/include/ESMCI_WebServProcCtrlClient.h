@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.h,v 1.5 2011/08/04 21:12:48 ksaint Exp $
+// $Id: ESMCI_WebServProcCtrlClient.h,v 1.1 2011/08/04 21:12:48 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -15,15 +15,15 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMCI_WebServCompSvrClient_H
-#define ESMCI_WebServCompSvrClient_H
+#ifndef ESMCI_WebServProcCtrlClient_H
+#define ESMCI_WebServProcCtrlClient_H
 
 #include <stdlib.h>
 #include <string>
 #include <vector>
 
-#include "ESMCI_WebServServerSocket.h"
-#include "ESMCI_WebServClientSocket.h"
+//#include "ESMCI_WebServServerSocket.h"
+//#include "ESMCI_WebServClientSocket.h"
 #include "ESMCI_WebServNetEsmf.h"
 #include "ESMCI_WebServNetEsmfClient.h"
 
@@ -31,13 +31,13 @@ using namespace std;
 
 //-------------------------------------------------------------------------
 //BOPI
-// !CLASS: ESMCI::ESMCI_WebServCompSvrClient
+// !CLASS: ESMCI::ESMCI_WebServProcCtrlClient
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ CompSvrClient members and method
-// signatures (prototypes).  The companion file ESMCI\_WebServCompSvrClient.C
-// contains the full code (bodies) for the CompSvrClient methods.
+// The code in this file defines the C++ ProcCtrlClient members and method
+// signatures (prototypes).  The companion file ESMCI\_WebServProcCtrlClient.C
+// contains the full code (bodies) for the ProcCtrlClient methods.
 //
 // This class provides the capability to connect and communicate with a
 // ESMF Component service implemented with the ESMCI_WebServComponentSvr class.
@@ -51,34 +51,40 @@ using namespace std;
 namespace ESMCI
 {
 
-  class ESMCI_WebServCompSvrClient : public ESMCI_WebServNetEsmfClient
+  class ESMCI_WebServProcCtrlClient : public ESMCI_WebServNetEsmfClient
   {
   public:
 
      // constructor and destructor
-	  ESMCI_WebServCompSvrClient(const char*  host,
-                                int          port,
-                                int          clientId);
-	  ~ESMCI_WebServCompSvrClient();
+	  ESMCI_WebServProcCtrlClient(const char*  host,
+                                 int          port,
+                                 const char*  userName,
+                                 const char*  password);
+	  ~ESMCI_WebServProcCtrlClient();
 
-     // methods to setup the connection parameters
-	  void setClientId(int  clientId);
+     // access methods
+     int  getClientId() { return theClientId; }
 
      // methods to send client requests to the server
+     int  state();
      int  init();
      int  run();
      int  final();
-     int  state();
-     vector<string>  files();
      int  end();
      int  killServer();
    
 
   private:
 
-	  int				theClientId;	// the id of the client on the PassThruSvr
+     int   newClient();
+	  void  setClientId(int  clientId);
+
+	  char    theMsg[8192];	     // the message buffer
+     char    theUserName[256];  // the login name for the user on the server
+     char    thePassword[256];  // the password for the user on the server
+	  int	    theClientId;	     // the id of the client on the PassThruSvr
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServCompSvrClient_H
+#endif 	// ESMCI_WebServProcCtrlClient_H

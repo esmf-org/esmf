@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServRegistrarClient.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServRegistrarClient.h,v 1.4 2011/08/04 21:12:48 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,7 +20,8 @@
 
 #include <stdlib.h>
 
-#include "ESMCI_WebServClientSocket.h"
+#include "ESMCI_WebServNetEsmfClient.h"
+#include "ESMCI_WebServCompSvrInfo.h"
 
 //-------------------------------------------------------------------------
 //BOPI
@@ -44,7 +45,7 @@
 namespace ESMCI
 {
 
-  class ESMCI_WebServRegistrarClient 
+  class ESMCI_WebServRegistrarClient : public ESMCI_WebServNetEsmfClient
   {
   public:
 
@@ -53,42 +54,31 @@ namespace ESMCI
                                   int          port);
 	  ~ESMCI_WebServRegistrarClient();
 
-     // methods to setup the connection parameters
-	  void setHost(const char*  host);
-	  void setPort(int  port);
-
-     // low-level methods to communicate across the socket
-	  int  sendRequest(int    request,
-                      int    length = 0,
-                      void*  data = NULL);
-
-	  int  getResponse(int    request,
-                      int&   length,
-                      void*  data);
-
-	  int  connect();
-	  void disconnect();
-
      // methods to send client requests to the server
-	  int  registerComp(char*  name,
-                       char*  desc,
-                       char*  hostName,
-                       char*  portNum,
-                       void*  retValue);
+	  int  registerComp(const char*  clientId,
+                       const char*  hostName,
+                       const char*  portNum);
 
-	  int  unregisterComp(char*  name,
-                         char*  hostName,
-                         char*  portNum,
-                         void*  retValue);
+	  int  compSubmitted(const char*  clientId,
+                        const char*  jobId);
+
+	  int  compStarted(const char*  clientId,
+                      const char*  compName,
+                      const char*  compDesc,
+                      const char*  physHostName);
+
+	  int  getComponent(const char*                clientId,
+                       ESMCI_WebServCompSvrInfo*  compSvrInfo);
+
+	  int  getStatus(const char*  clientId);
+
+	  int  setStatus(const char*  clientId,
+                    const char*  status);
+
+	  int  unregisterComp(const char*  clientId);
 
   private:
 
-	  char*			theHost;			// the name of the machine that hosts the svc
-	  int				thePort;			// the port number for the service
-	  char			theMsg[8192];	// the message buffer
-
-	  ESMCI_WebServClientSocket		
-						theSocket;		// the socket connection to the service
   };
 
 } // end namespace

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServClientInfo.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServClientInfo.h,v 1.4 2011/08/04 21:12:48 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -53,15 +53,21 @@ namespace ESMCI
 
      // get methods
 	  int    				clientId()		{ return theClientId; }
+	  string    			userName()		{ return theUserName; }
+	  string    			password()		{ return thePassword; }
 	  int    				status()			{ return theCurrentStatus; }
 	  string    			serverHost()	{ return theServerHost; }
 	  int    				serverPort()	{ return theServerPort; }
+	  string    			jobId()	   	{ return theJobId; }
 	  vector<string>  	outputFiles()	{ return theOutputFiles; }
 
      // set methods
+	  void  setUserName(string  userName);
+	  void  setPassword(string  password);
      void  setStatus(int  status);
 	  void  setServerHost(string  serverHost);
 	  void  setServerPort(int  serverPort);
+	  void  setJobId(string  jobId);
 	  void  addOutputFile(string  outputFile);
 
      void  print();
@@ -69,11 +75,16 @@ namespace ESMCI
   private:
 
 	  int					theClientId;			// the unique id for the client
+     string          theUserName;         // the client's login name on the svr
+                                          //   server
+     string          thePassword;         // the client's password on the svr
 	  int					theCurrentStatus;		// the current status of the client
 	  string				theServerHost;			// the name of the host to which the
-                                          // client is connected
+                                          //   client is connected
 	  int					theServerPort;       // the port number of the socket to
-                                          // which the client is connected
+                                          //   which the client is connected
+     string				theJobId;			   // the unique id for the component
+                                          //   service for this client
 	  vector<string>	theOutputFiles;		// the list of output files
   };
 
