@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.12 2011/08/05 13:01:31 w6ws Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.13 2011/08/05 18:38:37 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -73,15 +73,15 @@ extern "C"
                                  int               phase,
                                  int*              rc);
 
-	void  initThreadStartup(void*);
-	void  runThreadStartup(void*);
-	void  finalThreadStartup(void*);
+	void*  initThreadStartup(void*);
+	void*  runThreadStartup(void*);
+	void*  finalThreadStartup(void*);
 };
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.12 2011/08/05 13:01:31 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.13 2011/08/05 18:38:37 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1693,7 +1693,7 @@ void  ESMCI_WebServComponentSvr::runFinal(
 // !ROUTINE:  initThreadStartup()
 //
 // !INTERFACE:
-void  initThreadStartup(
+void*  initThreadStartup(
 //
 // !RETURN VALUE:
 //
@@ -1718,6 +1718,8 @@ void  initThreadStartup(
 	// Call the initialization method
 	//***
 	svrObject->runInit();
+
+        return NULL;
 }
 
 
@@ -1728,7 +1730,7 @@ void  initThreadStartup(
 // !ROUTINE:  runThreadStartup()
 //
 // !INTERFACE:
-void  runThreadStartup(
+void*  runThreadStartup(
 //
 // !RETURN VALUE:
 //
@@ -1753,6 +1755,8 @@ void  runThreadStartup(
 	// Call the run method
 	//***
 	svrObject->runRun();
+
+        return NULL;
 }
 
 
@@ -1763,7 +1767,7 @@ void  runThreadStartup(
 // !ROUTINE:  finalThreadStartup()
 //
 // !INTERFACE:
-void  finalThreadStartup(
+void*  finalThreadStartup(
 //
 // !RETURN VALUE:
 //
@@ -1788,4 +1792,6 @@ void  finalThreadStartup(
 	// Call the finalization method
 	//***
 	svrObject->runFinal();
+
+        return NULL;
 }
