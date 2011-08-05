@@ -1,10 +1,17 @@
-/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.5 2011/08/04 21:18:22 ksaint Exp $ */
+/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.6 2011/08/05 13:01:33 w6ws Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if !defined (ESMF_OS_MinGW)
 #include <time.h>
 #include <unistd.h>
+#else
+#include <windows.h>
+#define sleep(secs) Sleep(secs*1000)
+#endif
+
 #include "ESMCI_WebServCompSvrClient.h"
 
 // ESMF header
@@ -31,6 +38,7 @@ static char*   monthStr[] =
 };
 
 
+#if !defined (ESMF_OS_MinGW)
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "getDateAndTime"
@@ -76,6 +84,7 @@ const char*  getDateAndTime(
 
    return datestr;
 }
+#endif
 
 
 //-----------------------------------------------------------------------------
@@ -107,7 +116,9 @@ int main(int    argc,
    printf("\n");
    printf("ESMF_WebServCompSvrClientUTest\n");
    printf("-----------------------------------------------------\n");
+#if !defined (ESMF_OS_MinGW)
    printf("  date:  %s\n", getDateAndTime());
+#endif
    printf("  host:  %s\n", host);
    printf("  port:  %d\n", portNum);
    printf(" client: %d\n", clientId);

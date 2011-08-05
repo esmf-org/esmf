@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServGRAMClient.C,v 1.1 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServGRAMClient.C,v 1.2 2011/08/05 13:01:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServGRAMClient.C,v 1.1 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServGRAMClient.C,v 1.2 2011/08/05 13:01:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -120,7 +120,7 @@ int  ESMCI_WebServGRAMClient::loginToServer(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// do something
+	return 0; // do something
 }
 
 
@@ -146,7 +146,7 @@ string  ESMCI_WebServGRAMClient::submitJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// do something
+	return string(""); // do something
 }
 
 
@@ -171,7 +171,7 @@ int  ESMCI_WebServGRAMClient::cancelJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// do something
+	return 0; // do something
 }
 
 
@@ -196,7 +196,7 @@ int  ESMCI_WebServGRAMClient::jobStatus(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// do something
+	return 0; // do something
 }
 
 

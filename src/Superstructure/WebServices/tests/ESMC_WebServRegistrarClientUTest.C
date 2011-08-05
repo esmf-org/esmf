@@ -1,10 +1,14 @@
-/* $Id: ESMC_WebServRegistrarClientUTest.C,v 1.1 2011/08/04 21:18:22 ksaint Exp $ */
+/* $Id: ESMC_WebServRegistrarClientUTest.C,v 1.2 2011/08/05 13:01:33 w6ws Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#if !defined (ESMF_OS_MinGW)
 #include <unistd.h>
+#endif
+
 #include "ESMCI_WebServRegistrarClient.h"
 #include "ESMCI_WebServCompSvrInfo.h"
 

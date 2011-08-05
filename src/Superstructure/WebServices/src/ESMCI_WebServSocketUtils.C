@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.C,v 1.5 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServSocketUtils.C,v 1.6 2011/08/05 13:01:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,8 +32,13 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#else
+#include <Windows.h>
+#endif
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -43,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.5 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.6 2011/08/05 13:01:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -151,7 +156,7 @@ void  ESMCI_WebServNotify(
 // !ARGUMENTS:
 //
   const char  msg[],					// message to print to stderr
-  Severity    severity = PRINT,	// level of severity
+  WebServSeverity    severity = WebServPRINT,	// level of severity
   const char  proc[] = NULL		// method/function/procedure name
   )
 //
@@ -167,19 +172,19 @@ void  ESMCI_WebServNotify(
 	//***
 	switch (severity)
 	{
-	case PRINT:
+	case WebServPRINT:
 		fprintf(stderr, "MSG");
 		break;
 
-	case WARN:
+	case WebServWARN:
 		fprintf(stderr, "WARNING");
 		break;
 
-	case ERROR:
+	case WebServERROR:
 		fprintf(stderr, "ERROR");
 		break;
 
-	case FATAL:
+	case WebServFATAL:
 		fprintf(stderr, "FATAL");
 		break;
 
@@ -204,7 +209,7 @@ void  ESMCI_WebServNotify(
 	// Exit the application if this is a fatal message
 	// (KDS: This should probably go away.)
 	//***
-	if (severity == FATAL)
+	if (severity == WebServFATAL)
 	{
 		exit(0);
 	}
@@ -242,7 +247,7 @@ int  ESMCI_WebServSend(
 		return 0;
 	}
 
-	unsigned char*		ptr = (unsigned char*)data;
+	char*		ptr = (char*)data;
 	//printf("Sending: %s\n", ptr);
 
 	int	totalBytesWritten = 0;
@@ -256,9 +261,16 @@ int  ESMCI_WebServSend(
 	//***
 	while ((totalBytesWritten < size)  &&  (t < TWAIT))
 	{
+#if !defined (ESMF_OS_MinGW)
 		int	bytesWritten = write(fd, 
                                  ptr + totalBytesWritten, 
                                  size - totalBytesWritten);
+#else
+                int     bytesWritten = send(fd,
+                                 ptr + totalBytesWritten,
+                                 size - totalBytesWritten,
+                                 0);
+#endif
 		//printf("::send - Bytes Written: %d\n", bytesWritten);
 
 		if (bytesWritten > 0)
@@ -313,7 +325,7 @@ int  ESMCI_WebServRecv(
 	}
 
 	//printf("recv Size: %d\n", size);
-	unsigned char*	ptr = (unsigned char*)data;
+	char*	ptr = (char*)data;
 
 	int	totalBytesRead = 0;
 	int	t = 0;
@@ -325,7 +337,11 @@ int  ESMCI_WebServRecv(
 	//***
 	while ((totalBytesRead < size)  &&  (t < TWAIT))
 	{
+#if !defined (ESMF_OS_MinGW)
 		int	bytesRead = read(fd, ptr + totalBytesRead, size - totalBytesRead);
+#else
+                int     bytesRead = recv(fd, ptr + totalBytesRead, size - totalBytesRead, 0);
+#endif
 
 		if (bytesRead > 0)
 		{
@@ -381,7 +397,11 @@ int  ESMCI_WebServRecv(
 	//***
 	do
 	{
+#if !defined (ESMF_OS_MinGW)
 		bytesRead = read(fd, cp, 1);
+#else
+                bytesRead = recv(fd, cp, 1, 0);
+#endif
 		//printf("Bytes Read: %d\n", bytesRead);
 
 		if (bytesRead > 0)

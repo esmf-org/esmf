@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServPassThruSvr.C,v 1.7 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServPassThruSvr.C,v 1.8 2011/08/05 13:01:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -27,7 +27,11 @@
 
 #include "ESMCI_WebServPassThruSvr.h"
 
+#if !defined(ESMF_OS_MinGW)
 #include <netdb.h>
+#else
+#include <Winsock.h>
+#endif
 #include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
@@ -40,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.7 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServPassThruSvr.C,v 1.8 2011/08/05 13:01:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServForkClient.C,v 1.1 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServForkClient.C,v 1.2 2011/08/05 13:01:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,10 +36,14 @@
 #include <iostream>
 #include <string>
 
+#if defined (ESMF_OS_MinGW)
+#include <Winsock.h>
+#endif
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServForkClient.C,v 1.1 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServForkClient.C,v 1.2 2011/08/05 13:01:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -126,6 +130,7 @@ string  ESMCI_WebServForkClient::submitJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+#if !defined (ESMF_OS_MinGW)
 printf("ESMCI_WebServForkClient::submitJob()\n");
 printf("Client ID: %d\n", clientId);
 printf("Port Num: %d\n", portNum);
@@ -166,6 +171,10 @@ printf("Client ID: %s\n", clientIdStr);
 	string	jobId = theHostName + "_" + pidStr;
 
 	return jobId;
+#else
+// TODO: Use the Windows CreateProcess system call.
+        return "";
+#endif
 }
 
 
@@ -190,6 +199,7 @@ int  ESMCI_WebServForkClient::cancelJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
+#if !defined (ESMF_OS_MinGW)
 	int	pid = extractPid(jobId);
 	int	rc = 0;
 
@@ -199,6 +209,10 @@ int  ESMCI_WebServForkClient::cancelJob(
 	}
 
 	return rc;
+#else
+// TODO: Use the Windows TerminateProcess system call.
+        return -1;
+#endif
 }
 
 
@@ -223,7 +237,7 @@ int  ESMCI_WebServForkClient::jobStatus(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// do something
+	return 0; // do something
 }
 
 

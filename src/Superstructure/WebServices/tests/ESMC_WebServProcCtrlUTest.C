@@ -1,8 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
+
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#else
+#include <Winsock.h>
+#endif
 
 // ESMF header
 #include "ESMC.h"

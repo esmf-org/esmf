@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.11 2011/08/05 02:47:46 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.12 2011/08/05 13:01:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,11 @@
 
 #include "ESMCI_WebServComponentSvr.h"
 
+#if !defined (ESMF_OS_MinGW)
 #include <netdb.h>
+#else
+#include <Winsock.h>
+#endif
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_WebServRegistrarClient.h"
@@ -69,15 +73,15 @@ extern "C"
                                  int               phase,
                                  int*              rc);
 
-	void*  initThreadStartup(void*);
-	void*  runThreadStartup(void*);
-	void*  finalThreadStartup(void*);
+	void  initThreadStartup(void*);
+	void  runThreadStartup(void*);
+	void  finalThreadStartup(void*);
 };
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.11 2011/08/05 02:47:46 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.12 2011/08/05 13:01:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1520,7 +1524,7 @@ int  ESMCI_WebServComponentSvr::processEnd(
 // !ROUTINE:  ESMCI_WebServComponentSvr::runInit()
 //
 // !INTERFACE:
-void*  ESMCI_WebServComponentSvr::runInit(
+void  ESMCI_WebServComponentSvr::runInit(
 //
 // !RETURN VALUE:
 //
@@ -1576,7 +1580,7 @@ void*  ESMCI_WebServComponentSvr::runInit(
 // !ROUTINE:  ESMCI_WebServComponentSvr::runRun()
 //
 // !INTERFACE:
-void*  ESMCI_WebServComponentSvr::runRun(
+void  ESMCI_WebServComponentSvr::runRun(
 //
 // !RETURN VALUE:
 //
@@ -1630,7 +1634,7 @@ void*  ESMCI_WebServComponentSvr::runRun(
 // !ROUTINE:  ESMCI_WebServComponentSvr::runFinal()
 //
 // !INTERFACE:
-void*  ESMCI_WebServComponentSvr::runFinal(
+void  ESMCI_WebServComponentSvr::runFinal(
 //
 // !RETURN VALUE:
 //
@@ -1689,7 +1693,7 @@ void*  ESMCI_WebServComponentSvr::runFinal(
 // !ROUTINE:  initThreadStartup()
 //
 // !INTERFACE:
-void*  initThreadStartup(
+void  initThreadStartup(
 //
 // !RETURN VALUE:
 //
@@ -1724,7 +1728,7 @@ void*  initThreadStartup(
 // !ROUTINE:  runThreadStartup()
 //
 // !INTERFACE:
-void*  runThreadStartup(
+void  runThreadStartup(
 //
 // !RETURN VALUE:
 //
@@ -1759,7 +1763,7 @@ void*  runThreadStartup(
 // !ROUTINE:  finalThreadStartup()
 //
 // !INTERFACE:
-void*  finalThreadStartup(
+void  finalThreadStartup(
 //
 // !RETURN VALUE:
 //

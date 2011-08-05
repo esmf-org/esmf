@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.h,v 1.4 2011/08/04 21:12:48 ksaint Exp $
+// $Id: ESMCI_WebServSocketUtils.h,v 1.5 2011/08/05 13:01:28 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,12 +45,12 @@ namespace ESMCI
 
   // Levels of severity for "notify" messages
   // (KDS: I think this is going to be replaces by ESMF error hand.ing codes
-  enum Severity
+  enum WebServSeverity
   {
-	  PRINT,
-	  WARN,
-	  ERROR,
-	  FATAL
+	  WebServPRINT,
+	  WebServWARN,
+	  WebServERROR,
+	  WebServFATAL
   };
 
   // Looks up a request id based on a specified string value.
@@ -62,7 +62,7 @@ namespace ESMCI
   // Function that prints error messages to stderr
   // (KDS: I think this is going to be replaces by ESMF error hand.ing codes
   void  ESMCI_WebServNotify(const char  msg[],
-                            Severity    severity,
+                            WebServSeverity    severity,
                             const char  proc[]);
 
   // Functions to send and receive data using sockets

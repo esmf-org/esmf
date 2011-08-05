@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.7 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServLowLevelSocket.C,v 1.8 2011/08/05 13:01:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,11 +28,19 @@
 
 #include "ESMCI_WebServLowLevelSocket.h"
 
+#include <string.h>
+
+#if !defined (ESMF_OS_MinGW)
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <string.h>
+#else
+#include <Windows.h>
+#define sleep(secs) Sleep(secs*1000)
+#include <Winsock.h>
+#define ESMF_NO_SOCKOPT
+#endif
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
@@ -42,7 +50,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.7 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.8 2011/08/05 13:01:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -167,6 +175,7 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 		sock = theTSock;
 	}
 
+#if !defined (ESMF_OS_MinGW)
 	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
 	{
 		ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -176,6 +185,7 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 
 		return localrc;
 	}
+#endif
 
 	return ESMF_SUCCESS;
 }
@@ -448,7 +458,11 @@ void  ESMCI_WebServLowLevelSocket::close(
 
 	if (theSock > 0)
 	{
+#if !defined (ESMF_OS_MinGW)
 		::close(theSock);
+#else
+                ::closesocket(theSock);
+#endif
 		theSock = -1;
 	}
 }
@@ -481,7 +495,11 @@ void  ESMCI_WebServLowLevelSocket::disconnect(
 
 	if (theTSock > 0)
 	{
+#if !defined (ESMF_OS_MinGW)
 		::close(theTSock);
+#else
+                ::closesocket(theTSock);
+#endif
 		theTSock = -1;
 	}
 }
