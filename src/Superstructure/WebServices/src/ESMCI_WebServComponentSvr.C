@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.10 2011/08/04 21:09:19 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.11 2011/08/05 02:47:46 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,6 +35,7 @@
 #include <netdb.h>
 
 #include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_WebServRegistrarClient.h"
 #include <ESMCI_IO_NetCDF.h>
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -76,7 +77,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.10 2011/08/04 21:09:19 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.11 2011/08/05 02:47:46 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -585,6 +586,20 @@ void  ESMCI_WebServComponentSvr::setStatus(
          &localrc);
 	}
 #endif
+
+   ESMCI::ESMCI_WebServRegistrarClient registrar("localhost", REGISTRAR_PORT);
+
+	char	idStr[64];
+	sprintf(idStr, "%d", theCurrentClientId);
+
+   if (registrar.setStatus(idStr, registrar.getStateStr(theCurrentStatus)) == 
+		ESMF_FAILURE)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_UNEXPECTED,
+         "Error setting status on Registrar.",
+         &localrc);
+   }
 }
 
 
