@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServForkClient.C,v 1.2 2011/08/05 13:01:31 w6ws Exp $
+// $Id: ESMCI_WebServForkClient.C,v 1.3 2011/08/05 18:36:32 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <signal.h>
+#include <stdio.h>
 #include <iostream>
 #include <string>
 
@@ -43,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServForkClient.C,v 1.2 2011/08/05 13:01:31 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServForkClient.C,v 1.3 2011/08/05 18:36:32 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
