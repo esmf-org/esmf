@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.55 2011/07/28 01:03:27 eschwab Exp $
+// $Id: ESMCI_Attribute.h,v 1.56 2011/08/06 00:51:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -302,7 +302,7 @@ class Attribute
     int AttributeWriteCIMmodelComp(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMsimRun(IO_XML *io_xml) const;
     int AttributeWriteCIMplatform(IO_XML *io_xml) const;
-    int AttributeWriteCIMCPgeneral(IO_XML *io_xml, int indent) const;
+    int AttributeWriteCIMCP(IO_XML *io_xml, const std::string &purpose, int indent) const;
     int AttributeWriteCIMCPfield(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMRP(IO_XML *io_xml, int indent) const;
     int AttributeWriteCIMcitation(IO_XML *io_xml, int indent) const;

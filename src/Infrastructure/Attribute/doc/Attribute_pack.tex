@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.45 2011/07/08 02:13:02 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.46 2011/08/06 00:51:55 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -232,6 +232,29 @@ There are many attributes that are used to describe components. There are curren
 
 \vspace{.20in}
 
+{\bf 3. Common Information Model (CIM) Scientific Properties Package}
+
+\begin{itemize}
+    \item Convention: CIM 1.5
+    \item Purpose: Scientific Properties Description
+    \item Output Options: 
+    \begin{itemize}
+        \item CIM XML
+    \end{itemize}  
+    \item Description: This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies maintained by \htmladdnormallink{METAFOR}{http://metaforclimate.eu/}.
+\end{itemize}
+
+\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
+     \hline\hline
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     \hline\hline
+     {\tt <Scientific property name>} & <METAFOR definition>. & Names and values per METAFOR \\
+     {\tt ...} & ... & ... \\
+     \hline\hline
+\end{tabular}
+
+\vspace{.20in}
+
 {\bf 3. Common Information Model (CIM) Component Properties Package}
 
 \begin{itemize}
@@ -417,7 +440,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
-    {\tt ShortName*}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is
+    {\tt ShortName*}  & The short\_name is technically not part of the CF standard but is commonly the name of the variable on the output file and so is
  distinct from the long\_name & N/A \\
     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package & N/A\\
     \hline\hline
@@ -576,7 +599,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& ESMF Grid\\
      {\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& ESMF Grid\\
      {\tt ResponsiblePartyRole} & A flag to define the role of the Responsible Party. &  ISO Responsible Party\\ 
-     {\tt ShortName}  & For component: a version of the component name that contains acronyms.  For field:  The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CIM Main, CF General\\
+     {\tt ShortName}  & For component: a version of the component name that contains acronyms.  For field:  The short\_name is technically not part of the CF standard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CIM Main, CF General\\
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & ISO Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
      {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & CIM Main\\ 

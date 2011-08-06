@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.121 2011/07/28 01:03:29 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.122 2011/08/06 00:51:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.121 2011/07/28 01:03:29 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.122 2011/08/06 00:51:53 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4745,6 +4745,12 @@ if (attrRoot == ESMF_TRUE) {
                      inThisCompTreeOnly=true, 
                      inNestedAttPacks=false);
 
+  bool CPscientific = AttPackIsSet("CIM 1.5", 
+                     "Scientific Properties Description", "comp",
+                     inObjectTree=false, // only look at this comp, not children
+                     inThisCompTreeOnly=true, 
+                     inNestedAttPacks=false);
+
   bool CPfield   = AttPackIsSet("ESMF", "General", "field",
                      inObjectTree=true, inThisCompTreeOnly=true, 
                      inNestedAttPacks=true); // only look for CF/Extended
@@ -4753,12 +4759,18 @@ if (attrRoot == ESMF_TRUE) {
                                              // TODO: enforce CIM/Inputs as
                                              // top-level attpack (via pathing
                                              // mechanism?)
-  if (CPgeneral || CPfield) {
+  if (CPgeneral || CPscientific || CPfield) {
     localrc = io_xml->writeStartElement("componentProperties", "", indent, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     if (CPgeneral) {
-      localrc = AttributeWriteCIMCPgeneral(io_xml, indent);
+      localrc = AttributeWriteCIMCP(io_xml, 
+                 "General Component Properties Description", indent);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    }
+    if (CPscientific) {
+      localrc = AttributeWriteCIMCP(io_xml,
+                 "Scientific Properties Description", indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (CPfield) {
@@ -5744,17 +5756,18 @@ if (attrRoot == ESMF_TRUE) {
  } // end AttributeWriteCIMRP
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteCIMCPgeneral"
+#define ESMC_METHOD "AttributeWriteCIMCP"
 //BOPI
-// !IROUTINE:  AttributeWriteCIMCPgeneral - Write contents of a CIM {\tt Attribute} Inputs package as <componentProperties><componentProperty> records within a component. (fields from all components in tree)
+// !IROUTINE:  AttributeWriteCIMCP - Write contents of a CIM {\tt Attribute} Component Properties Description package (General or Scientific) as <componentProperties><componentProperty> records within a component. 
 //
 // !INTERFACE:
-      int Attribute::AttributeWriteCIMCPgeneral(
+      int Attribute::AttributeWriteCIMCP(
 // // !RETURN VALUE: //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      IO_XML *io_xml,      //  in - io pointer to write
-      int indent) const {  //  in - starting indent level
+      IO_XML *io_xml,                //  in - io pointer to write
+      const string &purpose,         //  in - purpose (General or Scientific)
+      int indent) const {            //  in - starting indent level
 //
 // !DESCRIPTION:
 //    Print the contents of a CIM {\tt Attribute}.  Expected to be
@@ -5771,9 +5784,9 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+  // Get the General or Scientific attpack, as specified by arg purpose
   string attPackInstanceName;
-  attpack = AttPackGet("CIM 1.5", "General Component Properties Description",
-                       "comp", attPackInstanceName);
+  attpack = AttPackGet("CIM 1.5", purpose, "comp", attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Cannot find the specified Attribute package\n", &localrc);
@@ -5791,8 +5804,11 @@ if (attrRoot == ESMF_TRUE) {
                           "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
+        string represented = 
+          (purpose.compare("Scientific Properties Description") == 0) ?
+            "true" : "false";
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
-                                            1, "represented", "false");
+                                        1, "represented", represented.c_str());
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
         localrc = io_xml->writeElement("shortName", name, indent+2, 0);
@@ -5806,7 +5822,7 @@ if (attrRoot == ESMF_TRUE) {
 
   return ESMF_SUCCESS;
 
- } // end AttributeWriteCIMCPgeneral
+ } // end AttributeWriteCIMCP
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteCIMCPfield"
