@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.26 2011/07/09 00:04:05 eschwab Exp $
+! $Id: user_model2.F90,v 1.27 2011/08/06 00:53:33 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,8 +95,9 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
-    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
+    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
+    character(ESMF_MAXSTR)      :: sciPropAtt(3)
     type(ESMF_Field)            :: DMS_emi, SST
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -177,6 +178,34 @@ module user_model2
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    !
+    !  CIM child component scientific property attributes
+    !
+    convCIM = 'CIM 1.5'
+    purpSci = 'Scientific Properties Description'
+    ! Define some user-specified scientific properties
+    sciPropAtt(1) = 'OceanOceanKeyPropertiesModelFamily'
+    sciPropAtt(2) = 'OceanOceanKeyPropertiesBasicApproximations'
+    sciPropAtt(3) = 'OceanOceanKeyPropertiesListOfPrognosticVariables'
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+      attrList=sciPropAtt, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Scientific Properties: user-specified attributes
+    call ESMF_AttributeSet(comp, &
+     'OceanOceanKeyPropertiesModelFamily', &
+       'OGCM', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+     'OceanOceanKeyPropertiesBasicApproximations', &
+       'non-hydrostatic', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+     'OceanOceanKeyPropertiesListOfPrognosticVariables', &
+       'salinity', &
+      convention=convCIM, purpose=purpSci, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create two Fields, and add CIM Attribute packages.

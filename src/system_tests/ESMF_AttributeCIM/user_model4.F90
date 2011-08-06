@@ -1,4 +1,4 @@
-! $Id: user_model4.F90,v 1.11 2011/07/28 01:04:07 eschwab Exp $
+! $Id: user_model4.F90,v 1.12 2011/08/06 00:53:33 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,8 +95,9 @@ module user_model4
     integer, intent(out) :: rc
 
     ! Local variables
-    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
+    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
+    character(ESMF_MAXSTR)      :: sciPropAtt(5)
     type(ESMF_Field)            :: SOA, POM
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -185,6 +186,44 @@ module user_model4
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    !
+    !  CIM child component scientific property attributes
+    !
+    convCIM = 'CIM 1.5'
+    purpSci = 'Scientific Properties Description'
+    ! Define some user-specified scientific properties
+    sciPropAtt(1) = 'OceanBiogeoChemistryOceanBioKeyPropertiesTransportMethod'
+    sciPropAtt(2) = 'OceanBiogeoChemistryOceanBioBoundaryForcingAtmosphericDeposition'
+    sciPropAtt(3) = 'OceanBiogeoChemistryOceanBioChemistryCarbonChemistrypH-scale'
+    sciPropAtt(4) = 'OceanBiogeoChemistryOceanBioTracersNutrientsListOfSpecies'
+    sciPropAtt(5) = 'OceanBiogeoChemistryOceanBioTracersOceanBioTracersEcosystemZooplanctonType'
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+      attrList=sciPropAtt, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Scientific Properties: user-specified attributes
+    call ESMF_AttributeSet(comp, &
+     'OceanBiogeoChemistryOceanBioKeyPropertiesTransportMethod', &
+       'different from Ocean Tracers', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+     'OceanBiogeoChemistryOceanBioBoundaryForcingAtmosphericDeposition', &
+       'other', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+     'OceanBiogeoChemistryOceanBioChemistryCarbonChemistrypH-scale', &
+       'sea water', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+     'OceanBiogeoChemistryOceanBioTracersNutrientsListOfSpecies', &
+       'Iron (Fe)', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+     'OceanBiogeoChemistryOceanBioTracersOceanBioTracersEcosystemZooplanctonType', &
+       'generic', &
+      convention=convCIM, purpose=purpSci, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create two Fields, and add CIM Attribute packages.
