@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.13 2011/08/05 18:38:37 w6ws Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.14 2011/08/07 00:08:54 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.13 2011/08/05 18:38:37 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.14 2011/08/07 00:08:54 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1365,16 +1365,16 @@ int  ESMCI_WebServComponentSvr::processGetData(
 										theCAMDir + 
 										"/camrun.cam2.rh0.0000-01-02-00000.nc");
 
-		//***
+		// ***
 		// KDS: Make call to component server to get filenames... set status 
 		//      to whatever status gets returned
-		//***
+		// ***
 		status = clientInfo->status();
 	}
 
-	//***
+	// ***
 	// Read the data from the specified file
-	//***
+	// ***
 	double	dataValue = theOutputFile->getDataValue(varName, 
                                                     timeValue, 
                                                     latValue, 
