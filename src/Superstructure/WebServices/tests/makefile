@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2011/08/04 22:16:12 ksaint Exp $ 
+# $Id: makefile,v 1.10 2011/08/08 20:05:48 ksaint Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -19,24 +19,9 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_WebServUTest \
 #                  $(ESMF_TESTDIR)/ESMC_WebServSecureClientSocketUTest 
 #                  $(ESMF_TESTDIR)/ESMC_WebServGRAMClientUTest 
 
-#TESTS_RUN     =	RUN_ESMF_WebServUTest \
-#                  RUN_ESMC_WebServCompSvrClientUTest \
-#                  RUN_ESMC_WebServSecureUTest \
-#		             RUN_ESMC_WebServGRAMClientUTest \
-#		             RUN_ESMC_WebServProcCtrlUTest
+TESTS_RUN     =	
 
-TESTS_RUN     =	RUN_ESMC_WebServForkClientUTest 
-
-#TESTS_RUN     =	RUN_ESMC_WebServProcCtrlUTest \
-#		            RUN_ESMC_WebServProcCtrlClientUTest
-
-#TESTS_RUN     =	RUN_ESMC_WebServRegistrarClientUTest
-
-TESTS_RUN_UNI =	RUN_ESMF_WebServUTestUNI \
-		            RUN_ESMC_WebServCompSvrClientUTestUNI \
-		            RUN_ESMC_WebServSecureUTestUNI \
-		            RUN_ESMC_WebServGRAMClientUTestUNI \
-	               RUN_ESMC_WebServProcCtrlUTestUNI
+TESTS_RUN_UNI =	
 
 
 include $(ESMF_DIR)/makefile
