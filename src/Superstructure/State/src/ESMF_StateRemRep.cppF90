@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.3 2011/07/05 20:55:38 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.4 2011/08/10 14:21:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.3 2011/07/05 20:55:38 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.4 2011/08/10 14:21:11 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -307,12 +307,13 @@ contains
 ! !IROUTINE: ESMF_StateReplace - Replace a list of items within a State
 !
 ! !INTERFACE:
-!  subroutine ESMF_StateReplace(state, <itemList>, rc)
+!  subroutine ESMF_StateReplace(state, <itemList>, relaxedflag, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state 
 !    <itemList>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    logical,          intent(in),   optional :: relaxedflag
 !    integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
@@ -346,6 +347,12 @@ contains
 !     Since <itemList> items can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
 !     destruction when they are no longer in use.
+! \item[{[relaxedflag]}]
+!      A setting of {\tt .true.} indicates a relaxed definition of "replace",
+!      where it is {\em not} an error if {\tt <itemList>} contains items
+!       with names that are not found in {\tt state}. The {\tt State}
+!      is left unchanged for these items. For {\tt .false.} this is treated
+!      as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -360,18 +367,20 @@ contains
 ! !INTERFACE: @\
   ! Private name; call using ESMF_StateAdd()  @\
   subroutine ESMF_StateRep##mentryname##List(state, mname,  & @\
-                                    keywordEnforcer, rc) @\
+                                    keywordEnforcer, relaxedflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
     type(ESMF_State), intent(inout)          :: state  @\
     type(mtype),      intent(in)             :: mname(:) @\
     type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
+    logical,          intent(in),   optional :: relaxedflag @\
     integer,          intent(out),  optional :: rc      @\
 !EOPI @\
 !------------------------------------------------------------------------------ @\
       integer :: localrc, i @\
       integer :: localcount @\
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+      logical :: localrelaxed @\
       type(ESMF_Logical) :: linkChange @\
  @\
       ! Initialize return code; assume routine not implemented @\
@@ -385,6 +394,11 @@ contains
          ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
                                    @\
+      localrelaxed = .false. @\
+      if (present (relaxedflag)) then @\
+        localrelaxed = relaxedflag @\
+      end if @\
+ @\
       localcount = size (mname) @\
  @\
       ! check input variables @\
@@ -394,7 +408,7 @@ contains
       enddo @\
  @\
       call ESMF_StateClsAdd (state%statep, mname, & @\
-          replaceflag=.true., rc=localrc) @\
+          replaceflag=.true., relaxedflag=localrelaxed, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\

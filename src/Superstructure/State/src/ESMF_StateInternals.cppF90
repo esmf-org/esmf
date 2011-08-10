@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.11 2011/07/01 22:08:54 w6ws Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.12 2011/08/10 14:21:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.11 2011/07/01 22:08:54 w6ws Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.12 2011/08/10 14:21:11 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -486,14 +486,14 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 ! @\
 ! !INTERFACE: @\
       subroutine ESMF_StateClsAdd##mentryname##List(stypep, mname, & @\
-          addflag, replaceflag, relaxflag, proxyflag, rc) @\
+          addflag, replaceflag, relaxedflag, proxyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_StateClass), pointer    :: stypep @\
       type(mtype),           intent(in) :: mname(:) @\
       logical,               intent(in),  optional :: addflag @\
       logical,               intent(in),  optional :: replaceflag @\
-      logical,               intent(in),  optional :: relaxflag @\
+      logical,               intent(in),  optional :: relaxedflag @\
       logical,               intent(in),  optional :: proxyflag @\
       integer,               intent(out), optional :: rc @\
 ! @\
@@ -534,21 +534,21 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
 ! @\
 ! !INTERFACE: @\
     subroutine ESMF_StateClsAdd##mentryname##List(stypep, mname, & @\
-        addflag, replaceflag, relaxflag, proxyflag, rc) @\
+        addflag, replaceflag, relaxedflag, proxyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_StateClass), pointer    :: stypep @\
       type(mtype), intent(in) :: mname(:) @\
       logical, intent(in),  optional :: addflag @\
       logical, intent(in),  optional :: replaceflag @\
-      logical, intent(in),  optional :: relaxflag @\
+      logical, intent(in),  optional :: relaxedflag @\
       logical, intent(in),  optional :: proxyflag @\
       integer, intent(out), optional :: rc @\
 !EOPI @\
       integer :: localrc                  ! local error status @\
       logical :: localaddflag             ! local add-only flag @\
       logical :: localrepflag             ! local replace-only flag @\
-      logical :: localrelaxflag           ! local relaxed flag @\
+      logical :: localrelaxedflag           ! local relaxed flag @\
       type(ESMF_StateItem), pointer :: sip @\
       type(ESMF_StateItemWrap)   :: siwrap(1) @\
       character(len=ESMF_MAXSTR) :: itemname @\
@@ -578,9 +578,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         localrepflag = replaceflag @\
       end if @\
  @\
-      localrelaxflag = .false. @\
-      if (present (relaxflag)) then @\
-        localrelaxflag = relaxflag @\
+      localrelaxedflag = .false. @\
+      if (present (relaxedflag)) then @\
+        localrelaxedflag = relaxedflag @\
       end if @\
  @\
       if (.not. localaddflag .and. .not. localrepflag) then @\
@@ -626,24 +626,36 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         ! caller preference. @\
  @\
         if (exists) then @\
-          ! can do addrep or replace.  Or add w/relaxed @\
-          if (.not. localrepflag .and. (localaddflag .and. .not. localrelaxflag)) then @\
-            errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not replacable" @\
-            if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
+          ! can do addreplace or replace.  Add w/relaxed does not replace the @\
+          ! existing item, and keeps cycling over the remaining items in @\
+          ! the input list. @\
+          if (.not. localrepflag) then @\
+            if (localrelaxedflag) then @\
+              cycle @\
+            else @\
+              errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not replacable" @\
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
                 msg = trim (errmsg), & @\
                 ESMF_CONTEXT, rcToReturn=rc)) return @\
+            end if @\
           end if @\
           ! TODO - should check to make sure sip%otype @\
           ! is compatible, or should be changed. @\
           ! TODO - maybe should do a StateItemDestruct/StateItemConstruct @\
           ! sequence.  But for now, just reuse the existing entry. @\
         else @\
-          ! can do add or addrep.  Or replace w/relaxed @\
-          if (.not. localaddflag .and. (localrepflag .and. .not. localrelaxflag)) then @\
-            errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not found" @\
-            if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
+          ! can do add or addrep.  Replace w/relaxed does not add a new @\
+          ! item, and keeps cycling over the remaining items in @\
+          ! the input list. @\
+          if (.not. localaddflag) then @\
+            if (localrelaxedflag) then @\
+              cycle @\
+            else @\
+              errmsg = "existing item " CONCAT/ trim (itemname) CONCAT/ " not found" @\
+              if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP,  & @\
                 msg = trim (errmsg), & @\
                 ESMF_CONTEXT, rcToReturn=rc)) return @\
+            end if @\
           end if @\
           sip => ESMF_StateItemConstruct (name=itemname,  & @\
               itemtype=ESMF_STATEITEM_##mtypetext, proxyflag=proxyflag,  & @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.21 2011/07/08 18:31:40 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.22 2011/08/10 14:21:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.21 2011/07/08 18:31:40 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.22 2011/08/10 14:21:11 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -427,12 +427,13 @@ contains
 ! !IROUTINE: ESMF_StateAdd - Add a single item to a State
 !
 ! !INTERFACE:
-!  subroutine ESMF_StateAdd(state, <item>, keywordEnforcer, rc)
+!  subroutine ESMF_StateAdd(state, <item>, keywordEnforcer, relaxedflag, rc)
 !
 ! !ARGUMENTS:
 !    type(ESMF_State), intent(inout)          :: state
 !    <item>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    logical,          intent(in),   optional :: relaxedflag
 !    integer,          intent(out),  optional :: rc
 !     
 ! !STATUS:
@@ -465,6 +466,12 @@ contains
 !      Since <item>s can be added to multiple containers, it remains
 !      the responsibility of the user to manage their
 !      destruction when they are no longer in use.
+! \item[{[relaxedflag]}]
+!      A setting of {\tt .true.} indicates a relaxed definition of "add",
+!      where it is {\em not} an error if {\tt <item>} contains items
+!       with names that are already found in {\tt state}. The {\tt State}
+!      is left unchanged for these items. For {\tt .false.} this is treated
+!      as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -528,7 +535,7 @@ contains
 ! !INTERFACE: @\
   ! Private name; call using ESMF_StateAdd()  @\
   subroutine ESMF_StateAdd##mentryname##X (state, mname,  & @\
-                                    proxyflag, addflag, replaceflag, relaxflag, rc) @\
+                                    proxyflag, addflag, replaceflag, relaxedflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
     type(ESMF_State), intent(inout)          :: state @\
@@ -536,7 +543,7 @@ contains
     logical,          intent(in)             :: proxyflag @\
     logical,          intent(in),   optional :: addflag @\
     logical,          intent(in),   optional :: replaceflag @\
-    logical,          intent(in),   optional :: relaxflag @\
+    logical,          intent(in),   optional :: relaxedflag @\
     integer,          intent(out),  optional :: rc @\
 !EOPI @\
 !------------------------------------------------------------------------------ @\
@@ -561,11 +568,12 @@ contains
       temp_list(1) = mname @\
  @\
       call ESMF_StateClsAdd (state%statep, temp_list, & @\
-        addflag=addflag, replaceflag=replaceflag, relaxflag=relaxflag,  & @\
+        addflag=addflag, replaceflag=replaceflag, relaxedflag=relaxedflag,  & @\
         proxyflag=proxyflag, rc=localrc)  @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
+^if !defined (routehandleversion) @\
       !  link the Attribute hierarchies @\
       linkChange = ESMF_TRUE @\
       call c_ESMC_AttributeLink(state%statep%base,  & @\
@@ -591,6 +599,7 @@ contains
            ESMF_ERR_PASSTHRU, & @\
            ESMF_CONTEXT, rcToReturn=rc)) return @\
       endif @\
+^endif @\
        @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateAdd##mentryname##X
@@ -600,75 +609,9 @@ StateAddMacro(ESMF_Array,      OneArray,      array,      array, array)
 StateAddMacro(ESMF_ArrayBundle,OneArrayBundle,arraybundle,array, arraybundle)
 StateAddMacro(ESMF_Field,      OneField,      field,      field, field%ftypep%base)
 StateAddMacro(ESMF_FieldBundle,OneFieldBundle,fieldbundle,field, fieldbundle%this%base)
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAddOneRouteHandle"
-!BOPI
-! !IROUTINE: ESMF_StateAdd - Add a RouteHandle to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddOneRouteHandle(state, routehandle,  &
-                                             keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State),       intent(inout)         :: state
-      type(ESMF_RouteHandle), intent(in)            :: routehandle
-      type(ESMF_KeywordEnforcer), optional          :: keywordEnforcer ! must use keywords for the below
-      integer,                intent(out), optional :: rc
-!     
-! !DESCRIPTION:
-!      Add a single RouteHandle reference to an existing 
-!      State.  The name of {\tt routehandle} must be unique 
-!      within the State.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!      An {\tt ESMF\_State} object.
-!     \item[routehandle]
-!      The {\tt ESMF\_RouteHandle} to be added.  This is a reference only; when
-!      the {\tt ESMF\_State} is destroyed the objects contained in it will
-!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle} cannot be safely 
-!      destroyed before the {\tt ESMF\_State} is destroyed.
-!      Since objects can be added to multiple containers, it remains
-!      the responsibility of the user to manage the
-!      destruction of objects when they are no longer in use.
-!     \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-      type(ESMF_RouteHandle) :: temp_list(1)
-      integer :: localrc
-
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandle,rc)
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      temp_list(1) = routehandle
-
-      call ESMF_StateClsAdd (state%statep, routehandles=temp_list,  &
-          addflag=.true., rc=localrc)      
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddOneRouteHandle
-
-!------------------------------------------------------------------------------
+^define routehandleversion
+StateAddMacro(ESMF_Routehandle,OneRouteHandle,routehandle,routehandle, routehandle)
+^undef routehandleversion
 ^define stateversion
 StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ^undef stateversion
@@ -730,18 +673,20 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ! !INTERFACE: @\
   ! Private name; call using ESMF_StateAdd()  @\
   subroutine ESMF_StateAdd##mentryname##List(state, mname,  & @\
-                                    keywordEnforcer, rc) @\
+                                    keywordEnforcer, relaxedflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
     type(ESMF_State), intent(inout)          :: state  @\
     type(mtype),      intent(in)             :: mname(:) @\
     type(ESMF_KeywordEnforcer), optional     :: keywordEnforcer ! must use keywords for the below @\
+    logical,          intent(in),   optional :: relaxedflag @\
     integer,          intent(out),  optional :: rc      @\
 !EOPI @\
 !------------------------------------------------------------------------------ @\
       integer :: localrc, i @\
       integer :: localcount @\
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+      logical :: localrelaxed @\
       type(ESMF_Logical) :: linkChange @\
  @\
       ! Initialize return code; assume routine not implemented @\
@@ -755,6 +700,11 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
          ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
                                    @\
+      localrelaxed = .false. @\
+      if (present (relaxedflag)) then @\
+        localrelaxed = relaxedflag @\
+      end if @\
+ @\
       localcount = size (mname) @\
  @\
       ! check input variables @\
@@ -764,7 +714,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
       enddo @\
  @\
       call ESMF_StateClsAdd (state%statep, mname, & @\
-          addflag=.true., rc=localrc) @\
+          addflag=.true., relaxedflag=localrelaxed, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
