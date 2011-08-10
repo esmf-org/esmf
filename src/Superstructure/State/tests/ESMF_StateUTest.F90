@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.103 2011/07/01 21:52:06 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.104 2011/08/10 14:22:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.103 2011/07/01 21:52:06 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.104 2011/08/10 14:22:17 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -70,7 +70,7 @@
       type(ESMF_Field)      :: field10, field11, field12
       type(ESMF_State)      :: state10, state11, state12
 
-      type(ESMF_State)      :: state20
+      type(ESMF_State)      :: state20, state30
 
       integer :: i
 #endif
@@ -1129,6 +1129,71 @@
       call ESMF_StateReplace (state20, (/array11/), rc=rc)
       write (failmsg, *) "Replacing a pre-existing Array in a State"
       write (name, *) "Replace an Array which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on Array
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test create an empty State
+      state30 = ESMF_StateCreate (name="stateContainer",  &
+        stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+      write (failmsg, *) "Creating state30 for Add/relaxed"
+      write (name, *) "Creating state30 for Add/relaxed test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/array10/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed an Array which did not exist"
+      write (name, *) "Add/relaxed an Array which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding a 2nd Array which has the same name as the first
+      call ESMF_StateAdd (state30, (/array11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a pre-existing Array in a State"
+      write (name, *) "Add/relaxed an Array which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateRemove w/relaxed on Array
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test removing the Array
+      call ESMF_StateRemove (state30, itemName='temperatures', rc=rc)
+      write (failmsg, *) "Remove a pre-existing Array in a State"
+      write (name, *) "Remove an Array which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed where none exists
+      call ESMF_StateReplace (state30, (/array10/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed an Array which did not exist"
+      write (name, *) "Replace/relaxed an Array which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/array10/), rc=rc)
+      write (failmsg, *) "Add an Array which did not exist"
+      write (name, *) "Add an Array which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed a 2nd Array which has the same name as the first
+      call ESMF_StateReplace (state30, (/array11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed a pre-existing Array in a State"
+      write (name, *) "Replace/relaxed an Array which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
