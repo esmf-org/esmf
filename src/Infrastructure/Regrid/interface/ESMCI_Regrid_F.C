@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.65 2011/07/29 18:42:00 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.66 2011/08/10 23:05:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,6 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                       regridScheme, &temp_unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
-
     // If user is worried about unmapped points then check that
     // here, because we have all the dest objects and weights
     // gathered onto the same proc.
@@ -229,10 +228,16 @@ wts.Print(Par::Out());
     } else {
       // Save off the weights so the F90 caller can allocate arrays and
       // copy the values.
-      *tweights = new ESMCI::TempWeights;
-      (*tweights)->nentries = num_entries;
-      (*tweights)->factors = factors;
-      (*tweights)->iientries = iientries;
+      if (num_entries>0) {
+	*tweights = new ESMCI::TempWeights;
+	(*tweights)->nentries = num_entries;
+	(*tweights)->factors = factors;
+	(*tweights)->iientries = iientries;
+      } else {
+	// No weights, so don't allocate structure
+	// Make sure copying method below takes this into account
+	*tweights = NULL;
+      }
     }
     
   } catch(std::exception &x) {
@@ -411,6 +416,10 @@ extern "C" void FTN(c_esmc_regrid_getfrac)(Grid **gridpp,
 // delete the temp weights.
 extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 
+  // See if the TempWeights structure is allocated, if not then just leave
+  if (*_tw==NULL) return;
+
+  // Copy Weights
   ESMCI::TempWeights &tw = (**_tw);
 
   for (int i = 0; i < tw.nentries; ++i) {
