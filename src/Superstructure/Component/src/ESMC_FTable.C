@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.31.2.7 2010/02/01 20:52:53 svasquez Exp $
+// $Id: ESMC_FTable.C,v 1.31.2.8 2011/08/11 19:17:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2010, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.31.2.7 2010/02/01 20:52:53 svasquez Exp $";
+           "$Id: ESMC_FTable.C,v 1.31.2.8 2011/08/11 19:17:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -856,7 +856,8 @@ void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);  // prototype
                 (int *)funcs[i].funcarg[4]);
             }
             // ensure that the return value is set correctly
-            *rc = *(int *)(funcs[i].funcarg[4]);
+//            *rc = *(int *)(funcs[i].funcarg[4]);
+            *rc = ESMF_SUCCESS; // hack to work around issues on RHS above
             break;
           }
           case FT_COMPSLIST: {
