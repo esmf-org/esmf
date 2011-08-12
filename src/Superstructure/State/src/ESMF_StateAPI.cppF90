@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.22 2011/08/10 14:21:11 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.23 2011/08/12 03:55:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.22 2011/08/10 14:21:11 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.23 2011/08/12 03:55:08 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -573,7 +573,7 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
                     ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
-^if !defined (routehandleversion) @\
+^if !defined (noattributesversion) @\
       !  link the Attribute hierarchies @\
       linkChange = ESMF_TRUE @\
       call c_ESMC_AttributeLink(state%statep%base,  & @\
@@ -609,9 +609,9 @@ StateAddMacro(ESMF_Array,      OneArray,      array,      array, array)
 StateAddMacro(ESMF_ArrayBundle,OneArrayBundle,arraybundle,array, arraybundle)
 StateAddMacro(ESMF_Field,      OneField,      field,      field, field%ftypep%base)
 StateAddMacro(ESMF_FieldBundle,OneFieldBundle,fieldbundle,field, fieldbundle%this%base)
-^define routehandleversion
+^define noattributesversion
 StateAddMacro(ESMF_Routehandle,OneRouteHandle,routehandle,routehandle, routehandle)
-^undef routehandleversion
+^undef noattributesversion
 ^define stateversion
 StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ^undef stateversion
@@ -718,6 +718,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
+^if !defined (noattributesversion) @\
       ! link the Attribute hierarchies @\
       linkChange = ESMF_TRUE @\
       do i=1, localcount @\
@@ -747,6 +748,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
           ESMF_CONTEXT, & @\
           rcToReturn=rc)) return @\
       endif @\
+^endif @\
        @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateAdd##mentryname##List
@@ -756,76 +758,9 @@ StateAddListMacro(ESMF_Array,Array,arrayList,array,arrayList(i))
 StateAddListMacro(ESMF_ArrayBundle,ArrayBundle,arraybundleList,array,arraybundleList(i))
 StateAddListMacro(ESMF_Field,Field,fieldList,field,fieldList(i)%ftypep%base)
 StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundleList(i)%this%base)
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAddRouteHandleList"
-!BOPI
-! !IROUTINE: ESMF_StateAdd - Add a list of RouteHandles to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAdd()   
-      subroutine ESMF_StateAddRouteHandleList(state, routehandleList,  &
-                                              keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout)      :: state 
-      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
-      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
-      integer,       intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!     Add multiple {\tt ESMF\_RouteHandle}s to an {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!      An {\tt ESMF\_State} object.
-!     \item[routehandleList]
-!      The list (Fortran array) of {\tt ESMF\_RouteHandle}s to be added.
-!      This is a reference only; when
-!      the {\tt ESMF\_State} is destroyed the objects contained in it will
-!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle}s cannot be safely 
-!      destroyed before the {\tt ESMF\_State} is destroyed.
-!      Since objects can be added to multiple containers, it remains
-!      the responsibility of the user to manage the
-!      destruction of objects when they are no longer in use.
-!     \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: localrc,i
-      integer :: localcount
-
-      ! check input variables
-      localcount = size(routehandleList)
-
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,localcount
-         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
-      enddo
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_StateClsAdd (state%statep,  routehandleList,  &
-          addflag=.true., rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddRouteHandleList
-
-!------------------------------------------------------------------------------
+^define noattributesversion
+StateAddListMacro(ESMF_RouteHandle,RouteHandle,routehandleList,none,none)
+^undef noattributesversion
 StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
 
 
@@ -926,6 +861,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
+^if !defined (noattributesversion) @\
       ! link the Attribute hierarchies @\
       linkChange = ESMF_TRUE @\
       do i=1, localcount @\
@@ -955,6 +891,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
           ESMF_CONTEXT, & @\
           rcToReturn=rc)) return @\
       endif @\
+^endif @\
        @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateAddRp##mentryname##List
@@ -964,76 +901,9 @@ StateAddRepListMacro(ESMF_Array,Array,arrayList,array,arrayList(i))
 StateAddRepListMacro(ESMF_ArrayBundle,ArrayBundle,arraybundleList,array,arraybundleList(i))
 StateAddRepListMacro(ESMF_Field,Field,fieldList,field,fieldList(i)%ftypep%base)
 StateAddRepListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundleList(i)%this%base)
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAddRpRouteHandleList"
-!BOPI
-! !IROUTINE: ESMF_StateAdd - Add or replace a list of RouteHandles to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddReplace()   
-      subroutine ESMF_StateAddRpRouteHandleList(state, routehandleList,  &
-                                              keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout)      :: state 
-      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
-      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
-      integer,       intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!     Add or replace multiple {\tt ESMF\_RouteHandle}s to an {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!      An {\tt ESMF\_State} object.
-!     \item[routehandleList]
-!      The list (Fortran array) of {\tt ESMF\_RouteHandle}s to be added and replaced.
-!      This is a reference only; when
-!      the {\tt ESMF\_State} is destroyed the objects contained in it will
-!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle}s cannot be safely 
-!      destroyed before the {\tt ESMF\_State} is destroyed.
-!      Since objects can be added to multiple containers, it remains
-!      the responsibility of the user to manage the
-!      destruction of objects when they are no longer in use.
-!     \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: localrc,i
-      integer :: localcount
-
-      ! check input variables
-      localcount = size(routehandleList)
-
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,localcount
-         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
-      enddo
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_StateClsAdd (state%statep,  routehandleList,  &
-          addflag=.true., replaceflag=.true., rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateAddRpRouteHandleList
-
-!------------------------------------------------------------------------------
+^define noattributesversion
+StateAddRepListMacro(ESMF_RouteHandle,RouteHandle,routehandleList,none,none)
+^undef noattributesversion
 StateAddRepListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
 
 !------------------------------------------------------------------------------
@@ -1600,7 +1470,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !EOPI @\
  @\
       type(ESMF_StateItem), pointer :: dataitem @\
-      type(ESMF_State) :: top @\
       logical :: exists @\
       integer :: localrc @\
       character(len=ESMF_MAXSTR) :: errmsg @\
@@ -1620,9 +1489,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       if (present(rc)) rc=ESMF_RC_NOT_IMPL @\
       ! TODO: do we need an empty (or invalid) item to mark failure? @\
  @\
-      top%statep => state%statep @\
- @\
-      exists = ESMF_StateClassFindData(top%statep,   & @\
+      exists = ESMF_StateClassFindData(state%statep,   & @\
                  dataname=itemName, expected=.true., & @\
                  dataitem=dataitem,  & @\
                  rc=localrc) @\
@@ -1638,7 +1505,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
                 ESMF_CONTEXT, rcToReturn=rc)) return @\
       endif @\
  @\
+^if !defined (stateversion) @\
       mname = dataitem%datap%mcomponent @\
+^else @\
+      mname%statep => dataitem%datap%mcomponent @\
+      ! validate created state @\
+      ESMF_INIT_SET_CREATED(nestedState) @\
+^endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -1649,6 +1522,10 @@ StateGetMacro(ESMF_Array,Array,array,ap)
 StateGetMacro(ESMF_ArrayBundle,ArrayBundle,arraybundle,abp)
 StateGetMacro(ESMF_Field,Field,field,fp)
 StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
+StateGetMacro(ESMF_RouteHandle,RouteHandle,routehandle,rp)
+^define stateversion
+StateGetMacro(ESMF_State,State,nestedstate,spp)
+^undef  stateversion
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
@@ -1738,229 +1615,6 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
       if (present(rc)) rc = ESMF_SUCCESS
 
     end subroutine ESMF_StateGetItemInfo
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateGetRouteHandle"
-!BOPI
-! !IROUTINE: ESMF_StateGet - Retrieve an RouteHandle from a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetRouteHandle(state, itemName, routehandle,  &
-                                         keywordEnforcer, nestedStateName, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State),       intent(in)  :: state
-      character (len=*),      intent(in)  :: itemName
-      type(ESMF_RouteHandle), intent(out) :: routehandle
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      character (len=*),      intent(in),  optional :: nestedStateName
-      integer,                intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns an {\tt ESMF\_RouteHandle} from an {\tt ESMF\_State} by name.  
-!      If the {\tt ESMF\_State} contains the {\tt ESMF\_RouteHandle} directly, only
-!      {\tt itemName} is required.
-!
-!      If the {\tt state} contains nested {\tt ESMF\_State}s,
-!      the {\tt itemName} argument may specify a fully qualified name
-!      to access the desired item with a single call.  This is performed
-!      using the ``/'' character to separate the names of the intermediate
-!      State names leading to the desired item.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}.
-!
-!      An alternative technique for accessing a nested item which is only
-!      one level down, is to specify the nested State with the
-!      {\tt nestedStateName} argument.  While States can be nested to any
-!      depth, this option only searches immediate descendents.
-!      It is an error to specify a {\tt nestedStateName} if the
-!      {\tt state} contains no nested {\tt ESMF\_State}s.
-!      It is an error to specify both {\tt nestedStateName} and
-!      a fully qualified, nested State itemName.
-!
-!     The arguments are:
-!  \begin{description}     
-!  \item[state]
-!   State to query for an {\tt ESMF\_RouteHandle} named {\tt itemName}.
-!  \item[itemName]
-!    Name of {\tt ESMF\_RouteHandle} to be returned.  This name may be fully
-!     qualified in order to access nested State items.
-!  \item[routehandle]
-!    Returned reference to the {\tt ESMF\_RouteHandle}.
-!  \item[{[nestedStateName]}]
-!     Optional.  Used when the {\tt state} contains 
-!     multiple nested {\tt ESMF\_State}s and the <item> being requested is
-!     one level down in one of the nested {\tt ESMF\_State}.
-!     An error if specified when the {\tt state} argument contains
-!     no nested {\tt ESMF\_State}s.  It is also an error to use this option
-!     with a fully qualified {\tt itemName}.  This option is retained for
-!     compatibility with earlier versions of ESMF.
-!  \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
-!
-!EOPI
-
-      type(ESMF_StateItem), pointer :: dataitem
-      type(ESMF_State) :: top
-      logical :: exists
-      integer :: localrc
-      character(len=ESMF_MAXSTR) :: errmsg
-
-      localrc = ESMF_RC_NOT_IMPL
-   
-      ! check input variables
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-    
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_RC_NOT_IMPL
-      ! TODO: do we need an empty (or invalid) routehandle to mark failure?
-
-      if (present (nestedStateName) .and. index (itemName, '/') > 0) then
-          errmsg = "both nestedStateName and fully qualified itemName were specified"
-          if (ESMF_LogFoundError (ESMF_RC_ARG_INCOMP, msg=errmsg,  &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
-
-      if (present(nestedStateName)) then
-          exists = ESMF_StateClassFindData(state%statep,  &
-                                           dataname=nestedStateName, expected=.true., &
-                                           dataitem=dataitem, rc=localrc)
-          if (.not. exists) then
-              write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-    
-          if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-              write(errmsg,*) trim(nestedStateName), " found but not type State"
-              if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-          
-          top%statep => dataitem%datap%spp
-      else
-          top%statep => state%statep
-      endif
-
-
-      exists = ESMF_StateClassFindData(top%statep,   &
-                                       dataname=itemName, expected=.true., &
-                                       dataitem=dataitem,  &
-                                       rc=localrc)
-      if (.not. exists) then
-          write(errmsg, *) "no RouteHandle found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-
-      if (dataitem%otype .ne. ESMF_STATEITEM_ROUTEHANDLE) then
-          write(errmsg, *) trim(itemName), " found but not type RouteHandle"
-          if (ESMF_LogFoundError(ESMF_RC_ARG_INCOMP, msg=errmsg, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-
-      routehandle = dataitem%datap%rp
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetRouteHandle
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateGetState"
-!BOPI
-! !IROUTINE: ESMF_StateGet - Retrieve a State nested in a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetState(state, itemName, nestedState, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State),      intent(in)  :: state
-      character (len=*),     intent(in)  :: itemName
-      type(ESMF_State),      intent(out) :: nestedState
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,               intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns a nested {\tt ESMF\_State} from another {\tt ESMF\_State} 
-!      by name.
-!      If the {\tt ESMF\_State} contains the nested {\tt ESMF\_State} directly, only
-!      {\tt itemName} is required.
-!
-!      If the {\tt state} contains nested {\tt ESMF\_State}s,
-!      the {\tt itemName} argument may specify a fully qualified name
-!      to access the desired item with a single call.  This is performed
-!      using the ``/'' character to separate the names of the intermediate
-!      State names leading to the desired item.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}.
-!
-!     The arguments are:
-!     \begin{description}     
-!     \item[state]
-!       The {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
-!       named {\tt name}.
-!     \item[itemName]
-!       Name of nested {\tt ESMF\_State} to return.  This name may be fully
-!       qualified in order to access nested State items.
-!     \item[nestedState]
-!       Returned {\tt ESMF\_State}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      type(ESMF_StateItem), pointer :: dataitem
-      character(len=ESMF_MAXSTR) :: errmsg
-      logical :: exists
-      integer :: localrc
-
-      ! Assume failure until we know we will succeed
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      ! TODO: do we need an empty state to mark failure?
-
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      exists = ESMF_StateClassFindData(state%statep,   &
-                                       dataname=itemName, expected=.true., &
-                                       dataitem=dataitem,  &
-                                       rc=localrc)
-      if (.not. exists) then
-          write (errmsg,*) "no nested state found named ", trim(itemName)
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-
-      if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
-          write (errmsg, *) trim(itemName), " found but not type State"
-          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-      endif
-
-      nestedState%statep => dataitem%datap%spp
-
-      ! validate created state
-       ESMF_INIT_SET_CREATED(nestedState)
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGetState
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD

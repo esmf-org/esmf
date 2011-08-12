@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.4 2011/08/10 14:21:11 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.5 2011/08/12 03:55:08 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.4 2011/08/10 14:21:11 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.5 2011/08/12 03:55:08 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -412,6 +412,7 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc))  return @\
  @\
+^if !defined (noattributesversion) @\
       ! link the Attribute hierarchies @\
       linkChange = ESMF_TRUE @\
       do i=1, localcount @\
@@ -441,6 +442,7 @@ contains
           ESMF_CONTEXT, & @\
           rcToReturn=rc)) return @\
       endif @\
+^endif @\
        @\
       if (present(rc)) rc = ESMF_SUCCESS @\
   end subroutine ESMF_StateRep##mentryname##List
@@ -450,76 +452,9 @@ StateReplaceListMacro(ESMF_Array,Array,arrayList,array,arrayList(i))
 StateReplaceListMacro(ESMF_ArrayBundle,ArrayBundle,arraybundleList,array,arraybundleList(i))
 StateReplaceListMacro(ESMF_Field,Field,fieldList,field,fieldList(i)%ftypep%base)
 StateReplaceListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundleList(i)%this%base)
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateAddRouteHandleList"
-!BOPI
-! !IROUTINE: ESMF_StateAdd - Add a list of RouteHandles to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateReplace()   
-      subroutine ESMF_StateRepRouteHandleList(state, routehandleList,  &
-                                              keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout)      :: state 
-      type(ESMF_RouteHandle), dimension(:), intent(in) :: routehandleList
-      type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords for the below
-      integer,       intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!     Add multiple {\tt ESMF\_RouteHandle}s to an {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!      An {\tt ESMF\_State} object.
-!     \item[routehandleList]
-!      The list (Fortran array) of {\tt ESMF\_RouteHandle}s to be added.
-!      This is a reference only; when
-!      the {\tt ESMF\_State} is destroyed the objects contained in it will
-!      not be destroyed.   Also, the {\tt ESMF\_RouteHandle}s cannot be safely 
-!      destroyed before the {\tt ESMF\_State} is destroyed.
-!      Since objects can be added to multiple containers, it remains
-!      the responsibility of the user to manage the
-!      destruction of objects when they are no longer in use.
-!     \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      integer :: localrc,i
-      integer :: localcount
-
-      ! check input variables
-      localcount = size(routehandleList)
-
-      ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-      do i=1,localcount
-         ESMF_INIT_CHECK_DEEP_SHORT(ESMF_RouteHandleGetInit,routehandleList(i),rc)
-      enddo
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_StateClsAdd (state%statep,  routehandleList,  &
-          replaceflag=.true., rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc))  return
-
-      if (present(rc)) rc = ESMF_SUCCESS
-      end subroutine ESMF_StateRepRouteHandleList
-
-!------------------------------------------------------------------------------
+^define noattributesversion
+StateReplaceListMacro(ESMF_RouteHandle,RouteHandle,routehandleList,none,none)
+^undef noattributesversion
 StateReplaceListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
 
 end module ESMF_StateRemRepMod
