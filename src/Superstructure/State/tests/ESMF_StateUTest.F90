@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.104 2011/08/10 14:22:17 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.105 2011/08/13 02:38:25 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.104 2011/08/10 14:22:17 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.105 2011/08/13 02:38:25 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -64,13 +64,20 @@
       type(ESMF_Field)       :: fields(5)
       type(ESMF_FieldBundle) :: fbundle
 
-      type(ESMF_Array)      :: array10, array11, array12
-      type(ESMF_ArrayBundle):: abund10, abund11
-      type(ESMF_Array)      :: alist10(1), alist11(1)
-      type(ESMF_Field)      :: field10, field11, field12
-      type(ESMF_State)      :: state10, state11, state12
-
-      type(ESMF_State)      :: state20, state30
+      type(ESMF_Array)       :: array10, array11, array12
+      type(ESMF_Array)       :: array1x
+      type(ESMF_ArrayBundle) :: abund10, abund11
+      type(ESMF_ArrayBundle) :: abund1x
+      type(ESMF_Array)       :: alist10(1), alist11(1)
+      type(ESMF_Field)       :: field10, field11, field12
+      type(ESMF_Field)       :: field1x
+      type(ESMF_FieldBundle) :: fbundle12
+      type(ESMF_FieldBundle) :: fbundle1x
+      type(ESMF_RouteHandle) :: routehandle11, routehandle12
+      type(ESMF_RouteHandle) :: routehandle1x
+      type(ESMF_State)       :: state10, state11, state12
+      type(ESMF_State)       :: state1x
+      type(ESMF_State)       :: state20, state30
 
       integer :: i
 #endif
@@ -1132,8 +1139,10 @@
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
+! call ESMF_StatePrint (state10, options='debug', nestedFlag=.true.)
+
       !------------------------------------------------------------------------
-      ! Test StateAdd w/relaxed on Array
+      ! Tests for relaxed flag on each supported type
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1143,7 +1152,11 @@
       write (failmsg, *) "Creating state30 for Add/relaxed"
       write (name, *) "Creating state30 for Add/relaxed test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on Array
+      !------------------------------------------------------------------------
 
       !EX_UTest
       ! Test Add where none exists
@@ -1151,7 +1164,7 @@
       write (failmsg, *) "Add/relaxed an Array which did not exist"
       write (name, *) "Add/relaxed an Array which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
 
       !EX_UTest
       ! Test adding a 2nd Array which has the same name as the first
@@ -1159,10 +1172,10 @@
       write (failmsg, *) "Add/relaxed a pre-existing Array in a State"
       write (name, *) "Add/relaxed an Array which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! Test StateRemove w/relaxed on Array
+      ! Test StateReplace w/relaxed on Array
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -1171,7 +1184,7 @@
       write (failmsg, *) "Remove a pre-existing Array in a State"
       write (name, *) "Remove an Array which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
 
       !EX_UTest
       ! Test Replace/relaxed where none exists
@@ -1179,7 +1192,16 @@
       write (failmsg, *) "Replace/relaxed an Array which did not exist"
       write (name, *) "Replace/relaxed an Array which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test getting the Array (should fail)
+      call ESMF_StateGet (state30, itemName='temperatures',  &
+          array=array1x, rc=rc)
+      write (failmsg, *) "Got an Array which should not exist in a State"
+      write (name, *) "Getting an Array which should not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
 
       !EX_UTest
       ! Test Add where none exists
@@ -1187,7 +1209,7 @@
       write (failmsg, *) "Add an Array which did not exist"
       write (name, *) "Add an Array which does not exist test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
 
       !EX_UTest
       ! Test Replace/relaxed a 2nd Array which has the same name as the first
@@ -1195,9 +1217,317 @@
       write (failmsg, *) "Replace/relaxed a pre-existing Array in a State"
       write (name, *) "Replace/relaxed an Array which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
-        result, ESMF_SRCLINE)
+          result, ESMF_SRCLINE)
 
-! call ESMF_StatePrint (state10, options='debug', nestedFlag=.true.)
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on ArrayBundle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/abund10/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed an ArrayBundle which did not exist"
+      write (name, *) "Add/relaxed an ArrayBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding a 2nd ArrayBundle which has the same name as the first
+      call ESMF_StateAdd (state30, (/abund11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a pre-existing ArrayBundle in a State"
+      write (name, *) "Add/relaxed an ArrayBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace w/relaxed on ArrayBundle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test removing the ArrayBundle
+      call ESMF_StateRemove (state30, itemName='temp bundle', rc=rc)
+      write (failmsg, *) "Remove a pre-existing ArrayBundle in a State"
+      write (name, *) "Remove an ArrayBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed where none exists
+      call ESMF_StateReplace (state30, (/abund10/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed an ArrayBundle which did not exist"
+      write (name, *) "Replace/relaxed an ArrayBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test getting the ArrayBundle (should fail)
+      call ESMF_StateGet (state30, itemName='temp bundle',  &
+          arraybundle=abund1x, rc=rc)
+      write (failmsg, *) "Got an ArrayBundle which should not exist in a State"
+      write (name, *) "Getting an ArrayBundle which should not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/abund10/), rc=rc)
+      write (failmsg, *) "Add an ArrayBundle which did not exist"
+      write (name, *) "Add an ArrayBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed a 2nd ArrayBundle which has the same name as the first
+      call ESMF_StateReplace (state30, (/abund11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed a pre-existing ArrayBundle in a State"
+      write (name, *) "Replace/relaxed an ArrayBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on Field
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/field10/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed an Field which did not exist"
+      write (name, *) "Add/relaxed an Field which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding a 2nd Field which has the same name as the first
+      call ESMF_StateAdd (state30, (/field11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a pre-existing Field in a State"
+      write (name, *) "Add/relaxed an Field which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace w/relaxed on Field
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test removing the Field
+      call ESMF_StateRemove (state30, itemName='pressures', rc=rc)
+      write (failmsg, *) "Remove a pre-existing Field in a State"
+      write (name, *) "Remove an Field which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed where none exists
+      call ESMF_StateReplace (state30, (/field10/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed an Field which did not exist"
+      write (name, *) "Replace/relaxed an Field which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test getting the Field (should fail)
+      call ESMF_StateGet (state30, itemName='pressures',  &
+          field=field1x, rc=rc)
+      write (failmsg, *) "Got an Field which should not exist in a State"
+      write (name, *) "Getting an Field which should not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/field10/), rc=rc)
+      write (failmsg, *) "Add an Field which did not exist"
+      write (name, *) "Add an Field which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed a 2nd Field which has the same name as the first
+      call ESMF_StateReplace (state30, (/field11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed a pre-existing Field in a State"
+      write (name, *) "Replace/relaxed an Field which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on FieldBundle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test creating a 2nd FieldBundle
+      fbundle12 = ESMF_FieldBundleCreate (name="testbundle", rc=rc)
+      write (failmsg, *) "Creating a FieldBundle test"
+      write (name, *) "Create a FieldBundle test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/fbundle/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a FieldBundle which did not exist"
+      write (name, *) "Add/relaxed a FieldBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding a 2nd FieldBundle which has the same name as the first
+      call ESMF_StateAdd (state30, (/fbundle12/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a pre-existing FieldBundle in a State"
+      write (name, *) "Add/relaxed a FieldBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace w/relaxed on FieldBundle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test removing the FieldBundle
+      call ESMF_StateRemove (state30, itemName='testbundle', rc=rc)
+      write (failmsg, *) "Remove a pre-existing FieldBundle in a State"
+      write (name, *) "Remove a FieldBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed where none exists
+      call ESMF_StateReplace (state30, (/fbundle/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed an FieldBundle which did not exist"
+      write (name, *) "Replace/relaxed an FieldBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test getting the FieldBundle (should fail)
+      call ESMF_StateGet (state30, itemName='testbundle',  &
+          fieldbundle=fbundle1x, rc=rc)
+      write (failmsg, *) "Got an FieldBundle which should not exist in a State"
+      write (name, *) "Getting an FieldBundle which should not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/fbundle/), rc=rc)
+      write (failmsg, *) "Add an FieldBundle which did not exist"
+      write (name, *) "Add a FieldBundle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed a 2nd FieldBundle which has the same name as the first
+      call ESMF_StateReplace (state30, (/fbundle12/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed a pre-existing FieldBundle in a State"
+      write (name, *) "Replace/relaxed a FieldBundle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on RouteHandle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test creating a RouteHandle
+      routehandle11 = ESMF_RouteHandleCreate (rc)
+      write (failmsg, *) "Creating a RouteHandle test"
+      write (name, *) "Create a RouteHandle test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test set the RouteHandle name
+      call ESMF_RouteHandleSet (routehandle11, name='rhandle', rc=rc)
+      write (failmsg, *) "Setting a RouteHandle name test"
+      write (name, *) "Set a RouteHandle name test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test creating a 2nd RouteHandle
+      routehandle12 = ESMF_RouteHandleCreate (rc)
+      write (failmsg, *) "Creating a RouteHandle test"
+      write (name, *) "Create a RouteHandle test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test set the 2nd RouteHandle name
+      call ESMF_RouteHandleSet (routehandle12, name='rhandle', rc=rc)
+      write (failmsg, *) "Setting a 2nd RouteHandle name test"
+      write (name, *) "Set a 2nd RouteHandle name test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/routehandle11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a RouteHandle which did not exist"
+      write (name, *) "Add/relaxed a RouteHandle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test adding a 2nd RouteHandle which has the same name as the first
+      call ESMF_StateAdd (state30, (/routehandle12/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Add/relaxed a pre-existing RouteHandle in a State"
+      write (name, *) "Add/relaxed a RouteHandle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace w/relaxed on RouteHandle
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test removing the RouteHandle
+      call ESMF_StateRemove (state30, itemName='rhandle', rc=rc)
+      write (failmsg, *) "Remove a pre-existing RouteHandle in a State"
+      write (name, *) "Remove a RouteHandle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed where none exists
+      call ESMF_StateReplace (state30, (/routehandle11/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed an RouteHandle which did not exist"
+      write (name, *) "Replace/relaxed an RouteHandle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test getting the RouteHandle (should fail)
+      call ESMF_StateGet (state30, itemName='rhandle',  &
+          routehandle=routehandle1x, rc=rc)
+      write (failmsg, *) "Got an RouteHandle which should not exist in a State"
+      write (name, *) "Getting an RouteHandle which should not exist test"
+      call ESMF_Test (rc /= ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Add where none exists
+      call ESMF_StateAdd (state30, (/routehandle11/), rc=rc)
+      write (failmsg, *) "Add an RouteHandle which did not exist"
+      write (name, *) "Add a RouteHandle which does not exist test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test Replace/relaxed a 2nd RouteHandle which has the same name as the first
+      call ESMF_StateReplace (state30, (/routehandle12/), relaxedflag=.true., rc=rc)
+      write (failmsg, *) "Replace/relaxed a pre-existing RouteHandle in a State"
+      write (name, *) "Replace/relaxed a RouteHandle which pre-exists test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+          result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Test StateAdd w/relaxed on nested State
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
+      ! Test StateReplace w/relaxed on nested State
+      !------------------------------------------------------------------------
+
+! call ESMF_StatePrint (state30, options='debug', nestedFlag=.true.)
 
 #if 0
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
