@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.12 2011/08/04 21:18:22 ksaint Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.13 2011/08/15 16:01:04 w6ws Exp $
 !
 ! Test code which creates a new Component.
 
@@ -284,12 +284,12 @@ program ESMF_WebServComponentUTest
     cdesc = "Atmosphere - default context"
     comp1 = ESMF_GridCompCreate(name=cname, rc=rc)  
 
-    call getarg(1, argBuffer)
+    call ESMF_UtilGetArg (1, argvalue=argBuffer)
     print *, "Arg 1: ", argBuffer
     read(argBuffer,*) portNum
     print *, "Port Num: ", portNum
 
-    call getarg(2, argBuffer)
+    call ESMF_UtilGetArg (2, argvalue=argBuffer)
     print *, "Arg 2: ", argBuffer
     read(argBuffer,*) clientId
     print *, "Client ID: ", clientId
