@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.12 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.6.2.1 2011/08/16 23:28:24 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -8,7 +8,7 @@ module NUOPC_DriverExplicit
   ! Generic Driver Component with explicit time stepping
   !-----------------------------------------------------------------------------
 
-  use ESMF
+  use ESMF_Mod
   use NUOPC
 
   implicit none
@@ -64,19 +64,19 @@ module NUOPC_DriverExplicit
     
     rc = ESMF_SUCCESS
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, &
       userRoutine=Initialize, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, &
       userRoutine=Run, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, &
       userRoutine=Finalize, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
   end subroutine
   
@@ -104,15 +104,21 @@ module NUOPC_DriverExplicit
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
+    ! by default set the internal clock to the parent clock, but only if
+    ! internal clock wasn't already set
+    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
     ! SPECIALIZE by calling into attached method to set modelCount
     call ESMF_MethodExecute(gcomp, label=label_SetModelCount, &
       userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! allocate lists inside the internal state according to modelCount
@@ -130,19 +136,19 @@ module NUOPC_DriverExplicit
       write (iString, *) i
       is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
         trim(adjustl(iString)), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
       is%wrap%modelIS(i) = ESMF_StateCreate(name="modelComp "// &
         trim(adjustl(iString))//" Import State", &
-        stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        statetype=ESMF_STATE_IMPORT, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
       is%wrap%modelES(i) = ESMF_StateCreate(name="modelComp "// &
         trim(adjustl(iString))//" Export State", &
-        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        statetype=ESMF_STATE_EXPORT, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
       do j=1, is%wrap%modelCount
@@ -150,7 +156,7 @@ module NUOPC_DriverExplicit
         write (jString, *) j
         is%wrap%connectorComp(i,j) = ESMF_CplCompCreate(name="connectorComp "//&
           trim(adjustl(iString))//" -> "//trim(adjustl(jString)), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       enddo
     enddo
@@ -161,27 +167,27 @@ module NUOPC_DriverExplicit
       do j=1, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
         call routine_AddRunElement(gcomp, i=i, j=j, phase=1, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       enddo
     enddo
     do i=1, is%wrap%modelCount
       call routine_AddRunElement(gcomp, i=i, j=0, phase=1, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     enddo
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
     call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
       userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! query Component for its Clock (set during specialization)
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -191,7 +197,7 @@ module NUOPC_DriverExplicit
       write (iString, *) i
       if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
         call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
@@ -215,7 +221,7 @@ module NUOPC_DriverExplicit
         write (jString, *) j
         if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
           call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
             importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
@@ -239,7 +245,7 @@ module NUOPC_DriverExplicit
       write (iString, *) i
       if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
         call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
@@ -263,7 +269,7 @@ module NUOPC_DriverExplicit
         write (jString, *) j
         if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
           call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
             importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
@@ -287,7 +293,7 @@ module NUOPC_DriverExplicit
       write (iString, *) i
       if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
         call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
@@ -308,7 +314,7 @@ module NUOPC_DriverExplicit
       write (iString, *) i
       if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
         call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
@@ -341,23 +347,37 @@ module NUOPC_DriverExplicit
     integer                   :: i, j, phase
     character(ESMF_MAXSTR)    :: iString, jString, pString
     type(type_RunElement), pointer  :: runElement
+    character(ESMF_MAXSTR)    :: modelName
 
     rc = ESMF_SUCCESS
     
+    call ESMF_GridCompGet(gcomp, name=modelName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! query Component for this internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" entered Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     ! time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
       ! execute Run Sequence
@@ -412,12 +432,26 @@ module NUOPC_DriverExplicit
 
       ! advance to next time step
       call ESMF_ClockAdvance(internalClock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
+      call NUOPC_ClockPrintCurrTime(internalClock, &
+        trim(modelName)//" time stepping loop, current time: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
     enddo ! end of time stepping loop
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" leaving Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
   end subroutine
   
@@ -442,20 +476,20 @@ module NUOPC_DriverExplicit
     ! SPECIALIZE by calling into optional attached method
     call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
       userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! query Component for this internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! Finalize: connectorComps
@@ -502,19 +536,19 @@ module NUOPC_DriverExplicit
     do i=1, is%wrap%modelCount
       write (iString, *) i
       call ESMF_GridCompDestroy(is%wrap%modelComp(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       call ESMF_StateDestroy(is%wrap%modelIS(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       call ESMF_StateDestroy(is%wrap%modelES(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       do j=1, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
         write (jString, *) j
         call ESMF_CplCompDestroy(is%wrap%connectorComp(i,j), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       enddo
     enddo
@@ -528,7 +562,7 @@ module NUOPC_DriverExplicit
       
     ! deallocate RunSequence
     call routine_DeallocateRunSequence(gcomp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! deallocate internal state memory
@@ -556,7 +590,7 @@ module NUOPC_DriverExplicit
     runElement%j = j
     runElement%phase = phase
     call routine_AddRunElement(gcomp, element=runElement, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRPASS, &
       line=__LINE__, file=FILENAME)) return  ! bail out
   end subroutine
 
@@ -572,7 +606,7 @@ module NUOPC_DriverExplicit
     ! query Component for this internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     ! find the last element in current list and point to added element
     if (.not.associated(is%wrap%runSequence)) then
@@ -599,7 +633,7 @@ module NUOPC_DriverExplicit
     ! query Component for this internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOG_ERRMSG, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     ! deallocate RunSequence
     if (associated(is%wrap%runSequence)) then
