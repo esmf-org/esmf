@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.11 2011/08/06 00:53:33 eschwab Exp $
+! $Id: user_model3.F90,v 1.12 2011/08/16 05:58:47 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,6 +98,8 @@ module user_model3
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(2)
+    character(ESMF_MAXSTR)      :: sciPropVal(4), outVal(4)
+    integer                     :: nvals
     type(ESMF_Field)            :: Ozone, UM
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -190,10 +192,15 @@ module user_model3
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Scientific Properties: user-specified attributes
+    sciPropVal(1) = 'clouds'
+    sciPropVal(2) = 'potential temperature'
+    sciPropVal(3) = 'vapour/solid/liquid'
+    sciPropVal(4) = 'wind components'
     call ESMF_AttributeSet(comp, &
       'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables', &
-        'wind components', &
+        valueList=sciPropVal, itemCount=4, &
       convention=convCIM, purpose=purpSci, rc=rc)
+
     call ESMF_AttributeSet(comp, &
       'AtmosphereAtmosDynamicalCoreTopBoundaryCondition', &
         'radiation boundary condition', &
