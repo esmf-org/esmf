@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.122 2011/08/06 00:51:53 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.123 2011/08/16 05:54:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.122 2011/08/06 00:51:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.123 2011/08/16 05:54:54 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -5799,11 +5799,6 @@ if (attrRoot == ESMF_TRUE) {
     if (((ap = attpack->AttPackGetAttribute(name)) != NULL) &&
          (ap->parent->AttributeIsSet(name))) {
         localrc = ap->parent->AttributeGet(name, &valuevector);
-        if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-          return ESMF_FAILURE;}
-        value = valuevector.at(0);
         string represented = 
           (purpose.compare("Scientific Properties Description") == 0) ?
             "true" : "false";
@@ -5813,8 +5808,11 @@ if (attrRoot == ESMF_TRUE) {
 
         localrc = io_xml->writeElement("shortName", name, indent+2, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeElement("value", value, indent+2, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        for(int j=0; j<valuevector.size(); j++) {
+          localrc = io_xml->writeElement("value", valuevector.at(j), indent+2, 0);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        }
+
         localrc = io_xml->writeEndElement("componentProperty", indent+1);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
@@ -5958,9 +5956,17 @@ if (attrRoot == ESMF_TRUE) {
                           "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeElement("units", "", indent+2, 2,
-                                       "open", "true", 
-                                       "value", value.c_str());
+        localrc = io_xml->writeStartElement("units", "", indent+2, 2,
+                                            "open", "true", 
+                                            "value", value.c_str());
+        localrc = io_xml->writeStartElement("controlledVocabulary", "", 
+                                            indent+3, 0);
+        localrc = io_xml->writeElement("name", "units", indent+4, 0);
+        localrc = io_xml->writeElement("server", 
+                   "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 
+                   indent+4, 0);
+        localrc = io_xml->writeEndElement("controlledVocabulary", indent+3);
+        localrc = io_xml->writeEndElement("units", indent+2);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
@@ -5971,9 +5977,17 @@ if (attrRoot == ESMF_TRUE) {
                           "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeElement("standardName", "", indent+2, 2,
-                                       "open", "true", 
-                                       "value", value.c_str());
+        localrc = io_xml->writeStartElement("standardName", "", indent+2, 2,
+                                            "open", "true", 
+                                            "value", value.c_str());
+        localrc = io_xml->writeStartElement("controlledVocabulary", "", 
+                                            indent+3, 0);
+        localrc = io_xml->writeElement("name", "cfName", indent+4, 0);
+        localrc = io_xml->writeElement("server", 
+                   "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 
+                   indent+4, 0);
+        localrc = io_xml->writeEndElement("controlledVocabulary", indent+3);
+        localrc = io_xml->writeEndElement("standardName", indent+2);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       localrc = io_xml->writeEndElement("componentProperty", indent+1);
