@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.46 2011/08/06 00:51:55 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.47 2011/08/16 05:55:59 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ Some Attributes come with a controlled vocabulary. A controlled vocabulary is a 
 \subsubsection{Component Attribute packages}
 \label{ComponentAttributePackages}
 
-There are many attributes that are used to describe components. There are currently 3 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
+There are many attributes that are used to describe components. There are currently 4 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
 
 \begin{enumerate}
     \item Earth System Grid (ESG) Basic
@@ -42,6 +42,7 @@ There are many attributes that are used to describe components. There are curren
         \item International Organization for Standardization (ISO) Responsible Party
         \item International Organization for Standardization (ISO) Citation
     \end{enumerate}
+    \item Common Information Model (CIM) Scientific Properties
     \item Common Information Model (CIM) Component Properties
 \end{enumerate}
 
@@ -255,7 +256,7 @@ There are many attributes that are used to describe components. There are curren
 
 \vspace{.20in}
 
-{\bf 3. Common Information Model (CIM) Component Properties Package}
+{\bf 4. Common Information Model (CIM) Component Properties Package}
 
 \begin{itemize}
     \item Convention: CIM 1.5
@@ -264,7 +265,7 @@ There are many attributes that are used to describe components. There are curren
     \begin{itemize}
         \item CIM XML
     \end{itemize}  
-    \item Description: This package is used to specify any number of user-defined attributes of a component and have them output in valid CIM XML format.  This differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.
+    \item Description: This package is used to specify any number of custom, user-defined attributes of a component and have them output in valid CIM XML format.  This differs from the scientific properties package above in that the names and values are custom, not part of any controlled vocabulary.  It also differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.
 \end{itemize}
 
 \begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
