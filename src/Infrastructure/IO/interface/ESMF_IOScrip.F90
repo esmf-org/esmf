@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.27 2011/07/01 16:07:15 rokuingh Exp $
+! $Id: ESMF_IOScrip.F90,v 1.28 2011/08/17 20:50:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -338,6 +338,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
+
       ! get the attribute 'units'
       ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
       errmsg = "Attribute units for grid_center_lon in "//trim(filename)
@@ -422,6 +423,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
+	grid_imask=1
       ncStatus = nf90_get_var (ncid, VarId, grid_imask)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
@@ -471,7 +473,7 @@ end subroutine ESMF_ScripInqUnits
       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
             rad2deg = 180.0/3.141592653589793238
-!            print *, 'Convert radians to degree ', rad2deg
+!           print *, 'Convert radians to degree ', rad2deg
             grid_corner_lon(:,:) = grid_corner_lon(:,:)*rad2deg
          endif
       endif	   
@@ -1833,14 +1835,15 @@ end subroutine ESMF_EsmfInqUnits
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GetMeshFromFile"
 subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
-				    elmtNums, startElmt, rc)
+				    elmtNums, startElmt, convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
     integer(ESMF_KIND_I4), pointer :: elementConn (:,:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
-    integer,           intent(out) :: rc
+    logical, intent(in), optional  :: convertToDeg
+    integer, intent(out), optional :: rc
 
     integer :: ncid
     integer :: ncStatus
@@ -1852,8 +1855,14 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
 
     integer :: VarNo
     character(len=256)::errmsg
+    character(len=80) :: units
+    real(ESMF_KIND_R8) :: rad2deg
+    integer :: len
+    logical :: convertToDegLocal
 
 #ifdef ESMF_NETCDF
+    convertToDegLocal = .false.
+    if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc /= ESMF_SUCCESS) return
@@ -1915,6 +1924,37 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
+
+    ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,errmsg,&
+        rc)) return
+
+    ncStatus = nf90_get_att(ncid, VarNo, "units", units)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,errmsg,&
+        rc)) return
+    ! if len != 7, something is wrong, check the value.  If it starts 
+    ! with Degrees/degrees/Radians/radians, ignore the garbage after the
+    ! word.  Otherwise, return the whole thing
+    call ESMF_StringLowerCase(units(1:len))
+    if ((len > 7) .and. (units(1:7) .ne. 'degrees' .and. &
+      units(1:7) .ne. 'radians')) then
+       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg="- units attribute is not degrees or radians", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+
+    ! if units is "radians", convert it to degree
+    if (convertToDegLocal) then
+       if (units(1:7) .eq. "radians") then
+          rad2deg = 180.0/3.141592653589793238
+          nodeCoords(:,:) = nodeCoords(:,:)*rad2deg
+       endif
+    endif
 
     ! get number of elmts
     ncStatus = nf90_inq_dimid (ncid, "elementCount", DimId)
