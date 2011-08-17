@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.77 2011/07/29 18:40:51 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.78 2011/08/17 20:55:56 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.77 2011/07/29 18:40:51 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.78 2011/08/17 20:55:56 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.77 2011/07/29 18:40:51 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.78 2011/08/17 20:55:56 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1170,7 +1170,8 @@ end function ESMF_MeshCreateFromFile
             ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! Read the mesh definition from the file
-    call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, startElmt, localrc)
+    call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+	startElmt, convertToDeg=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
