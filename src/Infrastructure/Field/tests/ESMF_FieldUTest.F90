@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.164 2011/06/30 14:49:39 oehmke Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.165 2011/08/18 19:59:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.164 2011/06/30 14:49:39 oehmke Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.165 2011/08/18 19:59:21 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,9 +70,9 @@
       type(ESMF_ArraySpec)            :: arrayspec8
       real(ESMF_KIND_R8), dimension(:,:,:), allocatable :: fptr
       real(ESMF_KIND_R4), dimension(:,:), pointer :: lsfptrR4Out
-      type(ESMF_Grid) :: grid, grid2
+      type(ESMF_Grid) :: grid, grid2, grid8
       real(ESMF_KIND_R8), dimension(:), pointer :: lsfptr,lsfptrOut
-      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS, f7
+      type(ESMF_Field) :: f2, f3, f4, f5, f6, fls, fS, f7, f8
       real(ESMF_KIND_R4), allocatable :: farray(:,:)
       type(ESMF_FieldStatus_Flag) :: fstatus
       integer :: ulb(1), uub(1)
@@ -836,6 +836,44 @@
 
       deallocate(farray)
       call ESMF_GridDestroy(grid, rc=rc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      grid8 = ESMF_GridEmptyCreate(rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create an empty Grid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      f8 = ESMF_FieldEmptyCreate(rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create an empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldEmptySet(f8, grid=grid8, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Set an empty Grid in an empty Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_GridEmptyComplete(grid8, maxIndex=(/10,10/), rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Complete an empty Grid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest_Multi_Proc_Only 
+      call ESMF_FieldEmptyComplete(f8, typekind=ESMF_TYPEKIND_R8, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Complete a partially created Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_FieldDestroy(f8, rc=rc)
+      call ESMF_GridDestroy(grid8, rc=rc)
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
