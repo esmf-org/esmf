@@ -58,23 +58,24 @@ Model component that is driven by explicit time stepping. Each time the {\tt Run
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0: {\sc Required override:} 
+\item phase 0: {\sc Required:} 
   \begin{itemize}
   \item Advertise Fields in import and export States.
   \end{itemize}
-\item phase 1: {\sc Required override:}
+\item phase 1: {\sc Required:}
   \begin{itemize}
   \item Realize advertised Fields in import and export States by providing actual Fields.
   \end{itemize}  
 \item phase 2: {\sc Provided:}
   \begin{itemize}
-  \item Set the model internal Clock. {\it Optional specialization:} {\tt label\_SetClock}
-  \item Check compatibility.
+  \item Set the model internal clock as a copy of the incoming clock. 
+  \item {\it Optional specialization} to set the internal clock: {\tt label\_SetClock}.
+  \item Check compatibility, ensuring all advertised import Fields are connected.
   \end{itemize}  
 \item phase 3. {\sc Provided:}
   \begin{itemize}
-  \item Initialize export Fields. {\it Optional specialization:} {\tt label\_DataInitialize}
-  \item Time stamp Fields in import and export States.
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Time stamp Fields in import and export States for compatibility checking.
   \end{itemize}    
 \end{itemize}
 
@@ -82,18 +83,19 @@ Model component that is driven by explicit time stepping. Each time the {\tt Run
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
-  \item Check clocks and timestamps.
-  \item Advance model. {\it Required specialization:} {\tt label\_Advance}
-  \item Update internal clock.
-  \item Timestamp Fields in export State.
+  \item Check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
+  \item Check import Fields against internal clock to make sure they all enter with a time stamp equal to the current time.
+  \item Model time stepping loop, starting at current time, running to stop time on the internal clock using the internal Clock time step.
+  \item {\it Required specialization} to advance the model each time step: {\tt label\_Advance}.
+  \item Time stamp all export Fields at the current time of the internal clock.
   \end{itemize}    
 \end{itemize}
 
 \bigskip{\sf FINALIZE:}
 \begin{itemize}
-\item phase 1: {\sc Optional override:}
+\item phase 1: {\sc Provided:}
   \begin{itemize}
-  \item Finalize the model.
+  \item Optionally overwrite the provided NOOP with model finalization code.
   \end{itemize}      
 \end{itemize}
 

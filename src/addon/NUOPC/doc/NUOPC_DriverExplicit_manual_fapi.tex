@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Driver component that drives model and connector components by explicit time stepping. Each time step the same sequence of model and connector components' {\tt Run} methods are called. The run sequence if fully customizable.
+Driver component that drives model and connector components by explicit time stepping. Each time step the same sequence of model and connector components' {\tt Run} methods are called. The run sequence is fully customizable.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_GridComp
@@ -60,11 +60,12 @@ Driver component that drives model and connector components by explicit time ste
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
-  \item Initialize internal State.
-  \item Set number of model components. {\it Required specialization:} {\tt label\_SetModelCount}
+  \item Initialize internal state.
+  \item Set default internal clock to be a copy of the incoming clock.
+  \item {\it Required specialization} to set number of model components: {\tt label\_SetModelCount}.
   \item Create model components, their import and export states and connector components.
-  \item Initialize run sequence.
-  \item Set model component services. {\it Required specialization:} {\tt label\_SetModelServices}
+  \item Initialize default run sequence.
+  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. Must call into SetServices() for all model and connector components. May overwrite default clock.
   \item Execute model components' Initialize() phase 0, in order from 1 to number of model components.
   \item Execute connector components' Initialize() phase 0, in order.
   \item Execute model components' Initialize() phase 1, in order from 1 to number of model components.
@@ -78,11 +79,8 @@ Driver component that drives model and connector components by explicit time ste
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
-  \item Time stepping 
-  \item Check Fields in import State. {\it Optional specialization:} {\tt label\_CheckImport}
-  \item Advance model. {\it Required specialization:} {\tt label\_Advance}
-  \item Update internal clock.
-  \item Timestamp Fields in export State. {\it Optional specialization:} {\tt label\_TimestampExport}
+  \item Time stepping loop, from current time to stop time, incrementing by time step.
+  \item For each time step iteration the model and connector components Run() methods are being called according to the run sequence.
   \end{itemize}    
 \end{itemize}
 
@@ -90,7 +88,13 @@ Driver component that drives model and connector components by explicit time ste
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
-  \item Finalize the model.
+  \item {\it Optional specialization} to finalize driver component: {\tt label\_Finalize}.
+  \item Execute all connector components' Finalize() methods in order.
+  \item Execute all model components' Finalize() methods in order.
+  \item Destroy all model components and their import and export states.
+  \item Destroy all connector components.
+  \item Deallocate run sequence.
+  \item Deallocate internal state.
   \end{itemize}      
 \end{itemize}
 
