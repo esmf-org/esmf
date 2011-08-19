@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.17 2011/06/30 17:35:27 feiliu Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.17 2011/06/30 17:35:27 feiliu Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $'
 
 !==============================================================================
 ! 
