@@ -1,0 +1,118 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: NUOPC\_DriverExplicit.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+}
+
+\bigskip{\sf MODULE:}
+\begin{verbatim}  module NUOPC_DriverExplicit
+\end{verbatim}
+
+\bigskip{\sf DESCRIPTION:\\}
+Driver component that drives model and connector components by explicit time stepping. Each time step the same sequence of model and connector components' {\tt Run} methods are called. The run sequence is fully customizable.
+
+\bigskip{\sf SUPER:}
+\begin{verbatim}  ESMF_GridComp
+\end{verbatim}
+
+\bigskip{\sf USE DEPENDENCIES:}
+\begin{verbatim}  use ESMF
+\end{verbatim}
+
+\bigskip{\sf SETSERVICES:}
+\begin{verbatim}  subroutine routine_SetServices(gcomp, rc)
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
+\end{verbatim}
+
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 1: {\sc Provided:}
+  \begin{itemize}
+  \item Initialize internal state.
+  \item Set default internal clock to be a copy of the incoming clock.
+  \item {\it Required specialization} to set number of model components: {\tt label\_SetModelCount}.
+  \item Create model components, their import and export states and connector components.
+  \item Initialize default run sequence.
+  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. Must call into SetServices() for all model and connector components. May overwrite default clock.
+  \item Execute model components' Initialize() phase 0, in order from 1 to number of model components.
+  \item Execute connector components' Initialize() phase 0, in order.
+  \item Execute model components' Initialize() phase 1, in order from 1 to number of model components.
+  \item Execute connector components' Initialize() phase 1, in order.
+  \item Execute model components' Initialize() phase 2, in order from 1 to number of model components.
+  \item Execute model components' Initialize() phase 3, in order from 1 to number of model components.
+  \end{itemize}  
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: {\sc Provided:}
+  \begin{itemize}
+  \item Time stepping loop, from current time to stop time, incrementing by time step.
+  \item For each time step iteration the model and connector components Run() methods are being called according to the run sequence.
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: {\sc Provided:}
+  \begin{itemize}
+  \item {\it Optional specialization} to finalize driver component: {\tt label\_Finalize}.
+  \item Execute all connector components' Finalize() methods in order.
+  \item Execute all model components' Finalize() methods in order.
+  \item Destroy all model components and their import and export states.
+  \item Destroy all connector components.
+  \item Deallocate run sequence.
+  \item Deallocate internal state.
+  \end{itemize}      
+\end{itemize}
+
+\bigskip{\sf INTERNALSTATE:}
+\begin{verbatim}  label_InternalState
+
+  type type_InternalState
+    type(type_InternalStateStruct), pointer :: wrap
+  end type
+
+  type type_InternalStateStruct
+    integer                         :: modelCount
+    type(ESMF_GridComp), pointer    :: modelComp(:)
+    type(ESMF_State),    pointer    :: modelIS(:), modelES(:)
+    type(ESMF_CplComp),  pointer    :: connectorComp(:,:)
+    type(type_RunElement), pointer  :: runSequence
+  end type
+
+\end{verbatim}
+%...............................................................
+

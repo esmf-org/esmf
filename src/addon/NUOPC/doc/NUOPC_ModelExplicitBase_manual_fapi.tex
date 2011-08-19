@@ -32,18 +32,18 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: NUOPC\_ModelExplicit.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+\markboth{Left}{Source File: NUOPC\_ModelExplicitBase.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
 }
 
 \bigskip{\sf MODULE:}
-\begin{verbatim}  module NUOPC_ModelExplicit
+\begin{verbatim}  module NUOPC_ModelExplicitBase
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
 Model component that is driven by explicit time stepping. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
 
 \bigskip{\sf SUPER:}
-\begin{verbatim}  NUOPC_ModelExplicitBase
+\begin{verbatim}  ESMF_GridComp
 \end{verbatim}
 
 \bigskip{\sf USE DEPENDENCIES:}
@@ -68,15 +68,12 @@ Model component that is driven by explicit time stepping. Each time the {\tt Run
   \end{itemize}  
 \item phase 2: {\sc Provided:}
   \begin{itemize}
-  \item Set the model internal clock as a copy of the incoming clock. 
-  \item {\it Optional specialization} to set the internal clock: {\tt label\_SetClock}.
-  \item Check compatibility, ensuring all advertised import Fields are connected.
+  \item Optionally overwrite the provided NOOP with model initialization code.
   \end{itemize}  
 \item phase 3. {\sc Provided:}
   \begin{itemize}
-  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
-  \item Time stamp Fields in import and export States for compatibility checking.
-  \end{itemize}    
+  \item Optionally overwrite the provided NOOP with model initialization code.
+  \end{itemize}  
 \end{itemize}
 
 \bigskip{\sf RUN:}
@@ -84,10 +81,10 @@ Model component that is driven by explicit time stepping. Each time the {\tt Run
 \item phase 1: {\sc Provided:}
   \begin{itemize}
   \item Check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
-  \item Check import Fields against internal clock to make sure they all enter with a time stamp equal to the current time.
+  \item {\it Optional specialization} to check Fields in import State: {\tt label\_CheckImport}.
   \item Model time stepping loop, starting at current time, running to stop time on the internal clock using the internal Clock time step.
   \item {\it Required specialization} to advance the model each time step: {\tt label\_Advance}.
-  \item Time stamp all export Fields at the current time of the internal clock.
+  \item {\it Optional specialization} to timestamp the Fields in the export State: {\tt label\_TimestampExport}.
   \end{itemize}    
 \end{itemize}
 

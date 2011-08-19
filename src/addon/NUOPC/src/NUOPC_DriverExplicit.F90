@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.11.2.1 2011/07/22 17:15:12 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.11.2.2 2011/08/19 19:05:10 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -91,6 +91,7 @@ module NUOPC_DriverExplicit
     ! local variables
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
+    logical                   :: clockIsPresent
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j
     character(ESMF_MAXSTR)    :: iString, jString, compName
@@ -106,7 +107,21 @@ module NUOPC_DriverExplicit
     call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! test whether internal Clock has already been set in the Component
+    call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
       
+    if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
+      ! set the internal Clock as a copy of the incoming Clock by a default
+      call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+
     ! SPECIALIZE by calling into attached method to set modelCount
     call ESMF_MethodExecute(gcomp, label=label_SetModelCount, &
       userRc=localrc, rc=rc)
@@ -341,8 +356,15 @@ module NUOPC_DriverExplicit
     integer                   :: i, j, phase
     character(ESMF_MAXSTR)    :: iString, jString, pString
     type(type_RunElement), pointer  :: runElement
+    character(ESMF_MAXSTR)    :: modelName
 
     rc = ESMF_SUCCESS
+    
+    call ESMF_GridCompGet(gcomp, name=modelName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
@@ -355,6 +377,13 @@ module NUOPC_DriverExplicit
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" entered Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     ! time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -415,9 +444,23 @@ module NUOPC_DriverExplicit
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
+      call NUOPC_ClockPrintCurrTime(internalClock, &
+        trim(modelName)//" time stepping loop, current time: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
     enddo ! end of time stepping loop
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" leaving Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
   end subroutine
   

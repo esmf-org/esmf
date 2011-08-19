@@ -1,6 +1,9 @@
-! $Id: NUOPC.F90,v 1.18.2.2 2011/07/22 17:24:49 theurich Exp $
+! $Id: NUOPC.F90,v 1.18.2.3 2011/08/19 19:05:10 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
+
+!TODO: make this macros available through ESMF as parameter or find other way
+#define ESMF_INIT_CREATED 82949521
 
 module NUOPC
 
@@ -45,6 +48,31 @@ module NUOPC
   public NUOPC_StateSetTimestamp
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_GridCreateSimpleXY
+  
+  public NUOPC_IsCreated
+  
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object is in created status
+! !INTERFACE:
+  interface NUOPC_IsCreated
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure NUOPC_ClockIsCreated
+
+! !DESCRIPTION: 
+!   Returns {\tt .true.} if an ESMF object is in the created status, 
+!   {\tt .false.} otherwise.
+!EOP
+  end interface
+  !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
   contains
@@ -1470,4 +1498,14 @@ module NUOPC
   end function
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  function NUOPC_ClockIsCreated(clock)
+    logical           :: NUOPC_ClockIsCreated
+    type(ESMF_Clock)  :: clock
+    NUOPC_ClockIsCreated = .false.  ! default assumption
+    if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
+      NUOPC_ClockIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+  
 end module
