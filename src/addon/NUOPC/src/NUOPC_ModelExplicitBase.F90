@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.7 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.8 2011/08/19 17:35:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -177,6 +177,13 @@ module NUOPC_ModelExplicitBase
       file=FILENAME)) &
       return  ! bail out
       
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" leaving Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     ! SPECIALIZE by calling into optional attached method
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
       existflag=existflag, userRc=localrc, rc=rc)

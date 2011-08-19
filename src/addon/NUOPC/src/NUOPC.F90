@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.20 2011/07/19 23:54:18 theurich Exp $
+! $Id: NUOPC.F90,v 1.21 2011/08/19 17:35:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -726,14 +726,25 @@ module NUOPC
 !   At the same time ensure that the timeStep of the externalClock is
 !   a multiple of the internal Clock's timeStep. If the stabilityTimeStep
 !   argument is not provided then the internal Clock will simply be set
-!   as a copy of the externalClock.
+!   as a copy of the externalClock. The method turns into a noop if the 
+!   the Component internal Clock has already been set.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
+    logical                 :: clockIsPresent
     type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS
     
+    ! test whether internal Clock was already set in the Component
+    call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (clockIsPresent) return ! NOOP
+    
+    ! internal Clock has not been set yet
     internalClock = NUOPC_ClockInitialize(externalClock, stabilityTimeStep, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

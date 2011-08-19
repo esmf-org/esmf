@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.12 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.13 2011/08/19 17:35:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -107,6 +107,12 @@ module NUOPC_DriverExplicit
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
+    ! by default set the internal clock to the parent clock, but only if
+    ! internal clock wasn't already set
+    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
     ! SPECIALIZE by calling into attached method to set modelCount
     call ESMF_MethodExecute(gcomp, label=label_SetModelCount, &
       userRc=localrc, rc=rc)
@@ -341,8 +347,15 @@ module NUOPC_DriverExplicit
     integer                   :: i, j, phase
     character(ESMF_MAXSTR)    :: iString, jString, pString
     type(type_RunElement), pointer  :: runElement
+    character(ESMF_MAXSTR)    :: modelName
 
     rc = ESMF_SUCCESS
+    
+    call ESMF_GridCompGet(gcomp, name=modelName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
@@ -355,6 +368,13 @@ module NUOPC_DriverExplicit
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" entered Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     ! time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -415,9 +435,23 @@ module NUOPC_DriverExplicit
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
+      call NUOPC_ClockPrintCurrTime(internalClock, &
+        trim(modelName)//" time stepping loop, current time: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
     enddo ! end of time stepping loop
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+      trim(modelName)//" leaving Run with current time: ", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
   end subroutine
   

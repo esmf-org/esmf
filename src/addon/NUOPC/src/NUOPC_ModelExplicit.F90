@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.10 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.11 2011/08/19 17:35:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -94,7 +94,8 @@ module NUOPC_ModelExplicit
        
     rc = ESMF_SUCCESS
     
-    ! by default set the internal clock to the parent clock
+    ! by default set the internal clock to the parent clock, but only if
+    ! internal clock wasn't already set
     call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
