@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.13 2011/08/19 17:35:56 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.14 2011/08/19 18:21:07 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -91,6 +91,7 @@ module NUOPC_DriverExplicit
     ! local variables
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
+    logical                   :: clockIsPresent
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j
     character(ESMF_MAXSTR)    :: iString, jString, compName
@@ -106,12 +107,20 @@ module NUOPC_DriverExplicit
     call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
-    ! by default set the internal clock to the parent clock, but only if
-    ! internal clock wasn't already set
-    call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+    
+    ! test whether internal Clock has already been set in the Component
+    call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    if (.not.clockIsPresent .and. NUOPC_IsCreated(clock)) then
+      ! set the internal Clock as a copy of the incoming Clock by a default
+      call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
 
     ! SPECIALIZE by calling into attached method to set modelCount
     call ESMF_MethodExecute(gcomp, label=label_SetModelCount, &

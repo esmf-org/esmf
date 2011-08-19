@@ -1,6 +1,9 @@
-! $Id: NUOPC.F90,v 1.21 2011/08/19 17:35:56 theurich Exp $
+! $Id: NUOPC.F90,v 1.22 2011/08/19 18:21:06 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
+
+!TODO: make this macros available through ESMF as parameter or find other way
+#define ESMF_INIT_CREATED 82949521
 
 module NUOPC
 
@@ -45,6 +48,31 @@ module NUOPC
   public NUOPC_StateSetTimestamp
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_GridCreateSimpleXY
+  
+  public NUOPC_IsCreated
+  
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object is in created status
+! !INTERFACE:
+  interface NUOPC_IsCreated
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure NUOPC_ClockIsCreated
+
+! !DESCRIPTION: 
+!   Returns {\tt .true.} if an ESMF object is in the created status, 
+!   {\tt .false.} otherwise.
+!EOP
+  end interface
+  !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
   contains
@@ -726,25 +754,14 @@ module NUOPC
 !   At the same time ensure that the timeStep of the externalClock is
 !   a multiple of the internal Clock's timeStep. If the stabilityTimeStep
 !   argument is not provided then the internal Clock will simply be set
-!   as a copy of the externalClock. The method turns into a noop if the 
-!   the Component internal Clock has already been set.
+!   as a copy of the externalClock.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    logical                 :: clockIsPresent
     type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! test whether internal Clock was already set in the Component
-    call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (clockIsPresent) return ! NOOP
-    
-    ! internal Clock has not been set yet
     internalClock = NUOPC_ClockInitialize(externalClock, stabilityTimeStep, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1481,4 +1498,14 @@ module NUOPC
   end function
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  function NUOPC_ClockIsCreated(clock)
+    logical           :: NUOPC_ClockIsCreated
+    type(ESMF_Clock)  :: clock
+    NUOPC_ClockIsCreated = .false.  ! default assumption
+    if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
+      NUOPC_ClockIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+  
 end module
