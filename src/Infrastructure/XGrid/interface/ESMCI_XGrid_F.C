@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.8 2011/05/06 19:00:55 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.9 2011/08/22 16:34:19 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,12 +32,13 @@ using namespace std;
 #include "Mesh/include/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h"
+#include "Mesh/include/ESMCI_MeshMerge.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.8 2011/05/06 19:00:55 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.9 2011/08/22 16:34:19 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -186,8 +187,8 @@ void FTN(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_regrid_create()" 
-  Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+#define ESMC_METHOD "c_esmc_xgridregrid_create()" 
+  Trace __trace(" FTN(c_esmc_xgridregrid_create)");
   ESMCI::VM *vm = *vmpp;
 
   int localPet = vm->getLocalPet();
@@ -292,6 +293,46 @@ void FTN(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, doubl
   if (tw.iientries != NULL) delete [] tw.iientries;
 
   delete *_tw;
+
+}
+
+// mesh merge
+void FTN(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
+                   Mesh **meshpp,
+                   //int *regridScheme,
+                   int*rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshmerge()" 
+  Trace __trace(" FTN(meshmerge) ");
+
+  Mesh &srcmesh = **srcmeshpp;
+  Mesh &dstmesh = **dstmeshpp;
+ 
+  try {
+    MeshMerge(srcmesh, dstmesh, meshpp);
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
 

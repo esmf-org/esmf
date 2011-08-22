@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2011/04/26 19:48:24 feiliu Exp $
+# $Id: makefile,v 1.29 2011/08/22 16:35:48 feiliu Exp $
 
 # leave alone.
 ALL: build_here 
@@ -37,6 +37,7 @@ SOURCEC	  = \
            ESMCI_MeshField.C \
            ESMCI_MeshGen.C \
            ESMCI_MeshllField.C \
+           ESMCI_MeshMerge.C \
            ESMCI_MeshNC.C \
            ESMCI_MeshObj.C \
            ESMCI_MeshObjConn.C \

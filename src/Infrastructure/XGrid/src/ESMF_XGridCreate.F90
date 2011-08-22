@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.39 2011/07/25 17:51:52 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.40 2011/08/22 16:34:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.39 2011/07/25 17:51:52 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.40 2011/08/22 16:34:23 feiliu Exp $'
 
 !==============================================================================
 !
@@ -569,11 +569,20 @@ integer, intent(out), optional              :: rc
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      ! call into Rendezveus mesh
-      !meshA = ESMF_MeshMerge(meshA, meshAt(i), rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into mesh merge with priority taken into account
+      ! meshAt is truncated(if necessary) and concatenated onto meshA
+      ! and result stored in tmpmesh
+      call c_esmc_meshmerge(meshA, meshAt(i), tmpmesh, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if(i .gt. 2) then
+        call ESMF_MeshDestroy(meshA, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      meshA = tmpmesh
     enddo
 
     meshBt(1) = ESMF_GridToMesh(sideB(l_sideBPriority(1)), &
@@ -591,11 +600,20 @@ integer, intent(out), optional              :: rc
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      ! call into Rendezveus mesh
-      !meshB = ESMF_MeshMerge(meshB, meshBt(i), rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into mesh merge with priority taken into account
+      ! meshBt is truncated(if necessary) and concatenated onto meshB 
+      ! and result stored in tmpmesh
+      call c_esmc_meshmerge(meshB, meshBt(i), tmpmesh, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if(i .gt. 2) then
+        call ESMF_MeshDestroy(meshB, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      meshB = tmpmesh
     enddo
 
     allocate(xgtype%sparseMatA2X(ngrid_a), &

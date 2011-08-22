@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2010/10/13 22:19:18 feiliu Exp $ 
+# $Id: makefile,v 1.5 2011/08/22 16:34:26 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -26,7 +26,7 @@ DIRS        =
 #
 
 RUN_ESMF_XGridUTest:
-	$(MAKE) TNAME=XGrid NP=1 ftest
+	$(MAKE) TNAME=XGrid NP=2 ftest
 
 RUN_ESMF_XGridUTestUNI:
 	$(MAKE) TNAME=XGrid NP=1 ftest

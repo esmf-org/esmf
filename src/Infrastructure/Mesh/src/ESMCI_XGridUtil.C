@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.4 2011/05/11 17:49:02 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.5 2011/08/22 16:35:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -238,6 +238,14 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
       }
     }
   }
+
+  construct_sintd(0., num_sintd_nodes, sintd_coords, pdim, sdim, 
+    sintd_nodes, sintd_cells);
+
+}
+
+void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
+  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells){
 
   // Ready to create nodes etc..
   // Break up the cell into triangles if it's got more than 4 nodes

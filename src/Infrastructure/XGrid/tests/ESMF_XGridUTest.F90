@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.28 2011/06/30 13:44:24 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.29 2011/08/22 16:34:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -56,6 +56,15 @@
     call test3(rc)
     write(failMsg, *) ""
     write(name, *) "Creating an XGrid with area/centroid, sparseMatA2X"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid from 2 adjacent Grids
+    print *, 'Starting test4'
+    call test4(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid from 2 adjacent Grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_Finalize(rc=rc)
@@ -378,5 +387,120 @@ contains
         deallocate(sparseMatX2B(1)%factorIndexList, sparseMatX2B(1)%factorList)
 
     end subroutine test3
+
+!------------------------------------------------------------------------
+  subroutine test4(rc)
+    integer, intent(out)                :: rc
+    integer                             :: localrc, i
+    type(ESMF_XGrid)                    :: xgrid
+    type(ESMF_Grid)                     :: sideA(2), sideB(1)
+
+    type(ESMF_VM)                       :: vm
+    real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
+    type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
+
+    type(ESMF_Mesh)                     :: mesh
+
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,4.,0.,localrc)/), &
+      (/make_grid(8,8,6.,6.,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine test4
+
+  function make_grid(atm_nx, atm_ny, atm_dx, atm_dy, atm_sx, atm_sy, rc)
+
+    ! return value
+    type(ESMF_Grid)                           :: make_grid
+    ! arguments
+    integer, intent(in)                       :: atm_nx, atm_ny
+    real(ESMF_KIND_R4), intent(in)            :: atm_dx, atm_dy
+    real(ESMF_KIND_R4), intent(in)            :: atm_sx, atm_sy
+    integer, intent(out), optional            :: rc
+
+    ! local variables
+    integer                                   :: localrc, i, j
+    real(ESMF_KIND_R8), pointer               :: coordX(:), coordY(:)
+    real(ESMF_KIND_R8)                        :: startx, starty
+
+    make_grid = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
+      coordSys=ESMF_COORDSYS_CART, &
+      indexflag=ESMF_INDEX_GLOBAL, &
+      coordDep1=(/1/), &
+      coordDep2=(/2/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridAddCoord(make_grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_GridAddCoord(make_grid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! global indexing
+    ! atm grid is not decomposed in the y direction
+    !startx = lpet*atm_nx/npet*atm_dx
+    startx = atm_sx
+    starty = atm_sy
+    ! compute coord
+    ! X center
+    call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, farrayPtr=coordX, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = lbound(coordX,1), ubound(coordX,1)
+      coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
+    enddo
+    print *, 'coordX: ', coordX
+    ! X corner
+    call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+        coordDim=1, farrayPtr=coordX, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = lbound(coordX,1), ubound(coordX,1)
+      coordX(i) = startx + (i-1)*atm_dx
+    enddo
+    !print *, 'startx: ', startx, lbound(coordX, 1), 'coordX: ', coordX
+    ! Y center
+    call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, farrayPtr=coordY, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = lbound(coordY,1), ubound(coordY,1)
+      coordY(i) = starty + atm_dy/2. + (i-1)*atm_dy
+    enddo
+    ! Y corner
+    call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+        coordDim=2, farrayPtr=coordY, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = lbound(coordY,1), ubound(coordY,1)
+      coordY(i) = starty + (i-1)*atm_dy
+    enddo
+  
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end function make_grid
 
 end program ESMF_XGridUTest
