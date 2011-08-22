@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.37 2011/08/22 20:58:22 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.38 2011/08/22 22:11:27 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9114,7 +9114,7 @@ write(*,*) "LOCALRC=",localrc
   integer :: clbnd(2),cubnd(2)
   integer :: fclbnd(2),fcubnd(2)
   integer :: i1,i2,i3, index(2)
-  integer :: lDE, localDECount
+  integer :: lDE, srclocalDECount, dstlocalDECount
   real(ESMF_KIND_R8) :: coord(2)
   character(len=ESMF_MAXSTR) :: string
   integer src_nx, src_ny, dst_nx, dst_ny
@@ -9227,12 +9227,6 @@ write(*,*) "LOCALRC=",localrc
   endif
 
 
-  ! Get number of local DEs
-  call ESMF_GridGet(srcGrid, localDECount=localDECount, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
 
   ! Get arrays
   ! dstArray
@@ -9251,9 +9245,25 @@ write(*,*) "LOCALRC=",localrc
   endif
 
 
+  ! Get number of local DEs
+  call ESMF_GridGet(srcGrid, localDECount=srclocalDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+  ! Get number of local DEs
+  call ESMF_GridGet(dstGrid, localDECount=dstlocalDECount, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+
+
+
   ! Construct Src Grid
   ! (Get memory and set coords for src)
-  do lDE=0,localDECount-1
+  do lDE=0,srclocalDECount-1
  
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
@@ -9285,7 +9295,9 @@ write(*,*) "LOCALRC=",localrc
 
         ! Set source coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*src_dx
+
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*src_dy + 0.5*src_dy)
+!        farrayPtrYC(i1,i2) = -90. + REAL(i2-1)*src_dy 
 
         ! init exact answer
         lon = farrayPtrXC(i1,i2)
@@ -9309,7 +9321,7 @@ write(*,*) "LOCALRC=",localrc
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   ! Get memory and set coords for dst
-  do lDE=0,localDECount-1
+  do lDE=0,dstlocalDECount-1
  
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
@@ -9370,6 +9382,14 @@ write(*,*) "LOCALRC=",localrc
 
   enddo    ! lDE
 
+#if 0
+  call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
+       filename="srcGrid", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=ESMF_FAILURE
+     return
+  endif
+#endif
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -9399,7 +9419,7 @@ write(*,*) "LOCALRC=",localrc
 
 
   ! Check results
-  do lDE=0,localDECount-1
+  do lDE=0,dstlocalDECount-1
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=clbnd, &
                              computationalUBound=cubnd,  rc=localrc)
