@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.26 2011/07/12 00:07:21 theurich Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.27 2011/08/22 17:38:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -241,17 +241,20 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Establish the resolution of the grids
-  Src_nx = 180
-  Src_ny = 100
+!  Src_nx = 180
+!  Src_ny = 100
 
-!  Src_nx = 144
-!  Src_ny = 72
+  Src_nx = 360
+  Src_ny = 180
 
   Src_dx = 360.0/Src_nx
   Src_dy = 180.0/Src_ny
 
-  Dst_nx = 100
-  Dst_ny = 80
+!  Dst_nx = 100
+!  Dst_ny = 80
+
+  Dst_nx = 144
+  Dst_ny = 72
 
   Dst_dx = 360.0/Dst_nx
   Dst_dy = 180.0/Dst_ny

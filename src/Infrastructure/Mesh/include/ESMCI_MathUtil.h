@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.6 2011/06/30 14:49:50 oehmke Exp $
+// $Id: ESMCI_MathUtil.h,v 1.7 2011/08/22 17:38:17 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -49,6 +49,58 @@ namespace ESMCI {
   void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn);
 
   void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn);
+
+
+  // STUFF FOR TRIANGULATION
+
+struct GEOM_CART2D {
+
+  static const int pnt_size=2;
+
+  static double *getPntAt(double *a, int i) {return a+2*i;}
+
+  // Direction of turn between vectors a and b, starting both starting from point p
+  // based on cross product
+  static double turn(double *a, double *b, double *p) {return a[0]*b[1]-a[1]*b[0];}
+
+  // Used as an approximation of sharpness of angle between two vectors
+  static double dot(double *a, double *b) {return a[0]*b[0]+a[1]*b[1];}
+
+  static void copy(double *a, double *b) {a[0]=b[0]; a[1]=b[1];}
+
+  static void sub(double *out, double *a, double *b) {out[0]=a[0]-b[0]; out[1]=a[1]-b[1];}
+
+};
+
+
+struct GEOM_SPH2D3D {
+
+  static const int pnt_size=3;
+
+  static double *getPntAt(double *a, int i) {return a+3*i;}
+
+  // direction of turn between vectors a and b, starting both starting from point p
+  // based on cross product
+  static double turn(double *a, double *b, double *p) {return p[0]*(a[1]*b[2]-a[2]*b[1])+p[1]*(a[2]*b[0]-a[0]*b[2])+p[2]*(a[0]*b[1]-a[1]*b[0]);}
+
+  // Used as an approximation of sharpness of angle between two vectors
+  static double dot(double *a, double *b) {return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+
+  static void copy(double *a, double *b) {a[0]=b[0]; a[1]=b[1]; a[2]=b[2];}
+
+  static void sub(double *out, double *a, double *b) {out[0]=a[0]-b[0]; out[1]=a[1]-b[1]; out[2]=a[2]-b[2];}
+
+};
+
+
+#define ESMCI_TP_SUCCESS 0 
+#define ESMCI_TP_DEGENERATE_POLY 1 
+#define ESMCI_TP_CLOCKWISE_POLY 2 
+template <class TYPE>
+int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
+
+template <class TYPE>
+bool is_pnt_in_poly(int num_p, double *p, double *pnt);
 
 } // namespace
 

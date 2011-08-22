@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.7 2011/03/21 18:01:18 w6ws Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.8 2011/08/22 17:38:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,15 +82,21 @@ FIELD* insert_bucket(double lon, double lat) {
       curr=curr->next;
     }
     if (lon == curr->lon) {
-      while (curr->lon == lon && (curr->lat < lat)) {
+    // Advance to the item which is still has curr->lon==lon, but which is just >= lat if possible
+    //      while (curr->lon == lon && (curr->lat < lat)) {
+    while (true) {
 	if (!curr->next) break;
+        if (curr->next->lon != lon) break;      
+        if (curr->lat >= lat) break;
 	curr=curr->next;
       }
-      // duplicate
+      // At this point curr->lon still == lon
+
+      // Point is in list
       if (curr->lat == lat) {
 	curr->count++;
 	return curr;
-      } else if (lat < curr->lat) {
+      } else if (lat < curr->lat) {  // Put point just before this one
 	  me = (FIELD*)malloc(sizeof(FIELD));
 	  me->prev = curr->prev;
 	  if (me->prev) {
@@ -100,6 +106,19 @@ FIELD* insert_bucket(double lon, double lat) {
 	  }
 	  me->next = curr;
 	  curr->prev = me;
+	  me->lon = lon;
+	  me->lat = lat;
+	  me->rank=nextrank++;
+	  me->count = 1;
+	  return me;
+      }	else if (lat > curr->lat) { // Put point just after this one
+	  me = (FIELD*)malloc(sizeof(FIELD));
+	  me->prev = curr;
+	  me->next = curr->next;
+          if (me->next) {
+            me->next->prev=me;
+          }
+	  curr->next = me;
 	  me->lon = lon;
 	  me->lat = lat;
 	  me->rank=nextrank++;
@@ -444,12 +463,13 @@ void FTN(c_convertscrip)(
     i1=i*gcdim;
     temp[0]=cells[i1];
     count = 1;
+
     for (j=1; j<gcdim; j++) {
       for (k=0; k<j; k++) {
 	if (cells[i1+j]==cells[i1+k]) {
 	  // the two vertices belong to one cell, over-counted
 	  totalneighbors[cells[i1+j]-1]--;
-	  //printf("duplicate vertex at %d: vertex %d\n", i, cells[i1+j]);
+          //  printf("duplicate vertex at %d: vertex %d\n", i, cells[i1+j]);
 	  break;
 	}
       }

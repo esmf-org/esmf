@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.10 2011/06/30 14:49:51 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.11 2011/08/22 17:38:20 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -19,6 +19,7 @@
 #include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_Ftn.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <iostream>
 #include <iterator>
@@ -31,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10 2011/06/30 14:49:51 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.11 2011/08/22 17:38:20 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -584,6 +585,8 @@ void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
 
 
+
+
 void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
   // Define Cross product                                                                                                                   
@@ -633,6 +636,204 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
 #undef CROSS_PRODUCT3D
 
 }
+
+
+  // Detect if a point (pnt) is in a polygon (p)
+  // here the points are 2D and the polygon is counter-clockwise
+  // returns true if the point is in the polygon (including on the edge), and
+  // false otherwise
+template <class GEOM>
+  bool is_pnt_in_poly(int num_p, double *p, double *pnt) {
+  
+  // Loop through polygon                    
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=GEOM::getPntAt(p,i);
+    double *pntip1=GEOM::getPntAt(p,(i+1)%num_p);
+
+    // vector from pntip0 to pnti1              
+    double v01[GEOM::pnt_size];
+    GEOM::sub(v01,pntip1,pntip0);
+
+    // vector from pntip0 to pnt              
+    double v0p[GEOM::pnt_size];
+    GEOM::sub(v0p,pnt,pntip0);
+
+    // Calc cross product                                                             
+    double cross;
+    cross=GEOM::turn(v01,v0p,pntip0);
+
+    //    printf("%d pnt0=%f %f turn=%f\n",i,pntip0[0],pntip0[1],cross);
+
+    if (cross < 0.0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Create instances for supported geometries, otherwise would have to put template
+// in include file
+template bool is_pnt_in_poly<GEOM_CART2D>(int num_p, double *p, double *pnt);
+template bool is_pnt_in_poly<GEOM_SPH2D3D>(int num_p, double *p, double *pnt);
+
+// See if any other points in the polygon are in the triangle formed by ind[0], ind[1], ind[2]
+template<class GEOM>
+bool is_ear(int num_p, double *p, int *ind) {
+
+  // Form triangle
+  double tri[3*GEOM::pnt_size];
+
+  GEOM::copy(GEOM::getPntAt(tri,0),GEOM::getPntAt(p,ind[0]));
+  GEOM::copy(GEOM::getPntAt(tri,1),GEOM::getPntAt(p,ind[1]));
+  GEOM::copy(GEOM::getPntAt(tri,2),GEOM::getPntAt(p,ind[2]));
+
+  // Check other points in polygon
+  for (int i=0; i<num_p; i++) {
+    if (i==ind[0]) continue;
+    if (i==ind[1]) continue;
+    if (i==ind[2]) continue;
+    if (is_pnt_in_poly<GEOM>(3, tri, GEOM::getPntAt(p,i))) return false;
+  }
+
+  return true;
+}
+
+// Create instances for supported geometries, otherwise would have to put template
+// in include file
+template bool is_ear<GEOM_CART2D>(int num_p, double *p, int *ind);
+template bool is_ear<GEOM_SPH2D3D>(int num_p, double *p, int *ind);
+
+
+// Triangulate a 2D polygon using the ear clip method.
+// This method works on both concave and convex polygons.
+// As usual in ESMF Mesh this assumes the polygon is counter-clockwise.
+// Output is in tri_ind, which are the 0-based indices of the triangles 
+// making up the triangulization. tri_ind should be of size 3*(num_p-2)
+// td should be the same size as p, ti should be of size num_p.
+template <class GEOM>
+int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
+
+  // Error check
+  if (num_p < 3) {
+    return ESMCI_TP_DEGENERATE_POLY;
+  }
+
+  // Handle degenerate case
+  if (num_p == 3) {
+    tri_ind[0]=0;
+    tri_ind[1]=1;
+    tri_ind[2]=2;
+    return ESMCI_TP_SUCCESS;
+  }
+
+  // Copy polygon to temporary array
+  memcpy((double *)td, (double *)p, GEOM::pnt_size*num_p*sizeof(double));
+  int num_t=num_p;
+  
+  // Fill index array
+  for(int i=0; i<num_p; i++) {
+    ti[i]=i;
+  }
+
+
+  // Loop until we've broken everything up
+  int pos_tri_ind=0;
+  while (true) {
+
+    // Handle triangle case
+    if (num_t == 3) {
+      tri_ind[pos_tri_ind]=ti[0];
+      tri_ind[pos_tri_ind+1]=ti[1];
+      tri_ind[pos_tri_ind+2]=ti[2];
+      return ESMCI_TP_SUCCESS;
+    }
+
+    // Loop through polygon                    
+    int max_clip_ind[3];
+    double max_clip_dot=-std::numeric_limits<double>::max();
+    bool found_clip=false;
+    for (int i=0; i<num_t; i++) {
+      // indices which make up triangle to potentially clip
+      int clip_ind[3];
+      clip_ind[0]=i;
+      clip_ind[1]=(i+1)%num_t;
+      clip_ind[2]=(i+2)%num_t;
+
+      // Points which make up triangle
+      double *pntip0=GEOM::getPntAt(td,clip_ind[0]);
+      double *pntip1=GEOM::getPntAt(td,clip_ind[1]);
+      double *pntip2=GEOM::getPntAt(td,clip_ind[2]);
+
+      // vector from pntip1 to pnti0                 
+      double v10[GEOM::pnt_size];
+      GEOM::sub(v10,pntip0,pntip1);
+
+      // vector from pntip1 to pnti2
+      double v12[GEOM::pnt_size];
+      GEOM::sub(v12,pntip2,pntip1);
+
+      // Calc cross product                                                             
+      double cross;
+      cross=GEOM::turn(v12,v10,pntip1);
+
+      // Find the maximum left turn to clip
+      // to give good triangles
+      if (cross > 0.0) {
+        double dot;
+        dot=GEOM::dot(v12,v10);
+        //printf("%d dot=%f max=%f \n",i,dot,max_clip_dot);
+        if (dot > max_clip_dot) {
+          bool is_ear_b=is_ear<GEOM>(num_t, td, clip_ind);
+          //printf("%d  is_ear_b=%d \n",i,is_ear_b);
+          if (is_ear_b) {
+          //          if (is_ear<GEOM>(num_t, td, clip_ind)) {
+            max_clip_dot=dot;
+            max_clip_ind[0]=clip_ind[0];
+            max_clip_ind[1]=clip_ind[1];
+            max_clip_ind[2]=clip_ind[2];
+            found_clip=true;
+          }
+        }
+      }
+    }
+    
+    // Clip
+    if (found_clip) {
+      // Add clipped triangle to list
+      tri_ind[pos_tri_ind]=ti[max_clip_ind[0]];
+      tri_ind[pos_tri_ind+1]=ti[max_clip_ind[1]];
+      tri_ind[pos_tri_ind+2]=ti[max_clip_ind[2]];
+      pos_tri_ind +=3;
+      
+      // remove triangle from polygon and collapse arrays
+      for (int j=max_clip_ind[1]+1; j<num_t; j++) {
+        GEOM::copy(GEOM::getPntAt(td,j-1),GEOM::getPntAt(td,j));
+        ti[j-1]=ti[j];
+      }
+
+      // shrink size by 1
+      num_t--;
+
+      // Loop back to beginning
+      continue;
+    } else {
+      return ESMCI_TP_CLOCKWISE_POLY;
+    }        
+  } // Loop back to top before triangle detection
+
+}
+
+// Create instances for supported geometries, otherwise would have to put template
+// in include file
+template int triangulate_poly<GEOM_CART2D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
+template int triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
+
+
+
+
+  
+
 
 
 } // namespace

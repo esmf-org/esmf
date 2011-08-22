@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.45 2011/07/20 00:03:15 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.46 2011/08/22 17:38:21 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -544,6 +544,7 @@ program ESMF_RegridWeightGen
            srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
                        convertToDual=convertToDual, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+           ! call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
            srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
