@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.1 2011/08/22 16:35:48 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.2 2011/08/22 17:01:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.1 2011/08/22 16:35:48 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.2 2011/08/22 17:01:24 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -54,29 +54,11 @@ namespace ESMCI {
 
   void  calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, int *num_pnts, std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, Zoltan_Struct * zz);
 
-  void PointMerge(int sdim, double stol, int num_pnts, std::vector<double> pnts, std::vector<int> local_ids, int *num_pnts_mrgd, std::vector<double> *pnts_mrgd);
-
 void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & midmesh, Zoltan_Struct * zz){
 
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
   int pdim=srcmesh.parametric_dim();
-
-//  {
-//    Mesh & mesh = srcmesh;
-//    MEField<> &coord = *mesh.GetCoordField();
-//    Mesh::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
-//    for (UInt i = 0; ni != ne; ++ni) {
-//      const MeshObj &node = *ni;
-//      double *cd = coord.data(node);
-//      // Write coordinates
-//      out << cd[0] << " " << cd[1] << " " << (mesh.spatial_dim() == 3 ? cd[2] : 0.0) << std::endl;
-//  
-//      // Increment ordinal
-//      id2ord[node.get_id()] = i++;
-//    }
-//  }
-//
 
   int rc;
   int me = VM::getCurrent(&rc)->getLocalPet();
@@ -618,38 +600,4 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
 
 }
 
-
-  
-  void PointMerge(int sdim, double stol, int num_pnts, std::vector<double> pnts, std::vector<int> local_ids, int *num_pnts_mrgd, std::vector<double> *pnts_mrgd) {
-    
-#if 0
-    // Setup search tree 
-    OTree *tree=new OTree(num_pnts); 
-    
-    // Add points
-    for (int i=0; i<num_pnts; i++) {
-      int p=sdim*i;
-      
-      double pmin[3], pmax[3];
-      
-      pmin[0] = pnts[p]-stol;
-      pmin[1] = pnts[p+1] - stol;
-      pmin[2] = sdim == 3 ? pnts[p+2]-stol : -stol;
-      
-      pmax[0] = pnts[p] + stol;
-      pmax[1] = pnts[p+1] + stol;
-      pmax[2] = sdim == 3 ? pnts[p+2]+stol : +stol;
-      
-      // Add element to search tree
-      tree->add(pmin, pmax, (void*)NULL);
-      
-      
-    }
-#endif    
-
-
-  }
-
-  
-  
 } // namespace
