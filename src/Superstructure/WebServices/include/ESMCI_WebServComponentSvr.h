@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.h,v 1.7 2011/01/26 04:53:28 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.h,v 1.7.4.1 2011/08/23 21:31:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -76,9 +76,9 @@ namespace ESMCI
 
      // methods to execute component functions... these need to be public so 
      // that they can be called from a separate thread
-	  void*  runInit(void);
-	  void*  runRun(void);
-	  void*  runFinal(void);
+	  void  runInit(void);
+	  void  runRun(void);
+	  void  runFinal(void);
 
      // methods to access other data members
      void  addOutputFilename(string  filename);

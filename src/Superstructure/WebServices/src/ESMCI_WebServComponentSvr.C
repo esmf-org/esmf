@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.9 2011/05/24 23:55:46 ksaint Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.9.2.1 2011/08/23 21:31:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,20 +32,14 @@
 
 #include "ESMCI_WebServComponentSvr.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
+#if !defined (ESMF_OS_MinGW)
 #include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <iostream>
-#include <fstream>
+#else
+#include <Winsock.h>
+#endif
 
 #include "ESMCI_WebServSocketUtils.h"
+#include "ESMCI_WebServRegistrarClient.h"
 #include <ESMCI_IO_NetCDF.h>
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -87,7 +81,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.9 2011/05/24 23:55:46 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.9.2.1 2011/08/23 21:31:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -384,7 +378,8 @@ int  ESMCI_WebServComponentSvr::getNextRequest(
          "Unable to read request id from socket.",
          &localrc);
 
-		return localrc;
+		//return localrc;
+		return ESMF_FAILURE;
 	}
 
 	//printf("SERVER: request: %s\n", requestStr);
@@ -595,6 +590,20 @@ void  ESMCI_WebServComponentSvr::setStatus(
          &localrc);
 	}
 #endif
+
+   ESMCI::ESMCI_WebServRegistrarClient registrar("localhost", REGISTRAR_PORT);
+
+	char	idStr[64];
+	sprintf(idStr, "%d", theCurrentClientId);
+
+   if (registrar.setStatus(idStr, registrar.getStateStr(theCurrentStatus)) == 
+		ESMF_FAILURE)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_UNEXPECTED,
+         "Error setting status on Registrar.",
+         &localrc);
+   }
 }
 
 
@@ -629,7 +638,7 @@ int  ESMCI_WebServComponentSvr::processInit(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Init\n");
+	printf("\n\nSERVER: processing Init\n");
 	int	localrc = 0;
 
 	//***
@@ -649,67 +658,7 @@ int  ESMCI_WebServComponentSvr::processInit(
 	}
 
    theCurrentClientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", theCurrentClientId);
-
-	//***
-	// Get the number of files (should be either 0 or 1)... if there's 1, then
-	// get the filename
-	//***
-	if (theSocket.read(bytesRead, buf) <= 0)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_READ,
-         "Unable to read number of files from socket.",
-         &localrc);
-
-		return localrc;
-	}
-
-   int	numFiles = ntohl(*((unsigned int*)buf));
-	char	filename[1024];
-	// printf("Num Files: %d\n", numFiles);
-
-	if (numFiles > 0)
-	{
-		if (theSocket.read(bytesRead, buf) <= 0)
-		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
-         	ESMC_RC_FILE_READ,
-         	"Unable to read filename from socket.",
-         	&localrc);
-
-			return localrc;
-		}
-
-		strcpy(filename, (char*)buf);
-		// printf("Filename: %s\n", filename);
-
-		//***
-		// TODO: Add the filename to a list of filenames in the ComponentSvr class
-		//
-		// KDS: For CCSM/CAM, I didn't need to import any files, so I ignored
-		//      any incoming filenames (which there weren't any, since I wrote
-		//      the client as well).
-		//***
-	}
-
-	//***
-	// If a filename was specified, create the import state object
-	//***
-	if (numFiles > 0)
-	{
-		//***
-		//	Create state object from specified file
-		// TODO: Add a flag that the calling program can set to indicate whether
-		//       not there is a state to import
-		// TODO: Read from the file as part of the netCDF web service 
-		//       (instead of as a local file)
-		//
-		// KDS: I removed all of the code here because it was commented out.
-		//      This wasn't used for the CCSM/CAM project, so I didn't need it.
-		//      To add it back in, look at the ESMCI_WebServNetEsmfServer code.
-		//***
-	}
+	printf("SERVER: Client ID: %d\n", theCurrentClientId);
 
 	if (theCurrentStatus == NET_ESMF_STAT_READY)
 	{
@@ -746,6 +695,7 @@ int  ESMCI_WebServComponentSvr::processInit(
 	//***
 	// Send the current state back to the client 
 	//***
+printf("SERVER: Writing Status: %d\n", theCurrentStatus);
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
@@ -787,7 +737,7 @@ int  ESMCI_WebServComponentSvr::processRun(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Run\n");
+	printf("\n\nSERVER: processing Run\n");
 	int	localrc = 0;
 
 	//***
@@ -807,12 +757,14 @@ int  ESMCI_WebServComponentSvr::processRun(
 	}
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	if (clientId != theCurrentClientId)
 	{
 		int				status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
+
+		setStatus(NET_ESMF_STAT_ERROR);
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
@@ -832,7 +784,7 @@ int  ESMCI_WebServComponentSvr::processRun(
 		return localrc;
 	}
 
-	//printf("Current Status: %d\n", theCurrentStatus);
+	printf("Current Status: %d\n", theCurrentStatus);
 	if (theCurrentStatus == NET_ESMF_STAT_INIT_DONE)
 	{
 		//***
@@ -903,7 +855,7 @@ int  ESMCI_WebServComponentSvr::processFinal(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Final\n");
+	printf("\n\nSERVER: processing Final\n");
 	int	localrc = 0;
 
 	//***
@@ -923,12 +875,14 @@ int  ESMCI_WebServComponentSvr::processFinal(
 	}
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	if (clientId != theCurrentClientId)
 	{
 		int				status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
+
+		setStatus(NET_ESMF_STAT_ERROR);
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
@@ -1017,7 +971,7 @@ int  ESMCI_WebServComponentSvr::processState(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing State\n");
+	printf("\n\nSERVER: processing State\n");
 	int	localrc = 0;
 
 	//***
@@ -1037,13 +991,13 @@ int  ESMCI_WebServComponentSvr::processState(
 	}
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	//***
 	// Send the current state back to the client (use the return code from
 	// the component initialize call to determine the state)
 	//***
-	//printf("The Current Status: %d\n", theCurrentStatus);
+	printf("The Current Status: %d\n", theCurrentStatus);
 	unsigned int	netStatus = htonl(theCurrentStatus);
 
 	if (theSocket.write(4, &netStatus) != 4)
@@ -1086,7 +1040,7 @@ int  ESMCI_WebServComponentSvr::processFiles(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Files\n");
+	printf("\n\nSERVER: processing Files\n");
 
 	int	localrc = 0;
 	int	numFiles = 0;
@@ -1108,7 +1062,7 @@ int  ESMCI_WebServComponentSvr::processFiles(
 	}
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
@@ -1411,16 +1365,16 @@ int  ESMCI_WebServComponentSvr::processGetData(
 										theCAMDir + 
 										"/camrun.cam2.rh0.0000-01-02-00000.nc");
 
-		//***
+		// ***
 		// KDS: Make call to component server to get filenames... set status 
 		//      to whatever status gets returned
-		//***
+		// ***
 		status = clientInfo->status();
 	}
 
-	//***
+	// ***
 	// Read the data from the specified file
-	//***
+	// ***
 	double	dataValue = theOutputFile->getDataValue(varName, 
                                                     timeValue, 
                                                     latValue, 
@@ -1486,11 +1440,13 @@ int  ESMCI_WebServComponentSvr::processEnd(
 //    client id from the socket and uses it to validate the client.
 //    The component status is updated and written to the socket to complete 
 //    the transaction.
+//    KDS: I think this method is not necessary any more, since the process
+//         will kill the server when it's completed.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing End\n");
+	printf("\n\nSERVER: processing End\n");
 	int	localrc = 0;
 
 	//***
@@ -1510,7 +1466,7 @@ int  ESMCI_WebServComponentSvr::processEnd(
 	}
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
@@ -1568,7 +1524,7 @@ int  ESMCI_WebServComponentSvr::processEnd(
 // !ROUTINE:  ESMCI_WebServComponentSvr::runInit()
 //
 // !INTERFACE:
-void*  ESMCI_WebServComponentSvr::runInit(
+void  ESMCI_WebServComponentSvr::runInit(
 //
 // !RETURN VALUE:
 //
@@ -1585,6 +1541,7 @@ void*  ESMCI_WebServComponentSvr::runInit(
 	//printf("initializing a grid component\n");
 	int	localrc = 0;
 
+// Update status on registrar
 	//***
 	// Make the call to the initialization routine
 	//***
@@ -1612,6 +1569,7 @@ void*  ESMCI_WebServComponentSvr::runInit(
 	{
 		setStatus(NET_ESMF_STAT_INIT_DONE);
 	}
+// Update status on registrar
 }
 
 
@@ -1622,7 +1580,7 @@ void*  ESMCI_WebServComponentSvr::runInit(
 // !ROUTINE:  ESMCI_WebServComponentSvr::runRun()
 //
 // !INTERFACE:
-void*  ESMCI_WebServComponentSvr::runRun(
+void  ESMCI_WebServComponentSvr::runRun(
 //
 // !RETURN VALUE:
 //
@@ -1676,7 +1634,7 @@ void*  ESMCI_WebServComponentSvr::runRun(
 // !ROUTINE:  ESMCI_WebServComponentSvr::runFinal()
 //
 // !INTERFACE:
-void*  ESMCI_WebServComponentSvr::runFinal(
+void  ESMCI_WebServComponentSvr::runFinal(
 //
 // !RETURN VALUE:
 //
@@ -1760,6 +1718,8 @@ void*  initThreadStartup(
 	// Call the initialization method
 	//***
 	svrObject->runInit();
+
+        return NULL;
 }
 
 
@@ -1795,6 +1755,8 @@ void*  runThreadStartup(
 	// Call the run method
 	//***
 	svrObject->runRun();
+
+        return NULL;
 }
 
 
@@ -1830,4 +1792,6 @@ void*  finalThreadStartup(
 	// Call the finalization method
 	//***
 	svrObject->runFinal();
+
+        return NULL;
 }

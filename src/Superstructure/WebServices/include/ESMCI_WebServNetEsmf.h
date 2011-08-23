@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmf.h,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServNetEsmf.h,v 1.3.4.1 2011/08/23 21:31:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,12 @@ namespace ESMCI
 #define NET_ESMF_STAT_RUN_DONE		7
 #define NET_ESMF_STAT_FINAL_DONE		8
 #define NET_ESMF_STAT_DONE				9
+#define NET_ESMF_STAT_SUBMITTED		10
 #define NET_ESMF_STAT_ERROR			99
+
+
+#define COMP_SVR_STATE_PENDING			"PENDING"
+#define COMP_SVR_STATE_READY				"READY"
 
 
 } // end namespace

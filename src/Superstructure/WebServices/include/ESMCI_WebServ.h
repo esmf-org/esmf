@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ.h,v 1.4 2011/01/24 17:04:56 ksaint Exp $
+// $Id: ESMCI_WebServ.h,v 1.4.4.1 2011/08/23 21:31:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -53,37 +53,19 @@ extern "C"
                                      int*        		   portNum,
                                      int*        		   rc);
 
-	// service loops from ESMCI_WebServNetEsmfSvr class
-	void FTN(c_esmc_gridserviceloop)(ESMCI::GridComp*  comp,
-                                    ESMCI::State*     importState,
-                                    ESMCI::State*     exportState,
-                                    ESMCI::Clock*     clock,
-                                    int*        		portNum,
-                                    int*        		rc);
-
-	void FTN(c_esmc_couplerserviceloop)(ESMCI::CplComp*  comp,
-                                       ESMCI::State*    importState,
-                                       ESMCI::State*    exportState,
-                                       ESMCI::Clock*    clock,
-                                       int*        	  portNum,
-                                       int*        	  rc);
-
 	// registration methods from ESMCI_WebServRegistrarClient class
 	void  FTN(c_esmc_registercomponent)(char*                   compName,
                                        char*                   compDesc, 
-                                       char*                   hostName, 
+                                       char*                   clientId, 
                                        int*                    portNum,
                                        int*                    rc,
                                        ESMCI_FortranStrLenArg  compNameLen,
                                        ESMCI_FortranStrLenArg  compDescLen,
-                                       ESMCI_FortranStrLenArg  hostNameLen);
+                                       ESMCI_FortranStrLenArg  clientIdLen);
 
-	void  FTN(c_esmc_unregistercomponent)(char*                   compName,
-                                         char*                   hostName, 
-                                         int*                    portNum,
+	void  FTN(c_esmc_unregistercomponent)(char*                   clientId,
                                          int*                    rc,
-                                         ESMCI_FortranStrLenArg  compNameLen,
-                                         ESMCI_FortranStrLenArg  hostNameLen);
+                                         ESMCI_FortranStrLenArg  clientIdLen);
 
 	void  FTN(c_esmc_getportnum)(int*  portNum,
                                 int*  rc);

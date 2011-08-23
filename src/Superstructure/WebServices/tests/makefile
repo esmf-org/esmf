@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2011/07/08 19:24:56 theurich Exp $ 
+# $Id: makefile,v 1.7.2.1 2011/08/23 21:31:54 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,13 +7,21 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Superstructure/WebServices/tests
 
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_WebServUTest \
-                  $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest
+                  $(ESMF_TESTDIR)/ESMC_WebServCompSvrClientUTest \
+                  $(ESMF_TESTDIR)/ESMC_WebServProcCtrlUTest \
+                  $(ESMF_TESTDIR)/ESMC_WebServProcCtrlClientUTest \
+                  $(ESMF_TESTDIR)/ESMC_WebServRegistrarClientUTest \
+                  $(ESMF_TESTDIR)/ESMC_WebServServerSocketUTest \
+                  $(ESMF_TESTDIR)/ESMC_WebServClientSocketUTest \
+                  $(ESMF_TESTDIR)/ESMC_WebServForkClientUTest 
 
-TESTS_RUN     =	RUN_ESMF_WebServUTest \
-                  RUN_ESMC_WebServCompSvrClientUTest
+#                  $(ESMF_TESTDIR)/ESMC_WebServSecureServerSocketUTest 
+#                  $(ESMF_TESTDIR)/ESMC_WebServSecureClientSocketUTest 
+#                  $(ESMF_TESTDIR)/ESMC_WebServGRAMClientUTest 
 
-TESTS_RUN_UNI =	RUN_ESMF_WebServUTestUNI \
-		            RUN_ESMC_WebServCompSvrClientUTestUNI
+TESTS_RUN     =	
+
+TESTS_RUN_UNI =	
 
 
 include $(ESMF_DIR)/makefile
@@ -56,5 +64,34 @@ RUN_ESMC_WebServCompSvrClientUTest:
 
 RUN_ESMC_WebServCompSvrClientUTestUNI:
 	$(MAKE) TNAME=WebServCompSvrClient NP=1 ctest
+
+RUN_ESMC_WebServSecureUTest:
+	$(MAKE) TNAME=WebServSecure NP=1 ctest
+
+RUN_ESMC_WebServSecureUTestUNI:
+	$(MAKE) TNAME=WebServSecure NP=1 ctest
+
+
+RUN_ESMC_WebServGRAMClientUTest:
+	$(MAKE) TNAME=WebServGRAMClient NP=1 ctest
+
+RUN_ESMC_WebServGRAMClientUTestUNI:
+	$(MAKE) TNAME=WebServGRAMClient NP=1 ctest
+
+
+RUN_ESMC_WebServProcCtrlUTest:
+	$(MAKE) TNAME=WebServProcCtrl NP=1 ctest & \
+   sleep 3 
+
+RUN_ESMC_WebServProcCtrlUTestUNI:
+	$(MAKE) TNAME=WebServProcCtrl NP=1 ctest & \
+   sleep 3 
+
+
+RUN_ESMC_WebServProcCtrlClientUTest:
+	$(MAKE) TNAME=WebServProcCtrlClient NP=1 ctest
+
+RUN_ESMC_WebServProcCtrlClientUTestUNI:
+	$(MAKE) TNAME=WebServProcCtrlClient NP=1 ctest
 
 endif

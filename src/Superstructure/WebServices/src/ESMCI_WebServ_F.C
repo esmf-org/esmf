@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $
+// $Id: ESMCI_WebServ_F.C,v 1.6.4.1 2011/08/23 21:31:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,6 +29,13 @@
 
 #include <stdio.h>
 #include <string.h>
+
+#if !defined (ESMF_OS_MinGW)
+#include <unistd.h>
+#else
+#include <Winsock.h>
+#endif
+
 #include "ESMCI_WebServComponentSvr.h"
 #include "ESMCI_WebServNetEsmfServer.h"
 #include "ESMCI_WebServNetEsmfClient.h"
@@ -39,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.6 2011/01/24 17:04:56 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.6.4.1 2011/08/23 21:31:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -47,6 +54,7 @@ static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.6 2011/01/24 17:0
 //-----------------------------------------------------------------------------
 
 ESMCI::ESMCI_WebServComponentSvr*	theComponentServer = NULL;
+string		theClientId = "";
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -78,7 +86,7 @@ void FTN(c_esmc_componentsvcloop)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("Port Number: %d\n", *portNum);
+	printf("Port Number: %d\n", *portNum);
 	int	localrc = 0;
 
    //***
@@ -89,118 +97,13 @@ void FTN(c_esmc_componentsvcloop)(
 	theComponentServer = new ESMCI::ESMCI_WebServComponentSvr(*portNum);
 
 //	if (server.requestLoop(comp, 
+printf("Component Server Request Loop\n");
 	if (theComponentServer->requestLoop(comp, 
                                        importState, 
                                        exportState, 
                                        clock, 
                                        *phase, 
                                        *blockingFlag) != ESMF_SUCCESS)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Error during request loop setup.",
-         &localrc);
-
-		*rc = localrc;
-		return;
-	}
-
-   *rc = ESMF_SUCCESS;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridserviceloop()"
-//BOPI
-// !ROUTINE:  c_esmc_gridserviceloop()
-//
-// !INTERFACE:
-void FTN(c_esmc_gridserviceloop)(
-//
-// !RETURN VALUE:
-//
-// !ARGUMENTS:
-//
-  ESMCI::GridComp*   comp,				// (in) the grid component
-  ESMCI::State*      importState,	// (in) the component import state
-  ESMCI::State*      exportState,	// (in) the component export state
-  ESMCI::Clock*      clock,			// (in) the component clock
-  int*               portNum,			// (in) the service port number
-  int*               rc			      // (in) the return code
-  )
-//
-// !DESCRIPTION:
-//    Creates a grid component service on the specified port and calls the
-//    loop method to listen for client requests.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	//printf("Port Number: %d\n", *portNum);
-	int	localrc = 0;
-
-	ESMCI::ESMCI_WebServNetEsmfServer	server(*portNum);
-
-	if (server.requestLoop(comp, 
-                          importState, 
-                          exportState, 
-                          clock, 
-                          0, 
-                          ESMF_BLOCKING) != ESMF_SUCCESS)
-	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Error during request loop setup.",
-         &localrc);
-
-		*rc = localrc;
-		return;
-	}
-
-   *rc = ESMF_SUCCESS;
-}
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_couplerserviceloop()"
-//BOPI
-// !ROUTINE:  c_esmc_couplerserviceloop()
-//
-// !INTERFACE:
-void FTN(c_esmc_couplerserviceloop)(
-//
-// !RETURN VALUE:
-//
-// !ARGUMENTS:
-//
-  ESMCI::CplComp*    comp,				// (in) the coupler component
-  ESMCI::State*      importState,	// (in) the component import state
-  ESMCI::State*      exportState,	// (in) the component export state
-  ESMCI::Clock*      clock,			// (in) the component clock
-  int*               portNum,			// (in) the service port number
-  int*               rc			      // (in) the return code
-  )
-//
-// !DESCRIPTION:
-//    Creates a coupler component service on the specified port and calls the
-//    loop method to listen for client requests.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-{
-	//printf("Port Number: %d\n", *portNum);
-	int	localrc = 0;
-
-	ESMCI::ESMCI_WebServNetEsmfServer	server(*portNum);
-
-	if (server.requestLoop(comp, 
-                          importState, 
-                          exportState, 
-                          clock, 
-                          0, 
-                          ESMF_BLOCKING) != ESMF_SUCCESS)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
@@ -230,12 +133,12 @@ void FTN(c_esmc_registercomponent)(
 //
   char*                   compName,		// (in) the grid component name
   char*                   compDesc,		// (in) the grid component description
-  char*                   hostName, 	// (in) the service host name
+  char*                   clientId, 	// (in) the client identifier
   int*                    portNum,     // (in) the service port number
   int*                    rc,          // (in) the return code
   ESMCI_FortranStrLenArg  compNameLen,	// (in) the length of the component name
   ESMCI_FortranStrLenArg  compDescLen,	// (in) the length of the comp desc
-  ESMCI_FortranStrLenArg  hostNameLen	// (in) the length of the host name
+  ESMCI_FortranStrLenArg  clientIdLen	// (in) the length of the client id
   )
 //
 // !DESCRIPTION:
@@ -249,38 +152,54 @@ void FTN(c_esmc_registercomponent)(
 
 	char	nameStr[ESMF_MAXSTR];
 	char	descStr[ESMF_MAXSTR];
-	char	hostStr[ESMF_MAXSTR];
+	char	clientIdStr[ESMF_MAXSTR];
 	char	portStr[ESMF_MAXSTR];
+	char	hostStr[ESMF_MAXSTR];
+
+	strncpy(descStr, compDesc, compDescLen);
+	descStr[compDescLen] = '\0';
+	string	descString(descStr);
+	size_t	found = descString.find_last_not_of(' ');
+	if (found != string::npos)
+		descString.erase(found + 1);
+	else
+		descString.clear();
 
 	strncpy(nameStr, compName, compNameLen);
-	strncpy(descStr, compDesc, compDescLen);
-	strncpy(hostStr, hostName, hostNameLen);
-	sprintf(portStr, "%d", portNum);
+	nameStr[compNameLen] = '\0';
+	string	nameString(nameStr);
+	found = nameString.find_last_not_of(' ');
+	if (found != string::npos)
+		nameString.erase(found + 1);
+	else
+		nameString.clear();
 
-	//printf("Name: %s\n", nameStr);
-	//printf("Desc: %s\n", descStr);
-	//printf("Host: %s\n", hostStr);
-	//printf("Port: %s\n", portStr);
+	strncpy(clientIdStr, clientId, clientIdLen);
+	clientIdStr[clientIdLen] = '\0';
+	string	clientIdString(clientIdStr);
+	found = clientIdString.find_last_not_of(' ');
+	if (found != string::npos)
+		clientIdString.erase(found + 1);
+	else
+		clientIdString.clear();
+
+	theClientId = clientIdString;
+
+	sprintf(portStr, "%d", *portNum);
+	gethostname(hostStr, ESMF_MAXSTR);
+
+	printf("Name: %s\n", nameString.c_str());
+	printf("Desc: %s\n", descString.c_str());
+	printf("Port: %s\n", portStr);
+	printf("Client ID: %s\n", clientIdString.c_str());
+	printf("Host: %s\n", hostStr);
 
 	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
 
-	if (client.connect() < 0)
-   {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		*rc = localrc;
-		return;
-   }
-
-	char	response[1024];
-	if (client.registerComp(nameStr, 
-                           descStr, 
-                           hostStr, 
-                           portStr, 
-                           response) == ESMF_FAILURE)
+	if (client.compStarted(clientIdString.c_str(), 
+                          nameString.c_str(), 
+                          descString.c_str(), 
+                          hostStr) == ESMF_FAILURE)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
@@ -289,11 +208,11 @@ void FTN(c_esmc_registercomponent)(
 
 		*rc = localrc;
 	}
-
-	printf("Response: %s\n", response);
-	client.disconnect();
+printf("Successfully notified Registrar of component ready.\n");
 
    *rc = ESMF_SUCCESS;
+
+	return;
 }
 
 
@@ -310,12 +229,9 @@ void FTN(c_esmc_unregistercomponent)(
 //
 // !ARGUMENTS:
 //
-  char*                   compName,		// (in) the grid component name
-  char*                   hostName, 	// (in) the service host name
-  int*                    portNum,     // (in) the service port number
+  char*                   clientId,		// (in) the client identifier
   int*                    rc,          // (in) the return code
-  ESMCI_FortranStrLenArg  compNameLen,	// (in) the length of the component name
-  ESMCI_FortranStrLenArg  hostNameLen	// (in) the length of the host name
+  ESMCI_FortranStrLenArg  clientIdLen	// (in) the length of the clientId
   )
 //
 // !DESCRIPTION:
@@ -328,36 +244,24 @@ void FTN(c_esmc_unregistercomponent)(
 	//printf("unregisterComponent()\n");
 
 	int	localrc = 0;
-	char	nameStr[ESMF_MAXSTR];
-	char	hostStr[ESMF_MAXSTR];
-	char	portStr[ESMF_MAXSTR];
+	char	clientIdStr[ESMF_MAXSTR];
 
-	strncpy(nameStr, compName, compNameLen);
-	strncpy(hostStr, hostName, hostNameLen);
-	sprintf(portStr, "%d", portNum);
+	strncpy(clientIdStr, clientId, clientIdLen);
+	clientIdStr[clientIdLen] = '\0';
+	string	clientIdString(clientIdStr);
+	size_t	found = clientIdString.find_last_not_of(' ');
+	if (found != string::npos)
+		clientIdString.erase(found + 1);
+	else
+		clientIdString.clear();
 
-	//printf("Name: %s\n", nameStr);
-	//printf("Host: %s\n", hostStr);
-	//printf("Port: %s\n", portStr);
+	printf("Client ID: %s\n", clientIdStr);
 
 	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
 
-	if (client.connect() < 0)
-   {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_OPEN,
-         "Unable to connect to server socket.",
-         &localrc);
-
-		*rc = localrc;
-		return;
-   }
-
 	char	response[1024];
-	if (client.unregisterComp(nameStr, 
-                             hostStr, 
-                             portStr, 
-                             response) == ESMF_FAILURE)
+	if (client.setStatus(clientIdString.c_str(), 
+                        client.getStateStr(NET_ESMF_STAT_DONE)) == ESMF_FAILURE)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
@@ -366,10 +270,6 @@ void FTN(c_esmc_unregistercomponent)(
 
 		*rc = localrc;
 	}
-
-
-	printf("Response: %s\n", response);
-	client.disconnect();
 
    *rc = ESMF_SUCCESS;
 }

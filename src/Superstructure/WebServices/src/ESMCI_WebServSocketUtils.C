@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServSocketUtils.C,v 1.4.4.1 2011/08/23 21:31:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,16 +32,23 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#if !defined (ESMF_OS_MinGW)
 #include <unistd.h>
+#else
+#include <Windows.h>
+#endif
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
+#include "ESMCI_WebServNetEsmf.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.4.4.1 2011/08/23 21:31:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -51,6 +58,89 @@ static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.4 2011/0
 
 namespace ESMCI
 {
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServGetRequestFromId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServGetRequestFromId()
+//
+// !INTERFACE:
+char*  ESMCI_WebServGetRequestFromId(
+//
+// !RETURN VALUE:
+//    char*  string value for the specified request id
+//
+// !ARGUMENTS:
+//
+  int  id      // request id for which the string value is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request string value based on a specified request id.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+   //printf("ESMCI_WebServProcCtrlClient::getRequestFromId()\n");
+
+   switch (id)
+   {
+   case NET_ESMF_EXIT:  return (char*)"EXIT";
+   case NET_ESMF_NEW:   return (char*)"NEW";
+   case NET_ESMF_INIT:  return (char*)"INIT";
+   case NET_ESMF_RUN:   return (char*)"RUN";
+   case NET_ESMF_FINAL: return (char*)"FINAL";
+   case NET_ESMF_STATE: return (char*)"STATE";
+   case NET_ESMF_FILES: return (char*)"FILES";
+   case NET_ESMF_END:   return (char*)"END";
+   case NET_ESMF_PING:  return (char*)"PING";
+   default:             return (char*)"UNKN";
+   }
+
+   return (char*)"UNKN";
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServGetRequestId()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServGetRequestId()
+//
+// !INTERFACE:
+int  ESMCI_WebServGetRequestId(
+//
+// !RETURN VALUE:
+//    int  id of the request based on the specified string; ESMF_FAILURE
+//         if the id cannot be found
+//
+// !ARGUMENTS:
+//
+  const char  request[] // request string for which the id is to be returned
+  )
+//
+// !DESCRIPTION:
+//    Looks up a request id based on a specified string value.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+   //printf("ESMCI_WebServGetRequestId()\n");
+
+   if (strcmp(request, "EXIT")  == 0)  return NET_ESMF_EXIT;
+   if (strcmp(request, "NEW")   == 0)  return NET_ESMF_NEW;
+   if (strcmp(request, "INIT")  == 0)  return NET_ESMF_INIT;
+   if (strcmp(request, "RUN")   == 0)  return NET_ESMF_RUN;
+   if (strcmp(request, "FINAL") == 0)  return NET_ESMF_FINAL;
+   if (strcmp(request, "STATE") == 0)  return NET_ESMF_STATE;
+   if (strcmp(request, "FILES") == 0)  return NET_ESMF_FILES;
+   if (strcmp(request, "END")   == 0)  return NET_ESMF_END;
+   if (strcmp(request, "PING")  == 0)  return NET_ESMF_PING;
+
+   return ESMF_FAILURE;
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -66,7 +156,7 @@ void  ESMCI_WebServNotify(
 // !ARGUMENTS:
 //
   const char  msg[],					// message to print to stderr
-  Severity    severity = PRINT,	// level of severity
+  WebServSeverity    severity = WebServPRINT,	// level of severity
   const char  proc[] = NULL		// method/function/procedure name
   )
 //
@@ -82,19 +172,19 @@ void  ESMCI_WebServNotify(
 	//***
 	switch (severity)
 	{
-	case PRINT:
+	case WebServPRINT:
 		fprintf(stderr, "MSG");
 		break;
 
-	case WARN:
+	case WebServWARN:
 		fprintf(stderr, "WARNING");
 		break;
 
-	case ERROR:
+	case WebServERROR:
 		fprintf(stderr, "ERROR");
 		break;
 
-	case FATAL:
+	case WebServFATAL:
 		fprintf(stderr, "FATAL");
 		break;
 
@@ -119,7 +209,7 @@ void  ESMCI_WebServNotify(
 	// Exit the application if this is a fatal message
 	// (KDS: This should probably go away.)
 	//***
-	if (severity == FATAL)
+	if (severity == WebServFATAL)
 	{
 		exit(0);
 	}
@@ -157,7 +247,7 @@ int  ESMCI_WebServSend(
 		return 0;
 	}
 
-	unsigned char*		ptr = (unsigned char*)data;
+	char*		ptr = (char*)data;
 	//printf("Sending: %s\n", ptr);
 
 	int	totalBytesWritten = 0;
@@ -171,9 +261,16 @@ int  ESMCI_WebServSend(
 	//***
 	while ((totalBytesWritten < size)  &&  (t < TWAIT))
 	{
+#if !defined (ESMF_OS_MinGW)
 		int	bytesWritten = write(fd, 
                                  ptr + totalBytesWritten, 
                                  size - totalBytesWritten);
+#else
+                int     bytesWritten = send(fd,
+                                 ptr + totalBytesWritten,
+                                 size - totalBytesWritten,
+                                 0);
+#endif
 		//printf("::send - Bytes Written: %d\n", bytesWritten);
 
 		if (bytesWritten > 0)
@@ -228,7 +325,7 @@ int  ESMCI_WebServRecv(
 	}
 
 	//printf("recv Size: %d\n", size);
-	unsigned char*	ptr = (unsigned char*)data;
+	char*	ptr = (char*)data;
 
 	int	totalBytesRead = 0;
 	int	t = 0;
@@ -240,7 +337,11 @@ int  ESMCI_WebServRecv(
 	//***
 	while ((totalBytesRead < size)  &&  (t < TWAIT))
 	{
+#if !defined (ESMF_OS_MinGW)
 		int	bytesRead = read(fd, ptr + totalBytesRead, size - totalBytesRead);
+#else
+                int     bytesRead = recv(fd, ptr + totalBytesRead, size - totalBytesRead, 0);
+#endif
 
 		if (bytesRead > 0)
 		{
@@ -296,7 +397,11 @@ int  ESMCI_WebServRecv(
 	//***
 	do
 	{
+#if !defined (ESMF_OS_MinGW)
 		bytesRead = read(fd, cp, 1);
+#else
+                bytesRead = recv(fd, cp, 1, 0);
+#endif
 		//printf("Bytes Read: %d\n", bytesRead);
 
 		if (bytesRead > 0)

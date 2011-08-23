@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmfServer.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WebServNetEsmfServer.C,v 1.4.4.1 2011/08/23 21:31:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -27,17 +27,11 @@
 
 #include "ESMCI_WebServNetEsmfServer.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
+#if !defined(ESMF_OS_MinGW)
 #include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <iostream>
+#else
+#include <Winsock.h>
+#endif
 #include <fstream>
 
 #include "ESMCI_WebServSocketUtils.h"
@@ -79,7 +73,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServNetEsmfServer.C,v 1.4 2011/01/05 20:05:48 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServNetEsmfServer.C,v 1.4.4.1 2011/08/23 21:31:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

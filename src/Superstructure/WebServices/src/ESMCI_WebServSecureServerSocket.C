@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServClientSocket.C,v 1.4.4.1 2011/08/23 21:31:53 theurich Exp $
+// $Id: ESMCI_WebServSecureServerSocket.C,v 1.1.2.2 2011/08/23 21:31:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -9,23 +9,24 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#define ESMC_FILENAME "ESMCI_WebServClientSocket.C"
+#define ESMC_FILENAME "ESMCI_WebServSecureServerSocket.C"
 //==============================================================================
 //
-// ESMC WebServClientSocket method implementation (body) file
+// ESMC WebServSecureServerSocket method implementation (body) file
 //
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ ClientSocket methods declared
-// in the companion file ESMCI_WebServClientSocket.h.  This code
-// provides provides a higher-level interface for creating a socket
-// client to send requests to and receive responses from socket services.
+// The code in this file implements the C++ SecureServerSocket methods declared
+// in the companion file ESMCI_WebServSecureServerSocket.h.  This code
+// provides provides a higher-level interface for creating a socket 
+// services to listen for, and respond to, client requests.
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMCI_WebServClientSocket.h"
+
+#include "ESMCI_WebServSecureServerSocket.h"
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
@@ -36,7 +37,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServClientSocket.C,v 1.4.4.1 2011/08/23 21:31:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_WebServSecureServerSocket.C,v 1.1.2.2 2011/08/23 21:31:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -55,12 +56,12 @@ namespace ESMCI
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServClientSocket::ESMCI_WebServClientSocket()"
+#define ESMC_METHOD "ESMCI_WebServSecureServerSocket::ESMCI_WebServSecureServerSocket()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServClientSocket::ESMCI_WebServClientSocket()
+// !ROUTINE:  ESMCI_WebServSecureServerSocket::ESMCI_WebServSecureServerSocket()
 //
 // !INTERFACE:
-ESMCI_WebServClientSocket::ESMCI_WebServClientSocket(
+ESMCI_WebServSecureServerSocket::ESMCI_WebServSecureServerSocket(
 //
 //
 // !ARGUMENTS:
@@ -68,7 +69,7 @@ ESMCI_WebServClientSocket::ESMCI_WebServClientSocket(
   )
 //
 // !DESCRIPTION:
-//    Setup the initial default values for the client socket interface.
+//    Setup the initial default values for the server socket interface.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -78,12 +79,12 @@ ESMCI_WebServClientSocket::ESMCI_WebServClientSocket(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServClientSocket::~ESMCI_WebServClientSocket()"
+#define ESMC_METHOD "ESMCI_WebServSecureServerSocket::~ESMCI_WebServSecureServerSocket()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServClientSocket::~ESMCI_WebServClientSocket()
+// !ROUTINE:  ESMCI_WebServSecureServerSocket::~ESMCI_WebServSecureServerSocket()
 //
 // !INTERFACE:
-ESMCI_WebServClientSocket::~ESMCI_WebServClientSocket(
+ESMCI_WebServSecureServerSocket::~ESMCI_WebServSecureServerSocket(
 //
 //
 // !ARGUMENTS:
@@ -91,7 +92,7 @@ ESMCI_WebServClientSocket::~ESMCI_WebServClientSocket(
   )
 //
 // !DESCRIPTION:
-//    Cleanup the socket client by making sure the socket is closed.
+//    Cleanup the socket service by making sure the socket is closed.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -102,33 +103,30 @@ ESMCI_WebServClientSocket::~ESMCI_WebServClientSocket(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServClientSocket::connect()"
+#define ESMC_METHOD "ESMCI_WebServSecureServerSocket::connect()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServClientSocket::connect()
+// !ROUTINE:  ESMCI_WebServSecureServerSocket::connect()
 //
 // !INTERFACE:
-int  ESMCI_WebServClientSocket::connect(
+int  ESMCI_WebServSecureServerSocket::connect(
 //
 // !RETURN VALUE:
 //   int  socket file descriptor if successful, ESMF_FAILURE otherwise.
 //
 // !ARGUMENTS:
 //
-  const char*  host, // (in) name of the machine which hosts the socket
-                     // service and to which we're connecting.
-  int  port          // (in) port number of the socket service to which
-                     // we're connecting.
+  int  port          // (in) port number on which socket service is setup
   )
 //
 // !DESCRIPTION:
-//    Creates a client socket and connects to a socket service on the 
-//    specified host listening on the specified port.
+//    Sets up a socket service on which we listen for requests from clients.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ClientSocket::connect()\n");
-	return clientConnect(host, port);
+	//printf("ESMCI_WebServSecureServerSocket::connect()\n");
+
+	return serverConnect(port);
 }
 
 
