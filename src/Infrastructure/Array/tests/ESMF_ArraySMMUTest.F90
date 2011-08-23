@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.2 2011/08/23 23:33:53 theurich Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.3 2011/08/23 23:50:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.2 2011/08/23 23:33:53 theurich Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.3 2011/08/23 23:50:09 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -191,7 +191,8 @@ contains
     !---------------------------------------------------------------------------
     ! set up dstArray
 
-    dstDistGrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/4/), rc=rc)
+    dstDistGrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/4/), &
+      regDecomp=(/4/), rc=rc) ! fix this DistGrid to have 4 DEs
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
