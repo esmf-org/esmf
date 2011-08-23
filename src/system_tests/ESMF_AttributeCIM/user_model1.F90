@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.27 2011/08/06 00:53:33 eschwab Exp $
+! $Id: user_model1.F90,v 1.28 2011/08/23 05:26:57 eschwab Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,7 +113,7 @@ module user_model1
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpComp = 'Model Component Simulation Description'
     ! Specify the Gridded Components to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
@@ -185,7 +185,7 @@ module user_model1
     !
     !  CIM child component scientific property attributes
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpSci = 'Scientific Properties Description'
     sciPropAtt(1) = 'AtmosphereAtmosConvectTurbulCloudMicrophysicsProcesses'
     sciPropAtt(2) = 'AtmosphereAtmosConvectTurbulCloudAtmosCloudSchemeCloudSchemeAttributesSeparatedCloudTreatment'
@@ -212,7 +212,7 @@ module user_model1
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpField = 'Inputs Description'
 
     ! OH Field
@@ -326,7 +326,7 @@ module user_model1
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpComp = 'Model Component Simulation Description'
 
     ! Initialize return code

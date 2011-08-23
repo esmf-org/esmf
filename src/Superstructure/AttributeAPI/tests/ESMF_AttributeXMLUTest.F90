@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.29 2011/07/01 19:21:08 eschwab Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.30 2011/08/23 05:25:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.29 2011/07/01 19:21:08 eschwab Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.30 2011/08/23 05:25:50 eschwab Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -526,7 +526,7 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Creating a gridded component to decorate with Attributes test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    ! call ESMF_AttributeWrite(gridcomp2, 'CIM 1.5', &
+    ! call ESMF_AttributeWrite(gridcomp2, 'CIM', &
     !                          'Model Component Simulation Description', &
     !                          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 
@@ -546,14 +546,14 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create standard CIM attribute package on the gridded component
     call ESMF_AttributeAdd(gridcomp2, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating std CIM responsibleParty attribute package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    ! call ESMF_AttributeWrite(gridcomp2, 'CIM 1.5', &
+    ! call ESMF_AttributeWrite(gridcomp2, 'CIM', &
     !                          'Model Component Simulation Description', &
     !                          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 
@@ -561,7 +561,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create duplicate standard CIM attribute package on the gridded component
     call ESMF_AttributeAdd(gridcomp2, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -569,9 +569,9 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! call ESMF_AttributeRemove(gridcomp2, &
-    !                 convention='CIM 1.5', &
+    !                 convention='CIM', &
     !                 purpose='Model Component Simulation Description', rc=rc)
-    ! call ESMF_AttributeWrite(gridcomp2, 'CIM 1.5', &
+    ! call ESMF_AttributeWrite(gridcomp2, 'CIM', &
     !                          'Model Component Simulation Description', &
     !                          attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 
@@ -582,7 +582,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st attribute value within the 1st CIM RP package
     ordinal = 1
     call ESMF_AttributeSet(gridcomp2, 'Name', 'Jane Doe', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            ordinal=ordinal, &
@@ -596,7 +596,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st attribute value within the 2nd CIM RP package
     ordinal = 2
     call ESMF_AttributeSet(gridcomp2, 'Name', 'Sally Doe', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            ordinal=ordinal, &
@@ -610,7 +610,7 @@ program ESMF_AttributeXMLUTest
     ! Get the 1st attribute value within the 2nd CIM RP package
     ordinal = 2
     call ESMF_AttributeGet(gridcomp2, 'Name', value=attrValue, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            ordinal=ordinal, &
@@ -625,7 +625,7 @@ program ESMF_AttributeXMLUTest
     ! Get the 1st attribute value within the 1st CIM RP package
     ordinal = 1
     call ESMF_AttributeGet(gridcomp2, 'Name', value=attrValue, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            ordinal=ordinal, &
@@ -640,7 +640,7 @@ program ESMF_AttributeXMLUTest
     ! Get the 1st attribute value within the 2nd CIM RP package
     !  default ordinal=2 (last one)
     call ESMF_AttributeGet(gridcomp2, 'Name', value=attrValue, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            rc=rc)
@@ -654,7 +654,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create triplicate standard CIM attribute package on the gridded component
     call ESMF_AttributeAdd(gridcomp2, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -665,7 +665,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Set the 1st attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'Name', 'John Doe', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
     !       convention='ISO 19115', purpose='Responsible Party Description', &
                            rc=rc)
@@ -714,13 +714,13 @@ program ESMF_AttributeXMLUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! call ESMF_AttributeRemove(gridcomp2, &
-    !                 convention='CIM 1.5', &
+    !                 convention='CIM', &
     !                 purpose='Model Component Simulation Description', rc=rc)
 
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write out the attribute tree as a CIM-formatted XML file
-    call ESMF_AttributeWrite(gridcomp2, 'CIM 1.5', &
+    call ESMF_AttributeWrite(gridcomp2, 'CIM', &
                                  'Model Component Simulation Description', &
     !call ESMF_AttributeWrite(gridcomp2, 'ISO 19115', &
     !                            'Responsible Party Description', &
@@ -750,7 +750,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create standard CIM attribute package on the gridded component
     call ESMF_AttributeAdd(gridcomp3, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -764,7 +764,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st <modelComponent> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ShortName', 'EarthSys_Atmos', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -776,7 +776,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd <modelComponent> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'LongName', 'Earth System High Resolution Global Model', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -794,7 +794,7 @@ program ESMF_AttributeXMLUTest
       'Increasing the horizontal resolution of coupled climate ' // &
       'models will allow us to capture climate processes and ' // &
       'weather systems in much greater detail.', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -806,7 +806,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 4th <modelComponent> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ReleaseDate', '2009-02-15T01:02:03Z', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -818,7 +818,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 5th <modelComponent> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ModelType', 'aerosol', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -832,7 +832,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st <simulationRun> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationShortName', '1.1_EarthSys_Sim', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -844,7 +844,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd <simulationRun> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationLongName', 'EarthSys Simulation for Experiment 1.1', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -857,7 +857,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationRationale', &
      'EarthSys simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -870,7 +870,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationStartDate', &
      '1960-01-01T00:00:00Z', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -882,7 +882,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 5th <simulationRun> attribute value within the CIM component
     !   package
     call ESMF_AttributeSet(gridcomp3, 'SimulationDuration', 'P10Y', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -897,7 +897,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'PreviousVersion', &
       'EarthSys1 Atmosphere', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -911,7 +911,7 @@ program ESMF_AttributeXMLUTest
     call ESMF_AttributeSet(gridcomp3, 'PreviousVersionDescription', &
      'Horizontal resolution increased to 1.20 x 0.80 degrees; ' // &
      'Timestep reduced from 30 minutes to 15 minutes.', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Model Component Simulation Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -928,7 +928,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyShortName', &
       'TimeStep', &
-                      convention='CIM 1.5', &
+                      convention='CIM', &
                       purpose='Scientific Property Description', &
                       rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -941,7 +941,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyLongName', &
       'Clock time step', &
-                      convention='CIM 1.5', &
+                      convention='CIM', &
                       purpose='Scientific Property Description', &
                       rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -954,7 +954,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyValue', &
       '20 mins', &
-                      convention='CIM 1.5', &
+                      convention='CIM', &
                       purpose='Scientific Property Description', &
                       rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -972,7 +972,7 @@ program ESMF_AttributeXMLUTest
       'HECToR (Phase 2a) is currently an integrated system known ' // &
       'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
       'system known as BlackWidow, and storage systems.', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -985,7 +985,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineName', &
       'HECToR', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -998,7 +998,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineOperatingSystem', &
       'Unicos', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1011,7 +1011,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineMaximumProcessors', &
       '22656', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1024,7 +1024,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineProcessorType', &
       'AMD X86_64', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1037,7 +1037,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineCoresPerProcessor', &
       '4', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1050,7 +1050,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineVendor', &
       'Cray Inc', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1063,7 +1063,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'CompilerName', &
       'Pathscale', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1076,7 +1076,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'CompilerVersion', &
       '3.0', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1089,7 +1089,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineInterconnectType', &
       'Cray Interconnect', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1102,7 +1102,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(gridcomp3, 'MachineSystem', &
       'Parallel', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Platform Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1237,7 +1237,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create standard CIM attribute package on the field
     call ESMF_AttributeAdd(field1, &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1249,7 +1249,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 1st <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'ShortName', 'DMS_emi', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1261,7 +1261,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 2nd <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'CouplingPurpose', 'Boundary', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1273,7 +1273,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 3rd <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'CouplingSource', 'EarthSys_Atmos', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1285,7 +1285,7 @@ program ESMF_AttributeXMLUTest
     ! Set the 4th <input> attribute value within the CIM field
     !   package
     call ESMF_AttributeSet(field1, 'CouplingTarget', 'EarthSys_AtmosDynCore', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1298,7 +1298,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(field1, 'SpatialRegriddingMethod', &
      'Conservative-First-Order', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1311,7 +1311,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(field1, 'SpatialRegriddingDimension', &
      '2D', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1324,7 +1324,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(field1, 'Frequency', &
      '15 Minutes', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1337,7 +1337,7 @@ program ESMF_AttributeXMLUTest
     !   package
     call ESMF_AttributeSet(field1, 'TimeTransformationType', &
      'TimeAverage', &
-                           convention='CIM 1.5', &
+                           convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -1388,7 +1388,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write out the attribute tree as a CIM-formatted XML file
-    call ESMF_AttributeWrite(gridcomp3, 'CIM 1.5', &
+    call ESMF_AttributeWrite(gridcomp3, 'CIM', &
                                  'Model Component Simulation Description', &
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
