@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.76 2011/07/07 19:55:55 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.76.2.1 2011/08/23 20:52:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.76 2011/07/07 19:55:55 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.76.2.1 2011/08/23 20:52:26 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.76 2011/07/07 19:55:55 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.76.2.1 2011/08/23 20:52:26 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1332,7 +1332,6 @@ end function ESMF_MeshCreateFromFile
        Mesh%origElemCount=ElemCnt
     endif
 
-    ! the node number is 0 based, need to change it to 1 based
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
