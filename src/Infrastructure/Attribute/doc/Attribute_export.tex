@@ -1,4 +1,4 @@
-% $Id: Attribute_export.tex,v 1.7 2011/05/12 23:54:20 eschwab Exp $
+% $Id: Attribute_export.tex,v 1.8 2011/08/23 05:21:36 eschwab Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,5 +33,5 @@ When {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file c
 \subsubsection{CIM XML}
 
 \begin{sloppypar}
-When the ESMF object from which {\tt ESMF\_AttributeWrite()} is called is a Component, and the Attribute package convention="CIM 1.5", and the purpose="Model Component Simulation Description", and {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file conforming to the CIM standard will be written.  The file will contain Attributes from the entire Component tree and their contained Fields.  The file will be named for the name of the ESMF Component object from which {\tt ESMF\_AttributeWrite()} is called, and the suffix will be .xml.
+When the ESMF object from which {\tt ESMF\_AttributeWrite()} is called is a Component, and the Attribute package convention="CIM", and the purpose="Model Component Simulation Description", and {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file conforming to the CIM standard will be written.  The file will contain Attributes from the entire Component tree and their contained Fields.  The file will be named for the name of the ESMF Component object from which {\tt ESMF\_AttributeWrite()} is called, and the suffix will be .xml.
 \end{sloppypar}
