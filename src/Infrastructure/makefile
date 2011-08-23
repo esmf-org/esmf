@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.117 2011/05/17 23:10:34 theurich Exp $ 
+# $Id: makefile,v 1.117.2.1 2011/08/23 17:27:15 theurich Exp $ 
 
 ALL: build_here
 
@@ -10,7 +10,7 @@ include $(ESMF_DIR)/makefile
 DIRS        = stubs Util Base LogErr VM IO/PIO TimeMgr DELayout \
               Config ArraySpec LocalArray Route DistGrid Array ArrayBundle \
               IO Grid Mesh GridUtil LocStream XGrid GeomBase Regrid Field \
-              FieldComm Container FieldBundle Attribute 
+              Container FieldBundle Attribute 
 
 CLEANDIRS   =
 CLEANFILES  =
