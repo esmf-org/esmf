@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.166 2011/07/07 19:55:57 rokuingh Exp $
+! $Id: ESMF_Regrid.F90,v 1.166.2.1 2011/08/23 21:44:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.166 2011/07/07 19:55:57 rokuingh Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.166.2.1 2011/08/23 21:44:42 theurich Exp $'
 
 !==============================================================================
 !
@@ -387,8 +387,9 @@ end function my_xor
          allocate(indices(2,nentries))
          allocate(weights(nentries))
 
-         call c_ESMC_Copy_TempWeights(tweights, indices(1,1), weights(1))
-
+         if (nentries > 0)  then
+            call c_ESMC_Copy_TempWeights(tweights, indices(1,1), weights(1))
+         endif
        endif
 
        ! Mark route handle created
