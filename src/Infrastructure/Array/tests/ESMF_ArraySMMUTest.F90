@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.3 2011/08/23 23:50:09 theurich Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.4 2011/08/25 18:41:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.3 2011/08/23 23:50:09 theurich Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.4 2011/08/25 18:41:48 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -45,11 +45,11 @@ program ESMF_ArraySMMUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
 
-  integer       :: rc, petCount
-  type(ESMF_VM) :: vm
+  integer               :: rc, petCount, i
+  integer, allocatable  :: petList(:)
+  type(ESMF_VM)         :: vm
   ! cumulative result: count failures; no failures equals "all pass"
-  integer       :: result = 0
-
+  integer               :: result = 0
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -72,9 +72,9 @@ program ESMF_ArraySMMUTest
     
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "1 DE/PET ASMM Test"
+  write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(regDecomp=(/1,petCount/), rc=rc)
+  call test_smm(srcRegDecomp=(/1,petCount/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -82,9 +82,9 @@ program ESMF_ArraySMMUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "2 DEs/PET ASMM Test"
+  write(name, *) "src 1 DE/PET -> dst all 4 DEs on PET 0 ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(regDecomp=(/2,petCount/), rc=rc)
+  call test_smm(srcRegDecomp=(/1,petCount/), dstPetList=(/0/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -92,9 +92,24 @@ program ESMF_ArraySMMUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "more than one DE/PET (irregular) ASMM Test"
+  write(name, *) "src 2 DEs/PET -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(regDecomp=(/2,4/), rc=rc)
+  call test_smm(srcRegDecomp=(/2,petCount/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  allocate(petList(0:petCount/2-1))
+  do i=0, petCount/2-1
+    petList(i) = i*2
+  enddo
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "src 2 DEs/PET -> dst skipping PETs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,petCount/), dstPetList=petList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -102,13 +117,45 @@ program ESMF_ArraySMMUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "some PETs with 0 DEs ASMM Test"
+  write(name, *) "src more than one DE/PET (irregular) -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(regDecomp=(/2,2/), rc=rc)
+  call test_smm(srcRegDecomp=(/2,4/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "src more than one DE/PET (irregular) -> dst all 4 DEs on PET 0 ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,4/), dstPetList=(/0/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "src some PETs with 0 DEs -> dst default 4DEs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "src some PETs with 0 DEs -> dst skipping PETs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,2/), dstPetList=petList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  deallocate(petlist)
 
   !------------------------------------------------------------------------
 10 continue
@@ -122,11 +169,14 @@ contains
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
-  subroutine test_smm(regDecomp, rc)
-    integer :: regDecomp(:), rc
-    
+  subroutine test_smm(srcRegDecomp, dstPetList, rc)
+    integer           :: srcRegDecomp(:)
+    integer, optional :: dstPetList(:)
+    integer           :: rc
+
     ! Local variables
     type(ESMF_VM)         :: vm
+    type(ESMF_DELayout)   :: delayout
     type(ESMF_DistGrid)   :: srcDistgrid, dstDistgrid
     type(ESMF_Array)      :: srcArray, dstArray
     integer               :: i, j, petCount, localPet, localDeCount
@@ -157,7 +207,7 @@ contains
     ! set up srcArray
     
     srcDistGrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/4,6/), &
-      regDecomp=regDecomp, rc=rc)
+      regDecomp=srcRegDecomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -190,9 +240,15 @@ contains
 
     !---------------------------------------------------------------------------
     ! set up dstArray
+    
+    delayout = ESMF_DELayoutCreate(deCount=4, petList=dstPetList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     dstDistGrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/4/), &
-      regDecomp=(/4/), rc=rc) ! fix this DistGrid to have 4 DEs
+      delayout=delayout, rc=rc) ! One data point on each of the 4 DEs
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -423,6 +479,12 @@ contains
       return  ! bail out
     
     call ESMF_DistGridDestroy(dstDistGrid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_DELayoutDestroy(delayout, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
