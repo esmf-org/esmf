@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.23 2011/08/12 03:55:08 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.24 2011/08/25 20:33:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.23 2011/08/12 03:55:08 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.24 2011/08/25 20:33:11 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1779,15 +1779,18 @@ StateGetMacro(ESMF_State,State,nestedstate,spp)
 
 !EOP
 
+       integer :: localrc
        character (len=8) :: localopts
        logical :: localnestedflag            ! Print nested states flag
        logical :: longflag                   ! Extended output
        logical :: debugflag                  ! Debug level output
+       type(ESMF_VM) :: localvm
+       integer :: mypet
+       character(8) :: mypet_string
        
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-       write (ESMF_UtilIOStdout,*) "StatePrint:"  
+       localrc = ESMF_RC_NOT_IMPL
 
        ! check input variables
        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
@@ -1831,6 +1834,25 @@ StateGetMacro(ESMF_State,State,nestedstate,spp)
 	 write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
 	 if (present (rc)) rc = ESMF_SUCCESS
 	 return
+       end if
+
+       call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       call ESMF_VMGet (localvm, localPet=mypet, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (debugflag) then
+         write (mypet_string,'(i8)') mypet
+         mypet_string = adjustl (mypet_string)
+         write (ESMF_UtilIOStdout,*)  &
+             "StatePrint (pet ", trim (mypet_string), "):"
+       else
+         write (ESMF_UtilIOStdout,*) "StatePrint:"
        end if
 
        call statePrintWorker (state%statep, level=0, rc1=rc)
@@ -1904,6 +1926,10 @@ StateGetMacro(ESMF_State,State,nestedstate,spp)
            "   reconcile needed: ", sp1%reconcileneededflag
 
        ! Prints Attributes associated with the State 
+       call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=localrc1)
+       if (ESMF_LogFoundError(localrc1, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc1)) return
        call c_ESMC_BasePrint(sp1%base, level, "brief", localrc1)
        if (ESMF_LogFoundError(localrc1, &
             ESMF_ERR_PASSTHRU, &
