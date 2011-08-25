@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetAllocBounds.F90,v 1.3 2011/07/01 23:34:35 theurich Exp $
+! $Id: ESMF_FieldGetAllocBounds.F90,v 1.4 2011/08/25 01:55:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ module ESMF_FieldGetAllocBoundsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.3 2011/07/01 23:34:35 theurich Exp $'
+    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.4 2011/08/25 01:55:58 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -92,7 +92,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetFieldBounds"
 !BOP
-! !IROUTINE: ESMF_GridGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from a Grid and Fortran array
+! !IROUTINE: ESMF_GridGetFieldBounds -  Get precomputed DE-local Fortran data array bounds for creating a Field from a Grid and Fortran array
 
 ! !INTERFACE:
     subroutine ESMF_GridGetFieldBounds(grid, keywordEnforcer, &
@@ -259,7 +259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetFieldBounds"
 !BOP
-! !IROUTINE: ESMF_LocStreamGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from a LocStream and Fortran array
+! !IROUTINE: ESMF_LocStreamGetFieldBounds -  Get precomputed DE-local Fortran data array bounds for creating a Field from a LocStream and Fortran array
 
 ! !INTERFACE:
     subroutine ESMF_LocStreamGetFieldBounds(locstream, keywordEnforcer, &
@@ -389,7 +389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGetFieldBounds"
 !BOP
-! !IROUTINE: ESMF_MeshGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from a Mesh and a Fortran array
+! !IROUTINE: ESMF_MeshGetFieldBounds -  Get precomputed DE-local Fortran data array bounds for creating a Field from a Mesh and a Fortran array
 
 ! !INTERFACE:
     subroutine ESMF_MeshGetFieldBounds(mesh, keywordEnforcer, &
@@ -519,7 +519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetFieldBounds"
 !BOP
-! !IROUTINE: ESMF_XGridGetFieldBounds -  Get precomputed Fortran data array bounds for creating a Field from an XGrid and a Fortran array
+! !IROUTINE: ESMF_XGridGetFieldBounds -  Get precomputed DE-local Fortran data array bounds for creating a Field from an XGrid and a Fortran array
 
 ! !INTERFACE:
     subroutine ESMF_XGridGetFieldBounds(xgrid, keywordEnforcer, &

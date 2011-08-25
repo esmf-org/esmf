@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.69 2011/07/07 19:55:54 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.70 2011/08/25 01:56:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.69 2011/07/07 19:55:54 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.70 2011/08/25 01:56:03 rokuingh Exp $'
 
 !==============================================================================
 !
@@ -1998,7 +1998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetDefault"
 !BOP
-! !IROUTINE: ESMF_LocStreamGet - Return info associated with a LocStream
+! !IROUTINE: ESMF_LocStreamGet - Return object-wide information from a LocStream
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()
@@ -2399,7 +2399,7 @@ end subroutine ESMF_LocStreamGetKeyBounds
 !------------------------------------------------------------------------------
 
 !BOP
-! !IROUTINE: ESMF_LocStreamGetKey - Get a pointer to key values
+! !IROUTINE: ESMF_LocStreamGetKey - Get a DE-local Fortran array pointer to key values
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
@@ -2985,7 +2985,7 @@ end subroutine ESMF_LocStreamGetKeyR8
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LocStreamGetBounds"
 !BOP
-! !IROUTINE: ESMF_LocStreamGet - Get the local bounds of a LocStream
+! !IROUTINE: ESMF_LocStreamGet - Get DE-local bounds of a LocStream
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGet()

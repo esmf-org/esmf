@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.100 2011/07/11 23:07:28 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.101 2011/08/25 01:55:56 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.100 2011/07/11 23:07:28 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.101 2011/08/25 01:55:56 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -2548,7 +2548,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetDefault()"
 !BOP
-! !IROUTINE: ESMF_DistGridGet - Get information about DistGrid object
+! !IROUTINE: ESMF_DistGridGet - Get object-wide DistGrid information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
@@ -2802,7 +2802,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetPLocalDe()"
 !BOP
-! !IROUTINE: ESMF_DistGridGet - Get DE local information about DistGrid
+! !IROUTINE: ESMF_DistGridGet - Get DE-local DistGrid information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()
@@ -2893,7 +2893,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridGetPLocalDePDim()"
 !BOP
-! !IROUTINE: ESMF_DistGridGet - Get DE local information for dimension about DistGrid
+! !IROUTINE: ESMF_DistGridGet - Get DE-local DistGrid information for a specific dimension
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridGet()

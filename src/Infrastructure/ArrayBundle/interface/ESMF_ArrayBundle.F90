@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.76 2011/07/11 22:11:35 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.77 2011/08/25 01:55:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.76 2011/07/11 22:11:35 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.77 2011/08/25 01:55:52 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -963,7 +963,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGetListAll()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Get general (not Array name specific) information
+! !IROUTINE: ESMF_ArrayBundleGet - Get object-wide (not Array name specific) information from an ArrayBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
@@ -1347,7 +1347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundlePrint()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundlePrint - Print ArrayBundle internals
+! !IROUTINE: ESMF_ArrayBundlePrint - Print object-wide ArrayBundle information
 
 ! !INTERFACE:
   subroutine ESMF_ArrayBundlePrint(arraybundle, keywordEnforcer, rc)

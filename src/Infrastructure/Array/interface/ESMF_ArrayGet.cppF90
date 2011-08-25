@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.71 2011/06/30 21:30:51 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.72 2011/08/25 01:55:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.71 2011/06/30 21:30:51 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.72 2011/08/25 01:55:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -126,7 +126,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetDefault()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Access to Array internals
+! !IROUTINE: ESMF_ArrayGet - Get object-wide Array information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
@@ -542,7 +542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetPLocalDePDim()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Access to Array internals per dim per local DE
+! !IROUTINE: ESMF_ArrayGet - Get DE-local Array information for a specific dimension
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()
@@ -696,7 +696,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ArrayGetFPtrDoc() \
 ! -------------------------- ESMF-public method ----------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array tile via Fortran array pointer @\
+! !IROUTINE: ESMF_ArrayGet - Get a DE-local Fortran array pointer from an Array @\
 @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayGet() @\
@@ -804,7 +804,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetLocalArray()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Access to PET-local Array tile via LocalArray object.
+! !IROUTINE: ESMF_ArrayGet - Get DE-local Array tile via LocalArray object
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()

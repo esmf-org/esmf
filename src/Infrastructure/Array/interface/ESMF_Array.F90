@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.160 2011/07/11 22:30:53 svasquez Exp $
+! $Id: ESMF_Array.F90,v 1.161 2011/08/25 01:55:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.160 2011/07/11 22:30:53 svasquez Exp $'
+    '$Id: ESMF_Array.F90,v 1.161 2011/08/25 01:55:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -362,7 +362,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySetDefault()"
 !BOP
-! !IROUTINE: ESMF_ArraySet - Set Array properties
+! !IROUTINE: ESMF_ArraySet - Set object-wide Array information
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySet()
@@ -464,7 +464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySetPLocalDe()"
 !BOP
-! !IROUTINE: ESMF_ArraySet - Set Array properties
+! !IROUTINE: ESMF_ArraySet - Set DE-local Array information
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySet()
@@ -1241,7 +1241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayValidate()"
 !BOP
-! !IROUTINE: ESMF_ArrayValidate - Validate Array internals
+! !IROUTINE: ESMF_ArrayValidate - Validate object-wide Array information
 
 ! !INTERFACE:
   subroutine ESMF_ArrayValidate(array, keywordEnforcer, rc)
