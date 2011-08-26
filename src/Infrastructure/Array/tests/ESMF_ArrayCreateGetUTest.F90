@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.43 2011/06/30 05:58:30 theurich Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.44 2011/08/26 21:09:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.43 2011/06/30 05:58:30 theurich Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.44 2011/08/26 21:09:22 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@ program ESMF_ArrayCreateGetUTest
   type(ESMF_VM):: vm
   integer:: petCount, localPet
   type(ESMF_ArraySpec):: arrayspec, arrayspec2
-  type(ESMF_Array):: array, arrayAlias, arrayCpy
+  type(ESMF_Array):: array, arrayAlias, arrayCpy, arrayUnInit
   type(ESMF_DistGrid):: distgrid, distgrid2
   real(ESMF_KIND_R8)      :: farray1D(10)
   real(ESMF_KIND_R8)      :: farray2D(10,10)
@@ -237,6 +237,13 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "Verify Attribute count from an Array"
   write(failMsg, *) "Incorrect count"
   call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayCreate from Copy, uninitialized Array Test"
+  write(failMsg, *) "Incorrectly returned ESMF_SUCCESS"
+  arrayCpy = ESMF_ArrayCreate(arrayUnInit, rc=rc)
+  call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
