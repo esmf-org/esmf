@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.135 2011/06/22 18:44:36 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.136 2011/08/26 21:47:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.135 2011/06/22 18:44:36 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.136 2011/08/26 21:47:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -242,10 +242,7 @@ Array::Array(
   rimSeqIndex.resize(localDeCount);
   rimLinIndex.resize(localDeCount);
   for (int i=0; i<localDeCount; i++){
-//TODO: Actually the call with "i" is the correct one, but it leads to 
-//TODO: problems on some platforms with replicated dimensions. Need to debug!
-//    ArrayElement arrayElement(this, i, true);
-    ArrayElement arrayElement(this, 0, true);
+    ArrayElement arrayElement(this, i, true);
     int element = 0;
     while(arrayElement.isWithin()){
       // obtain linear index for this element
@@ -256,8 +253,6 @@ Array::Array(
         // seqIndex is well defined for this arrayElement
         seqIndex = arrayElement.getSequenceIndexExclusive(3);
       }
-//printf("gjt - localDe=%d - arrayElement %05d, linearIndex=%d ", i, element,
-//linIndex); seqIndex.print();
       rimSeqIndex[i].push_back(seqIndex); // store seqIndex for this rim element
       rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
       arrayElement.next();  // next element
@@ -265,7 +260,6 @@ Array::Array(
     } // multi dim index loop
     rimElementCount[i] = element; // store element count
   }    
-  
   
   localDeCountAux = localDeCount; // TODO: auxilary for garb until ref. counting
   
@@ -2611,6 +2605,7 @@ int Array::print()const{
   int localDeCount = delayout->getLocalDeCount();
   printf("localDeCount = %d\n", localDeCount);
   const int *localDeList = delayout->getLocalDeList();
+  const int redDimCount = rank - tensorCount;
   for (int i=0; i<localDeCount; i++){
     int de = localDeList[i];
     printf("~ local data in LocalArray for DE %d ~\n", de);
@@ -2624,9 +2619,9 @@ int Array::print()const{
           // distributed dimension
           printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n", 
             jj+1, j, 
-            totalLBound[i*dimCount+j], computationalLBound[i*dimCount+j],
-            exclusiveLBound[i*dimCount+j], exclusiveUBound[i*dimCount+j],
-            computationalUBound[i*dimCount+j], totalUBound[i*dimCount+j]);
+            totalLBound[i*redDimCount+j], computationalLBound[i*redDimCount+j],
+            exclusiveLBound[i*redDimCount+j], exclusiveUBound[i*redDimCount+j],
+            computationalUBound[i*redDimCount+j], totalUBound[i*redDimCount+j]);
           ++j;
         }else{
           // non-distributed dimension
@@ -3981,10 +3976,7 @@ int Array::haloStore(
     vector<vector<int> > rimMaskElement(localDeCount);
     vector<vector<SeqIndex> > rimMaskSeqIndex(localDeCount);
     for (int i=0; i<localDeCount; i++){
-//TODO: Actually the call with "i" is the correct one, but it leads to 
-//TODO: problems on some platforms with replicated dimensions. Need to debug!
-//      ArrayElement arrayElement(array, i, true);
-      ArrayElement arrayElement(array, 0, true);
+      ArrayElement arrayElement(array, i, true);
       int element = 0;
       while(arrayElement.isWithin()){
         SeqIndex seqIndex = array->rimSeqIndex[i][element];
@@ -9633,7 +9625,8 @@ ArrayElement::ArrayElement(
   
   // initialize tuple variables for iteration through Array elements within
   // exclusive region, with origin of exclusive region at tuple (0,0,..)
-  int iOff = localDe * (array->getRank() - array->getTensorCount());
+  int redDimCount = array->getRank() - array->getTensorCount();
+  int iOff = localDe * redDimCount;
   int iPacked = 0;    // reset
   int iTensor = 0;    // reset
   for (int i=0; i<rank; i++){
@@ -9714,7 +9707,8 @@ ArrayElement::ArrayElement(
   
   // initialize tuple variables for iteration through Array elements within
   // total region, with origin of exclusive region at tuple (0,0,..)
-  int iOff = localDe * array->getDistGrid()->getDimCount();
+  int redDimCount = array->getRank() - array->getTensorCount();
+  int iOff = localDe * redDimCount;
   int iPacked = 0;    // reset
   int iTensor = 0;    // reset
   for (int i=0; i<rank; i++){
@@ -9924,6 +9918,30 @@ int ArrayElement::getArbSequenceIndexOffset(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, NULL))
     throw localrc;  // bail out with exception
   return arbSeqIndexOffset;
+}
+//-----------------------------------------------------------------------------
+    
+    
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayElement::print()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayElement::print
+//
+// !INTERFACE:
+void ArrayElement::print(
+//
+// !ARGUMENTS:
+//
+  )const{    
+//
+// !DESCRIPTION:
+//    Print internal information..
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  cout << "array:   " << array << "  localDe: " << localDe << "\n";
+  MultiDimIndexLoop::print();
 }
 //-----------------------------------------------------------------------------
     

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.61 2011/05/27 14:01:32 samsoncheung Exp $
+// $Id: ESMCI_Array.h,v 1.62 2011/08/26 21:50:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -383,6 +383,7 @@ namespace ESMCI {
     SeqIndex getSequenceIndexExclusive(int depth=0)const;
     int getTensorSequenceIndex()const;
     int getArbSequenceIndexOffset()const;
+    void print()const;
   };  // class ArrayElement 
   //============================================================================
   
