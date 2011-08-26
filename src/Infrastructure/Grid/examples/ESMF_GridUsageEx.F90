@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.103 2011/07/13 04:10:59 rokuingh Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.104 2011/08/26 21:41:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,12 +75,9 @@ program ESMF_GridCreateEx
 !\subsubsection{Create single-tile Grid shortcut method}
 
 ! The set of methods {\tt ESMF\_GridCreateNoPeriDim()}, {\tt ESMF\_GridCreate1PeriDim()},
-! {\tt ESMF\_GridCreate2PeriDim()}, {\tt ESMF\_GridCreate()} are shortcuts
-! for building single tile logically rectangular Grids up to 
-! three dimensions.
-!
-! In v5.1.0, these methods support 
-! all three types of distributions described in 
+! {\tt ESMF\_GridCreate2PeriDim()}, and {\tt ESMF\_GridCreate()} are shortcuts
+! for building 2D or 3D single tile logically rectangular Grids. 
+! These methods support all three types of distributions described in 
 ! Section~\ref{sec:desc:dist}: regular, irregular and arbitrary.
 !
 ! The ESMF Grid is cell based and so for all distribution 
