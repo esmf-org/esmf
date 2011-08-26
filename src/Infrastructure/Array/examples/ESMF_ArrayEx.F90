@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.78 2011/07/11 22:27:19 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.79 2011/08/26 21:31:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -175,8 +175,11 @@ program ESMF_ArrayEx
 ! a single DE on each PET. The Array class does not assume this special
 ! case, instead it supports multiple separate memory allocations on each PET.
 ! The number of such PET-local allocations is given by the {\tt localDeCount}
-! of the underlying DistGrid. Access to the DE-local memory allocations in this
-! general case requires a loop over {\tt localDeCount}.
+! of the underlying DistGrid. This is, there are {\tt localDeCount}
+! decomposition elements (DEs) on the local PET. Each of these local
+! decomposition elements (or local DEs) corresponds to one of the PET-local
+! memory allocation. The {\tt localDeCount} will often be 1, but the general
+! case requires a loop over {\tt localDeCount} on each PET.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
@@ -195,25 +198,26 @@ program ESMF_ArrayEx
 !BOE
 ! The 1 DE per PET case is so common that the ESMF Array provides simplified
 ! support for it. In this case the {\tt ESMF\_ArrayGet()} can be called 
-! without specifying {\tt localDe} to access the unique PET-local
-! {\tt farrayPtr}. An error will be returned if {\tt localDe} was omitted
-! for an Array that holds multiple DEs per PET.
+! without specifying the {\tt localDe} argument to access the unique PET-local
+! {\tt farrayPtr}. An error will be returned on a PET if {\tt localDe} was 
+! omitted but the Array holds multiple DEs on this PET.
 !
 ! Besides direct access to the DE-local memory allocation through the 
 ! Fortran array pointer, the Array can also be queried for a list of PET-local
 ! LocalArray objects. See section \ref{Array:LocalArray} for more on LocalArray
 ! usage in Array. In most cases this approach is less convenient than the direct
 ! {\tt farrayPtr} method, because it adds an extra object level between the
-! Array and the native language array. Further, the 1 DE per PET case is not
-! treated in a simplified manner.
+! Array and the native language array. Further, going through the LocalArray
+! access procedure does not simplify the common 1 DE per PET case as does the
+! {\tt farrayPtr} method.
 !EOE
 !BOC
-  allocate(larrayList(localDeCount))
+  allocate(larrayList(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList(de), myFarray, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOC
@@ -372,12 +376,12 @@ program ESMF_ArrayEx
 !EOE
 !
 !BOC
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList(de), myFarray, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     do i=1, size(myFarray, 1)
       do j=1, size(myFarray, 2)
-        print *, "PET-local DE=", de, ": array(",i,",",j,")=", myFarray(i,j)
+        print *, "localPET=", localPet, " localDE=", de, ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
   enddo
@@ -412,19 +416,19 @@ program ESMF_ArrayEx
 !
 !
 !BOC
-  allocate(exclusiveUBound(2, localDeCount))  ! dimCount=2
-  allocate(exclusiveLBound(2, localDeCount))  ! dimCount=2
+  allocate(exclusiveUBound(2, 0:localDeCount-1))  ! dimCount=2
+  allocate(exclusiveLBound(2, 0:localDeCount-1))  ! dimCount=2
   call ESMF_ArrayGet(array, indexflag=indexflag, &
     exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
   if (indexflag == ESMF_INDEX_DELOCAL) then
     ! this is the default
 !    print *, "DE-local exclusive regions start at (1,1)"
-    do de=1, localDeCount
+    do de=0, localDeCount-1
       call ESMF_LocalArrayGet(larrayList(de), myFarray, &
           datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
       do i=1, exclusiveUBound(1, de)
         do j=1, exclusiveUBound(2, de)
-!          print *, "DE-local exclusive region for PET-local DE=", de, &
+!          print *, "DE-local exclusive region for localDE=", de, &
 !            ": array(",i,",",j,")=", myFarray(i,j)
         enddo
       enddo
@@ -432,12 +436,12 @@ program ESMF_ArrayEx
   else if (indexflag == ESMF_INDEX_GLOBAL) then
     ! only if set during ESMF_ArrayCreate()
 !    print *, "DE-local exclusive regions of this Array have global bounds"
-    do de=1, localDeCount
+    do de=0, localDeCount-1
       call ESMF_LocalArrayGet(larrayList(de), myFarray, &
          datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
         do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
-!          print *, "DE-local exclusive region for PET-local DE=", de, &
+!          print *, "DE-local exclusive region for localDE=", de, &
 !            ": array(",i,",",j,")=", myFarray(i,j)
         enddo
       enddo
@@ -494,7 +498,7 @@ program ESMF_ArrayEx
 ! Obtain the {\tt larrayList} on every PET.
 !EOE
 !BOC
-  allocate(localDeList(localDeCount))
+  allocate(localDeList(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, &
     localDeList=localDeList, rc=rc)
 !EOC  
@@ -533,10 +537,10 @@ program ESMF_ArrayEx
 ! The Array object can be queried for absolute {\em bounds}
 !EOE
 !BOC
-  allocate(computationalLBound(2, localDeCount))  ! dimCount=2
-  allocate(computationalUBound(2, localDeCount))  ! dimCount=2
-  allocate(totalLBound(2, localDeCount))          ! dimCount=2
-  allocate(totalUBound(2, localDeCount))          ! dimCount=2
+  allocate(computationalLBound(2, 0:localDeCount-1))  ! dimCount=2
+  allocate(computationalUBound(2, 0:localDeCount-1))  ! dimCount=2
+  allocate(totalLBound(2, 0:localDeCount-1))          ! dimCount=2
+  allocate(totalUBound(2, 0:localDeCount-1))          ! dimCount=2
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, &
     computationalLBound=computationalLBound, &
@@ -549,10 +553,10 @@ program ESMF_ArrayEx
 ! or for the relative {\em widths}.
 !EOE
 !BOC
-  allocate(computationalLWidth(2, localDeCount))  ! dimCount=2
-  allocate(computationalUWidth(2, localDeCount))  ! dimCount=2
-  allocate(totalLWidth(2, localDeCount))          ! dimCount=2
-  allocate(totalUWidth(2, localDeCount))          ! dimCount=2
+  allocate(computationalLWidth(2, 0:localDeCount-1))  ! dimCount=2
+  allocate(computationalUWidth(2, 0:localDeCount-1))  ! dimCount=2
+  allocate(totalLWidth(2, 0:localDeCount-1))          ! dimCount=2
+  allocate(totalUWidth(2, 0:localDeCount-1))          ! dimCount=2
   call ESMF_ArrayGet(array, computationalLWidth=computationalLWidth, &
     computationalUWidth=computationalUWidth, totalLWidth=totalLWidth, &
     totalUWidth=totalUWidth, rc=rc)
@@ -562,7 +566,7 @@ program ESMF_ArrayEx
 ! exclusive region:
 !EOE
 !BOC
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList(de), myFarray, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     ! initialize the DE-local array
@@ -1010,11 +1014,11 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
-  allocate(larrayList1(localDeCount))
+  allocate(larrayList1(0:localDeCount-1))
   call ESMF_ArrayGet(array3D, localarrayList=larrayList1, rc=rc)
-  allocate(larrayList2(localDeCount))
+  allocate(larrayList2(0:localDeCount-1))
   call ESMF_ArrayGet(array2D, localarrayList=larrayList2, rc=rc)
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList1(de), myFarray3D, &
       datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     myFarray3D = 0.1d0 * de ! initialize
@@ -1139,7 +1143,7 @@ program ESMF_ArrayEx
 !EOE
 !BOC
   call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
-  allocate(larrayList(localDeCount))
+  allocate(larrayList(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
 !BOE
 ! The following loop shows how a Fortran pointer to the DE-local data chunks
@@ -1152,7 +1156,7 @@ program ESMF_ArrayEx
 !BOC
   call ESMF_ArrayGet(array, exclusiveLBound=exclusiveLBound, &
     exclusiveUBound=exclusiveUBound, rc=rc)
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList(de), myFarray3D, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     myFarray3D = 0.0 ! initialize
@@ -1224,9 +1228,9 @@ program ESMF_ArrayEx
     ! expected index indicate problem and bail out
   endif
   ! obtain larrayList for local DEs
-  allocate(larrayList(localDeCount))
+  allocate(larrayList(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, rc=rc)
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList(de), myFarray3D, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     myFarray3D(exclusiveLBound(1,de):exclusiveUBound(1,de), &
@@ -1303,8 +1307,8 @@ program ESMF_ArrayEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  allocate(larrayList(localDeCount))
-  allocate(localDeList(localDeCount))
+  allocate(larrayList(0:localDeCount-1))
+  allocate(localDeList(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, &
     localDeList=localDeList, rc=rc)
 !EOC
@@ -1328,13 +1332,13 @@ program ESMF_ArrayEx
 ! \end{verbatim}
 !EOE
 !BOC
-  do de=1, localDeCount
+  do de=0, localDeCount-1
     call ESMF_LocalArrayGet(larrayList(de), myFarray1D, &
       datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    print *, "DE ",localDeList(de)," [", lbound(myFarray1D), &
+    print *, "localPet: ", localPet, "DE ",localDeList(de)," [", lbound(myFarray1D), &
       ubound(myFarray1D),"]"
   enddo
   deallocate(larrayList)
@@ -1546,7 +1550,6 @@ program ESMF_ArrayEx
 !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 10 continue
-  call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
@@ -1554,5 +1557,7 @@ program ESMF_ArrayEx
   else
     print *, "FAIL: ESMF_ArrayEx.F90"
   endif
+
+  call ESMF_Finalize(rc=rc)
   
 end program
