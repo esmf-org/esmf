@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.47 2011/08/25 01:56:12 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.48 2011/08/29 23:08:13 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@ program ESMF_RegridWeightGen
       logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg
       logical            :: srcIsRegional, dstIsRegional, typeSetFlag
       character(len=256) :: methodStr
+      type(ESMF_RegridMethod_Flag) :: methodflag
       real(ESMF_KIND_R8), pointer :: srcArea(:)
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
@@ -169,8 +170,8 @@ print *, "PETNO = ", PetNo
 	   if (trim(flag) .eq. 'ESMF') then
              srcIsScrip = .false.
              dstIsScrip = .false.
-             write(*,*)
-             print *, 'ERROR: Set src and dst grid file types to ESMF.'
+             !write(*,*)
+             !print *, 'Set src and dst grid file types to ESMF.'
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown -t: must be either ESMF or SCRIP.'
@@ -451,6 +452,9 @@ print *, "PETNO = ", PetNo
         else
            ignoreUnmapped=.false.
         endif
+        if (ignoreUnmapped) then
+	       print *, "  Ignore unmapped destination points"
+        endif
      endif
 
      ! Set flag to say if we're conservative
@@ -522,7 +526,6 @@ print *, "PETNO = ", PetNo
 	  ypart = ypart-1
    	  ydim = srcdims(2)/ypart
         enddo
-     !   print *, 'src grid partition', srcdims, xpart, ypart
      endif
      !Read in the srcfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh
@@ -580,7 +583,6 @@ print *, "PETNO = ", PetNo
 	  ypart = ypart-1
    	  ydim = dstdims(2)/ypart
         enddo
-     !   print *, 'dst grid partition', dstdims, xpart, ypart
      endif
      if (dstIsScrip) then
 	if(dstIsReg) then
@@ -652,6 +654,7 @@ print *, "PETNO = ", PetNo
 	    rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping"
+	    methodflag = ESMF_REGRIDMETHOD_BILINEAR
       else if (trim(method) .eq. 'patch') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
@@ -662,6 +665,7 @@ print *, "PETNO = ", PetNo
 	    rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
+	    methodflag = ESMF_REGRIDMETHOD_PATCH
       else if (trim(method) .eq. 'conserve') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
@@ -673,11 +677,11 @@ print *, "PETNO = ", PetNo
 	    rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Conservative remapping"
+	    methodflag = ESMF_REGRIDMETHOD_CONSERVE
       else ! nothing recognizable so report error
 	     print *, 'ERROR: The -method is not a recognized interpolation method.'
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
-
 
       ! Compute areas if conservative
       ! Area only valid on PET 0 right now, when parallel Array
@@ -754,20 +758,18 @@ print *, "PETNO = ", PetNo
          endif
       endif
 
-
-	 
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
          if (isConserve) then
             call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	           dstIsScrip=dstIsScrip, method = methodStr, &
+	           dstIsScrip=dstIsScrip, method = methodflag, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
           else
             call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	           dstIsScrip=dstIsScrip, method = methodStr, dstFrac=dstFrac, rc=rc)
+	           dstIsScrip=dstIsScrip, method = methodflag, dstFrac=dstFrac, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	  endif
       else 
