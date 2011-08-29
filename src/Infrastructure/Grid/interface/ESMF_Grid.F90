@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246 2011/07/13 04:11:01 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.1 2011/08/29 17:57:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246 2011/07/13 04:11:01 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.1 2011/08/29 17:57:33 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5662,12 +5662,6 @@ end function ESMF_GridCreateFrmScripReg
 
 
 
-!VV
-                 
-
-
-
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate1PeriDimI"
@@ -5862,7 +5856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create Irregular distgrid and error check associated input and set defaults
     distgrid=ESMF_GridCreateDistgridIrreg(dimCount, minIndexLocal, maxIndexLocal, &
          countsPerDEDim1,countsPerDeDim2, &
-         countsPerDEDim3, indexflag, petMap, rc=localrc)
+         countsPerDEDim3, indexflag, petMap, connList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6632,7 +6626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create Irregular distgrid and error check associated input and set defaults
     distgrid=ESMF_GridCreateDistgridIrreg(dimCount, minIndexLocal, maxIndexLocal, &
          countsPerDEDim1,countsPerDeDim2, &
-         countsPerDEDim3, indexflag, petMap, rc=localrc)
+         countsPerDEDim3, indexflag, petMap, connList,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
