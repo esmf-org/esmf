@@ -1,4 +1,4 @@
-! $Id: ESMF_TestUTest.F90,v 1.9 2011/06/30 06:00:14 theurich Exp $
+! $Id: ESMF_TestUTest.F90,v 1.10 2011/08/29 22:25:20 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,6 +37,7 @@ program ESMF_TestUTest
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

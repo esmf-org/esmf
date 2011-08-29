@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.19 2011/06/24 15:04:36 rokuingh Exp $
+! $Id: ESMF_Test.F90,v 1.20 2011/08/29 22:25:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.19 2011/06/24 15:04:36 rokuingh Exp $'
+      '$Id: ESMF_Test.F90,v 1.20 2011/08/29 22:25:18 theurich Exp $'
 
 !==============================================================================
 
@@ -478,7 +478,8 @@
 ! !IROUTINE:  ESMF_TestResultsGather - Gathers test results from all Pets and prints out a PASS/FAIL message
 !
 ! !INTERFACE:
-      subroutine ESMF_TestResultsGather(vm, localPet, petCount, testResults, file, line, unit,  rc)
+      subroutine ESMF_TestResultsGather(vm, localPet, petCount, testResults, &
+        file, line, unit,  rc)
 
 ! !ARGUMENTS:
       type(ESMF_VM), intent(in) :: vm     ! the vm of this pet
@@ -559,8 +560,8 @@
           if (present(rc)) rc = localrc
           return
       endif
-      rc=ESMF_SUCCESS
-      return
+      
+      if (present(rc)) rc=ESMF_SUCCESS
                                                  
       end subroutine ESMF_TestResultsGather
 
@@ -630,6 +631,8 @@
       print *, trim(msg)
       call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_INFO)
       if (present(unit)) write(unit, *) trim(msg)
+      
+      if (present(rc)) rc=ESMF_SUCCESS
 
       end subroutine ESMF_TestStart
 
