@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.76.2.1 2011/08/23 20:52:26 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.76.2.2 2011/08/29 17:30:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.76.2.1 2011/08/23 20:52:26 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.76.2.2 2011/08/29 17:30:14 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.76.2.1 2011/08/23 20:52:26 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.76.2.2 2011/08/29 17:30:14 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1134,6 +1134,7 @@ end function ESMF_MeshCreateFromFile
     integer, allocatable                :: NodeId(:)
     integer, allocatable                :: NodeUsed(:)
     real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
+    real(ESMF_KIND_R8), allocatable     :: NodeCoordsTMP(:)
     real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
@@ -1152,6 +1153,15 @@ end function ESMF_MeshCreateFromFile
     integer(ESMF_KIND_I4)               :: localSplitElems(1)
     integer(ESMF_KIND_I4)               :: globalSplitElems(1)
     logical                             :: existSplitElems
+    integer, parameter                  :: maxNumPoly=20
+    integer                             :: numPoly
+    real(ESMF_KIND_R8)                  :: polyCoords(3*maxNumPoly)
+    real(ESMF_KIND_R8)                  :: polyDblBuf(3*maxNumPoly)
+    integer                             :: polyIntBuf(maxNumPoly)
+    integer                             :: triInd(3*(maxNumPoly-2))
+    integer                             :: spatialDim
+    integer                             :: parametricDim
+    integer                             :: lni,ti
 
 
     ! Initialize return code; assume failure until success is certain
@@ -1179,16 +1189,19 @@ end function ESMF_MeshCreateFromFile
     NodeDim  = ubound (nodeCoords, 1)
     deg2rad = 3.141592653589793238/180;
 
-    ! create the mesh
-    ! The spatialDim=3, we need to convert the 2D coordinate into 3D Cartisian in order
-    ! to handle the periodic longitude correctly
+   ! Figure out dimensions 
     if (convert3D) then
-        Mesh = ESMF_MeshCreate3part (2, 3, localrc)
+       parametricDim=2
+       spatialDim=3
     else
-        Mesh = ESMF_MeshCreate3part (2, NodeDim, localrc)
+       parametricDim=2
+       spatialDim=NodeDim
     end if
-   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! create the mesh
+    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! These two arrays are temp arrays
     ! NodeUsed() used for multiple purposes, first, find the owners of the node
@@ -1245,6 +1258,7 @@ end function ESMF_MeshCreateFromFile
     allocate (NodeId(localNodes))
     if (convert3D) then
        allocate(NodeCoords1D(localNodes*3))
+       allocate(NodeCoordsTMP(localNodes*2))
     else
        allocate (NodeCoords1D(localNodes*NodeDim))
     endif
@@ -1264,6 +1278,8 @@ end function ESMF_MeshCreateFromFile
               NodeCoords1D((i-1)*3+1) = COS(coorX)*SIN(coorY)             
               NodeCoords1D((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
               NodeCoords1D((i-1)*3+3) = COS(coorY)
+              NodeCoordsTMP((i-1)*2+1) = nodeCoords(1,NodeNo)
+              NodeCoordsTMP((i-1)*2+2) = nodeCoords(2,NodeNo)
            !   write (*,'(6F8.4)')nodeCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
            else 
              do dim = 1, NodeDim
@@ -1331,7 +1347,7 @@ end function ESMF_MeshCreateFromFile
        Mesh%origElemStart=startElmt  ! position of first element
        Mesh%origElemCount=ElemCnt
     endif
-
+    
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
@@ -1339,39 +1355,78 @@ end function ESMF_MeshCreateFromFile
     ElemNo = 1
     ConnNo = 0
     do j = 1, ElemCnt
-	if (elmtNum(j)==3) then        
-           ElemId(ElemNo) = myStartElmt+ElemNo
-           ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-           do i=1,3
-              ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-	   end do
-           if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-           ElemNo=ElemNo+1
-           ConnNo=ConnNo+3
-	elseif (elmtNum(j)==4) then
-           ElemId(ElemNo) = myStartElmt+ElemNo
-           ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
-           do i=1,4
-              ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-	   end do
-           if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-           ElemNo=ElemNo+1
-	   ConnNo=ConnNo+4
-	else
-	! elmtNum(j) > 4, break into elmtNum(j)-2 triangles
-	   do k=0,elmtNum(j)-3
+       if (elmtNum(j)==3) then        
+          ElemId(ElemNo) = myStartElmt+ElemNo
+          ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
+          do i=1,3
+             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+          end do
+          if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+          ElemNo=ElemNo+1
+          ConnNo=ConnNo+3
+       elseif (elmtNum(j)==4) then
+          ElemId(ElemNo) = myStartElmt+ElemNo
+          ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
+          do i=1,4
+             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+          end do
+          if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+          ElemNo=ElemNo+1
+          ConnNo=ConnNo+4
+       else
+          ! number of points in poly to triangulate
+          numPoly=elmtNum(j)
+          if (numPoly > maxNumPoly) then
+             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                  msg="- File contains polygons with more sides than triangulation is supported for", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+             return
+          endif
+
+          ! Copy points into input list
+          if (spatialDim==2) then
+             ti=0
+             do k=1,numPoly
+                lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
+                polyCoords(ti+1)=NodeCoords1D(lni+1)
+                polyCoords(ti+2)=NodeCoords1D(lni+2)
+                ti=ti+2
+             enddo
+          else if (spatialDim==3) then
+             ti=0
+             do k=1,numPoly
+                lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
+                polyCoords(ti+1)=NodeCoords1D(lni+1)
+                polyCoords(ti+2)=NodeCoords1D(lni+2)
+                polyCoords(ti+3)=NodeCoords1D(lni+3)
+                ti=ti+3
+             enddo
+          endif
+          ! Checking for other spatialDims above, not here in a loop
+
+          ! call triangulation routine
+          call c_ESMC_triangulate(parametricDim, spatialDim, &
+               numPoly, polyCoords, polyDblBuf, polyIntBuf, &
+               triInd, localrc)   
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! translate triangulation out of output list
+          ti=0
+          do k=1,numPoly-2
              ElemId(ElemNo)=myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-             ElemConn (ConnNo+1) = NodeUsed(elementConn(1,j))
-             ElemConn (ConnNo+2) = NodeUsed(elementConn(2+k,j))
-             ElemConn (ConnNo+3) = NodeUsed(elementConn(3+k,j))
+             ElemConn (ConnNo+1) = NodeUsed(elementConn(triInd(ti+1)+1,j))
+             ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
+             ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
              ElemNo=ElemNo+1
-	     ConnNo=ConnNo+3
-	   end do
-         end if
+             ConnNo=ConnNo+3
+             ti=ti+3
+          enddo
+       end if
     end do
-    
+
     if (ElemNo /= TotalElements+1) then
 	write (ESMF_UtilIOStdout,*)  &
             PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
@@ -1496,7 +1551,7 @@ end function ESMF_MeshCreateFromUnstruct
        call ESMF_UtilIOUnitGet(unit, rc=rc)
        if (rc==ESMF_SUCCESS) then
   	  open(unit, FILE=esmffilename,status='unknown')
-          close (unit, STATUS='delete')
+          close(unit, STATUS='delete')
        endif
     endif    
 

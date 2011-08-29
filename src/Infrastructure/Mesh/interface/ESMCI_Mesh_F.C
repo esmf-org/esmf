@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.51 2011/02/23 01:03:19 w6ws Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.51.4.1 2011/08/29 17:30:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.51 2011/02/23 01:03:19 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.51.4.1 2011/08/29 17:30:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1534,4 +1534,86 @@ extern "C" void FTN(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *el
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
+
+// Interface to internal code to triangulate a polygon
+// Input is: pnts (the polygon of size numPnts*sdim
+//           td a temporary buffer of the same size as pnts
+//           ti a temporary buffer of size numPnts
+// Output is: tri_ind, which are the 0-based indices of the triangles 
+//             making up the triangulization. tri_ind should be of size 3*(numPnts-2).
+// 
+extern "C" void FTN(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts, 
+					double *pnts, double *td, int *ti, int *triInd, int *rc){
+   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc))
+   return;  // bail out with exception
+    }
+
+  
+    // do triangulation based on the dimensions of polygon
+    int ret;
+    if (*pdim==2) {
+      if (*sdim==2) {
+        ret=triangulate_poly<GEOM_CART2D>(*numPnts, pnts, td, ti, triInd);
+      } else if (*sdim==3) {
+        ret=triangulate_poly<GEOM_SPH2D3D>(*numPnts, pnts, td, ti, triInd);
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+       " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3", rc);
+        return;
+      }
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+       " - triangulate can't be used for polygons with parametric dimension not equal to 2", rc);
+      return;
+    }
+
+    // Check return code
+    if (ret != ESMCI_TP_SUCCESS) {
+      if (ret == ESMCI_TP_DEGENERATE_POLY) {
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - can't triangulate a polygon with less than 3 sides", rc);
+         return;
+      } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - clockwise polygons not supported in triangulation routine", rc);
+         return;
+      } else {
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   			     	  " - unknown error in triangulation", rc);
+         return;
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
 
