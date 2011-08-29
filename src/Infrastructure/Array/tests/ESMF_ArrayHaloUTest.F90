@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.17 2011/06/30 05:58:30 theurich Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.17.2.1 2011/08/29 18:15:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.17 2011/06/30 05:58:30 theurich Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.17.2.1 2011/08/29 18:15:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -45,19 +45,23 @@ program ESMF_ArrayHaloUTest
 
   ! Local variables
   type(ESMF_VM)         :: vm
+  type(ESMF_DELayout)   :: delayout
   type(ESMF_DistGrid)   :: distgrid
   type(ESMF_Array)      :: array
   type(ESMF_ArraySpec)  :: arrayspec
   type(ESMF_RouteHandle):: routehandle
   integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)
   integer(ESMF_KIND_I4), pointer :: farrayPtr3d(:,:,:)
-  integer               :: rc, i, j, m, verifyValue, petCount, localPet
+  integer               :: rc, i, j, m, verifyValue
+  integer               :: petCount, localPet, localDeCount, lde
+  integer, allocatable  :: localDeList(:)
   logical               :: verifyFlag
   integer               :: eLB(2,1), eUB(2,1)
   integer               :: cLB(2,1), cUB(2,1)
   integer               :: tLB(2,1), tUB(2,1)
   integer               :: hLB(2,1), hUB(2,1)
   integer               :: uLB(1), uUB(1)
+  integer, allocatable  :: eLBde(:,:), eUBde(:,:), tLBde(:,:), tUBde(:,:)
   type(ESMF_DistGridConnection), allocatable :: connectionList(:)
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -677,6 +681,354 @@ program ESMF_ArrayHaloUTest
   write(name, *) "Distgrid Destroy Test-2"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(distGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! Test-2b: 2D decomposition, overlapping halo regions, multiple DEs/PET
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DELayout Create Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  delayout = ESMF_DELayoutCreate(petMap=(/0,3,2,0/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Create Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10,20/), &
+    regDecomp=(/2,2/), delayout=delayout, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySpec Set Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Create Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
+    computationalLWidth=(/2,2/), computationalUWidth=(/2,2/), rc=rc)
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get localDeCount Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, localDeCount=localDeCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  allocate(eLBde(2,localDeCount))
+  allocate(eUBde(2,localDeCount))
+  allocate(tLBde(2,localDeCount))
+  allocate(tUBde(2,localDeCount))
+  
+  allocate(localDeList(0:localDeCount-1))
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Get Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(array, exclusiveLBound=eLBde, exclusiveUBound=eUBde, &
+    totalLBound=tLBde, totalUBound=tUBde, localDeList=localDeList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+! The Array object is defined on a 10 x 20 index space which is regularily
+! decomposed into 2 x 2 = 4 DEs. This means that each DE holds a 5 x 10 
+! piece of the index space.
+! The unit test is set up to run on exactly 4 PETs. However, a DELayout is
+! explicitly created to map DEs 0 and 3 agains PET 0, DE 1 against PET 3 and
+! DE 2 against PET 2. Thus PET 0 holds 2 DEs, PET 1 holds no DEs, and PET 2 and
+! 3 each holds 1 DE.
+! The Array further defines a computational width of 2 elements in each
+! direction around the exclusive region. This area of 2 elements around
+! the exclusive region provides the destination elements for Halo operations
+! defined on the Array object.
+! 
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 0    |  |       |  |     DE 2    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+!                    ^            \/             ^
+!                    |            /\             |
+!                    v                           v
+!
+!          +-------------------+       +-------------------+
+!          | \       2       / |       | \       2       / |
+!          |  +-------------+  |       |  +-------------+  |
+!          |  |     DE 1    |  |       |  |     DE 3    |  |
+!          |  |             |  |       |  |             |  |
+!          |2 |    5 x 10   | 2|  <->  |2 |    5 x 10   | 2|
+!          |  |             |  |       |  |             |  |
+!          |  |             |  |       |  |             |  |
+!          |  +-------------+  |       |  +-------------+  |
+!          | /       2       \ |       | /       2       \ |
+!          +-------------------+       +-------------------+
+!
+! Without the explicit definition of boundary conditions only the indicated
+! inner connections define valid Halo paths for the Array object.
+!------------------------------------------------------------------------
+
+  do lde=0, localDeCount-1
+    call ESMF_ArrayGet(array, localDe=lde, farrayPtr=farrayPtr, rc=rc)
+    ! Initialize the entire Array piece to its DE number
+    farrayPtr = localDeList(lde)
+  enddo
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHaloStore Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloStore(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayHalo Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Verify Array elements after Halo() Test-2b"
+  write(failMsg, *) "Wrong results" 
+  
+  verifyFlag = .true. ! assume all is correct until error is found
+  
+  do lde=0, localDeCount-1
+  
+    call ESMF_ArrayGet(array, localDe=lde, farrayPtr=farrayPtr, rc=rc)
+
+    ! verify elements within exclusive region
+    do j=eLB(2,1), eUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= localDeList(lde)) then
+          verifyFlag = .false.
+          print *, "Found wrong exclusive element"
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+  
+    ! verify all eight sections outside the exclusive region
+    ! section 1 staring in NW corner and going counter clock wise
+    ! verify section 1
+    if (localDeList(lde) == 0) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 1) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 2) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 3) then
+      verifyValue = 0
+    endif
+    do j=tLB(2,1), eLB(2,1)-1
+      do i=tLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 1 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 2
+    if (localDeList(lde) == 0) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 1) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 2) then
+      verifyValue = 0
+    else if (localDeList(lde) == 3) then
+      verifyValue = 1
+    endif
+    do j=tLB(2,1), eLB(2,1)-1
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 2 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 3
+    if (localDeList(lde) == 0) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 1) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 2) then
+      verifyValue = 1
+    else if (localDeList(lde) == 3) then
+      verifyValue = localDeList(lde)
+    endif
+    do j=tLB(2,1), eLB(2,1)-1
+      do i=eUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 3 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 4
+    if (localDeList(lde) == 0) then
+      verifyValue = 1
+    else if (localDeList(lde) == 1) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 2) then
+      verifyValue = 3
+    else if (localDeList(lde) == 3) then
+      verifyValue = localDeList(lde)
+    endif
+    do j=eLB(2,1), eUB(2,1)
+      do i=eUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 4 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 5
+    if (localDeList(lde) == 0) then
+      verifyValue = 3
+    else if (localDeList(lde) == 1) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 2) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 3) then
+      verifyValue = localDeList(lde)
+    endif
+    do j=eUB(2,1)+1, tUB(2,1)
+      do i=eUB(1,1)+1, tUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 5 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 6
+    if (localDeList(lde) == 0) then
+      verifyValue = 2
+    else if (localDeList(lde) == 1) then
+      verifyValue = 3
+    else if (localDeList(lde) == 2) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 3) then
+      verifyValue = localDeList(lde)
+    endif
+    do j=eUB(2,1)+1, tUB(2,1)
+      do i=eLB(1,1), eUB(1,1)
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 6 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 7
+    if (localDeList(lde) == 0) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 1) then
+      verifyValue = 2
+    else if (localDeList(lde) == 2) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 3) then
+      verifyValue = localDeList(lde)
+    endif
+    do j=eUB(2,1)+1, tUB(2,1)
+      do i=tLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 7 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    ! verify section 8
+    if (localDeList(lde) == 0) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 1) then
+      verifyValue = 0
+    else if (localDeList(lde) == 2) then
+      verifyValue = localDeList(lde)
+    else if (localDeList(lde) == 3) then
+      verifyValue = 2
+    endif
+    do j=eLB(2,1), eUB(2,1)
+      do i=tLB(1,1), eLB(1,1)-1
+        if (farrayPtr(i,j) /= verifyValue) then
+          verifyFlag = .false.
+          print *, "Found wrong value in section 8 for DE", localDeList(lde), &
+            " on PET", localPet
+          exit
+        endif
+      enddo
+      if (.not. verifyFlag) exit
+    enddo
+    
+  enddo ! - local DE loop
+    
+  call ESMF_Test(verifyFlag, name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayHaloRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Array Destroy Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Distgrid Destroy Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(distGrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "DELayout Destroy Test-2b"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DELayoutDestroy(delayout, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------

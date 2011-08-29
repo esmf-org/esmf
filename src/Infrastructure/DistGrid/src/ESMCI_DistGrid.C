@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.63 2011/07/02 04:35:37 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.63.2.1 2011/08/29 18:15:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63 2011/07/02 04:35:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63.2.1 2011/08/29 18:15:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4256,6 +4256,14 @@ int DistGrid::setArbSeqIndex(
   }
   void MultiDimIndexLoop::print()const{
     int i;
+    printf("MultiDimIndexLoop: indexTupleStart = (");
+    for (i=0; i<indexTupleStart.size()-1; i++)
+      printf(" %d,", indexTupleStart[i]);
+    printf(" %d)\n", indexTupleStart[i]);
+    printf("MultiDimIndexLoop: indexTupleEnd = (");
+    for (i=0; i<indexTupleEnd.size()-1; i++)
+      printf(" %d,", indexTupleEnd[i]);
+    printf(" %d)\n", indexTupleEnd[i]);
     printf("MultiDimIndexLoop: indexTuple = (");
     for (i=0; i<indexTuple.size()-1; i++)
       printf(" %d,", indexTuple[i]);
