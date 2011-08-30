@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.39 2011/08/30 23:07:52 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.40 2011/08/30 23:29:05 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -42,13 +42,14 @@ To compile ESMF with the NetCDF library and the LAPACK library, please refer to
 the ``Third Party Libraries'' Section in the ESMF User's Guide for more information.
 
 Internally this application uses the ESMF public API to generate the interpolation weights.
-If a the source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
+If a source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 
 coordinates of the input grid are put into the center stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}). 
 In addition, the corner coordinates are also put into the corner stagger location 
 ({\tt ESMF\_STAGGERLOC\_CORNER}), for conservative regridding.  The method
 {\tt ESMF\_MeshCreate()}~\ref{sec:example:UnstructFromFile} is used to create an ESMF\_Mesh object, if the 
 source or destination grid is a cubed sphere grid or an unstructured grid. When making this call, 
-the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates.
+the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates. Currently, ESMF only supports
+triangle or quadrilateral Mesh element types for a 2D Mesh.  Therefore, when the cells in an unstructured grid contain more than four edges, they are broken into multiple triangle elements before {\tt ESMF\_MeshCreate()} is called to create the ESMF\_Mesh object.
 {\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indices table representing the interpolation matrix. 
 
 The regridding occurs in 3D to avoid
@@ -128,7 +129,7 @@ vary with the number of processors used to run the application. This means that 
 numbers of processors can contain exactly the same interpolation matrix, but can appear different in a direct line by line
 comparison (such as would be done by ncdiff).
 
-\subsection{SCRIP Format Grid Files and Remapping Weight Files}
+\subsection{SCRIP Format Grid Files and Regridding Weight Files}
 
 A SCRIP format grid file is a NetCDF file and the header of a sample grid file is shown as follows:
 
@@ -168,16 +169,16 @@ The integer array {\tt grid\_dims} gives the length of each grid axis when used
 in a model code. 
 
 The integer array {\tt grid\_imask} is used to mask out grid cells which should
-not participate in the remapping. The array should by zero for any points
-that do not participate in the remapping and one for all other points.
+not participate in the regridding. The array should by zero for any points
+that do not participate in the regridding and one for all other points.
 Coordinate arrays provide the latitudes and longitudes of cell centers
 and cell corners. The unit of the coordinates can be either ``{\tt radians}'' or ``{\tt degrees}''. 
 The grid corner coordinates must be
 written in an order which traces the outside of a grid cell in a counterclockwise
 order. 
 
-The remapping weight output files are also in netCDF format and contain some grid
-information from each grid as well as the remapping indices and weights.
+The regridding weight output files are also in netCDF format and contain some grid
+information from each grid as well as the regridding indices and weights.
 The header of a sample output weight file generated from regridding a logically rectangular 
 2D grid to a triangle mesh unstructured grid is shown as follows:
 
