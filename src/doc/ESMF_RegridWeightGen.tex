@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.38 2011/08/30 21:42:12 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.39 2011/08/30 23:07:52 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -128,6 +128,135 @@ vary with the number of processors used to run the application. This means that 
 numbers of processors can contain exactly the same interpolation matrix, but can appear different in a direct line by line
 comparison (such as would be done by ncdiff).
 
+\subsection{SCRIP Format Grid Files and Remapping Weight Files}
+
+A SCRIP format grid file is a NetCDF file and the header of a sample grid file is shown as follows:
+
+\begin{verbatim}
+netcdf remap_grid_T42 {
+dimensions:
+      grid_size = 8192 ;
+      grid_corners = 4 ;
+      grid_rank = 2 ;
+
+variables:
+      long grid_dims(grid_rank) ;
+      double grid_center_lat(grid_size) ;
+         grid_center_lat:units = ``radians'' ;
+      double grid_center_lon(grid_size) ;
+         grid_center_lon:units = ``radians'' ;
+      long grid_imask(grid_size) ;
+         grid_imask:units = ``unitless'' ;
+      double grid_corner_lat(grid_size, grid_corners) ;
+         grid_corner_lat:units = ``radians'' ;
+      double grid_corner_lon(grid_size, grid_corners) ;
+         grid_corner_lon:units = ``radians'' ;
+
+// global attributes:
+         :title = ``T42 Gaussian Grid'' ;
+}
+\end{verbatim}
+
+The {\tt grid\_size} dimension is the total number of cells in the grid; {\tt grid\_rank} refers to the
+number of dimensions. {\tt grid\_rank} is 2 for a 2D logically rectangular grid and 1 for an 
+unstructured grid.
+The number of corners (vertices) in each grid cell is given by {\tt grid\_corners}.
+Note that if your grid has a variable number of corners on grid cells, then
+you should set {\tt grid\_corners} to be the highest value and use redundant points
+on cells with fewer corners.
+The integer array {\tt grid\_dims} gives the length of each grid axis when used
+in a model code. 
+
+The integer array {\tt grid\_imask} is used to mask out grid cells which should
+not participate in the remapping. The array should by zero for any points
+that do not participate in the remapping and one for all other points.
+Coordinate arrays provide the latitudes and longitudes of cell centers
+and cell corners. The unit of the coordinates can be either ``{\tt radians}'' or ``{\tt degrees}''. 
+The grid corner coordinates must be
+written in an order which traces the outside of a grid cell in a counterclockwise
+order. 
+
+The remapping weight output files are also in netCDF format and contain some grid
+information from each grid as well as the remapping indices and weights.
+The header of a sample output weight file generated from regridding a logically rectangular 
+2D grid to a triangle mesh unstructured grid is shown as follows:
+
+\begin{verbatim}
+netcdf t42mpas-bilinear {
+dimensions:
+	n_a = 8192 ;
+	n_b = 20480 ;
+	n_s = 42456 ;
+	nv_a = 4 ;
+	nv_b = 3 ;
+	num_wgts = 1 ;
+	src_grid_rank = 2 ;
+	dst_grid_rank = 1 ;
+variables:
+	int src_grid_dims(src_grid_rank) ;
+	int dst_grid_dims(dst_grid_rank) ;
+	double yc_a(n_a) ;
+		yc_a:units = "degrees" ;
+	double yc_b(n_b) ;
+		yc_b:units = "radians" ;
+	double xc_a(n_a) ;
+		xc_a:units = "degrees" ;
+	double xc_b(n_b) ;
+		xc_b:units = "radians" ;
+	double yv_a(n_a, nv_a) ;
+		yv_a:units = "degrees" ;
+	double xv_a(n_a, nv_a) ;
+		xv_a:units = "degrees" ;
+	double yv_b(n_b, nv_b) ;
+		yv_b:units = "radians" ;
+	double xv_b(n_b, nv_b) ;
+		xv_b:units = "radians" ;
+	int mask_a(n_a) ;
+		mask_a:units = "unitless" ;
+	int mask_b(n_b) ;
+		mask_b:units = "unitless" ;
+	double area_a(n_a) ;
+		area_a:units = "square radians" ;
+	double area_b(n_b) ;
+		area_b:units = "square radians" ;
+	double frac_a(n_a) ;
+		frac_a:units = "unitless" ;
+	double frac_b(n_b) ;
+		frac_b:units = "unitless" ;
+	int col(n_s) ;
+	int row(n_s) ;
+	double S(n_s) ;
+
+// global attributes:
+		:title = "ESMF Offline Regridding Weight Generator" ;
+		:normalization = "destarea" ;
+		:map_method = "Bilinear remapping" ;
+		:conventions = "NCAR-CSM" ;
+		:domain_a = "T42_grid.nc" ;
+		:domain_b = "grid-dual.nc" ;
+		:grid_file_src = "T42_grid.nc" ;
+		:grid_file_dst = "grid-dual.nc" ;
+		:CVS_revision = "5.3.0 beta snapshot" ;
+}
+\end{verbatim}
+
+Variables ended with {\tt \_a} are the variables for the source grid and the ones ended with {\tt \_b}
+are the variables for the destination grid. For instance, {\tt xc\_a} and {\tt yc\_a} are corresponding
+to the {\tt grid\_center\_lon} and {\tt grid\_center\_lat} variables in the source grid file.
+The grid information is simply echoing the input grid file information and
+adding grid area and grid frac arrays. The grid area array currently is only
+computed by the conservative remapping option; the others will write arrays
+full of zeros for this field. The grid frac array for the conservative remapping
+returns the area fraction of the grid cell which participates in the remapping
+based on the source grid mask. For the other two remapping options, the
+grid frac array is one where the grid point participates in the remapping
+and zero otherwise, based again on the source grid mask (and not on the
+{\tt grid\_imask} for that grid).
+
+The <\tt indices> and <\tt weights> generated by {\tt ESMF\_FieldRegridStore()} are stored in the output
+file as variables {\tt col}, {\tt row} and {\tt S} where {\tt col} and {\tt row} are the indices to the
+source and the destination grid cells.  These are one-dimension array with length defined by dimension 
+{\tt n\_s}.
 
 \subsection{Usage}
 
