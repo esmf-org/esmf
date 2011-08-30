@@ -26,7 +26,6 @@ module pio_quicksort
 
 
 implicit none
-save
 private
 public quick_sort
 contains
