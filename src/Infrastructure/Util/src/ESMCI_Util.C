@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.8 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_Util.C,v 1.8.4.1 2011/08/31 23:17:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,8 +28,10 @@
 // associated class definition file and others
 #include "ESMCI_Util.h"
 
+#include <string>
 #include <cstring>
 #include <cstdlib>
+#include <ctime>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -40,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.8 2011/01/05 20:05:46 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.8.4.1 2011/08/31 23:17:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -607,4 +609,86 @@ extern "C" {
  }
 }
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_InitializeGUID"
+//BOPI
+// !IROUTINE:  ESMC_InitializeGUID - Initialize/reset a Globally Unique ID (GUID) sequence
+//
+// !INTERFACE:
+    int ESMC_InitializeGUID(
+//
+// !RETURN VALUE:
+//  returns ESMF_SUCCESS or ESMF_FAILURE.
+// 
+// !ARGUMENTS:
+    void) {
+    
+// !DESCRIPTION:
+// Initialize a sequence of Globally Unique IDs (GUIDs) in a platform 
+// independent way (e.g. does not require UUID library).  Uses <cstdlib> srand()
+//EOPI
 
+  int rc;
+
+  // Initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  // initialize/reset the seed for the random number generator using 
+  //  the current time
+  unsigned int seed = (unsigned int) time((time_t *)NULL);
+  if (seed >= 0) {
+    srand(seed);  // reset random number sequence with seed
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                "system call time() failed.", &rc);
+    return rc;
+  }
+
+  // return ok. 
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GenerateGUID"
+//BOPI
+// !IROUTINE:  ESMC_GenerateGUID - Generate a Globally Unique ID (GUID)
+//
+// !INTERFACE:
+    int ESMC_GenerateGUID(
+//
+// !RETURN VALUE:
+//  returns ESMF_SUCCESS or ESMF_FAILURE.
+// 
+// !ARGUMENTS:
+    string &guid) {    // inout - caller's buffer to hold GUID string
+    
+// !DESCRIPTION:
+// Generate a Globally Unique ID (GUID) in a platform independent way (e.g.
+//   does not require UUID library).  Uses <cstdlib> srand(), rand().
+//EOPI
+
+  int rc;
+
+  // Initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  // GUID is an 8-4-4-4-12 hex string, 37 chars long
+  char GUIDbuf[37];
+  sprintf(GUIDbuf, "%08x-%04x-%04x-%04x-%08x%04x",
+    rand() & 0x0ffffffff,                    // Generate 8 hex digits
+    rand() & 0x0ffff,                        // Generate 4 hex digits
+    rand() & 0x0ffff,                        // Generate 4 hex digits
+    rand() & 0x0ffff,                        // Generate 4 hex digits
+    rand() & 0x0ffffffff, rand() & 0x0ffff); // Generate 12 hex digits
+  // TODO:  use C++ string/iomanip techniques instead of C sprintf() ?
+
+  // copy into caller's string
+  guid = GUIDbuf;
+
+  // return ok. 
+  rc = ESMF_SUCCESS;
+  return rc;
+}
