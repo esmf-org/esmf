@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.45 2011/07/29 22:49:14 rokuingh Exp $
+! $Id: ESMF_MeshEx.F90,v 1.46 2011/08/31 07:16:41 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -695,9 +695,6 @@ program ESMF_MeshEx
 !	grid_corners = 5 ;
 !	grid_rank = 1 ;
 !variables:
-!	double grid_area(grid_size) ;
-!		grid_area:units = "radians^2" ;
-!		grid_area:long_name = "area weights" ;
 !	double grid_center_lat(grid_size) ;
 !		grid_center_lat:units = "degrees" ;
 !	double grid_center_lon(grid_size) ;
@@ -708,8 +705,11 @@ program ESMF_MeshEx
 !	double grid_corner_lat(grid_size, grid_corners) ;
 !		grid_corner_lat:units = "degrees" ;
 !		grid_corner_lat:_FillValue = -9999. ;
-!	double grid_imask(grid_size) ;
+!	int grid_imask(grid_size) ;
 !		grid_imask:_FillValue = -9999. ;
+!	double grid_area(grid_size) ;
+!		grid_area:units = "radians^2" ;
+!		grid_area:long_name = "area weights" ;
 !	int grid_dims(grid_rank) ;
 !}
 !\end{verbatim}
@@ -767,7 +767,7 @@ program ESMF_MeshEx
 !	coordDim = 2 ;
 !variables:	
 !	double 	nodeCoords(numNode, coordDim);
-!		nodeCoords:units = "degrees,degrees" ;
+!		nodeCoords:units = "degrees" ;
 !	int elementConn(numElement, maxNodePElement) ;
 !		elementConn:long_name = "Node Indices that define the element connectivity";
 !		elementConn:_FillValue = -1 ;	
