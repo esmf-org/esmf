@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.16 2011/02/22 21:17:11 w6ws Exp $
+// $Id: ESMCI_IO_XML.C,v 1.16.4.1 2011/09/01 18:21:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -22,6 +22,7 @@
  #define ESMC_FILENAME "ESMCI_IO_XML.C"
 
  // higher level, 3rd party or system includes here
+ #include <fstream>
  #include <cstdio>
  #include <cstdarg>
  #include <cstring>
@@ -49,7 +50,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.16 2011/02/22 21:17:11 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.16.4.1 2011/09/01 18:21:43 theurich Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -540,8 +541,44 @@ namespace ESMCI{
     }
          
 #else
-    // xerces library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
+    // if first write() call, open the writeFile for this IO_XML.
+    // TODO:  move to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if(!writeFile.is_open()) {
+      writeFile.open(this->fileName);
+      if (writeFile) {
+        writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName, &rc);
+        return(rc);
+      }
+    }
+
+    // indent if needed
+    if (indentLevel > 0) {
+      for(int i=0; i<indentLevel; i++) writeFile << "  ";
+    }
+ 
+    // write out the element's name with opening bracket: <name
+    writeFile << "<" << name;
+
+    // ... and follow with its attributes, if any: attrName="attrValue" ... 
+    if (nPairs > 0) {
+      for (int i=0; i < nPairs; i++) {
+        char *attrName  = va_arg(args, char*);
+        char *attrValue = va_arg(args, char*);
+        if (strlen(attrName) > 0) {
+          writeFile << " " << attrName << "=\"" << attrValue << "\"";
+        }
+      }
+    }
+
+    // ... and write the element's closing bracket: >
+    writeFile << ">";
+
+    // write out element name's value, if there is one
+    if (!value.empty()) writeFile << value;
 #endif
 
     return (rc);
@@ -585,20 +622,19 @@ namespace ESMCI{
 
     va_start(args, nPairs);
 
-#ifdef ESMF_XERCES
-
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
+#ifdef ESMF_XERCES
     // write end-of-line
     XMLCh* newLine = XMLString::transcode("\n");
     writeHandler->characters(newLine, XMLString::stringLen(newLine));
     XMLString::release(&newLine);
 
 #else
-    // xerces library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
+    // write end-of-line
+    writeFile << endl;
 #endif
 
     va_end(args);
@@ -645,12 +681,11 @@ namespace ESMCI{
 
     va_start(args, nPairs);
 
-#ifdef ESMF_XERCES
-
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
     ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
+#ifdef ESMF_XERCES
     // write the end of the XML element </name>
     XMLCh* qname = XMLString::transcode(name.c_str());
     writeHandler->endElement(XMLUni::fgZeroLenString,
@@ -663,8 +698,8 @@ namespace ESMCI{
     XMLString::release(&newLine);
 
 #else
-    // xerces library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
+    // write the end of the XML element </name> and end-of-line
+    writeFile << "</" << name << ">" << endl;
 #endif
 
     va_end(args);
@@ -734,9 +769,29 @@ namespace ESMCI{
     XMLCh* newLine = XMLString::transcode("\n");
     writeHandler->characters(newLine, XMLString::stringLen(newLine));
     XMLString::release(&newLine);
+
 #else
-    // xerces library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
+    // if first write() call, open the writeFile for this IO_XML.
+    // TODO:  move to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if(!writeFile.is_open()) {
+      writeFile.open(this->fileName);
+      if (writeFile) {
+        writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName, &rc);
+        return(rc);
+      }
+    }
+
+    // indent if needed
+    if (indentLevel > 0) {
+      for(int i=0; i<indentLevel; i++) writeFile << "  ";
+    }
+ 
+    // write the end of the XML element </name> and end-of-line
+    writeFile << "</" << name << ">" << endl;
 #endif
 
     return (rc);
@@ -792,9 +847,24 @@ namespace ESMCI{
     XMLCh* newLine = XMLString::transcode("\n");
     writeHandler->characters(newLine, XMLString::stringLen(newLine));
     XMLString::release(&newLine);
+
 #else
-    // xerces library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
+    // if first write() call, open the writeFile for this IO_XML.
+    // TODO:  move to Create()/construct(), if we ever
+    //      create "r,w,rw" flags in Create(), as well as move
+    //      readHandler/parser instantiation to Create()/construct().  ?
+    if(!writeFile.is_open()) {
+      writeFile.open(this->fileName);
+      if (writeFile) {
+        writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
+      } else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName, &rc);
+        return(rc);
+      }
+    }
+
+    // write XML <!-- comment --> and end-of-line
+    writeFile << "<!-- " << comment << " -->" << endl;
 #endif
 
     return (rc);
@@ -822,6 +892,10 @@ namespace ESMCI{
 //
 //EOP
 // !REQUIREMENTS:
+
+// TODO:  The intent is a single generalized write(), but probably not feasible
+//        for the Xerces SAX2 approach; however it may be if the Xerces DOM
+//        (tree) approach is ever used.
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_XML::write()"
@@ -1017,6 +1091,8 @@ void IO_XML::destruct(void) {
 
   // delete parser;  // NULL ok
   // parser = ESMC_NULL_POINTER;
+#else
+  writeFile.close();
 #endif
 
  } // end destruct()

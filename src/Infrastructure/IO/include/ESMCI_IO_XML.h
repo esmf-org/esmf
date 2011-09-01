@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.14 2011/04/28 18:53:35 rokuingh Exp $
+// $Id: ESMCI_IO_XML.h,v 1.14.2.1 2011/09/01 18:21:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,6 +40,7 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
+#include <fstream>
 #include <stdarg.h>
 #include "ESMCI_Base.h"           // inherited Base class
 #include "ESMCI_SAX2WriteHandler.h"
@@ -63,6 +64,8 @@ namespace ESMCI{
     SAX2WriteHandler* writeHandler;
     // SAX2ReadHandler* readHandler;  // TODO:  multiple reads per
     // SAX2XMLReader* parser;         //        IO_XML object lifetime ?
+#else
+    std::ofstream writeFile;
 #endif
 
 // !PUBLIC MEMBER FUNCTIONS:
