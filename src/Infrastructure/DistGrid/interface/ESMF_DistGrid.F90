@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.101 2011/08/25 01:55:56 rokuingh Exp $
+! $Id: ESMF_DistGrid.F90,v 1.102 2011/09/01 19:12:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.101 2011/08/25 01:55:56 rokuingh Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.102 2011/09/01 19:12:58 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -3037,7 +3037,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridPrint()"
 !BOP
-! !IROUTINE: ESMF_DistGridPrint - Print DistGrid internals
+! !IROUTINE: ESMF_DistGridPrint - Print DistGrid information
 
 ! !INTERFACE:
   subroutine ESMF_DistGridPrint(distgrid, keywordEnforcer, rc)

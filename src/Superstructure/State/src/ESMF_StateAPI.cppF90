@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.24 2011/08/25 20:33:11 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.25 2011/09/01 19:13:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.24 2011/08/25 20:33:11 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.25 2011/09/01 19:13:11 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1745,7 +1745,7 @@ StateGetMacro(ESMF_State,State,nestedstate,spp)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StatePrint"
 !BOP
-! !IROUTINE: ESMF_StatePrint - Print the internal data for a State
+! !IROUTINE: ESMF_StatePrint - Print State information
 !
 ! !INTERFACE:
       subroutine ESMF_StatePrint(state, options, nestedFlag, rc)

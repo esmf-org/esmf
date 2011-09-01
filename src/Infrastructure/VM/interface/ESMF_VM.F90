@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.147 2011/08/25 01:56:09 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.148 2011/09/01 19:13:07 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.147 2011/08/25 01:56:09 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.148 2011/09/01 19:13:07 rokuingh Exp $"
 
 !==============================================================================
 
@@ -3843,7 +3843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPrint()"
 !BOP
-! !IROUTINE: ESMF_VMPrint - Print VM internals
+! !IROUTINE: ESMF_VMPrint - Print VM information
 
 ! !INTERFACE:
   subroutine ESMF_VMPrint(vm, keywordEnforcer, rc)

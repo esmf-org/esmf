@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.44 2011/05/02 18:47:51 theurich Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.45 2011/09/01 19:13:12 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -9,7 +9,7 @@
 \usepackage{hyperref}
 \usepackage[T1]{fontenc}
 
-\newcommand{\docmttype}{User Guide}
+\newcommand{\docmttype}{User\`s Guide}
 \newcommand{\req}[1]{\section{\hspace{.2in}#1}}
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}

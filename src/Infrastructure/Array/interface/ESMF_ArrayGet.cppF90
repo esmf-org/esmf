@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.72 2011/08/25 01:55:51 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.73 2011/09/01 19:12:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.72 2011/08/25 01:55:51 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.73 2011/09/01 19:12:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -804,7 +804,7 @@ TypeKindRankDeclarationMacro(ArrayGetFPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayGetLocalArray()"
 !BOP
-! !IROUTINE: ESMF_ArrayGet - Get DE-local Array tile via LocalArray object
+! !IROUTINE: ESMF_ArrayGet - Get a DE-local LocalArray object from an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayGet()

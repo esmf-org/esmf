@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.36 2011/06/30 21:30:51 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.37 2011/09/01 19:12:51 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.36 2011/06/30 21:30:51 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.37 2011/09/01 19:12:51 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -423,7 +423,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayPrint()"
 !BOP
-! !IROUTINE: ESMF_ArrayPrint - Print Array internals
+! !IROUTINE: ESMF_ArrayPrint - Print Array information
 
 ! !INTERFACE:
   subroutine ESMF_ArrayPrint(array, keywordEnforcer, rc)
