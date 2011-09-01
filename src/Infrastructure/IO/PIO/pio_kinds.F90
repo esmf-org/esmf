@@ -11,7 +11,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.3 2011/03/14 23:33:12 samsoncheung Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.3.2.1 2011/09/01 18:26:49 theurich Exp $
 !  CVS:$Name:  $
 
 ! !USES:
@@ -20,7 +20,6 @@
    implicit none
    private
    include 'mpif.h'   ! _EXTERNAL
-   save
 
 
 ! !DEFINED PARAMETERS:

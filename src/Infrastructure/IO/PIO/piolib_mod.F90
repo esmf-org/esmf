@@ -36,7 +36,6 @@ module piolib_mod
   implicit none
   private
   include 'mpif.h'    ! _EXTERNAL
-  save
 
 
   ! !public member functions:
