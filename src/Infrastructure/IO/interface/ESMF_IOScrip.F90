@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.27.2.1 2011/09/01 18:10:43 theurich Exp $
+! $Id: ESMF_IOScrip.F90,v 1.27.2.2 2011/09/01 18:16:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -588,7 +588,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       logical, optional, intent(in) :: srcIsScrip
       logical, optional, intent(in) :: dstIsScrip
       character(len=*), optional, intent(in) :: title
-      character(len=*), optional, intent(in) :: method
+      type(ESMF_RegridMethod_Flag), optional, intent(in) :: method
       real(ESMF_KIND_R8),optional, intent(in) :: srcArea(:),dstArea(:)
       real(ESMF_KIND_R8),optional, intent(in) :: srcFrac(:), dstFrac(:)
       integer, optional :: rc
@@ -611,12 +611,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer(ESMF_KIND_I4), pointer:: mask(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
       character(len=256) :: titlelocal, norm, map_method, conventions
+      type(ESMF_RegridMethod_Flag) :: methodlocal
       character(len=80) :: srcunits, dstunits
       integer :: maxcount
       logical :: srcIsScriplocal, dstIsScriplocal
       integer :: srcNodeDim, dstNodeDim, srcCoordDim, dstCoordDim
       integer, parameter :: nf90_noerror = 0
       character(len=256) :: errmsg
+      character(len=20) :: varStr
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -685,9 +687,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          endif
          norm = "destarea"
          if (present(method)) then
-	   map_method = trim(method)
+	   methodlocal = method
+	   if (methodlocal%regridmethod == ESMF_REGRIDMETHOD_BILINEAR%regridmethod) then
+              map_method = "Bilinear remapping"
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_PATCH%regridmethod) then
+	      !scrip_test does not recognize patch remapping
+              map_method = "Bilinear remapping"
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+              map_method = "Conservative remapping"
+	   else
+	      !report error
+              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                  msg="- regridmethod not recongized", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+	      return
+	   endif
          else
-           map_method = "Bilinear remapping without Conservative Correction"
+	   methodlocal = ESMF_REGRIDMETHOD_BILINEAR
+           map_method = "Bilinear remapping"
          endif
          conventions = "NCAR-CSM"
 
@@ -770,8 +787,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, rc=status)
           call ESMF_ScripInqUnits(srcFile,units = srcunits, rc=status)
         else
-          call ESMF_EsmfInq(srcFile, elementCount=srcDim, maxNodePElement=src_grid_corner, &
-	      coordDim = srcCoordDim, nodeCount=srcNodeDim, rc=status)
+	  ! If bilinear, we have to switch node and elment, so the nodeCount became srcDim and
+          ! elementCount becomes srcNodeDim. Hard code src_grid_corner to 3.  The xv_a and xv_b
+          ! will be empty   
+	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. & 
+            methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
+            call ESMF_EsmfInq(srcFile, nodeCount=srcDim,  &
+	        coordDim = srcCoordDim, elementCount=srcNodeDim, rc=status)
+                src_grid_corner =3;
+	  else
+            call ESMF_EsmfInq(srcFile, elementCount=srcDim, maxNodePElement=src_grid_corner, &
+	        coordDim = srcCoordDim, nodeCount=srcNodeDim, rc=status)
+	  endif
           call ESMF_EsmfInqUnits(srcFile,units = srcunits, rc=status)
           allocate(src_grid_dims(1))
           src_grid_dims(1)=1
@@ -783,8 +810,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, rc=status)
           call ESMF_ScripInqUnits(dstFile,units = dstunits, rc=status)
         else
-          call ESMF_EsmfInq(dstFile, elementCount=dstDim, maxNodePElement=dst_grid_corner, &
+	  ! If bilinear, we have to switch node and elment, so the nodeCount became srcDim and
+          ! elementCount becomes srcNodeDim. Hard code src_grid_corner to 3.  The xv_a and xv_b
+          ! will be empty   
+	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
+	       methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
+            call ESMF_EsmfInq(dstFile, nodeCount=dstDim,  &
+	        coordDim = dstCoordDim, elementCount=dstNodeDim, rc=status)
+                dst_grid_corner =3;
+	  else
+            call ESMF_EsmfInq(dstFile, elementCount=dstDim, maxNodePElement=dst_grid_corner, &
 	      coordDim = dstCoordDim, nodeCount=dstNodeDim, rc=status)    
+	  endif
           call ESMF_EsmfInqUnits(dstFile,units = dstunits, rc=status)
           allocate(dst_grid_dims(1))
           dst_grid_dims(1)=1   
@@ -1206,21 +1243,29 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
            deallocate(mask)
         else 
+           ! ESMF unstructured grid
            ncStatus=nf90_open(srcFile,NF90_NOWRITE,ncid1)
            if (CDFCheckError (ncStatus, &
              ESMF_METHOD, &
              ESMF_SRCLINE,&
 	     trim(srcFile),&
              rc)) return
-	   ! check if centerCoords exit
-           ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
+  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
+	     ! check if centerCoords exit
+             ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
+	     varStr = "nodeCoords";
+	   else
+             ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
+	     varStr = "centerCoords";
+           endif
 	   if (ncStatus /= nf90_noerror) then
-	     print *, "centerCoords does not exit"
+	     print *, varStr, " does not exit"
            else 
 	     allocate(latBuffer2(srcCoordDim, srcDim))
              allocate(latBuffer(srcDim), lonBuffer(srcDim))
              ncStatus=nf90_get_var(ncid1,VarId, latBuffer2)
-             errmsg = "Variable centerCoors in "//trim(srcFile)
+             errmsg = "Variable "//trim(varStr)//" in "//trim(srcFile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,&
@@ -1249,45 +1294,52 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                rc)) return
              deallocate(latBuffer, lonBuffer, latBuffer2)
            endif
-           
+
+           ! only write out xv_a and yv_a when the regrid method is conserve
+  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
            ! output xv_a and yv_a is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes nd longitudes for
            ! all the corner vertices
-           allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
-           call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
-		latBuffer2, lonBuffer2,status) 
-           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))         
+             call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
+		  latBuffer2, lonBuffer2,status) 
+             if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        	  ESMF_CONTEXT, rcToReturn=rc)) return
 
-	   ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
-           ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
-           errmsg = "Variable xv_a in "//trim(wgtfile)
-           if (CDFCheckError (ncStatus, &
-             ESMF_METHOD, &
-             ESMF_SRCLINE, errmsg, &
-             rc)) return
+	     ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
+             ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
+             errmsg = "Variable xv_a in "//trim(wgtfile)
+             if (CDFCheckError (ncStatus, &
+               ESMF_METHOD, &
+               ESMF_SRCLINE, errmsg, &
+               rc)) return
 
-           ncStatus=nf90_inq_varid(ncid,"yv_a",VarId)
-           ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
-           errmsg = "Variable yv_a in "//trim(wgtfile)
-           if (CDFCheckError (ncStatus, &
-             ESMF_METHOD, &
-             ESMF_SRCLINE,errmsg,&
-             rc)) return
-           deallocate(latBuffer2, lonBuffer2) 
-           allocate(mask(srcDim))         
-           ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
-	   if (ncStatus /= nf90_noerror) then
-	     print *, "elementMask does not exit"
-             mask = 1
-           else 
-             ncStatus=nf90_get_var(ncid1,VarId, mask)
-             errmsg = "Variable elementMask in "//trim(srcFile)
+             ncStatus=nf90_inq_varid(ncid,"yv_a",VarId)
+             ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
+             errmsg = "Variable yv_a in "//trim(wgtfile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-           end if
+             deallocate(latBuffer2, lonBuffer2) 
+           endif
+           allocate(mask(srcDim))         
+  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+             ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
+	     if (ncStatus /= nf90_noerror) then
+	       print *, "elementMask does not exit"
+               mask = 1
+             else 
+               ncStatus=nf90_get_var(ncid1,VarId, mask)
+               errmsg = "Variable elementMask in "//trim(srcFile)
+               if (CDFCheckError (ncStatus, &
+                 ESMF_METHOD, &
+                 ESMF_SRCLINE,errmsg,&
+                 rc)) return
+              end if
+	   else
+	      mask = 1
+           endif   
            ncStatus=nf90_inq_varid(ncid,"mask_a",VarId)
            ncStatus=nf90_put_var(ncid,VarId, mask)          
            errmsg = "Variable mask_a in "//trim(wgtfile)
@@ -1367,15 +1419,23 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_METHOD, &
              ESMF_SRCLINE,errmsg,&
          rc)) return
-	   ! check if centerCoords exit
-           ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
+           ! only write out xv_a and yv_a when the regrid method is conserve
+  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
+	     ! check if centerCoords exit
+             ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
+	     varStr = "nodeCoords";
+	   else
+             ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
+	     varStr = "centerCoords";
+           endif
 	   if (ncStatus /= nf90_noerror) then
-	     print *, "centerCoords does not exit"
+	     print *, varStr, " does not exit"
            else 
 	     allocate(latBuffer2(dstCoordDim, dstDim))
              allocate(latBuffer(dstDim), lonBuffer(dstDim))
              ncStatus=nf90_get_var(ncid1,VarId, latBuffer2)
-             errmsg = "Variable centerCoords in "//trim(dstFile)
+             errmsg = "Variable "//varStr//" in "//trim(dstFile)
              if (CDFCheckError (ncStatus, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
@@ -1405,6 +1465,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! output xv_b and yv_b is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes nd longitudes for
            ! all the corner vertices
+  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
            allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))         
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
 		latBuffer2, lonBuffer2, status) 
@@ -1427,20 +1488,26 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
            deallocate(latBuffer2, lonBuffer2) 
+           endif
            ! Write mask_b
            allocate(mask(dstDim))         
-           ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
-	   if (ncStatus /= nf90_noerror) then
-	     print *, "elementMask does not exit"
-             mask = 1
-           else 
-             ncStatus=nf90_get_var(ncid1,VarId, mask)
-             errmsg = "Variable elementMask in "//trim(dstFile)
-             if (CDFCheckError (ncStatus, &
-               ESMF_METHOD, &
-               ESMF_SRCLINE,errmsg,&
-               rc)) return
-           end if
+  	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
+             ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
+	     if (ncStatus /= nf90_noerror) then
+	       print *, "elementMask does not exit"
+               mask = 1
+             else 
+               ncStatus=nf90_get_var(ncid1,VarId, mask)
+               errmsg = "Variable elementMask in "//trim(dstFile)
+               if (CDFCheckError (ncStatus, &
+                 ESMF_METHOD, &
+                 ESMF_SRCLINE,errmsg,&
+                 rc)) return
+             end if
+           else
+             ! make mask all 1
+             mask=1
+           endif
            ncStatus=nf90_inq_varid(ncid,"mask_b",VarId)
            ncStatus=nf90_put_var(ncid,VarId, mask)          
            errmsg = "Variable mask_b in "//trim(wgtfile)
@@ -1527,7 +1594,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             ncStatus=nf90_put_var(ncid,VarId, frac)          
             deallocate(frac)
          endif
-         errmsg = "Variable frac_a in "//trim(wgtfile)
+         errmsg = "Variable frac_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,errmsg,&
