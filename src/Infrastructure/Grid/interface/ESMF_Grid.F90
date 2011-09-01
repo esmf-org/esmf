@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246.2.1 2011/08/29 17:57:33 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.2 2011/09/01 18:59:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246.2.1 2011/08/29 17:57:33 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.2 2011/09/01 18:59:38 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3295,15 +3295,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, irregularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}) without a periodic dimension. 
+! (see Figure \ref{fig:GridDecomps}). 
 ! To specify the irregular distribution, the user passes in an array 
 ! for each grid dimension, where the length of the array is the number
-! of DEs in the dimension.   Up to three dimensions can be specified, 
-! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
-! The index of each array element corresponds to a DE number.  The 
-! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim arrays that are specified. 
+! of DEs in the dimension.  Currently this call only
+! supports creating 2D or 3D Grids. A 2D Grid can be specified using the   
+! countsPerDEDim1 and countsPerDEDim2 arguments.  A 3D Grid can  
+! be specified by also using the optional countsPerDEDim3 argument.
+! The index of each array element in these arguments corresponds to 
+! a DE number.  The array value at the index is the number of grid
+! cells on the DE in that dimension.
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -3594,7 +3595,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
-! occur.  The default is to divide the range as evenly as possible.
+! occur.  The default is to divide the range as evenly as possible. Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -3875,6 +3877,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
 ! {\tt localArbIndex}. 
+!
+! Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
+!
 !
 ! The arguments are:
 ! \begin{description}
@@ -4881,9 +4887,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Create single tile grid with global indices, and with specified 
     ! regular distribution
     ! TODO:  when RegDecompX,Y optional and not specified, don't pass regDecomp
-    call ESMF_GridSetCommitShapeTile(grid, maxIndex=maxIndex, &
-                                     regDecomp=regDecomp, &
-                                     indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+    call ESMF_GridEmptyComplete(grid, maxIndex=maxIndex, &
+         regDecomp=regDecomp, &
+         indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) then
       call ESMF_GridDestroy(grid)
@@ -5708,15 +5714,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, irregularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}) without a periodic dimension. 
+! (see Figure \ref{fig:GridDecomps}) with one periodic dimension. 
 ! To specify the irregular distribution, the user passes in an array 
 ! for each grid dimension, where the length of the array is the number
-! of DEs in the dimension.   Up to three dimensions can be specified, 
-! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
-! The index of each array element corresponds to a DE number.  The 
-! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim arrays that are specified. 
+! of DEs in the dimension. Currently this call only
+! supports creating 2D or 3D Grids. A 2D Grid can be specified using the   
+! countsPerDEDim1 and countsPerDEDim2 arguments.  A 3D Grid can  
+! be specified by also using the optional countsPerDEDim3 argument.
+! The index of each array element in these arguments corresponds to 
+! a DE number.  The array value at the index is the number of grid
+! cells on the DE in that dimension.
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -5990,11 +5997,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}).
+! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
-! occur.  The default is to divide the range as evenly as possible.
+! occur.  The default is to divide the range as evenly as possible. Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -6251,7 +6259,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, arbitrarily distributed grid 
-! (see Figure \ref{fig:GridDecomps}).
+! (see Figure \ref{fig:GridDecomps}) with one periodic dimension.
 ! To specify the arbitrary distribution, the user passes in an 2D array 
 ! of local indices, where the first dimension is the number of local grid cells
 ! specified by {\tt localArbIndexCount} and the second dimension is the number of distributed
@@ -6260,6 +6268,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
 ! {\tt localArbIndex}. 
+!
+! Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
+!
 !
 ! The arguments are:
 ! \begin{description}
@@ -6489,15 +6501,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, irregularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}) without a periodic dimension. 
+! (see Figure \ref{fig:GridDecomps}) with two periodic dimensions. 
 ! To specify the irregular distribution, the user passes in an array 
 ! for each grid dimension, where the length of the array is the number
-! of DEs in the dimension.   Up to three dimensions can be specified, 
-! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
-! The index of each array element corresponds to a DE number.  The 
-! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim arrays that are specified. 
+! of DEs in the dimension. Currently this call only
+! supports creating 2D or 3D Grids. A 2D Grid can be specified using the   
+! countsPerDEDim1 and countsPerDEDim2 arguments.  A 3D Grid can  
+! be specified by also using the optional countsPerDEDim3 argument.
+! The index of each array element in these arguments corresponds to 
+! a DE number.  The array value at the index is the number of grid
+! cells on the DE in that dimension.
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -6758,11 +6771,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}).
+! (see Figure \ref{fig:GridDecomps}) with two periodic dimensions. 
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
-! occur.  The default is to divide the range as evenly as possible.
+! occur.  The default is to divide the range as evenly as possible. Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -7004,15 +7018,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, arbitrarily distributed grid 
-! (see Figure \ref{fig:GridDecomps}).
+! (see Figure \ref{fig:GridDecomps}) with two periodic dimensions. 
 ! To specify the arbitrary distribution, the user passes in an 2D array 
 ! of local indices, where the first dimension is the number of local grid cells
 ! specified by {\tt localArbIndexCount} and the second dimension is the number of distributed
-! dimensions.
+! dimensions. 
 !
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
 ! {\tt localArbIndex}. 
+!
+! Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
+!
 !
 ! The arguments are:
 ! \begin{description}
@@ -7233,12 +7251,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! (see Figure \ref{fig:GridDecomps}) without a periodic dimension. 
 ! To specify the irregular distribution, the user passes in an array 
 ! for each grid dimension, where the length of the array is the number
-! of DEs in the dimension.   Up to three dimensions can be specified, 
-! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
-! The index of each array element corresponds to a DE number.  The 
-! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim arrays that are specified. 
+! of DEs in the dimension. Currently this call only
+! supports creating 2D or 3D Grids. A 2D Grid can be specified using the   
+! countsPerDEDim1 and countsPerDEDim2 arguments.  A 3D Grid can  
+! be specified by also using the optional countsPerDEDim3 argument.
+! The index of each array element in these arguments corresponds to 
+! a DE number.  The array value at the index is the number of grid
+! cells on the DE in that dimension.
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -7487,11 +7506,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, regularly distributed grid 
-! (see Figure \ref{fig:GridDecomps}).
+! (see Figure \ref{fig:GridDecomps}) with no periodic dimension. 
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
-! occur.  The default is to divide the range as evenly as possible.
+! occur.  The default is to divide the range as evenly as possible. Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -7723,7 +7743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !
 ! This method creates a single tile, arbitrarily distributed grid 
-! (see Figure \ref{fig:GridDecomps}).
+! (see Figure \ref{fig:GridDecomps}) with no periodic dimension. 
 ! To specify the arbitrary distribution, the user passes in an 2D array 
 ! of local indices, where the first dimension is the number of local grid cells
 ! specified by {\tt localArbIndexCount} and the second dimension is the number of distributed
@@ -7732,6 +7752,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
 ! {\tt localArbIndex}. 
+!
+! Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
+!
 !
 ! The arguments are:
 ! \begin{description}
@@ -10552,12 +10576,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! It then completes the grid to form a single tile, irregularly distributed grid 
 ! (see Figure \ref{fig:GridDecomps}). To specify the irregular distribution, the user passes in an array 
 ! for each grid dimension, where the length of the array is the number
-! of DEs in the dimension.   Up to three dimensions can be specified, 
-! using the countsPerDEDim1, countsPerDEDim2, countsPerDEDim3 arguments.
-! The index of each array element corresponds to a DE number.  The 
-! array value at the index is the number of grid cells on the DE in 
-! that dimension.  The dimCount of the grid is equal to the number of 
-! countsPerDEDim arrays that are specified. 
+! of DEs in the dimension. Currently this call only
+! supports creating 2D or 3D Grids. A 2D Grid can be specified using the   
+! countsPerDEDim1 and countsPerDEDim2 arguments.  A 3D Grid can  
+! be specified by also using the optional countsPerDEDim3 argument.
+! The index of each array element in these arguments corresponds to 
+! a DE number.  The array value at the index is the number of grid
+! cells on the DE in that dimension.
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
 ! of using this method to create a 2D Grid with uniformly spaced 
@@ -10854,7 +10879,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! To specify the distribution, the user passes in an array 
 ! ({\tt regDecomp}) specifying the number of DEs to divide each 
 ! dimension into. The array {\tt decompFlag} indicates how the division into DEs is to
-! occur.  The default is to divide the range as evenly as possible.
+! occur.  The default is to divide the range as evenly as possible. Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -11136,11 +11162,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! To specify the arbitrary distribution, the user passes in an 2D array 
 ! of local indices, where the first dimension is the number of local grid cells
 ! specified by {\tt localArbIndexCount} and the second dimension is the number of distributed
-! dimensions.
+! dimensions. 
 !
 ! {\tt distDim} specifies which grid dimensions are arbitrarily distributed. The 
 ! size of {\tt distDim} has to agree with the size of the second dimension of 
 ! {\tt localArbIndex}. 
+!
+! Currently this call
+! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
+!
 !
 ! The arguments are:
 ! \begin{description}
