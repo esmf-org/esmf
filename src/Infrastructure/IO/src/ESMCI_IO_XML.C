@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.17 2011/08/23 05:15:22 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.18 2011/09/01 23:19:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,12 +45,13 @@
  #include <ESMCI_SAX2ReadHandler.h>
  #include <ESMCI_SAX2WriteHandler.h>
 
- using namespace std;  // auto_ptr
+ using std::string;
+ using std::auto_ptr;
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.17 2011/08/23 05:15:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.18 2011/09/01 23:19:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -479,6 +480,8 @@ namespace ESMCI{
     // TODO:  move instantiation to Create()/construct(), if we ever
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
+    // Also, a future use could be to write to a network protocol rather
+    // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
       writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
@@ -545,6 +548,8 @@ namespace ESMCI{
     // TODO:  move to Create()/construct(), if we ever
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
+    // Also, a future use could be to write to a network protocol rather
+    // than a file.
     if(!writeFile.is_open()) {
       writeFile.open(this->fileName);
       if (writeFile) {
@@ -745,6 +750,8 @@ namespace ESMCI{
     // TODO:  move instantiation to Create()/construct(), if we ever
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
+    // Also, a future use could be to write to a network protocol rather
+    // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
       writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
@@ -833,6 +840,8 @@ namespace ESMCI{
     // TODO:  move instantiation to Create()/construct(), if we ever
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
+    // Also, a future use could be to write to a network protocol rather
+    // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
       writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
@@ -895,7 +904,8 @@ namespace ESMCI{
 
 // TODO:  The intent is a single generalized write(), but probably not feasible
 //        for the Xerces SAX2 approach; however it may be if the Xerces DOM
-//        (tree) approach is ever used.
+//        (tree) approach is ever used.  Also, a future use could be to write 
+//        to a network protocol rather than a file.
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::IO_XML::write()"
@@ -935,6 +945,8 @@ namespace ESMCI{
     // TODO:  move instantiation to Create()/construct(), if we ever
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
+    // Also, a future use could be to write to a network protocol rather
+    // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
       writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);

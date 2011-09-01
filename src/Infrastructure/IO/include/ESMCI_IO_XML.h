@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.15 2011/08/23 05:15:20 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.16 2011/09/01 23:19:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,7 +61,9 @@ namespace ESMCI{
     char       fileName[ESMF_MAXSTR];
     char       schemaFileName[ESMF_MAXSTR];
 #ifdef ESMF_XERCES
-    SAX2WriteHandler* writeHandler;
+    SAX2WriteHandler* writeHandler;   // to file; a future use could be to 
+                                      // write to a network protocol rather
+                                      // than a file.
     // SAX2ReadHandler* readHandler;  // TODO:  multiple reads per
     // SAX2XMLReader* parser;         //        IO_XML object lifetime ?
 #else

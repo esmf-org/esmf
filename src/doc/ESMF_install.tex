@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.98 2011/06/28 15:45:18 theurich Exp $
+% $Id: ESMF_install.tex,v 1.99 2011/09/01 23:19:06 eschwab Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -214,10 +214,12 @@ PIO library that is included and built with ESMF.
 
 \subsubsection{XERCES}
 \label{sec:xerces}
-ESMF provides the ability to read and write Attribute data in XML file format 
+ESMF provides the ability to read Attribute data in XML file format 
 via the \htmladdnormallink{XERCES C++}{http://xerces.apache.org/xerces-c/} 
-library.  The following environment variables enable, and specify the name 
-and location of the desired XERCES C++ library and associated header files:
+library.  (Writing Attribute XML files is performed with the standard C++ 
+output file stream facility, rather than with Xerces).  The following 
+environment variables enable, and specify the name and location of the 
+desired XERCES C++ library and associated header files:
 
 \begin{description}
 
