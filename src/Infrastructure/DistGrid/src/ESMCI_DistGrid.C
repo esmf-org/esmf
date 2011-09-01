@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.65 2011/09/01 21:17:54 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.66 2011/09/01 23:29:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.65 2011/09/01 21:17:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.66 2011/09/01 23:29:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -413,11 +413,14 @@ DistGrid *DistGrid::create(
     memcpy(distgrid->indexCountPDimPDe, dg->indexCountPDimPDe,
       sizeof(int)*dimCount*deCount);
     distgrid->indexListPDimPLocalDe = new int*[dimCount*localDeCount];
-    for (int i=0; i<dimCount*localDeCount; i++){
-      int size = distgrid->indexCountPDimPDe[i];
-      distgrid->indexListPDimPLocalDe[i] = new int[size];
-      memcpy(distgrid->indexListPDimPLocalDe[i],
-        dg->indexListPDimPLocalDe[i], sizeof(int)*size);
+    for (int i=0; i<localDeCount; i++){
+      int de = dg->delayout->getLocalDeList()[i];
+      for (int j=0; j<dimCount; j++){
+        int size = distgrid->indexCountPDimPDe[de*dimCount+j];
+        distgrid->indexListPDimPLocalDe[i*dimCount+j] = new int[size];
+        memcpy(distgrid->indexListPDimPLocalDe[i*dimCount+j],
+          dg->indexListPDimPLocalDe[i*dimCount+j], sizeof(int)*size);
+      }
     }
     int connectionCount = distgrid->connectionCount = dg->connectionCount;
     if (connectionCount){
@@ -479,6 +482,10 @@ DistGrid *DistGrid::create(
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return NULL;
+  }catch(exception &x){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), rc);
     return NULL;
   }catch(...){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
