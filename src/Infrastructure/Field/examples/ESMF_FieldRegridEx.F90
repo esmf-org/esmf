@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.51 2011/08/30 21:41:41 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.52 2011/09/01 21:50:19 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.51 2011/08/30 21:41:41 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.52 2011/09/01 21:50:19 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -288,8 +288,8 @@ program ESMF_FieldRegridEx
 ! In the case that the Grid is on a sphere (coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_DEG)
 ! then the coordinates given in the Grid are interpretted as latitude and longitude values. The coordinates can either be in degrees or radians as indicated by the 
 ! {\tt coordSys} flag set during Grid creation. As is true with many global models, this application currently assumes the latitude and longitude refer to positions on a 
-! perfect sphere, as opposed to a more complex and accurate representation of the earth's true shape such as would be used in a GIS system. (Our current user base doesn't 
-! require this level of detail in representing the earth's shape, but please feel free to contact us at esmf\_support@list.woc.noaa.gov to request this functionality.)
+! perfect sphere, as opposed to a more complex and accurate representation of the earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't 
+! require this level of detail in representing the earth's shape, but it could be added in the future if necessary.)
 !
 ! In terms of masking, ESMF regrid currently supports masking for Fields built on structured Grids. The user may mask out points in 
 ! the source Field or destination Field or both. The user also has the option to return an error for unmapped destination points or
