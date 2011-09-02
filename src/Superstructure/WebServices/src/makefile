@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2011/08/04 22:15:18 ksaint Exp $
+# $Id: makefile,v 1.7 2011/09/02 21:21:23 theurich Exp $
 
 ALL: build_here 
 
@@ -26,7 +26,7 @@ SOURCEC	  = ESMCI_WebServNetEsmfClient.C \
 SOURCEF	  = ESMF_WebServ.F90 ESMF_WebServComponent_C.F90
 SOURCEH	  = ESMCI_WebServ.h
 STOREH    = ESMCI_WebServLowLevelSocket.h \
-STOREH    = ESMCI_WebServServerSocket.h \
+            ESMCI_WebServServerSocket.h \
             ESMCI_WebServClientSocket.h \
             ESMCI_WebServNetEsmf.h \
             ESMCI_WebServClientInfo.h \
