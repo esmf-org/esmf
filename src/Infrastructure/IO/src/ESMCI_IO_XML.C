@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.18 2011/09/01 23:19:05 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.19 2011/09/02 04:49:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,11 +47,12 @@
 
  using std::string;
  using std::auto_ptr;
+ using std::endl;
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.18 2011/09/01 23:19:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.19 2011/09/02 04:49:11 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 
