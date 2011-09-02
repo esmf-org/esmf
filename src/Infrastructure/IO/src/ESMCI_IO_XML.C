@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.19 2011/09/02 04:49:11 w6ws Exp $
+// $Id: ESMCI_IO_XML.C,v 1.20 2011/09/02 05:59:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,13 +46,16 @@
  #include <ESMCI_SAX2WriteHandler.h>
 
  using std::string;
- using std::auto_ptr;
  using std::endl;
+
+#ifdef ESMF_XERCES
+ using std::auto_ptr;
+#endif
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.19 2011/09/02 04:49:11 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.20 2011/09/02 05:59:51 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
