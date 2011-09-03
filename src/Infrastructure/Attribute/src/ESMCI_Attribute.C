@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.124 2011/08/23 05:21:34 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.125 2011/09/03 06:00:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,12 +44,10 @@ using std::vector;
 using std::ostringstream;
 using std::transform;
 
-using namespace std;
-
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.124 2011/08/23 05:21:34 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.125 2011/09/03 06:00:29 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4968,9 +4966,12 @@ if (attrRoot == ESMF_TRUE) {
     localrc = io_xml->writeStartElement("documentRelationship", "", ++indent, 2,
                                         "direction", "toTarget",
       // direction: {'toTarget', 'fromTarget'}
-                                        "type", "laterVersionOf");
+                                        "type", "previousVersionOf");
       // type: {'similarTo', 'other', 'laterVersionOf', 
       //        'previousVersionOf', 'fixedVersionOf'}
+      // Both direction & type are set to match Metafor Questionnaire output.
+      // Note: ESG 1.3.1 harvester CimHarvest.java looks for "previousVersion";
+      //       bug was reported in Jira ticket #2692 8/31/11.
 
     if (attpack->AttributeIsSet("PreviousVersionDescription")) {
       localrc = attpack->AttributeGet("PreviousVersionDescription", &valuevector);
