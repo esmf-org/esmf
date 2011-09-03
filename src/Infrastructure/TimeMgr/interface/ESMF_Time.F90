@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.131 2011/06/30 23:31:05 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.131.2.1 2011/09/03 00:03:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.131 2011/06/30 23:31:05 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.131.2.1 2011/09/03 00:03:15 theurich Exp $'
 
 !==============================================================================
 !
@@ -954,7 +954,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_TimePrint()"
 !BOP
-! !IROUTINE:  ESMF_TimePrint - Print the contents of a Time 
+! !IROUTINE:  ESMF_TimePrint - Print Time information
 
 ! !INTERFACE:
       subroutine ESMF_TimePrint(time, options, rc)

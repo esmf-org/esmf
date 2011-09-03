@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.146 2011/07/01 18:17:01 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.146.2.1 2011/09/03 00:03:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.146 2011/07/01 18:17:01 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.146.2.1 2011/09/03 00:03:17 theurich Exp $"
 
 !==============================================================================
 
@@ -3448,7 +3448,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetDefault()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get VM internals
+! !IROUTINE: ESMF_VMGet - Get object-wide information from a VM
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
@@ -3542,7 +3542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetPetLocalInfo()"
 !BOP
-! !IROUTINE: ESMF_VMGet - Get VM PET local internals
+! !IROUTINE: ESMF_VMGet - Get PET-local VM information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
@@ -3843,7 +3843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPrint()"
 !BOP
-! !IROUTINE: ESMF_VMPrint - Print VM internals
+! !IROUTINE: ESMF_VMPrint - Print VM information
 
 ! !INTERFACE:
   subroutine ESMF_VMPrint(vm, keywordEnforcer, rc)

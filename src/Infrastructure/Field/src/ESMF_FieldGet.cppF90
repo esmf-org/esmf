@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.94 2011/07/05 18:12:32 feiliu Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.94.2.1 2011/09/03 00:03:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.94 2011/07/05 18:12:32 feiliu Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.94.2.1 2011/09/03 00:03:05 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -103,7 +103,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGetDefault"
 !BOP
-! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
+! !IROUTINE: ESMF_FieldGet - Get object-wide Field information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGet()
@@ -611,7 +611,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define FieldGetDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldGet - Get Fortran data pointer from a Field @\
+! !IROUTINE: ESMF_FieldGet - Get a DE-local Fortran array pointer from a Field @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldGet() @\
@@ -790,7 +790,7 @@ TypeKindRankDeclarationMacro(FieldGetDataPtr)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldGetBounds"
 !BOP
-! !IROUTINE: ESMF_FieldGetBounds -  Get Field data bounds
+! !IROUTINE: ESMF_FieldGetBounds -  Get DE-local Field data bounds
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldGetBounds()

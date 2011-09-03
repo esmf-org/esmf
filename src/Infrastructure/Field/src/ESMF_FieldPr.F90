@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.47 2011/06/30 17:35:23 feiliu Exp $
+! $Id: ESMF_FieldPr.F90,v 1.47.2.1 2011/09/03 00:03:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ contains
 #define ESMF_METHOD "ESMF_FieldPrint"
 
 !BOP
-! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
+! !IROUTINE:  ESMF_FieldPrint - Print Field information
 
 ! !INTERFACE:
       subroutine ESMF_FieldPrint(field, keywordEnforcer, rc)

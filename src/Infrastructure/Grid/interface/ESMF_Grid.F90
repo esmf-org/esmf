@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246.2.2 2011/09/01 18:59:38 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.3 2011/09/03 00:03:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246.2.2 2011/09/01 18:59:38 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.3 2011/09/03 00:03:09 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11441,7 +11441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetDefault"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get information about a Grid
+! !IROUTINE: ESMF_GridGet - Get object-wide Grid information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -11771,7 +11771,7 @@ end subroutine ESMF_GridGetDefault
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDe"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get information about a particular DE in a Grid
+! !IROUTINE: ESMF_GridGet - Get DE-local Grid information
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -11918,7 +11918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDePSloc"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get information about a particular DE in a stagger location in a Grid
+! !IROUTINE: ESMF_GridGet - Get DE-local information for a specific stagger location in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -12089,7 +12089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPSloc"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get information about a particular stagger location in a Grid
+! !IROUTINE: ESMF_GridGet - Get information about a specific stagger location in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -12164,7 +12164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPSlocPTile"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get information about a particular stagger location and tile 
+! !IROUTINE: ESMF_GridGet - Get information about a specific stagger location and tile in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGet()
@@ -12285,7 +12285,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get a Fortran pointer to Grid coord data and coord bounds
+! !IROUTINE: ESMF_GridGetCoord - Get a DE-local Fortran array pointer to Grid coord data and coord bounds
 !
 ! !INTERFACE:
 !      subroutine ESMF_GridGetCoord(grid, coordDim, keywordEnforcer,    &
@@ -14158,7 +14158,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put in an Array
+! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put into an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
@@ -14257,7 +14257,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordR4"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
+! !IROUTINE: ESMF_GridGetCoord - Get DE-local coordinates from a specific index location in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
@@ -14342,7 +14342,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordR8"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get coordinates from a specific index location
+! !IROUTINE: ESMF_GridGetCoord - Get DE-local coordinates from a specific index location in a Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
@@ -14635,7 +14635,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetItem - Get a Fortran pointer to Grid item data and item bounds
+! !IROUTINE: ESMF_GridGetItem - Get a DE-local Fortran array pointer to Grid item data and item bounds
 ! !INTERFACE:
 !      subroutine ESMF_GridGetItem(grid, itemflag,  keywordEnforcer, &
 !        staggerloc, localDE, <pointer argument>, 
@@ -17102,7 +17102,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemIntoArray"
 !BOP
-! !IROUTINE: ESMF_GridGetItem - Get item and put into an Array
+! !IROUTINE: ESMF_GridGetItem - Get a Grid item and put into an Array
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
@@ -17186,7 +17186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemBounds"
 !BOP
-! !IROUTINE: ESMF_GridGetItemBounds -  Get Grid item bounds
+! !IROUTINE: ESMF_GridGetItemBounds -  Get DE-local item bounds from a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetItemBounds(grid, itemflag,  keywordEnforcer, &

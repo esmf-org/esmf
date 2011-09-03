@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.76.2.3 2011/09/01 18:10:45 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.76.2.4 2011/09/03 00:03:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.76.2.3 2011/09/01 18:10:45 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.76.2.4 2011/09/03 00:03:14 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.76.2.3 2011/09/01 18:10:45 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.76.2.4 2011/09/03 00:03:14 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1762,7 +1762,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGet"
 !BOP
-! !IROUTINE: ESMF_MeshGet - Get information from a Mesh
+! !IROUTINE: ESMF_MeshGet - Get object-wide Mesh information
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &

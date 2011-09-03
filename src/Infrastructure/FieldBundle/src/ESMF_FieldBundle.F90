@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.128 2011/07/11 21:30:32 svasquez Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.128.2.1 2011/09/03 00:03:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.128 2011/07/11 21:30:32 svasquez Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.128.2.1 2011/09/03 00:03:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1297,7 +1297,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetListAll()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGet - Get information of the FieldBundle
+! !IROUTINE: ESMF_FieldBundleGet - Get object-wide information from the FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -1859,7 +1859,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundlePrint()"
 !BOP
-! !IROUTINE: ESMF_FieldBundlePrint - Print FieldBundle internals
+! !IROUTINE: ESMF_FieldBundlePrint - Print FieldBundle information
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundlePrint(fieldbundle, keywordEnforcer, rc)

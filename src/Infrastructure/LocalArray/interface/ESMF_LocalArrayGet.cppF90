@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.32 2011/07/01 03:56:40 theurich Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.32.2.1 2011/09/03 00:03:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ module ESMF_LocalArrayGetMod
 #define LocalArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
 !BOP @\
-! !IROUTINE: ESMF_LocalArrayGet - Get access to data in a LocalArray object @\
+! !IROUTINE: ESMF_LocalArrayGet - Get a Fortran array pointer from a LocalArray @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_LocalArrayGet() @\
@@ -210,7 +210,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.32 2011/07/01 03:56:40 theurich Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.32.2.1 2011/09/03 00:03:12 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -264,7 +264,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_LocalArrayGetDefault"
 !BOP
-! !IROUTINE: ESMF_LocalArrayGet - Return LocalArray information
+! !IROUTINE: ESMF_LocalArrayGet - Get object-wide LocalArray information
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_LocalArrayGet()

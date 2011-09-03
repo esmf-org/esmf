@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.102 2011/07/01 18:34:25 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.102.2.1 2011/09/03 00:03:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.102 2011/07/01 18:34:25 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.102.2.1 2011/09/03 00:03:02 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -976,7 +976,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGet()"
 !BOP
-! !IROUTINE: ESMF_DELayoutGet - Get DELayout internals
+! !IROUTINE: ESMF_DELayoutGet - Get object-wide DELayout information
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
@@ -1512,7 +1512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutPrint()"
 !BOP
-! !IROUTINE: ESMF_DELayoutPrint - Print DELayout internals
+! !IROUTINE: ESMF_DELayoutPrint - Print DELayout information
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutPrint(delayout, keywordEnforcer, rc)
