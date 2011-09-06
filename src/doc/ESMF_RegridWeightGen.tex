@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.42 2011/09/06 21:23:31 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.43 2011/09/06 21:28:52 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -50,7 +50,7 @@ In addition, the corner coordinates are also put into the corner stagger locatio
 source or destination grid is a cubed sphere grid or an unstructured grid. When making this call, 
 the flag {\tt convert3D} is set to {\tt TRUE} to convert the 2D coordinates into 3D Cartesian coordinates. Currently, ESMF only supports
 triangle or quadrilateral element types for a 2D Mesh.  Therefore, when the cells in an unstructured grid contain more than four edges, they are broken into multiple triangle elements before {\tt ESMF\_MeshCreate()} is called to create the ESMF\_Mesh object. After the calculation of the weight matrix based on the broken up
-cells, the matrix entries for the triangles are merged together, so that the output matrix is in terms of the original many sided cells.  
+cells, the matrix entries for the triangles are merged together, so that the output matrix is in terms of the original cells.  
 Internally {\tt ESMF\_FieldRegridStore()} is used to generate the weight table and indices table representing the interpolation matrix. 
 
 The regridding occurs in 3D to avoid
