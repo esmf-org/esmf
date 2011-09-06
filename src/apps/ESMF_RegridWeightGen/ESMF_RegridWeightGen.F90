@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.48 2011/08/29 23:08:13 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.49 2011/09/06 15:46:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@ program ESMF_RegridWeightGen
       ! set up local pet info
       call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
       if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-print *, "PETNO = ", PetNo
+
       !------------------------------------------------------------------------
       ! Parse keyword based arguments at Pet 0
       !   then broadcast the results to the rest of the Pets
