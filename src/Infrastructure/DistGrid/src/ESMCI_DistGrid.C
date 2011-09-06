@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.63.2.1 2011/08/29 18:15:43 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.63.2.2 2011/09/06 18:59:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63.2.1 2011/08/29 18:15:43 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63.2.2 2011/09/06 18:59:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -96,6 +96,7 @@ DistGrid *DistGrid::create(
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
   DistGrid *distgrid = NULL;  // initialize
+  try{
   
   if (firstExtra || lastExtra || indexflag || connectionList){
     // creating a new DistGrid from the existing one considering additional info
@@ -412,11 +413,14 @@ DistGrid *DistGrid::create(
     memcpy(distgrid->indexCountPDimPDe, dg->indexCountPDimPDe,
       sizeof(int)*dimCount*deCount);
     distgrid->indexListPDimPLocalDe = new int*[dimCount*localDeCount];
-    for (int i=0; i<dimCount*localDeCount; i++){
-      int size = distgrid->indexCountPDimPDe[i];
-      distgrid->indexListPDimPLocalDe[i] = new int[size];
-      memcpy(distgrid->indexListPDimPLocalDe[i],
-        dg->indexListPDimPLocalDe[i], sizeof(int)*size);
+    for (int i=0; i<localDeCount; i++){
+      int de = dg->delayout->getLocalDeList()[i];
+      for (int j=0; j<dimCount; j++){
+        int size = distgrid->indexCountPDimPDe[de*dimCount+j];
+        distgrid->indexListPDimPLocalDe[i*dimCount+j] = new int[size];
+        memcpy(distgrid->indexListPDimPLocalDe[i*dimCount+j],
+          dg->indexListPDimPLocalDe[i*dimCount+j], sizeof(int)*size);
+      }
     }
     int connectionCount = distgrid->connectionCount = dg->connectionCount;
     if (connectionCount){
@@ -474,6 +478,20 @@ DistGrid *DistGrid::create(
   // -> leave it up to ESMF automatic garbage collection to clean up the
   // DELayout when it is time
   dg->delayoutCreator = false;  // drop ownership of the referenced DELayout
+  
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return NULL;
+  }catch(exception &x){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), rc);
+    return NULL;
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", rc);
+    return NULL;
+  }
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
