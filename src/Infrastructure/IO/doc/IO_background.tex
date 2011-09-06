@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.34 2011/01/16 20:26:04 svasquez Exp $
+% $Id: IO_background.tex,v 1.34.4.1 2011/09/06 18:56:13 theurich Exp $
 
 %\subsection{Background}
 
@@ -8,7 +8,7 @@ capability is integrated with third-party software such as
 \htmladdnormallink{Parallel IO (PIO)}{http://code.google.com/p/parallelio/}
 to read and write Fortran array data in MPI\_IO binary or NetCDF format, and 
 \htmladdnormallink{Xerces}{http://xerces.apache.org/xerces-c/} 
-Library to read and write Attribute data in XML format.  Other file IO
+Library to read Attribute data in XML format.  Other file IO
 functionalities, such as writing of error and log messages, input of
 configuration parameters from an ASCII file, and lower-level IO utilites are 
 covered in different sections of this document.  See the Log Class 
@@ -79,15 +79,15 @@ I/O Utilities, \ref{sec:IOUtil} respectively.
 
 Metadata IO is handled via the ESMF Attribute class. The third
 party software Xerces C++ Library is used by ESMF to provide
-the ability to read and write Attribute data in XML file format.
+the ability to read Attribute data in XML file format.
 To enable this capability, the environment variable ESMF\_XERCES must be
-set. Details can be found in the ESMF User Guide, "Building and Installing the ESMF", "Third Party Libraries".
+set. Details can be found in the ESMF User Guide, "Building and Installing the ESMF", "Third Party Libraries".  Writing Attribute XML files is performed with 
+the standard C++ output file stream facility.
 
 In the current release, the following methods support Attribute XML I/O using Xerces:
 
 \begin{description}
 \item {\tt ESMF\_AttributeRead()}, section \ref{api:AttributeRead}.
-\item {\tt ESMF\_AttributeWrite()}, section \ref{api:AttributeWrite}.
 \end{description}
 
 

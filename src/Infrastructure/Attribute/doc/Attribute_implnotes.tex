@@ -1,4 +1,4 @@
-% $Id: Attribute_implnotes.tex,v 1.29 2011/06/23 20:35:33 rokuingh Exp $
+% $Id: Attribute_implnotes.tex,v 1.29.2.1 2011/09/06 18:56:11 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -64,10 +64,12 @@ The second available copy can be applied by setting the {\tt ESMF\_Copy\_Flag} t
 \label{Att:Xerces}
 
 \begin{sloppypar}
-The Xerces C++ library, v3.1.0 or better, is used to read and write XML files.  
+The Xerces C++ library, v3.1.0 or better, is used to read XML files.  
 More specifically, the SAX2 API is currently used, although future releases may 
 also use the DOM API.  The Xerces C++ website is 
 http://xerces.apache.org/xerces-c/.  For more details, see the 
 "ESMF Users Guide", "Building and Installing the ESMF, Third Party Libraries,
-Xerces".  Also please see the section on Attribute I/O,~\ref{io:attributeio}.
+Xerces".  Also please see the section on Attribute I/O,~\ref{io:attributeio}.  
+Writing Attribute XML files is performed with the standard C++ output file 
+stream facility.
 \end{sloppypar}
