@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.346 2011/09/08 21:33:25 theurich Exp $
+#  $Id: common.mk,v 1.347 2011/09/09 16:28:23 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -777,7 +777,15 @@ ifeq ($(origin ESMF_F90LINKPATHS_ENV), environment)
 ESMF_F90LINKPATHS = $(ESMF_F90LINKPATHS_ENV)
 endif
 ESMF_F90LINKPATHS    += -L$(ESMF_LDIR) $(ESMF_F90LINKPATHSTHIRD)
-ESMF_F90LINKRPATHS    = $(ESMF_F90RPATHPREFIX)$(ESMF_LDIR) $(ESMF_F90LINKRPATHSTHIRD)
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_F90LINKRPATHS), environment)
+export ESMF_F90LINKRPATHS_ENV := $(ESMF_F90LINKRPATHS)
+unexport ESMF_F90LINKRPATHS
+endif
+ifeq ($(origin ESMF_F90LINKRPATHS_ENV), environment)
+ESMF_F90LINKRPATHS = $(ESMF_F90LINKRPATHS_ENV)
+endif
+ESMF_F90LINKRPATHS   += $(ESMF_F90RPATHPREFIX)$(ESMF_LDIR) $(ESMF_F90LINKRPATHSTHIRD)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_F90LINKLIBS), environment)
 export ESMF_F90LINKLIBS_ENV := $(ESMF_F90LINKLIBS)
@@ -816,7 +824,15 @@ ifeq ($(origin ESMF_CXXLINKPATHS_ENV), environment)
 ESMF_CXXLINKPATHS = $(ESMF_CXXLINKPATHS_ENV)
 endif
 ESMF_CXXLINKPATHS    += -L$(ESMF_LDIR) $(ESMF_CXXLINKPATHSTHIRD)
-ESMF_CXXLINKRPATHS    = $(ESMF_CXXRPATHPREFIX)$(ESMF_LDIR) $(ESMF_CXXLINKRPATHSTHIRD)
+# - make sure environment variable gets prepended _once_
+ifeq ($(origin ESMF_CXXLINKRPATHS), environment)
+export ESMF_CXXLINKRPATHS_ENV := $(ESMF_CXXLINKRPATHS)
+unexport ESMF_CXXLINKRPATHS
+endif
+ifeq ($(origin ESMF_CXXLINKRPATHS_ENV), environment)
+ESMF_CXXLINKRPATHS = $(ESMF_CXXLINKRPATHS_ENV)
+endif
+ESMF_CXXLINKRPATHS   += $(ESMF_CXXRPATHPREFIX)$(ESMF_LDIR) $(ESMF_CXXLINKRPATHSTHIRD)
 # - make sure environment variable gets prepended _once_
 ifeq ($(origin ESMF_CXXLINKLIBS), environment)
 export ESMF_CXXLINKLIBS_ENV := $(ESMF_CXXLINKLIBS)
