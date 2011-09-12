@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.47 2011/09/06 21:25:42 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.48 2011/09/12 21:21:00 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -773,19 +773,19 @@ program ESMF_MeshEx
 !	maxNodePElement = 4 ;
 !	coordDim = 2 ;
 !variables:	
-!	double 	nodeCoords(numNode, coordDim);
+!	double 	nodeCoords(nodeCount, coordDim);
 !		nodeCoords:units = "degrees" ;
-!	int elementConn(numElement, maxNodePElement) ;
+!	int elementConn(elementCount, maxNodePElement) ;
 !		elementConn:long_name = "Node Indices that define the element connectivity";
 !		elementConn:_FillValue = -1 ;	
-!	byte numElementConn(numElement) ;
+!	byte numElementConn(elementCount) ;
 !		numElementConn:long_name = "Number of nodes per element" ;
-!	double centerCoords(numElement, coordDim) ;
+!	double centerCoords(elementCount, coordDim) ;
 !		centerCoords:units = "degrees" ;
-!	double elementArea(numElement) ;
+!	double elementArea(elementCount) ;
 !		elementArea:units = "radians^2" ;
 !		elementArea:long_name = "area weights" ;
-!	int  elementMask(numElement) ;
+!	int  elementMask(elementCount) ;
 !		elementMask:_FillValue = -9999. ;
 !// global attributes:
 !		:gridType="unstructured";
