@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.40 2011/08/22 16:34:23 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.41 2011/09/12 18:08:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.40 2011/08/22 16:34:23 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.41 2011/09/12 18:08:12 feiliu Exp $'
 
 !==============================================================================
 !
@@ -655,17 +655,16 @@ integer, intent(out), optional              :: rc
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Now we must allocate the F90 pointers and copy weights
-    allocate(indicies(2,nentries))
-    allocate(weights(nentries))
+    !allocate(indicies(2,nentries))
+    !allocate(weights(nentries))
 
-    call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-      indicies(1,1), weights(1))
+    !call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+    !  indicies(1,1), weights(1))
 
     !do i = 1, size(indicies,2)
     !   print *, indicies(1,i), '->', indicies(2,i), weights(i), mesharea(i)
     !enddo
-    deallocate(indicies, weights)
+    !deallocate(indicies, weights)
 
     ! TODO: loop through sideA and sideB to compute the interpolation
     ! Compute regrid weights in 4 directions? (2 directions have constant wgt matrix).
