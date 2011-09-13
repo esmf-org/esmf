@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.98.2.1 2011/09/06 18:56:19 theurich Exp $
+% $Id: ESMF_install.tex,v 1.98.2.2 2011/09/13 22:47:32 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -363,9 +363,15 @@ front-end executables. The executable may be specified with absolute path
 overriding the location determined by default from the user's PATH variable.
 
 \item[ESMF\_CXXCOMPILEOPTS]
-Possible value: {\em flag}
+Possible value: {\em list of flags}
 
-This variable can be used to prepend flags to default compiler flags.
+Prepend compiler flags to the list of flags the ESMF build system determines.
+
+\item[ESMF\_CXXCOMPILEPATHS]
+Possible value: {\em list of paths, each prepended with -I}
+
+Prepend compiler search paths to the list of search paths the ESMF build system
+determines.
 
 \item[ESMF\_CXXCOMPILER]
 Possible value: {\em executable}
@@ -374,27 +380,33 @@ This variable can be used to override the default C++ compiler
 front-end executables. The executable may be specified with absolute path
 overriding the location determined by default from the user's PATH variable.
 
-\item[ESMF\_CXXLINKDIRS]
-Possible value: {\em flag}
-
-This variable can be used to prepend directories to default linker directories.
-
-\item[ESMF\_CXXLINKLIBS]
-Possible value: {\em flag}
-
-This variable can be used to prepend libraries to default linker libraries.
-
-\item[ESMF\_CXXLINKOPTS]
-Possible value: {\em flag}
-
-This variable can be used to prepend flags to default linker flags.
-
 \item[ESMF\_CXXLINKER]
 Possible value: {\em executable}
 
 This variable can be used to override the default C++ linker
 front-end executables. The executable may be specified with absolute path
 overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_CXXLINKLIBS]
+Possible value: {\em list of libraries, each prepended with -l}
+
+Prepend libraries to the list of libraries the ESMF build system determines.
+
+\item[ESMF\_CXXLINKOPTS]
+Possible value: {\em list of flags}
+
+Prepend linker flags to the list of flags the ESMF build system determines.
+
+\item[ESMF\_CXXLINKPATHS]
+Possible value: {\em list of paths, each prepended with -L}
+
+Prepend linker search paths to the list of search paths the ESMF build system
+determines.
+
+\item[ESMF\_CXXLINKRPATHS]
+Possible value: {\em list of paths, each prepended with the correct rpath option}
+
+Prepend linker rpaths to the list of rpaths the ESMF build system determines.
 
 \item[ESMF\_CXXOPTFLAG]
 Possible value: {\em flag}
@@ -428,9 +440,15 @@ front-end executables. The executable may be specified with absolute path
 overriding the location determined by default from the user's PATH variable.
 
 \item[ESMF\_F90COMPILEOPTS]
-Possible value: {\em flag}
+Possible value: {\em list of flags}
 
-This variable can be used to prepend flags to default compiler flags.
+Prepend compiler flags to the list of flags the ESMF build system determines.
+
+\item[ESMF\_F90COMPILEPATHS]
+Possible value: {\em list of paths, each prepended with -I}
+
+Prepend compiler search paths to the list of search paths the ESMF build system
+determines.
 
 \item[ESMF\_F90COMPILER]
 Possible value: {\em executable}
@@ -442,23 +460,8 @@ overriding the location determined by default from the user's PATH variable.
 \item[ESMF\_F90IMOD]
 Possible value: {\em flag}
 
-This variable can be used to override the default flag used to specify the F90
-module directory.
-
-\item[ESMF\_F90LINKDIRS]
-Possible value: {\em flag}
-
-This variable can be used to prepend directories to default linker directories.
-
-\item[ESMF\_F90LINKLIBS]
-Possible value: {\em flag}
-
-This variable can be used to prepend libraries to default linker libraries.
-
-\item[ESMF\_F90LINKOPTS]
-Possible value: {\em flag}
-
-This variable can be used to prepend flags to default linker flags.
+This variable can be used to override the default flag (-I) used to specify a
+Fortran module directory.
 
 \item[ESMF\_F90LINKER]
 Possible value: {\em executable}
@@ -466,6 +469,27 @@ Possible value: {\em executable}
 This variable can be used to override the default Fortran90 linker
 front-end executables. The executable may be specified with absolute path
 overriding the location determined by default from the user's PATH variable.
+
+\item[ESMF\_F90LINKLIBS]
+Possible value: {\em list of libraries, each prepended with -l}
+
+Prepend libraries to the list of libraries the ESMF build system determines.
+
+\item[ESMF\_F90LINKOPTS]
+Possible value: {\em list of flags}
+
+Prepend linker flags to the list of flags the ESMF build system determines.
+
+\item[ESMF\_F90LINKPATHS]
+Possible value: {\em list of paths, each prepended with -L}
+
+Prepend linker search paths to the list of search paths the ESMF build system
+determines.
+
+\item[ESMF\_F90LINKRPATHS]
+Possible value: {\em list of paths, each prepended with the correct rpath option}
+
+Prepend linker rpaths to the list of rpaths the ESMF build system determines.
 
 \item[ESMF\_F90OPTFLAG]
 Possible value: {\em flag}
