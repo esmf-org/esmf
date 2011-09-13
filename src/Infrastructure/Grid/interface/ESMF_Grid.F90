@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246.2.3 2011/09/03 00:03:09 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.4 2011/09/13 22:39:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246.2.3 2011/09/03 00:03:09 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.4 2011/09/13 22:39:21 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -1196,7 +1196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !       Grid to allocate coordinate storage in.  
 ! \item[{[staggerloc]}]
 !      The stagger location to add. Please see Section~\ref{const:staggerloc} for a list 
@@ -1516,9 +1516,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !       Grid to allocate coordinate storage in.  
-! \item[{itemflag}]
+! \item[itemflag]
 !      The grid item to add. Please see Section~\ref{const:griditem} for a list of valid items. 
 ! \item[{[staggerloc]}]
 !      The stagger location to add. Please see Section~\ref{const:staggerloc} for a list 
@@ -3316,10 +3316,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{countsPerDEDim1}] 
+! \item[countsPerDEDim1] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
-! \item[{countsPerDEDim2}] 
+! \item[countsPerDEDim2] 
 !     This array specifies the number of cells per DE for index dimension 2
 !     for the exclusive region (center stagger location). 
 ! \item[{[countsPerDEDim3]}] 
@@ -3613,7 +3613,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
-! \item[{maxIndex}] 
+! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[{[connflagDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
@@ -3887,12 +3887,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{[maxIndex]}] 
+! \item[maxIndex] 
 !      The upper extend of the grid index ranges.
-! \item[{arbIndexCount}] 
+! \item[arbIndexCount] 
 !      The number of grid cells in the local DE. It is okay to have 0
 !      grid cell in a local DE.  
-! \item[{[arbIndexList]}] 
+! \item[arbIndexList] 
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
@@ -4370,7 +4370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. 
-! \item[{[indexArray]}] 
+! \item[indexArray] 
 !      The minIndex and maxIndex array of size {\tt 2} x {\tt dimCount}
 !      {\tt indexArray(1,:)} is the minIndex and {\tt indexArray(2,:)} is the maxIndex
 ! \item[{[distDim]}]
@@ -4946,7 +4946,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[distgrid]
 !      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
 !      distributed over DEs. 
-! \item[{[filename]}]
+! \item[filename]
 !     The SCRIP Grid filename.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5368,9 +5368,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[filename]}]
+! \item[filename]
 !     The SCRIP Grid filename.
-! \item[{[regDecomp]}] 
+! \item[regDecomp] 
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
 ! \item[{[decompflag]}]
@@ -5735,10 +5735,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{countsPerDEDim1}] 
+! \item[countsPerDEDim1] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
-! \item[{countsPerDEDim2}] 
+! \item[countsPerDEDim2] 
 !     This array specifies the number of cells per DE for index dimension 2
 !     for the exclusive region (center stagger location). 
 ! \item[{[countsPerDEDim3]}] 
@@ -6019,7 +6019,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
-! \item[{maxIndex}] 
+! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[{[polekindflag]}]                                                                                          
 !      Two item array which specifies the type of connection which occurs at the pole. polekindflag(1)             
@@ -6278,12 +6278,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{[maxIndex]}] 
+! \item[maxIndex] 
 !      The upper extend of the grid index ranges.
-! \item[{arbIndexCount}] 
+! \item[arbIndexCount] 
 !      The number of grid cells in the local DE. It is okay to have 0
 !      grid cell in a local DE.  
-! \item[{[arbIndexList]}] 
+! \item[arbIndexList] 
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
@@ -6522,10 +6522,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{countsPerDEDim1}] 
+! \item[countsPerDEDim1] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
-! \item[{countsPerDEDim2}] 
+! \item[countsPerDEDim2] 
 !     This array specifies the number of cells per DE for index dimension 2
 !     for the exclusive region (center stagger location). 
 ! \item[{[countsPerDEDim3]}] 
@@ -6793,7 +6793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
-! \item[{maxIndex}] 
+! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
@@ -7037,12 +7037,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{[maxIndex]}] 
+! \item[maxIndex] 
 !      The upper extend of the grid index ranges.
-! \item[{arbIndexCount}] 
+! \item[arbIndexCount] 
 !      The number of grid cells in the local DE. It is okay to have 0
 !      grid cell in a local DE.  
-! \item[{[arbIndexList]}] 
+! \item[arbIndexList] 
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
@@ -7269,10 +7269,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{countsPerDEDim1}] 
+! \item[countsPerDEDim1] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
-! \item[{countsPerDEDim2}] 
+! \item[countsPerDEDim2] 
 !     This array specifies the number of cells per DE for index dimension 2
 !     for the exclusive region (center stagger location). 
 ! \item[{[countsPerDEDim3]}] 
@@ -7528,7 +7528,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
-! \item[{maxIndex}] 
+! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[{[coordSys]}] 
 !     The coordinate system of the grid coordinate data. 
@@ -7762,12 +7762,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{[maxIndex]}] 
+! \item[maxIndex] 
 !      The upper extend of the grid index ranges.
-! \item[{arbIndexCount}] 
+! \item[arbIndexCount] 
 !      The number of grid cells in the local DE. It is okay to have 0
 !      grid cell in a local DE.  
-! \item[{[arbIndexList]}] 
+! \item[arbIndexList] 
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
@@ -10591,15 +10591,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{grid}]
+! \item[grid]
 !     The empty {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{countsPerDEDim1}] 
+! \item[countsPerDEDim1] 
 !     This arrays specifies the number of cells per DE for index dimension 1
 !     for the exclusive region (the center stagger location).
-! \item[{countsPerDEDim2}] 
+! \item[countsPerDEDim2] 
 !     This array specifies the number of cells per DE for index dimension 2
 !     for the exclusive region (center stagger location). 
 ! \item[{[countsPerDEDim3]}] 
@@ -10884,7 +10884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{grid}]
+! \item[grid]
 !     The empty {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[regDecomp]}] 
 !      List that has the same number of elements as {\tt maxIndex}.
@@ -10899,7 +10899,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[minIndex]}] 
 !      The bottom extent of the grid array. If not given then the value defaults
 !      to /1,1,1,.../.
-! \item[{maxIndex}] 
+! \item[maxIndex] 
 !      The upper extent of the grid array.
 ! \item[{[connDim1]}] 
 !      Fortran array describing the index dimension 1 connections.
@@ -11174,17 +11174,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{grid}]
+! \item[grid]
 !     The empty {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[minIndex]}] 
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
-! \item[{[maxIndex]}] 
+! \item[maxIndex] 
 !      The upper extend of the grid index ranges.
-! \item[{arbIndexCount}] 
+! \item[arbIndexCount] 
 !      The number of grid cells in the local DE. It is okay to have 0
 !      grid cell in a local DE.  
-! \item[{[arbIndexList]}] 
+! \item[arbIndexList] 
 !      This 2D array specifies the indices of the PET LOCAL grid cells.  The 
 !      dimensions should be arbIndexCount * number of Distributed grid dimensions
 !      where arbIndexCount is the input argument specified below
@@ -11482,7 +11482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !   Grid to get the information from.
 !\item[{[coordTypeKind]}] 
 !   The type/kind of the grid coordinate data. 
@@ -11797,9 +11797,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    Grid to get the information from.
-!\item[{[localDe]}]
+!\item[localDe]
 !     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
 !\item[{[isLBound]}]
 !     Upon return, for each dimension this indicates if the DE is a lower bound of the Grid.
@@ -11929,8 +11929,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
-      integer,                intent(in)            :: localDe
       type (ESMF_StaggerLoc), intent(in)            :: staggerloc
+      integer,                intent(in)            :: localDe
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
@@ -11961,13 +11961,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    Grid to get the information from.
-!\item[{staggerloc}]
+!\item[staggerloc]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations.
-!\item[{[localDe]}]
+!\item[localDe]
 !     The local DE from which to get the information. {\tt [0,..,localDeCount-1]} 
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
@@ -12114,9 +12114,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    Grid to get the information from.
-!\item[{staggerloc}]
+!\item[staggerloc]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. 
@@ -12191,11 +12191,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    Grid to get the information from.
-!\item[{tile}]
+!\item[tile]
 !     The tile number to get the data from. Tile numbers range from 1 to TileCount. 
-!\item[{staggerloc}]
+!\item[staggerloc]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. 
@@ -12341,11 +12341,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !          Grid to get the information from.
-!     \item[{coordDim}]
+!     \item[coordDim]
 !          The coordinate dimension to get the data from (e.g. 1=x).
-!     \item[{staggerloc}]
+!     \item[{[staggerloc]}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
@@ -14185,15 +14185,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !          The grid to get the coord array from. 
-!     \item[{coordDim}]
+!     \item[coordDim]
 !          The coordinate dimension to get the data from (e.g. 1=x).
-!     \item[{staggerloc}]
+!     \item[{[staggerloc]}]
 !          The stagger location from which to get the arrays. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{array}]
+!     \item[array]
 !          An array into which to put the coordinate infomation. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -14283,19 +14283,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{staggerloc}]
+!     \item[{[staggerloc]}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{index}]
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[index]
 !          This array holds the index location to be queried in the Grid. This array must
 !          at least be of the size Grid rank.
-!     \item[{coord}]
+!     \item[coord]
 !          This array will be filled with the coordinate data. This array must
 !          at least be of the size Grid rank.
 !     \item[{[rc]}]
@@ -14368,19 +14368,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !          Grid to get the information from.
-!     \item[{[localDE]}]
-!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{staggerloc}]
+!     \item[{[staggerloc]}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to
 !          ESMF\_STAGGERLOC\_CENTER.
-!     \item[{index}]
+!     \item[{[localDE]}]
+!          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[index]
 !          This array holds the index location to be queried in the Grid. This array must
 !          at least be of the size Grid rank.
-!     \item[{coord}]
+!     \item[coord]
 !          This array will be filled with the coordinate data. This array must
 !          at least be of the size Grid rank.
 !     \item[{[rc]}]
@@ -14468,11 +14468,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    Grid to get the information from.
-!\item[{coordDim}]
+!\item[coordDim]
 !     The coordinate dimension to get the information for (e.g. 1=x). 
-!\item[{staggerloc}]
+!\item[{[staggerloc]}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
@@ -14645,23 +14645,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        datacopyflag, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),      intent(in)            :: grid
-!     type (ESMF_GridItem_Flag),intent(in)        :: itemflag
+!     type(ESMF_Grid),      intent(in)             :: grid
+!     type (ESMF_GridItem_Flag),intent(in)         :: itemflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
-!     integer,              intent(in),  optional :: localDE
+!     type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
+!     integer,              intent(in),  optional  :: localDE
 !     <pointer argument>, see below for supported values
-!     integer,              intent(out), optional :: exclusiveLBound(:)
-!     integer,              intent(out), optional :: exclusiveUBound(:)
-!     integer,              intent(out), optional :: exclusiveCount(:)
-!     integer,              intent(out), optional :: computationalLBound(:)
-!     integer,              intent(out), optional :: computationalUBound(:)
-!     integer,              intent(out), optional :: computationalCount(:)
-!     integer,              intent(out), optional :: totalLBound(:)
-!     integer,              intent(out), optional :: totalUBound(:)
-!     integer,              intent(out), optional :: totalCount(:)
-!     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
-!     integer,              intent(out), optional :: rc
+!     integer,              intent(out), optional  :: exclusiveLBound(:)
+!     integer,              intent(out), optional  :: exclusiveUBound(:)
+!     integer,              intent(out), optional  :: exclusiveCount(:)
+!     integer,              intent(out), optional  :: computationalLBound(:)
+!     integer,              intent(out), optional  :: computationalUBound(:)
+!     integer,              intent(out), optional  :: computationalCount(:)
+!     integer,              intent(out), optional  :: totalLBound(:)
+!     integer,              intent(out), optional  :: totalUBound(:)
+!     integer,              intent(out), optional  :: totalCount(:)
+!     type(ESMF_DataCopy_Flag),intent(in),optional :: datacopyflag
+!     integer,              intent(out), optional  :: rc
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -14692,18 +14692,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{grid}]
+!     \item[grid]
 !          Grid to get the information from.
-!     \item[{itemflag}]
+!     \item[itemflag]
 !          The item to get the information for. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
-!     \item[{staggerloc}]
+!     \item[{[staggerloc]}]
 !          The stagger location to get the information for. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{localDE}]
+!     \item[{[localDE]}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
-!     \item[{farrayPtr}]
+!     \item[farrayPtr]
 !          The pointer to the item data.
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
@@ -17129,14 +17129,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{itemflag}]
+!     \item[grid]
+!          Grid to get the information from.
+!     \item[itemflag]
 !          The item from which to get the arrays. Please see Section~\ref{const:griditem} for a 
 !          list of valid items.  
-!     \item[{staggerloc}]
+!     \item[{[staggerloc]}]
 !          The stagger location from which to get the arrays. 
 !          Please see Section~\ref{const:staggerloc} for a list 
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
-!     \item[{array}]
+!     \item[array]
 !          An array into which to put the item infomation. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -17227,17 +17229,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !The arguments are:
 !\begin{description}
-!\item[{grid}]
-!    Grid to get the information from.
-!\item[{itemflag}]
+!\item[grid]
+!     Grid to get the information from.
+!\item[itemflag]
 !     The item to get the information for. Please see Section~\ref{const:griditem} for a 
-!          list of valid items.   
-!\item[{staggerloc}]
+!     list of valid items.   
+!\item[{[staggerloc]}]
 !     The stagger location to get the information for. 
 !     Please see Section~\ref{const:staggerloc} for a list 
 !     of predefined stagger locations. If not present, defaults to
 !     ESMF\_STAGGERLOC\_CENTER.
-!\item[{localDE}]
+!\item[{[localDE]}]
 !     The local DE from which to get the information. {\tt [0,..,localDeCount-1]}
 !\item[{[exclusiveLBound]}]
 !     Upon return this holds the lower bounds of the exclusive region.
@@ -17910,19 +17912,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    
 !     The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    The grid to set the coord in.
-!\item[{coordDim}]
+!\item[coordDim]
 !    The coordinate dimension to put the data in (e.g. 1=x).
-!\item[{staggerloc}]
+!\item[{[staggerloc]}]
 !    The stagger location into which to copy the arrays. 
 !    Please see Section~\ref{const:staggerloc} for a list 
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
-!\item[{array}]
+!\item[array]
 !    An array to set the grid coordinate information from.
 !\item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
 !EOP
@@ -20533,20 +20535,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !\begin{description}
-!\item[{grid}]
+!\item[grid]
 !    The grid in which to set the array.
-!\item[{itemflag}]
+!\item[itemflag]
 !    The item into which to copy the arrays. Please see Section~\ref{const:griditem} for a 
-!          list of valid items.   
-!\item[{staggerloc}]
+!    list of valid items.   
+!\item[{[staggerloc]}]
 !    The stagger location into which to copy the arrays. 
 !    Please see Section~\ref{const:staggerloc} for a list 
 !    of predefined stagger locations. If not present, defaults to
 !    ESMF\_STAGGERLOC\_CENTER.
-!\item[{array}]
+!\item[array]
 !    An array to set the grid item information from.
 !\item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !\end{description}
 !
 !EOP
