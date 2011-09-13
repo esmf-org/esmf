@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.22 2011/03/24 04:59:19 theurich Exp $
+// $Id: ESMCI_FTable.h,v 1.23 2011/09/13 21:32:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,6 @@ class funcinfo {
     char *funcname;
     void *funcptr;
     void *funcarg[numargs];
-    int  funcintarg;
     enum ftype ftype;
   public:
     funcinfo(){
