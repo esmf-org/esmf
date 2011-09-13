@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.57 2011/06/28 02:07:25 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.58 2011/09/13 00:36:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.57 2011/06/28 02:07:25 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.58 2011/09/13 00:36:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1373,7 +1373,7 @@ int FTable::callVFuncPtr(
 // !ARGUMENTS:
   char const *name,     // in, function name
   VM *vm_pointer,       // in, optional, pointer to this PET's VM instance
-  int *userrc) {        // out, optional, function return
+  int *userrc) {        // out, function return code
 //
 // !DESCRIPTION:
 //    Calls the named function pointer
@@ -1383,6 +1383,13 @@ int FTable::callVFuncPtr(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // sanity check userrc
+  if (!userrc){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "- userrc must not be NULL pointer!", &rc);
+    return rc; // bail out
+  }
 
   // try to find "name" entry in single FTable instance on parent PET
   int i = getEntry(name, &localrc);
@@ -1468,9 +1475,8 @@ int FTable::callVFuncPtr(
   switch (func->ftype){
     case FT_VOIDP1INTP: {
       //printf("calling out of case FT_VOIDP1INTP\n");
-      if (userrc) func->funcintarg = *userrc;
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
-      (*vf)((void *)comp, &(func->funcintarg));
+      (*vf)((void *)comp, userrc);
       // conditionally call into compliance IC for register
       if (!strcmp(name, "Register")){
         char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
@@ -1486,7 +1492,7 @@ int FTable::callVFuncPtr(
 #define ESMF_NO_DLFCNdummy
           
 #ifdef ESMF_NO_DLFCNdummy
-          FTN(esmf_complianceicregister)((void *)comp, &(func->funcintarg));
+          FTN(esmf_complianceicregister)((void *)comp, userrc);
 #else
           
 #define QUOTEMACRO_(x) #x
@@ -1514,21 +1520,18 @@ int FTable::callVFuncPtr(
           }
           
           VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
-          (*vf)((void *)comp, &(func->funcintarg));
+          (*vf)((void *)comp, userrc);
 #endif
         }
       }
       
-      if (userrc) *userrc = func->funcintarg;
       break;
     }
     case FT_VOIDP4INTP: {
       //printf("calling out of case FT_VOIDP4INTP\n");
-      if (userrc) func->funcintarg = *userrc;
       VoidP4IntPFunc vf = (VoidP4IntPFunc)func->funcptr;
       (*vf)((void *)comp, func->funcarg[1], func->funcarg[2],
-        func->funcarg[3], &(func->funcintarg));
-      if (userrc) *userrc = func->funcintarg;
+        func->funcarg[3], userrc);
       break;
     }
     default:
