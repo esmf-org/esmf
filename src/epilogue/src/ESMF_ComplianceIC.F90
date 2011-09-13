@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.38 2011/06/30 06:00:12 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.38.2.1 2011/09/13 21:48:29 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -377,7 +377,7 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     ! Component Attributes should be set up -> ready to output
-!    call ESMF_AttributeWrite(comp, convention='CIM 1.5', &
+!    call ESMF_AttributeWrite(comp, convention='CIM', &
 !      purpose='Model Component Simulation Description', &
 !      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
 !    if (ESMF_LogFoundError(rc, &
@@ -920,7 +920,7 @@ module ESMF_ComplianceICMod
     if (comptype == ESMF_COMPTYPE_GRID) then
     
       ! set CIM convention and purpose specifiers
-      convention = "CIM 1.5"
+      convention = "CIM"
       purpose = "Model Component Simulation Description"
     
       call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &

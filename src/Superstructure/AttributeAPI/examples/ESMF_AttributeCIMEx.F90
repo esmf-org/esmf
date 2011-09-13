@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.43 2011/07/01 05:05:25 eschwab Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.43.2.1 2011/09/13 21:48:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC 
-      convCIM = 'CIM 1.5'
+      convCIM = 'CIM'
       purpComp = 'Model Component Simulation Description'
       purpProp = 'General Component Properties Description'
       purpField = 'Inputs Description'

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.26 2011/07/09 00:04:05 eschwab Exp $
+! $Id: user_model1.F90,v 1.26.2.1 2011/09/13 21:48:31 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,8 +95,9 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
+    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
+    character(ESMF_MAXSTR)      :: sciPropAtt(3)
     type(ESMF_Field)            :: OH, Orog
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -112,7 +113,7 @@ module user_model1
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpComp = 'Model Component Simulation Description'
     ! Specify the Gridded Components to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
@@ -181,10 +182,37 @@ module user_model1
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
+    !
+    !  CIM child component scientific property attributes
+    !
+    convCIM = 'CIM'
+    purpSci = 'Scientific Properties Description'
+    sciPropAtt(1) = 'AtmosphereAtmosConvectTurbulCloudMicrophysicsProcesses'
+    sciPropAtt(2) = 'AtmosphereAtmosConvectTurbulCloudAtmosCloudSchemeCloudSchemeAttributesSeparatedCloudTreatment'
+    sciPropAtt(3) = 'AtmosphereAtmosConvectTurbulCloudCloudSimulatorInputsRadarRadarType'
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+      attrList=sciPropAtt, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Scientific Properties: user-specified attributes
+    call ESMF_AttributeSet(comp, &
+      'AtmosphereAtmosConvectTurbulCloudMicrophysicsProcesses', &
+        'effect of snow', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+      'AtmosphereAtmosConvectTurbulCloudAtmosCloudSchemeCloudSchemeAttributesSeparatedCloudTreatment', &
+        'yes', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    call ESMF_AttributeSet(comp, &
+      'AtmosphereAtmosConvectTurbulCloudCloudSimulatorInputsRadarRadarType', &
+        'spaceborne', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpField = 'Inputs Description'
 
     ! OH Field
@@ -298,7 +326,7 @@ module user_model1
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpComp = 'Model Component Simulation Description'
 
     ! Initialize return code

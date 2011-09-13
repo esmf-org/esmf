@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.10 2011/07/09 00:04:05 eschwab Exp $
+! $Id: user_model3.F90,v 1.10.2.1 2011/09/13 21:48:31 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,8 +95,11 @@ module user_model3
     integer, intent(out) :: rc
 
     ! Local variables
-    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpField
+    character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
+    character(ESMF_MAXSTR)      :: sciPropAtt(2)
+    character(ESMF_MAXSTR)      :: sciPropVal(4), outVal(4)
+    integer                     :: nvals
     type(ESMF_Field)            :: Ozone, UM
     type(ESMF_FieldBundle)      :: fieldbundle
     
@@ -112,7 +115,7 @@ module user_model3
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpComp = 'Model Component Simulation Description'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -177,10 +180,37 @@ module user_model3
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
+    !
+    !  CIM child component scientific property attributes
+    !
+    convCIM = 'CIM'
+    purpSci = 'Scientific Properties Description'
+    sciPropAtt(1) = 'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables'
+    sciPropAtt(2) = 'AtmosphereAtmosDynamicalCoreTopBoundaryCondition'
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+      attrList=sciPropAtt, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
+    ! Scientific Properties: user-specified attributes
+    sciPropVal(1) = 'clouds'
+    sciPropVal(2) = 'potential temperature'
+    sciPropVal(3) = 'vapour/solid/liquid'
+    sciPropVal(4) = 'wind components'
+    call ESMF_AttributeSet(comp, &
+      'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables', &
+        valueList=sciPropVal, itemCount=4, &
+      convention=convCIM, purpose=purpSci, rc=rc)
+
+    call ESMF_AttributeSet(comp, &
+      'AtmosphereAtmosDynamicalCoreTopBoundaryCondition', &
+        'radiation boundary condition', &
+      convention=convCIM, purpose=purpSci, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
+
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpField = 'Inputs Description'
 
     ! Ozone Field
@@ -284,7 +314,7 @@ module user_model3
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM 1.5'
+    convCIM = 'CIM'
     purpComp = 'Model Component Simulation Description'
 
     ! Initialize return code

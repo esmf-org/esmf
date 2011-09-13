@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.45.2.1 2011/09/06 18:56:11 theurich Exp $
+% $Id: Attribute_pack.tex,v 1.45.2.2 2011/09/13 21:48:20 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ Some Attributes come with a controlled vocabulary. A controlled vocabulary is a 
 \subsubsection{Component Attribute packages}
 \label{ComponentAttributePackages}
 
-There are many attributes that are used to describe components. There are currently 3 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
+There are many attributes that are used to describe components. There are currently 4 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
 
 \begin{enumerate}
     \item Earth System Grid (ESG) Basic
@@ -42,6 +42,7 @@ There are many attributes that are used to describe components. There are curren
         \item International Organization for Standardization (ISO) Responsible Party
         \item International Organization for Standardization (ISO) Citation
     \end{enumerate}
+    \item Common Information Model (CIM) Scientific Properties
     \item Common Information Model (CIM) Component Properties
 \end{enumerate}
 
@@ -82,7 +83,7 @@ There are many attributes that are used to describe components. There are curren
 {\bf 2. Common Information Model (CIM) Main Attribute Package}
 
 \begin{itemize}
-    \item Convention: CIM 1.5
+    \item Convention: CIM
     \item Purpose: Model Component Simulation Description
     \item Includes:
     \begin{itemize}
@@ -140,7 +141,7 @@ There are many attributes that are used to describe components. There are curren
 {\bf 2.1. CIM Platform Attribute Package}
 
 \begin{itemize}
-    \item Convention: CIM 1.5
+    \item Convention: CIM
     \item Purpose: Platform Description
     \item Output Options:
     \begin{itemize}
@@ -232,16 +233,39 @@ There are many attributes that are used to describe components. There are curren
 
 \vspace{.20in}
 
-{\bf 3. Common Information Model (CIM) Component Properties Package}
+{\bf 3. Common Information Model (CIM) Scientific Properties Package}
 
 \begin{itemize}
-    \item Convention: CIM 1.5
+    \item Convention: CIM
+    \item Purpose: Scientific Properties Description
+    \item Output Options: 
+    \begin{itemize}
+        \item CIM XML
+    \end{itemize}  
+    \item Description: This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies maintained by \htmladdnormallink{METAFOR}{http://metaforclimate.eu/}.
+\end{itemize}
+
+\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
+     \hline\hline
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     \hline\hline
+     {\tt <Scientific property name>} & <METAFOR definition>. & Names and values per METAFOR \\
+     {\tt ...} & ... & ... \\
+     \hline\hline
+\end{tabular}
+
+\vspace{.20in}
+
+{\bf 4. Common Information Model (CIM) Component Properties Package}
+
+\begin{itemize}
+    \item Convention: CIM
     \item Purpose: General Component Properties Description
     \item Output Options: 
     \begin{itemize}
         \item CIM XML
     \end{itemize}  
-    \item Description: This package is used to specify any number of user-defined attributes of a component and have them output in valid CIM XML format.  This differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.
+    \item Description: This package is used to specify any number of custom, user-defined attributes of a component and have them output in valid CIM XML format.  This differs from the scientific properties package above in that the names and values are custom, not part of any controlled vocabulary.  It also differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.
 \end{itemize}
 
 \begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
@@ -306,7 +330,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 {\bf 1. Common Information Model (CIM) Inputs}
 
 \begin{itemize}
-    \item Convention: CIM 1.5
+    \item Convention: CIM
     \item Purpose: Inputs Description
     \item Includes: 
     \begin{itemize}
@@ -417,7 +441,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
     {\tt LongName} & An ad-hoc long descriptive name which may, for example, be used for labeling plots & N/A\\
-    {\tt ShortName*}  & The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is
+    {\tt ShortName*}  & The short\_name is technically not part of the CF standard but is commonly the name of the variable on the output file and so is
  distinct from the long\_name & N/A \\
     {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package & N/A\\
     \hline\hline
@@ -576,7 +600,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt RegDecompX} & The number of DEs in X a particular grid is decomposed into.& ESMF Grid\\
      {\tt RegDecompY} & The number of DEs in Y a particular grid is decomposed into.& ESMF Grid\\
      {\tt ResponsiblePartyRole} & A flag to define the role of the Responsible Party. &  ISO Responsible Party\\ 
-     {\tt ShortName}  & For component: a version of the component name that contains acronyms.  For field:  The short\_name is technically not part of the CF stanard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CIM Main, CF General\\
+     {\tt ShortName}  & For component: a version of the component name that contains acronyms.  For field:  The short\_name is technically not part of the CF standard but is commonly the name of the variable on the output file and so is distinct from the long\_name. & CIM Main, CF General\\
      {\tt ShortTitle} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & ISO Citation \\     
      {\tt SimulationDuration} & The length of time a simulation runs.&  CIM Main\\ 
      {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & CIM Main\\ 

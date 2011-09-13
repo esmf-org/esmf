@@ -460,7 +460,7 @@ program ESMF_AttributeCIMSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  conv = 'CIM 1.5'
+  conv = 'CIM'
   purp = 'Model Component Simulation Description'
 #if 1
   ! write the Attribute info in CIM XML format for the Coupler, both Components,
@@ -541,7 +541,7 @@ program ESMF_AttributeCIMSTest
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! run comp4, child of comp2
-  call ESMF_GridCompRun(comp3, importState=c3imp, exportState=c3exp, &
+  call ESMF_GridCompRun(comp4, importState=c4imp, exportState=c4exp, &
     userRc=userrc, rc=rc)
   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
