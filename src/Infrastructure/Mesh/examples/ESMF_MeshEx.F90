@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.44.2.1 2011/08/23 20:52:24 theurich Exp $
+! $Id: ESMF_MeshEx.F90,v 1.44.2.2 2011/09/13 22:09:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -695,9 +695,6 @@ program ESMF_MeshEx
 !	grid_corners = 5 ;
 !	grid_rank = 1 ;
 !variables:
-!	double grid_area(grid_size) ;
-!		grid_area:units = "radians^2" ;
-!		grid_area:long_name = "area weights" ;
 !	double grid_center_lat(grid_size) ;
 !		grid_center_lat:units = "degrees" ;
 !	double grid_center_lon(grid_size) ;
@@ -708,15 +705,21 @@ program ESMF_MeshEx
 !	double grid_corner_lat(grid_size, grid_corners) ;
 !		grid_corner_lat:units = "degrees" ;
 !		grid_corner_lat:_FillValue = -9999. ;
-!	double grid_imask(grid_size) ;
+!	int grid_imask(grid_size) ;
 !		grid_imask:_FillValue = -9999. ;
+!	double grid_area(grid_size) ;
+!		grid_area:units = "radians^2" ;
+!		grid_area:long_name = "area weights" ;
 !	int grid_dims(grid_rank) ;
 !}
 !\end{verbatim}
 !
 ! The grid cells are organized as a one dimensional array ({\tt grid\_rank = 1}). The
 ! cell connection is defined using {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} with
-! the maximum number of corners defined in {\tt grid\_corners}. {\tt grid\_imask} is not used 
+! the maximum number of corners defined in {\tt grid\_corners}.
+! Note that the grid corner coordinates must be
+! written in an order which traces the outside of a grid cell in a counterclockwise order.
+! {\tt grid\_imask} is not used 
 ! in the Mesh object in the current implementation.  
 ! The data is located at the center of the grid cell in a SCRIP grid; whereas
 ! the data is located at the corner of a cell in an ESMF Mesh object.  Therefore,
@@ -750,9 +753,13 @@ program ESMF_MeshEx
 ! In addition to the SCRIP format, ESMF also supports a more general unstructured grid file format for describing meshes.
 ! In the ESMF file format, the node coordinates are defined in a separate array
 ! {\tt nodeCoords}.  The indices to the {\tt nodeCoords} array are used in the element
-! connectivity array {\tt elementConn}, and they are 1-based.  
+! connectivity array {\tt elementConn}, and they are 1-based. 
 ! While in the SCRIP format, the two are combined into 
-! {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} arrays.  The ESMF file format works
+! {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} arrays.  
+! Note that the {\tt elementConn} array must be defined in an order such that the nodes it references trace
+! the outside of a grid cell in a counterclockwise order.
+!
+! The ESMF file format works
 ! better with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. 
 ! The ESMF format is also more general than the SCRIP format because it supports higher dimension coordinates and more general
 ! topologies.  Currently, ESMF\_MeshCreate() does not support conversion to a dual mesh for this format. All regrid methods
@@ -767,7 +774,7 @@ program ESMF_MeshEx
 !	coordDim = 2 ;
 !variables:	
 !	double 	nodeCoords(numNode, coordDim);
-!		nodeCoords:units = "degrees,degrees" ;
+!		nodeCoords:units = "degrees" ;
 !	int elementConn(numElement, maxNodePElement) ;
 !		elementConn:long_name = "Node Indices that define the element connectivity";
 !		elementConn:_FillValue = -1 ;	
