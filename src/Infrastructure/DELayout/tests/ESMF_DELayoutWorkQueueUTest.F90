@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.28 2011/06/30 05:58:48 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.29 2011/09/13 00:28:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -22,18 +22,17 @@ module ESMF_DELayoutWQUTest_mod
     
   contains !--------------------------------------------------------------------
 
-  subroutine mygcomp_register(gcomp, rc)
+  recursive subroutine mygcomp_register(gcomp, rc)
     type(ESMF_GridComp):: gcomp
     integer, intent(out):: rc
     
     rc = ESMF_SUCCESS
 
-    print *, "*** hi from mygcomp_register ***"
+    !IO may not be thread-safe print *, "*** hi from mygcomp_register ***"
     
-    ! Run this VM default mode: mpi-only, no threads
-    
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=mygcomp_run, &
-      rc=rc)
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
+      userRoutine=mygcomp_run, rc=rc)
+      
     if (rc /= ESMF_SUCCESS) return  ! bail out
     
   end subroutine !--------------------------------------------------------------
