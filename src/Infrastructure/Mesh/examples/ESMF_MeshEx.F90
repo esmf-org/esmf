@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.48 2011/09/12 21:21:00 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.49 2011/09/14 16:35:27 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -752,10 +752,13 @@ program ESMF_MeshEx
 !BOE
 ! In addition to the SCRIP format, ESMF also supports a more general unstructured grid file format for describing meshes.
 ! In the ESMF file format, the node coordinates are defined in a separate array
-! {\tt nodeCoords}.  The indices to the {\tt nodeCoords} array are used in the element
+! {\tt nodeCoords}. {\tt nodeCoords} is a two-dimensional array of dimension {\tt (nodeCount,coordDim)}.
+! For a 2D Grid, {\tt coordDim} is 2. {\tt nodeCoords(:,1)} contains the longitude coordinates and
+! {\tt nodeCoords(:,2)} contains the latitude coordinates.  The same order applies to {\tt centerCoords}.
+!  The indices to the {\tt nodeCoords} array are used in the element
 ! connectivity array {\tt elementConn}, and they are 1-based. 
 ! While in the SCRIP format, the two are combined into 
-! {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} arrays.  
+! {\tt grid\_corner\_lon} and {\tt grid\_corner\_lat} arrays.  
 ! Note that the {\tt elementConn} array must be defined in an order such that the nodes it references trace
 ! the outside of a grid cell in a counterclockwise order.
 !
@@ -785,7 +788,7 @@ program ESMF_MeshEx
 !	double elementArea(elementCount) ;
 !		elementArea:units = "radians^2" ;
 !		elementArea:long_name = "area weights" ;
-!	int  elementMask(elementCount) ;
+!	int elementMask(elementCount) ;
 !		elementMask:_FillValue = -9999. ;
 !// global attributes:
 !		:gridType="unstructured";
