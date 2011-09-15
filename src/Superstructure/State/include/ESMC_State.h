@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.37 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMC_State.h,v 1.38 2011/09/15 00:44:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,7 +38,9 @@ extern "C" {
 #endif
 
 // class declaration type
-typedef void* ESMC_State;
+typedef struct{
+  void *ptr;
+}ESMC_State;
 
 // Class API
 

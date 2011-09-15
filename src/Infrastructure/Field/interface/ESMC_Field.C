@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.23 2011/02/23 05:06:40 w6ws Exp $
+// $Id: ESMC_Field.C,v 1.24 2011/09/15 00:44:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,15 +44,18 @@ extern "C" {
     if (rc) *rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMF_RC_NOT_IMPL;
 
-    ESMC_Field field = NULL;  // initialize
+    ESMC_Field field;
 
     // Invoque the C++ interface
-    field = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
+    field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
       gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+      field.ptr = NULL;  // invalidate
       return field; // bail out
+    }
 
-    if(rc) *rc = localrc;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
     return field;
   }
 //--------------------------------------------------------------------------
@@ -67,7 +70,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     
     // typecase into ESMCI type
-    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(*field);
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field->ptr);
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::destroy(fieldp);
@@ -75,7 +78,7 @@ extern "C" {
       return rc;
 
     // invalidate pointer
-    *field = NULL;
+    field->ptr = NULL;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -93,7 +96,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     
     // typecase into ESMCI type
-    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
     // Invoque the C++ interface
     localrc = fieldp->print();
@@ -116,7 +119,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     
     // typecase into ESMCI type
-    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
     // Invoque the C++ interface
     ESMC_Mesh mesh = fieldp->getMesh(&localrc);
@@ -139,7 +142,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     
     // typecase into ESMCI type
-    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field);
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
 
     // Invoque the C++ interface
     ESMC_Array array = fieldp->getArray(&localrc);

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.31 2011/06/28 02:07:21 theurich Exp $
+// $Id: ESMC_CplComp.h,v 1.32 2011/09/15 00:44:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,7 +39,9 @@ extern "C" {
 #endif
 
 // Class declaration type
-typedef void* ESMC_CplComp;
+typedef struct{
+  void *ptr;
+}ESMC_CplComp;
 
 // Class API
 

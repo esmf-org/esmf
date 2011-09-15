@@ -28,7 +28,6 @@
 
 // associated header file
 #include "ESMCI_Field.h"
-#include "ESMC_Field.h"
 #include "ESMCI_Array.h"
 
 //insert any higher level, 3rd party or system includes here
@@ -50,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.7 2011/04/18 21:12:25 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.8 2011/09/15 00:44:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

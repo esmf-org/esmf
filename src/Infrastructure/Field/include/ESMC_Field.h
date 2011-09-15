@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.30 2011/01/05 20:05:42 svasquez Exp $
+// $Id: ESMC_Field.h,v 1.31 2011/09/15 00:44:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,9 @@ extern "C" {
 #include "ESMC_Interface.h"
 
 // Class declaration type
-typedef void * ESMC_Field;
+typedef struct{
+  void *ptr;
+}ESMC_Field;
 
 // Class API
 
