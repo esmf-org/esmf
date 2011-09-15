@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.149 2011/09/15 18:36:24 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.150 2011/09/15 18:46:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,9 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.149 2011/09/15 18:36:24 w6ws Exp $"
-
-!------------------------------------------------------------------------------
+      "$Id: ESMF_VM.F90,v 1.150 2011/09/15 18:46:41 w6ws Exp $"
 
 !==============================================================================
 
@@ -2336,8 +2334,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
-integer :: myPet
-
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2348,11 +2344,6 @@ integer :: myPet
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
-call ESMF_VMGet(vm, localPet=mypet, rc=localrc)
-if (ESMF_LogFoundError(localrc, &
-    ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(syncflag)) then
@@ -2362,9 +2353,6 @@ if (ESMF_LogFoundError(localrc, &
     if (count > 0) then
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
-    print *, ESMF_METHOD, ': PET', myPet, ', size =', size
-    flush (6)
-
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
