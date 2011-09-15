@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.148 2011/09/01 19:13:07 rokuingh Exp $
+! $Id: ESMF_VM.F90,v 1.149 2011/09/15 18:36:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,9 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.148 2011/09/01 19:13:07 rokuingh Exp $"
+      "$Id: ESMF_VM.F90,v 1.149 2011/09/15 18:36:24 w6ws Exp $"
+
+!------------------------------------------------------------------------------
 
 !==============================================================================
 
@@ -497,6 +499,36 @@ module ESMF_VMMod
 !EOPI 
     end interface
 
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMIdCreate -- Create VMId objects
+
+! !INTERFACE:
+  interface ESMF_VMIdCreate
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_VMIdCreate_s
+    module procedure ESMF_VMIdCreate_v
+
+!EOPI
+  end interface
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMIdDestroy -- Destroy VMId objects
+
+! !INTERFACE:
+  interface ESMF_VMIdDestroy
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+    module procedure ESMF_VMIdDestroy_s
+    module procedure ESMF_VMIdDestroy_v
+
+!EOPI
+  end interface
 
 !==============================================================================
       
@@ -2304,6 +2336,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                 :: blocking
     type(ESMF_CommHandle)   :: localcommhandle
 
+integer :: myPet
+
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2314,6 +2348,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize commhandle to an invalid pointer
     if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
 
+call ESMF_VMGet(vm, localPet=mypet, rc=localrc)
+if (ESMF_LogFoundError(localrc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Decide whether this is blocking or non-blocking
     blocking = .true. !default is blocking
     if (present(syncflag)) then
@@ -2323,6 +2362,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (count > 0) then
       size = count * 4 ! 4 bytes
       ! Call into the C++ interface.
+    print *, ESMF_METHOD, ': PET', myPet, ', size =', size
+    flush (6)
+
       if (blocking) then
         call c_ESMC_VMBroadcast(vm, bcstData(1), size, rootPet, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7342,7 +7384,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdCreate - Create an ESMF_VMId object
 
 ! !INTERFACE:
-  subroutine ESMF_VMIdCreate(vmId, rc)
+  subroutine ESMF_VMIdCreate_s(vmId, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId
@@ -7375,7 +7417,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMIdCreate
+  end subroutine ESMF_VMIdCreate_s
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdCreate()"
+!BOPI
+! !IROUTINE: ESMF_VMIdCreate - Create an array of ESMF_VMId objects
+
+! !INTERFACE:
+  subroutine ESMF_VMIdCreate_v(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(inout)         :: vmId(:)
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Create an ESMF_VMId object. This allocates memory on the C side.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!        Array of ESMF_VMId objects
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: i
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface
+    do, i=1, size (vmId)
+      call c_ESMC_VMIdCreate(vmId(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end do
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdCreate_v
 !------------------------------------------------------------------------------
 
 
@@ -7386,7 +7475,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMIdDestroy - Destroy an ESMF_VMId object
 
 ! !INTERFACE:
-  subroutine ESMF_VMIdDestroy(vmId, rc)
+  subroutine ESMF_VMIdDestroy_s(vmId, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(inout)         :: vmId
@@ -7419,7 +7508,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMIdDestroy
+  end subroutine ESMF_VMIdDestroy_s
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdDestroy()"
+!BOPI
+! !IROUTINE: ESMF_VMIdDestroy - Destroy an array of ESMF_VMId objects
+
+! !INTERFACE:
+  subroutine ESMF_VMIdDestroy_v(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(inout)         :: vmId(:)
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Destroy an ESMF_VMId object. This frees memory on the C side.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!        Array of ESMF_VMId objects
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: i
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface
+    do, i=1, size (vmId)
+      call c_ESMC_VMIdDestroy(vmId(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end do
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdDestroy_v
 !------------------------------------------------------------------------------
 
 
