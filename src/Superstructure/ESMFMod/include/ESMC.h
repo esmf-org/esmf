@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.32 2011/01/05 20:05:47 svasquez Exp $
+// $Id: ESMC.h,v 1.33 2011/09/15 20:16:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@
 // Infrastructure headers
 #include "ESMC_Util.h"
 #include "ESMC_VM.h"
+#include "ESMC_RHandle.h"
 #include "ESMC_DistGrid.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMC_Array.h"
