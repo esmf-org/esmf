@@ -27,7 +27,7 @@ program ESMF_AttributeCIMSTest
   implicit none
 
   ! Local variables
-  integer :: localPet, petCount, localrc, rc, userrc
+  integer :: localPet, petCount, userrc, localrc, rc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cname4, cplname
   type(ESMF_VM):: vm
   type(ESMF_State) :: c1imp, c1exp, c2imp, c2exp, c3imp, c3exp, c4imp, c4exp
