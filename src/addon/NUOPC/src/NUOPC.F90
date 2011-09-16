@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.18.2.3 2011/08/19 19:05:10 theurich Exp $
+! $Id: NUOPC.F90,v 1.18.2.4 2011/09/16 20:09:17 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -1010,7 +1010,8 @@ module NUOPC
           call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
             msg="stdAttrNameList too small", &
             line=__LINE__, &
-            file=FILENAME)
+            file=FILENAME, &
+            rcToReturn=rc)
           return  ! bail out
         endif
       else
@@ -1027,7 +1028,8 @@ module NUOPC
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
               msg="stdItemNameList too small", &
               line=__LINE__, &
-              file=FILENAME)
+              file=FILENAME, &
+              rcToReturn=rc)
             return  ! bail out
           endif
         else
@@ -1045,7 +1047,8 @@ module NUOPC
             call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
               msg="stdConnectedList too small", &
               line=__LINE__, &
-              file=FILENAME)
+              file=FILENAME, &
+              rcToReturn=rc)
             return  ! bail out
           endif
         else
