@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.103 2011/07/06 20:25:43 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.104 2011/09/16 00:33:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.103 2011/07/06 20:25:43 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.104 2011/09/16 00:33:38 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -893,9 +893,7 @@ petloop:  &
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Allocating buffer for local VM ID list", &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-               do, k=1, si%theircount
-                   call ESMF_VMIdCreate (si%vmidrecv(k))
-               enddo                              
+               call ESMF_VMIdCreate (si%vmidrecv(1:si%theircount))
                call ESMF_VMBcastVMId(vm, si%vmidrecv, count=size (si%vmidrecv), &
                    rootPet=j, rc=localrc)
            end if
@@ -1165,9 +1163,7 @@ itemloop:  do k=attreconstart, si%theircount
                if (ESMF_LogFoundDeAllocError(memstat, &
                               msg="Deallocating buffer for local ID list", &
                                ESMF_CONTEXT, rcToReturn=rc)) return
-               do k = 1, si%theircount
-                   call ESMF_VMIdDestroy(si%vmidrecv(k))
-               enddo
+               call ESMF_VMIdDestroy(si%vmidrecv(1:si%theircount))
                deallocate(si%vmidrecv, stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Deallocating buffer for local VM ID list", &
