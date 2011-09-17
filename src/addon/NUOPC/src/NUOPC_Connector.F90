@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.14 2011/07/19 23:54:18 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.15 2011/09/17 00:07:52 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -167,6 +167,12 @@ module NUOPC_Connector
     logical                               :: existflag
     
     rc = ESMF_SUCCESS
+    
+    ! prepare local pointer variables
+    nullify(importStdAttrNameList)
+    nullify(importStdItemNameList)
+    nullify(exportStdAttrNameList)
+    nullify(exportStdItemNameList)
     
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
