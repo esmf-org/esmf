@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.14 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMC_MeshUTest.C,v 1.15 2011/09/19 17:21:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,8 +35,9 @@ int main(void){
   char failMsg[80];
   int result = 0;
   int rc;
+  bool correct;
   int num_elem, num_node, conn_size;
-  int num_elements, num_nodes;
+  int num_elem_out, num_node_out;
   ESMC_Mesh mesh;
   int pdim=2;
   int sdim=3;
@@ -64,6 +65,65 @@ int main(void){
   mesh = ESMC_MeshCreate(pdim,sdim,&rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Read input files' header data
+  strcpy(name, "MeshVTKHeader");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshVTKHeader("data/testmesh", &num_elem, &num_node, &conn_size);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetLocalElementCount before MeshAddElements");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
+  // Get the number of local elements
+  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
+
+  correct=true;
+  if (num_elem_out != 0) {
+    correct = false;
+	printf("OUTPUT - num_elem_out = %d\n", num_elem_out);
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetLocalNodeCount before MeshAddNodes");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
+  // Get the number of local nodes
+  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_node_out);
+
+  correct=true;
+  if (num_node_out != 0) {
+    correct = false;
+	printf("OUTPUT - num_node_out = %d\n", num_node_out);
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+#if 0
+  //----------------------------------------------------------------------------
+  //NEX_disable_UTest_Multi_Proc_Only
+  // TODO: This call fails if called before nodes and elements have been added
+  // Free internal mesh memory
+  strcpy(name, "MeshFreeMemory");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshFreeMemory(mesh);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
@@ -137,24 +197,47 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetLocalNodeCount");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
   // Get the number of local nodes
-  strcpy(name, "MeshGetNumNodes");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_nodes);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_node_out);
+
+  correct=true;
+  if (num_node_out != num_node) {
+    correct = false;
+	printf("OUTPUT - num_node_out = %d, and num_node = %d\n", 
+	       num_node_out, num_node);
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetLocalElementCount");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
   // Get the number of local elements
-  strcpy(name, "MeshGetNumElements");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elements);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
+
+  correct=true;
+  if (num_elem_out != num_elem) {
+    correct = false;
+	printf("OUTPUT - num_elem_out = %d, and num_elem = %d\n", 
+	       num_elem_out, num_elem);
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
+  // TODO: This call fails if called before nodes and elements have been added
   // Free internal mesh memory
   strcpy(name, "MeshFreeMemory");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
