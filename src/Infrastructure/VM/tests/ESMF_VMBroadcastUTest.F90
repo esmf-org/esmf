@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBroadcastUTest.F90,v 1.16 2011/06/30 05:59:34 theurich Exp $
+! $Id: ESMF_VMBroadcastUTest.F90,v 1.17 2011/09/20 01:43:49 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBroadcastUTest.F90,v 1.16 2011/06/30 05:59:34 theurich Exp $'
+      '$Id: ESMF_VMBroadcastUTest.F90,v 1.17 2011/09/20 01:43:49 w6ws Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -48,7 +48,7 @@
       character(len=8) :: strvalue
 
       ! local variables
-      integer:: i, rc
+      integer:: i, j, rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
       integer:: count,root  
@@ -57,10 +57,17 @@
       real(ESMF_KIND_R4), allocatable:: r4_localData(:),r4_soln(:)
 
       type(ESMF_logical), allocatable:: local_logical(:),logical_soln(:)
-     
+
+      type(ESMF_VMId), allocatable :: local_vmids(:), vmids_soln(:)
+      integer   :: idData
+      character :: keyData
+      logical   :: all_verify
+
       integer :: isum
       real(ESMF_KIND_R8) :: R8Sum
       real(ESMF_KIND_R4) :: R4Sum
+
+      integer, parameter :: n_elements = 4
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -222,6 +229,62 @@
         if (local_logical(i).ne. logical_soln(i)) ISum= ISum + 1
       end do
       call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+
+      !Test with VMId arguments
+      !===========================
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Create VMid arrays on both root and destinations
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Creating VMId array Test"
+      allocate (local_vmids(n_elements))
+      call ESMF_VMIdCreate (local_vmids, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Create VMid arrays on both root and destinations
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Creating VMId solution array Test"
+      allocate (vmids_soln(n_elements))
+      call ESMF_VMIdCreate (vmids_soln, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Insert dummy data for the purposes of the test
+      do, i=1, n_elements
+	if (localPet == root) then
+          call c_ESMCI_VMIdinsert (local_vmids(i), i, achar (i+10))
+	else
+          call c_ESMCI_VMIdinsert (local_vmids(i), -1, achar (255))
+	end if
+	call c_ESMCI_VMIdinsert (vmids_soln(i), i, achar (i+10))
+      end do
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Broadcast data from the root processor
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Broadcasting VMId data Test"
+      call ESMF_VMBcastVMId(vm,  &
+          bcstData=local_vmids, count=size (local_vmids),  &
+          rootPet=root, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Broadcast
+      write(failMsg, *) "Wrong Local Data"
+      write(name, *) "Verify VMId data after broadcast Test"
+      all_verify = .true.
+      do, i=1, n_elements
+        call c_ESMCI_VMIdextract (local_vmids(i), idData, keyData)
+        if (idData /= i .or. iachar (keyData) /= i+10) then
+          print *, 'non-compare: index =', i, ', idData =', idData, ', keyData =', iachar(keyData)
+          all_verify = .false.
+        end if
+      end do
+      CALL ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
