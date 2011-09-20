@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.24 2011/04/28 18:53:41 rokuingh Exp $
+// $Id: ESMCI_VM.C,v 1.25 2011/09/20 19:38:17 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.24 2011/04/28 18:53:41 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.25 2011/09/20 19:38:17 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -881,7 +881,8 @@ int VM::bcastVMId(
 //
 // !ARGUMENTS:
 //
-  VMId *vmID,                   // in/out - VMId
+  VMId **vmID,                   // in/out - VMId
+  int count,                    // in  - VMId count
   int root                      // in  - root PET
   ){
 //
@@ -892,15 +893,40 @@ int VM::bcastVMId(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  if (vmID==ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Invalid VMId", &rc);
-    return rc;
+  for (int i=0; i<count; i++) {
+    if (vmID[i]==ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+	"- Invalid VMId", &rc);
+      return rc;
+    }
   }
-  // broadcast vmKey
-  broadcast(vmID->vmKey, vmKeyWidth, root);
-  // braodcast localID
-  broadcast(&(vmID->localID), sizeof(int), root);
+
+  // broadcast vmKeys
+  char *local_vmkeys = new char[count*vmKeyWidth];
+  for (int key=0; key<count; key++) {
+    for (int i=0; i<vmKeyWidth; i++) {
+      local_vmkeys[i + key*vmKeyWidth] = vmID[key]->vmKey[i];
+    }
+  }
+  broadcast(local_vmkeys, count*vmKeyWidth, root);
+  for (int key=0; key<count; key++) {
+    for (int i=0; i<vmKeyWidth; i++) {
+      vmID[key]->vmKey[i] = local_vmkeys[i + key*vmKeyWidth];
+    }
+  }
+  delete local_vmkeys;
+
+  // broadcast localIDs
+  int *local_ids = new int[count];
+  for (int i=0; i<count; i++) {
+    local_ids[i] = vmID[i]->localID;
+  }
+  broadcast(local_ids, count*sizeof(int), root);
+  for (int i=0; i<count; i++) {
+    vmID[i]->localID = local_ids[i];
+  }
+  delete local_ids;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
