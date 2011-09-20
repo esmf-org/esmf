@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMUTestHelper.C,v 1.1 2011/09/20 01:43:49 w6ws Exp $
+// $Id: ESMCI_VMUTestHelper.C,v 1.2 2011/09/20 21:33:36 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -20,13 +20,15 @@
 //
 //-----------------------------------------------------------------------------
 
+#include <iostream>
+
 // include associated header file
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VMUTestHelper.C,v 1.1 2011/09/20 01:43:49 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_VMUTestHelper.C,v 1.2 2011/09/20 21:33:36 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -35,12 +37,16 @@ extern "C" {
 
 namespace ESMCI {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmidinsert()"
 void FTN(c_esmci_vmidinsert)(ESMCI::VMId **vmid, int *localID, char *key) {
   VMId *localvmid = *vmid;
   localvmid->localID = *localID;
   *localvmid->vmKey  = *key;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmidextract()"
 void FTN(c_esmci_vmidextract)(ESMCI::VMId **vmid, int *localID, char *key) {
   VMId *localvmid = *vmid;
   *localID = localvmid->localID;
