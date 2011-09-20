@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2009/06/03 23:00:28 theurich Exp $ 
+# $Id: makefile,v 1.39 2011/09/20 03:07:14 w6ws Exp $ 
 
 ifeq ($(ESMF_TESTFORCEOPENMP),ON)
 ifeq ($(ESMF_OPENMP),OFF)
@@ -71,6 +71,8 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
+ESMF_VMBroadcastUTest.o:	ESMCI_VMUTestHelper.o
+ESMF_UTEST_VMBroadcast_OBJS =	ESMCI_VMUTestHelper.o
 
 #
 # VM
@@ -183,7 +185,7 @@ RUN_ESMF_VMAllGatherVUTestUNI:
 #
 # VM Broadcast
 #
-RUN_ESMF_VMBroadcastUTest:
+RUN_ESMF_VMBroadcastUTest:	ESMCI_TestHelper.o
 	$(MAKE) TNAME=VMBroadcast NP=4 ftest
 
 RUN_ESMF_VMBroadcastUTestUNI:
