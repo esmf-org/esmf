@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.104 2011/09/16 00:33:38 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.105 2011/09/20 19:17:13 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.104 2011/09/16 00:33:38 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.105 2011/09/20 19:17:13 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -894,7 +894,7 @@ petloop:  &
                               msg="Allocating buffer for local VM ID list", &
                               ESMF_CONTEXT, rcToReturn=rc)) return
                call ESMF_VMIdCreate (si%vmidrecv(1:si%theircount))
-               call ESMF_VMBcastVMId(vm, si%vmidrecv, count=size (si%vmidrecv), &
+               call ESMF_VMBcastVMId(vm, si%vmidrecv, count=si%theircount, &
                    rootPet=j, rc=localrc)
            end if
            if (ESMF_LogFoundError(localrc, &
