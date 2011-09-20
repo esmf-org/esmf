@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.49 2011/09/06 15:46:02 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.50 2011/09/20 17:59:26 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ program ESMF_RegridWeightGen
       integer            :: commandbuf2(15)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
-      logical            :: wasCompacted
+      logical            :: wasCompacted, largeFileFlag
       integer(ESMF_KIND_I4), pointer:: compactedIndices(:,:)
       real(ESMF_KIND_R8), pointer :: compactedWeights(:)
       logical :: ignoreUnmapped
@@ -252,6 +252,14 @@ program ESMF_RegridWeightGen
          if (index /= -1) then
            dstIsRegional = .true.
          end if
+
+	! --64bit_offset for large weight file
+ 	call ESMF_UtilGetArgIndex('--64bit_offset', argindex=index, rc=rc)
+	if (index /= -1) then
+	   largeFileFlag = .true.
+	else
+	   largeFileFlag = .false.
+        end if
 
         ! Should I have only PetNO=0 to open the file and find out the size?
          if (srcIsScrip) then
@@ -764,12 +772,14 @@ program ESMF_RegridWeightGen
             call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodflag, &
-                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, dstFrac=dstFrac, rc=rc)
+                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-          else
+         else
             call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	           dstIsScrip=dstIsScrip, method = methodflag, dstFrac=dstFrac, rc=rc)
+	           dstIsScrip=dstIsScrip, method = methodflag, dstFrac=dstFrac, &
+		   largeFileFlag=largeFileFlag, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	  endif
       else 
