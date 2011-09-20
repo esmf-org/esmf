@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.150 2011/09/15 18:46:41 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.151 2011/09/20 19:26:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.150 2011/09/15 18:46:41 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.151 2011/09/20 19:26:01 w6ws Exp $"
 
 !==============================================================================
 
@@ -7597,42 +7597,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-#define OLDBCASTVMIDIMPL_dis
-#ifdef OLDBCASTVMIDIMPL
     if (count > 0) then
-      call ESMF_VMGet (vm, localPet=mypet, petCount=npets)
-      ! TODO: Implement broadcastVMId array at the C++ layer
-      if (mypet == rootPet) then
-          do, i=0, npets-1
-              if (i == mypet) cycle
-              do, k=1, count
-                  call ESMF_VMSendVMId (vm, bcstData(k), i, rc=localrc)
-                  if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-              end do
-          end do
-      else
-          do, k=1, count
-              call ESMF_VMRecvVMId (vm, bcstData(k), rootPet, rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                             ESMF_ERR_PASSTHRU, &
-                             ESMF_CONTEXT, rc)) return
-          end do
-      end if
+      call c_ESMC_VMBcastVMId (vm, bcstData, count, rootPet, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-#else
-    if (count > 0) then
-      ! Call into the C++ interface.
-      if (blocking) then
-        do k=1, count
-          call c_ESMC_VMBcastVMId(vm, bcstData(k), rootPet, localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        enddo
-      endif
-    endif
-#endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
