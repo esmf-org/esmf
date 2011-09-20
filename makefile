@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.124 2011/06/29 20:25:58 theurich Exp $
+# $Id: makefile,v 1.125 2011/09/20 19:35:51 rokuingh Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -258,6 +258,7 @@ info_mk: chkdir_lib
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_APPSDIR=$(ESMF_APPSDIR)" >> $(MKINFO)
+	-@echo "ESMF_LIBSDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_F90COMPILER=$(ESMF_F90COMPILER)" >> $(MKINFO)
