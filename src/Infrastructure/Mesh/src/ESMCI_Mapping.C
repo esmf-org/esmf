@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mapping.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_Mapping.C,v 1.10.4.1 2011/09/21 04:51:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Mapping.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Mapping.C,v 1.10.4.1 2011/09/21 04:51:07 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -98,67 +98,71 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
                              double *dist) const
 {
 
+  // The maximum number of points we expect to see in a polygon in here, plus a bit extra
+#define PM_MAX_PNTS_IN_POLY 6
+
+
   // Eventually need to reorganize mapping/shape_func system
   // so that the switch to different mapping types happens
   // automatically (perhaps via a curved set of shapes as suggested
   // by Ryan).
 
-  // if this is a quad then solve it particular to that
-  if (SFUNC_TYPE::ndofs==4) {
+  // translate into polygon
+  int num_pnts;
+  double pnts[3*PM_MAX_PNTS_IN_POLY];
+  if (SFUNC_TYPE::ndofs==3) {
+    num_pnts=3;
+    pnts[0]=mdata[0]; pnts[1]=mdata[1]; pnts[2]=mdata[2];
+    pnts[3]=mdata[3]; pnts[4]=mdata[4]; pnts[5]=mdata[5];
+    pnts[6]=mdata[6]; pnts[7]=mdata[7]; pnts[8]=mdata[8];
+  } else if (SFUNC_TYPE::ndofs==4) {
+    num_pnts=4;
+    pnts[0]=mdata[0]; pnts[1]=mdata[1]; pnts[2]=mdata[2];
+    pnts[3]=mdata[3]; pnts[4]=mdata[4]; pnts[5]=mdata[5];
+    pnts[6]=mdata[6]; pnts[7]=mdata[7]; pnts[8]=mdata[8];
+    pnts[9]=mdata[9]; pnts[10]=mdata[10]; pnts[11]=mdata[11];
+  } else {
+    Throw() << " only polygons with 3 or 4 sides are currently supported with 2 parametric dimensions";
+  }
+
+  // Get rid of degenerate edges
+  remove_0len_edges3D(&num_pnts, pnts);
+
+  // Get the parameters particular to what it looks like
+  if (num_pnts==4) {
     double center[3]={0.0,0.0,0.0}; // center of sphere
     double p[2]; 
     double t;
-
+    
     // Intersect quad with line from point to center of sphere
-    if (!intersect_quad_with_line(mdata, point, center, p, &t)) {
+    if (!intersect_quad_with_line(pnts, point, center, p, &t)) {
       if (dist) *dist = std::numeric_limits<double>::max();
       pcoord[0]=0.0; pcoord[1]=0.0;
-      printf("QUAD CAN'T INVERT \n");
+      Throw() << "Can't map point to quadrilateral cell \n";
       return false;
     }
-
+    
     // Transform quad parametric coords from [0,1] to [-1,1] for consistancy
     pcoord[0]=2*p[0]-1.0;
     pcoord[1]=2*p[1]-1.0;
-
-#if 0
-    // Calculate distance
-    if (dist) {
-      double ipnt[3]; // intersection point
-
-      // calculate intersection point
-      ipnt[0]=t*(center[0]-point[0])+point[0];
-      ipnt[1]=t*(center[1]-point[1])+point[1];
-      ipnt[2]=t*(center[2]-point[2])+point[2];
-
-      // calculate dist from point to intersection point
-      *dist=std::sqrt((point[0]-ipnt[0])*(point[0]-ipnt[0]) +
-		      (point[1]-ipnt[1])*(point[1]-ipnt[1]) +
-		      (point[2]-ipnt[2])*(point[2]-ipnt[2]));
-    }
-#endif
-
+    
     // do is in
     double sdist;
-    bool in_quad = SFUNC_TYPE::is_in(pcoord, &sdist);
-
+    bool in_quad = quad_shape_func::is_in(pcoord, &sdist);
+    
     // Distance to quad
     if (dist) *dist=sdist;
-
+    
     return in_quad;
-  }
-
-
-  // if this is a tri then solve it particular to that
-  if (SFUNC_TYPE::ndofs==3) {
+  } else if (num_pnts==3) {
     double center[3]={0.0,0.0,0.0}; // center of sphere
     double p[2]; 
     double t;
 
-    // Intersect quad with line from point to center of sphere
-    if (!intersect_tri_with_line(mdata, point, center, p, &t)) {
+    // Intersect tri with line from point to center of sphere
+    if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
       if (dist) *dist = std::numeric_limits<double>::max();
-      printf("TRI CAN'T INVERT \n");
+      Throw() << "Can't map point to triangle cell \n";
       pcoord[0]=0.0; pcoord[1]=0.0;
       return false;
     }
@@ -168,156 +172,23 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
     pcoord[0]=p[0];
     pcoord[1]=p[1];
 
-#if 0
-    // Calculate distance
-    if (dist) {
-      double ipnt[3]; // intersection point
-
-      // calculate intersection point
-      ipnt[0]=t*(center[0]-point[0])+point[0];
-      ipnt[1]=t*(center[1]-point[1])+point[1];
-      ipnt[2]=t*(center[2]-point[2])+point[2];
-
-      // calculate dist from point to intersection point
-      *dist=std::sqrt((point[0]-ipnt[0])*(point[0]-ipnt[0]) +
-		      (point[1]-ipnt[1])*(point[1]-ipnt[1]) +
-		      (point[2]-ipnt[2])*(point[2]-ipnt[2]));
-    }
-#endif
-
-
     // do is in
     double sdist;
-    bool in_tri = SFUNC_TYPE::is_in(pcoord, &sdist);
+    bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
 
     // Distance to tri
     if (dist) *dist=2.0*sdist;
 
     return in_tri;
-  }
-
-
-//std::cout << "in 3 2 is_in_cell" << std::endl;
-  // Newton's method
-  const double ctol = 1e-11;
-  const int max_iter = 20;
-
-  fad_type s[sdim];
-  fad_type normal[sdim];
-  double delta_s[sdim];
-  fad_type res[sdim];
-  double jac[sdim][sdim];
-  double jac_inv[sdim][sdim];
-  double dnorm = 0.0, rnorm = 0.0;
-  int niters = 0;
-
-  for (unsigned int i = 0; i < sdim; i++) {
-    s[i] = 0.0;
-    s[i].diff(i, sdim);
-    delta_s[i] = 0.0;
-    res[i] = 0.0;
-    normal[i] = 0;
-  }
-
-  POLY_Mapping<SFUNC_TYPE,MPTraits<double,fad_type>,sdim,pdim> *mp_psens =
-    trade<MPTraits<double,fad_type> >();
-  bool converged = false;
-  do {
-    // Calculate residual.  Also use loop to start jacobian
-    mp_psens->forward(1, mdata, s, res); // F($)
-
-    // Now compute the normals and add n(eta,xi)*d
-    mp_psens->normal(1,mdata,s,normal);
-//    std::cout << "normal:(" << normal[0] << ", " << normal[1] << ", " <<  normal[2] <<")" << std::endl;
-
-    for (UInt i = 0; i < sdim; i++)
-      res[i] += normal[i]*s[sdim-1];
-    
-    rnorm = 0.0;
-    for (unsigned int i = 0; i < sdim; i++) {
-      res[i] = res[i]-point[i];  // F(x) - x = R(x)
-
-      rnorm += res[i].val()*res[i].val();
-
-      // Form jacobian at the same time
-      double *row = &(res[i].fastAccessDx(0));
-      for (UInt j = 0; j < sdim; j++) {
-        jac[i][j] = row[j];
-      }
-    } // for sdim
-/*
-std::cout << "res:(" << res[0].val() << ", " << res[1].val() << ", " <<  res[2].val() <<")" << std::endl;
-std::cout << "jacobian:" << std::endl;;
-for (unsigned int i = 0; i < sdim; i++) {
-for (unsigned int j = 0; j < sdim; j++) {
-  std::cout << jac[i][j] << ", ";
-}
-std::cout << std::endl;
-}
-*/
-
-/* Rnorm can be tiny when dnorm is huge.  Dnorm seems to be more reliable.
-    if (rnorm < ctol) {
-      converged = true;
-      break;
-    }
-*/
-
-    // So now res holds -F(x) and jac has jacobian.  We must invert the jacobian
-    POLY_Mapping_jacobian_invert<sdim>(&jac[0][0], &jac_inv[0][0]);
-/*
-std::cout << "jacobian inv:" << std::endl;
-for (unsigned int i = 0; i < sdim; i++) {
-for (unsigned int j = 0; j < sdim; j++) {
-  std::cout << jac_inv[i][j] << ", ";
-}
-std::cout << std::endl;
-}
-*/
-
-    // delta_s = jac_inv*res
-    dnorm = 0;
-    for (unsigned int i = 0; i < sdim; i++) {
-      delta_s[i] = 0.0;
-      for (unsigned int j = 0; j < sdim; j++) {
-        delta_s[i] += jac_inv[i][j]*(-res[j].val());
-// TODO Use fad derivs
-
-      }
-
-      // snew = sold+delta
-      s[i] = s[i] + delta_s[i];
-      dnorm += delta_s[i]*delta_s[i];
-    } // i
-
-    if (dnorm <= ctol) converged = true;
-    niters++;
-
-    if (niters >= max_iter) break; // stop loop uncoverged.
-  } while(!converged);
-//std::cout << "Newton iters:" << niters << ", d=" << s[sdim-1].val() << std::endl;
-
-  // Throw out last coord
-  for (unsigned int i = 0; i < pdim; i++) 
-    pcoord[i] = s[i].val();
-
-  if (!converged) {
-//    std::cout << "Not converged, dnorm=" << dnorm << ", rnorm=" << rnorm<< std::endl;
-    if (dist) *dist = std::numeric_limits<double>::max();
+  } else {
+    // This is a degenerate cell so we can't map to it. 
+    // Could throw an error here, but for flexiblity allow
+    // these degenerate cells for now, but simply don't map to them. 
     return false;
-  } //else std::cout << "Converged, dnorm=" << dnorm << " rnorm=" << rnorm<< std::endl;
+  }
 
-  if (dist) *dist = std::sqrt(
-       std::abs(s[sdim-1].val())*(
-       normal[0].val()*normal[0].val()
-       +normal[1].val()*normal[1].val()
-       +normal[2].val()*normal[2].val()));
 
-  // check parametric bounds.
-  double sdist(0);
-  bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
-  //  if(dist) *dist += sdist; Dont' do this for now because is_in doesn't set this consistently
-  return resu;
+#undef PM_MAX_PNTS_IN_POLY
 }
 
 
