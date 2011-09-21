@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.7.2.1 2011/08/29 17:30:05 theurich Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.7.2.2 2011/09/21 04:56:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -54,7 +54,8 @@ int init_bucket(int num_cells) {
     len = num_cells/total;
   }
   //  printf("total number of buckets: %d\n", total);
-  totalbuckets = total;
+  // need one more bucket for latitude = 90
+  totalbuckets = total+1;
   interval = factor;
   bucket = (FIELD**)malloc(sizeof(FIELD*)*totalbuckets);
   for (i=0; i<totalbuckets; i++) {
