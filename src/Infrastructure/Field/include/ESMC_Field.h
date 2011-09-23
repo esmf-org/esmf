@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.32 2011/09/23 20:53:08 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.33 2011/09/23 22:17:29 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -276,23 +276,23 @@ int ESMC_FieldPrint(
 //
 //   Creates a sparse matrix operation (stored in routehandle) that contains 
 //   the calculations and communications necessary to interpolate from srcField 
-//   to dstField. The routehandle can then be used in the call ESMC_FieldRegrid() 
+//   to dstField. The routehandle can then be used in the call ESMC\_FieldRegrid() 
 //   to interpolate between the Fields. 
 //
 //  The arguments are:
 //  \begin{description}
 //  \item[srcField]
-//    ESMC_Field with source data.
+//    ESMC\_Field with source data.
 //  \item[dstField]
-//    ESMC_Field with destination data.
+//    ESMC\_Field with destination data.
 //  \item[routehandle]
-//    The handle that implements the regrid, to be used in ESMC_FieldRegrid().
+//    The handle that implements the regrid, to be used in ESMC\_FieldRegrid().
 //  \item[regridmethod]
-//    The type of interpolation. If not specified, defaults to ESMF_REGRIDMETHOD_BILINEAR.
+//    The type of interpolation. If not specified, defaults to ESMF\_REGRIDMETHOD\_BILINEAR.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
-//    be mapped to a source cell. Options are ESMF_UNMAPPEDACTION_ERROR or 
-//    ESMF_UNMAPPEDACTION_IGNORE. If not specified, defaults to ESMF_UNMAPPEDACTION_ERROR.
+//    be mapped to a source cell. Options are ESMF\_UNMAPPEDACTION\_ERROR or 
+//    ESMF\_UNMAPPEDACTION\_IGNORE. If not specified, defaults to ESMF\_UNMAPPEDACTION\_ERROR.
 //  \end{description}
 //
 //EOP
@@ -309,12 +309,12 @@ int ESMC_FieldPrint(
     ESMC_RouteHandle *routehandle);  // in
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  Return code; equals ESMF\_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
 //
 //  Execute the precomputed regrid operation stored in routehandle to interpolate 
-//  from srcField to dstField. See ESMF_FieldRegridStore() on how to precompute
+//  from srcField to dstField. See ESMF\_FieldRegridStore() on how to precompute
 //  the routehandle.  It is erroneous to specify the identical Field object for
 //  srcField and dstField arguments.  This call is collective across the 
 //  current VM.
@@ -322,9 +322,9 @@ int ESMC_FieldPrint(
 //  The arguments are:
 //  \begin{description}
 //  \item[srcField]
-//    ESMC_Field with source data.
+//    ESMC\_Field with source data.
 //  \item[dstField]
-//    ESMC_Field with destination data.
+//    ESMC\_Field with destination data.
 //  \item[routehandle]
 //    Handle to the precomputed Route.
 //  \end{description}
@@ -340,7 +340,7 @@ int ESMC_FieldPrint(
   int ESMC_FieldRegridRelease(ESMC_RouteHandle *routehandle);  // inout
 
 // !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
+//  Return code; equals ESMF\_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
 //
