@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.18 2011/04/28 18:53:40 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.19 2011/09/23 21:11:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.18 2011/04/28 18:53:40 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.19 2011/09/23 21:11:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -299,6 +299,12 @@ int MeshCXX::addElements(int numElems, int *elemId,
 	   "- there are nodes on this PET that were not used in the element connectivity list ", &localrc)) throw localrc;
     }
 
+    // numElems is input data from AddElements
+    // numLElements is what is returned to C interface
+    // what is mesh.num_elems?  petlocal?  should it = numElems?
+    ThrowAssert(mesh.num_elems() == numElems);
+    numLElements = numElems;
+
     // Perhaps commit will be a separate call, but for now commit the mesh here.
     mesh.build_sym_comm_rel(MeshObj::NODE);
     
@@ -397,6 +403,12 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
       nc += sdim;
 
     }
+
+    // numNodes is input data from AddNodes
+    // numLNodes is what is returned to C interface
+    // what is mesh.num_nodes?  petlocal?  should it = numNodes?
+    ThrowAssert(mesh.num_nodes() == numNodes);
+    numLNodes = numNodes;
 
    } catch(std::exception &x) {
     // catch Mesh exception return code 
