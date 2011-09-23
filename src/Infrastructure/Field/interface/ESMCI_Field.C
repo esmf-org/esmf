@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.8 2011/09/15 00:44:35 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.9 2011/09/23 20:53:10 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -82,6 +82,15 @@ void FTN(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 
 void FTN(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
+
+void FTN(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  ESMCI::RouteHandle *routehandlep, int *regridmethod, int *unmappedaction,
+  int *rc);
+
+void FTN(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  ESMCI::RouteHandle *routehandlep, int *rc);
+
+void FTN(f_esmf_regridrelease)(ESMCI::RouteHandle *routehandlep, int *rc);
 
 }
 
@@ -349,6 +358,115 @@ namespace ESMCI {
       return rc;
 
     // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::regridstore()"
+//BOP
+// !IROUTINE:  ESMCI::Field::regridstore - precompute a regriddding operation
+//
+// !INTERFACE:
+  int Field::regridstore(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldpsrc, 
+    Field *fieldpdst, 
+    RouteHandle *routehandlep, 
+    int *regridMethod, 
+    int *unmappedAction) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+  
+    // TODO: why are fields.ptr and routehandle by reference??  from create.. 
+    FTN(f_esmf_regridstore)(fieldpsrc, fieldpdst, routehandlep,
+        regridMethod, unmappedAction, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::regrid()"
+//BOP
+// !IROUTINE:  ESMCI::Field::regrid - compute a regridding operation
+//
+// !INTERFACE:
+  int Field::regrid(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldpsrc, 
+    Field *fieldpdst, 
+    RouteHandle *routehandlep) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+  
+    // TODO: why are fields.ptr and routehandle by reference??  from create.. 
+    FTN(f_esmf_regrid)(fieldpsrc, fieldpdst, routehandlep, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::regridrelease()"
+//BOP
+// !IROUTINE:  ESMCI::Field::regridrelase - release resources associated with a regridding operation
+//
+// !INTERFACE:
+  int Field::regridrelease(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    RouteHandle *routehandlep) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+  
+    // TODO: why are fields.ptr and routehandle by reference??  from create.. 
+    FTN(f_esmf_regridrelease)(routehandlep, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+
     rc = ESMF_SUCCESS;
     return rc;
   }

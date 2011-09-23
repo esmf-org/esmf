@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.6 2011/04/18 21:12:23 theurich Exp $
+// $Id: ESMCI_Field.h,v 1.7 2011/09/23 20:53:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,9 +35,12 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
+#include "ESMC_Field.h"
 #include "ESMC_Mesh.h"
 #include "ESMC_Array.h"
 #include "ESMC_ArraySpec.h"
+#include "ESMC_RHandle.h"
+#include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMC_Interface.h"
 #include "ESMCI_LogErr.h"
@@ -68,6 +71,12 @@ namespace ESMCI{
     ESMC_Array getArray(int *rc);
     int print();
     int castToFortran(F90ClassHolder *fc);
+    static int regridstore(Field *fieldsrc, Field *fielddst, 
+        RouteHandle *routehandle,  
+		int *regridMethod, int *unmappedAction);
+    static int regrid(Field *fieldsrc, Field *fielddst, 
+        RouteHandle *routehandle);
+    static int regridrelease(RouteHandle *routehandle);
   }; 
 }
 

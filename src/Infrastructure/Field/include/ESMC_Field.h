@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.31 2011/09/15 00:44:33 theurich Exp $
+// $Id: ESMC_Field.h,v 1.32 2011/09/23 20:53:08 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,9 +35,11 @@
 extern "C" {
 #endif
 
+#include "ESMC_Field.h"
 #include "ESMC_Mesh.h"
 #include "ESMC_Array.h"
 #include "ESMC_ArraySpec.h"
+#include "ESMC_RHandle.h"
 #include "ESMC_Interface.h"
 
 // Class declaration type
@@ -254,6 +256,105 @@ int ESMC_FieldPrint(
 //
 //EOP
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldRegridStore - Precompute a Field regridding operation and return a RouteHandle
+//
+// !INTERFACE:
+  int ESMC_FieldRegridStore( 
+    ESMC_Field *srcField,          // in
+    ESMC_Field *dstField,          // in
+    ESMC_RouteHandle *routehandle, // inout
+	int regridmethod,              // in
+	int unmappedaction);           // in
+
+// !RETURN VALUE:
+//   Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//   Creates a sparse matrix operation (stored in routehandle) that contains 
+//   the calculations and communications necessary to interpolate from srcField 
+//   to dstField. The routehandle can then be used in the call ESMC_FieldRegrid() 
+//   to interpolate between the Fields. 
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC_Field with source data.
+//  \item[dstField]
+//    ESMC_Field with destination data.
+//  \item[routehandle]
+//    The handle that implements the regrid, to be used in ESMC_FieldRegrid().
+//  \item[regridmethod]
+//    The type of interpolation. If not specified, defaults to ESMF_REGRIDMETHOD_BILINEAR.
+//  \item[unmappedaction]
+//    Specifies what should happen if there are destination points that can't 
+//    be mapped to a source cell. Options are ESMF_UNMAPPEDACTION_ERROR or 
+//    ESMF_UNMAPPEDACTION_IGNORE. If not specified, defaults to ESMF_UNMAPPEDACTION_ERROR.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldRegrid - Compute a regridding operation
+//
+// !INTERFACE:
+  int ESMC_FieldRegrid( 
+    ESMC_Field *srcField,            // in
+    ESMC_Field *dstField,            // inout
+    ESMC_RouteHandle *routehandle);  // in
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Execute the precomputed regrid operation stored in routehandle to interpolate 
+//  from srcField to dstField. See ESMF_FieldRegridStore() on how to precompute
+//  the routehandle.  It is erroneous to specify the identical Field object for
+//  srcField and dstField arguments.  This call is collective across the 
+//  current VM.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC_Field with source data.
+//  \item[dstField]
+//    ESMC_Field with destination data.
+//  \item[routehandle]
+//    Handle to the precomputed Route.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldRegridRelease - Free resources used by a regridding operation
+//
+// !INTERFACE:
+  int ESMC_FieldRegridRelease(ESMC_RouteHandle *routehandle);  // inout
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Free resources used by regrid object
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[routehandle]
+//    Handle carrying the sparse matrix
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
 
 #if defined (__cplusplus)
 } // extern "C"

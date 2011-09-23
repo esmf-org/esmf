@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.26 2011/04/18 21:12:25 theurich Exp $
+!  $Id: ESMF_Field_C.F90,v 1.27 2011/09/23 20:53:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.26 2011/04/18 21:12:25 theurich Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.27 2011/09/23 20:53:10 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -267,3 +267,118 @@
     rc = ESMF_SUCCESS
 
   end subroutine f_esmf_fieldcollectgarbage
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_regridstore"
+  subroutine f_esmf_regridstore(srcField, dstField, routehandle, &
+                                     regridmethod, unmappedaction, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_RHandleMod
+    use ESMF_FieldRegridMod
+    use ESMF_FieldMod
+
+    implicit none
+
+      type(ESMF_Field)  :: srcField
+      type(ESMF_Field)  :: dstField
+      type(ESMF_RouteHandle)  :: routehandle
+
+!      integer(ESMF_KIND_I4),       intent(in),   optional :: srcMaskValues(:)
+!      integer(ESMF_KIND_I4),       intent(in),   optional :: dstMaskValues(:)
+      integer,intent(in)   :: regridmethod
+      integer,intent(in) :: unmappedaction
+!      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:)
+!      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)
+!      type(ESMF_Field),            intent(inout),optional :: srcFracField
+!      type(ESMF_Field),            intent(inout),optional :: dstFracField
+      integer,                      intent(out) :: rc 
+
+    integer :: localrc
+  
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+	! handle the regridmethod and unmappedaction flags
+
+    call ESMF_FieldRegridStore(srcField, dstField, &
+                               regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+                               unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
+                               routehandle=routehandle, rc=localrc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=localrc)) return
+  
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_regridstore
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_regrid"
+  subroutine f_esmf_regrid(srcField, dstField, routehandle, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_RHandleMod
+    use ESMF_FieldRegridMod
+    use ESMF_FieldMod
+
+    implicit none
+
+      type(ESMF_Field)        :: srcField
+      type(ESMF_Field)        :: dstField
+      type(ESMF_RouteHandle)  :: routehandle
+      integer                 :: rc 
+
+    integer :: localrc
+  
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+	! handle the regridmethod and unmappedaction flags
+
+    call ESMF_FieldRegrid(srcField, dstField, routehandle=routehandle, rc=localrc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=localrc)) return
+  
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_regrid
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_regridrelease"
+  subroutine f_esmf_regridrelease(routehandle, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_RHandleMod
+    use ESMF_FieldRegridMod
+    use ESMF_FieldMod
+
+    implicit none
+
+      type(ESMF_RouteHandle)  :: routehandle
+      integer                 :: rc 
+
+    integer :: localrc
+  
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+	! handle the regridmethod and unmappedaction flags
+
+    call ESMF_FieldRegridRelease(routehandle=routehandle, rc=localrc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=localrc)) return
+  
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_regridrelease
+
+

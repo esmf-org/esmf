@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.24 2011/09/15 00:44:35 theurich Exp $
+// $Id: ESMC_Field.C,v 1.25 2011/09/23 20:53:10 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -176,6 +176,83 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return ptr;
 } 
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegridStore()"
+  int ESMC_FieldRegridStore(ESMC_Field *srcField, ESMC_Field *dstField, 
+                            ESMC_RouteHandle *routehandle, 
+                            int regridmethod, int unmappedaction){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // typecase into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField->ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField->ptr);
+    ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
+
+    // Invoque the C++ interface
+    localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, routehandlep,
+      &regridmethod, &unmappedaction);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return NULL;  // bail out
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegrid()"
+  int ESMC_FieldRegrid(ESMC_Field *srcField, ESMC_Field *dstField, 
+                            ESMC_RouteHandle *routehandle){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // typecase into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField->ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField->ptr);
+    ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
+
+    // Invoque the C++ interface
+    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return NULL;  // bail out
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegridRelease()"
+  int ESMC_FieldRegridRelease(ESMC_RouteHandle *routehandle){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // typecase into ESMCI type
+    ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
+
+    // Invoque the C++ interface
+    localrc = ESMCI::Field::regridrelease(routehandlep);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return NULL;  // bail out
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
 //--------------------------------------------------------------------------
 
 }
