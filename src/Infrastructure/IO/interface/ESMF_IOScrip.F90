@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.27.2.2 2011/09/01 18:16:35 theurich Exp $
+! $Id: ESMF_IOScrip.F90,v 1.27.2.3 2011/09/26 18:29:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -577,7 +577,7 @@ end subroutine ESMF_ScripGetVar
 subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcFile, dstFile, srcIsScrip, dstIsScrip,&
 				      title, method, srcArea, dstArea, &
-				      srcFrac, dstFrac, rc)
+				      srcFrac, dstFrac, largeFileFlag,rc)
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: wgtFile
@@ -591,6 +591,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       type(ESMF_RegridMethod_Flag), optional, intent(in) :: method
       real(ESMF_KIND_R8),optional, intent(in) :: srcArea(:),dstArea(:)
       real(ESMF_KIND_R8),optional, intent(in) :: srcFrac(:), dstFrac(:)
+      logical, optional, intent(in) :: largeFileFlag
       integer, optional :: rc
 
       integer :: total, localCount(1)
@@ -619,6 +620,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer, parameter :: nf90_noerror = 0
       character(len=256) :: errmsg
       character(len=20) :: varStr
+      logical :: largeFileFlaglocal
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -636,6 +638,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       else
         dstIsScriplocal = .true.
       endif
+
+      if (present(largeFileFlag)) then
+	largeFileFlaglocal = largeFileFlag
+      else
+        largeFileFlaglocal = .false.
+      endif
+
 
       call ESMF_VMGetGlobal(vm, rc=rc)
       if (rc /= ESMF_SUCCESS) return
@@ -672,7 +681,12 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     return
         endif
         ! Create output file and create dimensions and variables
+	if (largeFileFlaglocal) then
+         ncStatus = nf90_create(trim(wgtFile), &
+		    or(NF90_CLOBBER,NF90_64BIT_OFFSET), ncid)
+	else
          ncStatus = nf90_create(trim(wgtFile), NF90_CLOBBER, ncid)
+	endif
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&

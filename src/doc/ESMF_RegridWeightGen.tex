@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.37.2.2 2011/09/13 22:10:54 theurich Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.37.2.3 2011/09/26 18:29:20 theurich Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -151,6 +151,7 @@ ESMF_RegridWeightGen  [--help]
                       -r
                       --src_regional
                       --dst_regional
+		      --64bit_offset
 
 where
   --help              - print the usage message 
@@ -238,6 +239,9 @@ where
     --dst_regional    - an optional argument specifying that the destination 
                         is a regional grid and the source is a global grid.  
 
+    --64bit_offset    - an optional argument specifying that the weight file will
+                        be created in the NetCDF 64-bit offset format to allow
+			variables larger than 2GB.
 \end{verbatim}
 
 
