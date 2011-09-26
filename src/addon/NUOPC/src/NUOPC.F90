@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.23 2011/09/16 20:04:08 theurich Exp $
+! $Id: NUOPC.F90,v 1.24 2011/09/26 03:40:04 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -27,6 +27,7 @@ module NUOPC
 
   ! public module interfaces
   public NUOPC_FieldDictionarySetup
+  public NUOPC_FieldDictionaryAddEntry  
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeAdd
   public NUOPC_CplCompAreServicesSet
@@ -114,6 +115,43 @@ module NUOPC
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, &
+    defaultLongName, defaultShortName, rc)
+! !ARGUMENTS:
+    character(*),                     intent(in)            :: standardName
+    character(*),                     intent(in)            :: canonicalUnits
+    character(*),                     intent(in),  optional :: defaultLongName
+    character(*),                     intent(in),  optional :: defaultShortName
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add an entry to the NUOPC Field dictionary. If necessary the dictionary is
+!   first set up.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_FieldDictionaryAddEntryI(NUOPC_FieldDictionary, &
+      standardName = standardName, canonicalUnits = canonicalUnits, &
+      defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
+      rc = rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_FieldAttributeGet - Get a NUOPC Field Attribute
 ! !INTERFACE:
   subroutine NUOPC_FieldAttributeGet(field, name, value, rc)
@@ -176,12 +214,47 @@ module NUOPC
     character(*), intent(in),  optional   :: Connected
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
+!   Add standard NUOPC Attributes to a Field object. Check the provided
+!   arguments against the NUOPC Field Dictionary. Omitted optional
+!   information is filled in using defaults out of the NUOPC Field Dictionary.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to which the Attributes are added.
+!   \item[StandardName]
+!     The StandardName of the Field. Must be a StandardName found in
+!     the  NUOPC Field Dictionary.
+!   \item[{[Units]}]
+!     The Units of the Field. Must be convertible to the canonical
+!     units specified in the NUOPC Field Dictionary for the specified
+!     StandardName.
+!     If omitted, the default is to use the canonical units associated with
+!     the StandardName in the NUOPC Field Dictionary.
+!   \item[{[LongName]}]
+!     The LongName of the Field. NUOPC does not restrict the value
+!     of this variable.
+!     If omitted, the default is to use the LongName associated with 
+!     the StandardName in the NUOPC Field Dictionary.
+!   \item[{[ShortName]}]
+!     The ShortName of the Field. NUOPC does not restrict the value
+!     of this variable.
+!     If omitted, the default is to use the ShortName associated with 
+!     the StandardName in the NUOPC Field Dictionary.
+!   \item[{[Connected]}]
+!     The connection status of the Field. Must be one of the NUOPC supported
+!     values: {\tt false} or {\tt true}.
+!     If omitted, the default is a connected status of {\tt false}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)            :: attrList(2)
     character(ESMF_MAXSTR)            :: tempString
-    logical                           :: isPresent
+    logical                           :: accepted
     integer                           :: i
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     
@@ -208,10 +281,10 @@ module NUOPC
 
     ! check that StandardName has an entry in the NUOPC_FieldDictionary
     call ESMF_ContainerGet(NUOPC_FieldDictionary, itemName=StandardName, &
-      isPresent=isPresent, rc=rc)
+      isPresent=accepted, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    if (.not.isPresent) then
+    if (.not.accepted) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg=StandardName//" is not a StandardName in the NUOPC_FieldDictionary!",&
         line=__LINE__, file=FILENAME, rcToReturn=rc)
@@ -232,23 +305,22 @@ module NUOPC
     
     ! set Units
     if (present(Units)) then
-      isPresent = .false. ! reset
-      do i=1, size(fdEntry%wrap%unitOptions)
-        if ((trim(Units))==trim(fdEntry%wrap%unitOptions(i))) then
-          isPresent = .true.
-          exit
+      if ((trim(Units))/=trim(fdEntry%wrap%canonicalUnits)) then
+        ! not the same as canoncial units
+        accepted = .false. ! reset
+        ! TODO: implement access to UDUNITS-2 to figure if Units can be 
+        ! TODO: converted to the canonicalUnits, if so then o.k.
+        if (.not.accepted) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg=Units//" cannot be converted to the canonical units in "// &
+              " NUOPC_FieldDictionary for StandardName: "//StandardName,&
+              line=__LINE__, file=FILENAME, rcToReturn=rc)
+          return  ! bail out
         endif
-      enddo
-      if (.not.isPresent) then
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg=Units//" is not a supported set of Units in the "// &
-            " NUOPC_FieldDictionary for StandardName: "//StandardName,&
-            line=__LINE__, file=FILENAME, rcToReturn=rc)
-        return  ! bail out
       endif
       tempString = Units
     else
-      tempString = fdEntry%wrap%unitOptions(1)  ! default
+      tempString = fdEntry%wrap%canonicalUnits  ! default
     endif
     call ESMF_AttributeSet(field, &
       name="Units", value=trim(tempString), &
@@ -285,14 +357,14 @@ module NUOPC
       
     ! set Connected
     if (present(Connected)) then
-      isPresent = .false. ! reset
+      accepted = .false. ! reset
       do i=1, size(fdEntry%wrap%connectedOptions)
         if ((trim(Connected))==trim(fdEntry%wrap%connectedOptions(i))) then
-          isPresent = .true.
+          accepted = .true.
           exit
         endif
       enddo
-      if (.not.isPresent) then
+      if (.not.accepted) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
           msg=Connected//" is not a supported Connected value in the "// &
             " NUOPC_FieldDictionary for StandardName: "//StandardName,&
@@ -886,9 +958,10 @@ module NUOPC
 !     The StandardName of the advertised Field. Must be a StandardName found in
 !     the  NUOPC Field Dictionary.
 !   \item[{[Units]}]
-!     The Units of the advertised Field. Must be a supported set of units found
-!     in the NUOPC Field Dictionary for the specified StandardName.
-!     If omitted, the default is to use the first set of units associated with
+!     The Units of the advertised Field. Must be convertible to the canonical
+!     units specified in the NUOPC Field Dictionary for the specified
+!     StandardName.
+!     If omitted, the default is to use the canonical units associated with
 !     the StandardName in the NUOPC Field Dictionary.
 !   \item[{[LongName]}]
 !     The LongName of the advertised Field. NUOPC does not restrict the value
