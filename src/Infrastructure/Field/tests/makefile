@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.87 2011/09/23 20:53:11 rokuingh Exp $ 
+# $Id: makefile,v 1.88 2011/09/26 17:19:19 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -51,6 +51,7 @@ TESTS_RUN_UNI = RUN_ESMF_FieldStressUTestUNI \
                 RUN_ESMF_FieldArbGridUTestUNI \
                 RUN_ESMF_FieldRegridXGOnlineUTestUNI \
                 RUN_ESMC_FieldUTestUNI \
+                RUN_ESMC_FieldRegridUTestUNI \
                 RUN_ESMF_FieldRedistArbUTestUNI
 
 #
@@ -91,6 +92,9 @@ RUN_ESMC_FieldUTestUNI:
 	$(MAKE) TNAME=Field NP=1 ctest
 
 RUN_ESMC_FieldRegridUTest:
+	$(MAKE) TNAME=FieldRegrid NP=1 ctest
+
+RUN_ESMC_FieldRegridUTestUNI:
 	$(MAKE) TNAME=FieldRegrid NP=1 ctest
 
 RUN_ESMF_FieldCreateGetUTest:
