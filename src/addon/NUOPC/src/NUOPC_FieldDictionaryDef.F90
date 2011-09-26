@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.5.2.1 2011/07/22 17:15:12 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.5.2.2 2011/09/26 18:18:09 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -13,7 +13,7 @@ module NUOPC_FieldDictionaryDef
   type NUOPC_FieldDictionaryEntryS
     sequence
     character(ESMF_MAXSTR)          :: standardName
-    character(ESMF_MAXSTR), pointer :: unitOptions(:)
+    character(ESMF_MAXSTR)          :: canonicalUnits
     character(ESMF_MAXSTR), pointer :: connectedOptions(:)
     character(ESMF_MAXSTR)          :: defaultLongName
     character(ESMF_MAXSTR)          :: defaultShortName
@@ -28,6 +28,7 @@ module NUOPC_FieldDictionaryDef
   public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
   ! public module interfaces
+  public NUOPC_FieldDictionaryAddEntryI
   public NUOPC_FieldDictionaryDefinition
 
   !-----------------------------------------------------------------------------
@@ -36,14 +37,14 @@ module NUOPC_FieldDictionaryDef
   
   !-----------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
+! !IROUTINE: NUOPC_FieldDictionaryAddEntryI - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
-    standardName, unitOptions, defaultLongName, defaultShortName, rc)
+  subroutine NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
+    standardName, canonicalUnits, defaultLongName, defaultShortName, rc)
 ! !ARGUMENTS:
     type(ESMF_Container),             intent(inout)         :: fieldDictionary
     character(*),                     intent(in)            :: standardName
-    character(*),                     intent(in)            :: unitOptions(:)
+    character(*),                     intent(in)            :: canonicalUnits
     character(*),                     intent(in),  optional :: defaultLongName
     character(*),                     intent(in),  optional :: defaultShortName
     integer,                          intent(out), optional :: rc
@@ -64,13 +65,7 @@ module NUOPC_FieldDictionaryDef
     
     ! set values inside of fdEntry
     fdEntry%wrap%standardName     = standardName
-    count = size(unitOptions)
-    allocate(fdEntry%wrap%unitOptions(count), stat=stat)
-    if (ESMF_LogFoundAllocError(stat, msg="allocating stdAttrNameList", &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    do i=1, count
-      fdEntry%wrap%unitOptions(i) = unitOptions(i)
-    enddo
+    fdEntry%wrap%canonicalUnits   = canonicalUnits
     allocate(fdEntry%wrap%connectedOptions(2), stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating fdEntry member", &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -112,13 +107,13 @@ module NUOPC_FieldDictionaryDef
 
 !BOT l l l l
 ! "{\bf StandardName}"
-! "{\bf Units}"
+! "{\bf CanonicalUnits}"
 ! "{\bf LongName}"
 ! "{\bf ShortName}"
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "air_pressure_at_sea_level", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Air Pressure at Sea Level", &
       defaultShortName  = "pmsl", &
       rc=rc)
@@ -126,9 +121,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "air_sea_temperature_difference", &
-      unitOptions       = (/"K"/), &
+      canonicalUnits    = "K", &
       defaultLongName   = "Air Sea Temperature Difference", &
       defaultShortName  = "astd", &
       rc=rc)
@@ -136,9 +131,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "bottom_depth", &
-      unitOptions       = (/"m"/), &
+      canonicalUnits    = "m", &
       defaultLongName   = "Bottom depth", &
       defaultShortName  = "bdpt", &
       rc=rc)
@@ -146,9 +141,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "bottom_friction_coefficient", &
-      unitOptions       = (/"1"/), &
+      canonicalUnits    = "1", &
       defaultLongName   = "Bottom Friction Coefficient", &
       defaultShortName  = "bfrc", &
       rc=rc)
@@ -156,9 +151,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "eastward_10m_wind", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Eastward 10m Wind", &
       defaultShortName  = "wndu", &
       rc=rc)
@@ -166,9 +161,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "eastward_northward_wave_radiation_stress", &
-      unitOptions       = (/"N m-1"/), &
+      canonicalUnits    = "N m-1", &
       defaultLongName   = "Eastward Northward Wave Radiation Stress", &
       defaultShortName  = "wsuv", &
       rc=rc)
@@ -176,9 +171,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "eastward_stokes_drift_current", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Eastward Stokes Drift Current", &
       defaultShortName  = "sdcu", &
       rc=rc)
@@ -186,9 +181,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "eastward_wave_bottom_current", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Eastward Wave Bottom Current", &
       defaultShortName  = "wbcu", &
       rc=rc)
@@ -196,9 +191,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "eastward_wave_radiation_stress", &
-      unitOptions       = (/"N m-1"/), &
+      canonicalUnits    = "N m-1", &
       defaultLongName   = "Eastward Wave Radiation Stress", &
       defaultShortName  = "wsuu", &
       rc=rc)
@@ -206,9 +201,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "eastward_wave_radiation_stress_gradient", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Eastward Wave Radiation Stress Gradient", &
       defaultShortName  = "wsgu", &
       rc=rc)
@@ -216,9 +211,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "isotropic_longwave_radiance_in_air", &
-      unitOptions       = (/"W m-2 sr-1"/), &
+      canonicalUnits    = "W m-2 sr-1", &
       defaultLongName   = "Isotropic Longwave Radiance in Air", &
       defaultShortName  = "rilw", &
       rc=rc)
@@ -226,9 +221,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "isotropic_shortwave_radiance_in_air", &
-      unitOptions       = (/"W m-2 sr-1"/), &
+      canonicalUnits    = "W m-2 sr-1", &
       defaultLongName   = "Isotropic Shortwave Radiance in Air", &
       defaultShortName  = "risw", &
       rc=rc)
@@ -236,9 +231,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "magnitude_of_surface_downward_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Magnitude of Surface Downward Stress", &
       defaultShortName  = "taum", &
       rc=rc)
@@ -246,9 +241,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "northward_10m_wind", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Northward 10m Wind", &
       defaultShortName  = "wndv", &
       rc=rc)
@@ -256,9 +251,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "northward_stokes_drift_current", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Northward Stokes Drift Current", &
       defaultShortName  = "sdcv", &
       rc=rc)
@@ -266,9 +261,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "northward_wave_bottom_current", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Northward Wave Bottom Current", &
       defaultShortName  = "wbcv", &
       rc=rc)
@@ -276,9 +271,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "northward_wave_radiation_stress", &
-      unitOptions       = (/"N m-1"/), &
+      canonicalUnits    = "N m-1", &
       defaultLongName   = "Northward Wave Radiation Stress", &
       defaultShortName  = "wsvv", &
       rc=rc)
@@ -286,9 +281,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "northward_wave_radiation_stress_gradient", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Northward Wave Radiation Stress Gradient", &
       defaultShortName  = "wsgv", &
       rc=rc)
@@ -296,9 +291,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "precipitation_amount", &
-      unitOptions       = (/"kg m-2"/), &
+      canonicalUnits    = "kg m-2", &
       defaultLongName   = "Precipitation Amount", &
       defaultShortName  = "prcp", &
       rc=rc)
@@ -306,9 +301,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "sea_surface_height_above_sea_level", &
-      unitOptions       = (/"m"/), &
+      canonicalUnits    = "m", &
       defaultLongName   = "Sea Surface Height Above Sea Level", &
       defaultShortName  = "ssh", &
       rc=rc)
@@ -316,9 +311,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "sea_surface_salinity", &
-      unitOptions       = (/"1e-3"/), &
+      canonicalUnits    = "1e-3", &
       defaultLongName   = "Sea Surface Salinity", &
       defaultShortName  = "sss", &
       rc=rc)
@@ -326,9 +321,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "sea_surface_temperature", &
-      unitOptions       = (/"K"/), &
+      canonicalUnits    = "K", &
       defaultLongName   = "Sea Surface Temperature", &
       defaultShortName  = "sst", &
       rc=rc)
@@ -336,9 +331,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_air_pressure", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Air Pressure", &
       defaultShortName  = "psfc", &
       rc=rc)
@@ -346,9 +341,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_eastward_sea_water_velocity", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Surface Eastward Sea Water Velocity", &
       defaultShortName  = "sscu", &
       rc=rc)
@@ -356,9 +351,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_eastward_wave_induced_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Eastward Wave Induced Stress", &
       defaultShortName  = "wvsu", &
       rc=rc)
@@ -366,9 +361,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_eastward_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Downward Eastward Stress", &
       defaultShortName  = "tauu", &
       rc=rc)
@@ -376,9 +371,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_heat_flux", &
-      unitOptions       = (/"W m-2"/), &
+      canonicalUnits    = "W m-2", &
       defaultLongName   = "Surface Downward Heat Flux", &
       defaultShortName  = "hfns", &
       rc=rc)
@@ -386,9 +381,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_latent_heat_flux", &
-      unitOptions       = (/"W m-2"/), &
+      canonicalUnits    = "W m-2", &
       defaultLongName   = "Surface Downward Latent Heat Flux", &
       defaultShortName  = "hfls", &
       rc=rc)
@@ -396,9 +391,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_moisture_flux", &
-      unitOptions       = (/"kg m-2 s-1"/), &
+      canonicalUnits    = "kg m-2 s-1", &
       defaultLongName   = "Surface Downward Moisture Flux", &
       defaultShortName  = "mfns", &
       rc=rc)
@@ -406,9 +401,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_northward_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Downward Northward Stress", &
       defaultShortName  = "tauv", &
       rc=rc)
@@ -416,9 +411,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_sensible_heat_flux", &
-      unitOptions       = (/"W m-2"/), &
+      canonicalUnits    = "W m-2", &
       defaultLongName   = "Surface Downward Sensible Heat Flux", &
       defaultShortName  = "hfss", &
       rc=rc)
@@ -426,9 +421,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_x_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Downward X Stress", &
       defaultShortName  = "taux", &
       rc=rc)
@@ -436,9 +431,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_downward_y_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Downward Y Stress", &
       defaultShortName  = "tauy", &
       rc=rc)
@@ -446,9 +441,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_northward_sea_water_velocity", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Surface Northward Sea Water Velocity", &
       defaultShortName  = "sscv", &
       rc=rc)
@@ -456,9 +451,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_northward_wave_induced_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Northward Wave Induced Stress", &
       defaultShortName  = "wvsv", &
       rc=rc)
@@ -466,9 +461,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_roughness_length", &
-      unitOptions       = (/"m"/), &
+      canonicalUnits    = "m", &
       defaultLongName   = "Surface Roughness Length", &
       defaultShortName  = "srl", &
       rc=rc)
@@ -476,9 +471,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_total_wave_induced_stress", &
-      unitOptions       = (/"Pa"/), &
+      canonicalUnits    = "Pa", &
       defaultLongName   = "Surface Total Wave Induced Stress", &
       defaultShortName  = "wvst", &
       rc=rc)
@@ -486,9 +481,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "wave_bottom_current_radian_frequency", &
-      unitOptions       = (/"rad s-1"/), &
+      canonicalUnits    = "rad s-1", &
       defaultLongName   = "Wave Bottom Current Radian Frequency", &
       defaultShortName  = "wbcf", &
       rc=rc)
@@ -496,9 +491,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "wave_induced_charnock_parameter", &
-      unitOptions       = (/"1"/), &
+      canonicalUnits    = "1", &
       defaultLongName   = "Wave Induced Charnock Parameter", &
       defaultShortName  = "chnk", &
       rc=rc)
@@ -506,9 +501,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "x_10m_wind", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "X 10m Wind", &
       defaultShortName  = "wndx", &
       rc=rc)
@@ -516,9 +511,9 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
-    call NUOPC_FieldDictionaryAddEntry(fieldDictionary, &
+    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "y_10m_wind", &
-      unitOptions       = (/"m s-1"/), &
+      canonicalUnits    = "m s-1", &
       defaultLongName   = "Y 10m Wind", &
       defaultShortName  = "wndy", &
       rc=rc)
