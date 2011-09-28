@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.54 2011/06/27 21:28:38 theurich Exp $
+! $Id: ESMF_RHandle.F90,v 1.55 2011/09/28 21:52:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -89,6 +89,8 @@ module ESMF_RHandleMod
  
   public ESMF_RouteHandleValidate
   public ESMF_RouteHandlePrint
+  
+  public ESMF_RouteHandleCopyThis
  
 !EOPI
 !------------------------------------------------------------------------------
@@ -96,7 +98,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.54 2011/06/27 21:28:38 theurich Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.55 2011/09/28 21:52:33 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -686,6 +688,52 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_RouteHandlePrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleCopyThis()"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleCopyThis - Copy RouteHandle this member
+
+! !INTERFACE:
+  subroutine ESMF_RouteHandleCopyThis(rhandleIn, rhandleOut, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(in)              :: rhandleIn
+    type(ESMF_RouteHandle), intent(inout)           :: rhandleOut
+    integer,                intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Copy RouteHandle this member. Do not set init code.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[rhandleIn] 
+!          Input {\tt ESMF\_RouteHandle} object.
+!     \item[rhandleOut] 
+!          Output {\tt ESMF\_RouteHandle} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+    
+    ! Copy this member
+    rhandleOut%this = rhandleIn%this
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_RouteHandleCopyThis
 !------------------------------------------------------------------------------
 
 end module ESMF_RHandleMod
