@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.27 2011/09/23 20:53:10 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.28 2011/09/28 22:16:57 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.27 2011/09/23 20:53:10 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.28 2011/09/28 22:16:57 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -297,6 +297,7 @@
       integer,                      intent(out) :: rc 
 
     integer :: localrc
+		type(ESMF_RouteHandle) :: l_routehandle
   
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -307,10 +308,18 @@
     call ESMF_FieldRegridStore(srcField, dstField, &
                                regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
                                unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
-                               routehandle=routehandle, rc=localrc)
+                               routehandle=l_routehandle, rc=localrc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=localrc)) return
-  
+ 
+    ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
+    ! we use the public interface to do the ptr copy;
+    ! the array object returned to the C interface must consist only of the
+    ! this pointer. It must not contain the isInit member.
+    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_regridstore

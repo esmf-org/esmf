@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.2 2011/09/28 21:39:06 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.3 2011/09/28 22:16:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -428,7 +428,6 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  rc = ESMC_RouteHandlePrint(routehandle);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -438,6 +437,8 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+//  rc = ESMC_RouteHandlePrint(routehandle);
+  
 //for (;;){}
 
   //----------------------------------------------------------------------------
