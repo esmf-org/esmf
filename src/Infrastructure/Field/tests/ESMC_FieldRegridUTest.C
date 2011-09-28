@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.1 2011/09/23 20:53:11 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.2 2011/09/28 21:39:06 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -89,7 +89,9 @@ int main(void){
   num_node_s = 9;
 
 #if 0
-  conn_size_s = num_elem_s*4;
+  int *nodeId_s, *nodeOwner_s, *elemId_s, *elemType_s, *elemConn_s;
+  double *nodeCoord_s;
+  int conn_size_s = num_elem_s*4;
   // Allocate the arrays to describe Mesh
   nodeId_s    = (int *) malloc (num_node_s * sizeof (int));
   nodeCoord_s = (double *) malloc (3*num_node_s * sizeof (double));
@@ -106,12 +108,13 @@ int main(void){
                0.0,2.0, 1.0,2.0, 2.0,2.0);
   *nodeOwner_s=(0,0,0,0,0,0,0,0,0); // everything on proc 0
   *elemId_s=(1,2,3,4);
-  *elemType_s=(9,9,9,; // ESMF_MESHELEMTYPE_QUAD=9  could not get ESMC version
+  *elemType_s=(9,9,9,9); // ESMF_MESHELEMTYPE_QUAD=9  could not get ESMC version
   *elemConn_s=(1,2,5,4,
               2,3,6,5,
               4,5,8,7,
               5,6,9,8);
 #endif
+#if 1
   int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
   double nodeCoord_s [] ={0.0,0.0, 1.0,0.0, 2.0,0.0,
                0.0,1.0, 1.0,1.0, 2.0,1.0,
@@ -124,7 +127,7 @@ int main(void){
               2,3,6,5,
               4,5,8,7,
               5,6,9,8};
-
+#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -205,7 +208,9 @@ printf("num_elem_s = %d\nnum_elem_out_s=%d\n", num_elem_s, num_elem_out_s);
   num_node_d = 16;
 
 #if 0
-  conn_size_d = num_elem_d*4;
+  int *nodeId_d, *nodeOwner_d, *elemId_d, *elemType_d, *elemConn_d;
+  double *nodeCoord_d;
+  int conn_size_d = num_elem_d*4;
   // Allocate the arrays to describe Mesh
   nodeId_d    = (int *) malloc (num_node_d * sizeof (int));
   nodeCoord_d = (double *) malloc (3*num_node_d * sizeof (double));
@@ -234,6 +239,7 @@ printf("num_elem_s = %d\nnum_elem_out_s=%d\n", num_elem_s, num_elem_out_s);
               10,11,15,14,
               11,12,16,15);
 #endif
+#if 1
   int nodeId_d [] ={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
   double nodeCoord_d [] ={0.0,0.0, 0.5,0.0, 1.5,0.0, 2.0,0.0,
                0.0,0.5, 0.5,0.5, 1.5,0.5, 2.0,0.5,
@@ -252,6 +258,7 @@ printf("num_elem_s = %d\nnum_elem_out_s=%d\n", num_elem_s, num_elem_out_s);
               9,10,14,13,
               10,11,15,14,
               11,12,16,15};
+#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -373,11 +380,12 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   //NEX_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  void * srcfieldptr = ESMC_FieldGetPtr(srcfield, 0, &rc);
+//  void * srcfieldptr = ESMC_FieldGetPtr(srcfield, 0, &rc);
+  double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-#if INITDATA
+#if 1
 {
   // define analytic field on source field
   double x,y;
@@ -385,7 +393,7 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   for(i=0;i<num_node_s;++i) {
     x=nodeCoord_s[2*i];
     y=nodeCoord_s[2*i+1];
-    static_cast<double *>(srcfieldptr)[i] = 20.0+x+y;
+    srcfieldptr[i] = 20.0+x+y;
   }
 }
 #endif
@@ -394,18 +402,20 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   //NEX_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  void * dstfieldptr = ESMC_FieldGetPtr(dstfield, 0, &rc);
+//  void * dstfieldptr = ESMC_FieldGetPtr(dstfield, 0, &rc);
+  double * dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-#if INITDATA
+#if 1
 // define analytic field on source field
 {
   int i;
   for(i=0;i<num_node_d;++i)
-    static_cast<double *>(dstfieldptr)[i] = 0.0;
+    dstfieldptr[i] = 0.0;
 }
 #endif
+
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -413,10 +423,12 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   int unmappedaction = 0;			
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegridStore(&srcfield, &dstfield, &routehandle, 
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, &routehandle, 
                         regridmethod, unmappedaction);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  rc = ESMC_RouteHandlePrint(routehandle);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -425,6 +437,8 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   rc = ESMC_FieldRegrid(&srcfield, &dstfield, &routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+//for (;;){}
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -439,7 +453,7 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
   //-------------------------- REGRID VALIDATION -------------------------------
   //----------------------------------------------------------------------------
 
-#if INITDATA
+#if 1
 {
   double x,y;
   int i;
@@ -449,7 +463,7 @@ printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
     x=nodeCoord_d[2*i];
     y=nodeCoord_d[2*i+1];
     // if error is too big report an error
-    if ( abs( static_cast<double *>(dstfieldptr)[i]-(x+y+20.0) ) > 0.0001)
+    if ( abs( dstfieldptr[i]-(x+y+20.0) ) > 0.0001)
       correct=false;
   }
   
