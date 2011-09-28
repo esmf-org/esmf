@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.151 2011/09/20 19:26:01 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.152 2011/09/28 19:12:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.151 2011/09/20 19:26:01 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.152 2011/09/28 19:12:07 w6ws Exp $"
 
 !==============================================================================
 
@@ -7275,7 +7275,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_VMIdCompare(vmId1, vmId2, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Logical) :: ESMF_VMIdCompare
+    logical :: ESMF_VMIdCompare
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId1
@@ -7298,13 +7298,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
+    type(ESMF_Logical)      :: tf
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface
-    call c_ESMC_VMIdCompare(vmId1, vmId2, ESMF_VMIdCompare, localrc)
+    call c_ESMC_VMIdCompare(vmId1, vmId2, tf, localrc)
+    ESMF_VMIdCompare = tf == ESMF_TRUE
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

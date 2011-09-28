@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.105 2011/09/20 19:17:13 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.106 2011/09/28 19:12:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.105 2011/09/20 19:17:13 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.106 2011/09/28 19:12:09 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -978,7 +978,7 @@ itemloop:  do k=attreconstart, si%theircount
                 !print *, "vm compare says ", ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) 
                 if ((si%idrecv(k) .eq. si%idsend(l)) &
                 .and. & 
-     (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE) ) then
+     ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) ) then
                           ihave = .true.
 !!DEBUG "  objects match, no need to create proxy"
                      exit
@@ -998,7 +998,7 @@ itemloop:  do k=attreconstart, si%theircount
              llow = max(1, si%mycount - 20)
              do l=si%mycount, llow, -1
                if ((si%idrecv(k) .eq. si%idsend(l)) .and. & 
-     (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE) ) then
+     ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) ) then
                  ihave = .true.
                  exit
                endif
