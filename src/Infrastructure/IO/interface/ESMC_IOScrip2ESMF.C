@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.9 2011/09/15 16:33:11 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.10 2011/09/29 21:54:58 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -288,18 +288,66 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
     }
   }
 }
-      
+
+extern "C" {
+  void FTN(c_nc_create)(
+			  char *infile,
+			  int *mode,
+			  int *largefileflag,
+			  int *ncid,
+			  int *rc,
+			  ESMCI_FortranStrLenArg infileLen)
+  {
+    bool oldversion = false;
+    int status;
+    int id;
+    char *c_infile;
+
+#ifdef ESMF_NETCDF
+
+#ifndef NC_64BIT_OFFSET
+    oldversion = true;
+#define NC_64BIT_OFFSET 0
+#endif
+
+    // ensure C conform string termination
+    c_infile=NULL;
+    c_infile=ESMC_F90toCstring(infile,infileLen);
+    if (c_infile == NULL) {
+      fprintf(stderr, "NetCDF file name not valid \n");
+      *rc = -1;
+      return; // bail out
+    }
+
+    if (*largefileflag == 1 && oldversion) {
+      fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+      *rc = -1;
+      return; //bail out
+    }
+    if (*largefileflag == 1) {
+      status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
+    } else {
+      status = nc_create(c_infile, *mode, &id);
+    }
+    *rc = status;
+    *ncid = id;
+    return;
+#else
+  fprintf(stderr, "Have to compile with ESMF_NETCDF environment variable defined\n");
+  *rc = -1;
+  return;
+#endif
+  }
+}
+
 extern "C" { 
 void FTN(c_convertscrip)(
   char *infile,
-  int *infileLen,
   char *outfile,
-  int *outfileLen,
   int *dualflag,
   int *rc,
-  ESMCI_FortranStrLenArg name_l0,
-  ESMCI_FortranStrLenArg name_l1,
-  ESMCI_FortranStrLenArg name_l2)
+  ESMCI_FortranStrLenArg infileLen,
+  ESMCI_FortranStrLenArg outfileLen)
 {
   int ncid1, ncid2;
   int gsdimid, gcdimid, grdimid;
@@ -334,7 +382,7 @@ void FTN(c_convertscrip)(
 #ifdef ESMF_NETCDF
   // ensure C conform string termination
   c_infile=NULL;
-  c_infile=ESMC_F90toCstring(infile,*infileLen);
+  c_infile=ESMC_F90toCstring(infile,infileLen);
   if (c_infile == NULL) {
     fprintf(stderr, "SCRIP file name not valid \n");
     *rc = -1;
@@ -342,7 +390,7 @@ void FTN(c_convertscrip)(
   }
 
   c_outfile=NULL;
-  c_outfile=ESMC_F90toCstring(outfile,*outfileLen);
+  c_outfile=ESMC_F90toCstring(outfile,outfileLen);
   if (c_outfile == NULL) {
     fprintf(stderr, "output file name from converter not valid \n");
     *rc = -1;
