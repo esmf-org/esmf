@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.pc604,v 1.1 2009/04/07 18:46:02 svasquez Exp $
+# $Id: mpirun.pc604,v 1.2 2011/09/29 15:48:45 svasquez Exp $
 ################################################################################
 # This script is written specifically for bluefire.
 ################################################################################
@@ -9,6 +9,9 @@ then
 	echo "Usage: mpirun -np # prog"
 	exit 1
 fi
+
+# Needed for netcdf/4.1.3_seq
+export LIBPATH=/contrib/zlib/lib
 
 num_procs=$2
 shift 2
