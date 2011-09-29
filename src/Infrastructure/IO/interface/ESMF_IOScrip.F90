@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.31 2011/09/20 17:58:21 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.32 2011/09/29 21:56:18 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -14,11 +14,6 @@
 !
 !     ESMF IOScrip Module
       module ESMF_IOScripMod
-!
-!==============================================================================
-!
-! This file contains the Grid class definition and all Grid class
-! methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -620,7 +615,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer, parameter :: nf90_noerror = 0
       character(len=256) :: errmsg
       character(len=20) :: varStr
-      logical :: largeFileFlaglocal
+      integer :: largeFileFlaglocal
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -639,10 +634,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         dstIsScriplocal = .true.
       endif
 
-      if (present(largeFileFlag)) then
-	largeFileFlaglocal = largeFileFlag
+      if (present(largeFileFlag) .and. largeFileFlag) then
+	largeFileFlaglocal = 1
       else
-        largeFileFlaglocal = .false.
+        largeFileFlaglocal = 0
       endif
 
 
@@ -681,13 +676,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     return
         endif
         ! Create output file and create dimensions and variables
-	if (largeFileFlaglocal) then
-         ncStatus = nf90_create(trim(wgtFile), &
-		    or(NF90_CLOBBER,NF90_64BIT_OFFSET), ncid)
-	else
-         ncStatus = nf90_create(trim(wgtFile), NF90_CLOBBER, ncid)
+	call c_nc_create(wgtFile, NF90_CLOBBER, &
+		largeFileFlaglocal, ncid, ncStatus)
+	if (largeFileFlaglocal==1 .and. (ncStatus == ESMF_FAILURE)) then
+	   call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+              msg="- 64bit file format is not supported in this version of NetCDF library", & 
+              ESMF_CONTEXT, rcToReturn=rc) 
+          return 	
 	endif
-         if (CDFCheckError (ncStatus, &
+	if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
 	   trim(wgtFile),&
