@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.34 2011/09/28 21:39:03 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.35 2011/09/29 00:20:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -304,9 +304,9 @@ int ESMC_FieldPrint(
 //
 // !INTERFACE:
   int ESMC_FieldRegrid( 
-    ESMC_Field *srcField,            // in
-    ESMC_Field *dstField,            // inout
-    ESMC_RouteHandle *routehandle);  // in
+    ESMC_Field srcField,            // in
+    ESMC_Field dstField,            // inout
+    ESMC_RouteHandle routehandle);  // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF\_SUCCESS if there are no errors.

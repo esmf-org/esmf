@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.28 2011/09/28 22:16:57 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.29 2011/09/29 00:20:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.28 2011/09/28 22:16:57 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.29 2011/09/29 00:20:45 theurich Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -297,7 +297,7 @@
       integer,                      intent(out) :: rc 
 
     integer :: localrc
-		type(ESMF_RouteHandle) :: l_routehandle
+    type(ESMF_RouteHandle) :: l_routehandle
   
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -309,15 +309,15 @@
                                regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
                                unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
                                routehandle=l_routehandle, rc=localrc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=localrc)) return
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
     ! we use the public interface to do the ptr copy;
     ! the array object returned to the C interface must consist only of the
     ! this pointer. It must not contain the isInit member.
-    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     rc = ESMF_SUCCESS
@@ -337,22 +337,35 @@
 
     implicit none
 
-      type(ESMF_Field)        :: srcField
-      type(ESMF_Field)        :: dstField
-      type(ESMF_RouteHandle)  :: routehandle
-      integer                 :: rc 
+    type(ESMF_Field)        :: srcField
+    type(ESMF_Field)        :: dstField
+    type(ESMF_RouteHandle)  :: routehandle
+    integer                 :: rc 
 
     integer :: localrc
+    type(ESMF_RouteHandle)  :: l_routehandle
   
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-	! handle the regridmethod and unmappedaction flags
+    ! Must first create a proper ESMF_RouteHandle that contains the 
+    ! required "isInit" class member.
+    ! Copy the this pointer a new ESMF_RouteHandle object
+    call ESMF_RouteHandleCopyThis(routehandle, l_routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! set the valid init code of the new object
+    call ESMF_RouteHandleSetInitCreated(l_routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_FieldRegrid(srcField, dstField, routehandle=routehandle, rc=localrc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=localrc)) return
+    ! handle the regridmethod and unmappedaction flags
+
+    call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
   
     rc = ESMF_SUCCESS
   
@@ -371,20 +384,30 @@
 
     implicit none
 
-      type(ESMF_RouteHandle)  :: routehandle
-      integer                 :: rc 
+    type(ESMF_RouteHandle)  :: routehandle
+    integer                 :: rc 
 
     integer :: localrc
+    type(ESMF_RouteHandle)  :: l_routehandle
   
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-	! handle the regridmethod and unmappedaction flags
+    ! Must first create a proper ESMF_RouteHandle that contains the 
+    ! required "isInit" class member.
+    ! Copy the this pointer a new ESMF_RouteHandle object
+    call ESMF_RouteHandleCopyThis(routehandle, l_routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! set the valid init code of the new object
+    call ESMF_RouteHandleSetInitCreated(l_routehandle, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_FieldRegridRelease(routehandle=routehandle, rc=localrc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=localrc)) return
+    call ESMF_FieldRegridRelease(routehandle=l_routehandle, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
   
     rc = ESMF_SUCCESS
   

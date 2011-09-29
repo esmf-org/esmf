@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.4 2011/09/28 23:07:42 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.5 2011/09/29 00:20:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -362,20 +362,17 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(&srcfield, &dstfield, &routehandle);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-#if 0
-  // this segfaults - no routehandle test file so i put it here for now
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   strcpy(name, "Execute ESMC_RouteHandlePrint()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_RouteHandlePrint(routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-#endif
 
   //----------------------------------------------------------------------------
   //NEX_UTest
