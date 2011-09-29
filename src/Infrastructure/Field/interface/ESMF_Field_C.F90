@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.29 2011/09/29 00:20:45 theurich Exp $
+!  $Id: ESMF_Field_C.F90,v 1.30 2011/09/29 22:26:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,12 +24,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.29 2011/09/29 00:20:45 theurich Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.30 2011/09/29 22:26:26 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fieldcreate"
-  subroutine f_esmf_fieldcreate(field, mesh_pointer, arrayspec, &
+#define ESMF_METHOD "f_esmf_fieldcreatemeshas"
+  subroutine f_esmf_fieldcreatemeshas(field, mesh_pointer, arrayspec, &
     gridToFieldMap, len1, ungriddedLBound, len2, ungriddedUBound, len3, name, rc)
 
     use ESMF_UtilTypesMod
@@ -68,7 +68,49 @@
    
     rc = ESMF_SUCCESS
   
-  end subroutine f_esmf_fieldcreate
+  end subroutine f_esmf_fieldcreatemeshas
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_fieldcreatemeshas"
+  subroutine f_esmf_fieldcreatemeshtk(field, mesh_pointer, typekind, &
+    gridToFieldMap, len1, ungriddedLBound, len2, ungriddedUBound, len3, name, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_MeshMod
+    use ESMF_FieldMod
+    use ESMF_FieldCreateMod
+
+    implicit none
+
+    ! arguments
+    type(ESMF_Field)               :: field
+    type(ESMF_Pointer)             :: mesh_pointer
+    type(ESMF_TypeKind_Flag)       :: typekind
+    integer, intent(in)            :: len1, len2, len3
+    integer                        :: gridToFieldMap(1:len1), ungriddedLBound(1:len2), ungriddedUBound(1:len3)
+    character(len=*),intent(in)    :: name
+    integer, intent(out)           :: rc              
+  
+    ! local variables  
+    type(ESMF_Mesh)          :: mesh
+  
+  ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+
+    mesh = ESMF_MeshCreate(mesh_pointer)
+  
+    field = ESMF_FieldCreate(mesh, typekind=typekind, gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+        name=name, &
+        rc=rc)    
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+   
+    rc = ESMF_SUCCESS
+  
+  end subroutine f_esmf_fieldcreatemeshtk
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldprint"

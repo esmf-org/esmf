@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.27 2011/09/29 00:20:45 theurich Exp $
+// $Id: ESMC_Field.C,v 1.28 2011/09/29 22:26:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,8 +36,8 @@ extern "C" {
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FieldCreate()"
-  ESMC_Field ESMC_FieldCreate(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
+#define ESMC_METHOD "ESMC_FieldCreateMeshAS()"
+  ESMC_Field ESMC_FieldCreateMeshAS(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
     ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
     ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
@@ -48,6 +48,33 @@ extern "C" {
 
     // Invoque the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
+      gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+      field.ptr = NULL;  // invalidate
+      return field; // bail out
+    }
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+    return field;
+  }
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldCreateMeshTK()"
+  ESMC_Field ESMC_FieldCreateMeshTK(ESMC_Mesh mesh, ESMC_TypeKind typekind,
+    ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
+    ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
+    // Initialize return code. Assume routine not implemented
+    if (rc) *rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMF_RC_NOT_IMPL;
+
+    ESMC_Field field;
+
+    // Invoque the C++ interface
+    field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, typekind,
       gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       field.ptr = NULL;  // invalidate

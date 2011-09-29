@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.12 2011/09/29 00:20:45 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.13 2011/09/29 22:26:26 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -62,7 +62,17 @@ static const char *const version = "$Id: ESMCI_Field.C,v 1.12 2011/09/29 00:20:4
 //-----------------------------------------------------------------------------
 extern "C" {
 // Prototypes of the Fortran interface functions.
-void FTN(f_esmf_fieldcreate)(ESMCI::Field *fieldp, void *mesh_pointer, ESMC_ArraySpec *arrayspec, 
+void FTN(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer, 
+    ESMC_ArraySpec *arrayspec, 
+    int *gridToFieldMap, int *len1, 
+    int *ungriddedLBound, int *len2,
+    int *ungriddedUBound, int *len3,
+    char *name, 
+    int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
+void FTN(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
+    ESMC_TypeKind *typekind, 
     int *gridToFieldMap, int *len1, 
     int *ungriddedLBound, int *len2,
     int *ungriddedUBound, int *len3,
@@ -107,7 +117,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Field::create()"
 //BOP
-// !IROUTINE:  ESMCI::Field::create - Create a new Field
+// !IROUTINE:  ESMCI::Field::create - Create a new Field from Mesh and ArraySpec
 //
 // !INTERFACE:
       Field *Field::create(
@@ -173,7 +183,94 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
   
-    FTN(f_esmf_fieldcreate)(field, mesh.ptr, &arrayspec, 
+    FTN(f_esmf_fieldcreatemeshas)(field, mesh.ptr, &arrayspec, 
+        gtfm->array, &gtfm->extent[0], 
+        uglb->array, &uglb->extent[0], 
+        ugub->array, &ugub->extent[0], 
+        fName, &localrc, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        return field;
+    }
+  
+    delete[] fName;
+  
+    if (rc) *rc = localrc;
+  
+    return field;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::create()"
+//BOP
+// !IROUTINE:  ESMCI::Field::create - Create a new Field from Mesh and typekind
+//
+// !INTERFACE:
+      Field *Field::create(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Field object
+//
+// !ARGUMENTS:
+    ESMC_Mesh mesh, 
+    ESMC_TypeKind typekind, 
+    ESMC_InterfaceInt gridToFieldMap, 
+    ESMC_InterfaceInt ungriddedLBound, 
+    ESMC_InterfaceInt ungriddedUBound, 
+    const char *name,  
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Field.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Field.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+    ESMCI::InterfaceInt *gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap.ptr);
+    ESMCI::InterfaceInt *uglb = (ESMCI::InterfaceInt *)(ungriddedLBound.ptr);
+    ESMCI::InterfaceInt *ugub = (ESMCI::InterfaceInt *)(ungriddedUBound.ptr);
+  
+    ESMCI::Field * field = NULL;
+  
+    if(gtfm->dimCount != 1){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+         "- gridToFieldMap array must be of rank 1", rc);
+       return field;
+    }
+    if(uglb->dimCount != 1){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+         "- ungriddedLBound array must be of rank 1", rc);
+       return field;
+    }
+    if(ugub->dimCount != 1){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+         "- ungriddedUBound array must be of rank 1", rc);
+       return field;
+    }
+  
+    int slen = strlen(name);
+    char * fName = new char[slen];
+    localrc = ESMC_CtoF90string(name, fName, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        delete[] fName;
+        return field;
+    }
+
+    try{
+      field = new Field;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      return ESMC_NULL_POINTER;
+    }
+  
+    FTN(f_esmf_fieldcreatemeshtk)(field, mesh.ptr, &typekind, 
         gtfm->array, &gtfm->extent[0], 
         uglb->array, &uglb->extent[0], 
         ugub->array, &ugub->extent[0], 

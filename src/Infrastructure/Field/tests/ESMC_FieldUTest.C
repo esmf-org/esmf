@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.17 2011/01/05 20:05:43 svasquez Exp $
+// $Id: ESMC_FieldUTest.C,v 1.18 2011/09/29 22:26:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -39,11 +39,11 @@ int main(void){
   ESMC_ArraySpec arrayspec;
   int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound;
   ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
-  ESMC_Field field;
+  ESMC_Field field, field2;
 
   int num_elem, num_node, conn_size;
-  ESMC_Mesh mesh, mesh1;
-  ESMC_Array array;
+  ESMC_Mesh mesh, mesh1, mesh2;
+  ESMC_Array array, array2;
   int pdim=2;
   int sdim=3;
 
@@ -163,8 +163,17 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field = ESMC_FieldCreate(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound,
+  field = ESMC_FieldCreateMeshAS(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound,
     i_ungriddedUBound, "field1", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  field2 = ESMC_FieldCreateMeshTK(mesh, ESMC_TYPEKIND_R8, i_gridToFieldMap, i_ungriddedLBound,
+    i_ungriddedUBound, "field2", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -210,9 +219,49 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  mesh2 = ESMC_FieldGetMesh(field2, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get an ESMC_Array object from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  array2 = ESMC_FieldGetArray(field2, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  void * ptr2 = ESMC_FieldGetPtr(field2, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Print an ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldPrint(field2);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_FieldDestroy(&field2);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshDestroy(&mesh1);
+  rc = ESMC_MeshDestroy(&mesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
