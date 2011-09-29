@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.80 2011/08/25 01:56:07 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.81 2011/09/29 21:57:23 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.80 2011/08/25 01:56:07 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.81 2011/09/29 21:57:23 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.80 2011/08/25 01:56:07 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.81 2011/09/29 21:57:23 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1532,10 +1532,8 @@ end function ESMF_MeshCreateFromUnstruct
     
     if (PetNo == 0) then
         ! this is a serial call into C code for now
-        scrip_file_len = len_trim(filename)
-        esmf_file_len = len_trim(esmffilename)
-        call c_ConvertSCRIP(filename, scrip_file_len, &
-          esmffilename, esmf_file_len, dualflag, localrc )
+        call c_ConvertSCRIP(filename, esmffilename,  &
+          dualflag, localrc )
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
