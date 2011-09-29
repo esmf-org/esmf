@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.20 2011/09/02 05:59:51 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.21 2011/09/29 05:51:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.20 2011/09/02 05:59:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.21 2011/09/29 05:51:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -820,7 +820,8 @@ namespace ESMCI{
 //     int error return code
 //
 // !ARGUMENTS:
-      const string &comment) {      // comment characters
+      const string &comment,        // comment characters
+      const int     indentLevel) {
 
 // !DESCRIPTION:
 //      Writes an {\tt ESMC\_IO\_XML} comment to file
@@ -851,6 +852,15 @@ namespace ESMCI{
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
+    // indent if needed
+    if (indentLevel > 0) {
+      string indentSpaces;
+      for(int i=0; i<indentLevel; i++) indentSpaces += "  ";
+      XMLCh* indent = XMLString::transcode(indentSpaces.c_str());
+      writeHandler->characters(indent, XMLString::stringLen(indent));
+      XMLString::release(&indent);
+    }
+ 
     // write XML <!-- comment -->
     XMLCh* cmt = XMLString::transcode(comment.c_str());
     writeHandler->comment(cmt, XMLString::stringLen(cmt));
@@ -876,6 +886,11 @@ namespace ESMCI{
       }
     }
 
+    // indent if needed
+    if (indentLevel > 0) {
+      for(int i=0; i<indentLevel; i++) writeFile << "  ";
+    }
+ 
     // write XML <!-- comment --> and end-of-line
     writeFile << "<!-- " << comment << " -->" << endl;
 #endif

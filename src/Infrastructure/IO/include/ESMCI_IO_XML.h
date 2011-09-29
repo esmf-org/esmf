@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.16 2011/09/01 23:19:03 eschwab Exp $
+// $Id: ESMCI_IO_XML.h,v 1.17 2011/09/29 05:51:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@ namespace ESMCI{
                         const int     indentLevel);
 
     // write an XML comment
-    int writeComment(const std::string& comment);
+    int writeComment(const std::string& comment, const int indentLevel=0);
 
     int write(int fileNameLen, const char* fileName,
               const char* outChars, int flag);
