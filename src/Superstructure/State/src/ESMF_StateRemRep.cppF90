@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.5 2011/08/12 03:55:08 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.6 2011/09/30 14:47:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.5 2011/08/12 03:55:08 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.6 2011/09/30 14:47:31 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -331,7 +331,7 @@ contains
 !    \item type(ESMF\_Field), intent(in)             :: fieldList(:)
 !    \item type(ESMF\_FieldBundle), intent(in)       :: fieldbundleList(:)
 !    \item type(ESMF\_RouteHandle), intent(in)       :: routehandleList(:)
-!    \item type(ESMF\_State), intent(in)             :: stateList(:)
+!    \item type(ESMF\_State), intent(in)             :: nestedStateList(:)
 !    \end{description}
 !
 ! The arguments are:
@@ -455,6 +455,6 @@ StateReplaceListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbu
 ^define noattributesversion
 StateReplaceListMacro(ESMF_RouteHandle,RouteHandle,routehandleList,none,none)
 ^undef noattributesversion
-StateReplaceListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
+StateReplaceListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%statep%base)
 
 end module ESMF_StateRemRepMod
