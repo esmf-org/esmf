@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.36 2011/09/29 22:26:24 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.37 2011/09/30 04:18:36 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ ESMC_Field ESMC_FieldCreateMeshAS(
 );
 
 // !RETURN VALUE:
-//  Newly created ESMC_Field object.
+//  Newly created ESMC\_Field object.
 //
 // !DESCRIPTION:
 //
@@ -145,7 +145,7 @@ ESMC_Field ESMC_FieldCreateMeshTK(
 //  \item[mesh]
 //    A {\tt ESMC\_Mesh} object.
 //  \item[arrayspec]
-//    The ESMC_TypeKind that describes this Field data.
+//    The ESMC\_TypeKind that describes this Field data.
 //  \item[gridToFieldMap]
 //    List with number of elements equal to the grid's dimCount. The list
 //    elements map each dimension of the grid to a dimension in the field by
@@ -224,7 +224,7 @@ ESMC_Array ESMC_FieldGetArray(
 );
 
 // !RETURN VALUE:
-//  The ESMC_Array object stored in the ESMC_Field.
+//  The ESMC\_Array object stored in the ESMC\_Field.
 //
 // !DESCRIPTION:
 //
@@ -252,7 +252,7 @@ ESMC_Mesh ESMC_FieldGetMesh(
 );
 
 // !RETURN VALUE:
-//  The ESMC_Mesh object stored in the ESMC_Field.
+//  The ESMC\_Mesh object stored in the ESMC\_Field.
 //
 // !DESCRIPTION:
 //
@@ -281,7 +281,7 @@ void *ESMC_FieldGetPtr(
 );
 
 // !RETURN VALUE:
-//  The Fortran data pointer stored in the ESMC_Field.
+//  The Fortran data pointer stored in the ESMC\_Field.
 //
 // !DESCRIPTION:
 //
