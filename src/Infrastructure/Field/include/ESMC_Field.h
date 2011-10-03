@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.37 2011/09/30 04:18:36 svasquez Exp $
+// $Id: ESMC_Field.h,v 1.38 2011/10/03 17:51:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -31,16 +31,15 @@
 // the definitions (full code bodies) for the Field methods.
 //-----------------------------------------------------------------------------
 
-#if defined (__cplusplus)
-extern "C" {
-#endif
-
-#include "ESMC_Field.h"
 #include "ESMC_Mesh.h"
 #include "ESMC_Array.h"
 #include "ESMC_ArraySpec.h"
 #include "ESMC_RHandle.h"
 #include "ESMC_Interface.h"
+
+#if defined (__cplusplus)
+extern "C" {
+#endif
 
 // Class declaration type
 typedef struct{
@@ -65,7 +64,7 @@ ESMC_Field ESMC_FieldCreateMeshAS(
 );
 
 // !RETURN VALUE:
-//  Newly created ESMC\_Field object.
+//  Newly created ESMC_Field object.
 //
 // !DESCRIPTION:
 //
@@ -125,7 +124,7 @@ ESMC_Field ESMC_FieldCreateMeshAS(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateMeshTK(
   ESMC_Mesh mesh,                           // in
-  ESMC_TypeKind typekind,                   // in
+  enum ESMC_TypeKind typekind,              // in
   ESMC_InterfaceInt gridToFieldMap,         // in
   ESMC_InterfaceInt ungriddedLBound,        // in
   ESMC_InterfaceInt ungriddedUBound,        // in
@@ -224,7 +223,7 @@ ESMC_Array ESMC_FieldGetArray(
 );
 
 // !RETURN VALUE:
-//  The ESMC\_Array object stored in the ESMC\_Field.
+//  The ESMC_Array object stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
@@ -252,7 +251,7 @@ ESMC_Mesh ESMC_FieldGetMesh(
 );
 
 // !RETURN VALUE:
-//  The ESMC\_Mesh object stored in the ESMC\_Field.
+//  The ESMC_Mesh object stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
@@ -281,7 +280,7 @@ void *ESMC_FieldGetPtr(
 );
 
 // !RETURN VALUE:
-//  The Fortran data pointer stored in the ESMC\_Field.
+//  The Fortran data pointer stored in the ESMC_Field.
 //
 // !DESCRIPTION:
 //
@@ -378,7 +377,7 @@ int ESMC_FieldPrint(
     ESMC_RouteHandle routehandle);  // in
 
 // !RETURN VALUE:
-//  Return code; equals ESMF\_SUCCESS if there are no errors.
+//  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
 //
@@ -409,7 +408,7 @@ int ESMC_FieldPrint(
   int ESMC_FieldRegridRelease(ESMC_RouteHandle *routehandle);  // inout
 
 // !RETURN VALUE:
-//  Return code; equals ESMF\_SUCCESS if there are no errors.
+//  Return code; equals ESMF_SUCCESS if there are no errors.
 //
 // !DESCRIPTION:
 //
