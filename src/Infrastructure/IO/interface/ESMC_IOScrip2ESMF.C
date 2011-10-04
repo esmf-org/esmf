@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.10 2011/09/29 21:54:58 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.11 2011/10/04 21:13:55 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
+#include "ESMCI_LogErr.h"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -178,9 +179,12 @@ FIELD* search_bucket(double lon, double lat) {
   
 void handle_error(int status) {
 #ifdef ESMF_NETCDF
+  char errmsg[128];
+  int rc;
   if (status != NC_NOERR) {
-    fprintf(stderr, "%s\n", nc_strerror(status));
-    exit(-1);
+    sprintf(errmsg, "NetCDF error: %s", nc_strerror(status));
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,errmsg,&rc);
+    exit(1);
   }
 #endif
 }
@@ -293,7 +297,7 @@ extern "C" {
   void FTN(c_nc_create)(
 			  char *infile,
 			  int *mode,
-			  int *largefileflag,
+			  ESMC_Logical *largefileflag,
 			  int *ncid,
 			  int *rc,
 			  ESMCI_FortranStrLenArg infileLen)
@@ -314,27 +318,26 @@ extern "C" {
     c_infile=NULL;
     c_infile=ESMC_F90toCstring(infile,infileLen);
     if (c_infile == NULL) {
-      fprintf(stderr, "NetCDF file name not valid \n");
-      *rc = -1;
+      ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",rc);
       return; // bail out
     }
 
-    if (*largefileflag == 1 && oldversion) {
+    if (*largefileflag == ESMF_TRUE && oldversion) {
       fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
-      *rc = -1;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: 64 bit file format is not supported in this version of NetCDF library",rc);
       return; //bail out
     }
-    if (*largefileflag == 1) {
+    if (*largefileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
     } else {
       status = nc_create(c_infile, *mode, &id);
     }
     *rc = status;
     *ncid = id;
+    delete [] c_infile;
     return;
 #else
-  fprintf(stderr, "Have to compile with ESMF_NETCDF environment variable defined\n");
-  *rc = -1;
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,"Have to compile with ESMF_NETCDF environment variable defined",rc);
   return;
 #endif
   }
@@ -384,16 +387,14 @@ void FTN(c_convertscrip)(
   c_infile=NULL;
   c_infile=ESMC_F90toCstring(infile,infileLen);
   if (c_infile == NULL) {
-    fprintf(stderr, "SCRIP file name not valid \n");
-    *rc = -1;
+    ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",rc);
     return; // bail out
   }
 
   c_outfile=NULL;
   c_outfile=ESMC_F90toCstring(outfile,outfileLen);
   if (c_outfile == NULL) {
-    fprintf(stderr, "output file name from converter not valid \n");
-    *rc = -1;
+    ESMC_LogDefault.MsgAllocError("Fail to allocate output NetCDF filename",rc);
     return; // bail out
   }
   
@@ -419,8 +420,8 @@ void FTN(c_convertscrip)(
 
   if (grdim > 1) {
     fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
-    *rc = -1;
-    return; // bail out
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The grid_rank is not equal 1.", rc);
+    return;
   }
 
   noarea = 0;
@@ -434,8 +435,8 @@ void FTN(c_convertscrip)(
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
     fprintf(stderr, "%s: Either grid_center_lat or grid_center_lon does not exist.\n",c_infile);
-    *rc = -1;
-    return; // bail out
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND,"Either grid_center_lon or grid_center_lat does not exist.", rc);
+    return;
   }
   status = nc_inq_varid(ncid1, "grid_corner_lat", &colatid);
   if (status != NC_NOERR) handle_error(status);
@@ -465,7 +466,7 @@ void FTN(c_convertscrip)(
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_corner_lon is not degrees nor radians.\n",c_infile);
-    *rc = -1;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
     return;
   }
   if (!strncmp(units, "radians", 7)) {
@@ -683,8 +684,8 @@ void FTN(c_convertscrip)(
       }
       if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
           fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-          *rc = -1;
-          return;
+	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
+	  return;
       }
       if (!strncmp(units, "radians", 7)) {
 	for (i=0; i<gsdim*2; i++) {
@@ -761,7 +762,7 @@ void FTN(c_convertscrip)(
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-    *rc = -1;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
     return;
   }
   if (!strncmp(units, "radians", 7)) {
@@ -786,8 +787,8 @@ void FTN(c_convertscrip)(
       dualcells[i1*maxconnection+dualcellcounts[i1]]=i+1;
       dualcellcounts[i1]++;
       if (dualcellcounts[i1] > maxconnection) {
-	printf("Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-	*rc = -1;
+	fprintf(stderr, "Vertex %d exceed maximal connections %d\n", i1, maxconnection);
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"Unrecoveable internal error",rc);
 	return; // bail out
       }
     }
@@ -883,15 +884,14 @@ void FTN(c_convertscrip)(
   free(inbuf1);
   nc_close(ncid2);
   nc_close(ncid1);
-  free(c_infile);
-  free(c_outfile);
+  delete [] c_infile;
+  delete [] c_outfile;
 
   *rc = 0;
   return;
 
 #else
-  fprintf(stderr, "Have to compile with ESMF_NETCDF environment variable defined\n");
-  *rc = -1;
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,"Have to compile with ESMF_NETCDF environment variable defined",rc);
   return;
 #endif
 }
