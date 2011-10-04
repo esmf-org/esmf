@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.132 2011/09/01 19:13:06 rokuingh Exp $
+! $Id: ESMF_Time.F90,v 1.133 2011/10/04 05:36:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.132 2011/09/01 19:13:06 rokuingh Exp $'
+      '$Id: ESMF_Time.F90,v 1.133 2011/10/04 05:36:51 eschwab Exp $'
 
 !==============================================================================
 !
@@ -854,8 +854,8 @@
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Returns true if given time is in a leap year, and false otherwise.
-!     See also {\tt ESMF\_CalendarIsLeapYear()}.
+!     Returns {\tt .true.} if given time is in a leap year, and {\tt .false.}
+!     otherwise.  See also {\tt ESMF\_CalendarIsLeapYear()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -912,8 +912,8 @@
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Returns true if the Calendars in these Times are
-!     the same, false otherwise.
+!     Returns {\tt .true.} if the Calendars in these Times are
+!     the same, {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
