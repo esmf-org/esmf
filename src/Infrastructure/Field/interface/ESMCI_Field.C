@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.13 2011/09/29 22:26:26 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.14 2011/10/04 19:35:24 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -94,8 +94,8 @@ void FTN(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
 
 void FTN(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
-  void *routehandlep, int *regridmethod, int *unmappedaction,
-  int *rc);
+  void *routehandlep, ESMC_RegridMethod *regridmethod, 
+  ESMC_UnmappedAction *unmappedaction, int *rc);
 
 void FTN(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, int *rc);
@@ -477,8 +477,8 @@ namespace ESMCI {
     Field *fieldpsrc, 
     Field *fieldpdst, 
     RouteHandle **routehandlep, 
-    int *regridMethod, 
-    int *unmappedAction) {
+    ESMC_RegridMethod *regridMethod, 
+    ESMC_UnmappedAction *unmappedAction) {
 //
 // !DESCRIPTION:
 //

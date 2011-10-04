@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.19 2011/09/23 21:11:54 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.19 2011/09/23 21:11:54 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -41,9 +41,9 @@ MeshCXX::MeshCXX() {
 }
 
 MeshCXX::~MeshCXX(){
-  cerr << "MeshCXX::~MeshCXX(): destructor entered" << endl;
+  //cerr << "MeshCXX::~MeshCXX(): destructor entered" << endl;
   if (!isMeshFreed()) {
-    cerr << "MeshCXX::~MeshCXX(): meshPointer = " << meshPointer << endl;
+    //cerr << "MeshCXX::~MeshCXX(): meshPointer = " << meshPointer << endl;
     delete meshPointer;
   }
 }
@@ -90,8 +90,8 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
     (meshCXXp)->meshPointer = meshp;
 
-    cerr << "MeshCXX::create(): meshp = " << meshp;
-    cerr << ".  Setting meshFreed to 0."  << endl;
+    //cerr << "MeshCXX::create(): meshp = " << meshp;
+    //cerr << ".  Setting meshFreed to 0."  << endl;
     meshCXXp->meshFreed = 0;
 
   } catch(std::exception &x) {
@@ -270,6 +270,7 @@ int MeshCXX::addElements(int numElems, int *elemId,
 	   "- elemConn entries should not be greater than number of nodes on processor ", &localrc)) throw localrc;
 	}
 
+
         // Setup connectivity list
         nconnect[n] = all_nodes[node_index];
 
@@ -349,7 +350,6 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
    int localrc;
    //Initialize localrc; assume routine not implemented
    localrc = ESMC_RC_NOT_IMPL;
-
    try{
      // Initialize the parallel environment for mesh (if not already done)
      {
@@ -374,6 +374,7 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
      
      Mesh &mesh = *meshPointer;
      for (int n = 0; n < numNodes; ++n) {
+//fprintf(stderr, "ESMCI - adding node %d\n", nodeId[n]);
        
        MeshObj *node = new MeshObj(MeshObj::NODE, nodeId[n], n);
        
@@ -400,6 +401,7 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
       for (UInt c = 0; c < sdim; ++c)
         coord[c] = nodeCoord[nc+c];
 
+//fprintf(stderr, "ESMCI - node coord [%f,%f] \n", nodeCoord[nc+0], nodeCoord[nc+1]);       
       nc += sdim;
 
     }
@@ -577,8 +579,8 @@ int MeshCXX::freeMemory(){
 	 throw localrc;  // bail out with exception
      }
      
-     cerr << "MeshCXX::freeMemory(): meshPointer = " << meshPointer;
-     cerr << ".  Setting meshFreed to 1." << endl;
+     //cerr << "MeshCXX::freeMemory(): meshPointer = " << meshPointer;
+     //cerr << ".  Setting meshFreed to 1." << endl;
      delete meshPointer;
      meshFreed=1;
           
@@ -732,7 +734,7 @@ int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwne
 } //MeshVTKBody
 
 int MeshCXX::isMeshFreed(){
-  cerr << "MeshCXX::isMeshFreed(): meshFreed = " << meshFreed << endl;
+  //cerr << "MeshCXX::isMeshFreed(): meshFreed = " << meshFreed << endl;
   return meshFreed;
 }
 

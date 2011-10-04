@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.30 2011/09/29 22:26:26 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.31 2011/10/04 19:35:24 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.30 2011/09/29 22:26:26 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.31 2011/10/04 19:35:24 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -100,7 +100,7 @@
     rc = ESMF_RC_NOT_IMPL
 
     mesh = ESMF_MeshCreate(mesh_pointer)
-  
+
     field = ESMF_FieldCreate(mesh, typekind=typekind, gridToFieldMap=gridToFieldMap, &
         ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         name=name, &
@@ -327,16 +327,9 @@
       type(ESMF_Field)  :: srcField
       type(ESMF_Field)  :: dstField
       type(ESMF_RouteHandle)  :: routehandle
-
-!      integer(ESMF_KIND_I4),       intent(in),   optional :: srcMaskValues(:)
-!      integer(ESMF_KIND_I4),       intent(in),   optional :: dstMaskValues(:)
-      integer,intent(in)   :: regridmethod
-      integer,intent(in) :: unmappedaction
-!      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:)
-!      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)
-!      type(ESMF_Field),            intent(inout),optional :: srcFracField
-!      type(ESMF_Field),            intent(inout),optional :: dstFracField
-      integer,                      intent(out) :: rc 
+      type(ESMF_RegridMethod_Flag)  :: regridmethod
+      type(ESMF_UnmappedAction_Flag)  :: unmappedaction
+      integer  :: rc 
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
@@ -348,8 +341,8 @@
 	! handle the regridmethod and unmappedaction flags
 
     call ESMF_FieldRegridStore(srcField, dstField, &
-                               regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
-                               unmappedaction=ESMF_UNMAPPEDACTION_ERROR, &
+                               regridmethod=regridmethod, &
+                               unmappedaction=unmappedaction, &
                                routehandle=l_routehandle, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

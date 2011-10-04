@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.28 2011/09/29 22:26:26 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.29 2011/10/04 19:35:24 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -78,6 +78,7 @@ extern "C" {
       gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       field.ptr = NULL;  // invalidate
+      if (rc!=NULL) *rc = 49987233;
       return field; // bail out
     }
 
@@ -210,7 +211,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 #define ESMC_METHOD "ESMC_FieldRegridStore()"
   int ESMC_FieldRegridStore(ESMC_Field srcField, ESMC_Field dstField, 
                             ESMC_RouteHandle *routehandle, 
-                            int regridmethod, int unmappedaction){
+                            ESMC_RegridMethod regridmethod, 
+                            ESMC_UnmappedAction unmappedaction){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;

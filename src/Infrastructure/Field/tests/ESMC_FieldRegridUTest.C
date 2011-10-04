@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.7 2011/10/03 19:11:30 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.8 2011/10/04 19:35:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -352,12 +352,10 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  int regridmethod = 0;
-  int unmappedaction = 0;			
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &routehandle, 
-                        regridmethod, unmappedaction);
+                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_ERROR);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

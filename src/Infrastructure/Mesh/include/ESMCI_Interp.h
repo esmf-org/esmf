@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.15 2011/08/22 16:35:46 feiliu Exp $
+// $Id: ESMCI_Interp.h,v 1.16 2011/10/04 19:35:27 rokuingh Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -146,7 +146,7 @@ public:
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
-  Interp(Mesh &src, Mesh &dest, Mesh *midmesh, const std::vector<FieldPair> &Fields, int unmappedaction=ESMC_UNMAPPEDACTION_ERROR);
+  Interp(Mesh &src, Mesh &dest, Mesh *midmesh, const std::vector<FieldPair> &Fields, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
   
   ~Interp();
   

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.19 2011/02/25 19:05:05 oehmke Exp $
+// $Id: ESMCI_Search.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.19 2011/02/25 19:05:05 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -456,9 +456,9 @@ static int found_func(void *c, void *y) {
       again.push_back(&node);
     } else {
       if (si.elem_masked) {
-	if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
+	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
 	  Throw() << " Some destination points cannot be mapped to source grid";
-	} else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
 	  // don't do anything
 	} else {
 	  Throw() << " Unknown unmappedaction option";
@@ -496,8 +496,8 @@ static int found_func(void *c, void *y) {
 
   if (!again.empty()) {
      if (stol > 1e-6) {
-	if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
-	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+	if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
+	  Throw() << " Some destination points cannot be mapped to source grid";	} else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
 	  // don't do anything
 	} else {
 	  Throw() << " Unknown unmappedaction option";
@@ -766,9 +766,9 @@ static int found_func_elems(void *c, void *y) {
   
   // Check for meshB elements which haven't been intersected
   if (meshB_elem_not_found) {
-    if (unmappedactionB == ESMC_UNMAPPEDACTION_ERROR) {
+    if (unmappedactionB == ESMCI_UNMAPPEDACTION_ERROR) {
       Throw() << " Some mesh B elements do not intersect with mesh A";	
-    } else if (unmappedactionB == ESMC_UNMAPPEDACTION_IGNORE) {
+    } else if (unmappedactionB == ESMCI_UNMAPPEDACTION_IGNORE) {
       // don't do anything
     } else {
       Throw() << " Unknown unmappedaction option";
@@ -777,7 +777,7 @@ static int found_func_elems(void *c, void *y) {
 
   // Check for meshA elements which haven't been intersected
   // MIGHT BE MORE EFFICIENT TO CHECK IF MATRIX ROW SUMS TO 1.0
-  if (unmappedactionA == ESMC_UNMAPPEDACTION_ERROR) {
+  if (unmappedactionA == ESMCI_UNMAPPEDACTION_ERROR) {
     SearchResult::iterator sb = result.begin(), se = result.end();
     for (; sb != se; sb++) {
       Search_result &sr = **sb;

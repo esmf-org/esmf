@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.66 2011/08/10 23:05:23 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.67 2011/10/04 19:35:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     IWeights wts;
     // Turn off unmapped action checking in regrid because it's local to a proc, and can therefore
     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
-    int temp_unmappedaction=ESMC_UNMAPPEDACTION_IGNORE;
+    int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
 
     if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
                       regridPoleType, regridPoleNPnts, 
@@ -150,7 +150,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // If user is worried about unmapped points then check that
     // here, because we have all the dest objects and weights
     // gathered onto the same proc.
-    if (*unmappedaction==ESMC_UNMAPPEDACTION_ERROR) {
+    if (*unmappedaction==ESMCI_UNMAPPEDACTION_ERROR) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         if (!all_mesh_elem_ids_in_wmat(dstmesh, wts)) {
           int localrc;

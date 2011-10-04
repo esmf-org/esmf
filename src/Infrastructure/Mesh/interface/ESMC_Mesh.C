@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.22 2011/02/23 01:03:19 w6ws Exp $
+// $Id: ESMC_Mesh.C,v 1.23 2011/10/04 19:35:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.22 2011/02/23 01:03:19 w6ws Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.23 2011/10/04 19:35:28 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -73,7 +73,6 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
   
@@ -81,7 +80,7 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   localrc = mep->addNodes(nodeCount, nodeIds, nodeCoords, nodeOwners);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

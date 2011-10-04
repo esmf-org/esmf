@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.33 2011/05/06 18:59:19 feiliu Exp $
+// $Id: ESMCI_Interp.C,v 1.34 2011/10/04 19:35:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.33 2011/05/06 18:59:19 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.34 2011/10/04 19:35:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1184,8 +1184,8 @@ zz(0)
     if (search_obj_type == MeshObj::NODE) {
       OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
     } else if (search_obj_type == MeshObj::ELEMENT) {
-      //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMC_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-      OctSearchElems(grend.GetSrcRend(), ESMC_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+      //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
+      OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
     }
 
     /*
@@ -1201,8 +1201,8 @@ zz(0)
     if (search_obj_type == MeshObj::NODE) {
       OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
     } else if (search_obj_type == MeshObj::ELEMENT) {
-      //      OctSearchElems(dest, unmappedaction, src, ESMC_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-      OctSearchElems(src, ESMC_UNMAPPEDACTION_IGNORE, dest, unmappedaction, 1e-8, sres);
+      //      OctSearchElems(dest, unmappedaction, src, ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
+      OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, dest, unmappedaction, 1e-8, sres);
     }
 
 

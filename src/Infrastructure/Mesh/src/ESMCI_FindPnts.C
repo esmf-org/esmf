@@ -1,4 +1,4 @@
-// $Id: ESMCI_FindPnts.C,v 1.4 2011/04/28 18:53:40 rokuingh Exp $
+// $Id: ESMCI_FindPnts.C,v 1.5 2011/10/04 19:35:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FindPnts.C,v 1.4 2011/04/28 18:53:40 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_FindPnts.C,v 1.5 2011/10/04 19:35:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -623,10 +623,10 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
       if (gids) gids[i]=-1;
       
       //// check possible error condition
-      if (unmappedaction == ESMC_UNMAPPEDACTION_ERROR) {
+      if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
 	return ESMCI_FINDPNT_PNT_NOT_FOUND;
         // Throw having problems: Throw() << " Some destination points cannot be mapped to source grid";
-      } else if (unmappedaction == ESMC_UNMAPPEDACTION_IGNORE) {
+      } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
 	// don't do anything
       } else {
 	return ESMCI_FINDPNT_UNKNOWN;

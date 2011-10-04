@@ -1,4 +1,4 @@
-// $Id: ESMCI_SearchFlags.h,v 1.4 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_SearchFlags.h,v 1.5 2011/10/04 19:35:27 rokuingh Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -16,8 +16,8 @@ namespace ESMCI {
 
 
 // What to do if dest points aren't found
-#define ESMC_UNMAPPEDACTION_ERROR  0
-#define ESMC_UNMAPPEDACTION_IGNORE 1
+#define ESMCI_UNMAPPEDACTION_ERROR  0
+#define ESMCI_UNMAPPEDACTION_IGNORE 1
 
 } //namespace
 

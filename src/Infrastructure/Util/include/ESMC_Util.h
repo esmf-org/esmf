@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.38 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMC_Util.h,v 1.39 2011/10/04 19:35:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -47,6 +47,13 @@ enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMC_TYPEKIND_LOGICAL,
                      ESMC_TYPEKIND_CHARACTER,
                      ESMF_NOKIND=99 };
+
+enum ESMC_RegridMethod { ESMC_REGRIDMETHOD_BILINEAR=0,
+                         ESMC_REGRIDMETHOD_PATCH,
+                         ESMC_REGRIDMETHOD_CONSERVE };
+
+enum ESMC_UnmappedAction { ESMC_UNMAPPEDACTION_ERROR=0,
+                           ESMC_UNMAPPEDACTION_IGNORE };
 
 // ESMF platform-dependent data types
 #if (ESMC_POINTER_SIZE == 4)

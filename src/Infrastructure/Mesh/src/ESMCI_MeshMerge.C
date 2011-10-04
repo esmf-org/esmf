@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.2 2011/08/22 17:01:24 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.3 2011/10/04 19:35:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.2 2011/08/22 17:01:24 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.3 2011/10/04 19:35:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -187,12 +187,12 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   // Build the rendezvous meshes and compute search result
   std::vector<Interp::FieldPair> fpairs;
   fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_CONSERVE));
-  int unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  int unmappedaction = ESMCI_UNMAPPEDACTION_IGNORE;
   Interp interp(srcmesh, dstmesh, meshmrgp, fpairs, unmappedaction);
   
   // Use search to figure out which elements of srcmesh overlap elements of dstmesh
   SearchResult sres;
-  OctSearchElems(srcmesh, ESMC_UNMAPPEDACTION_IGNORE, dstmesh, ESMC_UNMAPPEDACTION_IGNORE, search_tol, sres);
+  OctSearchElems(srcmesh, ESMCI_UNMAPPEDACTION_IGNORE, dstmesh, ESMCI_UNMAPPEDACTION_IGNORE, search_tol, sres);
   //SearchResult sres = interp.get_sres();
   Zoltan_Struct * zz = interp.get_zz();
 
