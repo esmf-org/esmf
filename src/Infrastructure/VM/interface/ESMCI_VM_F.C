@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.16 2011/10/04 23:01:01 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.17 2011/10/04 23:17:35 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1109,8 +1109,8 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidcopy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-std::cerr << ESMC_METHOD << ": calling ESMCI::VMIdCopy(*dest=";
-std::cerr << *dest << ",*source=" << *source << ")" << std::endl;
+//std::cerr << ESMC_METHOD << ": calling ESMCI::VMIdCopy(*dest=";
+//std::cerr << *dest << ",*source=" << *source << ")" << std::endl;
     int localrc = ESMCI::VMIdCopy(*dest, *source);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return;
@@ -1153,8 +1153,10 @@ std::cerr << *dest << ",*source=" << *source << ")" << std::endl;
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     ESMCI::VMIdPrint(*vmid);
+    // Flush before crossing language interface to ensure correct output order
+    fflush(stdout);
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
-    fflush (stdout);
   }
 
   void FTN(c_esmc_vmsendvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *dest,
@@ -1208,6 +1210,7 @@ std::cerr << *dest << ",*source=" << *source << ")" << std::endl;
 #define ESMC_METHOD "c_esmc_vmpointerprint()"
     // print the address to which this pointer points
     printf("c_esmc_vmpointerprint: %p\n", ptr);
+    fflush (stdout);
   }
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.153 2011/10/04 23:01:01 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.154 2011/10/04 23:17:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -188,7 +188,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.153 2011/10/04 23:01:01 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.154 2011/10/04 23:17:35 w6ws Exp $"
 
 !==============================================================================
 
@@ -7394,12 +7394,6 @@ write (0,*) ESMF_METHOD, ': calling c_ESMC_VMIdCopy, i=', i
 ! !DESCRIPTION:
 !   Print an ESMF_VMId object.\newline
 !
-!   Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!   On some platforms/compilers there is a potential issue with interleaving
-!   Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!   the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!   may be used on unit 6 to get coherent output.  \\
-!
 !   The arguments are:
 !   \begin{description}
 !   \item[vmId] 
@@ -7416,11 +7410,12 @@ write (0,*) ESMF_METHOD, ': calling c_ESMC_VMIdCopy, i=', i
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! Call into the C++ interface
+    ! Flush before crossing language interface to ensure correct output order
     call ESMF_UtilIOUnitFlush (ESMF_UtilIOstdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Call into the C++ interface
     call c_ESMC_VMIdPrint(vmId, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
