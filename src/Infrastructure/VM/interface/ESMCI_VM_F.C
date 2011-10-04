@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.15 2011/09/20 19:26:01 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.16 2011/10/04 23:01:01 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1103,12 +1103,18 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
-  void FTN(c_esmc_vmidprint)(ESMCI::VMId **vmid, int *rc){
+  void FTN(c_esmc_vmidcopy)(ESMCI::VMId **dest, ESMCI::VMId **source,
+    int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmidprint()"
+#define ESMC_METHOD "c_esmc_vmidcopy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdPrint(*vmid);
+std::cerr << ESMC_METHOD << ": calling ESMCI::VMIdCopy(*dest=";
+std::cerr << *dest << ",*source=" << *source << ")" << std::endl;
+    int localrc = ESMCI::VMIdCopy(*dest, *source);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return;
+    // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
@@ -1139,6 +1145,16 @@ extern "C" {
       return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN(c_esmc_vmidprint)(ESMCI::VMId **vmid, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmidprint()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    ESMCI::VMIdPrint(*vmid);
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+    fflush (stdout);
   }
 
   void FTN(c_esmc_vmsendvmid)(ESMCI::VM **ptr, ESMCI::VMId **vmid, int *dest,

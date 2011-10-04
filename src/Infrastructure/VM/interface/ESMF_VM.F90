@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.152 2011/09/28 19:12:07 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.153 2011/10/04 23:01:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -172,6 +172,7 @@ module ESMF_VMMod
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
   public ESMF_VMIdCompare
+  public ESMF_VMIdCopy
   public ESMF_VMIdPrint
   public ESMF_VMIdCreate
   public ESMF_VMIdDestroy
@@ -187,7 +188,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.152 2011/09/28 19:12:07 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.153 2011/10/04 23:01:01 w6ws Exp $"
 
 !==============================================================================
 
@@ -7319,6 +7320,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdCopy()"
+!BOPI
+! !IROUTINE: ESMF_VMIdCopy - Copy contents of ESMF_VMId objects
+
+! !INTERFACE:
+  subroutine ESMF_VMIdCopy(dest, source, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(out)           :: dest(:)
+    type(ESMF_VMId),   intent(in)            :: source(:)
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Copy the contents of ESMF_VMId objects.  Note that the destination
+!   objects must have been (deeply) allocated prior to calling this
+!   copy.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[dest]
+!        Destination ESMF_VMId object array
+!   \item[source]
+!        Source ESMF_VMId object array
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: i
+    type(ESMF_Logical)      :: tf
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    if (size (dest) /= size (source)) then
+      localrc = ESMF_RC_ARG_SIZE
+      if (ESMF_LogFoundError(localrc, msg='size (dest) /= size (source)', &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
+    ! Call into the C++ interface
+    do, i=1, size (source)
+write (0,*) ESMF_METHOD, ': calling c_ESMC_VMIdCopy, i=', i
+      call c_ESMC_VMIdCopy(dest(i), source(i), localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+	ESMF_CONTEXT, rcToReturn=rc)) return
+    end do
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdCopy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMIdPrint()"
 !BOPI
 ! !IROUTINE: ESMF_VMIdPrint - Print an ESMF_VMId object
@@ -7356,6 +7417,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOstdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_ESMC_VMIdPrint(vmId, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
