@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.32 2011/09/29 21:56:18 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.33 2011/10/04 21:10:32 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -615,7 +615,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer, parameter :: nf90_noerror = 0
       character(len=256) :: errmsg
       character(len=20) :: varStr
-      integer :: largeFileFlaglocal
+      type(ESMF_Logical) :: largeFileFlaglocal
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -634,10 +634,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         dstIsScriplocal = .true.
       endif
 
-      if (present(largeFileFlag) .and. largeFileFlag) then
-	largeFileFlaglocal = 1
+      if (present(largeFileFlag)) then
+	largeFileFlaglocal = largeFileFlag
       else
-        largeFileFlaglocal = 0
+        largeFileFlaglocal = .false.
       endif
 
 
@@ -678,11 +678,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         ! Create output file and create dimensions and variables
 	call c_nc_create(wgtFile, NF90_CLOBBER, &
 		largeFileFlaglocal, ncid, ncStatus)
-	if (largeFileFlaglocal==1 .and. (ncStatus == ESMF_FAILURE)) then
-	   call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-              msg="- 64bit file format is not supported in this version of NetCDF library", & 
-              ESMF_CONTEXT, rcToReturn=rc) 
-          return 	
+	if (largeFileFlaglocal == ESMF_TRUE .and. &
+		(ncStatus == ESMC_RC_LIB)) then
+	   if (ESMF_LogFoundError(ncStatus, ESMF_ERR_PASSTHRU, &
+		ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
 	if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
