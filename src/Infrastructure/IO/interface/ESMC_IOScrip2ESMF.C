@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.11 2011/10/04 21:13:55 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.12 2011/10/05 16:50:32 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -177,6 +178,8 @@ FIELD* search_bucket(double lon, double lat) {
   return NULL;
 }
   
+#undef ESMC_METHOD
+#define ESMC_METHOD "handle_error"
 void handle_error(int status) {
 #ifdef ESMF_NETCDF
   char errmsg[128];
@@ -293,6 +296,8 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
   }
 }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_nc_create"
 extern "C" {
   void FTN(c_nc_create)(
 			  char *infile,
@@ -343,6 +348,8 @@ extern "C" {
   }
 }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_convertscrip"
 extern "C" { 
 void FTN(c_convertscrip)(
   char *infile,
