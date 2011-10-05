@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.126 2011/09/29 05:55:39 eschwab Exp $
+// $Id: ESMCI_Attribute.C,v 1.127 2011/10/05 05:58:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.126 2011/09/29 05:55:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.127 2011/10/05 05:58:49 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -6489,19 +6489,37 @@ if (attrRoot == ESMF_TRUE) {
       localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
-    if (attpack->AttributeIsSet("LongTitle")) {
-      localrc = attpack->AttributeGet("LongTitle", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
+    if (attpack->AttributeIsSet("LongTitle") ||
+        attpack->AttributeIsSet("URL")) {
+      value.clear();
+      if (attpack->AttributeIsSet("LongTitle")) {
+        localrc = attpack->AttributeGet("LongTitle", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        value = valuevector.at(0);
+      }
+      // TODO:  CIM, as of 1.5/1.7, using ISO CI_Citation_Type, has no
+      // definition for a citation URL.  Until CIM extends (subclasses)
+      // CI_Citation_Type to add a place for citation URL, append it to
+      // LongTitle.
+      if (attpack->AttributeIsSet("URL")) {
+        localrc = attpack->AttributeGet("URL", &valuevector);
+        if (valuevector.size() > 1) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", &localrc);
+          return ESMF_FAILURE;}
+        // append URL to LongTitle for now TODO: separate when place for
+        // citation URL is created in CIM
+        value += (value.empty() ? "" : " ") + valuevector.at(0);
+      }
       localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeComment(
-        "from ESMF: CIM/Citation, 'LongTitle'.", indent+1);
+        "from ESMF: CIM/Citation, 'LongTitle' + 'URL'.", indent+1);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: \"Reference\" under tab \"References\", "
@@ -6510,19 +6528,7 @@ if (attrRoot == ESMF_TRUE) {
       localrc = io_xml->writeEndElement("gmd:collectiveTitle", --indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
-#if 0
-    // TODO:  CIM, as of 1.5/1.7, using ISO CI_Citation_Type, has no definition 
-    //        for a citation URL.  Perhaps append to LongTitle (above)?
-    if (attpack->AttributeIsSet("URL")) {
-      localrc = attpack->AttributeGet("URL", &valuevector);
-      if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
-        return ESMF_FAILURE;}
-      value = valuevector.at(0);
-      // ???
-    }
-#endif
+
     // citation footer
     localrc = io_xml->writeEndElement("citation", --indent);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -6877,7 +6883,7 @@ if (attrRoot == ESMF_TRUE) {
             "to produce valid CIM XML output.",
             ESMC_LOG_WARN, ESMC_CONTEXT);
         }
-        localrc = io_xml->writeStartElement("input", "", 3, 2,
+        localrc = io_xml->writeStartElement("input", "", 2, 2,
                      "fullySpecified", "true", "purpose", 
                      couplingPurpose.c_str());
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -6885,10 +6891,10 @@ if (attrRoot == ESMF_TRUE) {
           "from ESMF: CIM/Inputs, 'CouplingPurpose' "
           "(\"Ancillary\"=\"ancillaryFile\", "
           "\"Boundary\"=\"boundaryCondition\", "
-          "\"Initial\"=\"initialCondition\")", 4);
+          "\"Initial\"=\"initialCondition\")", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
-          "   to ESG: Title of expandable bar under tab \"Inputs\".", 4);
+          "   to ESG: Title of expandable bar under tab \"Inputs\".", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         // Output starting <input> element, to match ending element
@@ -6897,7 +6903,7 @@ if (attrRoot == ESMF_TRUE) {
         // outputting no <input></input> pair, which would produce far
         // more validation errors, confusing a user as to what the real 
         // problem is -- that attribute CouplingPurpose is not set.
-        localrc = io_xml->writeStartElement("input", "", 3, 2,
+        localrc = io_xml->writeStartElement("input", "", 2, 2,
                      "fullySpecified", "true", "purpose", "");
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
@@ -6914,29 +6920,29 @@ if (attrRoot == ESMF_TRUE) {
                       "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeElement("description", value, 4, 0);
+        localrc = io_xml->writeElement("description", value, 3, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
-          "from ESMF: CIM/Inputs, 'Description'.", 5);
+          "from ESMF: CIM/Inputs, 'Description'.", 4);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
-          "   to ESG: Next to field name (after colon) under tab \"Inputs\".", 5);
+          "   to ESG: Next to field name (after colon) under tab \"Inputs\".", 4);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       
       if (couplingPurpose == "ancillaryFile") {
-        localrc = io_xml->writeStartElement("type", "", 4, 2, 
+        localrc = io_xml->writeStartElement("type", "", 3, 2, 
                                      "open", "true", "value", "File");
       } else {
-        localrc = io_xml->writeStartElement("type", "", 4, 2, 
+        localrc = io_xml->writeStartElement("type", "", 3, 2, 
                                      "open", "true", "value", "Shared Memory");
       }
-      localrc = io_xml->writeStartElement("controlledVocabulary","", 5, 0);
-      localrc = io_xml->writeElement("name", "CouplingType", 6, 0);
+      localrc = io_xml->writeStartElement("controlledVocabulary","", 4, 0);
+      localrc = io_xml->writeElement("name", "CouplingType", 5, 0);
       localrc = io_xml->writeElement("server", 
-                 "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 6, 0);
-      localrc = io_xml->writeEndElement("controlledVocabulary", 5);
-      localrc = io_xml->writeEndElement("type", 4);
+                 "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 5, 0);
+      localrc = io_xml->writeEndElement("controlledVocabulary", 4);
+      localrc = io_xml->writeEndElement("type", 3);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
       if (attpack->AttributeIsSet("Frequency")) {
@@ -6974,15 +6980,15 @@ if (attrRoot == ESMF_TRUE) {
             "Decades, Centuries}, to produce valid CIM XML output.",
             ESMC_LOG_WARN, ESMC_CONTEXT);
         }
-        localrc = io_xml->writeStartElement("timeProfile", "", 4, 2,
+        localrc = io_xml->writeStartElement("timeProfile", "", 3, 2,
                               "units", value.c_str(), "variableRate", "false");
-        localrc = io_xml->writeElement("rate", freq, 5, 0);
+        localrc = io_xml->writeElement("rate", freq, 4, 0);
         localrc = io_xml->writeComment(
-          "from ESMF: CIM/Inputs, 'Frequency'.", 6);
+          "from ESMF: CIM/Inputs, 'Frequency'.", 5);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Frequency\" under tab \"Inputs\", "
-          "under field name.", 6);
-        localrc = io_xml->writeEndElement("timeProfile", 4);
+          "under field name.", 5);
+        localrc = io_xml->writeEndElement("timeProfile", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
@@ -7003,20 +7009,20 @@ if (attrRoot == ESMF_TRUE) {
               "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
               ESMC_LOG_WARN, ESMC_CONTEXT);
           }
-          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 3, 1,
                              "spatialRegriddingDimension", value.c_str()); 
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeComment(
-            "from ESMF: CIM/Inputs, 'SpatialRegriddingDimension'.", 5);
+            "from ESMF: CIM/Inputs, 'SpatialRegriddingDimension'.", 4);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeComment(
-            "   to ESG: Not ingested yet.", 5);
+            "   to ESG: Not ingested yet.", 4);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
           // Output starting <spatialRegridding> element, to match ending 
           // element </spatialRegridding>, but without a
           // spatialRegriddingDimension="" xml attribute.
-          localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 0);
+          localrc = io_xml->writeStartElement("spatialRegridding", "", 3, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
         if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
@@ -7045,17 +7051,17 @@ if (attrRoot == ESMF_TRUE) {
               ESMC_LOG_WARN, ESMC_CONTEXT);
           }
           localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
-                                       value2.c_str(), 5, 0);
+                                       value2.c_str(), 4, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeComment(
-            "from ESMF: CIM/Inputs, 'SpatialRegriddingMethod'.", 6);
+            "from ESMF: CIM/Inputs, 'SpatialRegriddingMethod'.", 5);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
           localrc = io_xml->writeComment(
             "   to ESG: \"Input Spatial Regridding Method\" "
-            "under tab \"Inputs\", under field name.", 6);
+            "under tab \"Inputs\", under field name.", 5);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
-        localrc = io_xml->writeEndElement("spatialRegridding", 4);
+        localrc = io_xml->writeEndElement("spatialRegridding", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (attpack->AttributeIsSet("TimeTransformationType")) {
@@ -7065,18 +7071,18 @@ if (attrRoot == ESMF_TRUE) {
                       "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeStartElement("timeTransformation", "", 4, 0);
-        localrc = io_xml->writeElement("mappingType", "", 5, 2,
+        localrc = io_xml->writeStartElement("timeTransformation", "", 3, 0);
+        localrc = io_xml->writeElement("mappingType", "", 4, 2,
                                        "open", "true", 
                                        "value", value.c_str());
         localrc = io_xml->writeComment(
-          "from ESMF: CIM/Inputs, 'TimeTransformationType'.", 6);
+          "from ESMF: CIM/Inputs, 'TimeTransformationType'.", 5);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Time Transformation Type\" "
-          "under tab \"Inputs\", under field name.", 6);
+          "under tab \"Inputs\", under field name.", 5);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("timeTransformation", 4);
+        localrc = io_xml->writeEndElement("timeTransformation", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
       if (attpack->AttributeIsSet("CouplingSource")) {
@@ -7087,11 +7093,11 @@ if (attrRoot == ESMF_TRUE) {
           return ESMF_FAILURE;}
         value = valuevector.at(0);
 
-        localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
+        localrc = io_xml->writeStartElement("couplingSource", "", 3, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 4, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeStartElement("reference", "", 6, 0);
+        localrc = io_xml->writeStartElement("reference", "", 5, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
         // recursively search from top-level component for a
@@ -7101,7 +7107,7 @@ if (attrRoot == ESMF_TRUE) {
                 "Model Component Simulation Description", "comp", 
                 "ShortName", value);
         if (ap != NULL) {
-          localrc = io_xml->writeElement("id", ap->attrGUID, 7, 0);
+          localrc = io_xml->writeElement("id", ap->attrGUID, 6, 0);
         } else {
           // TODO:  output value of CouplingSource
           ESMC_LogDefault.Write("The value of attribute CouplingSource in "
@@ -7115,27 +7121,27 @@ if (attrRoot == ESMF_TRUE) {
             ESMC_LOG_WARN, ESMC_CONTEXT);
         }
 
-        localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeElement("name", value, 6, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
-          "from ESMF: CIM/Inputs, 'CouplingSource'.", 8);
+          "from ESMF: CIM/Inputs, 'CouplingSource'.", 7);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Source Component\" "
-          "under tab \"Inputs\", under field name.", 8);
+          "under tab \"Inputs\", under field name.", 7);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         if (couplingPurpose == "ancillaryFile") {
-          localrc = io_xml->writeElement("type", "dataObject", 7, 0);
+          localrc = io_xml->writeElement("type", "dataObject", 6, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         } else {
-          localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
+          localrc = io_xml->writeElement("type", "modelComponent", 6, 0);
           ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         }
-        localrc = io_xml->writeEndElement("reference", 6);
+        localrc = io_xml->writeEndElement("reference", 5);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("dataSource", 5);
+        localrc = io_xml->writeEndElement("dataSource", 4);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("couplingSource", 4);
+        localrc = io_xml->writeEndElement("couplingSource", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
@@ -7152,9 +7158,9 @@ if (attrRoot == ESMF_TRUE) {
                       "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
-        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
-        localrc = io_xml->writeStartElement("reference", "", 6, 0);
+        localrc = io_xml->writeStartElement("couplingTarget", "", 3, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 4, 0);
+        localrc = io_xml->writeStartElement("reference", "", 5, 0);
 
         // recursively search from top-level component for a
         //   component attpack that has a ShortName value that matches the
@@ -7163,7 +7169,7 @@ if (attrRoot == ESMF_TRUE) {
                 "Model Component Simulation Description", "comp", 
                 "ShortName", value);
         if (ap != NULL) {
-          localrc = io_xml->writeElement("id", ap->attrGUID, 7, 0);
+          localrc = io_xml->writeElement("id", ap->attrGUID, 6, 0);
         } else {
           // TODO:  output value of CouplingTarget
           ESMC_LogDefault.Write("The value of attribute CouplingTarget in "
@@ -7177,22 +7183,22 @@ if (attrRoot == ESMF_TRUE) {
             ESMC_LOG_WARN, ESMC_CONTEXT);
         }
 
-        localrc = io_xml->writeElement("name", value, 7, 0);
+        localrc = io_xml->writeElement("name", value, 6, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
-          "from ESMF: CIM/Inputs, 'CouplingTarget'.", 8);
+          "from ESMF: CIM/Inputs, 'CouplingTarget'.", 7);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Target Component\" "
-          "under tab \"Inputs\", under field name.", 8);
+          "under tab \"Inputs\", under field name.", 7);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeElement("type", "modelComponent", 7, 0);
+        localrc = io_xml->writeElement("type", "modelComponent", 6, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("reference", 6);
+        localrc = io_xml->writeEndElement("reference", 5);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("dataSource", 5);
+        localrc = io_xml->writeEndElement("dataSource", 4);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("couplingTarget", 4);
+        localrc = io_xml->writeEndElement("couplingTarget", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
@@ -7211,34 +7217,34 @@ if (attrRoot == ESMF_TRUE) {
                   "Write items > 1 - Not yet implemented", &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
-        localrc = io_xml->writeStartElement("connection", "", 4, 0);
+        localrc = io_xml->writeStartElement("connection", "", 3, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeStartElement("connectionTarget", "", 5, 0);
+        localrc = io_xml->writeStartElement("connectionTarget", "", 4, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeStartElement("dataSource", "", 6, 0);
+        localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeStartElement("reference", "", 7, 0);
+        localrc = io_xml->writeStartElement("reference", "", 6, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeElement("name", value, 8, 0);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeComment(
-          "from ESMF: CIM/Inputs, 'ShortName'.", 9);
+        localrc = io_xml->writeElement("name", value, 7, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         localrc = io_xml->writeComment(
-          "   to ESG: Field name under tab \"Inputs\".", 9);
+          "from ESMF: CIM/Inputs, 'ShortName'.", 8);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeElement("type", "componentProperty", 8, 0);
+        localrc = io_xml->writeComment(
+          "   to ESG: Field name under tab \"Inputs\".", 8);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("reference", 7);
+        localrc = io_xml->writeElement("type", "componentProperty", 7, 0);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("dataSource", 6);
+        localrc = io_xml->writeEndElement("reference", 6);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("connectionTarget", 5);
+        localrc = io_xml->writeEndElement("dataSource", 5);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        localrc = io_xml->writeEndElement("connection", 4);
+        localrc = io_xml->writeEndElement("connectionTarget", 4);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        localrc = io_xml->writeEndElement("connection", 3);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       }
-      localrc = io_xml->writeEndElement("input", 3);
+      localrc = io_xml->writeEndElement("input", 2);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     // recurse through ESMF objects
