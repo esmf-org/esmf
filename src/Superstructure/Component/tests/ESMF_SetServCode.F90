@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.23 2011/06/30 05:59:47 theurich Exp $
+! $Id: ESMF_SetServCode.F90,v 1.24 2011/10/05 22:58:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      module SetServCode
+module SetServCode
 
 !------------------------------------------------------------------------------
 
@@ -28,174 +28,208 @@
 !
 ! !USES:
 
-    use ESMF
-    implicit none
-    
-    public SetVM
-    public SetServ1, SetServ2
+  use ESMF
+  implicit none
+   
+  public SetVM
+  public SetServ1, SetServ2
 
-contains
+ contains
 
-    subroutine SetVM(gcomp, rc)
-       type(ESMF_GridComp) :: gcomp
-       integer, intent(out) :: rc
+  subroutine SetVM(gcomp, rc)
+    type(ESMF_GridComp) :: gcomp
+    integer, intent(out) :: rc
 #ifdef ESMF_TESTWITHTHREADS
-       type(ESMF_VM) :: vm
-       logical :: pthreadsEnabled
+    type(ESMF_VM) :: vm
+    logical :: pthreadsEnabled
 #endif
-       ! Initialize return code
-       rc = ESMF_SUCCESS
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 #ifdef ESMF_TESTWITHTHREADS
-       ! The following call will turn on ESMF-threading (single threaded)
-       ! for this component. If you are using this file as a template for
-       ! your own code development you probably don't want to include the
-       ! following call unless you are interested in exploring ESMF's
-       ! threading features.
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
+    ! threading features.
 
-       ! First test whether ESMF-threading is supported on this machine
-       call ESMF_VMGetGlobal(vm, rc=rc)
-       call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
-       if (pthreadsEnabled) then
-         call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
-       endif
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    if (pthreadsEnabled) then
+      call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+    endif
 #endif
-    end subroutine SetVM
+  end subroutine SetVM
 
 
-    subroutine SetServ1(gcomp, rc)
-       type(ESMF_GridComp) :: gcomp
-       integer, intent(out) :: rc
+  subroutine SetServ0(gcomp, rc)
+    type(ESMF_GridComp) :: gcomp
+    integer, intent(out) :: rc
        
-       ! Initialize return code
-       rc = ESMF_SUCCESS
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, userRoutine=my_init1, &
-         rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=my_run1, &
-         rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, userRoutine=my_final1, &
-         rc=rc)
-                                                     
-    end subroutine SetServ1
+  end subroutine SetServ0
 
 
-    subroutine SetServ2(gcomp, rc)
-       type(ESMF_GridComp) :: gcomp
-       integer, intent(out) :: rc
+  subroutine SetServ1(gcomp, rc)
+    type(ESMF_GridComp) :: gcomp
+    integer, intent(out) :: rc
+       
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
-       ! Initialize return code
-       rc = ESMF_SUCCESS
-
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, userRoutine=my_init2, &
-         rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=my_run2, &
-         rc=rc)
-       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, userRoutine=my_final2, &
-         rc=rc)
-
-    end subroutine SetServ2
-
-
-    subroutine my_init1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp)   :: gcomp
-      type(ESMF_State)      :: importState
-      type(ESMF_State)      :: exportState
-      type(ESMF_Clock)      :: externalclock
-      integer, intent(out)  :: rc
-      ! local variables
-      type(ESMF_Method_Flag)  :: currentMethod
-      integer                 :: currentPhase
-     
-      print *, "User initialize 1 routine called"
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=my_init1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
       
-      ! set user return code according to correctness of method and phase test
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
+      userRoutine=my_run1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+      
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
+      userRoutine=my_final1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+                                                     
+  end subroutine SetServ1
 
-      call ESMF_GridCompGet(gcomp, currentMethod=currentMethod, &
-        currentPhase=currentPhase)
+
+  subroutine SetServ2(gcomp, rc)
+    type(ESMF_GridComp) :: gcomp
+    integer, intent(out) :: rc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=my_init2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+      
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
+      userRoutine=my_run2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+      
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, &
+      userRoutine=my_final2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+  end subroutine SetServ2
+
+
+  subroutine my_init1(gcomp, importState, exportState, externalclock, rc)
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState
+    type(ESMF_State)      :: exportState
+    type(ESMF_Clock)      :: externalclock
+    integer, intent(out)  :: rc
+
+    ! local variables
+    type(ESMF_Method_Flag)  :: currentMethod
+    integer                 :: currentPhase
+     
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User initialize 1 routine called"
+      
+    ! set user return code according to correctness of method and phase test
+
+    call ESMF_GridCompGet(gcomp, currentMethod=currentMethod, &
+      currentPhase=currentPhase, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
         
-      if (currentMethod/=ESMF_METHOD_INITIALIZE) then
-        rc = ESMF_FAILURE
-        return
-      endif
+    if (currentMethod/=ESMF_METHOD_INITIALIZE) then
+      rc = ESMF_FAILURE
+      return  ! bail out
+    endif
 
-      if (currentPhase/=1) then
-        rc = ESMF_FAILURE
-        return
-      endif
+    if (currentPhase/=1) then
+      rc = ESMF_FAILURE
+      return  ! bail out
+    endif
 
-      ! return successfully
-      rc = ESMF_SUCCESS
-
-    end subroutine my_init1
+  end subroutine my_init1
 
 
-    subroutine my_run1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importState
-      type(ESMF_State) :: exportState
-      type(ESMF_Clock) :: externalclock
-      integer, intent(out) :: rc
-     
-      print *, "User run routine 1 called"
-      rc = ESMF_SUCCESS
+  subroutine my_run1(gcomp, importState, exportState, externalclock, rc)
+    type(ESMF_GridComp) :: gcomp
+    type(ESMF_State) :: importState
+    type(ESMF_State) :: exportState
+    type(ESMF_Clock) :: externalclock
+    integer, intent(out) :: rc
+   
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
-    end subroutine my_run1
+    print *, "User run routine 1 called"
 
-
-    subroutine my_final1(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importState
-      type(ESMF_State) :: exportState
-      type(ESMF_Clock) :: externalclock
-      integer, intent(out) :: rc
-     
-      print *, "User finalize 1 routine called"
-      rc = ESMF_SUCCESS
-
-    end subroutine my_final1
+  end subroutine my_run1
 
 
-    subroutine my_init2(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importState
-      type(ESMF_State) :: exportState
-      type(ESMF_Clock) :: externalclock
-      integer, intent(out) :: rc
-     
-      print *, "User initialize 2 routine called"
+  subroutine my_final1(gcomp, importState, exportState, externalclock, rc)
+    type(ESMF_GridComp) :: gcomp
+    type(ESMF_State) :: importState
+    type(ESMF_State) :: exportState
+    type(ESMF_Clock) :: externalclock
+    integer, intent(out) :: rc
+   
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
-      ! test returning a specific user return code      
-      rc = 123456
+    print *, "User finalize 1 routine called"
 
-    end subroutine my_init2
-
-
-    subroutine my_run2(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importState
-      type(ESMF_State) :: exportState
-      type(ESMF_Clock) :: externalclock
-      integer, intent(out) :: rc
-     
-      print *, "User run routine 2 called"
-      rc = ESMF_SUCCESS
-
-    end subroutine my_run2
+  end subroutine my_final1
 
 
-    subroutine my_final2(gcomp, importState, exportState, externalclock, rc)
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importState
-      type(ESMF_State) :: exportState
-      type(ESMF_Clock) :: externalclock
-      integer, intent(out) :: rc
-     
-      print *, "User finalize 2 routine called"
-      rc = ESMF_SUCCESS
+  subroutine my_init2(gcomp, importState, exportState, externalclock, rc)
+    type(ESMF_GridComp) :: gcomp
+    type(ESMF_State) :: importState
+    type(ESMF_State) :: exportState
+    type(ESMF_Clock) :: externalclock
+    integer, intent(out) :: rc
+   
+    ! Initialize return code
+    rc = ESMF_SUCCESS
 
-    end subroutine my_final2
+    print *, "User initialize 2 routine called"
+
+    ! test returning a specific user return code      
+    rc = 123456
+
+  end subroutine my_init2
 
 
-    
-    end module
+  subroutine my_run2(gcomp, importState, exportState, externalclock, rc)
+    type(ESMF_GridComp) :: gcomp
+    type(ESMF_State) :: importState
+    type(ESMF_State) :: exportState
+    type(ESMF_Clock) :: externalclock
+    integer, intent(out) :: rc
+   
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User run routine 2 called"
+
+  end subroutine my_run2
+
+
+  subroutine my_final2(gcomp, importState, exportState, externalclock, rc)
+    type(ESMF_GridComp) :: gcomp
+    type(ESMF_State) :: importState
+    type(ESMF_State) :: exportState
+    type(ESMF_Clock) :: externalclock
+    integer, intent(out) :: rc
+   
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User finalize 2 routine called"
+
+  end subroutine my_final2
+
+end module
     
