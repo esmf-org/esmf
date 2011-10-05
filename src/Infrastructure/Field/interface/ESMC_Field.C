@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.29 2011/10/04 19:35:24 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.30 2011/10/05 22:05:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@ extern "C" {
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreateMeshTK()"
-  ESMC_Field ESMC_FieldCreateMeshTK(ESMC_Mesh mesh, ESMC_TypeKind typekind,
+  ESMC_Field ESMC_FieldCreateMeshTK(ESMC_Mesh mesh, enum ESMC_TypeKind typekind,
     ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
     ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
@@ -211,8 +211,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 #define ESMC_METHOD "ESMC_FieldRegridStore()"
   int ESMC_FieldRegridStore(ESMC_Field srcField, ESMC_Field dstField, 
                             ESMC_RouteHandle *routehandle, 
-                            ESMC_RegridMethod regridmethod, 
-                            ESMC_UnmappedAction unmappedaction){
+                            enum ESMC_RegridMethod regridmethod, 
+                            enum ESMC_UnmappedAction unmappedaction){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
