@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedist.F90,v 1.1 2011/07/22 14:45:11 feiliu Exp $
+! $Id: ESMF_FieldRedist.F90,v 1.2 2011/10/06 13:46:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldRedistMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldRedist.F90,v 1.1 2011/07/22 14:45:11 feiliu Exp $'
+      '$Id: ESMF_FieldRedist.F90,v 1.2 2011/10/06 13:46:01 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldRedistStore
@@ -297,6 +297,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! be transposed during the redistribution. The number of source and destination
 ! Field dimensions must be equal under this condition and the size of mapped
 ! dimensions must match.
+!
+! The {\tt srcField} and {\tt dstField} arguments are optional in support of
+! the situation where {\tt srcField} and/or {\tt dstField} are not defined on
+! all PETs. The {\tt srcField} and {\tt dstField} must be specified on those
+! PETs that hold source or destination DEs, respectively, but may be omitted
+! on all other PETs. PETs that hold neither source nor destination DEs may
+! omit both arguments.
 !  
 ! It is erroneous to specify the identical Field object for {\tt srcField} and
 ! {\tt dstField} arguments. 
