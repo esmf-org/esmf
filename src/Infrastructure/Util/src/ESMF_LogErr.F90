@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.103 2011/07/06 02:19:18 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.104 2011/10/06 19:34:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1597,17 +1597,17 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-      type(ESMF_Log),      intent(inout), optional :: log 		   
-      logical,             intent(in),    optional :: verbose		   
-      logical,             intent(in),    optional :: flush		   
-      logical,             intent(in),    optional :: rootOnly		   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgAbort(:)		   
-      integer,             intent(in),    optional :: stream		   
-      integer,             intent(in),    optional :: maxElements 	   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgList(:) 	   
+      type(ESMF_Log),      intent(inout), optional :: log	   
+      logical,             intent(in),    optional :: verbose	   
+      logical,             intent(in),    optional :: flush	   
+      logical,             intent(in),    optional :: rootOnly	   
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgAbort(:)
+      integer,             intent(in),    optional :: stream	   
+      integer,             intent(in),    optional :: maxElements
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgList(:)
       integer,             intent(in),    optional :: errorMask(:)
-      logical,             intent(in),    optional :: trace	   
-      integer,             intent(out),   optional :: rc  		   
+      logical,             intent(in),    optional :: trace
+      integer,             intent(out),   optional :: rc
 	
 !
 ! !DESCRIPTION:
@@ -1620,9 +1620,14 @@ end subroutine ESMF_LogOpen
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !            of the default Log.
 !      \item [{[verbose]}]
-!            Verbose flag.
+!            If set to {\tt .true.}, additional message text may be issued.
+!            (Currently unimplemented.)
+!      \item [{[flush]}]
+!	     If set to {\tt .true.}, flush log messages immediately, rather
+!            than buffering them.
 !      \item [{[rootOnly]}]
-!	     Root only flag.
+!	     If set to {\tt .true.}, only log messages on the
+!            root PET will be issued.  (Currently unimplemented.)
 !      \item [{[logmsgAbort]}]
 !            Sets the condition on which ESMF aborts.  The array
 !            can contain any combination of ESMF\_LOGMSG named constants.  These
@@ -1633,8 +1638,9 @@ end subroutine ESMF_LogOpen
 !              \item 0 \  free;
 !              \item 1 \  preordered. 
 !            \end{description}
+!            (Currently unimplemented.)
 !      \item [{[maxElements]}]
-!            Maximum number of elements in the Log.
+!            Maximum number of elements in the Log buffer before flushing occurs.
 !      \item [{[logmsgList]}]
 !            An array of message types that will be logged.  Log write requests
 !            not matching the list will be ignored.  By default all messages
@@ -1645,7 +1651,7 @@ end subroutine ESMF_LogOpen
 !            List of error codes that will {\em not} be logged as errors.
 !      \item [{[trace]}]
 !	     \begin{sloppypar}
-!            If set to true, calls such as {\tt ESMF\_LogFoundError},
+!            If set to {\tt .true.}, calls such as {\tt ESMF\_LogFoundError},
 !            {\tt ESMF\_LogFoundAllocError}, and {\tt ESMF\_LogFoundDeallocError}
 !            will be logged as a tool for program flow tracing.  This may generate
 !            voluminous output in the log.
