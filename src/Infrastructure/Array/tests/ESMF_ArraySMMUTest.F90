@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.4 2011/08/25 18:41:48 theurich Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.5 2011/10/07 23:29:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.4 2011/08/25 18:41:48 theurich Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.5 2011/10/07 23:29:34 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -71,7 +71,7 @@ program ESMF_ArraySMMUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/1,petCount/), rc=rc)
@@ -81,7 +81,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src 1 DE/PET -> dst all 4 DEs on PET 0 ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/1,petCount/), dstPetList=(/0/), rc=rc)
@@ -91,7 +91,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src 2 DEs/PET -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,petCount/), rc=rc)
@@ -106,7 +106,7 @@ program ESMF_ArraySMMUTest
   enddo
   
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src 2 DEs/PET -> dst skipping PETs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,petCount/), dstPetList=petList, rc=rc)
@@ -116,7 +116,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src more than one DE/PET (irregular) -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,4/), rc=rc)
@@ -126,7 +126,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src more than one DE/PET (irregular) -> dst all 4 DEs on PET 0 ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,4/), dstPetList=(/0/), rc=rc)
@@ -136,7 +136,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src some PETs with 0 DEs -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,2/), rc=rc)
@@ -146,7 +146,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  !NEX_UTest_Multi_Proc_Only
+  !NEX_UTest
   write(name, *) "src some PETs with 0 DEs -> dst skipping PETs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,2/), dstPetList=petList, rc=rc)

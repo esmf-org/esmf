@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.52 2011/08/23 23:30:29 theurich Exp $ 
+# $Id: makefile,v 1.53 2011/10/07 23:29:34 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -29,6 +29,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMC_ArrayUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_ArrayDataUTestUNI \
+                RUN_ESMF_ArraySMMUTestUNI \
                 RUN_ESMC_ArrayUTestUNI
 
 #
