@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistUTest.F90,v 1.1 2011/07/22 14:44:19 feiliu Exp $
+! $Id: ESMF_FieldRedistUTest.F90,v 1.2 2011/10/07 16:09:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_FieldRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistUTest.F90,v 1.1 2011/07/22 14:44:19 feiliu Exp $'
+    '$Id: ESMF_FieldRedistUTest.F90,v 1.2 2011/10/07 16:09:33 oehmke Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -96,6 +96,14 @@ program ESMF_FieldRedistUTest
         write(failMsg, *) ""
         write(name, *) "FieldRedist congruent 5d fields with ungridded bounds and halos " // &
             " srcToDstTransposeMap"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        !------------------------------------------------------------------------
+        !EX_UTest_Multi_Proc_Only
+        call test_redist_mesh(rc)
+        write(failMsg, *) "results not correct"
+        write(name, *) "FieldRedist on Fields built on Meshes"
+
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -791,6 +799,497 @@ contains
 
         rc = ESMF_SUCCESS
     end subroutine test_redist_5dt
+
+
+#undef ESMF_METHOD
+#define ESMF_METHOD "test_redist_mesh"
+    subroutine test_redist_mesh(rc)
+        integer, intent(out)                        :: rc
+
+        ! local arguments used to create field etc
+        type(ESMF_Field)                            :: srcField, dstField
+        type(ESMF_Mesh)                             :: srcMesh, dstMesh
+        type(ESMF_VM)                               :: vm
+        type(ESMF_RouteHandle)                      :: routehandle
+        integer                                     :: localrc, lpe, i
+        integer(ESMF_KIND_I4), pointer                            :: src_farray(:), dst_farray(:)
+        integer, pointer :: nodeIds(:),nodeOwners(:)
+        real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+        real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+        integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+        integer :: numElems,numOwnedElemsTst
+        integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+        integer :: i1,i2, localPet, petCount
+
+        rc = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
+
+        call ESMF_VMGetCurrent(vm, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! SETUP MESH INFO
+        !!!!!!!!!!!!!!!!!!!!!
+        ! 
+        !              Mesh Ids
+        !
+        !  2.0   7 ------- 8 -------- 9
+        !        |         |          |
+        !        |    3    |    4     |
+        !        |         |          |
+        !  1.0   4 ------- 5 -------- 6
+        !        |         |          |
+        !        |    1    |    2     |
+        !        |         |          |
+        !  0.0   1 ------- 2 -------- 3
+        !
+        !       0.0       1.0        2.0 
+        !
+        !      Node Ids at corners
+        !      Element Ids in centers
+        ! 
+        !!!!! 
+        !             Mesh Owners
+        !
+        !  2.0   2 ------- 2 -------- 3
+        !        |         |          |
+        !        |    2    |    3     |
+        !        |         |          |
+        !  1.0   0 ------- 0 -------- 1
+        !        |         |          |
+        !        |    0    |    1     |
+        !        |         |          |
+        !  0.0   0 ------- 0 -------- 1
+        !
+        !       0.0       1.0        2.0 
+        !
+        !      Node Owners at corners
+        !      Element Owners in centers
+        ! 
+        
+        ! Only do this if we have 4 PETs
+        if (petCount .ne. 4) then
+           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="- this test is being run with the wrong number of processors", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           return
+        endif
+        
+        ! Setup src mesh data depending on PET
+        if (localPet .eq. 0) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=4
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/1,2,4,5/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/0.0,0.0, &
+                1.0,0.0, &
+                0.0,1.0, &
+                1.0,1.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/1/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)
+        else if (localPet .eq. 1) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=2
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/2,3,5,6/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/1.0,0.0, &
+                2.0,0.0, &
+                1.0,1.0, &
+                2.0,1.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/0,1,0,1/) 
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/2/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)
+        else if (localPet .eq. 2) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=2
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/4,5,7,8/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/0.0,1.0, &
+                1.0,1.0, &
+                0.0,2.0, &
+                1.0,2.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/0,0,2,2/) 
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/3/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)  
+        else 
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=1
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/5,6,8,9/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/1.0,1.0, &
+                2.0,1.0, &
+                1.0,2.0, &
+                2.0,2.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/0,1,2,3/) 
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/4/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)  
+        endif
+
+        ! Create Mesh structure in 1 step
+        srcMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+             nodeIds=nodeIds, nodeCoords=nodeCoords, &
+             nodeOwners=nodeOwners, elementIds=elemIds,&
+             elementTypes=elemTypes, elementConn=elemConn, &
+             rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        ! Create the src Field
+        srcField = ESMF_FieldCreate(srcMesh, ESMF_TYPEKIND_I4, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        ! Load test data into the source Field
+        call ESMF_FieldGet(srcField, farrayPtr=src_farray,  rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! set interpolated function
+        i2=1
+        do i1=1,numNodes
+           if (nodeOwners(i1) .eq. localPet) then
+              
+              ! Set source function
+              src_farray(i2) = nodeIds(i1)
+              
+              ! Advance to next owner
+              i2=i2+1
+           endif
+        enddo
+
+
+        ! Deallocate Arrays from above
+        deallocate(nodeIds)
+        deallocate(nodeCoords)
+        deallocate(nodeOwners)
+        deallocate(elemIds)
+        deallocate(elemTypes)
+        deallocate(elemConn)
+
+
+        ! Same Mesh, but on different processors
+        if (localPet .eq. 0) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=1
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/5,6,8,9/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/1.0,1.0, &
+                2.0,1.0, &
+                1.0,2.0, &
+                2.0,2.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/1,2,3,0/) 
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/4/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)  
+        else if (localPet .eq. 1) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=4
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/1,2,4,5/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/0.0,0.0, &
+                1.0,0.0, &
+                0.0,1.0, &
+                1.0,1.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/1,1,1,1/) ! everything on proc 0
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/1/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)
+        else if (localPet .eq. 2) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=2
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/2,3,5,6/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/1.0,0.0, &
+                2.0,0.0, &
+                1.0,1.0, &
+                2.0,1.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/1,2,1,2/) 
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/2/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)
+        else if (localPet .eq. 3) then
+           ! Fill in node data
+           numNodes=4
+           numOwnedNodes=2
+
+           !! node ids
+           allocate(nodeIds(numNodes))
+           nodeIds=(/4,5,7,8/) 
+
+           !! node Coords
+           allocate(nodeCoords(numNodes*2))
+           nodeCoords=(/0.0,1.0, &
+                1.0,1.0, &
+                0.0,2.0, &
+                1.0,2.0/)
+
+           !! node owners
+           allocate(nodeOwners(numNodes))
+           nodeOwners=(/1,1,3,3/) 
+
+           ! Fill in elem data
+           numElems=1
+
+           !! elem ids
+           allocate(elemIds(numElems))
+           elemIds=(/3/) 
+
+           !! elem type
+           allocate(elemTypes(numElems))
+           elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+           !! elem conn
+           allocate(elemConn(numElems*4))
+           elemConn=(/1,2,4,3/)  
+        endif
+
+        ! Create dst Mesh structure 
+        dstMesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+             nodeIds=nodeIds, nodeCoords=nodeCoords, &
+             nodeOwners=nodeOwners, elementIds=elemIds,&
+             elementTypes=elemTypes, elementConn=elemConn, &
+             rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        ! Create the dst Field
+        dstField = ESMF_FieldCreate(dstMesh, ESMF_TYPEKIND_I4, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        ! Load test data into the source Field
+        call ESMF_FieldGet(dstField, farrayPtr=dst_farray,  rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Init dst_farray
+         dst_farray(:)=0
+
+
+        ! perform redist
+        call ESMF_FieldRedistStore(srcField, dstField, routehandle, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldRedist(srcfield, dstField, routehandle, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! release route handle
+        call ESMF_FieldRedistRelease(routehandle, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+        ! Check results
+        i2=1
+        do i1=1,numNodes
+           if (nodeOwners(i1) .eq. localPet) then
+              
+              ! Check results
+              if (dst_farray(i2) .ne. nodeIds(i1)) then
+                 call ESMF_LogSetError(ESMF_RC_VAL_WRONG, &
+                      msg="- redisted values not correct ", &
+                      ESMF_CONTEXT, rcToReturn=rc)
+                 return
+              endif
+              
+              ! Advance to next owner
+              i2=i2+1
+           endif
+        enddo
+
+
+        ! Deallocate Arrays from above
+        deallocate(nodeIds)
+        deallocate(nodeCoords)
+        deallocate(nodeOwners)
+        deallocate(elemIds)
+        deallocate(elemTypes)
+        deallocate(elemConn)
+
+        ! Clean up classes
+        call ESMF_FieldDestroy(srcField)
+        call ESMF_FieldDestroy(dstField)
+
+        call ESMF_MeshDestroy(srcMesh)
+        call ESMF_MeshDestroy(dstMesh)
+
+        rc = ESMF_SUCCESS
+    end subroutine test_redist_mesh
+
+
  
 #endif
 
