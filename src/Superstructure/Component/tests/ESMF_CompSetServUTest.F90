@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.30 2011/10/05 22:58:03 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.31 2011/10/07 16:47:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -87,13 +87,12 @@
     !NEX_UTest
 !   !  Create a Component
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, &
-      petList=petList, configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, petList=petList, &
+      configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
 !-------------------------------------------------------------------------
 !   !
@@ -144,8 +143,8 @@
     !NEX_UTest
 !   !  Create a Component
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="grid.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", &
+      contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
@@ -180,8 +179,8 @@
     !NEX_UTest
 !   !  Create a Component
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="grid.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", &
+      contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
@@ -196,8 +195,16 @@
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component VM"
+#ifdef ESMF_TESTWITHTHREADS
+    ! the user SetVM() routine will return not ESMF_SUCCESS because it cannot
+    ! make the Component threaded due to the fact that it was created with
+    ! ESMF_CONTEXT_PARENT_VM. The following logic tests this.
+    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.ne.ESMF_SUCCESS), &
+      name, failMsg, result, ESMF_SRCLINE)
+#else    
     call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
       name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 !-------------------------------------------------------------------------
 !   !
@@ -228,8 +235,7 @@
     !NEX_UTest
 !   !  Create a Component
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="grid.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"
