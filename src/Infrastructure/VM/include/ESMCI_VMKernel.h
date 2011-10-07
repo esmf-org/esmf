@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.11 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_VMKernel.h,v 1.12 2011/10/07 23:28:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,6 +62,9 @@ enum vmType { vmBYTE=1, vmI4, vmR4, vmR8};
 // - buffer lenghts in bytes
 #define PIPC_BUFFER                   (4096)
 #define SHARED_BUFFER                 (64)
+
+// - number of shared memory non-blocking channels
+#define SHARED_NONBLOCK_CHANNELS      (16)
 
 // begin sync stuff -----
 #define SYNC_NBUFFERS                 (2)
@@ -135,7 +138,13 @@ class VMK{
   struct shared_mp{
     // source and destination pointers
     volatile const void *ptr_src;
-    volatile void *ptr_dest;
+    volatile void *ptr_dst;
+    volatile int tcounter;
+    // non-blocking channels
+    volatile const void *ptr_src_nb[SHARED_NONBLOCK_CHANNELS];
+    volatile void *ptr_dst_nb[SHARED_NONBLOCK_CHANNELS];
+    int recvCount;
+    int sendCount;
     // hack sync variables
     shmsync shms;
     // buffer for small messages
@@ -145,7 +154,6 @@ class VMK{
     esmf_pthread_cond_t cond1;
     esmf_pthread_mutex_t mutex2;
     esmf_pthread_cond_t cond2;
-    volatile int tcounter;
   };
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.22 2011/06/07 20:00:37 w6ws Exp $
+// $Id: ESMCI_VMKernel.C,v 1.23 2011/10/07 23:28:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -348,6 +348,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
   sendChannel[0].shmp = new shared_mp;
   sync_reset(&(sendChannel[0].shmp->shms));
   sendChannel[0].shmp->tcounter = 0;
+  sendChannel[0].shmp->recvCount = 0;
+  sendChannel[0].shmp->sendCount = 0;
+  for (int i=0; i<SHARED_NONBLOCK_CHANNELS; i++){
+    sendChannel[0].shmp->ptr_src_nb[i] = NULL;
+    sendChannel[0].shmp->ptr_dst_nb[i] = NULL;
+  }
   recvChannel[0] = sendChannel[0];
 #else
   if (npets==1){
@@ -356,6 +362,12 @@ void VMK::init(MPI_Comm mpiCommunicator){
     sendChannel[0].shmp = new shared_mp;
     sync_reset(&(sendChannel[0].shmp->shms));
     sendChannel[0].shmp->tcounter = 0;
+    sendChannel[0].shmp->recvCount = 0;
+    sendChannel[0].shmp->sendCount = 0;
+    for (int i=0; i<SHARED_NONBLOCK_CHANNELS; i++){
+      sendChannel[0].shmp->ptr_src_nb[i] = NULL;
+      sendChannel[0].shmp->ptr_dst_nb[i] = NULL;
+    }
     recvChannel[0] = sendChannel[0];
   }else{
     for (int i=0; i<npets; i++){
@@ -1537,6 +1549,14 @@ void *VMK::startup(class VMKPlan *vmp,
                 new_commarray[pet1Index][pet2Index].comm_type =
                   VM_COMM_TYPE_MPIUNI;
                 new_commarray[pet1Index][pet2Index].shmp->tcounter = 0;
+                new_commarray[pet1Index][pet2Index].shmp->recvCount = 0;
+                new_commarray[pet1Index][pet2Index].shmp->sendCount = 0;
+                for (int i=0; i<SHARED_NONBLOCK_CHANNELS; i++){
+                  new_commarray[pet1Index][pet2Index].shmp->ptr_src_nb[i]
+                    = NULL;
+                  new_commarray[pet1Index][pet2Index].shmp->ptr_dst_nb[i]
+                    = NULL;
+                }
 #else
                 if (pet1 != pet2){
                   // pet1 and pet2 are different PETs that run in mypet's VAS
@@ -1567,6 +1587,14 @@ void *VMK::startup(class VMKPlan *vmp,
                       NULL);
 #endif
                     new_commarray[pet1Index][pet2Index].shmp->tcounter = 0;
+                    new_commarray[pet1Index][pet2Index].shmp->recvCount = 0;
+                    new_commarray[pet1Index][pet2Index].shmp->sendCount = 0;
+                    for (int i=0; i<SHARED_NONBLOCK_CHANNELS; i++){
+                      new_commarray[pet1Index][pet2Index].shmp->ptr_src_nb[i]
+                        = NULL;
+                      new_commarray[pet1Index][pet2Index].shmp->ptr_dst_nb[i]
+                        = NULL;
+                    }
                   }
                 }else{
                   new_commarray[pet1Index][pet2Index].comm_type =
@@ -2850,9 +2878,9 @@ int VMK::send(const void *message, int size, int dest, int tag){
     }
     pthread_mutex_unlock(&(shmp->mutex1));
 #endif
-    // now ptr_src and ptr_dest are valid for this message
+    // now ptr_src and ptr_dst are valid for this message
     scpsize = size/2;   // send takes the lower half
-    pdest = (char *)shmp->ptr_dest;
+    pdest = (char *)shmp->ptr_dst;
     psrc = (char *)shmp->ptr_src;
     // do the actual memcpy
     memcpy(pdest, psrc, scpsize);
@@ -2888,9 +2916,9 @@ int VMK::send(const void *message, int size, int dest, int tag){
       shmp->ptr_src = message;                        // set the source pointer
       // synchronize with recv()
       sync_a_flip(&shmp->shms);
-      // now ptr_src and ptr_dest are valid for this message
+      // now ptr_src and ptr_dst are valid for this message
       scpsize = size/2;   // send takes the lower half
-      pdest = (char *)shmp->ptr_dest;
+      pdest = (char *)shmp->ptr_dst;
       psrc = (char *)shmp->ptr_src;
       // do the actual memcpy
       memcpy(pdest, psrc, scpsize);
@@ -2965,6 +2993,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
   char *psrc;
   int i;
   char *mess;
+  int sendCount;
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
     *ch = new commhandle;
@@ -2994,35 +3023,39 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
+    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking send not implemented for VM_COMM_TYPE_PTHREAD.\n");
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
+    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking send not implemented for VM_COMM_TYPE_SHMHACK.\n");
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
+    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking send not implemented for VM_COMM_TYPE_POSIXIPC.\n");
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
     // This shared memory implementation is naturally non-blocking.
-    // Of course this allows only one message per sender - receiver channel.
-    // TODO: To remove the single message per channel limitation there will need
-    // TODO: to be one shared_mp element per request.
+    // Limited to SHARED_NONBLOCK_CHANNELS per src/dst pair
     (*ch)->type=-1; // indicate that this is a dummy commhandle
     shmp = sendChannel[dest].shmp;  // shared memory mp channel
-    if (shmp->tcounter == 1){
-      // recv() already set the ptr_dest -> send() came second -> copy data
-      pdest = (char *)shmp->ptr_dest;
+    sendCount = shmp->sendCount;
+    pdest = (char *)shmp->ptr_dst_nb[sendCount];
+    if (pdest != NULL){
+      // recv() already set the pointer, send() came second -> copy data
       memcpy(pdest, message, size);      
-      // reset counter
-      shmp->tcounter = 0;
+      // reset ptr_dst_nb entry
+      shmp->ptr_dst_nb[sendCount] = NULL;
     }else{
-      // send() came first, set variables for recv() side
-      shmp->ptr_src = message;        // set the source pointer
-      shmp->tcounter++; // no need to sync for this in mpiuni
+      // send() came first, set pointer for recv() side
+      shmp->ptr_src_nb[sendCount] = message;  // set the destination pointer
     }
+    // increment recvCount
+    ++sendCount;
+    shmp->sendCount = sendCount%SHARED_NONBLOCK_CHANNELS;
     break;
   default:
     printf("unknown comm_type.\n");
@@ -3097,7 +3130,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
     shmp = recvChannel[source].shmp;   // shared memory mp channel
-    shmp->ptr_dest = message;               // set the destination pointer
+    shmp->ptr_dst = message;               // set the destination pointer
     // synchronize with send()
 #ifndef ESMF_NO_PTHREADS
     pthread_mutex_lock(&(shmp->mutex1));
@@ -3112,10 +3145,10 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
     }
     pthread_mutex_unlock(&(shmp->mutex1));
 #endif
-    // now ptr_src and ptr_dest are valid for this message
+    // now ptr_src and ptr_dst are valid for this message
     scpsize = size/2;           // send takes the lower half
     rcpsize = size - scpsize;   // recv takes the upper half
-    pdest = (char *)shmp->ptr_dest;
+    pdest = (char *)shmp->ptr_dst;
     psrc = (char *)shmp->ptr_src;
     // do actual memcpy
     memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
@@ -3148,13 +3181,13 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
       sync_buffer_flag_empty(&shmp->shms, 0);
     }else{
       // don't use buffer
-      shmp->ptr_dest = message;               // set the destination pointer
+      shmp->ptr_dst = message;               // set the destination pointer
       // synchronize with send()
       sync_b_flip(&shmp->shms);
-      // now ptr_src and ptr_dest are valid for this message
+      // now ptr_src and ptr_dst are valid for this message
       scpsize = size/2;           // send takes the lower half
       rcpsize = size - scpsize;   // recv takes the upper half
-      pdest = (char *)shmp->ptr_dest;
+      pdest = (char *)shmp->ptr_dst;
       psrc = (char *)shmp->ptr_src;
       // do actual memcpy
       memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
@@ -3228,6 +3261,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
   char *psrc;
   int i;
   char *mess;
+  int recvCount;
   // check if this needs a new entry in the request queue
   if (*ch==NULL){
     *ch = new commhandle;
@@ -3267,35 +3301,39 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
+    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking recv not implemented for VM_COMM_TYPE_PTHREAD.\n");
     break;
   case VM_COMM_TYPE_SHMHACK:
     // Shared memory hack sync with spin-lock
+    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking recv not implemented for VM_COMM_TYPE_SHMHACK.\n");
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
+    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking recv not implemented for VM_COMM_TYPE_POSIXIPC.\n");
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
     // This shared memory implementation is naturally non-blocking.
-    // Of course this allows only one message per sender - receiver channel.
-    // TODO: To remove the single message per channel limitation there will need
-    // TODO: to be one shared_mp element per request.
+    // Limited to SHARED_NONBLOCK_CHANNELS per src/dst pair
     (*ch)->type=-1; // indicate that this is a dummy commhandle
     shmp = recvChannel[source].shmp;  // shared memory mp channel
-    if (shmp->tcounter == 1){
-      // send() already set the ptr_src -> recv() came second -> copy data
-      psrc = (char *)shmp->ptr_src;
+    recvCount = shmp->recvCount;
+    psrc = (char *)shmp->ptr_src_nb[recvCount];
+    if (psrc != NULL){
+      // send() already set the pointer, recv() came second -> copy data
       memcpy(message, psrc, size);
-      // reset counter
-      shmp->tcounter = 0;
+      // reset ptr_src_nb entry
+      shmp->ptr_src_nb[recvCount] = NULL;
     }else{
-      // recv() came first, set variables for send() side
-      shmp->ptr_dest = message;        // set the destination pointer
-      shmp->tcounter++; // no need to sync for this in mpiuni
+      // recv() came first, set pointer for send() side
+      shmp->ptr_dst_nb[recvCount] = message;  // set the destination pointer
     }
+    // increment recvCount
+    ++recvCount;
+    shmp->recvCount = recvCount%SHARED_NONBLOCK_CHANNELS;
     break;
   default:
     printf("unknown comm_type.\n");
