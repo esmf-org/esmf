@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.58 2011/09/13 00:36:55 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.59 2011/10/07 18:02:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.58 2011/09/13 00:36:55 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.59 2011/10/07 18:02:44 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -995,6 +995,19 @@ void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
     return;
   }
 
+  // cast into ESMCI::Comp pointer
+  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
+
+  // check to see if VM already exists for this Component
+  void *vm_info;
+  FTN(f_esmf_compgetvminfo)(f90comp, &vm_info, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
+  if (vm_info!=NULL){
+    // VM for this component already exists
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID, "- VM already exists", rc);
+    return;
+  }
+
   // TODO: shouldn't need to expand the table here - should be done inside
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
@@ -1003,7 +1016,6 @@ void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
     return;
 
   // Set callback function and arguments
-  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
   localrc = (tabptr)->setFuncPtr("setVM", (void *)func, f90comp);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;

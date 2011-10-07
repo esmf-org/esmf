@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.31 2011/10/07 16:47:10 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.32 2011/10/07 18:02:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -196,7 +196,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting Component VM"
 #ifdef ESMF_TESTWITHTHREADS
-    ! the user SetVM() routine will return not ESMF_SUCCESS because it cannot
+    ! The user SetVM() routine will not return ESMF_SUCCESS because it cannot
     ! make the Component threaded due to the fact that it was created with
     ! ESMF_CONTEXT_PARENT_VM. The following logic tests this.
     call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.ne.ESMF_SUCCESS), &
@@ -234,7 +234,7 @@
 !   !
     !NEX_UTest
 !   !  Create a Component
-    cname = "Atmosphere - child in parent VM context"
+    cname = "Atmosphere - in its own context"
     comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -397,6 +397,87 @@
     write(name, *) "Calling Component Init"
     call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
       name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Destroying a component
+
+    call ESMF_GridCompDestroy(comp1, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Destroying a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Create a Component
+    cname = "Atmosphere - in its own context"
+    comp1 = ESMF_GridCompCreate(name=cname, rc=rc)  
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Component Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set VM
+
+    call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Setting Component VM"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
+      name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set VM
+
+    call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Setting Component VM - 2nd time (but before SetServices)"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
+      name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set Services
+
+    call ESMF_GridCompSetServices(comp1, userRoutine=SetServ1, userRc=userRc, &
+      rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Setting Component Services - SetServ1"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
+      name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set VM
+    call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
+!     NOTE: The userRc is irrelevant when RC/=ESMF_SUCCESS
+
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Setting Component VM - 3rd time (but after SetServices)"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set VM directly
+
+    call ESMF_GridCompSetVMMinThreads(comp1, rc=rc)
+
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Directly setting Component VM properties after SetServices"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
