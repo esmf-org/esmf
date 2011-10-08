@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.13 2010/08/10 16:49:47 svasquez Exp $
+# $Id: examples_results.pl,v 1.13.4.1 2011/10/08 02:28:36 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -56,7 +56,7 @@ use File::Find;
 	find(\&allFiles, '.'); 
 	sub allFiles {
 			# Put all files in a list
-	 		push all_files, "$File::Find::name\n" if -T ; 
+	 		push all_files, "$File::Find::name\n"  ; 
 	}	
 	# Get all example files
 	@ex_files=grep (/Ex/, @all_files);
