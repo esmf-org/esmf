@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.27 2010/08/10 16:49:47 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.28 2011/10/08 02:00:29 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -106,10 +106,10 @@ use File::Find
         }
 
         #Find all files
-        find(\&allFiles, '.');
-        sub allFiles {
-                        # Put all files in a list
-                        push all_files, "$File::Find::name\n" if -T ;
+        find(\&wanted, '.');
+        sub wanted {
+                        ## Put all files in a list
+			push all_files, "$File::Find::name\n" ;
         }
         # Get all system tests files
         @st_files=grep (/STest/, @all_files);
