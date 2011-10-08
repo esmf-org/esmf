@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.19 2010/08/02 17:14:16 theurich Exp $
+# $Id: unit_tests_results.pl,v 1.19.4.1 2011/10/08 02:27:33 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -100,7 +100,7 @@ use File::Find
         find(\&allFiles, '.');
         sub allFiles {
                         # Put all files in a list
-                        push all_files, "$File::Find::name\n" if -T ;
+                        push all_files, "$File::Find::name\n"  ;
         }
         # Get all unit tests files
         @ut_files=grep (/UTest/, @all_files);
