@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.21 2011/09/29 05:51:14 eschwab Exp $
+// $Id: ESMCI_IO_XML.C,v 1.22 2011/10/10 06:00:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
 
  // higher level, 3rd party or system includes here
  #include <fstream>
+ #include <string>
  #include <cstdio>
  #include <cstdarg>
  #include <cstring>
@@ -44,6 +45,7 @@
  #include <ESMCI_IO_XML.h>
  #include <ESMCI_SAX2ReadHandler.h>
  #include <ESMCI_SAX2WriteHandler.h>
+ #include <ESMCI_Util.h>
 
  using std::string;
  using std::endl;
@@ -55,7 +57,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.21 2011/09/29 05:51:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.22 2011/10/10 06:00:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -575,9 +577,13 @@ namespace ESMCI{
     // ... and follow with its attributes, if any: attrName="attrValue" ... 
     if (nPairs > 0) {
       for (int i=0; i < nPairs; i++) {
-        char *attrName  = va_arg(args, char*);
-        char *attrValue = va_arg(args, char*);
-        if (strlen(attrName) > 0) {
+        string attrName  = va_arg(args, char*);
+        string attrValue = va_arg(args, char*);
+        if (!attrValue.empty()) {
+          // replace any special char in attr value with equivalent xml entity
+          replaceXMLEntities(attrValue);
+        }
+        if (!attrName.empty()) {
           writeFile << " " << attrName << "=\"" << attrValue << "\"";
         }
       }
@@ -587,7 +593,12 @@ namespace ESMCI{
     writeFile << ">";
 
     // write out element name's value, if there is one
-    if (!value.empty()) writeFile << value;
+    if (!value.empty()) {
+       // replace any special char in value with equivalent xml entity
+       string val_copy = value;
+       replaceXMLEntities(val_copy);
+       writeFile << val_copy;
+    }
 #endif
 
     return (rc);
@@ -892,7 +903,26 @@ namespace ESMCI{
     }
  
     // write XML <!-- comment --> and end-of-line
-    writeFile << "<!-- " << comment << " -->" << endl;
+    if (!comment.empty()) {
+      // Special chars & < > ' " in comment do _not_ need to be replaced with
+      //   equivalent xml entities.
+      // However, must replace any series of >=2 dashes with a single dash,
+      //   otherwise malformed (unparseable) XML will result.
+      string cmt = comment;
+      string::size_type dash_begin = 0, dash_end;
+      while ((dash_begin = cmt.find("--", dash_begin)) != string::npos) {
+        if ((dash_end = cmt.find_first_not_of('-', dash_begin+2))
+            != string::npos) {
+          // erase all but the first dash and keep looking for the next "--*"
+          cmt.erase(dash_begin+1, dash_end - dash_begin - 1);
+        } else {
+          // dashes to end of string: erase the extras and done!
+          cmt.erase(dash_begin+1); break;
+        }
+        ++dash_begin;
+      }
+      writeFile << "<!-- " << cmt << " -->" << endl;
+    }
 #endif
 
     return (rc);
@@ -1010,6 +1040,51 @@ namespace ESMCI{
     return (rc);
 
 }  // end IO_XML::write
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_XML::replaceXMLEntities - replace special characters with XML entities
+//
+// !INTERFACE:
+      int IO_XML::replaceXMLEntities(
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+      string& str) {        // string containing special chars to replace
+
+// !DESCRIPTION:
+//    Replace special characters with XML entities to prevent 
+//    malformed (unparseable) XML.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_XML::replaceXMLEntities()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
+    // use ESMF C++ utility function
+    // TODO:  When C++11 STL becomes supported in all our supported
+    // compilers/versions, replace with std::tr1::regex_replace() or simply
+    // std::regex_replace().
+    ESMC_FindAndReplaceAll(str, "&",  "&amp;"); // must be done 1st!
+    ESMC_FindAndReplaceAll(str, "<",  "&lt;");
+    ESMC_FindAndReplaceAll(str, ">",  "&gt;");
+    ESMC_FindAndReplaceAll(str, "'",  "&apos;");
+    ESMC_FindAndReplaceAll(str, "\"", "&quot;");
+
+    return (rc);
+
+}  // end IO_XML::replaceXMLEntities
 
 //-------------------------------------------------------------------------
 //BOP
