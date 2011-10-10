@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.23 2011/10/07 23:28:18 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.24 2011/10/10 22:29:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -612,7 +612,11 @@ void VMK::construct(void *ssarg){
           int size = sizeof(pipc_mp);
           void *shm_segment;
           // first: sendChannel
+#ifdef ESMF_OS_Linux
+          sprintf(shm_file, "/shm_channel_%d_%d", mypet, i);
+#else
           sprintf(shm_file, "/tmp/shm_channel_%d_%d", mypet, i);
+#endif
           // get a descriptor for this shared memory resource
           // which ever PET comes first will create this resource, the other
           // will just open it...
@@ -633,8 +637,13 @@ void VMK::construct(void *ssarg){
           // enter the address into the sendChannel
           sendChannel[i].pipcmp = (pipc_mp *)shm_segment;
           sendChannel[i].comm_type = VM_COMM_TYPE_POSIXIPC;
+//fprintf(stderr, "Setting sendChannel[%d].pipcmp = %p, %p\n", i, shm_segment, MAP_FAILED);
           // then: recvChannel
+#ifdef ESMF_OS_Linux
+          sprintf(shm_file, "/shm_channel_%d_%d", i, mypet);
+#else
           sprintf(shm_file, "/tmp/shm_channel_%d_%d", i, mypet);
+#endif
           // get a descriptor for this shared memory resource
           // which ever PET comes first will create this resource, the other
           // will just open it...
@@ -655,6 +664,7 @@ void VMK::construct(void *ssarg){
           // enter the address into the recvChannel
           recvChannel[i].pipcmp = (pipc_mp *)shm_segment;
           recvChannel[i].comm_type = VM_COMM_TYPE_POSIXIPC;
+//fprintf(stderr, "Setting recvChannel[%d].pipcmp = %p, %p\n", i, shm_segment, MAP_FAILED);
         }
       }
     }
@@ -2753,6 +2763,16 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
         }
       }
       delete [] (*ch)->mpireq;
+#if 0
+    //TODO: totally wrong code here!!!!
+    }else if ((*ch)->type==5){
+      // this commhandle is based on POSIXIPC share memory channels
+      if ((*ch)->ptr){
+        // This transfer was not complete when it was initiated -> wait now
+        volatile void *ptr = *((void **)((*ch)->ptr));
+        while (ptr);
+      }
+#endif
     }else if ((*ch)->type==-1){
       // this is a dummy commhandle and there is nothing to wait for...
     }else{
@@ -2980,7 +3000,7 @@ int VMK::send(const void *message, int size, int dest, int tag){
 
 int VMK::send(const void *message, int size, int dest, commhandle **ch,
   int tag){
-  // p2p send
+  // p2p send non-blocking
 //fprintf(stderr, "VMK::send: ch=%p\n", *ch);
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
@@ -3003,8 +3023,8 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
   switch(sendChannel[dest].comm_type){
   case VM_COMM_TYPE_MPI1:
     (*ch)->nelements=1;
-    (*ch)->type=1;
-    (*ch)->sendFlag=true; // send request
+    (*ch)->type=1;          // MPI
+    (*ch)->sendFlag=true;   // send request
     (*ch)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
     void *messageC; // for MPI C interface convert (const void *) -> (void *)
@@ -3033,8 +3053,30 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
-    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
-    printf("non-blocking send not implemented for VM_COMM_TYPE_POSIXIPC.\n");
+    printf("non-blocking not implemented for VM_COMM_TYPE_POSIXIPC.\n");
+#if 0
+    //TODO: the following is totally incorrect code!!!!!!!!!
+    (*ch)->type=5;          // POSIXIPC share memory channels
+    pipcmp = sendChannel[dest].pipcmp;  // shared memory mp channel
+    sendCount = pipcmp->sendCount;
+    //TODO: enter mutex with "dest"
+    pdest = (char *)pipcmp->ptr_dst_nb[sendCount];
+    if (pdest != NULL){
+      // recv() already set the pointer, send() came second -> copy data
+      memcpy(pdest, message, size);      
+      // reset ptr_dst_nb entry
+      pipcmp->ptr_dst_nb[sendCount] = NULL;
+      (*ch)->ptr=NULL;        // indicate that this transfer is complete
+    }else{
+      // send() came first, set pointer for recv() side
+      pipcmp->ptr_src_nb[sendCount] = message;  // set the destination pointer
+      (*ch)->ptr=&(pipcmp->ptr_src_nb[sendCount]);  // check by reference
+    }
+    //TODO: exit mutex with "dest"
+    // increment sendCount
+    ++sendCount;
+    pipcmp->sendCount = sendCount%SHARED_NONBLOCK_CHANNELS;
+#endif    
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
@@ -3053,7 +3095,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       // send() came first, set pointer for recv() side
       shmp->ptr_src_nb[sendCount] = message;  // set the destination pointer
     }
-    // increment recvCount
+    // increment sendCount
     ++sendCount;
     shmp->sendCount = sendCount%SHARED_NONBLOCK_CHANNELS;
     break;
@@ -3248,7 +3290,7 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
 
 
 int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
-  // p2p recv
+  // p2p recv non-blocking
 //fprintf(stderr, "VMK::recv: ch=%p\n", *ch);
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
@@ -3279,7 +3321,7 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
   switch(comm_type){
   case VM_COMM_TYPE_MPI1:
     (*ch)->nelements=1;
-    (*ch)->type=1;
+    (*ch)->type=1;          // MPI
     (*ch)->sendFlag=false;  // not a send request
     (*ch)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
@@ -3311,8 +3353,30 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     break;
   case VM_COMM_TYPE_POSIXIPC:
     // Shared memory hack sync with spin-lock
-    // TODO: implement this using the SHARED_NONBLOCK_CHANNELS mechanism
     printf("non-blocking recv not implemented for VM_COMM_TYPE_POSIXIPC.\n");
+#if 0    
+    //TODO: the following is totally incorrect code!!!!!!!!!
+    (*ch)->type=5;          // POSIXIPC share memory channels
+    pipcmp = recvChannel[source].pipcmp;  // shared memory mp channel
+    recvCount = pipcmp->recvCount;
+    //TODO: enter mutex with "source"
+    psrc = (char *)pipcmp->ptr_src_nb[recvCount];
+    if (psrc != NULL){
+      // send() already set the pointer, recv() came second -> copy data
+      memcpy(message, psrc, size);
+      // reset ptr_src_nb entry
+      pipcmp->ptr_src_nb[recvCount] = NULL;
+      (*ch)->ptr=NULL;         // indicate that this transfer is complete
+    }else{
+      // recv() came first, set pointer for send() side
+      pipcmp->ptr_dst_nb[recvCount] = message;  // set the destination pointer
+      (*ch)->ptr=&(pipcmp->ptr_src_nb[recvCount]);  // check by reference
+    }
+    //TODO: exit mutex with "source"
+    // increment recvCount
+    ++recvCount;
+    pipcmp->recvCount = recvCount%SHARED_NONBLOCK_CHANNELS;
+#endif
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
