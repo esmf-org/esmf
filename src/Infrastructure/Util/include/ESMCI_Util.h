@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.43 2011/07/28 00:59:13 eschwab Exp $
+// $Id: ESMCI_Util.h,v 1.44 2011/10/10 05:59:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -186,6 +186,14 @@ void FTN(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
 //   does not require UUID library).
 int ESMC_InitializeGUID(void);
 int ESMC_GenerateGUID(std::string &guid);
+
+// Find and replace all occurrences of a string in a given string with another.
+// TODO:  When C++11 STL becomes supported in all our supported
+// compilers/versions, replace with std::tr1::regex_replace() or simply
+// std::regex_replace().
+int ESMC_FindAndReplaceAll(std::string &subjectStr,
+                           const std::string& searchStr,
+                           const std::string& replaceStr);
 
 // general reduction operator value - MUST MATCH F90
 enum ESMC_Operation { ESMF_SUM=1, ESMF_MIN, ESMF_MAX};
