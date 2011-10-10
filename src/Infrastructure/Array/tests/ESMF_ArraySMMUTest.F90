@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.5 2011/10/07 23:29:34 theurich Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.6 2011/10/10 22:32:14 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -12,164 +12,116 @@
 
 #define FILENAME "src/Infrastructure/Array/tests/ESMF_ArraySMMUTest.F90"
 
-program ESMF_ArraySMMUTest
-
-!------------------------------------------------------------------------------
-
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
 
-!==============================================================================
-!BOP
-! !PROGRAM: ESMF_ArraySMMUTest -  Tests ArraySMM()
-!
-! !DESCRIPTION:
-!
-!-----------------------------------------------------------------------------
-! !USES:
+module ESMF_ArraySMMUTest_comp_mod
+
+  ! modules
   use ESMF_TestMod     ! test methods
   use ESMF
-
-  implicit none
-
-!------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
-  character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.5 2011/10/07 23:29:34 theurich Exp $'
-!------------------------------------------------------------------------------
-
-!-------------------------------------------------------------------------
-!=========================================================================
-
-  ! individual test failure message
-  character(ESMF_MAXSTR) :: failMsg
-  character(ESMF_MAXSTR) :: name
-
-  integer               :: rc, petCount, i
-  integer, allocatable  :: petList(:)
-  type(ESMF_VM)         :: vm
-  ! cumulative result: count failures; no failures equals "all pass"
-  integer               :: result = 0
-
-!-------------------------------------------------------------------------------
-! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-! always run. When the environment variable, EXHAUSTIVE, is set to ON then
-! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-! to OFF, then only the sanity unit tests.
-! Special strings (Non-exhaustive and exhaustive) have been
-! added to allow a script to count the number and types of unit tests.
-!-------------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
-  !------------------------------------------------------------------------
-
-  call ESMF_VMGetGlobal(vm, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/1,petCount/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src 1 DE/PET -> dst all 4 DEs on PET 0 ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/1,petCount/), dstPetList=(/0/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src 2 DEs/PET -> dst default 4DEs ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/2,petCount/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
-
-  allocate(petList(0:petCount/2-1))
-  do i=0, petCount/2-1
-    petList(i) = i*2
-  enddo
   
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src 2 DEs/PET -> dst skipping PETs ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/2,petCount/), dstPetList=petList, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
+  implicit none
+  
+  private
+  
+  public setvm, setservices, test_smm
 
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src more than one DE/PET (irregular) -> dst default 4DEs ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/2,4/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
+  contains !--------------------------------------------------------------------
 
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src more than one DE/PET (irregular) -> dst all 4 DEs on PET 0 ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/2,4/), dstPetList=(/0/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
+  subroutine setvm(gcomp, rc)
+    ! arguments
+    type(ESMF_GridComp):: gcomp
+    integer, intent(out):: rc
+#ifdef ESMF_TESTWITHTHREADS
+    type(ESMF_VM) :: vm
+    logical :: pthreadsEnabled
+#endif
+    
+    ! Initialize
+    rc = ESMF_SUCCESS
 
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src some PETs with 0 DEs -> dst default 4DEs ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/2,2/), rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
+#ifdef ESMF_TESTWITHTHREADS
+    ! The following call will turn on ESMF-threading (single threaded)
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
+    ! threading features.
 
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "src some PETs with 0 DEs -> dst skipping PETs ASMM Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call test_smm(srcRegDecomp=(/2,2/), dstPetList=petList, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! must abort to prevent possible hanging due to communications
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  !------------------------------------------------------------------------
+    ! First test whether ESMF-threading is supported on this machine
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    if (pthreadsEnabled) then
+      !TODO: use the following call to change the VM threading level + comm sets
+      call ESMF_GridCompSetVMMinThreads(gcomp, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+    endif
+#endif
 
-  deallocate(petlist)
+  end subroutine !--------------------------------------------------------------
 
-  !------------------------------------------------------------------------
-10 continue
-  !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
-  !------------------------------------------------------------------------
+  recursive subroutine setservices(gcomp, rc)
+    ! arguments
+    type(ESMF_GridComp):: gcomp
+    integer, intent(out):: rc
+    
+    ! Initialize
+    rc = ESMF_SUCCESS
 
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
-contains
-!-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
+    ! register RUN method
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, userRoutine=run, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
-  subroutine test_smm(srcRegDecomp, dstPetList, rc)
+  end subroutine !--------------------------------------------------------------
+  
+  recursive subroutine run(gcomp, istate, estate, clock, rc)
+    ! arguments
+    type(ESMF_GridComp):: gcomp
+    type(ESMF_State):: istate, estate
+    type(ESMF_Clock):: clock
+    integer, intent(out):: rc
+    
+    ! local variables
+    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: name
+    integer                :: petCount, i, result
+    integer, allocatable   :: petList(:)
+#if 0
+    type(ESMF_VM)           :: vm
+#endif
+
+    ! Initialize
+    rc = ESMF_SUCCESS
+    result = 0
+    
+    call ESMF_GridCompGet(gcomp, petCount=petCount, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+#if 0
+    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_VMPrint(vm, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+#endif
+
+#if 1
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "ComponentizedSMMSuite: src 1 DE/PET -> dst default 4DEs ASMM Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    call test_smm(srcRegDecomp=(/1,petCount/), rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    ! must bail out to prevent possible hanging due to communications
+    if (rc /= ESMF_SUCCESS) return ! bail out
+    !------------------------------------------------------------------------
+#endif
+
+  end subroutine !--------------------------------------------------------------
+
+  recursive subroutine test_smm(srcRegDecomp, dstPetList, rc)
     integer           :: srcRegDecomp(:)
     integer, optional :: dstPetList(:)
     integer           :: rc
@@ -491,5 +443,176 @@ contains
       return  ! bail out
 
   end subroutine
+
+end module
+
+!==============================================================================
+!==============================================================================
+!==============================================================================
+
+program ESMF_ArraySMMUTest
+
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_ArraySMMUTest -  Tests ArraySMM()
+!
+! !DESCRIPTION:
+!
+!-----------------------------------------------------------------------------
+! !USES:
+  use ESMF_TestMod     ! test methods
+  use ESMF
+
+  use ESMF_ArraySMMUTest_comp_mod, only: setvm, setservices, test_smm
+
+  implicit none
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter :: version = &
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.6 2011/10/10 22:32:14 theurich Exp $'
+!------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!=========================================================================
+
+  ! individual test failure message
+  character(ESMF_MAXSTR) :: failMsg
+  character(ESMF_MAXSTR) :: name
+
+  integer               :: rc, petCount, i
+  integer, allocatable  :: petList(:)
+  type(ESMF_VM)         :: vm
+  type(ESMF_GridComp)   :: gcomp
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer               :: result = 0
+
+!-------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  !------------------------------------------------------------------------
+
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst all 4 DEs on PET 0 ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), dstPetList=(/0/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 2 DEs/PET -> dst default 4DEs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,petCount/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  allocate(petList(0:petCount/2-1))
+  do i=0, petCount/2-1
+    petList(i) = i*2
+  enddo
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 2 DEs/PET -> dst skipping PETs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,petCount/), dstPetList=petList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src more than one DE/PET (irregular) -> dst default 4DEs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,4/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src more than one DE/PET (irregular) -> dst all 4 DEs on PET 0 ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,4/), dstPetList=(/0/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src some PETs with 0 DEs -> dst default 4DEs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src some PETs with 0 DEs -> dst skipping PETs ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,2/), dstPetList=petList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  deallocate(petlist)
+  
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+  ! Run the componentized SMM test suite
+  
+  gcomp = ESMF_GridCompCreate(rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  call ESMF_GridCompSetVM(gcomp, userRoutine=setvm, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_GridCompSetServices(gcomp, userRoutine=setservices, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  call ESMF_GridCompRun(gcomp, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  !------------------------------------------------------------------------
 
 end program ESMF_ArraySMMUTest
