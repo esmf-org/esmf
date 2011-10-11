@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.85 2011/10/11 17:42:32 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.86 2011/10/11 18:23:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -5652,7 +5652,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldEmptyComplete(field, farray_cr, &
+        call ESMF_FieldEmptyComplete(field1, farray_cr, &
             indexflag=ESMF_INDEX_DELOCAL, gridToFieldMap=gridToFieldMap, &
             ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
@@ -6063,7 +6063,7 @@ contains
         logical, optional                 :: fieldget
 
         ! local arguments used to create field
-        type(ESMF_Field)    :: field
+        type(ESMF_Field)    :: field, field1
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
         type(ESMF_ArraySpec):: arrayspec
@@ -6141,6 +6141,29 @@ contains
             totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
             staggerloc=staggerloc, &
             rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        field1 = ESMF_FieldEmptyCreate(name="field1", rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldEmptySet(field1, grid=grid, staggerloc=staggerloc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldEmptyComplete(field1, farray_cr, &
+            gridToFieldMap=gridToFieldMap, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldDestroy(field1, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
