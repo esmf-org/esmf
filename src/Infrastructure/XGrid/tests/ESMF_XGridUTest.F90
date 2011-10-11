@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.29 2011/08/22 16:34:26 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.30 2011/10/11 13:54:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -400,6 +400,8 @@ contains
     type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
 
     type(ESMF_Mesh)                     :: mesh
+    type(ESMF_Field)                    :: field1, field2
+    type(ESMF_RouteHandle)              :: rh
 
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
@@ -409,12 +411,53 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,4.,0.,localrc)/), &
-      (/make_grid(8,8,6.,6.,0.,0.,localrc)/), &
+    ! Sew mesh
+    ! right, left
+    xgrid = ESMF_XGridCreate((/make_grid(4,2,1.,1.,0.,0.,localrc), make_grid(4,2,0.5,1.,4.,0.,localrc)/), &
+      (/make_grid(8,8,0.7,0.7,0.,0.,localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Bigger Grids
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,4.,0.,localrc)/), &
+      (/make_grid(8,8,1.,1.,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! right, left
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,0.5,1.,4.,0.,localrc), make_grid(4,4,1.,1.,0.,0.,localrc)/), &
+      (/make_grid(8,8,1.,1.,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  
+    ! down, up
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,0.5,1.,0.,-4.,localrc), make_grid(4,4,1.,1.,0.,0.,localrc)/), &
+      (/make_grid(8,8,1.,1.,0.,-4.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! up, down
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,0.5,1.,0.,0.,localrc), make_grid(4,4,1.,1.,0.,-4.,localrc)/), &
+      (/make_grid(8,8,1.,1.,0.,-4.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap
+    !xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,3.5,3.5,localrc)/), &
+    !  (/make_grid(8,8,1.,1.,0.,0.,localrc)/), &
+    !  rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !  ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine test4
 
