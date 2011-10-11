@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.5 2011/08/22 16:35:48 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.6 2011/10/11 14:02:37 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,6 +32,65 @@
 #include "ESMCI_Macros.h"
 
 namespace ESMCI{
+
+// Assume a counter clock wise order of points in p and q
+int weiler_clip_2D_2D(int num_p, double *p, int num_q, double *q, std::vector<polygon> & difference){
+
+  // return if either of the polygons are empty
+  if(num_p == 0 || num_q == 0) return 0;
+
+  // prepare subject and clip vertex lists
+  std::vector<xpoint> pnodes, qnodes;
+  for(int i = 0; i < num_p; i ++)
+    pnodes.push_back(xpoint(*(p+i), *(p+2*i+1), 'A'+i)); 
+  for(int i = 0; i < num_q; i ++)
+    qnodes.push_back(xpoint(*(q+i), *(q+2*i+1), 'a'+i)); 
+
+  // phase 1, find all intersection points, note degenerated points too
+  std::list<xpoint> final_pnodes, final_qnodes, degenerated;
+  std::copy(pnodes.begin(), pnodes.end(), final_pnodes.begin());
+  std::copy(qnodes.begin(), qnodes.end(), final_qnodes.begin());
+
+  unsigned int n_inter = 0;
+  for(int i = 0; i < num_p; i ++){
+    double *p1 = (pnodes[i].c);
+    double *p2 = (pnodes[(i+1)%num_p].c);
+
+    for(int j = 0; j < num_q; j ++){
+
+      double intersect[2];
+      double *q1 = (qnodes[j].c);
+      double *q2 = (qnodes[(j+1)%num_p].c); 
+
+      if(line_with_seg2D(p1, p2, q2, q1, intersect)){
+        // optimize by move along final node lists in loops, pay attention to degeneracies
+        std::list<xpoint>::iterator it = std::find(final_pnodes.begin(), final_pnodes.end(), pnodes[i]);
+        if(it == final_pnodes.end()) Throw() << "Failed to locate p(subject) vertex.\n";
+        final_pnodes.insert(it, xpoint(intersect[0], intersect[1], '1'+n_inter));
+
+        it = std::find(final_qnodes.begin(), final_qnodes.end(), qnodes[i]);
+        if(it == final_qnodes.end()) Throw() << "Failed to locate q(clip) vertex.\n";
+        final_qnodes.insert(it, xpoint(intersect[0], intersect[1], '1'+n_inter));
+      
+        n_inter++;
+      }
+    }
+  }
+
+  { // debug: dump final lists
+
+    std::list<xpoint>::const_iterator it = final_pnodes.begin(), eit=final_pnodes.end();
+    for(;it != eit; ++it)
+      std::cout << it->c[0] << ',' << it->c[1] << ',' << it->label << std::endl;
+    it = final_pnodes.begin(), eit=final_pnodes.end();
+    for(;it != eit; ++it)
+      std::cout << it->c[0] << ',' << it->c[1] << ',' << it->label << std::endl;
+  }
+
+  return 0;
+
+}
+
 
 void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh){
 
@@ -172,7 +231,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     //*area = sintd_cells[i]->get_area();
   }
 
-  //WriteVTKMesh(meshmid, "midMesh.vtk");
+  //char str[64]; memset(str, 0, 64);
+  //sprintf(str, "midMesh.vtk.%d", me);
+  //WriteVTKMesh(meshmid, str);
   //WriteVTKMesh(srcmesh, "srcMesh.vtk");
   //WriteVTKMesh(dstmesh, "dstMesh.vtk");
 

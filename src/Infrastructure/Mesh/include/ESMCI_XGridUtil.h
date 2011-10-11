@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.h,v 1.3 2011/08/22 16:35:46 feiliu Exp $
+// $Id: ESMCI_XGridUtil.h,v 1.4 2011/10/11 14:02:31 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -29,6 +29,43 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &wts,
   int *regridConserve, int *regridMethod, int *regridScheme,
   int *unmappedaction);
+
+// Weiler Atherton Algorithm O(nlogn), Sutherland–Hodgman O(n**2)
+
+struct xpoint{
+  double c[2];
+  bool visited;
+  char label;
+  xpoint() : visited(false) {}
+  xpoint(double x_, double y_, char label_) : visited(false), label(label_) {
+    c[0] = x_; c[1] = y_;
+  }
+
+  bool operator == (const xpoint & that) const{
+    return (this->c[0] == that.c[0] && this->c[1] == that.c[1]);
+  }
+};
+
+struct xpoint_equal{
+
+  bool operator () (const xpoint & rhs, const xpoint & lhs){
+    return (rhs.c[0] == lhs.c[0] && rhs.c[1] == lhs.c[1]);
+  }
+};
+
+struct xedge{
+  xpoint *s,*e;
+  xpoint norm; // in CCW sense
+};
+
+struct polygon{
+  std::list<xpoint> points;
+};
+
+// Compute the difference polygons: p-q
+// p: subject
+// q: clip
+int weiler_clip_2D_2D(int num_p, double *p, int num_q, double *q, std::vector<polygon> & difference);
 
 } // namespace
 

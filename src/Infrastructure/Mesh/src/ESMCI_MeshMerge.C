@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.3 2011/10/04 19:35:30 rokuingh Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.4 2011/10/11 14:02:37 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -9,41 +9,40 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+#include <Mesh/include/ESMCI_BBox.h>
+#include <Mesh/include/ESMCI_ConserveInterp.h>
+#include <Mesh/include/ESMCI_Exception.h> 
+#include <Mesh/include/ESMCI_Interp.h>
+#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/ESMCI_MathUtil.h> 
+#include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshMerge.h>
 #include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/ESMCI_MeshVTK.h>
 #include <Mesh/include/ESMCI_OTree.h>
-#include <Mesh/include/ESMCI_BBox.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_SparseMsg.h>
 #include <Mesh/include/ESMCI_SpaceDir.h>
 #include <Mesh/include/ESMCI_Search.h>
-#include <Mesh/include/ESMCI_Exception.h> 
-#include <Mesh/include/ESMCI_MathUtil.h> 
-#include <Mesh/include/ESMCI_ConserveInterp.h>
-#include <Mesh/include/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <ESMCI_VM.h>
  
 #include <algorithm>
 #include <iterator>
-
 #include <ostream>
-
 #include <set>
-
 #include <limits>
 #include <vector>
 
 #include "stdlib.h"
+#include <cstring>
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.3 2011/10/04 19:35:30 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.4 2011/10/11 14:02:37 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -52,9 +51,375 @@ namespace ESMCI {
   typedef std::vector<sintd_node *> * Sintd_nodes;
   typedef std::vector<sintd_cell *> * Sintd_cells;
 
-  void  calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, int *num_pnts, std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, Zoltan_Struct * zz);
+  void calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, int *num_pnts, std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, Zoltan_Struct * zz);
+  void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, Zoltan_Struct * zz);
+  void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, SearchResult &sres, Zoltan_Struct * zz);
+  void dump_elem(const MeshObj & elem);
 
-void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & midmesh, Zoltan_Struct * zz){
+// The main routine
+void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
+  Trace __trace("MeshMerge()");
+  //WriteVTKMesh(srcmesh, "srcmesh.vtk");
+
+  // Set some parameters for seach, eventually move these to .h or get rid of
+  // const double normexp = 0.15;
+  const double search_tol = 1e-20;
+
+  {
+    double p[8]={2.,0.,2.,2.,1.,2.,1.,0.};
+    double q[6]={3.,1.,2.,2.5,0.,0.};
+    double *tmp=new double[10];
+    double *out=new double[10];
+    int num_out;
+    intersect_convex_poly2D(4, p, 3, q, tmp, &num_out, out);
+    delete[] tmp;
+    delete[] out;
+  }
+
+  // Some error checking
+  if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
+    Throw() << "Meshes must have same spatial dim for mesh merge";
+  }  
+
+  if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
+    Throw() << "Meshes must have same parametric dim for mesh merge";
+  }  
+
+  //printf("Inside MeshMerge srcmesh.spatial_dim=%d \n",srcmesh.spatial_dim());
+  //printf("Inside MeshMerge dstmesh.spatial_dim=%d \n",dstmesh.spatial_dim());
+
+  // Get dim info for mesh
+  int sdim=srcmesh.spatial_dim();
+  int pdim=srcmesh.parametric_dim();
+
+  int rc;
+
+  // Compute global bounding box and determine if a mesh merge can be performed.
+  // Get coordinate fields
+  MEField<> &scoord = *srcmesh.GetCoordField();
+  MEField<> &dcoord = *dstmesh.GetCoordField();
+  BBox srcBBox(scoord, srcmesh);
+  BBox dstBBox(dcoord, dstmesh);
+
+  BBox gsrcBBox = BBoxParUnion(srcBBox);
+  BBox gdstBBox = BBoxParUnion(dstBBox);
+
+  bool intersected = BBoxIntersect(gsrcBBox, gdstBBox, search_tol);
+
+  if(! intersected) {
+    Throw() << "src and dst mesh do not neighbor or intersect, cannot be merged to form XGrid";
+  }
+    
+  // Create Mesh
+  Mesh *meshmrgp = new Mesh();
+  Mesh &meshmrg=*(meshmrgp);
+  *meshpp = meshmrgp;
+
+  meshmrg.set_parametric_dimension(sdim);
+  meshmrg.set_spatial_dimension(pdim);
+
+  Interp * interp=0;
+  SearchResult sres;
+  Zoltan_Struct * zz=0;
+  Mesh *mesh_src, *mesh_dst;
+  int unmappedaction = ESMCI_UNMAPPEDACTION_IGNORE;
+  int npet = VM::getCurrent(&rc)->getPetCount();
+  // No need to compute rendezvous meshes running uni. Make sure things are scoped correctly.
+  if(npet > 1){
+    // Build the rendezvous meshes and compute search result
+    std::vector<Interp::FieldPair> fpairs;
+    fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_CONSERVE));
+    interp = new Interp(dstmesh, srcmesh, meshmrgp, fpairs, unmappedaction);
+
+    // Get the rendevous meshes, the meaning of dst/src is flipped in interp
+    mesh_dst = &(interp->get_grend().GetSrcRend());
+    mesh_src = &(interp->get_grend().GetDstRend());
+    
+    // Use search to figure out which elements of srcmesh overlap elements of dstmesh
+    // each sres is an element keyed by a cell in dstmesh
+    sres = interp->get_sres();
+    zz = interp->get_zz();
+    //PrintSearchResult(sres);
+  }else{
+    mesh_src = &srcmesh;
+    mesh_dst = &dstmesh;
+    OctSearchElems(dstmesh, unmappedaction, srcmesh, unmappedaction, 1e-8, sres);
+    //PrintSearchResult(sres);
+  }
+
+  std::vector<sintd_node *> sintd_nodes;
+  std::vector<sintd_cell *> sintd_cells;
+
+  // Number of pnts
+  int num_pnts;
+  // Points
+  std::vector<double> pnts;
+  // Number of points in polys
+  std::vector<int> num_pnts_in_poly;
+
+  // Calculate polygons from search results
+  calc_clipped_poly(*mesh_dst, *mesh_src, sres, &num_pnts, &pnts, &num_pnts_in_poly, &sintd_nodes, &sintd_cells, zz);
+
+  // check sres
+  int nelem[2];
+  int gnelem[2];
+  nelem[0] = sres.size();
+  nelem[1] = sintd_nodes.size();
+  MPI_Allreduce(&nelem, &gnelem, 2, MPI_INT, MPI_SUM, Par::Comm());
+
+  // if src and dst mesh are neigbors, just sew them together
+  if((gnelem[0] == 0 && gnelem[1] == 0) || (gnelem[0] != 0 && gnelem[1] == 0)) {
+    sew_meshes(srcmesh, dstmesh, meshmrg, zz);
+  }else{
+    concat_meshes(srcmesh, dstmesh, meshmrg, sres, zz);
+  }
+
+  // Delete search result list
+  if(zz) Zoltan_Destroy(&zz);
+  if(interp) delete interp;
+
+}
+
+void dump_elem(const MeshObj & elem, int sdim, const MEField<> & coord){
+
+  int rc;
+  int npet = VM::getCurrent(&rc)->getPetCount();
+  int me   = VM::getCurrent(&rc)->getLocalPet();
+  int owner = elem.get_owner();
+  std::cout << "Me: " << me << " Owner: " << elem.get_owner()
+            << " Locally owned: " << GetAttr(elem).is_locally_owned() << '\n';
+  //if(elem.get_owner() != me) continue;
+  if(!GetAttr(elem).is_locally_owned()) return;
+
+  const MeshObjTopo *topo = GetMeshObjTopo(elem);
+  for (UInt n = 0; n < topo->num_nodes; n++) {
+
+    const MeshObj &node = *elem.Relations[n].obj;
+    double * tmp = coord.data(node);
+    for(int i = 0; i < sdim; i ++) {
+      std::cout << tmp[i] << ',';
+    }
+    std::cout << '\n';
+  }
+}
+
+#if 0
+void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, Zoltan_Struct * zz){
+
+  // Get dim info for mesh
+  int sdim=srcmesh.spatial_dim();
+  int pdim=srcmesh.parametric_dim();
+  WriteVTKMesh(srcmesh, "srcmesh.vtk");
+  WriteVTKMesh(dstmesh, "dstmesh.vtk");
+
+  int rc;
+  int me = VM::getCurrent(&rc)->getLocalPet();
+  std::vector<sintd_node *> sintd_nodes;
+  std::vector<sintd_cell *> sintd_cells;
+
+  // go through all src mesh elements
+  {
+    std::cout << "Traversing the source Mesh\n";
+    const Mesh & mesh = srcmesh;
+    unsigned int ncells = 0;
+    MEField<> &coord = *mesh.GetCoordField();
+    Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      const MeshObj &elem = *ei;  dump_elem(elem, sdim, coord);
+      const MeshObjTopo *topo = GetMeshObjTopo(elem);
+      double *cd = new double[sdim*topo->num_nodes];
+      //if(elem.get_owner() != me) continue;
+      //if(!GetAttr(elem).is_locally_owned()) continue;
+
+      for (UInt n = 0; n < topo->num_nodes; n++) {
+
+        const MeshObj &node = *elem.Relations[n].obj;
+        double * tmp = coord.data(node);
+        for(int i = 0; i < sdim; i ++) {
+          cd[(n*sdim)+i] = tmp[i];
+        }
+        // We are not checking if the src/dst meshes are self consistent, they should be...
+        //MeshObj::id_type id = elem.Relations[n].obj->get_id();
+        //std::map<MeshObj::id_type,int>::iterator imi = id2ord.find(id);
+        //ThrowRequire(imi != id2ord.end());
+        //MeshObj::id_type id = elem.Relations[n].obj->get_id();
+        //std::cout << "\tnode id:" << id << std::endl;
+        //MeshDB::MeshObjIDMap::iterator mni = mesh.map_find(MeshObj::NODE, id);
+        //if (mni == mesh.map_end(MeshObj::NODE)) throw("MeshDB Concat, node should be there!!!!");
+        // nconnect[n] = const_cast<MeshObj*>(&*mni);
+        //  MeshDB::MeshObjIDMap::iterator efi = mesh.map_find(MeshObj::ELEMENT, elem.get_id());
+        //if (efi != mesh.map_end(MeshObj::ELEMENT)) continue;
+        //mesh.add_element(newelem, nconnect, GetAttr(elem).GetBlock(), GetMeshObjTopo(elem));
+      }
+
+      compute_sintd_nodes_cells(0., topo->num_nodes, cd, pdim, sdim, 
+        &sintd_nodes, &sintd_cells, zz);
+      //construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+      //  &sintd_nodes, &sintd_cells);
+      ncells ++;
+      delete[] cd;
+
+    } // for ei
+  } 
+
+  {
+    // Debug
+    int num_cells = sintd_cells.size();
+    for (int i=0; i<num_cells; i++) 
+      sintd_cells[i]->print(me, i, i);
+  }
+
+  // go through all dst mesh elements
+  {
+    std::cout << "Traversing the destination Mesh\n";
+    const Mesh & mesh = dstmesh;
+    unsigned int ncells = 0;
+    MEField<> &coord = *mesh.GetCoordField();
+    Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      const MeshObj &elem = *ei;  dump_elem(elem, sdim, coord);
+      const MeshObjTopo *topo = GetMeshObjTopo(elem);
+      double *cd = new double[sdim*topo->num_nodes];
+      //if(elem.get_owner() != me) continue;
+      //if(!GetAttr(elem).is_locally_owned()) continue;
+
+      for (UInt n = 0; n < topo->num_nodes; n++) {
+
+        const MeshObj &node = *elem.Relations[n].obj;
+        double * tmp = coord.data(node);
+        for(int i = 0; i < sdim; i ++) {
+          cd[(n*sdim)+i] = tmp[i];
+        }
+      }
+
+      compute_sintd_nodes_cells(0., topo->num_nodes, cd, pdim, sdim, 
+        &sintd_nodes, &sintd_cells, zz);
+      //construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+      //  &sintd_nodes, &sintd_cells);
+      ncells ++;
+      delete[] cd;
+
+    } // for ei
+  } 
+
+  {
+    // Debug
+    int num_cells = sintd_cells.size();
+    for (int i=0; i<num_cells; i++) 
+      sintd_cells[i]->print(me, i, i);
+  }
+
+  // We now have all the genesis cells, compute the merged mesh
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  //WriteVTKMesh(mergemesh, "sewmesh.vtk");
+
+}
+
+#else
+void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, Zoltan_Struct * zz){
+
+  // Get dim info for mesh
+  int sdim=srcmesh.spatial_dim();
+  int pdim=srcmesh.parametric_dim();
+
+  int rc;
+  int me = VM::getCurrent(&rc)->getLocalPet();
+  std::vector<sintd_node *> sintd_nodes;
+  std::vector<sintd_cell *> sintd_cells;
+
+  // go through all src mesh elements
+  unsigned int ncells = 0;
+  {
+    std::cout << "Traversing the source Mesh\n";
+    const Mesh & mesh = srcmesh;
+    MEField<> &coord = *mesh.GetCoordField();
+    Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      const MeshObj &elem = *ei;  //dump_elem(elem, sdim, coord);
+      const MeshObjTopo *topo = GetMeshObjTopo(elem);
+      double *cd = new double[sdim*topo->num_nodes];
+      if(elem.get_owner() != me) continue;
+      //if(!GetAttr(elem).is_locally_owned()) continue;
+
+      for (UInt n = 0; n < topo->num_nodes; n++) {
+
+        const MeshObj &node = *elem.Relations[n].obj;
+        double * tmp = coord.data(node);
+        for(int i = 0; i < sdim; i ++) {
+          cd[(n*sdim)+i] = tmp[i];
+        }
+        // We are not checking if the src/dst meshes are self consistent, they should be...
+        //MeshObj::id_type id = elem.Relations[n].obj->get_id();
+        //std::map<MeshObj::id_type,int>::iterator imi = id2ord.find(id);
+        //ThrowRequire(imi != id2ord.end());
+      }
+
+      //compute_sintd_nodes_cells(0., topo->num_nodes, cd, pdim, sdim, 
+      //  &sintd_nodes, &sintd_cells, zz);
+      construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+        &sintd_nodes, &sintd_cells);
+      ncells ++;
+      delete[] cd;
+
+    } // for ei
+  } 
+
+  {
+    // Debug
+    int num_cells = sintd_cells.size();
+    for (int i=0; i<num_cells; i++) 
+      sintd_cells[i]->print(me, i, i);
+  }
+
+  // go through all dst mesh elements
+  {
+    std::cout << "Traversing the destination Mesh\n";
+    const Mesh & mesh = dstmesh;
+    MEField<> &coord = *mesh.GetCoordField();
+    Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      const MeshObj &elem = *ei;  //dump_elem(elem, sdim, coord);
+      const MeshObjTopo *topo = GetMeshObjTopo(elem);
+      double *cd = new double[sdim*topo->num_nodes];
+      if(elem.get_owner() != me) continue;
+      //if(!GetAttr(elem).is_locally_owned()) continue;
+
+      for (UInt n = 0; n < topo->num_nodes; n++) {
+
+        const MeshObj &node = *elem.Relations[n].obj;
+        double * tmp = coord.data(node);
+        for(int i = 0; i < sdim; i ++) {
+          cd[(n*sdim)+i] = tmp[i];
+        }
+      }
+
+      //compute_sintd_nodes_cells(0., topo->num_nodes, cd, pdim, sdim, 
+      //  &sintd_nodes, &sintd_cells, zz);
+      construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+        &sintd_nodes, &sintd_cells);
+      ncells ++;
+      delete[] cd;
+
+    } // for ei
+  } 
+
+  {
+    // Debug
+    int num_cells = sintd_cells.size();
+    for (int i=0; i<num_cells; i++) 
+      sintd_cells[i]->print(me, i, i);
+  }
+
+  // We now have all the genesis cells, compute the merged mesh
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  //char str[64]; memset(str, 0, 64);
+  //sprintf(str, "sewmesh.vtk.%d", me);
+  //WriteVTKMesh(mergemesh, str);
+
+}
+#endif
+
+void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, SearchResult &sres, Zoltan_Struct * zz){
 
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
@@ -98,141 +463,55 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & midmesh, Zolt
     } // for ei
   } 
 
-  // go through all dst mesh elements
+  // Go through all dst mesh elements
   {
+    // Construct a vector of dst elements that intersect with src mesh (higher priority mesh)
+    std::vector<MeshObj *> dstelems;
+    //for(int i = 0; i < sres.size(); i ++)
+    //  dstelems.push_back(sres[i].elem);
+
     const Mesh & mesh = dstmesh;
     unsigned int ncells = 0;
     MEField<> &coord = *mesh.GetCoordField();
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
-      const MeshObjTopo *topo = GetMeshObjTopo(elem);
-      double *cd = new double[sdim*topo->num_nodes];
-      if(elem.get_owner() != me) continue;
 
-      for (UInt n = 0; n < topo->num_nodes; n++) {
+      // Check if this element is in sres
+      std::vector<MeshObj *>::iterator it = std::find(dstelems.begin(), dstelems.end(), &elem);
+      if(it == dstelems.end()){ // Not intersected, just add it to the list
+        const MeshObjTopo *topo = GetMeshObjTopo(elem);
+        double *cd = new double[sdim*topo->num_nodes];
+        if(elem.get_owner() != me) continue;
 
-        const MeshObj &node = *elem.Relations[n].obj;
-        for(int i = 0; i < sdim; i ++) {
-          double * tmp = coord.data(node);
-          cd[(n*sdim)+i] = tmp[i];
+        for (UInt n = 0; n < topo->num_nodes; n++) {
+
+          const MeshObj &node = *elem.Relations[n].obj;
+          for(int i = 0; i < sdim; i ++) {
+            double * tmp = coord.data(node);
+            cd[(n*sdim)+i] = tmp[i];
+          }
         }
-      }
 
-      construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
-        &sintd_nodes, &sintd_cells);
-      ncells ++;
-      delete[] cd;
+        construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+          &sintd_nodes, &sintd_cells);
+        ncells ++;
+        delete[] cd;
+      }else{ 
+      // Do spatial boolean math: difference, cut each intersected part off the dst mesh and 
+      // triangulate the remaining polygon
+
+      }
 
     } // for ei
   } 
 
   // We now have all the genesis cells, compute the merged mesh
-  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &midmesh);
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  //WriteVTKMesh(mergemesh, "mergemesh.vtk");
 
 }
-
-// The main routine
-void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
-    Trace __trace("MeshMerge()");
-
-  // Set some parameters for seach, eventually move these to .h or get rid of
-  // const double normexp = 0.15;
-  const double search_tol = 1e-20;
-
-
-  // Some error checking
-  if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
-    Throw() << "Meshes must have same spatial dim for mesh merge";
-  }  
-
-  if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
-    Throw() << "Meshes must have same parametric dim for mesh merge";
-  }  
-
-  printf("Inside MeshMerge srcmesh.spatial_dim=%d \n",srcmesh.spatial_dim());
-
-  printf("Inside MeshMerge dstmesh.spatial_dim=%d \n",dstmesh.spatial_dim());
-
-  // Get dim info for mesh
-  int sdim=srcmesh.spatial_dim();
-  int pdim=srcmesh.parametric_dim();
-
-  int rc;
-
-  // Compute global bounding box and determine if a mesh merge can be performed.
-  // Get coordinate fields
-  MEField<> &scoord = *srcmesh.GetCoordField();
-  MEField<> &dcoord = *dstmesh.GetCoordField();
-  BBox srcBBox(scoord, srcmesh);
-  BBox dstBBox(dcoord, dstmesh);
-
-  BBox gsrcBBox = BBoxParUnion(srcBBox);
-  BBox gdstBBox = BBoxParUnion(dstBBox);
-
-  bool intersected = BBoxIntersect(gsrcBBox, gdstBBox, search_tol);
-
-  if(! intersected) {
-    Throw() << "src and dst mesh do not intersect, cannot be merged to form XGrid";
-  }
-    
-  // Create Mesh
-  Mesh *meshmrgp = new Mesh();
-  Mesh &meshmrg=*(meshmrgp);
-  *meshpp = meshmrgp;
-
-  meshmrg.set_parametric_dimension(sdim);
-  meshmrg.set_spatial_dimension(pdim);
-
-  // Build the rendezvous meshes and compute search result
-  std::vector<Interp::FieldPair> fpairs;
-  fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_CONSERVE));
-  int unmappedaction = ESMCI_UNMAPPEDACTION_IGNORE;
-  Interp interp(srcmesh, dstmesh, meshmrgp, fpairs, unmappedaction);
   
-  // Use search to figure out which elements of srcmesh overlap elements of dstmesh
-  SearchResult sres;
-  OctSearchElems(srcmesh, ESMCI_UNMAPPEDACTION_IGNORE, dstmesh, ESMCI_UNMAPPEDACTION_IGNORE, search_tol, sres);
-  //SearchResult sres = interp.get_sres();
-  Zoltan_Struct * zz = interp.get_zz();
-
-  // check sres
-  int nelem = sres.size();
-  int gnelem;
-  MPI_Allreduce(&nelem, &gnelem, 1, MPI_INT, MPI_SUM, Par::Comm());
-
-  std::vector<sintd_node *> sintd_nodes;
-  std::vector<sintd_cell *> sintd_cells;
-
-
-  // Number of pnts
-  int num_pnts;
-
-  // Points
-  std::vector<double> pnts;
-  
-  // Number of points in polys
-  std::vector<int> num_pnts_in_poly;
-
-  // Calculate polygons from search results
-  calc_clipped_poly(srcmesh, dstmesh, sres, &num_pnts, &pnts, &num_pnts_in_poly, &sintd_nodes, &sintd_cells, zz);
-
-  // if src and dst mesh are neigbors, just sew them together
-  if(gnelem == 0 || (gnelem != 0 && sintd_nodes.size() == 0)) {
-    sew_meshes(srcmesh, dstmesh, meshmrg, zz);
-  }
-
-  // Delete search result list
-  DestroySearchResult(sres);
-
-  // Release the Zoltan struct we used for the mid mesh
-  interp.release_zz();
-
-
-  }
-  
-
-
 
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 

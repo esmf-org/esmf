@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.h,v 1.8 2011/08/22 16:35:46 feiliu Exp $
+// $Id: ESMCI_ConserveInterp.h,v 1.9 2011/10/11 14:02:31 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -48,6 +48,11 @@ namespace ESMCI {
              int num_q, double *q,
              double *tmp,
              int *num_out, double *out);
+
+  bool line_with_seg2D(double *a1, double *a2, double *sin, double *sout,
+		       double *p);
+  bool line_with_gc_seg3D(double *a1, double *a2, double *sin, double *sout,
+		       double *p);
 
 
 
