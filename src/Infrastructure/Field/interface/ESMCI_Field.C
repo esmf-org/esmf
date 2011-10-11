@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.14 2011/10/04 19:35:24 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.15 2011/10/11 20:45:46 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -81,6 +81,9 @@ void FTN(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
+
+void FTN(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
+  int *rc);
 
 void FTN(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
   int *rc);
@@ -323,7 +326,7 @@ namespace ESMCI {
     return localrc;
 
  } 
-
+  
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Field::getMesh()"

@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.30 2011/10/05 22:05:27 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.31 2011/10/11 20:45:46 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,8 +36,8 @@ extern "C" {
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FieldCreateMeshAS()"
-  ESMC_Field ESMC_FieldCreateMeshAS(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
+#define ESMC_METHOD "ESMC_FieldCreateMeshArraySpec()"
+  ESMC_Field ESMC_FieldCreateMeshArraySpec(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
     ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
     ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
@@ -63,8 +63,8 @@ extern "C" {
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FieldCreateMeshTK()"
-  ESMC_Field ESMC_FieldCreateMeshTK(ESMC_Mesh mesh, enum ESMC_TypeKind typekind,
+#define ESMC_METHOD "ESMC_FieldCreateMeshTypeKind()"
+  ESMC_Field ESMC_FieldCreateMeshTypeKind(ESMC_Mesh mesh, enum ESMC_TypeKind typekind,
     ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
     ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
@@ -206,6 +206,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 } 
 //--------------------------------------------------------------------------
 
+
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegridStore()"
@@ -241,6 +242,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
   }
 //--------------------------------------------------------------------------
 
+
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegrid()"
@@ -267,6 +269,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     return rc;
   }
 //--------------------------------------------------------------------------
+
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD

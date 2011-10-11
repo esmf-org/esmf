@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.40 2011/10/05 22:05:25 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.41 2011/10/11 20:45:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -50,10 +50,10 @@ typedef struct{
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_FieldCreateMeshAS - Create a Field from Mesh and ArraySpec
+// !IROUTINE: ESMC_FieldCreateMeshArraySpec - Create a Field from Mesh and ArraySpec
 //
 // !INTERFACE:
-ESMC_Field ESMC_FieldCreateMeshAS(
+ESMC_Field ESMC_FieldCreateMeshArraySpec(
   ESMC_Mesh mesh,                           // in
   ESMC_ArraySpec arrayspec,                 // in
   ESMC_InterfaceInt gridToFieldMap,         // in
@@ -119,10 +119,10 @@ ESMC_Field ESMC_FieldCreateMeshAS(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_FieldCreateMeshTK - Create a Field from Mesh and typekind
+// !IROUTINE: ESMC_FieldCreateMeshTypeKind - Create a Field from Mesh and typekind
 //
 // !INTERFACE:
-ESMC_Field ESMC_FieldCreateMeshTK(
+ESMC_Field ESMC_FieldCreateMeshTypeKind(
   ESMC_Mesh mesh,                           // in
   enum ESMC_TypeKind typekind,              // in
   ESMC_InterfaceInt gridToFieldMap,         // in
@@ -291,7 +291,7 @@ void *ESMC_FieldGetPtr(
 //  \item[field]
 //    Get the internal Fortran data pointer stored in this {\tt ESMC\_Field}.
 //  \item[localDe]
-//  Local DE for which information is requested. {\tt [0,..,localDeCount-1]}. 
+//    Local DE for which information is requested. {\tt [0,..,localDeCount-1]}. 
 //  \item[{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
@@ -314,7 +314,6 @@ int ESMC_FieldPrint(
 // !DESCRIPTION:
 //
 //  Print the internal information within this {\tt ESMC\_Field}.
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //
 //  The arguments are:
 //  \begin{description}

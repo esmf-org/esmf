@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.18 2011/09/29 22:26:27 rokuingh Exp $
+// $Id: ESMC_FieldUTest.C,v 1.19 2011/10/11 20:45:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -163,7 +163,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field = ESMC_FieldCreateMeshAS(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound,
+  field = ESMC_FieldCreateMeshArraySpec(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound,
     i_ungriddedUBound, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -172,7 +172,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field2 = ESMC_FieldCreateMeshTK(mesh, ESMC_TYPEKIND_R8, i_gridToFieldMap, i_ungriddedLBound,
+  field2 = ESMC_FieldCreateMeshTypeKind(mesh, ESMC_TYPEKIND_R8, i_gridToFieldMap, i_ungriddedLBound,
     i_ungriddedUBound, "field2", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
