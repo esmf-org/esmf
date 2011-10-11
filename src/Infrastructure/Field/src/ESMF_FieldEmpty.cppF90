@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.28 2011/07/08 22:18:17 svasquez Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.29 2011/10/11 17:42:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.28 2011/07/08 22:18:17 svasquez Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.29 2011/10/11 17:42:54 feiliu Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -3196,9 +3196,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
 @\
     ! make sure the input field has a EMPTY status @\
-    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
+    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY .or. & @\
+       field%ftypep%status /= ESMF_FIELDSTATUS_GRIDSET) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &   @\
-             msg="- input Field must be empty", &  @\
+             msg="- input Field must be empty or have a geombase set", &  @\
                ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
     endif @\
@@ -3721,9 +3722,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit,geombase,rc) @\
 @\
     ! make sure the input field has a EMPTY status @\
-    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
+    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY .or. & @\
+       field%ftypep%status /= ESMF_FIELDSTATUS_GRIDSET) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &   @\
-             msg="- input Field must be empty", &  @\
+             msg="- input Field must be empty or have a geombase set", &  @\
                ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
     endif @\
