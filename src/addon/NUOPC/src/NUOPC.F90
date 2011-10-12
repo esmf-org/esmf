@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.24 2011/09/26 03:40:04 theurich Exp $
+! $Id: NUOPC.F90,v 1.25 2011/10/12 22:59:54 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -44,6 +44,7 @@ module NUOPC
   public NUOPC_StateAdvertiseField
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
+  public NUOPC_StateIsFieldConnected
   public NUOPC_StateIsCurrentTimestamp
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
@@ -1178,9 +1179,11 @@ module NUOPC
   function NUOPC_StateIsAllConnected(state, rc)
 ! !ARGUMENTS:
     logical :: NUOPC_StateIsAllConnected
-    type(ESMF_State)                          :: state
-    integer,            intent(out), optional :: rc
+    type(ESMF_State), intent(in)            :: state
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Returns {\tt .true.} if all Fields in {\tt state} are connected. Otherwise 
+!   returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1221,14 +1224,57 @@ module NUOPC
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_StateIsFieldConnected - Test if Field in a State is connected
+! !INTERFACE:
+  function NUOPC_StateIsFieldConnected(state, fieldName, rc)
+! !ARGUMENTS:
+    logical :: NUOPC_StateIsFieldConnected
+    type(ESMF_State), intent(in)            :: state
+    character(*),     intent(in)            :: fieldName
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if Fields with name {\tt fieldName} contained in 
+!   {\tt state} is connected. Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)        :: field
+    character(ESMF_MAXSTR)  :: connectedValue
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    NUOPC_StateIsFieldConnected = .false. ! initialize
+
+    call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_FieldAttributeGet(field, name="Connected", &
+      value=connectedValue, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    if (connectedValue=="true") then
+      NUOPC_StateIsFieldConnected = .true.
+    endif
+
+  end function
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_StateIsCurrentTimestamp - Check if fields in state are at current time
 ! !INTERFACE:
   function NUOPC_StateIsCurrentTimestamp(state, clock, rc)
 ! !ARGUMENTS:
     logical :: NUOPC_StateIsCurrentTimestamp
-    type(ESMF_State),        intent(inout)         :: state
-    type(ESMF_Clock),        intent(in)            :: clock
-    integer,                 intent(out), optional :: rc
+    type(ESMF_State), intent(in)            :: state
+    type(ESMF_Clock), intent(in)            :: clock
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------
@@ -1368,9 +1414,9 @@ module NUOPC
 ! !INTERFACE:
   subroutine NUOPC_StateSetTimestamp(state, clock, rc)
 ! !ARGUMENTS:
-    type(ESMF_State),        intent(inout)         :: state
-    type(ESMF_Clock),        intent(in)            :: clock
-    integer,                 intent(out), optional :: rc
+    type(ESMF_State), intent(inout)         :: state
+    type(ESMF_Clock), intent(in)            :: clock
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------
@@ -1437,9 +1483,9 @@ module NUOPC
 ! !INTERFACE:
   subroutine NUOPC_FieldBundleUpdateTime(srcFields, dstFields, rc)
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle),  intent(inout)         :: srcFields
-    type(ESMF_FieldBundle),  intent(inout)         :: dstFields
-    integer,                 intent(out), optional :: rc
+    type(ESMF_FieldBundle), intent(inout)         :: srcFields
+    type(ESMF_FieldBundle), intent(inout)         :: dstFields
+    integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------

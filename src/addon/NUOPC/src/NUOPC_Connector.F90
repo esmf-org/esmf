@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.15 2011/09/17 00:07:52 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.16 2011/10/12 22:59:54 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -90,25 +90,16 @@ module NUOPC_Connector
     ! local variables
     type(ESMF_StateIntent_Flag)                  :: isType, esType
     integer                               :: isItemCount, esItemCount
-    type(ESMF_VM)                         :: vm
     
     rc = ESMF_SUCCESS
     
-    ! get current VM because StateReconcile needs it
-    !TODO: StateReconcile should have VM optional and this is obsolete
-    call ESMF_VMGetCurrent(vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
     ! reconcile the States
-    call ESMF_StateReconcile(importState, vm=vm, rc=rc)
+    call ESMF_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
+    call ESMF_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -160,7 +151,6 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer       :: exportStdItemNameList(:)
     integer                               :: iMatch, eMatch
     type(ESMF_Field)                      :: iField, eField
-    type(ESMF_VM)                         :: vm
     integer                               :: stat
     type(type_InternalState)              :: is
     integer                               :: localrc
@@ -188,21 +178,13 @@ module NUOPC_Connector
       file=FILENAME)) &
       return  ! bail out
 
-    ! get current VM because StateReconcile needs it
-    !TODO: StateReconcile should have VM optional and this is obsolete
-    call ESMF_VMGetCurrent(vm, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
     ! reconcile the States
-    call ESMF_StateReconcile(importState, vm=vm, rc=rc)
+    call ESMF_StateReconcile(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_StateReconcile(exportState, vm=vm, rc=rc)
+    call ESMF_StateReconcile(exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
