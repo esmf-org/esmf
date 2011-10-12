@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.44 2011/06/30 05:59:24 theurich Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.44.2.1 2011/10/12 23:14:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.44 2011/06/30 05:59:24 theurich Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.44.2.1 2011/10/12 23:14:27 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -143,6 +143,81 @@
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Attempt to compare an initialized time to an un-initialized time.
+      ! In support of bug #2826626 "Error in ESMC_Fraction.C w/ ESMF 3.1.0rp2",
+      ! which in all likelihood was due to user-code using an uninitialized 
+      ! time in a comparison.  If run against ESMF 3.1.0rp2, this test will
+      ! produce the same log error message the user reported:
+      !  "ESMC_Fraction.C 352 ESMC_FractionSimplify() Cannot divide by zero".
+      ! In ESMF >= 4.0.0r, the Init macros catch this condition and report it
+      ! in the log file accordingly:
+      !  "Object Set or SetDefault method not called - Object not Initialized".
+      ! However, since this test uses an overloaded operator, there is no
+      ! return code to check.  Also, the == operation does not change its input 
+      ! arguments, and always returns .false. in case of error.
+      ! TODO:  Hence the only way to verify that the test is truly successful
+      ! is to check that the appropriate error message was written to the log
+      ! file at the appropriate place.  Currently, this can only be done via
+      ! manual inspection, so we need a way to automate it, probably with a new
+      ! ESMF_Test*() method.
+      write(name, *) "Compare initialized and uninitialized Times Test 1"
+      bool = (startTime == time2)
+      write(failMsg, *) " Returned .true."
+      call ESMF_Test((bool .eqv. .false.), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! TODO:  Automate check for real success; see "Compare ... Times Test 1"
+      ! above.
+      write(name, *) "Compare initialized and uninitialized Times Test 2"
+      bool = (time1 .ne. time2)
+      write(failMsg, *) " Returned .false."
+      call ESMF_Test((bool .eqv. .true.), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! TODO:  Automate check for real success; see "Compare ... Times Test 1"
+      ! above.
+      write(name, *) "Compare initialized and uninitialized Times Test 3"
+      bool = (time1 < startTime)
+      write(failMsg, *) " Returned .true."
+      call ESMF_Test((bool .eqv. .false.), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! TODO:  Automate check for real success; see "Compare ... Times Test 1"
+      ! above.
+      write(name, *) "Compare initialized and uninitialized Times Test 4"
+      bool = (time1 .le. time2)
+      write(failMsg, *) " Returned .true."
+      call ESMF_Test((bool .eqv. .false.), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! TODO:  Automate check for real success; see "Compare ... Times Test 1"
+      ! above.
+      write(name, *) "Compare initialized and uninitialized Times Test 5"
+      bool = (time1 > time2)
+      write(failMsg, *) " Returned .true."
+      call ESMF_Test((bool .eqv. .false.), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! TODO:  Automate check for real success; see "Compare ... Times Test 1"
+      ! above.
+      write(name, *) "Compare initialized and uninitialized Times Test 6"
+      bool = (startTime .ge. time2)
+      write(failMsg, *) " Returned .true."
+      call ESMF_Test((bool .eqv. .false.), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Tests fix to support #1115836, bug #1118178, "ESMF_TimeGet returns
       !   string with %lld not %04lld" reported by Paul Schopf/GMU

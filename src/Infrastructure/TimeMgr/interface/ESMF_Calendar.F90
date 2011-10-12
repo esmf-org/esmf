@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.141.2.1 2011/09/03 00:03:15 theurich Exp $
+! $Id: ESMF_Calendar.F90,v 1.141.2.2 2011/10/12 23:14:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.141.2.1 2011/09/03 00:03:15 theurich Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.141.2.2 2011/10/12 23:14:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -662,15 +662,16 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,               intent(in),  optional :: daysPerMonth(:)
       integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not imp
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not imp
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not imp
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd
       character (len=*),     intent(in),  optional :: name
       integer,               intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
-!     Creates a custom {\tt ESMF\_Calendar} and sets its properties.
+!     Creates a custom {\tt ESMF\_Calendar} and sets its properties.  Not
+!     fully supported yet; see Section ~\ref{subsec:Calendar_rest}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -678,10 +679,10 @@
 !          Integer array of days per month, for each month of the year.
 !          The number of months per year is variable and taken from the
 !          size of the array.  If unspecified, months per year = 0,
-!          with the days array undefined.
+!          with the days array undefined.  (Not implemented yet).
 !     \item[{[secondsPerDay]}]
 !          Integer number of seconds per day.  Defaults to 86400 if not 
-!          specified.
+!          specified.  (Not implemented yet).
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and
 !          daysPerYearDd (see below) to specify a days-per-year calendar
@@ -872,9 +873,9 @@
       integer,                intent(out), optional :: monthsPerYear
       integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerDay
       integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerYear
-      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYear   !not imp
-      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDn !not imp
-      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDd !not imp
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYear
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDn
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDd
       character (len=*),      intent(out), optional :: name
       integer,                intent(out), optional :: rc
 
@@ -905,18 +906,17 @@
 !          Integer number of days per year.  For calendars with
 !          intercalations, daysPerYear is the number of days for years without
 !          an intercalation.  For other calendars, it is the number of days in
-!          every year.  (Not implemented yet).
+!          every year.
 !     \item[{[daysPerYearDn]}]
 !          \begin{sloppypar}
 !          Integer fractional number of days per year (numerator).
 !          For calendars with intercalations, daysPerYearDn/daysPerYearDd is
 !          the average fractional number of days per year (e.g. 25/100 for
 !          Julian 4-year intercalation).  For other calendars, it is zero.
-!          (Not implemented yet).
 !          \end{sloppypar}
 !     \item[{[daysPerYearDd]}]
 !          Integer fractional number of days per year (denominator).  See
-!          daysPerYearDn above.  (Not implemented yet).
+!          daysPerYearDn above.
 !     \item[{[name]}]
 !          The name of this calendar.
 !     \item[{[rc]}]
@@ -1054,8 +1054,10 @@
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns {\tt .true.} if the given year is a leap year within the given
-!     calendar, and {\tt .false.} otherwise.  See also 
-!     {\tt ESMF\_TimeIsLeapYear()}.
+!     calendar, and {\tt .false.} otherwise.  Custom calendars are not yet 
+!     fully supported, so {\tt .false.} will always be returned in this case;
+!     see Section ~\ref{subsec:Calendar_rest}.
+!     See also {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
 !
 !     The arguments are:
@@ -1096,8 +1098,10 @@
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns {\tt .true.} if the given year is a leap year within the given
-!     calendar, and {\tt .false.} otherwise.  See also
-!     {\tt ESMF\_TimeIsLeapYear()}.
+!     calendar, and {\tt .false.} otherwise.  Custom calendars are not yet 
+!     fully supported, so {\tt .false.} will always be returned in this case;
+!     see Section ~\ref{subsec:Calendar_rest}.
+!     See also {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
 !
 !     The arguments are:
@@ -1159,8 +1163,10 @@
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns {\tt .true.} if the given year is a leap year within the given
-!     calendar, and {\tt .false.} otherwise.  See also 
-!     {\tt ESMF\_TimeIsLeapYear()}.
+!     calendar, and {\tt .false.} otherwise.  Custom calendars are not yet 
+!     fully supported, so {\tt .false.} will always be returned in this case;
+!     see Section ~\ref{subsec:Calendar_rest}.
+!     See also {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
 !
 !     The arguments are:
@@ -1411,9 +1417,9 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(in),  optional :: daysPerMonth(:)
       integer(ESMF_KIND_I4),intent(in),  optional :: secondsPerDay
-      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYear   !not imp
-      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYearDn !not imp
-      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYearDd !not imp
+      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYear
+      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYearDn
+      integer(ESMF_KIND_I4),intent(in),  optional :: daysPerYearDd
       character (len=*),    intent(in),  optional :: name
       integer,              intent(out), optional :: rc
 
@@ -1422,7 +1428,8 @@
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Sets properties in a custom {\tt ESMF\_Calendar}.
+!     Sets properties in a custom {\tt ESMF\_Calendar}.  Not fully 
+!     supported yet; see Section ~\ref{subsec:Calendar_rest}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1432,10 +1439,10 @@
 !          Integer array of days per month, for each month of the year.
 !          The number of months per year is variable and taken from the
 !          size of the array.  If unspecified, months per year = 0,
-!          with the days array undefined.
+!          with the days array undefined.  (Not implemented yet).
 !     \item[{[secondsPerDay]}]
 !          Integer number of seconds per day.  Defaults to 86400 if not 
-!          specified.
+!          specified.  (Not implemented yet).
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and
 !          daysPerYearDd (see below) to specify a days-per-year calendar
