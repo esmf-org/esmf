@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.h,v 1.14.2.2 2011/09/06 18:56:14 theurich Exp $
+// $Id: ESMCI_IO_XML.h,v 1.14.2.3 2011/10/12 23:07:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,6 +41,7 @@
 //
 // !USES:
 #include <fstream>
+#include <string>
 #include <stdarg.h>
 #include "ESMCI_Base.h"           // inherited Base class
 #include "ESMCI_SAX2WriteHandler.h"
@@ -100,7 +101,7 @@ namespace ESMCI{
                         const int     indentLevel);
 
     // write an XML comment
-    int writeComment(const std::string& comment);
+    int writeComment(const std::string& comment, const int indentLevel=0);
 
     int write(int fileNameLen, const char* fileName,
               const char* outChars, int flag);
@@ -116,7 +117,13 @@ namespace ESMCI{
     IO_XML(Attribute*);
     // IO_XML(const IO_XML &io_xml);  TODO
     ~IO_XML(){destruct();}
-   private:
+
+// !PRIVATE MEMBER FUNCTIONS:
+//
+  private:
+//
+ // < declare private interface methods here >
+
     // used internally by public methods writeStartElement() & writeElement()
     //   to share the common logic of writing the bulk of the tag
     //   (the difference is in the handling of the end-of-line/end-of-tag)
@@ -128,6 +135,9 @@ namespace ESMCI{
                      // (char *attrName, char *attrValue)
     void destruct();
 
+    // replace special characters to XML entities to prevent malformed XML
+    int replaceXMLEntities(std::string& str);
+
     // friend function to allocate and initialize IO_XML object from heap
     friend IO_XML *ESMCI_IO_XMLCreate(int, const char*, int, const char*,
                                       Attribute*, int*);
@@ -137,12 +147,6 @@ namespace ESMCI{
 
     // friend function to de-allocate IO_XML
     friend int ESMCI_IO_XMLDestroy(IO_XML**);
-
-// !PRIVATE MEMBER FUNCTIONS:
-//
-  private:
-//
- // < declare private interface methods here >
 
 //
 //EOP
