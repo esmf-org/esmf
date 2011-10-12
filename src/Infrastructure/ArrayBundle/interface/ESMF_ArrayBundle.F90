@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.76.2.1 2011/09/03 00:02:58 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.76.2.2 2011/10/12 23:32:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.76.2.1 2011/09/03 00:02:58 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.76.2.2 2011/10/12 23:32:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1550,6 +1550,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
 !   \end{sloppypar}
 !
+!   The {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments are optional in
+!   support of the situation where {\tt srcArrayBundle} and/or
+!   {\tt dstArrayBundle} are not defined on all PETs. The {\tt srcArrayBundle}
+!   and {\tt dstArrayBundle} must be specified on those PETs that hold source
+!   or destination DEs, respectively, but may be omitted on all other PETs.
+!   PETs that hold neither source nor destination DEs may omit both arguments.
+!
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
@@ -2344,6 +2351,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Execute a precomputed ArrayBundle sparse matrix multiplication from the
 !   Arrays in {\tt srcArrayBundle} to the Arrays in {\tt dstArrayBundle}.
+!
+!   The {\tt srcArrayBundle} and {\tt dstArrayBundle} arguments are optional in
+!   support of the situation where {\tt srcArrayBundle} and/or
+!   {\tt dstArrayBundle} are not defined on all PETs. The {\tt srcArrayBundle}
+!   and {\tt dstArrayBundle} must be specified on those PETs that hold source
+!   or destination DEs, respectively, but may be omitted on all other PETs.
+!   PETs that hold neither source nor destination DEs may omit both arguments.
 !
 !   This call is {\em collective} across the current VM.
 !

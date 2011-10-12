@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.128.2.1 2011/09/03 00:03:07 theurich Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.128.2.2 2011/10/12 23:32:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.128.2.1 2011/09/03 00:03:07 theurich Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.128.2.2 2011/10/12 23:32:23 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -2285,6 +2285,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source and destination FieldBundles may be of different <type><kind>. Further source 
 ! and destination FieldBundles may differ in shape, however, the number of elements 
 ! must match. 
+!
+! The {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments are optional in support of
+! the situation where {\tt srcFieldBundle} and/or {\tt dstFieldBundle} are not defined on
+! all PETs. The {\tt srcFieldBundle} and {\tt dstFieldBundle} must be specified on those
+! PETs that hold source or destination DEs, respectively, but may be omitted
+! on all other PETs. PETs that hold neither source nor destination DEs may
+! omit both arguments.
 !  
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle 
 ! and dstFieldBundle arguments. 
@@ -4055,6 +4062,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source and destination Fields may be of different <type><kind>. Further source 
 ! and destination Fields may differ in shape, however, the number of elements 
 ! must match. 
+!
+! The {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments are optional in support of
+! the situation where {\tt srcFieldBundle} and/or {\tt dstFieldBundle} are not defined on
+! all PETs. The {\tt srcFieldBundle} and {\tt dstFieldBundle} must be specified on those
+! PETs that hold source or destination DEs, respectively, but may be omitted
+! on all other PETs. PETs that hold neither source nor destination DEs may
+! omit both arguments.
 !  
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle 
 ! and dstFieldBundle arguments. 

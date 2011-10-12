@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.1.2.3 2011/10/12 23:32:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.1.2.3 2011/10/12 23:32:21 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -302,6 +302,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Source and destination Fields may be of different <type><kind>. Further source 
 ! and destination Fields may differ in shape, however, the number of elements 
 ! must match. 
+!
+! The {\tt srcField} and {\tt dstField} arguments are optional in support of
+! the situation where {\tt srcField} and/or {\tt dstField} are not defined on
+! all PETs. The {\tt srcField} and {\tt dstField} must be specified on those
+! PETs that hold source or destination DEs, respectively, but may be omitted
+! on all other PETs. PETs that hold neither source nor destination DEs may
+! omit both arguments.
 !  
 ! It is erroneous to specify the identical Field object for srcField and dstField 
 ! arguments.

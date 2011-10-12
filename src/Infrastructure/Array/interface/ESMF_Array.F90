@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.160.2.1 2011/09/03 00:02:57 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.160.2.2 2011/10/12 23:32:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.160.2.1 2011/09/03 00:02:57 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.160.2.2 2011/10/12 23:32:13 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -556,6 +556,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   This means that the same {\tt routehandle} can be applied to a large class
 !   of similar Arrays that differ in the number of elements in the left most
 !   undistributed dimensions.
+!
+!   The {\tt srcArray} and {\tt dstArray} arguments are optional in support of
+!   the situation where {\tt srcArray} and/or {\tt dstArray} are not defined on
+!   all PETs. The {\tt srcArray} and {\tt dstArray} must be specified on those
+!   PETs that hold source or destination DEs, respectively, but may be omitted
+!   on all other PETs. PETs that hold neither source nor destination DEs may
+!   omit both arguments.
 !
 !   It is erroneous to specify the identical Array object for {\tt srcArray} and
 !   {\tt dstArray} arguments.
