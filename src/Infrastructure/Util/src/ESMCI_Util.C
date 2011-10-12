@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.8.4.1 2011/08/31 23:17:33 theurich Exp $
+// $Id: ESMCI_Util.C,v 1.8.4.2 2011/10/12 23:11:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.8.4.1 2011/08/31 23:17:33 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.8.4.2 2011/10/12 23:11:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -687,6 +687,47 @@ extern "C" {
 
   // copy into caller's string
   guid = GUIDbuf;
+
+  // return ok. 
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FindAndReplaceAll"
+//BOPI
+// !IROUTINE:  ESMC_FindAndReplaceAll - Find and replace all occurrences of a string in a given string with another 
+//
+// !INTERFACE:
+    int ESMC_FindAndReplaceAll(
+//
+// !RETURN VALUE:
+//  returns ESMF_SUCCESS or ESMF_FAILURE.
+// 
+// !ARGUMENTS:
+          string& subjectStr,    // inout - caller's subject string
+    const string& searchStr,     // in    - string to search for in subject str
+    const string& replaceStr) {  // in    - replacement string
+    
+// !DESCRIPTION:
+// Find and replace all occurrences of searchStr within subjectStr with
+// replaceStr.  TODO:  When C++11 STL becomes supported in all our supported
+// compilers/versions, replace with std::tr1::regex_replace() or simply
+// std::regex_replace().
+//EOPI
+
+  int rc;
+
+  // Initialize return code; assume routine not implemented
+  rc = ESMC_RC_NOT_IMPL;
+
+  string::size_type pos = 0;
+  while ((pos = subjectStr.find(searchStr, pos)) != string::npos)
+  {
+    subjectStr.replace(pos, searchStr.size(), replaceStr);
+    pos += replaceStr.size();
+  }
 
   // return ok. 
   rc = ESMF_SUCCESS;
