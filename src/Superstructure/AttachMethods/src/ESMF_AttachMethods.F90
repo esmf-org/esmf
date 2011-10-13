@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.4 2011/05/19 20:10:57 svasquez Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.5 2011/10/13 20:21:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.4 2011/05/19 20:10:57 svasquez Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.5 2011/10/13 20:21:31 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -130,6 +130,14 @@ module ESMF_AttachMethodsMod
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
+!
+! The caller must supply a subroutine with the exact interface 
+! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+! must not be declared as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -500,6 +508,14 @@ module ESMF_AttachMethodsMod
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
+!
+! The caller must supply a subroutine with the exact interface 
+! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+! must not be declared as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 !EOP
 !------------------------------------------------------------------------------
