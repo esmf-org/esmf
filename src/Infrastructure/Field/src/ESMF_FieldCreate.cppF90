@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.118 2011/07/11 21:57:33 svasquez Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.118.2.1 2011/10/13 21:10:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.118 2011/07/11 21:57:33 svasquez Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.118.2.1 2011/10/13 21:10:24 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -3153,7 +3153,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
 ! associated documentation using this method see section 
-! \ref{sec:field:usage:create_grid_tkr}.
+! \ref{sec:field:usage:create_mesh_tkr}.
 ! 
 ! The arguments are:
 ! \begin{description}
@@ -3290,7 +3290,8 @@ end function ESMF_FieldCreateMeshTKR
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}. For an example and
 ! associated documentation using this method see section 
-! \ref{sec:field:usage:create_grid_arrayspec}.
+! \ref{sec:field:usage:create_mesh_arrayspec} and
+! \ref{sec:field:usage:createMeshArrayspecOpt}.
 ! 
 ! The arguments are:
 ! \begin{description}
@@ -3414,7 +3415,7 @@ end function ESMF_FieldCreateMeshTKR
 ! assumes the data exists already and is being
 ! passed in through an {\tt ESMF\_Array}.  For an example and
 ! associated documentation using this method see section 
-! \ref{sec:field:usage:create_grid_array}.
+! \ref{sec:field:usage:create_mesh_array}.
 ! 
 ! The arguments are:
 ! \begin{description}
