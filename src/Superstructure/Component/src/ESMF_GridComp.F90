@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.185 2011/09/13 00:34:31 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.186 2011/10/13 20:16:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.185 2011/09/13 00:34:31 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.186 2011/10/13 20:16:05 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1613,6 +1613,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The Component writer must supply a subroutine with the exact interface 
 ! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 ! must not be declared as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1740,6 +1744,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The Component writer must supply a subroutine with the exact interface 
 ! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 ! must not be declared as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 ! \begin{sloppypar}
 ! The {\tt userRoutine}, when called by the framework, must make successive calls
@@ -1820,6 +1828,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The Component writer must supply a subroutine with the exact interface 
 ! shown for {\tt userRoutine} below. Arguments must not be declared
 ! as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 ! !INTERFACE:
 !   interface
@@ -1913,6 +1925,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The Component writer must supply a subroutine with the exact interface 
 ! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 ! must not be declared as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 ! The subroutine, when called by the framework, is expected to use any of the
 ! {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
@@ -1990,6 +2006,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The Component writer must supply a subroutine with the exact interface 
 ! shown for {\tt userRoutine} below. Arguments must not be declared
 ! as optional, and the types, intent and order must match.
+! The subroutine must be either a module scope procedure, or an external
+! procedure that has a matching interface block specified for it.
+! It must not be an internal procedure which is contained
+! within another procedure.
 !
 ! !INTERFACE:
 !   interface
