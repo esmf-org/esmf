@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.11.2.2 2011/08/19 19:05:10 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.11.2.3 2011/10/13 02:48:58 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -19,12 +19,15 @@ module NUOPC_DriverExplicit
   public routine_AddRunElement, routine_DeallocateRunSequence
   public type_InternalState, type_InternalStateStruct, type_RunElement
   public label_InternalState
-  public label_SetModelCount, label_SetModelServices, label_Finalize
+  public label_SetModelCount, label_SetModelPetLists
+  public label_SetModelServices, label_Finalize
   
   character(*), parameter :: &
     label_InternalState = "DriverExplicit_InternalState"
   character(*), parameter :: &
     label_SetModelCount = "DriverExplicit_SetModelCount"
+  character(*), parameter :: &
+    label_SetModelPetLists = "DriverExplicit_SetModelPetLists"
   character(*), parameter :: &
     label_SetModelServices = "DriverExplicit_SetModelServices"
   character(*), parameter :: &
@@ -32,6 +35,8 @@ module NUOPC_DriverExplicit
     
   type type_InternalStateStruct
     integer                         :: modelCount
+    type(type_PetList),  pointer    :: modelPetLists(:)
+    !--- private members -------------
     type(ESMF_GridComp), pointer    :: modelComp(:)
     type(ESMF_State),    pointer    :: modelIS(:), modelES(:)
     type(ESMF_CplComp),  pointer    :: connectorComp(:,:)
@@ -40,6 +45,10 @@ module NUOPC_DriverExplicit
 
   type type_InternalState
     type(type_InternalStateStruct), pointer :: wrap
+  end type
+  
+  type type_PetList
+    integer, pointer :: petList(:)  ! list that are set here transfer ownership
   end type
   
   type type_RunElement
@@ -96,6 +105,8 @@ module NUOPC_DriverExplicit
     integer                   :: i, j
     character(ESMF_MAXSTR)    :: iString, jString, compName
     type(type_RunElement), pointer  :: runElement
+    integer, pointer          :: l_petList(:)
+    logical                   :: existflag
 
     rc = ESMF_SUCCESS
     
@@ -131,23 +142,46 @@ module NUOPC_DriverExplicit
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! allocate lists inside the internal state according to modelCount
-    allocate(is%wrap%modelComp(is%wrap%modelCount), &
+    allocate(is%wrap%modelPetLists(is%wrap%modelCount), &
+      is%wrap%modelComp(is%wrap%modelCount), &
       is%wrap%modelIS(is%wrap%modelCount), is%wrap%modelES(is%wrap%modelCount),&
       is%wrap%connectorComp(is%wrap%modelCount,is%wrap%modelCount), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
+    ! nullify all of the model petLists
+    do i=1, is%wrap%modelCount
+      nullify(is%wrap%modelPetLists(i)%petList)
+    enddo
+
+    ! SPECIALIZE by calling into optional attached method to set modelPetLists
+    call ESMF_MethodExecute(gcomp, label=label_SetModelPetLists, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! create modelComps and their import and export States + connectorComps
     do i=1, is%wrap%modelCount
-      !TODO: there should be petList members in the internal State that 
-      !TODO: can be specialized and would be used here
       write (iString, *) i
-      is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
-        trim(adjustl(iString)), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
+      
+      l_petList => is%wrap%modelPetLists(i)%petList
+      if (associated(l_petList)) then
+print *, "create model", i, " with petList", l_petList
+        is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
+          trim(adjustl(iString)), petList=l_petList, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      else
+print *, "create model", i, " without petList"
+        is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
+          trim(adjustl(iString)), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      
       is%wrap%modelIS(i) = ESMF_StateCreate(name="modelComp "// &
         trim(adjustl(iString))//" Import State", &
         stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
@@ -160,6 +194,8 @@ module NUOPC_DriverExplicit
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
+      !TODO: need to take into account the petLists for the i,j models
+
       do j=1, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
         write (jString, *) j
