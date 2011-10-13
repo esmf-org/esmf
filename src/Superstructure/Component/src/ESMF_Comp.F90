@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.223 2011/07/01 16:07:45 rokuingh Exp $
+! $Id: ESMF_Comp.F90,v 1.223.2.1 2011/10/13 03:07:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -267,7 +267,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.223 2011/07/01 16:07:45 rokuingh Exp $'
+    '$Id: ESMF_Comp.F90,v 1.223.2.1 2011/10/13 03:07:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1592,8 +1592,16 @@ contains
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
         msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
+    
+    ! ensure that this component's VM wasn't already created
+    if (compp%vm_info /= ESMF_NULL_POINTER) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls cannot be called on components with existing VM", &
         ESMF_CONTEXT, rcTOReturn=rc)
       return
     endif
@@ -1671,8 +1679,16 @@ contains
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
         msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
+    
+    ! ensure that this component's VM wasn't already created
+    if (compp%vm_info /= ESMF_NULL_POINTER) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls cannot be called on components with existing VM", &
         ESMF_CONTEXT, rcTOReturn=rc)
       return
     endif
@@ -1750,8 +1766,16 @@ contains
 
     ! ensure that this is not a child_in_parent_vm plan
     if (compp%contextflag == ESMF_CONTEXT_PARENT_VM) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
         msg="CompSetVM() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
+    
+    ! ensure that this component's VM wasn't already created
+    if (compp%vm_info /= ESMF_NULL_POINTER) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+        msg="CompSetVM() calls cannot be called on components with existing VM", &
         ESMF_CONTEXT, rcTOReturn=rc)
       return
     endif
