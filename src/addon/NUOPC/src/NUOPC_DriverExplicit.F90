@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.15 2011/10/12 22:59:54 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.16 2011/10/13 18:18:27 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -17,7 +17,8 @@ module NUOPC_DriverExplicit
   
   public routine_SetServices
   public routine_AddRunElement, routine_DeallocateRunSequence
-  public type_InternalState, type_InternalStateStruct, type_RunElement
+  public type_InternalState, type_InternalStateStruct
+  public type_PetList, type_RunElement
   public label_InternalState
   public label_SetModelCount, label_SetModelPetLists
   public label_SetModelServices, label_Finalize
