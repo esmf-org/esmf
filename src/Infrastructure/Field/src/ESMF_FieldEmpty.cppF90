@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.28 2011/07/08 22:18:17 svasquez Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.28.2.1 2011/10/13 02:41:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.28 2011/07/08 22:18:17 svasquez Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.28.2.1 2011/10/13 02:41:37 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -1936,6 +1936,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase)   :: geombase @\
     type(ESMF_GridDecompType) :: decompType @\
     type(ESMF_Logical) :: linkChange @\
+    type(ESMF_FieldStatus_Flag)         :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -1945,6 +1946,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, grid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
@@ -2126,6 +2139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GeomBase)            :: geombase @\
     type(ESMF_GridDecompType)      :: decompType @\
     type(ESMF_Logical)             :: linkChange @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -2135,6 +2149,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, grid, farrayPtr are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     call ESMF_GridGetDecompType(grid, decompType, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, &   @\
@@ -2306,6 +2332,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -2315,6 +2342,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, locstream, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit,locstream,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2426,6 +2465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -2435,6 +2475,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, locstream, farrayPtr are properly initialized @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocStreamGetInit,locstream,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     geombase=ESMF_GeomBaseCreate(locstream,rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2579,6 +2631,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -2588,6 +2641,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, mesh, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2707,6 +2772,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -2716,6 +2782,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, mesh, farrayPtr are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     geombase=ESMF_GeomBaseCreate(mesh,meshloc, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2864,6 +2942,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -2873,6 +2952,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, xgrid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     geombase=ESMF_GeomBaseCreate(xgrid,xgridSide, gridIndex, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -2997,6 +3088,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! local variables @\
     integer                        :: localrc  @\
     type(ESMF_GeomBase)   :: geombase @\
+    type(ESMF_FieldStatus_Flag)    :: status @\
 @\
     if (present(rc)) then @\
       rc = ESMF_RC_NOT_IMPL @\
@@ -3006,6 +3098,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! make sure field, xgrid, farrayPtr are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc) @\
+@\
+    call ESMF_FieldGet(field, status=status, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, &   @\
+        ESMF_ERR_PASSTHRU, &   @\
+        ESMF_CONTEXT, rcToReturn=rc)) return   @\
+@\
+    if(status /= ESMF_FIELDSTATUS_EMPTY) then @\
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+        msg="- can only use this ESMF_FieldEmptyComplete with empty Field", & @\
+        ESMF_CONTEXT, rcToReturn=rc)  @\
+      return @\
+    endif @\
 @\
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
@@ -3194,14 +3298,6 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXGPtr)
     ! make sure field, grid, farray are properly initialized @\
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP(ESMF_GeomBaseGetInit,geombase,rc) @\
-@\
-    ! make sure the input field has a EMPTY status @\
-    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &   @\
-             msg="- input Field must be empty", &  @\
-               ESMF_CONTEXT, rcToReturn=rc) @\
-        return @\
-    endif @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\
@@ -3719,14 +3815,6 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGB)
     ! make sure field, grid, farrayPtr are properly initialized @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit,field,rc) @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GeomBaseGetInit,geombase,rc) @\
-@\
-    ! make sure the input field has a EMPTY status @\
-    if(field%ftypep%status /= ESMF_FIELDSTATUS_EMPTY) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &   @\
-             msg="- input Field must be empty", &  @\
-               ESMF_CONTEXT, rcToReturn=rc) @\
-        return @\
-    endif @\
 @\
     ! Get number of grid dimensions, number @\
     ! of distributed grid dimensions, distgrid, @\
