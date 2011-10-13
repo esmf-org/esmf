@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.159.2.1 2011/09/03 00:03:20 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.159.2.2 2011/10/13 03:02:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.159.2.1 2011/09/03 00:03:20 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.159.2.2 2011/10/13 03:02:58 theurich Exp $'
 
 !==============================================================================
 !
@@ -1435,8 +1435,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompSetEntryPoint - Set user routine as entry point for standard Component method
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompSetEntryPoint(cplcomp, methodflag, userRoutine, &
-     keywordEnforcer, phase, rc)
+  recursive subroutine ESMF_CplCompSetEntryPoint(cplcomp, methodflag, &
+    userRoutine, keywordEnforcer, phase, rc)
 
 ! !ARGUMENTS:
     type(ESMF_CplComp),     intent(inout)         :: cplcomp
@@ -1508,9 +1508,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     call c_ESMC_SetEntryPoint(cplcomp, methodflag, userRoutine, phaseArg, &
       localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+!TODO: back in once thread-safe    if (ESMF_LogFoundError(localrc, &
+!TODO: back in once thread-safe      ESMF_ERR_PASSTHRU, &
+!TODO: back in once thread-safe      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
