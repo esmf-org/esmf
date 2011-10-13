@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.83 2011/07/11 22:04:58 svasquez Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.83.2.1 2011/10/13 21:14:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.83 2011/07/11 22:04:58 svasquez Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.83.2.1 2011/10/13 21:14:17 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -132,6 +132,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in the Grids upon which the Fields are built are
 !   in degrees.  
 !   \end{sloppypar}
+!
+!   The {\tt srcField} and {\tt dstField} arguments are optional in support of
+!   the situation where {\tt srcField} and/or {\tt dstField} are not defined on
+!   all PETs. The {\tt srcField} and {\tt dstField} must be specified on those
+!   PETs that hold source or destination DEs, respectively, but may be omitted
+!   on all other PETs. PETs that hold neither source nor destination DEs may
+!   omit both arguments.
 !
 !   It is erroneous to specify the identical Field object for {\tt srcField} and
 !   {\tt dstField} arguments.
