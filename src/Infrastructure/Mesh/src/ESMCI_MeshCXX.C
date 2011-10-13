@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.21 2011/10/13 16:57:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.21 2011/10/13 16:57:29 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -89,6 +89,12 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
     (meshp)->set_spatial_dimension(sdim);
 
     (meshCXXp)->meshPointer = meshp;
+
+    // set the number of nodes and elements
+    ThrowAssert(meshp->num_elems() == 0);
+    meshCXXp->numLElements = meshp->num_elems();
+    ThrowAssert(meshp->num_nodes() == 0);
+    meshCXXp->numLNodes = meshp->num_nodes();
 
     //cerr << "MeshCXX::create(): meshp = " << meshp;
     //cerr << ".  Setting meshFreed to 0."  << endl;
