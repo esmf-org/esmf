@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.44.2.4 2011/09/26 18:29:18 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.44.2.5 2011/10/13 04:00:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -340,6 +340,9 @@ program ESMF_RegridWeightGen
         endif
         if (ignoreUnmapped) then
 	       print *, "  Ignore unmapped destination points"
+        endif
+	if (largeFileFlag) then
+	       print *, "  Output weight file in 64bit offset NetCDF file format"
         endif
         write(*,*)
 
