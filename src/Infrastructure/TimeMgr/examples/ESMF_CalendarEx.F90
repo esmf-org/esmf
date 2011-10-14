@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.48 2011/10/14 14:37:43 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.49 2011/10/14 17:50:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -139,7 +139,7 @@
 !BOE
 !\subsubsection{Add a time interval to a time on a Calendar}
 
-! This example shows how to increment a time using an custom {\tt ESMF\_Calendar}.
+! This example shows how to increment a time using a custom {\tt ESMF\_Calendar}.
 !EOE
 
 !BOC
