@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.67 2011/10/14 05:58:55 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.68 2011/10/14 14:37:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.67 2011/10/14 05:58:55 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.68 2011/10/14 14:37:45 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1775,7 +1775,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing ESMF_TimeOperator(+)(time, timestep)
-      write(name, *) "Mars Calendar Interval increment yy=0 by 1 sol Test"
+      write(name, *) "Mars Calendar Interval increment yy=0 by 40 sols Test"
       write(failMsg, *) " Did not return yy=0, s=3,551,000 or ESMF_SUCCESS"
       startTime = startTime + timeStep  ! exercise Time + operator
       call ESMF_TimeGet(startTime, yy=YY, s=S, rc=rc) ! S bounded by YY; seconds
@@ -1817,7 +1817,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Testing ESMF_TimeGet() sols (solar days) for Mars calendar
-      write(name, *) "Mars Calendar Time Get sols (solar days)"
+      write(name, *) "Mars Calendar Time Get sols (solar days) and seconds"
       write(failMsg, *) " Did not return sols=708, sols_r8=708.592092368347d0, S=52563 or ESMF_SUCCESS"
       call ESMF_TimeGet(startTime, d=sols, d_r8=sols_r8, s=S, rc=rc)
                                                          ! S bounded by sols;
@@ -1878,9 +1878,9 @@
       write(name, *) "Set Time at arbitrary Mars solar year 4 + 668.5921 sols"
       call ESMF_TimeSet(startTime, yy=4, d_r8=668.5921d0, &
                         calendar=marsCalendar, rc=rc)
-      call ESMF_TimePrint(startTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimePrint(startTime, rc=rc)
       
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -2102,6 +2102,15 @@
       call ESMF_Test((MM==8 .and. DD==45 .and. YY==99 .and. &
                       rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !print *, "MM/DD/YY = ", MM, "/", DD, "/", YY
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing ESMF_CalendarSet() for Custom calendar
+      write(name, *) "Test CalendarSet() daysPerMonth array for Custom calendar"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_CalendarSet(customCalendar, daysPerMonth=days_per_month, rc=rc)
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarPrint(customCalendar, rc=rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest

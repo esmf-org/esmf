@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.144 2011/10/14 05:58:51 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.145 2011/10/14 14:37:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.144 2011/10/14 05:58:51 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.145 2011/10/14 14:37:52 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -1053,8 +1053,8 @@
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns {\tt .true.} if the given year is a leap year within the given
-!     calendar, and {\tt .false.} otherwise.  Custom calendars are not yet 
-!     fully supported, so {\tt .false.} will always be returned in this case;
+!     calendar, and {\tt .false.} otherwise.  Custom calendars do not define
+!     leap years, so {\tt .false.} will always be returned in this case;
 !     see Section ~\ref{subsec:Calendar_rest}.
 !     See also {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
@@ -1097,8 +1097,8 @@
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns {\tt .true.} if the given year is a leap year within the given
-!     calendar, and {\tt .false.} otherwise.  Custom calendars are not yet 
-!     fully supported, so {\tt .false.} will always be returned in this case;
+!     calendar, and {\tt .false.} otherwise.  Custom calendars do not define
+!     leap years, so {\tt .false.} will always be returned in this case;
 !     see Section ~\ref{subsec:Calendar_rest}.
 !     See also {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
@@ -1162,8 +1162,8 @@
 ! !DESCRIPTION:
 !     \begin{sloppypar}
 !     Returns {\tt .true.} if the given year is a leap year within the given
-!     calendar, and {\tt .false.} otherwise.  Custom calendars are not yet 
-!     fully supported, so {\tt .false.} will always be returned in this case;
+!     calendar, and {\tt .false.} otherwise.  Custom calendars do not define
+!     leap years, so {\tt .false.} will always be returned in this case;
 !     see Section ~\ref{subsec:Calendar_rest}.
 !     See also {\tt ESMF\_TimeIsLeapYear()}.
 !     \end{sloppypar}
@@ -1439,7 +1439,7 @@
 !          size of the array.  If unspecified, months per year = 0,
 !          with the days array undefined.
 !     \item[{[secondsPerDay]}]
-!          Integer number of seconds per day.  Defaults to 86400 if not 
+!          Integer number of seconds per day.  Defaults to 0 if not 
 !          specified.
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and

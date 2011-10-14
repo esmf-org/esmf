@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.h,v 1.8 2011/10/14 05:58:56 eschwab Exp $
+// $Id: ESMCI_Fraction.h,v 1.9 2011/10/14 14:37:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,6 +104,9 @@ class Fraction
     Fraction& operator-=(const Fraction &);
 
     // multiplication methods
+    // TODO: implement commutative operator* version:
+    //   friend Fraction operator*(ESMC_I4 multiplier, const Fraction&);
+    //   e.g. multiplier * Fraction
     Fraction  operator* (ESMC_I4 multiplier) const;
     Fraction& operator*=(ESMC_I4 multiplier);
 
@@ -133,8 +136,9 @@ class Fraction
     Fraction(ESMC_I8 w_in, ESMC_I8 n_in=0, ESMC_I8 d_in=1);
     Fraction(ESMC_R8 r);
     ~Fraction(void);
-    // TODO: virtual destructor causes failures on at least
-    //   Bluefire/XLF 12.1.0.8
+    // TODO: virtual destructor causes many failures using a 
+    //   Bluefire/XLF 12.1.0.8 Fortran main.
+    //   (may happen with other F90 compilers too).
     // virtual ~Fraction(void);
 
  // < declare the rest of the public interface methods here >

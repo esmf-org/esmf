@@ -1,4 +1,4 @@
-% $Id: Calendar_rest.tex,v 1.8 2011/10/14 05:58:46 eschwab Exp $
+% $Id: Calendar_rest.tex,v 1.9 2011/10/14 14:37:53 eschwab Exp $
 
 \label{subsec:Calendar_rest}
 
@@ -8,7 +8,6 @@
 
 \item {\bf Calendar date conversions.} Date conversions are currently defined between the Gregorian, Julian, Julian Day, and Modified Julian Day calendars. Further research and work would need to be done to determine conversion algorithms with and between the other calendars:  No Leap, 360 Day, and Custom.
 
-\item {\bf ESMF\_CALKIND\_CUSTOM.} Currently, there is no provision for a custom calendar to define a leap year rule, so {\tt ESMF\_CalendarIsLeapYear()} will always return {\tt .false.} in this case.  However, the arguments daysPerYear,
-daysPerYearDn, daysPerYearDd in ESMF\_CalendarCreate() and ESMF\_CalendarSet() can be used to set a fractional days per year, for example, 365.25.
+\item {\bf ESMF\_CALKIND\_CUSTOM.} Currently, there is no provision for a custom calendar to define a leap year rule, so {\tt ESMF\_CalendarIsLeapYear()} will always return {\tt .false.} in this case.  However, the arguments {\tt daysPerYear}, {\tt daysPerYearDn}, and {\tt daysPerYearDd} in {\tt ESMF\_CalendarCreate()} and {\tt ESMF\_CalendarSet()} can be used to set a fractional number of days per year, for example, 365.25 = 365 25/100.  Also, if further timekeeping precision is required, fractional and/or floating point {\tt secondsPerDay} and {\tt secondsPerYear} could be added to the interfaces {\tt ESMF\_CalendarCreate()}, {\tt ESMF\_CalendarSet()}, and {\tt ESMF\_CalendarGet()} and implemented.
 
 \end{enumerate}

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.47 2011/10/14 05:58:48 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.48 2011/10/14 14:37:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
       type(ESMF_Calendar) :: marsCalendar
 
       ! local variables for Get methods
-      integer :: D
+      integer :: sols
       integer(ESMF_KIND_I8) :: dl
       type(ESMF_Time) :: time, marsTime
       type(ESMF_TimeInterval) :: marsTimeStep
@@ -78,8 +78,12 @@
 
 !BOC
       ! create a Custom calendar for the planet Mars
-      marsCalendar = ESMF_CalendarCreate(secondsPerDay=88775, & ! 1 Sol
-                                         daysPerYear=668, & ! 668.5921 Sols/year
+      ! 1 Mars solar day = 24 hours, 39 minutes, 35 seconds = 88775 seconds
+      ! 1 Mars solar year = 668.5921 Mars solar days = 668 5921/10000 sols/year
+      ! http://www.giss.nasa.gov/research/briefs/allison_02
+      ! http://www.giss.nasa.gov/tools/mars24/help/notes.html
+      marsCalendar = ESMF_CalendarCreate(secondsPerDay=88775, &
+                                         daysPerYear=668, &
                                          daysPerYearDn=5921, &
                                          daysPerYearDd=10000, &
                                          name="MarsCalendar", rc=rc)
@@ -135,7 +139,7 @@
 !BOE
 !\subsubsection{Add a time interval to a time on a Calendar}
 
-! This example shows how to increment a time using an {\tt ESMF\_Calendar}.
+! This example shows how to increment a time using an custom {\tt ESMF\_Calendar}.
 !EOE
 
 !BOC
@@ -162,7 +166,8 @@
 
 !BOC
       ! Get the result in sols (2774 = (3+1)*668.5921 + 100)
-      call ESMF_TimeGet(marsTime, d=D, rc=rc)
+      call ESMF_TimeGet(marsTime, d=sols, rc=rc)
+      print *, "For Mars, 3 solar years, 100 sols + 1 solar year = ", sols, "sols."
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -170,7 +175,7 @@
 !BOE
 !\subsubsection{Calendar destruction}
 
-! This example shows how to destroy two {\tt ESMF\_Calendars}.
+! This example shows how to destroy three {\tt ESMF\_Calendars}.
 !EOE
 
 !BOC
