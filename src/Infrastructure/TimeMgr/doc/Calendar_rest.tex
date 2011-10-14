@@ -1,4 +1,4 @@
-% $Id: Calendar_rest.tex,v 1.7 2011/10/04 05:35:31 eschwab Exp $
+% $Id: Calendar_rest.tex,v 1.8 2011/10/14 05:58:46 eschwab Exp $
 
 \label{subsec:Calendar_rest}
 
@@ -6,6 +6,9 @@
 
 \item {\bf Months per year set to 12.} Due to the requirement of only Earth modeling, the number of months per year is hard-coded at 12.  However, for easy modification, this is implemented via a C preprocessor \#define MONTHS\_PER\_YEAR in ESMCI\_Calendar.h.
 
-\item {\bf ESMF\_CALKIND\_CUSTOM partially implemented.} Currently, a user-defined calendar can be created, but no operations with an {\tt ESMF\_Time} or {\tt ESMF\_TimeInterval} are supported.  Most notably, performing an {\tt ESMF\_TimeSet()} and time-stepping via {\tt ESMF\_ClockAdvance()} using a custom calendar are not currently supported.  Also, there is no provision for a custom calendar to define a leap year rule, so {\tt ESMF\_CalendarIsLeapYear()} will always return {\tt .false.} in this case.
+\item {\bf Calendar date conversions.} Date conversions are currently defined between the Gregorian, Julian, Julian Day, and Modified Julian Day calendars. Further research and work would need to be done to determine conversion algorithms with and between the other calendars:  No Leap, 360 Day, and Custom.
+
+\item {\bf ESMF\_CALKIND\_CUSTOM.} Currently, there is no provision for a custom calendar to define a leap year rule, so {\tt ESMF\_CalendarIsLeapYear()} will always return {\tt .false.} in this case.  However, the arguments daysPerYear,
+daysPerYearDn, daysPerYearDd in ESMF\_CalendarCreate() and ESMF\_CalendarSet() can be used to set a fractional days per year, for example, 365.25.
 
 \end{enumerate}

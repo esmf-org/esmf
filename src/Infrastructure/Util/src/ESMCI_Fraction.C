@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_Fraction.C,v 1.11 2011/10/14 05:58:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:05:46 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Fraction.C,v 1.11 2011/10/14 05:58:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about
@@ -734,9 +734,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
     Fraction f1 = *this;
     Fraction f2 = fraction;
 
-    // ensure proper fractions
-    f1.simplify();
-    f2.simplify();
+    // ensure proper fractions; check for divide-by-zero
+    if (f1.simplify() == ESMC_RC_DIV_ZERO ||
+        f2.simplify() == ESMC_RC_DIV_ZERO) {
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
+                                 ESMC_NULL_POINTER);
+      return false;
+    }
 
     // put both fractions on the same denominator, then compare
     ESMC_I8 lcm = ESMCI_FractionLCM(f1.d, f2.d);
@@ -771,9 +775,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
     Fraction f1 = *this;
     Fraction f2 = fraction;
 
-    // put both fractions on the same denominator, then compare
-    f1.simplify();
-    f2.simplify();
+    // ensure proper fractions; check for divide-by-zero
+    if (f1.simplify() == ESMC_RC_DIV_ZERO ||
+        f2.simplify() == ESMC_RC_DIV_ZERO) {
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
+                                 ESMC_NULL_POINTER);
+      return true;
+    }
 
     // put both fractions on the same denominator, then compare
     ESMC_I8 lcm = ESMCI_FractionLCM(f1.d, f2.d);
@@ -808,9 +816,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
     Fraction f1 = *this;
     Fraction f2 = fraction;
 
-    // ensure proper fractions
-    f1.simplify();
-    f2.simplify();
+    // ensure proper fractions; check for divide-by-zero
+    if (f1.simplify() == ESMC_RC_DIV_ZERO ||
+        f2.simplify() == ESMC_RC_DIV_ZERO) {
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
+                                 ESMC_NULL_POINTER);
+      return false;
+    }
 
     // ignore fractional part if whole parts are different
     if (f1.w != f2.w) return(f1.w < f2.w);
@@ -849,9 +861,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
     Fraction f1 = *this;
     Fraction f2 = fraction;
 
-    // ensure proper fractions
-    f1.simplify();
-    f2.simplify();
+    // ensure proper fractions; check for divide-by-zero
+    if (f1.simplify() == ESMC_RC_DIV_ZERO ||
+        f2.simplify() == ESMC_RC_DIV_ZERO) {
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
+                                 ESMC_NULL_POINTER);
+      return false;
+    }
 
     // ignore fractional part if whole parts are different
     if (f1.w != f2.w) return(f1.w > f2.w);
@@ -942,6 +958,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::Fraction::operator+()"
 
+    // check for divide-by-zero
+    if (d == 0 || fraction.d == 0) {
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
+                                 ESMC_NULL_POINTER);
+      return(Fraction(0,0,1));
+    }
+
     Fraction sum;
 
     // fractional part addition
@@ -981,6 +1004,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::Fraction::operator-()"
 
+    // check for divide-by-zero
+    if (d == 0 || fraction.d == 0) {
+      ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
+                                 ESMC_NULL_POINTER);
+      return(Fraction(0,0,1));
+    }
+
     Fraction diff;
 
     // fractional part subtraction
@@ -990,7 +1020,7 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
     // whole part subtraction 
     diff.w = w - fraction.w;
 
-   // ensure simplified form
+    // ensure simplified form
     diff.simplify();
 
     return(diff);
@@ -1180,7 +1210,7 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
       quotient += Fraction(0, remainder, (ESMC_I8) divisor);
     }
 
-   // ensure simplified form
+    // ensure simplified form
     quotient.simplify();
 
     return(quotient);
@@ -1244,7 +1274,7 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
         fraction.w * fraction.d + fraction.n == 0) {
       ESMC_LogDefault.FoundError(ESMC_RC_DIV_ZERO, ESMC_CONTEXT,
                                  ESMC_NULL_POINTER);
-      return(ESMC_RC_DIV_ZERO);
+      return(0.0);
     }
 
     ESMC_R8 quotient = 
@@ -1312,7 +1342,7 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
       }
     }
 
-   // ensure simplified form
+    // ensure simplified form
     remainder.simplify();
 
     return(remainder);
@@ -1458,10 +1488,10 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  Fraction - native default C++ constructor
+// !IROUTINE:  Fraction - default C++ constructor
 //
 // !INTERFACE:
-      Fraction::Fraction(void) {
+      Fraction::Fraction(void) :
 //
 // !RETURN VALUE:
 //    none
@@ -1476,17 +1506,17 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::Fraction::Fraction(void) constructor"
+ #define ESMC_METHOD "ESMCI::Fraction::Fraction(void) default constructor"
 
-   w = 0;
-   n = 0;
-   d = 1;  // to prevent divide-by-zero
+   w(0),
+   n(0),
+   d(1) {  // to prevent divide-by-zero
 
  }  // end Fraction
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  Fraction - native C++ constructor
+// !IROUTINE:  Fraction - copy C++ constructor
 //
 // !INTERFACE:
       Fraction::Fraction(
@@ -1495,9 +1525,37 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
 //    none
 //
 // !ARGUMENTS:
-      ESMC_I8 w,   // Integer (whole) seconds (signed)
-      ESMC_I8 n,   // Integer fraction (exact) n/d; numerator (signed)
-      ESMC_I8 d) { // Integer fraction (exact) n/d; denominator
+      const Fraction &fraction) :   // in - Fraction
+//
+// !DESCRIPTION:
+//      Initializes a {\tt Fraction} with defaults
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::Fraction::Fraction(Fraction&) copy constructor"
+
+   w(fraction.w),
+   n(fraction.n),
+   d(fraction.d) {
+
+ }  // end Fraction
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  Fraction - C++ constructor
+//
+// !INTERFACE:
+      Fraction::Fraction(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      ESMC_I8 w_in,   // Integer (whole) seconds (signed)
+      ESMC_I8 n_in,   // Integer fraction (exact) n/d; numerator (signed)
+      ESMC_I8 d_in) : // Integer fraction (exact) n/d; denominator
 
 // !DESCRIPTION:
 //      Initializes a {\tt Fraction} with given values
@@ -1508,12 +1566,9 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMCI::Fraction::Fraction(w,n,d) constructor"
 
- // Initialize return code
- int rc = ESMC_RC_NOT_IMPL;
-
-   this->w = w;
-   this->n = n;
-   this->d = d;
+   w(w_in),
+   n(n_in),
+   d(d_in) {
 
    // ensure simplified form
    simplify();
@@ -1523,7 +1578,7 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  Fraction - native C++ constructor
+// !IROUTINE:  Fraction - C++ constructor
 //
 // !INTERFACE:
       Fraction::Fraction(
@@ -1544,12 +1599,13 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.10 2011/01/05 20:0
  #define ESMC_METHOD "ESMCI::Fraction::Fraction(r) constructor"
 
    setr(r);
+   // TODO:  throw exception if setr() returns ESMF_FAILURE
 
  }  // end Fraction
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~Fraction - native default C++ destructor
+// !IROUTINE:  ~Fraction - default C++ destructor
 //
 // !INTERFACE:
       Fraction::~Fraction(void) {

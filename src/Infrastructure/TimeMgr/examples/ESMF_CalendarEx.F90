@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.46 2011/06/30 05:59:23 theurich Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.47 2011/10/14 05:58:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -30,10 +30,13 @@
       ! instantiate calendars
       type(ESMF_Calendar) :: gregorianCalendar
       type(ESMF_Calendar) :: julianDayCalendar
+      type(ESMF_Calendar) :: marsCalendar
 
       ! local variables for Get methods
+      integer :: D
       integer(ESMF_KIND_I8) :: dl
-      type(ESMF_Time) :: time
+      type(ESMF_Time) :: time, marsTime
+      type(ESMF_TimeInterval) :: marsTimeStep
 
       ! return code
       integer:: rc
@@ -54,7 +57,7 @@
 !BOE
 !\subsubsection{Calendar creation}
 
-! This example shows how to create two {\tt ESMF\_Calendars}.
+! This example shows how to create three {\tt ESMF\_Calendars}.
 !EOE
 
 !BOC
@@ -69,6 +72,17 @@
       ! create a Julian Day calendar
       julianDayCalendar = ESMF_CalendarCreate(ESMF_CALKIND_JULIANDAY, &
                                               name="JulianDay", rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! create a Custom calendar for the planet Mars
+      marsCalendar = ESMF_CalendarCreate(secondsPerDay=88775, & ! 1 Sol
+                                         daysPerYear=668, & ! 668.5921 Sols/year
+                                         daysPerYearDn=5921, &
+                                         daysPerYearDd=10000, &
+                                         name="MarsCalendar", rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -119,6 +133,41 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
+!\subsubsection{Add a time interval to a time on a Calendar}
+
+! This example shows how to increment a time using an {\tt ESMF\_Calendar}.
+!EOE
+
+!BOC
+      ! Set a time to Mars solar year 3, sol 100
+      call ESMF_TimeSet(marsTime, yy=3, d=100, &
+                        calendar=marsCalendar, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! Set a 1 solar year time step
+      call ESMF_TimeIntervalSet(marsTimeStep, yy=1, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! Perform the increment
+      marsTime = marsTime + marsTimeStep
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! Get the result in sols (2774 = (3+1)*668.5921 + 100)
+      call ESMF_TimeGet(marsTime, d=D, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOE
 !\subsubsection{Calendar destruction}
 
 ! This example shows how to destroy two {\tt ESMF\_Calendars}.
@@ -132,6 +181,12 @@
 
 !BOC
       call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      call ESMF_CalendarDestroy(marsCalendar, rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-// $Id: ESMCI_TimeInterval.C,v 1.21 2011/06/16 05:56:49 eschwab Exp $
+// $Id: ESMCI_TimeInterval.C,v 1.22 2011/10/14 05:58:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.21 2011/06/16 05:56:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_TimeInterval.C,v 1.22 2011/10/14 05:58:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -688,7 +688,7 @@ namespace ESMCI{
                   tiToConvert.mm <= -tiToConvert.calendar->monthsPerYear) &&
                   tiToConvert.mm  %  tiToConvert.calendar->monthsPerYear == 0) {
               days += (tiToConvert.mm / tiToConvert.calendar->monthsPerYear) *
-                                     tiToConvert.calendar->daysPerYear.d;
+                                     tiToConvert.calendar->daysPerYear.getw();
               tiToConvert.mm = 0;
             } else {
               // can't do

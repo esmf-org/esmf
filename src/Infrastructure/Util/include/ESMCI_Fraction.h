@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.h,v 1.7 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_Fraction.h,v 1.8 2011/10/14 05:58:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -128,10 +128,14 @@ class Fraction
     int print(const char *options=0) const;
 
     // native C++ constructor/destructors
-    Fraction(void);
-    Fraction(ESMC_I8 w, ESMC_I8 n=0, ESMC_I8 d=1);
+    Fraction(void);             // default
+    Fraction(const Fraction &); // copy
+    Fraction(ESMC_I8 w_in, ESMC_I8 n_in=0, ESMC_I8 d_in=1);
     Fraction(ESMC_R8 r);
     ~Fraction(void);
+    // TODO: virtual destructor causes failures on at least
+    //   Bluefire/XLF 12.1.0.8
+    // virtual ~Fraction(void);
 
  // < declare the rest of the public interface methods here >
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time.C,v 1.18 2011/06/16 05:56:49 eschwab Exp $"
+// $Id: ESMCI_Time.C,v 1.19 2011/10/14 05:58:53 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Time.C,v 1.18 2011/06/16 05:56:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMCI_Time.C,v 1.19 2011/10/14 05:58:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -110,7 +110,7 @@ namespace ESMCI{
     // if any time value is specified, initialize core values first;
     // user is specifying a complete time and not relying on any past settings.
     // (if only calendar or timezone is specified, don't initialize, but do
-    //  validate calendar and/or timezone)
+    //  validate basetime, calendar and/or timezone)
     // (this if-else logic avoids the need for a separate Time::setup()
     //  method)
 
@@ -142,7 +142,14 @@ namespace ESMCI{
     } else if (calendar     != ESMC_NULL_POINTER ||
                calkindflag  != ESMC_NULL_POINTER ||
                timeZone     != ESMC_NULL_POINTER) {
-      // only calendar and/or timezone specified
+      // only calendar and/or timezone specified, do not re-initialize basetime
+
+      // initialize basetime only if not done previously 
+      if (BaseTime::validate() != ESMF_SUCCESS) {
+        Fraction::set(0,0,1);  // set seconds = 0
+                               // set fractional seconds numerator = 0
+                               // set fractional seconds denominator = 1
+      }
 
       // TODO: ? validate calendar conversions? 
       // Allow  Gregorian <-> Julian Day <-> Julian (triangular paths)
@@ -223,12 +230,57 @@ namespace ESMCI{
 
     // TODO: Timezone adjust
 
-    // convert date to base time according to calendar kind
-    // TODO: create two calendar conversion method entry points ?
+    // convert date to base time according to calendar date style:
+    //  yy/d (planet), yy/mm/dd (Earth), or d (Earth or planet)
 
-    // is a yy/mm/dd style date specified?
-    if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
-        mm != ESMC_NULL_POINTER || dd    != ESMC_NULL_POINTER) {
+    // TODO: create two (or more) calendar conversion method entry points ?
+
+    // is a yy/d style date specified (planet)?
+    if ((yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) && 
+         (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) &&
+          mm == ESMC_NULL_POINTER && dd == ESMC_NULL_POINTER) {
+
+      // calendar required
+      if (this->calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                              ", calendar required.", &rc);
+        *this = saveTime; return(rc);
+      }
+
+      // use only one specified year (yy and yy_i8 are mutually exclusive)
+      ESMC_I8 argYY = (yy != ESMC_NULL_POINTER) ? *yy : *yy_i8;
+      
+      // use only one specified day count (d and d_i8 are mutually exclusive)
+      ESMC_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
+
+      // do the conversion
+      rc = this->calendar->convertToTime(argYY, 0, 0, argD, 0.0, this);
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
+
+    // is a yy/d_r8 style date specified (planet) ?
+    } else if ((yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) &&
+                d_r8 != ESMC_NULL_POINTER &&
+                mm == ESMC_NULL_POINTER && dd == ESMC_NULL_POINTER) {
+
+      // calendar required
+      if (this->calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                              ", calendar required.", &rc);
+        *this = saveTime; return(rc);
+      }
+
+      // use only one specified year (yy and yy_i8 are mutually exclusive)
+      ESMC_I8 argYY = (yy != ESMC_NULL_POINTER) ? *yy : *yy_i8;
+      
+      // do the conversion
+      rc = this->calendar->convertToTime(argYY, 0, 0, 0, *d_r8, this);
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
+
+    // is a yy/mm/dd style date specified (Earth) ?
+    } else if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
+               mm != ESMC_NULL_POINTER || dd    != ESMC_NULL_POINTER) {
 
       // calendar required
       if (this->calendar == ESMC_NULL_POINTER) {
@@ -277,7 +329,7 @@ namespace ESMCI{
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
         { *this = saveTime; return(rc); }
 
-    // is a Julian-days style date specified?
+    // is a Julian-days style date specified (Earth or planet) ?
     } else if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
 
       // calendar required
@@ -292,7 +344,9 @@ namespace ESMCI{
       if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
           { *this = saveTime; return(rc); }
 
+    // is a floating-point Julian-days style date specified (Earth or planet) ?
     } else if (d_r8 != ESMC_NULL_POINTER) {
+
       // calendar required
       if (this->calendar == ESMC_NULL_POINTER) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,

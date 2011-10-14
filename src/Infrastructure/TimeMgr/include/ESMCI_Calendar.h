@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.17 2011/06/16 05:56:45 eschwab Exp $
+// $Id: ESMCI_Calendar.h,v 1.18 2011/10/14 05:58:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -68,6 +68,7 @@
 //-------------------------------------------------------------------------
 //  
 // !USES:
+#include "ESMCI_Fraction.h"
 #include "ESMCI_BaseTime.h"       // inherited BaseTime class
 #include "ESMC_Calendar.h"        // for enum ESMC_CalKind_Flag
 
@@ -101,14 +102,12 @@ class Calendar {
     int daysPerMonth[MONTHS_PER_YEAR];
     int monthsPerYear;
 // TODO: make dynamically allocatable with monthsPerYear
-    ESMC_I4 secondsPerDay;
-    ESMC_I4 secondsPerYear;
-    struct daysPerYear_s
-    {
-        ESMC_I4 d;    // integer number of days per year
-        ESMC_I4 dN;   // fractional number of days per year (numerator)
-        ESMC_I4 dD;   //                                    (denominator)
-    } daysPerYear;    // e.g. for Venus, d=0, dN=926, dD=1000
+    ESMC_I4 secondsPerDay;        // TODO:  fractional secondsPerDay  sN/sD
+    ESMC_I4 secondsPerYear;       // TODO:  fractional secondsPerYear yN/yD
+    Fraction daysPerYear; // w: integer number of days per year
+;                         // n: fractional number of days per year (numerator)
+                          // d:                                    (denominator)
+                          // e.g. for Venus, w=0, n=926, d=1000
 
     // array of calendar kind name strings
     static const char *const calkindflagName[CALENDAR_KIND_COUNT];
@@ -132,32 +131,32 @@ class Calendar {
 
     // set built-in calendar kind
     int set(int               nameLen,
-                         const char       *name,    // TODO: default (=0)
-                         ESMC_CalKind_Flag calkindflag);
+            const char       *name,    // TODO: default (=0)
+            ESMC_CalKind_Flag calkindflag);
 
     // set custom calendar kind
     int set(int           nameLen,      
-                         const char   *name=0,
-                         int          *daysPerMonth=0,
-                         int           monthsPerYear=0,
-                         ESMC_I4 *secondsPerDay=0,
-                         ESMC_I4 *daysPerYear=0,
-                         ESMC_I4 *daysPerYearDn=0,
-                         ESMC_I4 *daysPerYearDd=0);
+            const char   *name=0,
+            int          *daysPerMonth=0,
+            int           monthsPerYear=0,
+            ESMC_I4      *secondsPerDay=0,
+            ESMC_I4      *daysPerYear=0,
+            ESMC_I4      *daysPerYearDn=0,
+            ESMC_I4      *daysPerYearDd=0);
 
     // get properties of any calendar kind
     int get(int                nameLen,
-                         int               *tempNameLen,
-                         char              *tempName,
-                         ESMC_CalKind_Flag *calkindflag=0,
-                         int               *daysPerMonth=0,
-                         int                sizeofDaysPerMonth=0,
-                         int               *monthsPerYear=0,
-                         ESMC_I4      *secondsPerDay=0,
-                         ESMC_I4      *secondsPerYear=0,
-                         ESMC_I4      *daysPerYear=0,
-                         ESMC_I4      *daysPerYeardN=0,
-                         ESMC_I4      *daysPerYeardD=0);
+            int               *tempNameLen,
+            char              *tempName,
+            ESMC_CalKind_Flag *calkindflag=0,
+            int               *daysPerMonth=0,
+            int                sizeofDaysPerMonth=0,
+            int               *monthsPerYear=0,
+            ESMC_I4           *secondsPerDay=0,
+            ESMC_I4           *secondsPerYear=0,
+            ESMC_I4           *daysPerYear=0,
+            ESMC_I4           *daysPerYeardN=0,
+            ESMC_I4           *daysPerYeardD=0);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -165,20 +164,15 @@ class Calendar {
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
     int convertToTime(ESMC_I8 yy, int mm, int dd,
-                                   ESMC_I8 d, ESMC_R8 d_r8, BaseTime *t) const;
-    int convertToDate(BaseTime *t,
-                                   ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
-                                   int *mm=0, int *dd=0,
-                                   ESMC_I4 *d=0, ESMC_I8 *d_i8=0,
-                                   ESMC_R8 *d_r8=0) const;
+                      ESMC_I8 d, ESMC_R8 d_r8, BaseTime *t) const;
+    int convertToDate(BaseTime *t, ESMC_I4 *yy=0, ESMC_I8 *yy_i8=0,
+                      int *mm=0, int *dd=0,
+                      ESMC_I4 *d=0, ESMC_I8 *d_i8=0,
+                      ESMC_R8 *d_r8=0) const;
 
-    Time increment(const Time *time,
-                                     const TimeInterval &timeinterval)
-                                     const;
+    Time increment(const Time *time, const TimeInterval &timeinterval) const;
 
-    Time decrement(const Time *time,
-                                     const TimeInterval &timeinterval)
-                                     const;
+    Time decrement(const Time *time, const TimeInterval &timeinterval) const;
 
     bool isLeapYear(ESMC_I8 yy, int *rc=0) const;
 
@@ -202,34 +196,30 @@ class Calendar {
     int validate(const char *options=0) const;
 
     // for testing/debugging
-    int print(const char *options=0, 
-                           const Time *time=0) const;
+    int print(const char *options=0, const Time *time=0) const;
 
     // native C++ constructors/destructors
     Calendar(void);
     Calendar(const Calendar &calendar);  // copy constructor
     Calendar(const char *name, ESMC_CalKind_Flag calkindflag);
     Calendar(const char *name, int *daysPerMonth, int monthsPerYear,
-                  ESMC_I4 *secondsPerDay, ESMC_I4 *daysPerYear,
-                  ESMC_I4 *daysPerYeardN, ESMC_I4 *daysPerYearDd);
+             ESMC_I4 *secondsPerDay, ESMC_I4 *daysPerYear,
+             ESMC_I4 *daysPerYeardN, ESMC_I4 *daysPerYearDd);
     ~Calendar(void);
 
  // < declare the rest of the public interface methods here >
 
     // friend function to allocate and initialize calendar from heap
     friend Calendar *ESMCI_CalendarCreate(int, const char*,
-                                              ESMC_CalKind_Flag, int*);
+                                          ESMC_CalKind_Flag, int*);
 
     // friend function to allocate and initialize internal calendar from heap
     friend int ESMCI_CalendarCreate(ESMC_CalKind_Flag);
 
     // friend function to allocate and initialize custom calendar from heap
-    friend Calendar *ESMCI_CalendarCreate(int, const char*,
-                                              int*, int,
-                                              ESMC_I4*,
-                                              ESMC_I4*,
-                                              ESMC_I4*,
-                                              ESMC_I4*, int*);
+    friend Calendar *ESMCI_CalendarCreate(int, const char*, int*, int,
+                                          ESMC_I4*, ESMC_I4*,
+                                          ESMC_I4*, ESMC_I4*, int*);
 
     // friend function to copy a calendar
     friend Calendar *ESMCI_CalendarCreate(Calendar*, int*);
@@ -267,24 +257,24 @@ class Calendar {
 
     // friend function to allocate and initialize calendar from heap
     Calendar *ESMCI_CalendarCreate(int               nameLen,
-                                       const char       *name=0,
-                                       ESMC_CalKind_Flag calkindflag=
+                                   const char       *name=0,
+                                   ESMC_CalKind_Flag calkindflag=
                                                        ESMC_CALKIND_NOCALENDAR,
-                                       int*              rc=0);
+                                   int*              rc=0);
 
     // friend function to allocate and initialize internal calendar from heap
     int ESMCI_CalendarCreate(ESMC_CalKind_Flag calkindflag);
 
     // friend function to allocate and initialize custom calendar from heap
     Calendar *ESMCI_CalendarCreate(int           nameLen,
-                                       const char   *name=0,
-                                       int          *daysPerMonth=0,
-                                       int           monthsPerYear=0,
-                                       ESMC_I4 *secondsPerDay=0,
-                                       ESMC_I4 *daysPerYear=0,
-                                       ESMC_I4 *daysPerYearDn=0,
-                                       ESMC_I4 *daysPerYearDd=0,
-                                       int          *rc=0);
+                                   const char   *name=0,
+                                   int          *daysPerMonth=0,
+                                   int           monthsPerYear=0,
+                                   ESMC_I4      *secondsPerDay=0,
+                                   ESMC_I4      *daysPerYear=0,
+                                   ESMC_I4      *daysPerYearDn=0,
+                                   ESMC_I4      *daysPerYearDd=0,
+                                   int          *rc=0);
 
     // friend function to copy a calendar
     Calendar *ESMCI_CalendarCreate(Calendar *calendar, int *rc=0);
@@ -296,9 +286,8 @@ class Calendar {
     int ESMCI_CalendarFinalize(void);
 
     // friend to restore state
-    Calendar *ESMCI_CalendarReadRestart(int nameLen,
-                                            const char*  name=0,
-                                            int*         rc=0);
+    Calendar *ESMCI_CalendarReadRestart(int nameLen, const char* name=0,
+                                        int* rc=0);
 
     // friend functions to initialize and set the default calendar
     int ESMCI_CalendarInitialize(ESMC_CalKind_Flag *calkindflag);

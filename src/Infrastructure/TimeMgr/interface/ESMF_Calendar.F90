@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.143 2011/10/04 05:35:33 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.144 2011/10/14 05:58:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.143 2011/10/04 05:35:33 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.144 2011/10/14 05:58:51 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -670,8 +670,7 @@
 
 !
 ! !DESCRIPTION:
-!     Creates a custom {\tt ESMF\_Calendar} and sets its properties.  Not
-!     fully supported yet; see Section ~\ref{subsec:Calendar_rest}.
+!     Creates a custom {\tt ESMF\_Calendar} and sets its properties.
 !
 !     The arguments are:
 !     \begin{description}
@@ -679,28 +678,28 @@
 !          Integer array of days per month, for each month of the year.
 !          The number of months per year is variable and taken from the
 !          size of the array.  If unspecified, months per year = 0,
-!          with the days array undefined.  (Not implemented yet).
+!          with the days array undefined.
 !     \item[{[secondsPerDay]}]
-!          Integer number of seconds per day.  Defaults to 86400 if not 
-!          specified.  (Not implemented yet).
+!          Integer number of seconds per day.  Defaults to 0 if not 
+!          specified.
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and
 !          daysPerYearDd (see below) to specify a days-per-year calendar
-!          for any planetary body.  Default = 0.  (Not implemented yet).
+!          for any planetary body.  Default = 0.
 !     \item[{[daysPerYearDn]}]
 !          \begin{sloppypar}
 !          Integer numerator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear (see above) and daysPerYearDd (see below) to
 !          specify a days-per-year calendar for any planetary body.
-!          Default = 0.  (Not implemented yet).
+!          Default = 0.
 !          \end{sloppypar}
 !     \item[{[daysPerYearDd]}]
 !          Integer denominator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear and daysPerYearDn (see above) to
 !          specify a days-per-year calendar for any planetary body.
-!          Default = 1.  (Not implemented yet).
+!          Default = 1.
 !     \item[{[name]}]
 !          The name for the newly created calendar.  If not specified, a
 !          default unique name will be generated: "CalendarNNN" where NNN
@@ -1428,8 +1427,7 @@
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Sets properties in a custom {\tt ESMF\_Calendar}.  Not fully 
-!     supported yet; see Section ~\ref{subsec:Calendar_rest}.
+!     Sets properties in a custom {\tt ESMF\_Calendar}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1439,27 +1437,27 @@
 !          Integer array of days per month, for each month of the year.
 !          The number of months per year is variable and taken from the
 !          size of the array.  If unspecified, months per year = 0,
-!          with the days array undefined.  (Not implemented yet).
+!          with the days array undefined.
 !     \item[{[secondsPerDay]}]
 !          Integer number of seconds per day.  Defaults to 86400 if not 
-!          specified.  (Not implemented yet).
+!          specified.
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and
 !          daysPerYearDd (see below) to specify a days-per-year calendar
-!          for any planetary body.  Default = 0.  (Not implemented yet).
+!          for any planetary body.  Default = 0.
 !     \item[{[daysPerYearDn]}]
 !          Integer numerator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear (see above) and daysPerYearDd (see below) to
 !          specify a days-per-year calendar for any planetary body.
-!          Default = 0.  (Not implemented yet).
+!          Default = 0.
 !     \item[{[daysPerYearDd]}]
 !          \begin{sloppypar}
 !          Integer denominator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear and daysPerYearDn (see above) to
 !          specify a days-per-year calendar for any planetary body.
-!          Default = 1.  (Not implemented yet).
+!          Default = 1.
 !          \end{sloppypar}
 !     \item[{[name]}]
 !          The new name for this calendar.
