@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.17 2011/10/04 23:17:35 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.18 2011/10/17 21:38:49 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1098,8 +1098,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     bool resultBool = ESMCI::VMIdCompare(*vmid1, *vmid2);
-    if (resultBool) *result = ESMF_TRUE;
-    else *result = ESMF_FALSE;
+    *result = resultBool ? ESMF_TRUE : ESMF_FALSE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
 
@@ -1109,8 +1108,6 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidcopy()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-//std::cerr << ESMC_METHOD << ": calling ESMCI::VMIdCopy(*dest=";
-//std::cerr << *dest << ",*source=" << *source << ")" << std::endl;
     int localrc = ESMCI::VMIdCopy(*dest, *source);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return;
@@ -1147,6 +1144,19 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN(c_esmci_vmidget)(ESMCI::VMId **vmid, int *localID,
+      char *key, int *rc, ESMCI_FortranStrLenArg key_len) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmidget()"
+//  This method is primarily intended for use by VM unit tests.
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::VMIdGet(*vmid, localID, key, key_len, rc);
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+  }
+
   void FTN(c_esmc_vmidprint)(ESMCI::VMId **vmid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmidprint()"
@@ -1155,6 +1165,20 @@ extern "C" {
     ESMCI::VMIdPrint(*vmid);
     // Flush before crossing language interface to ensure correct output order
     fflush(stdout);
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
+  }
+
+  void FTN(c_esmci_vmidset)(ESMCI::VMId **vmid, int *localID,
+      char *key, int *rc, ESMCI_FortranStrLenArg key_len) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmidset()"
+//  This method is primarily intended for use by VM unit tests.
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    ESMCI::VMId *localvmid = *vmid;
+    ESMCI::VMIdSet(*vmid, *localID, key, key_len, rc);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
