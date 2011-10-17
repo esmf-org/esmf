@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.25 2011/09/20 19:38:17 w6ws Exp $
+// $Id: ESMCI_VM.C,v 1.26 2011/10/17 21:28:13 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.25 2011/09/20 19:38:17 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.26 2011/10/17 21:28:13 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -298,6 +298,50 @@ int VMIdCopy(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdGet()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdGet
+//
+// !INTERFACE:
+void VMIdGet(
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+//
+  VMId *vmID,
+  int  *localID,
+  char *key,
+  int   key_len,
+  int  *rc
+  ){
+//
+// !DESCRIPTION:
+//    Get the elements of a {\tt ESMC\_VMId} object.
+//
+//    This method is primarily intended for use by VM unit tests.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;
+  *localID = vmID->localID;
+  if (key_len < ESMCI::vmKeyWidth) {
+    if (rc != NULL) *rc = ESMC_RC_ARG_SIZE;
+    return;
+  }
+  for (int i=0; i<vmKeyWidth; i++){
+    key[i] = vmID->vmKey[i];
+  }
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VMIdPrint()"
 //BOPI
 // !IROUTINE:  ESMCI::VMIdPrint
@@ -348,6 +392,50 @@ void VMIdPrint(
     printf("%X\n", bitmap);
   }
   printf("  localID: %d\n", vmID->localID);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdSet()"
+//BOPI
+// !IROUTINE:  ESMCI::VMIdSet
+//
+// !INTERFACE:
+void VMIdSet(
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+//
+  VMId *vmID,
+  int   localID,
+  char *key,
+  int   key_len,
+  int  *rc
+  ){
+//
+// !DESCRIPTION:
+//    Set the elements of an existing {\tt ESMC\_VMId} object.
+//
+//    This method is primarily intended for use by VM unit tests.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Initialize return code; assume routine not implemented
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+  int localrc = ESMC_RC_NOT_IMPL;
+  vmID->localID = localID;
+  if (key_len < ESMCI::vmKeyWidth) {
+    if (rc != NULL) *rc = ESMC_RC_ARG_SIZE;
+    return;
+  }
+  for (int i=0; i<vmKeyWidth; i++){
+    vmID->vmKey[i] = key[i];
+  }
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -881,7 +969,7 @@ int VM::bcastVMId(
 //
 // !ARGUMENTS:
 //
-  VMId **vmID,                   // in/out - VMId
+  VMId **vmID,                  // in/out - VMId
   int count,                    // in  - VMId count
   int root                      // in  - root PET
   ){
