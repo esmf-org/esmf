@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.42 2011/06/30 05:59:34 theurich Exp $
+! $Id: ESMF_VMUTest.F90,v 1.43 2011/10/17 21:42:32 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1058,7 +1058,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.42 2011/06/30 05:59:34 theurich Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.43 2011/10/17 21:42:32 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -1069,6 +1069,11 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
+      type(ESMF_VMId), allocatable :: vmid1(:), vmid2(:)
+      integer   :: id_value
+      character :: key_value
+
+      logical :: tf
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
@@ -1183,6 +1188,78 @@
       call test_Reduce_max
       call test_AllFullReduce_max
       call test_AllReduce_max
+
+      !------------------------------------------------------------------------
+      ! VMId tests
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId Create vmid1 Test"
+      allocate (vmid1(1))
+      call ESMF_VMIdCreate (vmid1, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId Create vmid2 Test"
+      allocate (vmid2(1))
+      call ESMF_VMIdCreate (vmid2, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Bad comparison result"
+      write(name, *) "VMId Compare Test"
+      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1))
+      call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId Set test values Test"
+      call c_ESMCI_VMIdSet (vmid1(1), 1234, achar (123), rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Bad comparison result"
+      write(name, *) "VMId Compare Test"
+      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1))
+      call ESMF_Test(.not. tf, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId Set test values Test"
+      call ESMF_VMIdCopy (dest=vmid2, source=vmid1, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Bad comparison result"
+      write(name, *) "VMId Compare Test"
+      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1))
+      call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId Get test values Test"
+      call c_ESMCI_VMIdGet (vmid2(1), id_value, key_value, rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId id_value Test"
+      call ESMF_Test(id_value == 1234, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId key_value Test"
+      call ESMF_Test(key_value == achar (123), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
       call ESMF_TestEnd(result, ESMF_SRCLINE)
