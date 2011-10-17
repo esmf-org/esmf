@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.23 2011/10/04 19:35:28 rokuingh Exp $
+// $Id: ESMC_Mesh.C,v 1.24 2011/10/17 17:35:24 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.23 2011/10/04 19:35:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.24 2011/10/17 17:35:24 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -200,6 +200,15 @@ int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
+
+  // init output (because 0 could be legit)
+  *num_nodes=-1;
+
+  // make sure Mesh has had it's nodes added
+  if (!mep->isNodesAdded()) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+     "- Mesh must have had its nodes added to get local node count ", &localrc)) return localrc;
+  }
   
   // call into ESMCI method
   *num_nodes = mep->numNodes();
@@ -220,9 +229,18 @@ int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int* num_elems){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // init output (because 0 could be legit)
+  *num_elems=-1;
+
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
-  
+
+  // make sure Mesh has had it's elements added
+  if (!mep->isElemsAdded()) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+     "- Mesh must have had its elements added to get local element count ", &localrc)) return localrc;
+  }
+
   // call into ESMCI method
   *num_elems = mep->numElements();
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.21 2011/10/13 16:57:29 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.22 2011/10/17 17:35:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,13 +31,14 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.21 2011/10/13 16:57:29 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.22 2011/10/17 17:35:26 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
 
 MeshCXX::MeshCXX() {
   meshFreed = 1;
+  level=MeshCXXLevel_Empty;
 }
 
 MeshCXX::~MeshCXX(){
@@ -99,6 +100,9 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
     //cerr << "MeshCXX::create(): meshp = " << meshp;
     //cerr << ".  Setting meshFreed to 0."  << endl;
     meshCXXp->meshFreed = 0;
+
+    // Set create level
+    meshCXXp->level=MeshCXXLevel_Created;
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -194,6 +198,18 @@ int MeshCXX::addElements(int numElems, int *elemId,
      }
      
       Mesh &mesh = *meshPointer;
+
+     // Make sure that we're at the correct level to do this
+     if (level >= MeshCXXLevel_Finished) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Can't add elements twice to a Mesh. ", &localrc)) throw localrc;
+     }
+
+     if (level < MeshCXXLevel_NodesAdded) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Need to add nodes before adding elements. ", &localrc)) throw localrc;
+     }
+
 
 
     // Get parametric dimension
@@ -314,8 +330,10 @@ int MeshCXX::addElements(int numElems, int *elemId,
 
     // Perhaps commit will be a separate call, but for now commit the mesh here.
     mesh.build_sym_comm_rel(MeshObj::NODE);
-    
     mesh.Commit();
+
+    // Mark Mesh as finshed
+    level=MeshCXXLevel_Finished;
 
 #ifdef ESMF_PARLOG
   mesh.Print(Par::Out());
@@ -362,6 +380,18 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
+     }
+
+
+     // Make sure that we're at the correct level to do this
+     if (level >= MeshCXXLevel_NodesAdded) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Can't add nodes twice to a Mesh. ", &localrc)) throw localrc;
+     }
+
+     if (level < MeshCXXLevel_Created) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Mesh must be created before adding nodes. ", &localrc)) throw localrc;
      }
 
 
@@ -417,6 +447,9 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
     // what is mesh.num_nodes?  petlocal?  should it = numNodes?
     ThrowAssert(mesh.num_nodes() == numNodes);
     numLNodes = numNodes;
+
+    // Mark Mesh as having nodes added
+    level=MeshCXXLevel_NodesAdded;
 
    } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -504,6 +537,12 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      }
      
 
+     if (level < MeshCXXLevel_Finished) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Mesh must be finished before making distgrids on it. ", &localrc)) throw localrc;
+     }
+
+
      std::vector<int> ngids;
      std::vector<int> egids;
      {
@@ -583,6 +622,12 @@ int MeshCXX::freeMemory(){
        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
+     }
+
+
+     if (level < MeshCXXLevel_Finished) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Mesh must be finished before you can free it's memory. ", &localrc)) throw localrc;
      }
      
      //cerr << "MeshCXX::freeMemory(): meshPointer = " << meshPointer;
@@ -767,6 +812,13 @@ int MeshCXX::meshWrite(const char* fileName){
        if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	 throw localrc;  // bail out with exception
      }
+
+
+     if (level < MeshCXXLevel_Finished) {
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Mesh must be finished before you can write it out.", &localrc)) throw localrc;
+     }
+
 
     WriteMesh(*meshPointer, fileName);
   } catch(std::exception &x) {

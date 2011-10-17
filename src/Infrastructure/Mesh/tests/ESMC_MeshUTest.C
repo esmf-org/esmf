@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.15 2011/09/19 17:21:49 rokuingh Exp $
+// $Id: ESMC_MeshUTest.C,v 1.16 2011/10/17 17:35:28 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -75,44 +75,6 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
-  strcpy(name, "MeshGetLocalElementCount before MeshAddElements");
-  strcpy(failMsg, "Incorrect result");
-  rc = ESMF_SUCCESS;
-
-  // Get the number of local elements
-  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
-
-  correct=true;
-  if (num_elem_out != 0) {
-    correct = false;
-	printf("OUTPUT - num_elem_out = %d\n", num_elem_out);
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
-            name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
-  strcpy(name, "MeshGetLocalNodeCount before MeshAddNodes");
-  strcpy(failMsg, "Incorrect result");
-  rc = ESMF_SUCCESS;
-
-  // Get the number of local nodes
-  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_node_out);
-
-  correct=true;
-  if (num_node_out != 0) {
-    correct = false;
-	printf("OUTPUT - num_node_out = %d\n", num_node_out);
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
-            name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
 #if 0
   //----------------------------------------------------------------------------
   //NEX_disable_UTest_Multi_Proc_Only
@@ -158,40 +120,27 @@ int main(void){
     elemConn[i] = elemConn[i]+1;
   }
 
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetLocalNodeCount before MeshAddNodes");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
+  // Get the number of local nodes
+  rc = ESMC_MeshGetLocalNodeCount(mesh, &num_node_out);
+
+  // Note != below to negate success
+  ESMC_Test((rc!=ESMF_SUCCESS),
+            name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   // Add node information to the mesh
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddNodes(mesh, num_node, nodeId, nodeCoord, nodeOwner);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
-  // Add element information to the mesh
-  strcpy(name, "MeshAddElements");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_disabled_UTest_Multi_Proc_Only
-  // Create DisGrids for the nodes and elements of the mesh
-//strcpy(name, "MeshCreateDistGrid");
-//strcpy(failMsg, "Did not return ESMF_SUCCESS");
-//rc = ESMC_MeshCreateDistGrids(mesh, nodeDistG, elemDistG, &num_node,
-//&num_elem);
-//ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
-  // Write out the internal mesh data
-  strcpy(name, "MeshWrite");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshWrite(mesh, "MeshOutput");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -217,6 +166,29 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetLocalElementCount before MeshAddElements");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
+  // Get the number of local elements
+  rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
+
+  // Note != below to negate success
+  ESMC_Test((rc!=ESMF_SUCCESS), 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Add element information to the mesh
+  strcpy(name, "MeshAddElements");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
   strcpy(name, "MeshGetLocalElementCount");
   strcpy(failMsg, "Incorrect result");
   rc = ESMF_SUCCESS;
@@ -233,6 +205,26 @@ int main(void){
 
   ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //NEX_disabled_UTest_Multi_Proc_Only
+  // Create DisGrids for the nodes and elements of the mesh
+//strcpy(name, "MeshCreateDistGrid");
+//strcpy(failMsg, "Did not return ESMF_SUCCESS");
+//rc = ESMC_MeshCreateDistGrids(mesh, nodeDistG, elemDistG, &num_node,
+//&num_elem);
+//ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  // Write out the internal mesh data
+  strcpy(name, "MeshWrite");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_MeshWrite(mesh, "MeshOutput");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
