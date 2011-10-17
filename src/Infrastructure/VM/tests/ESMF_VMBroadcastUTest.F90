@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBroadcastUTest.F90,v 1.20 2011/09/28 20:17:23 w6ws Exp $
+! $Id: ESMF_VMBroadcastUTest.F90,v 1.21 2011/10/17 22:53:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBroadcastUTest.F90,v 1.20 2011/09/28 20:17:23 w6ws Exp $'
+      '$Id: ESMF_VMBroadcastUTest.F90,v 1.21 2011/10/17 22:53:41 w6ws Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -48,7 +48,8 @@
       character(len=8) :: strvalue
 
       ! local variables
-      integer:: i, j, rc
+      integer:: i, j
+      integer:: localrc, rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
       integer:: count,root  
@@ -242,15 +243,22 @@
       call ESMF_VMIdCreate (local_vmids, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! Insert dummy data for the purposes of the test.  Only
       ! the first character of the key is set.
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Inserting dummy data into VMId array Test"
+      rc = ESMF_SUCCESS
       do, i=1, n_elements
 	if (localPet == root) then
-          call c_ESMCI_VMIdinsert (local_vmids(i), i, achar (i+10))
+          call c_ESMCI_VMIdSet (local_vmids(i), i, achar (i+10), localrc)
 	else
-          call c_ESMCI_VMIdinsert (local_vmids(i), -1, achar (255))
+          call c_ESMCI_VMIdSet (local_vmids(i), -1, achar (255), localrc)
 	end if
+        if (localrc /= ESMF_SUCCESS) rc = localrc
       end do
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -261,11 +269,18 @@
       call ESMF_VMIdCreate (vmids_soln, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !NEX_UTest
       ! Insert dummy data for the purposes of the test.  Only
       ! the first character of the key is set.
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Inserting dummy data into VMId solution array Test"
+      rc = ESMF_SUCCESS
       do, i=1, n_elements
-        call c_ESMCI_VMIdinsert (vmids_soln(i), i, achar (i+10))
+        call c_ESMCI_VMIdSet (vmids_soln(i), i, achar (i+10), localrc)
+        if (localrc /= ESMF_SUCCESS) rc = localrc
       end do
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -281,17 +296,27 @@
       !NEX_UTest
       ! Verify localData after VM Broadcast.  Only
       ! the first character of the key is tested.
-      write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify VMId data after broadcast Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "ID/Key extraction VMId data after broadcast Test"
       all_verify = .true.
+      rc = ESMF_SUCCESS
       do, i=1, n_elements
-        call c_ESMCI_VMIdextract (local_vmids(i), idData, keyData)
+        call c_ESMCI_VMIdGet (local_vmids(i), idData, keyData, localrc)
+        if (localrc /= ESMF_SUCCESS) rc = localrc
         if (idData /= i .or. iachar (keyData) /= i+10) then
           print *, 'non-compare: index =', i,  &
                    ', idData =', idData, ', keyData =', iachar(keyData)
           all_verify = .false.
         end if
       end do
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Broadcast.  Only
+      ! the first character of the key is tested.
+      write(failMsg, *) "Wrong Local Data"
+      write(name, *) "Verify VMId data after broadcast Test"
       call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
