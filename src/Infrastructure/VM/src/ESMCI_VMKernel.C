@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.24 2011/10/10 22:29:53 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.25 2011/10/18 20:42:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -121,10 +121,12 @@ typedef struct{
   esmf_pthread_mutex_t mut_extra2;
   esmf_pthread_cond_t cond_extra2;
   void *arg;
+  int released;
 }vmkt_t;
 
 int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
-  vmkt->flag = 0;
+  vmkt->flag = 0;     // initialize
+  vmkt->released = 0; // initialize
 #ifndef ESMF_NO_PTHREADS
   pthread_mutex_init(&(vmkt->mut0), NULL);
   pthread_mutex_lock(&(vmkt->mut0));
@@ -156,6 +158,7 @@ int vmkt_release(vmkt_t *vmkt, void *arg){
   pthread_cond_signal(&(vmkt->cond1));
   pthread_mutex_unlock(&(vmkt->mut1));
 #endif
+  vmkt->released = 1; // set flag
   return 0;
 }
 
@@ -163,11 +166,16 @@ int vmkt_catch(vmkt_t *vmkt){
 #ifndef ESMF_NO_PTHREADS
   pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0)); //wait for the child
 #endif
+  vmkt->released = 0; // reset flag  
   return 0;
 }
 
 int vmkt_join(vmkt_t *vmkt){
-  vmkt->flag = 1;
+  if (vmkt->released){
+    // need to first catch the released threads
+    vmkt_catch(vmkt);
+  }
+  vmkt->flag = 1; // set flag to indicate that this is a wrap up call
 #ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(&(vmkt->mut1));  
   pthread_cond_signal(&(vmkt->cond1));
