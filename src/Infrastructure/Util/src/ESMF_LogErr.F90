@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.105 2011/10/18 01:24:24 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.106 2011/10/19 20:57:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1586,31 +1586,37 @@ end subroutine ESMF_LogOpen
 !      \begin{description}
 !
 !      \item [{[log]}]
-!            An optional {\tt ESMF\_Log} object that can be used instead
-!            of the default Log.
+!            An optional {\tt ESMF\_Log} object.  The default is to use the
+!            default log that was opened at {\tt ESMF\_Initialize} time.
 !      \item [{[flush]}]
 !	     If set to {\tt .true.}, flush log messages immediately, rather
-!            than buffering them.
+!            than buffering them.  Default is to flush after {\tt maxElements}
+!            messages.
 !      \item [{[logmsgAbort]}]
 !            Sets the condition on which ESMF aborts.  The array
-!            can contain any combination of ESMF\_LOGMSG named constants.  These
+!            can contain any combination of {\tt ESMF\_LOGMSG} named constants.  These
 !            named constants are described in section \ref{const:logmsgflag}.
+!            Default is to always continue processing.
 !      \item [{[maxElements]}]
 !            Maximum number of elements in the Log buffer before flushing occurs.
+!            Default is to flush when 10 messages have been accumulated.
 !      \item [{[logmsgList]}]
 !            An array of message types that will be logged.  Log write requests
-!            not matching the list will be ignored.  By default all messages
-!            will be logged.  If an empty array is provided, no messages will be logged.
+!            not matching the list will be ignored.  If an empty array is
+!            provided, no messages will be logged.
 !            See section \ref{const:logmsgflag} for a list of
-!            valid message types.  
+!            valid message types.  By default, all non-trace messages will be
+!            logged.
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
+!            Default is to log all error codes. 
 !      \item [{[trace]}]
 !	     \begin{sloppypar}
 !            If set to {\tt .true.}, calls such as {\tt ESMF\_LogFoundError},
 !            {\tt ESMF\_LogFoundAllocError}, and {\tt ESMF\_LogFoundDeallocError}
-!            will be logged as a tool for program flow tracing.  This may generate
-!            voluminous output in the log.
+!            will be logged as a tool for program flow tracing.  This may
+!            generate voluminous output in the log.  Default is to not trace
+!            these calls.
 !	     \end{sloppypar}
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
