@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.10 2011/05/06 18:59:19 feiliu Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.11 2011/10/19 21:49:37 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.10 2011/05/06 18:59:19 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.11 2011/10/19 21:49:37 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -891,7 +891,7 @@ void norm_poly3D(int num_p, double *p) {
 
     // if less than a triangle complain
     if (num_src_nodes<3) {
-      Throw() << "Source Element is degenerate";
+      Throw() << " Source element is degenerate (has less than 3 distinct nodes)";
     }
 
     // calculate dst area
@@ -945,7 +945,7 @@ void norm_poly3D(int num_p, double *p) {
       
       // if less than a triangle complain
       if (num_dst_nodes<3) {
-	Throw() << "Source Element is degenerate";
+	Throw() << " Destination element is degenerate (has less than 3 distinct nodes)";
       }
       
       // calculate dst area
