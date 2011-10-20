@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_errorhandling.tex,v 1.3 2011/10/20 19:46:03 w6ws Exp $
+% CVS $Id: code_conv_errorhandling.tex,v 1.4 2011/10/20 21:54:51 w6ws Exp $
 
 \subsection{Code: Error Handling Conventions}
 
@@ -124,7 +124,7 @@ elseif (branch==2) then call subsub2(localrc)
 if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
   ESMF_CONTEXT, rc=rc)) then
-  !   ... any necessary garage collection ...
+  !   ... any necessary garbage collection ...
   return ! Return point 2
 endif
 !   ...incomplete code...
@@ -163,15 +163,43 @@ and a ESMF return code, the variable is named ``memstat'' rather than
   if (ESMF_LogFoundAllocError(memstat, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc=rc)) then
-    !   ... any necessary garage collection ...
-    return ! Return point 2
+    ! ... any necessary clean up
+    return
   end if
   ! ... use big_array for a while
   deallocate (big_array, stat=memstat)
   if (ESMF_LogFoundDeAllocError(memstat, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rc=rc)) then
-    !   ... any necessary garage collection ...
-    return ! Return point 2
+    ! ... any necessary clean up
+    return
   end if
+\end{verbatim}
+
+In C++ code, where the {\tt new} operator is used, allocation errors can
+be caught by wrapping the allocation code inside a {\tt try} block to catch
+any exceptions.  Multiple allocations may be wrapped inside a single block
+in order to reduce the amount of checking code.
+
+\begin{verbatim}
+#include "ESMCI.h"
+//...
+void alloc_func (int m, int n, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD alloc_func
+  double *array1, *array2;
+  try {
+    array1 = new double[m];
+    array2 = new double[n];
+  }
+  catch (std::bad_alloc) {
+    // ... any necessary clean up
+    ESMC_LogDefault.MsgAllocError("allocating array1 and array2",
+        ESMC_CONTEXT, rc);
+    return;
+  }
+  // ... use array1 and array2 for a while
+  delete array2;
+  delete array1;
+}
 \end{verbatim}
