@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.21 2011/10/20 20:12:03 oehmke Exp $
+// $Id: ESMCI_Search.C,v 1.22 2011/10/20 21:03:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.21 2011/10/20 20:12:03 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.22 2011/10/20 21:03:26 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -676,9 +676,6 @@ static int found_func_elems(void *c, void *y) {
       for (; ei != ee; ++ei) {
           meshB_elist.push_back(&*ei);
       }
-
-      if (meshB_elist.size() == 0) return;
-
   } else { // meshB masks exist
       MeshDB::const_iterator ei = meshB.elem_begin(), ee = meshB.elem_end();
       for (; ei != ee; ++ei) {
@@ -691,6 +688,7 @@ static int found_func_elems(void *c, void *y) {
 	  }
       }
   }
+
   if (meshB_elist.size() == 0) return;
   
 
