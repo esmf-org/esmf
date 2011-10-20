@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $
+// $Id: ESMCI_Search.C,v 1.21 2011/10/20 20:12:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Search.C,v 1.20 2011/10/04 19:35:30 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Search.C,v 1.21 2011/10/20 20:12:03 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -344,7 +344,6 @@ static int found_func(void *c, void *y) {
     Throw() << "Meshes must have same spatial dim for search";
   }
 
-  // TODO: only grab objects in the current interpolation realm.
 
   // Load the destination objects into a list
   std::vector<const MeshObj*> dest_nlist;
@@ -394,6 +393,7 @@ static int found_func(void *c, void *y) {
   }
 
   // Get a bounding box for the dest mesh.
+  // TODO: NEED TO MAKE BOUNDING BOX ONLY DEPEND ON NON-MASKED POINTS
   BBox dstBBox(dstcoord_field, dest);
   
   OTree *box;
@@ -615,7 +615,6 @@ static int num_intersecting_elems(const Mesh &meshA, const BBox &meshBBBox, doub
 }
 
 
-
 struct OctSearchElemsData {
   const MeshObj *meshB_elem;
   bool found;
@@ -653,7 +652,7 @@ static int found_func_elems(void *c, void *y) {
 
   // Mesh A fields
   MEField<> &coord_field = *meshA.GetCoordField();
-  MEField<> *meshA_mask_field_ptr = meshA.GetField("mask");
+  MEField<> *meshA_mask_field_ptr = meshA.GetField("elem_mask");
 
   
   // Mesh B fields
@@ -662,17 +661,15 @@ static int found_func_elems(void *c, void *y) {
   MEField<> &meshBcoord_field = *dcptr;
 
   // Get destination mask field
-  MEField<> *dmptr = meshB.GetField("mask");
+  MEField<> *dmptr = meshB.GetField("elem_mask");
   MEField<> &meshBmask_field = *dmptr;
    
-
   if (meshA.spatial_dim() != meshB.spatial_dim()) {
     Throw() << "Meshes must have same spatial dim for search";
   }
 
-  // TODO: only grab objects in the current interpolation realm.
 
-  // Load the meshBination objects into a list
+  // Load the meshB objects into a list
   std::vector<const MeshObj*> meshB_elist;
   if (dmptr == NULL){ // No meshB masks
       MeshDB::const_iterator ei = meshB.elem_begin(), ee = meshB.elem_end();
@@ -683,29 +680,22 @@ static int found_func_elems(void *c, void *y) {
       if (meshB_elist.size() == 0) return;
 
   } else { // meshB masks exist
-      Throw() << " ERROR Masking not yet implemented for conservative";
-
       MeshDB::const_iterator ei = meshB.elem_begin(), ee = meshB.elem_end();
       for (; ei != ee; ++ei) {
-
-	// Check the mask value of all the nodes in the elem, only
-	// add if none are masked
-#if 0
 	  // Get mask value
-	  double *m=meshBmask_field.data(*ni);
+	  double *m=meshBmask_field.data(*ei);
 	  
 	  // Only put objects in if they're not masked
 	  if (*m < 0.5) {
 	    meshB_elist.push_back(&*ei);
 	  }
-#endif
-
       }
   }
   if (meshB_elist.size() == 0) return;
   
 
   // Get a bounding box for the meshB mesh.
+  // TODO: NEED TO MAKE BOUNDING BOX ONLY DEPEND ON NON-MASKED ELEMENTS
   BBox meshBBBox(meshBcoord_field, meshB);
   
   // declare some variables
