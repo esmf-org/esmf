@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.41 2011/09/12 18:08:12 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.42 2011/10/20 16:49:19 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.41 2011/09/12 18:08:12 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.42 2011/10/20 16:49:19 feiliu Exp $'
 
 !==============================================================================
 !
@@ -684,9 +684,11 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatA2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatA2X(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-      xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
-      xgtype%sparseMatA2X(i)%factorList(1))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
+        xgtype%sparseMatA2X(i)%factorList(1))
+      endif
       ! We can do a bit of checking here because 
       ! we know the weights must be all 1. in this case
       !print *, 'A2X'
@@ -748,9 +750,11 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-      xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
-      xgtype%sparseMatX2A(i)%factorList(1))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
+        xgtype%sparseMatX2A(i)%factorList(1))
+      endif
       !print *, 'X2A +'
       !do j = 1, size(xgtype%sparseMatX2A(i)%factorIndexList,2)
       !   print *, xgtype%sparseMatX2A(i)%factorIndexList(1,j), '->', &
@@ -779,9 +783,11 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatB2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatB2X(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-      xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
-      xgtype%sparseMatB2X(i)%factorList(1))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
+        xgtype%sparseMatB2X(i)%factorList(1))
+      endif
       !print *, 'B2X'
       !do j = 1, size(xgtype%sparseMatB2X(i)%factorIndexList,2)
       !   print *, xgtype%sparseMatB2X(i)%factorIndexList(1,j), '->', &
@@ -804,9 +810,11 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatX2B(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2B(i)%factorList(nentries))
-      call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-      xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
-      xgtype%sparseMatX2B(i)%factorList(1))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
+        xgtype%sparseMatX2B(i)%factorList(1))
+      endif
       !print *, 'X2B'
       !do j = 1, size(xgtype%sparseMatX2B(i)%factorIndexList,2)
       !   print *, xgtype%sparseMatX2B(i)%factorIndexList(1,j), &
