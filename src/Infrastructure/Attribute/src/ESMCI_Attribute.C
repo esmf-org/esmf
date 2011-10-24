@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.120.2.3 2011/10/12 23:21:02 theurich Exp $
+// $Id: ESMCI_Attribute.C,v 1.120.2.4 2011/10/24 18:39:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.120.2.3 2011/10/12 23:21:02 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.120.2.4 2011/10/24 18:39:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -954,6 +954,7 @@ int Attribute::count = 0;
       // TODO:  more detailed error message including conv,purp,object
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND,
         "could not find the attpack", &localrc);
+      delete [] nestpack;
       return localrc;
     }
     if (i == 0) {
@@ -962,6 +963,7 @@ int Attribute::count = 0;
       if (nestpack[i]->parent != localParent) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
           "parents of nested attpacks not one and the same", &localrc);
+        delete [] nestpack;
         return localrc;
       }
     }
@@ -973,13 +975,14 @@ int Attribute::count = 0;
     // TODO:  more detailed error message including conv,purp,object 
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "could not make the attpack", &localrc);
+    delete [] nestpack;
     return localrc;
   }
   
   // Put the attpack onto nestPack's parent
   localrc = localParent->AttPackSet(attpack);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        &localrc)) return localrc;
+        &localrc)) {delete [] nestpack; return localrc;}
 
   // Now remove nestpacks from their parent
   int removed=0;
@@ -1002,15 +1005,19 @@ int Attribute::count = 0;
   for (i=0; i<nestCount; i++) {
     localrc = attpack->AttPackSet(nestpack[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          &localrc)) return localrc;
+          &localrc)) {delete [] nestpack; return localrc;}
   }
   
   if (!done) {
     // TODO:  more detailed error message including conv,purp,object 
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_DELETED,
       "AttPackNest() failed removing the nested Attribute packages", &localrc);
+    delete [] nestpack;
     return localrc;
   }
+ 
+  // delete array of temp attpack pointers
+  delete [] nestpack;
 
   return ESMF_SUCCESS;
 
