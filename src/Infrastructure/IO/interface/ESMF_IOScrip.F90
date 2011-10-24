@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.33 2011/10/04 21:10:32 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.34 2011/10/24 21:55:00 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -662,32 +662,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
      !Read the variables from the input grid files at PET0
       if (PetNo == 0) then
-        ! Check if srcFile and dstFile exists
-        if (.not. present(srcFile)) then
+         ! Check if srcFile and dstFile exists
+         if (.not. present(srcFile)) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
 		  msg="- The srcFile argument does not exist on PET0 ", &
                   ESMF_CONTEXT, rcToReturn=rc)
 	     return
-        endif
-        if (.not. present(dstFile)) then
+         endif
+         if (.not. present(dstFile)) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
 		  msg="- The dstFile argument does not exist on PET0 ",  &
                   ESMF_CONTEXT, rcToReturn=rc)
 	     return
-        endif
-        ! Create output file and create dimensions and variables
-	call c_nc_create(wgtFile, NF90_CLOBBER, &
-		largeFileFlaglocal, ncid, ncStatus)
-	if (largeFileFlaglocal == ESMF_TRUE .and. &
-		(ncStatus == ESMC_RC_LIB)) then
-	   if (ESMF_LogFoundError(ncStatus, ESMF_ERR_PASSTHRU, &
+         endif
+         ! Create output file and create dimensions and variables
+	 call c_nc_create(wgtFile, NF90_CLOBBER, &
+		largeFileFlaglocal, ncid, status)
+	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
 		ESMF_CONTEXT, rcToReturn=rc)) return
-	endif
-	if (CDFCheckError (ncStatus, &
-           ESMF_METHOD, &
-           ESMF_SRCLINE,&
-	   trim(wgtFile),&
-           rc)) return
          
          ! global variables
          if (present(title)) then
