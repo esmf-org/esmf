@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.29.2.1 2011/10/13 03:07:33 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.29.2.2 2011/10/24 18:43:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_CompSetServUTest
+program ESMF_CompSetServUTest
 
 !------------------------------------------------------------------------------
 
@@ -86,200 +86,219 @@
 !   !
     !NEX_UTest
 !   !  Create a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, petList=petList, &
       configFile="grid.rc", rc=rc)  
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Call initialize before SetServices
+    write(name, *) "Calling Component Initialize before SetServices"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
 
     call ESMF_GridCompInitialize(comp1, rc=rc)
 
-    write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Calling Component Initialize before SetServices"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Call run before SetServices
+    write(name, *) "Calling Component Run before SetServices"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
 
     call ESMF_GridCompRun(comp1, rc=rc)
 
-    write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Calling Component Run before SetServices"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Call finalize before SetServices
+    write(name, *) "Calling Component Finalize before SetServices"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
 
     call ESMF_GridCompFinalize(comp1, rc=rc)
 
-    write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Calling Component Finalize before SetServices"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Destroying a component
+    write(name, *) "Destroying a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Create a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", &
       contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Set Services
+    write(name, *) "Setting Component Services - SetServ0"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ0, userRc=userRc, &
       rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services - SetServ0"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Destroying a component
+    write(name, *) "Destroying a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Create a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", &
       contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Set VM
+    write(name, *) "Setting Component VM"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component VM"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
 #ifdef ESMF_TESTWITHTHREADS
     ! The user SetVM() routine will not return ESMF_SUCCESS because it cannot
     ! make the Component threaded due to the fact that it was created with
     ! ESMF_CONTEXT_PARENT_VM. The following logic tests this.
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.ne.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "userRc ESMF_SUCCESS"
+    call ESMF_Test((userRc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else    
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Set Services
+    write(name, *) "Setting Component Services - SetServ0"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ0, userRc=userRc, &
       rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services - SetServ0"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Destroying a component
+    write(name, *) "Destroying a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Create a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     cname = "Atmosphere - in its own context"
     comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Set VM
+    write(name, *) "Setting Component VM"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component VM"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Set Services
+    write(name, *) "Setting Component Services - SetServ1"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ1, userRc=userRc, &
       rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services - SetServ1"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
 !   !  Call init
+    write(name, *) "Calling Component Init"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompInitialize(comp1, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling Component Init"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !NEX_UTest
-    write(failMsg, *) "userRc not ESMF_SUCCESS"
     write(name, *) "Calling Component Init"
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
     if ((localPet/2)*2 == localPet) then
       call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     else      
@@ -291,29 +310,31 @@
 !   !
     !EX_UTest
 !   !  Re-Set Services
+    write(name, *) "Setting Component Services - SetServ2"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ2, userRc=userRc, &
       rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services - SetServ2"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Call new init
+    write(name, *) "Calling Component Init"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompInitialize(comp1, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling Component Init"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
     write(failMsg, *) "userRc does not contain expected code"
-    write(name, *) "Calling Component Init"
     if ((localPet/2)*2 == localPet) then
       call ESMF_Test((userRc.eq.123456), name, failMsg, result, ESMF_SRCLINE)
     else
@@ -323,11 +344,12 @@
 !-------------------------------------------------------------------------
 !   !  Set Internal State
     !EX_UTest
+    write(name, *) "Set Internal State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     data1%testnumber=4567
     wrap1%p=>data1
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set Internal State Test"
     call ESMF_GridCompSetInternalState(comp1, wrap1, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -335,18 +357,22 @@
 !   !
 !   !  Get Internal State
     !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Get Internal State Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     call ESMF_GridCompGetInternalState(comp1, wrap2, rc)
+
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
 !   !  Verify Internal State
     !EX_UTest
-    data2 = wrap2%p 
-    write(failMsg, *) "Did not return correct data"
     write(name, *) "Verify Internal State Test"
+    write(failMsg, *) "Did not return correct data"
+
+    data2 = wrap2%p 
+
     call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
     print *, "data2%testnumber = ", data2%testnumber
 
@@ -354,129 +380,147 @@
 !   !
     !EX_UTest
 !   !  Destroying a component
+    write(name, *) "Destroying a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Create a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, &
       configFile="grid.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Set Services
+    write(name, *) "Setting Component Services - SetServ1"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ1, userRc=userRc, &
       rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services - SetServ1"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Call init
+    write(name, *) "Calling Component Init"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompInitialize(comp1, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Calling Component Init"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Destroying a component
+    write(name, *) "Destroying a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Create a Component
+    write(name, *) "Creating a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+
     cname = "Atmosphere - in its own context"
     comp1 = ESMF_GridCompCreate(name=cname, rc=rc)  
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Set VM
+    write(name, *) "Setting Component VM"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component VM"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Set VM
+    write(name, *) "Setting Component VM - 2nd time (but before SetServices)"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component VM - 2nd time (but before SetServices)"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Set Services
+    write(name, *) "Setting Component Services - SetServ1"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompSetServices(comp1, userRoutine=SetServ1, userRc=userRc, &
       rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Setting Component Services - SetServ1"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(userRc.eq.ESMF_SUCCESS), &
-      name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    write(failMsg, *) "userRc not ESMF_SUCCESS"
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Set VM
+    write(name, *) "Setting Component VM - 3rd time (but after SetServices)"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+
     call ESMF_GridCompSetVM(comp1, SetVM, userRc=userRc, rc=rc)
 !     NOTE: The userRc is irrelevant when RC/=ESMF_SUCCESS
 
-    write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Setting Component VM - 3rd time (but after SetServices)"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
 !   !  Set VM directly
+    write(name, *) "Directly setting Component VM properties after SetServices"
+    write(failMsg, *) "Did return ESMF_SUCCESS"
 
     call ESMF_GridCompSetVMMinThreads(comp1, rc=rc)
 
-    write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Directly setting Component VM properties after SetServices"
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
@@ -485,15 +529,18 @@
 !   !
     !NEX_UTest
 !   !  Destroying a component
+    write(name, *) "Destroying a Component Test"
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     call ESMF_GridCompDestroy(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-    end program ESMF_CompSetServUTest
+end program ESMF_CompSetServUTest
     
