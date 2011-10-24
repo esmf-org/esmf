@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.19.4.1 2011/10/08 02:27:33 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.19.4.2 2011/10/24 16:27:45 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -422,7 +422,6 @@ use File::Find
 			}
 			print "NOTE: There are no executable unit tests files, either the 'gmake ESMF_BOPT=$ESMF_BOPT build_unit_tests' has \n";
 			print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
-			return 0;
 		}
 	}
 
