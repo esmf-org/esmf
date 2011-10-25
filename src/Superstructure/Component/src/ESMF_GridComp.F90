@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.186 2011/10/13 20:16:05 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.187 2011/10/25 21:20:56 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.186 2011/10/13 20:16:05 w6ws Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.187 2011/10/25 21:20:56 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1601,7 +1601,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{sloppypar}
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this Component 
-!   {\tt method}. This subroutine does not have to be public.
+!   {\tt method}. The subroutine must be either a module scope procedure,
+!   or an external procedure that has a matching interface block specified
+!   for it. It must not be an internal procedure which is contained
+!   within another procedure. Argument types, intent and order must match
+!   the interface signature, and must not have the {\tt optional} attribute.
 ! \item[{[phase]}] 
 !   The {\tt phase} number for multi-phase methods. For single phase 
 !   methods the {\tt phase} argument can be omitted. The default setting
@@ -1609,14 +1613,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[rc]}] 
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!
-! The Component writer must supply a subroutine with the exact interface 
-! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-! must not be declared as optional, and the types, intent and order must match.
-! The subroutine must be either a module scope procedure, or an external
-! procedure that has a matching interface block specified for it.
-! It must not be an internal procedure which is contained
-! within another procedure.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1727,33 +1723,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Call into user provided {\tt userRoutine} which is responsible for
-! setting Component's Initialize(), Run() and Finalize() services.
+! setting Component's Initialize(), Run(), and Finalize() services.
 !    
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   Routine to be called.
+!   The Component writer must supply a subroutine with the exact interface 
+!   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must match.
+!   The subroutine must be either a module scope procedure, or an external
+!   procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
+!
+!   \begin{sloppypar}
+!   The {\tt userRoutine}, when called by the framework, must make successive calls
+!   to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
+!   standard Component Initialize(), Run(), and Finalize() methods.
+!   \end{sloppypar}
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-! The Component writer must supply a subroutine with the exact interface 
-! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-! must not be declared as optional, and the types, intent and order must match.
-! The subroutine must be either a module scope procedure, or an external
-! procedure that has a matching interface block specified for it.
-! It must not be an internal procedure which is contained
-! within another procedure.
-!
-! \begin{sloppypar}
-! The {\tt userRoutine}, when called by the framework, must make successive calls
-! to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
-! standard Component Initialize(), Run() and Finalize() methods.
-! \end{sloppypar}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1804,7 +1799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Call into user provided routine which is responsible for setting
-! Component's Initialize(), Run() and Finalize() services. The named
+! Component's Initialize(), Run(), and Finalize() services. The named
 ! {\tt userRoutine} must exist in the shared object file specified in the
 ! {\tt sharedObj} argument. All of the platform specific details about 
 ! dynamic linking and loading apply.
@@ -1814,7 +1809,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   Name of routine to be called.
+!   Name of routine to be called, specified as a character string.
+!   The Component writer must supply a subroutine with the exact interface 
+!   shown for {\tt userRoutine} below. Arguments must not be declared
+!   as optional, and the types, intent and order must match.
+!   The subroutine must be either a module scope procedure, or an external
+!   procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
+!
+!   !INTERFACE:
+!     interface
+!   	subroutine userRoutine(gridcomp, rc)
+!   	  type(ESMF_GridComp)  :: gridcomp   ! must not be optional
+!   	  integer, intent(out) :: rc	     ! must not be optional
+!   	end subroutine
+!     end interface
+!
+!   !DESCRIPTION:
+!   \begin{sloppypar}
+!   The {\tt userRoutine}, when called by the framework, must make successive calls
+!   to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
+!   standard Component Initialize(), Run(), and Finalize() methods.
+!   \end{sloppypar}
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
@@ -1824,29 +1841,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!
-! The Component writer must supply a subroutine with the exact interface 
-! shown for {\tt userRoutine} below. Arguments must not be declared
-! as optional, and the types, intent and order must match.
-! The subroutine must be either a module scope procedure, or an external
-! procedure that has a matching interface block specified for it.
-! It must not be an internal procedure which is contained
-! within another procedure.
-!
-! !INTERFACE:
-!   interface
-!     subroutine userRoutine(gridcomp, rc)
-!       type(ESMF_GridComp)  :: gridcomp   ! must not be optional
-!       integer, intent(out) :: rc         ! must not be optional
-!     end subroutine
-!   end interface
-!
-! !DESCRIPTION:
-! \begin{sloppypar}
-! The {\tt userRoutine}, when called by the framework, must make successive calls
-! to {\tt ESMF\_GridCompSetEntryPoint()} to preset callback routines for
-! standard Component Initialize(), Run() and Finalize() methods.
-! \end{sloppypar}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1915,24 +1909,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   Routine to be called.
+!   The Component writer must supply a subroutine with the exact interface 
+!   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must match.
+!   The subroutine must be either a module scope procedure, or an external
+!   procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
+!
+!   The subroutine, when called by the framework, is expected to use any of the
+!   {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
+!   associated with the Gridded Component.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!
-! The Component writer must supply a subroutine with the exact interface 
-! shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
-! must not be declared as optional, and the types, intent and order must match.
-! The subroutine must be either a module scope procedure, or an external
-! procedure that has a matching interface block specified for it.
-! It must not be an internal procedure which is contained
-! within another procedure.
-!
-! The subroutine, when called by the framework, is expected to use any of the
-! {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
-! associated with the Gridded Component.
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -1992,7 +1984,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   Routine to be called.
+!   Routine to be called, specified as a character string.
+!   The Component writer must supply a subroutine with the exact interface 
+!   shown for {\tt userRoutine} below. Arguments must not be declared
+!   as optional, and the types, intent and order must match.
+!   The subroutine must be either a module scope procedure, or an external
+!   procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
+!
+!   !INTERFACE:
+!     interface
+!   	subroutine userRoutine(gridcomp, rc)
+!   	  type(ESMF_GridComp)  :: gridcomp    ! must not be optional
+!   	  integer, intent(out) :: rc	      ! must not be optional
+!   	end subroutine
+!     end interface
+!
+!   !DESCRIPTION:
+!   The subroutine, when called by the framework, is expected to use any of the
+!   {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
+!   associated with the Gridded Component.
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
@@ -2002,27 +2014,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!
-! The Component writer must supply a subroutine with the exact interface 
-! shown for {\tt userRoutine} below. Arguments must not be declared
-! as optional, and the types, intent and order must match.
-! The subroutine must be either a module scope procedure, or an external
-! procedure that has a matching interface block specified for it.
-! It must not be an internal procedure which is contained
-! within another procedure.
-!
-! !INTERFACE:
-!   interface
-!     subroutine userRoutine(gridcomp, rc)
-!       type(ESMF_GridComp)  :: gridcomp    ! must not be optional
-!       integer, intent(out) :: rc          ! must not be optional
-!     end subroutine
-!   end interface
-!
-! !DESCRIPTION:
-! The subroutine, when called by the framework, is expected to use any of the
-! {\tt ESMF\_GridCompSetVMxxx()} methods to set the properties of the VM
-! associated with the Gridded Component.
 !
 !EOP
 !------------------------------------------------------------------------------
