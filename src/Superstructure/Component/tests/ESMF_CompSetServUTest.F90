@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.33 2011/10/14 17:35:26 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.34 2011/10/25 23:40:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,6 +95,8 @@ program ESMF_CompSetServUTest
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    deallocate(petList)
+
 !-------------------------------------------------------------------------
 !   !
     !NEX_UTest
@@ -104,7 +106,11 @@ program ESMF_CompSetServUTest
 
     call ESMF_GridCompInitialize(comp1, rc=rc)
 
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_GridCompIsPetLocal(comp1)) then  
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    endif
 
 !-------------------------------------------------------------------------
 !   !
@@ -115,7 +121,11 @@ program ESMF_CompSetServUTest
 
     call ESMF_GridCompRun(comp1, rc=rc)
 
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_GridCompIsPetLocal(comp1)) then  
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    endif
 
 !-------------------------------------------------------------------------
 !   !
@@ -126,7 +136,11 @@ program ESMF_CompSetServUTest
 
     call ESMF_GridCompFinalize(comp1, rc=rc)
 
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    if (ESMF_GridCompIsPetLocal(comp1)) then  
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    else
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    endif
 
 !-------------------------------------------------------------------------
 !   !
