@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.39 2011/09/15 00:44:36 theurich Exp $
+// $Id: ESMC_GridComp.h,v 1.40 2011/10/25 23:05:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -40,7 +40,8 @@ extern "C" {
 #endif
 
 enum ESMC_Method { ESMF_METHOD_INITIALIZE=1, ESMF_METHOD_RUN,
-  ESMF_METHOD_FINALIZE, ESMF_METHOD_WRITERESTART, ESMF_METHOD_READRESTART };
+  ESMF_METHOD_FINALIZE, ESMF_METHOD_WRITERESTART, ESMF_METHOD_READRESTART,
+  ESMF_METHOD_SERVICELOOP };
 
 // Class declaration type
 typedef struct{

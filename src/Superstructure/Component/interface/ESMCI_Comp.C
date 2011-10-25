@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.21 2011/06/28 02:07:23 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.22 2011/10/25 23:05:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,13 +41,32 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.21 2011/06/28 02:07:23 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.22 2011/10/25 23:05:37 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
 //==============================================================================
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
+  void FTN(f_esmf_compexecute)(const ESMCI::Comp *comp,
+    enum ESMCI::method *method,
+    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
+    int *userRc, int *rc);
+  
+  void FTN(f_esmf_compgetvminfo)(const ESMCI::Comp *compp, void **vm_info,
+    int *rc);
+  void FTN(f_esmf_compgetvm)(const ESMCI::Comp *compp, ESMCI::VM **vm,
+    int *rc);
+  void FTN(f_esmf_compgetvmparent)(const ESMCI::Comp *compp,
+    ESMCI::VM **vmparent, int *rc);
+  void FTN(f_esmf_compgetvmplan)(const ESMCI::Comp *compp,
+    ESMCI::VMPlan **vmplan, int *rc);
+  void FTN(f_esmf_compgetftable)(const ESMCI::Comp *compp,
+    ESMCI::FTable **ftable, int *rc);
+  void FTN(f_esmf_compgettunnel)(const ESMCI::Comp *comp, 
+    ESMCI::CompTunnel **tunnel, int *rc);
+
   void FTN(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name, 
     char const *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
@@ -174,44 +193,7 @@ int Comp::setEntryPoint(
     return rc;
   }
 
-  char const *methodString;
-  switch(method){
-  case ESMCI::METHOD_INITIALIZE:
-    methodString = "Initialize";
-    break;
-  case ESMCI::METHOD_RUN:
-    methodString = "Run";
-    break;
-  case ESMCI::METHOD_FINALIZE:
-    methodString = "Finalize";
-    break;
-  case ESMCI::METHOD_WRITERESTART:
-    methodString = "WriteRestart";
-    break;
-  case ESMCI::METHOD_READRESTART:
-    methodString = "ReadRestart";
-    break;
-  case ESMCI::METHOD_INITIALIZEIC:
-    methodString = "InitializeIC";
-    break;
-  case ESMCI::METHOD_RUNIC:
-    methodString = "RunIC";
-    break;
-  case ESMCI::METHOD_FINALIZEIC:
-    methodString = "FinalizeIC";
-    break;
-  case ESMCI::METHOD_WRITERESTARTIC:
-    methodString = "WriteRestartIC";
-    break;
-  case ESMCI::METHOD_READRESTARTIC:
-    methodString = "ReadRestartIC";
-    break;
-  case ESMCI::METHOD_SETSERVICES:
-    methodString = "Register";
-    break;
-  default:
-    break;
-  }
+  char const *methodString = FTable::methodString(method);
   
   int slen = strlen(methodString);
   char *fname;
@@ -337,6 +319,319 @@ int Comp::setInternalState(
 //-----------------------------------------------------------------------------
 
   
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:execute()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:execute
+//
+// !INTERFACE:
+int Comp::execute(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    enum method method,
+    State *importState,
+    State *exportState,
+    Clock *clock,
+    ESMC_BlockingFlag blockingFlag,
+    int phase,
+    int *userRc
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  int localUserRc;
+  if (userRc) localUserRc = *userRc;
+  
+  FTN(f_esmf_compexecute)(this, &method, importState, exportState, &clock,
+    &blockingFlag, &phase, &localUserRc, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  if (userRc) *userRc = localUserRc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getVmInfo()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getVmInfo
+//
+// !INTERFACE:
+int Comp::getVmInfo(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    void **vm_info
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_compgetvminfo)(this, vm_info, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getVm()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getVm
+//
+// !INTERFACE:
+int Comp::getVm(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    VM **vm
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_compgetvm)(this, vm, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getVmParent()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getVmParent
+//
+// !INTERFACE:
+int Comp::getVmParent(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    VM **vmparent
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_compgetvmparent)(this, vmparent, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getVmPlan()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getVmPlan
+//
+// !INTERFACE:
+int Comp::getVmPlan(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    VMPlan **vmplan
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_compgetvmplan)(this, vmplan, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getFTable()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getFTable
+//
+// !INTERFACE:
+int Comp::getFTable(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    FTable **ftable
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_compgetftable)(this, ftable, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getTunnel()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getTunnel
+//
+// !INTERFACE:
+int Comp::getTunnel(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    CompTunnel **tunnel
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN(f_esmf_compgettunnel)(this, tunnel, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::GridComp:create()"

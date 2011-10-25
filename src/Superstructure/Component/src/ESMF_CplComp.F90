@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.163 2011/10/25 21:20:56 w6ws Exp $
+! $Id: ESMF_CplComp.F90,v 1.164 2011/10/25 23:05:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.163 2011/10/25 21:20:56 w6ws Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.164 2011/10/25 23:05:35 theurich Exp $'
 
 !==============================================================================
 !
@@ -1647,6 +1647,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! now indicate that this Component has a VM associated
+    cplcomp%compp%compStatus%vmIsPresent = .true.
+    
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -1747,6 +1750,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! now indicate that this Component has a VM associated
+    cplcomp%compp%compStatus%vmIsPresent = .true.
+    
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 

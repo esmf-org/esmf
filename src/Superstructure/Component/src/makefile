@@ -1,13 +1,13 @@
-# $Id: makefile,v 1.35 2011/06/28 04:55:39 theurich Exp $
+# $Id: makefile,v 1.36 2011/10/25 23:05:35 theurich Exp $
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_FTable.C
+SOURCEC	  = ESMCI_FTable.C ESMCI_MethodTable.C ESMCI_CompTunnel.C
 SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 
 SOURCEH	  = 
 
 # If you have public .h files in this dir, list them here
-STOREH    = ESMCI_FTable.h
+STOREH    = ESMCI_FTable.h ESMCI_MethodTable.h ESMCI_CompTunnel.h
 
 # etc files
 STOREETC  = 

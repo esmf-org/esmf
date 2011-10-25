@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.24 2011/06/28 02:07:21 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.25 2011/10/25 23:05:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,14 +41,18 @@
 
 namespace ESMCI {
 
+class CompTunnel; // forward reference here, breaking circular dependency issue
+class FTable;     // forward reference here, breaking circular dependency issue
+
 // constants and enums
 
 enum CompType { COMPTYPE_GRID=1, COMPTYPE_CPL, COMPTYPE_UNKNOWN };
 enum method { METHOD_NONE=0, 
   METHOD_INITIALIZE, METHOD_RUN, METHOD_FINALIZE, 
-  METHOD_WRITERESTART, METHOD_READRESTART,
+  METHOD_WRITERESTART, METHOD_READRESTART, METHOD_SERVICELOOP,
   METHOD_INITIALIZEIC, METHOD_RUNIC, METHOD_FINALIZEIC, 
-  METHOD_WRITERESTARTIC, METHOD_READRESTARTIC, METHOD_SETSERVICES };
+  METHOD_WRITERESTARTIC, METHOD_READRESTARTIC, METHOD_SERVICELOOPIC,
+  METHOD_SETSERVICES };
 
 
 // class definition
@@ -59,9 +63,19 @@ class Comp{
     int setServices(void (*func)(Comp *, int *), int *userRc);
     int setEntryPoint(enum method method,
       void (*functionPtr)(Comp *, State *, State *, Clock **, int *),
-      int phase);
+      int phase=1);
     void *getInternalState(int *rc)const;
     int setInternalState(void *data);
+    int execute(enum method method, ESMCI::State *importState, 
+      ESMCI::State *exportState, ESMCI::Clock *clock, 
+      ESMC_BlockingFlag blockingFlag, int phase, int *userRc) const;
+    
+    int getVmInfo(void **vm_info) const;
+    int getVm(VM **vm) const;
+    int getVmParent(VM **vmparent) const;
+    int getVmPlan(VMPlan **vmplan) const;
+    int getFTable(FTable **ftable) const;
+    int getTunnel(CompTunnel **tunnel) const;
 };
 
 class GridComp:public Comp{

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.187 2011/10/25 21:20:56 w6ws Exp $
+! $Id: ESMF_GridComp.F90,v 1.188 2011/10/25 23:05:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -75,6 +75,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompReadRestart
   public ESMF_GridCompRun
   public ESMF_GridCompRunAct
+  public ESMF_GridCompServiceLoop
   public ESMF_GridCompSet
   public ESMF_GridCompSetEntryPoint
   public ESMF_GridCompSetServices
@@ -94,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.187 2011/10/25 21:20:56 w6ws Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.188 2011/10/25 23:05:35 theurich Exp $'
 
 !==============================================================================
 !
@@ -106,6 +107,7 @@ module ESMF_GridCompMod
   interface ESMF_GridCompSetServices
     module procedure ESMF_GridCompSetServices
     module procedure ESMF_GridCompSetServicesShObj
+    module procedure ESMF_GridCompSetServicesComp
   end interface
 !------------------------------------------------------------------------------
 
@@ -1477,6 +1479,100 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompServiceLoop"
+!BOP
+! !IROUTINE: ESMF_GridCompServiceLoop - Call the GridComp's service loop routine
+
+! !INTERFACE:
+  recursive subroutine ESMF_GridCompServiceLoop(gridcomp, keywordEnforcer, &
+    importState, exportState, clock, syncflag, phase, userRc, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp),  intent(inout)           :: gridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
+    integer,              intent(in),    optional :: phase
+    integer,              intent(out),   optional :: userRc
+    integer,              intent(out),   optional :: rc
+!
+! !STATUS:
+! \apiStatusCompatible
+!
+! !DESCRIPTION:
+! Call the associated user initialization routine for 
+! an {\tt ESMF\_GridComp}.
+!   
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   {\tt ESMF\_GridComp} to call service loop routine for.
+! \item[{[importState]}]  
+!   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   importState argument in the user code cannot be optional. 
+! \item[{[exportState]}]  
+!   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   exportState argument in the user code cannot be optional. 
+! \item[{[clock]}]  
+!   External {\tt ESMF\_Clock} for passing in time information.  
+!   This is generally the parent component's clock, and will be treated
+!   as read-only by the child component.  The child component can maintain
+!   a private clock for its own internal time computations. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   clock argument in the user code cannot be optional. 
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[phase]}]
+!   Component providers must document whether each of their
+!   routines are {\em single-phase} or {\em multi-phase}.
+!   Single-phase routines require only one invocation to complete
+!   their work.
+!   Multi-phase routines provide multiple subroutines to accomplish
+!   the work, accomodating components which must complete part of their
+!   work, return to the caller and allow other processing to occur,
+!   and then continue the original operation.
+!   For multiple-phase child components, this is the integer phase
+!   number to be invoked.
+!   For single-phase child components this argument is optional. The default is
+!   1.
+! \item[{[userRc]}]
+!   Return code set by {\tt userRoutine} before returning.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+
+    call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_SERVICELOOP, &
+      importState=importState, exportState=exportState, clock=clock, &
+      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_GridCompServiceLoop
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSet"
 !BOP
 ! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
@@ -1766,6 +1862,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! now indicate that this Component has a VM associated
+    gridcomp%compp%compStatus%vmIsPresent = .true.
+    
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -1865,9 +1964,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! now indicate that this Component has a VM associated
+    gridcomp%compp%compStatus%vmIsPresent = .true.
+    
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetServicesComp"
+!BOP
+! !IROUTINE: ESMF_GridCompSetServices - Set to serve as Dual Component for another Component
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCompSetServices()
+  recursive subroutine ESMF_GridCompSetServicesComp(gridcomp, actualGridcomp, &
+    keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+    type(ESMF_GridComp), intent(in)            :: actualGridcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Set the services of a Gridded Component to serve a "dual" Component for an
+! "actual" Component.
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Dual Gridded Component.
+! \item[actualGridcomp]
+!   Actual Gridded Component.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                       ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, actualGridComp, rc)
+  
+    call c_ESMC_SetServicesComp(gridcomp, gridcomp%compp%compTunnel, &
+      actualGridComp, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! now indicate that this Component has a VM associated
+    gridcomp%compp%compStatus%vmIsPresent = .true.
+    
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine

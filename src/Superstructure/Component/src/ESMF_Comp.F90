@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.224 2011/10/07 18:02:44 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.225 2011/10/25 23:05:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -87,20 +87,22 @@ module ESMF_CompMod
     ESMF_METHOD_FINALIZE        = ESMF_Method_Flag(3), &
     ESMF_METHOD_WRITERESTART    = ESMF_Method_Flag(4), &
     ESMF_METHOD_READRESTART     = ESMF_Method_Flag(5), &
-    ESMF_METHOD_INITIALIZEIC    = ESMF_Method_Flag(6), &
-    ESMF_METHOD_RUNIC           = ESMF_Method_Flag(7), &
-    ESMF_METHOD_FINALIZEIC      = ESMF_Method_Flag(8), &
-    ESMF_METHOD_WRITERESTARTIC  = ESMF_Method_Flag(9), &
-    ESMF_METHOD_READRESTARTIC   = ESMF_Method_Flag(10), &
-    ESMF_SETVM              = ESMF_Method_Flag(11), &
-    ESMF_SETSERVICES        = ESMF_Method_Flag(12)
+    ESMF_METHOD_SERVICELOOP     = ESMF_Method_Flag(6), &
+    ESMF_METHOD_INITIALIZEIC    = ESMF_Method_Flag(7), &
+    ESMF_METHOD_RUNIC           = ESMF_Method_Flag(8), &
+    ESMF_METHOD_FINALIZEIC      = ESMF_Method_Flag(9), &
+    ESMF_METHOD_WRITERESTARTIC  = ESMF_Method_Flag(10), &
+    ESMF_METHOD_READRESTARTIC   = ESMF_Method_Flag(11), &
+    ESMF_METHOD_SERVICELOOPIC   = ESMF_Method_Flag(12), &
+    ESMF_METHOD_SETVM           = ESMF_Method_Flag(13), &
+    ESMF_METHOD_SETSERVICES     = ESMF_Method_Flag(14)
     
 !------------------------------------------------------------------------------
 ! ! ESMF_CompStatus
 !
   type ESMF_CompStatus
     sequence
-    private
+!    private
     logical :: configIsPresent
     logical :: clockIsPresent
     logical :: gridIsPresent
@@ -132,6 +134,16 @@ module ESMF_CompMod
       ESMF_INIT_DEFINED)
 
 !------------------------------------------------------------------------------
+! ! ESMF_CompTunnel
+
+  type ESMF_CompTunnel
+    sequence
+    !private
+    type(ESMF_Pointer) :: this
+    ! only use internally -> no init macro!
+  end type
+     
+!------------------------------------------------------------------------------
 ! ! wrapper for Component objects going across F90/C++ boundary
   type ESMF_CWrap
 #ifndef ESMF_SEQUENCE_BUG
@@ -152,10 +164,13 @@ module ESMF_CompMod
     sequence
 #endif
     !private
-    type(ESMF_Pointer)  :: this             ! C++ ftable pointer - MUST BE FIRST
+    type(ESMF_Pointer)  :: ftable           ! C++ ftable pointer - MUST BE FIRST
     type(ESMF_Base)     :: base             ! base class
-    type(ESMF_MethodTable) :: methodTable   ! attachable methods
-    type(ESMF_CompType_Flag) :: compType         ! component type
+    type(ESMF_MethodTable)  :: methodTable  ! attachable methods
+    type(ESMF_CompType_Flag):: compType     ! component type
+    
+    type(ESMF_CompTunnel)   :: compTunnel   ! in case this is a dual component
+    
     type(ESMF_Config)   :: config           ! configuration object
     type(ESMF_Clock)    :: clock            ! private component clock
     type(ESMF_Grid)     :: grid             ! default grid, gcomp only
@@ -182,7 +197,7 @@ module ESMF_CompMod
 
     logical             :: vm_released      ! flag whether vm is running
 
-    type(ESMF_Context_Flag)    :: contextflag      ! contextflag
+    type(ESMF_Context_Flag)   :: contextflag      ! contextflag
     type(ESMF_CompStatus)     :: compStatus       ! isPresent bits
     
     ESMF_INIT_DECLARE
@@ -220,11 +235,14 @@ module ESMF_CompMod
 ! !PUBLIC TYPES:
   public ESMF_GridComp, ESMF_CplComp
 
-  public ESMF_Method_Flag, ESMF_METHOD_NONE, ESMF_METHOD_INITIALIZE, ESMF_METHOD_RUN, ESMF_METHOD_FINALIZE
+  public ESMF_Method_Flag, ESMF_METHOD_NONE
+  public ESMF_METHOD_INITIALIZE, ESMF_METHOD_RUN, ESMF_METHOD_FINALIZE
   public ESMF_METHOD_WRITERESTART, ESMF_METHOD_READRESTART
+  public ESMF_METHOD_SERVICELOOP
   public ESMF_METHOD_INITIALIZEIC, ESMF_METHOD_RUNIC, ESMF_METHOD_FINALIZEIC
   public ESMF_METHOD_WRITERESTARTIC, ESMF_METHOD_READRESTARTIC
-  public ESMF_SETVM, ESMF_SETSERVICES
+  public ESMF_METHOD_SERVICELOOPIC
+  public ESMF_METHOD_SETVM, ESMF_METHOD_SETSERVICES
   
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
@@ -233,6 +251,8 @@ module ESMF_CompMod
   public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
   public ESMF_CompStatus
   public ESMF_COMPSTATUS_ALL_PRESENT, ESMF_COMPSTATUS_ALL_NOTPRESENT
+
+  public ESMF_CompTunnel
 
 !------------------------------------------------------------------------------
 
@@ -267,7 +287,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.224 2011/10/07 18:02:44 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.225 2011/10/25 23:05:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -543,9 +563,10 @@ contains
     endif
 
     ! Set values for the derived type members
-    compp%this = ESMF_NULL_POINTER
+    compp%ftable = ESMF_NULL_POINTER
     compp%base%this = ESMF_NULL_POINTER
     compp%compType = compType
+    compp%compTunnel%this = ESMF_NULL_POINTER
     compp%configFile = "uninitialized"
     compp%dirPath = "uninitialized"
     compp%grid%this = ESMF_NULL_POINTER
@@ -716,7 +737,7 @@ contains
     compp%vm_released = .false.
                               
     ! Create an empty subroutine/internal state table.
-    call c_ESMC_FTableCreate(compp%this, localrc) 
+    call c_ESMC_FTableCreate(compp%ftable, localrc) 
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -807,7 +828,7 @@ contains
         ESMF_CONTEXT, rcTOReturn=rc)) return 
 
       ! call C++ to release function and data pointer tables.
-      call c_ESMC_FTableDestroy(compp%this, localrc)
+      call c_ESMC_FTableDestroy(compp%ftable, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -848,11 +869,11 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),    pointer                 :: compp
-    type(ESMF_Method_Flag),       intent(in)              :: method
+    type(ESMF_Method_Flag),  intent(in)              :: method
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(in),    optional :: clock
-    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
@@ -976,56 +997,59 @@ contains
 
     ! Set up the arguments
     if (compp%iAmParticipant) then
-      ! only need to call this on PETs that participate
-      call c_ESMC_FTableSetStateArgs(compp%this, method, phaseArg, &
-        compp%compw, compp%is, compp%es, compp%argclock, localrc)
+      ! only call this on PETs that participate
+      call c_ESMC_FTableSetStateArgs(compp%ftable, method, phaseArg, &
+        compp%compw, compp%is, compp%es, compp%argclock, compp%compTunnel, &
+        localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
     endif
     
-    ! in anticipation of VM insertion set the vmIsPresent bit
-    compp%compStatus%vmIsPresent = .true.
-    
-    ! callback into user code
-    call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
-      compp%vm_info, compp%vm_cargo, compp%this, method, phaseArg, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcTOReturn=rc)) return
+    ! All of the participating PETs must call in, but also non-participating
+    ! PETs that hold a valid VM and show up here enter the callback mechanism.
+    if (compp%iAmParticipant .or. compp%compStatus%vmIsPresent) then
+      ! callback into user code
+      call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
+        compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
+        phaseArg, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcTOReturn=rc)) return
       
-    ! for threaded VMs (single- or multi-threaded) the child VM will 
-    ! now be running concurrently with the parent VM. This is indicated
-    ! by the following flag:  
-    compp%vm_released = .true.
+      ! for threaded VMs (single- or multi-threaded) the child VM will 
+      ! now be running concurrently with the parent VM. This is indicated
+      ! by the following flag:  
+      compp%vm_released = .true.
 
-    ! sync PETs according to blocking mode
-    if (blocking == ESMF_SYNC_VASBLOCKING .or. blocking == ESMF_SYNC_BLOCKING) then
-      ! wait for all child PETs that run in this parent's PET VAS to finish
-      call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-        compp%vm_cargo, localUserRc, localrc)
-      ! localUserRc - return code of registered user callback method
-      ! localrc     - return code of ESMF internal callback stack
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
-      compp%vm_released = .false.       ! indicate child VM has been caught
-      ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
-      if (blocking == ESMF_SYNC_BLOCKING) then
-        ! the current context _is_ the parent context...
-        call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
+      ! sync PETs according to blocking mode
+      if (blocking == ESMF_SYNC_VASBLOCKING .or. blocking == ESMF_SYNC_BLOCKING) then
+        ! wait for all child PETs that run in this parent's PET VAS to finish
+        call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+          compp%vm_cargo, localUserRc, localrc)
+        ! localUserRc - return code of registered user callback method
+        ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcTOReturn=rc)) return
-        call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcTOReturn=rc)) return
+        compp%vm_released = .false.       ! indicate child VM has been caught
+        ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
+        if (blocking == ESMF_SYNC_BLOCKING) then
+          ! the current context _is_ the parent context...
+          call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcTOReturn=rc)) return
+          call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcTOReturn=rc)) return
+        endif
       endif
-    endif
 
-    ! pass back userRc
-    if (present(userRc)) userRc = localUserRc
+      ! pass back userRc
+      if (present(userRc)) userRc = localUserRc
+    endif
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1044,7 +1068,8 @@ contains
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, grid, gridIsPresent, importState, &
     exportState, clock, dirPath, configFile, config, configIsPresent, &
-    compType, currentMethod, currentPhase, localPet, petCount, compStatus, rc)
+    compType, currentMethod, currentPhase, localPet, petCount, compStatus, &
+    compTunnel, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -1069,6 +1094,7 @@ contains
     integer,                  intent(out), optional :: localPet
     integer,                  intent(out), optional :: petCount
     type(ESMF_CompStatus),    intent(out), optional :: compStatus
+    type(ESMF_CompTunnel),    intent(out), optional :: compTunnel
     integer,                  intent(out), optional :: rc
 
 !
@@ -1276,6 +1302,11 @@ contains
     ! access compStatus
     if (present(compStatus)) then
       compStatus = compp%compStatus
+    endif
+
+    ! access compTunnel
+    if (present(compTunnel)) then
+      compTunnel = compp%compTunnel
     endif
 
     ! Return successfully
