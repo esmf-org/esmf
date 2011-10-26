@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2010/11/11 00:48:35 theurich Exp $
+# $Id: build_rules.mk,v 1.21 2011/10/26 20:59:08 theurich Exp $
 #
 # Linux.gfortran.default
 #
@@ -218,6 +218,7 @@ ESMF_CXXLINKLIBS += -lrt -lgfortran -ldl
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
+ESMF_SL_LIBLIBS  += -lgfortran
 
 ############################################################
 # Shared object options
