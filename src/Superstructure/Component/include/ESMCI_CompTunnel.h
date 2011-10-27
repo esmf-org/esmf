@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.h,v 1.1 2011/10/25 23:05:39 theurich Exp $
+// $Id: ESMCI_CompTunnel.h,v 1.2 2011/10/27 21:38:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -29,6 +29,7 @@
 //-----------------------------------------------------------------------------
 
 #include <string>
+#include <vector>
 
 #include "ESMCI_Comp.h"
 #include "ESMCI_FTable.h"
@@ -54,15 +55,19 @@ class CompTunnel{
     State *exportState;
     Clock **clock;
     //--------------
-    Comp *localComp;    // in case the actual component happens to be local
-    cargotype localCargo;
+    Comp *localActualComp; // in case the actual component happens to be local
+    int localActualCompRootPet;
+    cargotype localActualCompCargo;
     //--------------
-    VM *interVM;
+    VM *bridgeVM;
     //--------------
     //-- vars for the current negotiation prototype - may move into inter-VM --
-    int interLocalPet;  // local PET on the interVM
-    int dualRootPet;    // designated rootPET on the dual side within interVM
-    int actualRootPet;  // designated rootPET on the actual side within interVM
+    int interLocalPet;  // local PET in terms of bridgeVM
+    int interRootPet;   // this side's rootPET in terms of bridgeVM
+    int localPet;       // local PET in terms of this side's VM
+    int rootPet;        // this side's rootPet in terms of this side's VM
+    std::vector<int> localSendToPetList;  // other side's PETs terms of bridgeVM
+    int localRecvFromPet; // other side's PET that sends in terms of bridgeVM 
     //--------------
   public:
     // native C++ constructors/destructors
@@ -70,26 +75,30 @@ class CompTunnel{
       connected = false;
       dual = NULL;
       actual = NULL;
-      localComp = NULL;
+      localActualComp = NULL;
+      localSendToPetList.resize(0);
     }
-    CompTunnel(Comp *localActualComp){
+    CompTunnel(Comp *localActualComp_, int localActualCompRootPet_){
       connected = false;
       dual = NULL;
       actual = NULL;
-      localComp = localActualComp;
+      localActualComp = localActualComp_;
+      localActualCompRootPet = localActualCompRootPet_;
+      localSendToPetList.resize(0);
     }
-    CompTunnel(VM *interVM_){
+    CompTunnel(VM *bridgeVM_){
       connected = false;
       dual = NULL;
       actual = NULL;
-      localComp = NULL;
-      interVM = interVM_;
+      localActualComp = NULL;
+      bridgeVM = bridgeVM_;
+      localSendToPetList.resize(0);
     }
     ~CompTunnel(void){
       connected = false;
       dual = NULL;
       actual = NULL;
-      localComp = NULL;
+      localActualComp = NULL;
     }
     // other methods
     void setConnected(bool connected_){ connected=connected_;}

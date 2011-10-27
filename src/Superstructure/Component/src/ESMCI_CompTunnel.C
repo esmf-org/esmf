@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.C,v 1.1 2011/10/25 23:05:35 theurich Exp $
+// $Id: ESMCI_CompTunnel.C,v 1.2 2011/10/27 21:38:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,6 +34,7 @@
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
+#include "ESMCI_VMKernel.h"
 
 // LogErr
 #include "ESMCI_LogErr.h"
@@ -51,7 +52,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::CompTunnel::print()"
   int CompTunnel::print(void)const{
     int rc = ESMC_RC_NOT_IMPL;
-    printf("localComp: %p\n", localComp);
+    printf("localActualComp: %p\n", localActualComp);
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
@@ -92,7 +93,7 @@ namespace ESMCI {
     //TODO: that are neither part of dual or actual component (in which case 
     //TODO: this approach will break down.
     
-    localrc = dualComp->getVmParent(&interVM);
+    localrc = dualComp->getVmParent(&bridgeVM);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     
@@ -117,33 +118,33 @@ namespace ESMCI {
     // Do pre-execution data transfer and kick-off actual component execution.
     //
 printf("calling CompTunnel::execute() for name: %s\n", cargo->name);
-    if (interVM){
+    if (bridgeVM){
       
       
       
-      interVM->barrier();  //TODO: very simple control for now
+      bridgeVM->barrier();  //TODO: very simple control for now
 
-    }else if (localComp){
+    }else if (localActualComp){
       // the actual component is local
-      localCargo = *cargo;   // copy dual component's cargo structure
-      localCargo.f90comp = localComp;  // overwrite f90comp member
+      localActualCompCargo = *cargo;   // copy dual component's cargo structure
+      localActualCompCargo.f90comp = localActualComp;  // overwrite f90comp
       
       ESMCI::FTable *ftable;
-      localrc = localComp->getFTable(&ftable);
+      localrc = localActualComp->getFTable(&ftable);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
-      localCargo.ftable = ftable;
+      localActualCompCargo.ftable = ftable;
       
       ESMCI::VM *vm_parent;
-      localrc = localComp->getVmParent(&vm_parent);
+      localrc = localActualComp->getVmParent(&vm_parent);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
       ESMCI::VMPlan *vmplan;
-      localrc = localComp->getVmPlan(&vmplan);
+      localrc = localActualComp->getVmPlan(&vmplan);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
       void *vm_info;
-      localrc = localComp->getVmInfo(&vm_info);
+      localrc = localActualComp->getVmInfo(&vm_info);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
 
@@ -153,7 +154,7 @@ printf("now calling into vm_parent->enter() from CompTunnel::execute()\n");
       //TODO: the arguments have been set up correctly for the callback!!!
       
       // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
-      localrc = vm_parent->enter(vmplan, vm_info, (void*)&localCargo);
+      localrc = vm_parent->enter(vmplan, vm_info, (void*)&localActualCompCargo);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) 
         return rc; // bail out
             
@@ -180,18 +181,18 @@ printf("now calling into vm_parent->enter() from CompTunnel::execute()\n");
     // Do post-execution data transfer and wait for actual component to finish.
     //
 printf("calling CompTunnel::wait() for name: %s\n", cargo->name);
-    if (localComp){
+    if (localActualComp){
       // the actual component is local
       ESMCI::VM *vm_parent;
-      localrc = localComp->getVmParent(&vm_parent);
+      localrc = localActualComp->getVmParent(&vm_parent);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
       ESMCI::VMPlan *vmplan;
-      localrc = localComp->getVmPlan(&vmplan);
+      localrc = localActualComp->getVmPlan(&vmplan);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
       void *vm_info;
-      localrc = localComp->getVmInfo(&vm_info);
+      localrc = localActualComp->getVmInfo(&vm_info);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;
 
@@ -207,6 +208,8 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
   }
   
   
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CompTunnel::negotiate()"
   int CompTunnel::negotiate(){
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
@@ -229,9 +232,195 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
     // every PET to determine which unique id it holds in the inter-VM
     //TODO: Of course this does not work if a child VM has multiple PETs spawned
     //TODO: from a single parent VM PET. Things get more involved for that case.
-    interLocalPet = interVM->getLocalPet();
+    interLocalPet = bridgeVM->getLocalPet();  // localPet in terms of bridgeVM
+    localPet = vm->getLocalPet();             // localPet in terms of VM
+    int *localPets = new int[2];
+    localPets[0] = interLocalPet;
+    localPets[1] = localPet;
+    int petCount = vm->getPetCount();
+    int *petList = new int[2*petCount];
+    vm->allgather(localPets, petList, 2*sizeof(int));
+    interRootPet = petList[0];  // prime the search variable
+    rootPet = petList[1];       // prime the associated variable
+    for (int i=1; i<petCount; i++){
+      if (petList[i*2] < interRootPet){
+        interRootPet = petList[i*2];
+        rootPet = petList[i*2];
+      }
+    }
+    delete [] localPets;
+
+#if 0
+if (localActualComp){
+printf("local rootPet was determined as %d and remote is %d\n", interRootPet, localActualCompRootPet);
+}else{
+printf("local rootPet was determined as %d\n", interRootPet);
+}
+#endif 
+
+    // standard rootPet variables
+    int interDualRootPet;
+    int interActualRootPet;
     
+    int const tag = 12345;//TODO: construct a more unique tag to use w/ bridgeVM
     
+    // dual and actual comps to rendezvous on the known actual component rootPet
+    if (localActualComp){
+      // this is a dual component side with locally associated actual component
+      // already know rootPet of both sides
+      interDualRootPet = interRootPet;
+      interActualRootPet = localActualCompRootPet;
+      if (interLocalPet == interRootPet){
+        // rootPet to send information over to the rendezvous PET
+//printf("dualComp is sending %d -> %d\n", interRootPet, interActualRootPet);
+        bridgeVM->send(&interDualRootPet, sizeof(int), interActualRootPet, tag);
+      }
+    }else{
+      // this is the actual component side
+      interActualRootPet = interRootPet;
+      if (interLocalPet == interRootPet){
+        // rootPet on the actual component side receives the dual side rootPET, 
+        // but for this transfer the dual side rootPet is yet unknown on the
+        // actual component side
+//printf("actualComp is receiving ANY -> %d\n", interRootPet);
+        bridgeVM->recv(&interDualRootPet, sizeof(int), VM_ANY_SRC, tag);
+      }
+      // tell all PETs on the actual component side about the dual rootPet
+      vm->broadcast(&interDualRootPet, sizeof(int), rootPet);
+//printf("all actualComp PETs know that interDualRootPet is: %d\n", interDualRootPet);
+    }
+    
+    //TODO: now that each side knows about the both side rootPet an 
+    //TODO: interCommunicator could be created -> need to wrap that into VM
+    
+    // standard petCount variables
+    int dualPetCount;
+    int actualPetCount;
+
+    // dual and actual comps to exchange petCount info
+    if (localActualComp){
+      // this is a dual component side with locally associated actual component
+      dualPetCount = petCount;
+      if (interLocalPet == interRootPet){
+        bridgeVM->send(&dualPetCount, sizeof(int), interActualRootPet, tag);
+        bridgeVM->recv(&actualPetCount, sizeof(int), interActualRootPet, tag);
+      }
+      // tell all PETs on the dual component side about the actual petCount
+      vm->broadcast(&actualPetCount, sizeof(int), rootPet);
+    }else{
+      // this is the actual component side
+      actualPetCount = petCount;
+      if (interLocalPet == interRootPet){
+        bridgeVM->recv(&dualPetCount, sizeof(int), interDualRootPet, tag);
+        bridgeVM->send(&actualPetCount, sizeof(int), interDualRootPet, tag);
+      }
+      // tell all PETs on the actual component side about the dual petCount
+      vm->broadcast(&dualPetCount, sizeof(int), rootPet);
+    }
+    
+//printf("now every PET knows dualPetCount=%d, actualPetCount=%d\n", dualPetCount, actualPetCount);
+
+    // standard petList variables
+    int *dualPetList = new int[dualPetCount];
+    int *actualPetList = new int[actualPetCount];
+
+    // dual and actual comps to exchange petCount info
+    if (localActualComp){
+      // this is a dual component side with locally associated actual component
+      for (int i=0; i<dualPetCount; i++)
+        dualPetList[i] = petList[i*2];  // pull out the interPet values
+      if (interLocalPet == interRootPet){
+        bridgeVM->send(dualPetList, dualPetCount*sizeof(int),
+          interActualRootPet, tag);
+        bridgeVM->recv(actualPetList, actualPetCount*sizeof(int),
+          interActualRootPet, tag);
+      }
+      // tell all PETs on the dual component side about the actual petList
+      vm->broadcast(actualPetList, actualPetCount*sizeof(int), rootPet);
+    }else{
+      // this is the actual component side
+      for (int i=0; i<actualPetCount; i++)
+        actualPetList[i] = petList[i*2];  // pull out the interPet values
+      if (interLocalPet == interRootPet){
+        bridgeVM->recv(dualPetList, dualPetCount*sizeof(int),
+          interDualRootPet, tag);
+        bridgeVM->send(actualPetList, actualPetCount*sizeof(int),
+          interDualRootPet, tag);
+      }
+      // tell all PETs on the actual component side about the dual petList
+      vm->broadcast(dualPetList, dualPetCount*sizeof(int), rootPet);
+    }
+    
+    // now construct the tunnel communication pattern: dual <-> actual PET map
+    
+    // determine send pattern for the localPet to be used in tunnel comms
+    if (localActualComp){
+      // this is a dual component side with locally associated actual component
+      int startIndex = localPet * (actualPetCount / dualPetCount);
+      if (localPet < actualPetCount % dualPetCount) startIndex += localPet;
+      else startIndex += actualPetCount % dualPetCount;
+      int startIndexNext = (localPet+1) * (actualPetCount / dualPetCount);
+      if ((localPet+1) < actualPetCount % dualPetCount)
+        startIndexNext += (localPet+1);
+      else startIndexNext += actualPetCount % dualPetCount;
+      for (int i=startIndex; i<startIndexNext; i++)
+        localSendToPetList.push_back(actualPetList[i]);
+    }else{
+      // this is the actual component side
+      int startIndex = localPet * (dualPetCount / actualPetCount);
+      if (localPet < dualPetCount % actualPetCount) startIndex += localPet;
+      else startIndex += dualPetCount % actualPetCount;
+      int startIndexNext = (localPet+1) * (dualPetCount / actualPetCount);
+      if ((localPet+1) < dualPetCount % actualPetCount)
+        startIndexNext += (localPet+1);
+      else startIndexNext += dualPetCount % actualPetCount;
+      for (int i=startIndex; i<startIndexNext; i++)
+        localSendToPetList.push_back(dualPetList[i]);
+    }
+
+    // determine the receive pattern for the localPet to be used in tunnel comms
+    if (localActualComp){
+      // this is a dual component side with locally associated actual component
+      int ratio = actualPetCount / dualPetCount;
+      if (ratio >= 1)
+        localRecvFromPet = actualPetList[localPet];
+      else{
+        int revratio = dualPetCount / actualPetCount;
+        int extraLimit = dualPetCount % actualPetCount;
+        int limitSum = (revratio+1)*extraLimit;
+        if (localPet >= limitSum){
+          int index = extraLimit + (localPet - limitSum);
+          localRecvFromPet = actualPetList[index];
+        }else{
+          int index = localPet / (revratio=1);
+          localRecvFromPet = actualPetList[index];          
+        }
+      }
+    }else{
+      // this is the actual component side
+      int ratio = dualPetCount / actualPetCount;
+      if (ratio >= 1)
+        localRecvFromPet = dualPetList[localPet];
+      else{
+        int revratio = actualPetCount / dualPetCount;
+        int extraLimit = actualPetCount % dualPetCount;
+        int limitSum = (revratio+1)*extraLimit;
+        if (localPet >= limitSum){
+          int index = extraLimit + (localPet - limitSum);
+          localRecvFromPet = dualPetList[index];
+        }else{
+          int index = localPet / (revratio+1);
+          localRecvFromPet = dualPetList[index];          
+        }
+      }
+    }
+        
+//printf("On interLocalPet %d the localSendToPetCount = %d, and the localRecvFromPet = %d\n", interLocalPet, localSendToPetList.size(), localRecvFromPet);
+    
+    // garbage collection
+    delete [] petList;
+    delete [] dualPetList;
+    delete [] actualPetList;
     
     // return successfully
     rc = ESMF_SUCCESS;
@@ -258,15 +447,15 @@ namespace ESMCI {
 ESMC_LogDefault.Write("ServiceLoop: entering", ESMC_LOG_INFO);
 
     //TODO: for now simply use the parent VM, this will change!!!!
-    VM *parentVM;
-    localrc = comp->getVmParent(&parentVM);
+    VM *bridgeVM;
+    localrc = comp->getVmParent(&bridgeVM);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return; // bail out
    
-    CompTunnel compTunnel(parentVM);  // local compTunnel object
+    CompTunnel compTunnel(bridgeVM);  // local compTunnel object
 
     // negotiation phase
-    compTunnel.setActual(comp); // set as the actual side
+    compTunnel.setActual(comp);       // set this component as the actual side
     localrc = compTunnel.negotiate();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return; // bail out
@@ -274,7 +463,7 @@ ESMC_LogDefault.Write("ServiceLoop: entering", ESMC_LOG_INFO);
     // execution loop phase
     for (int i=0; i<3; i++){
       
-      parentVM->barrier();  //TODO: for now very simple test for control
+      bridgeVM->barrier();  //TODO: for now very simple test for control
       
       localrc = comp->execute(METHOD_INITIALIZE, importState, exportState,
         *clock, ESMF_VASBLOCKING, 1, &userRc);

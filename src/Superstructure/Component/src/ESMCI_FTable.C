@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.60 2011/10/25 23:05:35 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.61 2011/10/27 21:38:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.60 2011/10/25 23:05:35 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.61 2011/10/27 21:38:29 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -317,7 +317,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicescomp"
   void FTN(c_esmc_setservicescomp)(ESMCI::Comp *dualComp, 
-    ESMCI::CompTunnel **compTunnel, ESMCI::Comp *localActualComp, int *rc){
+    ESMCI::CompTunnel **compTunnel, ESMCI::Comp *localActualComp, 
+    int *localActualCompRootPet, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*compTunnel != NULL){
@@ -330,7 +331,8 @@ extern "C" {
     // that eventually enter the child VM. This is so that all child component
     // objects that exist on the parent VM with a valid entry of a child VM
     // also have a valid compTunnel member.
-    *compTunnel = new ESMCI::CompTunnel(localActualComp);
+    *compTunnel = new ESMCI::CompTunnel(localActualComp,
+      *localActualCompRootPet);
     if (*compTunnel == NULL){
       ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", rc);  
       return;
@@ -642,14 +644,14 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     //TODO: consider that an override, and execute dual components method
     //TODO:  instead
     
-printf("in the dual component branch, name: %s\n", name);
+//printf("in the dual component branch, name: %s\n", name);
     compTunnel->print();
     
     localrc = compTunnel->execute(cargo);
     
   }else{
     // this is a regular component, use the local ftable for user code callback
-printf("in the actual component branch, name: %s\n", name);
+//printf("in the actual component branch, name: %s\n", name);
     localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
     // ...back from user code
     // put the return codes into cargo 
@@ -800,7 +802,7 @@ void FTN(c_esmc_compwait)(
   if (dualFlag){
     // this is a dual component with an compTunnel that is connected
     
-printf("c_esmc_compwait(): in the dual component branch\n");
+//printf("c_esmc_compwait(): in the dual component branch\n");
     compTunnel->print();
     
     localrc = compTunnel->wait(cargo);

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.188 2011/10/25 23:05:35 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.189 2011/10/27 21:38:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.188 2011/10/25 23:05:35 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.189 2011/10/27 21:38:29 theurich Exp $'
 
 !==============================================================================
 !
@@ -2009,17 +2009,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc                       ! local error status
+    integer :: localrc                        ! local error status
+    integer, pointer :: actualCompPetList(:)
+    integer :: actualCompRootPet, i
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, actualGridComp, rc)
-  
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, actualGridcomp, rc)
+    
+    ! access the petList of the actualGridcomp and find the lowest PET
+    ! -> this is going to be the rendezvous PET for the component tunnel setup
+    nullify(actualCompPetList)
+    call ESMF_CompGet(actualGridcomp%compp, petList=actualCompPetList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    actualCompRootPet = actualCompPetList(1)  ! prime the search variable
+    do i=2, size(actualCompPetList)
+      if (actualCompPetList(i) < actualCompRootPet) &
+        actualCompRootPet = actualCompPetList(i)
+    enddo
+    deallocate(actualCompPetList)
+    
     call c_ESMC_SetServicesComp(gridcomp, gridcomp%compp%compTunnel, &
-      actualGridComp, localrc)
+      actualGridcomp, actualCompRootPet, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
