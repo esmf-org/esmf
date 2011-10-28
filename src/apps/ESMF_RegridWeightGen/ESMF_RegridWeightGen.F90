@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.44.2.5 2011/10/13 04:00:42 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.44.2.6 2011/10/28 17:46:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -462,9 +462,6 @@ program ESMF_RegridWeightGen
            ignoreUnmapped=.true.
         else
            ignoreUnmapped=.false.
-        endif
-        if (ignoreUnmapped) then
-	       print *, "  Ignore unmapped destination points"
         endif
      endif
 
@@ -1403,6 +1400,7 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
     integer  :: i, srcInd, dstInd
     integer  :: outListPos
     real(ESMF_KIND_R8) :: factorSum
+    integer  :: beg
 
 
     ! Get size of list
@@ -1413,6 +1411,22 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
        wasCompacted=.false.
        return
     endif
+
+   ! Put source entries in sorted order
+    beg=1
+    dstInd=inFactorIndexList(2,1)
+    do i=2,inListCount
+       if (inFactorIndexList(2,i) .ne. dstInd) then
+          ! Sort [beg,i-1] if there could be repeats 
+          if ((i-1)-beg+1 >2) then
+             call hsort_array(inFactorIndexList(:,beg:i-1), inFactorList(beg:i-1))
+          endif
+
+          ! Reset
+          beg=i
+          dstInd=inFactorIndexList(2,i)
+       endif
+    enddo
 
     ! Loop counting unique entries
     outListCount=1 ! 1 because counting switches below
@@ -1475,6 +1489,63 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
     rc = ESMF_SUCCESS
 
 end subroutine CompactMatrix
+
+ subroutine hsort_array(ia,ra)
+   integer :: ia(:,:)
+   real(ESMF_KIND_R8)    :: ra(:)
+   integer :: num_a
+   integer :: i,ir,j,l
+   integer :: tia(size(ia,1))
+   real(ESMF_KIND_R8)    :: tra
+
+   ! get size of array
+   num_a=size(ia,2)
+
+   ! Leave if list is too small to sort
+   if (num_a <2) return
+
+   l=num_a/2+1
+   ir=num_a
+
+10 continue
+   if (l .gt. 1) then
+      l=l-1
+      tia(:)=ia(:,l)
+      tra=ra(l)
+   else
+      tia(:)=ia(:,ir)
+      tra=ra(ir)
+      ia(:,ir)=ia(:,1)
+      ra(ir)=ra(1)
+      ir=ir-1
+      if (ir .eq. 1) then
+         ia(:,1)=tia(:)
+         ra(1)=tra
+         return
+      endif
+   endif
+   i=l
+   j=l+l
+20 if (j .le. ir) then
+      if (j .lt. ir) then
+         if (ia(1,j) .lt. ia(1,j+1)) j=j+1
+      endif
+      if (tia(1) .lt. ia(1,j)) then
+         ia(:,i)=ia(:,j)
+         ra(i)=ra(j)
+         i=j
+         j=j+j
+      else
+         j=ir+1
+      endif
+      goto 20
+   endif
+   ia(:,i)=tia(:)
+   ra(i)=tra
+   goto 10
+ end subroutine hsort_array
+
+
 
 
 subroutine ErrorMsgAndAbort(localPet)
