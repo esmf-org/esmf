@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.34 2011/10/25 23:40:17 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.35 2011/10/28 18:37:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -218,7 +218,7 @@ program ESMF_CompSetServUTest
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !NEX_UTest
-#ifdef ESMF_TESTWITHTHREADS
+#if (defined ESMF_TESTWITHTHREADS && ! defined ESMF_NO_PTHREADS)
     ! The user SetVM() routine will not return ESMF_SUCCESS because it cannot
     ! make the Component threaded due to the fact that it was created with
     ! ESMF_CONTEXT_PARENT_VM. The following logic tests this.
