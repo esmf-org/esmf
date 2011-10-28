@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.4 2011/05/19 20:10:57 svasquez Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.4.2.1 2011/10/28 17:40:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.4 2011/05/19 20:10:57 svasquez Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.4.2.1 2011/10/28 17:40:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -127,6 +127,14 @@ module ESMF_AttachMethodsMod
 !   Label of method.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated with the {\tt label}.
+!
+!   The subroutine must have the exact interface shown above
+!   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must
+!   match.  The subroutine must be either a module scope procedure, or an
+!   external procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -180,7 +188,16 @@ module ESMF_AttachMethodsMod
 ! \item[label]
 !   Label of method.
 ! \item[userRoutine]
-!   Name of user-supplied subroutine to be associated with the {\tt label}.
+!   Name of user-supplied subroutine to be associated with the {\tt label},
+!   specified as a character string.
+!
+!   The subroutine must have the exact interface shown in {\tt ESMF\_MethodStateAdd}
+!   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must
+!   match.  The subroutine must be either a module scope procedure, or an
+!   external procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
@@ -374,6 +391,14 @@ module ESMF_AttachMethodsMod
 !   Label of method.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated with the {\tt label}.
+!
+!   The subroutine must have the exact interface shown above
+!   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must
+!   match.  The subroutine must be either a module scope procedure, or an
+!   external procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -427,7 +452,16 @@ module ESMF_AttachMethodsMod
 ! \item[label]
 !   Label of method.
 ! \item[userRoutine]
-!   Name of user-supplied subroutine to be associated with the {\tt label}.
+!   Name of user-supplied subroutine to be associated with the {\tt label},
+!   specified as a character string.
+!
+!   The subroutine must have the exact interface shown in {\tt ESMF\_MethodGridCompAdd}
+!   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must
+!   match.  The subroutine must be either a module scope procedure, or an
+!   external procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
@@ -497,6 +531,14 @@ module ESMF_AttachMethodsMod
 !   Label of method.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated with the {\tt label}.
+!
+!   The subroutine must have the exact interface shown above
+!   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must
+!   match.  The subroutine must be either a module scope procedure, or an
+!   external procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -550,7 +592,16 @@ module ESMF_AttachMethodsMod
 ! \item[label]
 !   Label of method.
 ! \item[userRoutine]
-!   Name of user-supplied subroutine to be associated with the {\tt label}.
+!   Name of user-supplied subroutine to be associated with the {\tt label},
+!   specified as a character string.
+!
+!   The subroutine must have the exact interface shown in {\tt ESMF\_MethodCplCompAdd}
+!   for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
+!   must not be declared as optional, and the types, intent and order must
+!   match.  The subroutine must be either a module scope procedure, or an
+!   external procedure that has a matching interface block specified for it.
+!   It must not be an internal procedure which is contained
+!   within another procedure.
 ! \item[{[sharedObj]}]
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
