@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_errorhandling.tex,v 1.2 2010/12/03 05:58:07 theurich Exp $
+% CVS $Id: code_conv_errorhandling.tex,v 1.2.4.1 2011/10/28 17:14:09 theurich Exp $
 
 \subsection{Code: Error Handling Conventions}
 
@@ -65,7 +65,7 @@ if (branch==1) then
 call subsub1(localrc)
 if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
-  ESMF_CONTEXT, rc)) then
+  ESMF_CONTEXT, rc=rc)) then
   !   ... any necessary garbage collection ...
   return ! Return point 1
 endif !   ...fully implemented code...
@@ -73,7 +73,7 @@ if (present(rc)) rc=ESMF_SUCCESS
 elseif (branch==2) then call subsub2(localrc)
 if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
-  ESMF_CONTEXT, rc)) then
+  ESMF_CONTEXT, rc=rc)) then
   !   ... any necessary garbage collection ...
   return ! Return point 2
 endif
@@ -115,7 +115,7 @@ if (branch==1) then
 call subsub1(localrc)
 if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
-  ESMF_CONTEXT, rc)) then
+  ESMF_CONTEXT, rc=rc)) then
   !   ... any necessary garbage collection ...      return ! Return point 1
 endif
 !   ...fully implemented code...
@@ -123,8 +123,8 @@ if (present(rc)) rc=ESMF_SUCCESS
 elseif (branch==2) then call subsub2(localrc)
 if (ESMF_LogFoundError(localrc, &
   ESMF_ERR_PASSTHRU, &
-  ESMF_CONTEXT, rc)) then
-  !   ... any necessary garage collection ...
+  ESMF_CONTEXT, rc=rc)) then
+  !   ... any necessary garbage collection ...
   return ! Return point 2
 endif
 !   ...incomplete code...
@@ -144,15 +144,69 @@ end subroutine
 
 \end{enumerate}
 
+\subsubsection{Memory Allocation Checking}
 
+In Fortran code, the {\tt allocate} and {\tt deallocate} statements should
+always have their success or failure checked by using {\tt stat=} and checking
+the value it returns.  Since this value is defined by the Fortran
+standard, and is not an ESMF return code, the alternative checking calls are
+{\tt ESMF\_LogFoundAllocError()} and {\tt ESMF\_LogFoundDeAllocError()}.
+To further distinguish the difference between a Fortran status return
+and a ESMF return code, the local error variable should be named ``memstat''
+rather than ``localrc''.
 
+\begin{verbatim}
+  real, allocatable :: big_array(:,:)
+  integer :: memstat
+  ! ...
+  allocate (big_array(m,n), stat=memstat)
+  if (ESMF_LogFoundAllocError(memstat, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc=rc)) then
+    ! ... any necessary clean up
+    return
+  end if
+  ! ... use big_array for a while
+  deallocate (big_array, stat=memstat)
+  if (ESMF_LogFoundDeAllocError(memstat, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rc=rc)) then
+    ! ... any necessary clean up
+    return
+  end if
+\end{verbatim}
 
+In C++ code, where the {\tt new} operator is used, allocation errors can
+be caught by wrapping the allocation code inside a {\tt try} block to catch
+any exceptions.  Multiple allocations may be wrapped inside a single block
+in order to reduce the amount of checking code.
 
+\begin{verbatim}
+#include "ESMCI.h"
+//...
+void alloc_func (int m, int n, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD alloc_func
+  double *array1, *array2;
+  try {
+    array1 = new double[m];
+    array2 = new double[n];
+  }
+  catch (std::bad_alloc) {
+    // ... any necessary clean up
+    ESMC_LogDefault.MsgAllocError("allocating array1 and array2",
+        ESMC_CONTEXT, rc);
+    return;
+  }
+  // ... use array1 and array2 for a while
+  delete array2;
+  delete array1;
+}
+\end{verbatim}
 
-
-
-
-
-
-
+In code which uses {\tt malloc()} and {\tt free()},
+the return value from {\tt malloc()} may be tested against
+{\tt NULL} to determine if an error occurred.  No checking is
+possible with {\tt free()}.  In new code, the C++ {\tt new}
+operator and associated checking should be used.
 
