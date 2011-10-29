@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.1 2011/10/29 00:03:08 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.2 2011/10/29 14:59:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -144,7 +144,7 @@ module ESMF_CompTunnelUTest_comp_mod
     ! in order to test blocking/non-blocking dual component feature put the
     ! actual component to sleep for a few seconds:
     
-    call sleep(SLEEPTIME)  ! sleep for a number of seconds
+    call ESMF_VMWtimeDelay(SLEEPTIME._ESMF_KIND_R8) ! sleep a few seconds
 
     call ESMF_LogWrite("Actual Component exit Finalize after sleep", &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -181,7 +181,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.1 2011/10/29 00:03:08 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.2 2011/10/29 14:59:15 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
