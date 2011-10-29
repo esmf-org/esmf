@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.C,v 1.2 2011/10/27 21:38:29 theurich Exp $
+// $Id: ESMCI_CompTunnel.C,v 1.3 2011/10/29 00:01:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,6 +46,27 @@
 //==============================================================================
 //==============================================================================
 
+extern "C" {
+
+  // Fortran access point to native class destructor
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_comptunneldestroy"
+  void FTN(c_esmc_comptunneldestroy)(ESMCI::CompTunnel **ptr, int *rc){
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (*ptr == NULL){
+      ESMC_LogDefault.MsgAllocError("- CompTunnel deallocation", rc);  
+      return;
+    }
+    delete (*ptr);
+    *ptr = NULL;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+
+} // extern "C"
+
+
+
 namespace ESMCI {
   
 #undef  ESMC_METHOD
@@ -85,14 +106,8 @@ namespace ESMCI {
     // This nethod is executed on the dualComp VM
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    
-    //TODO: need to create a joint-VM (that works even for the threaded case)
-    //TODO: that combines two VMs
-    
-    //TODO: For now simply set the parentVM, hoping that there aren't any PETs
-    //TODO: that are neither part of dual or actual component (in which case 
-    //TODO: this approach will break down.
-    
+
+    // use the parent VM as bridge during the negotiation    
     localrc = dualComp->getVmParent(&bridgeVM);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
@@ -120,9 +135,9 @@ namespace ESMCI {
 printf("calling CompTunnel::execute() for name: %s\n", cargo->name);
     if (bridgeVM){
       
-      
-      
-      bridgeVM->barrier();  //TODO: very simple control for now
+printf("in CompTunnel::execute() ... call CompTunnel::dual2actual() with method %d\n", method);
+
+      dual2actual(&method, sizeof(enum method));
 
     }else if (localActualComp){
       // the actual component is local
@@ -181,7 +196,20 @@ printf("now calling into vm_parent->enter() from CompTunnel::execute()\n");
     // Do post-execution data transfer and wait for actual component to finish.
     //
 printf("calling CompTunnel::wait() for name: %s\n", cargo->name);
-    if (localActualComp){
+    if (bridgeVM){
+      
+printf("in CompTunnel::wait() ... \n");
+
+      int rcs[2];
+      actual2dual(rcs, 2*sizeof(int));
+      
+printf("in CompTunnel::wait() ... received RC=%d, userRC=%d\n", rcs[0], rcs[1]);
+      
+      // pass the actual return codes back through dual cargo
+      cargo->esmfrc[0] = rcs[0];
+      cargo->userrc[0] = rcs[1];
+      
+    }else if (localActualComp){
       // the actual component is local
       ESMCI::VM *vm_parent;
       localrc = localActualComp->getVmParent(&vm_parent);
@@ -265,6 +293,8 @@ printf("local rootPet was determined as %d\n", interRootPet);
     int const tag = 12345;//TODO: construct a more unique tag to use w/ bridgeVM
     
     // dual and actual comps to rendezvous on the known actual component rootPet
+    //TODO: this is the part that depends on the fact that there is a
+    //TODO: localActualComp, because if not then the rendezvous is different 
     if (localActualComp){
       // this is a dual component side with locally associated actual component
       // already know rootPet of both sides
@@ -298,8 +328,8 @@ printf("local rootPet was determined as %d\n", interRootPet);
     int actualPetCount;
 
     // dual and actual comps to exchange petCount info
-    if (localActualComp){
-      // this is a dual component side with locally associated actual component
+    if (isDual){
+      // this is a dual component side
       dualPetCount = petCount;
       if (interLocalPet == interRootPet){
         bridgeVM->send(&dualPetCount, sizeof(int), interActualRootPet, tag);
@@ -325,8 +355,8 @@ printf("local rootPet was determined as %d\n", interRootPet);
     int *actualPetList = new int[actualPetCount];
 
     // dual and actual comps to exchange petCount info
-    if (localActualComp){
-      // this is a dual component side with locally associated actual component
+    if (isDual){
+      // this is a dual component side
       for (int i=0; i<dualPetCount; i++)
         dualPetList[i] = petList[i*2];  // pull out the interPet values
       if (interLocalPet == interRootPet){
@@ -354,8 +384,8 @@ printf("local rootPet was determined as %d\n", interRootPet);
     // now construct the tunnel communication pattern: dual <-> actual PET map
     
     // determine send pattern for the localPet to be used in tunnel comms
-    if (localActualComp){
-      // this is a dual component side with locally associated actual component
+    if (isDual){
+      // this is a dual component side
       int startIndex = localPet * (actualPetCount / dualPetCount);
       if (localPet < actualPetCount % dualPetCount) startIndex += localPet;
       else startIndex += actualPetCount % dualPetCount;
@@ -379,8 +409,8 @@ printf("local rootPet was determined as %d\n", interRootPet);
     }
 
     // determine the receive pattern for the localPet to be used in tunnel comms
-    if (localActualComp){
-      // this is a dual component side with locally associated actual component
+    if (isDual){
+      // this is a dual component side
       int ratio = actualPetCount / dualPetCount;
       if (ratio >= 1)
         localRecvFromPet = actualPetList[localPet];
@@ -427,6 +457,83 @@ printf("local rootPet was determined as %d\n", interRootPet);
     return rc;
   }
     
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CompTunnel::dual2actual()"
+  int CompTunnel::dual2actual(void *msg, int len){
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // check that dual/actual are uniquely defined
+    Comp *comp = NULL;
+    bool isDual = false;    // initialize
+    bool isActual = false;  // initialize
+    if (getDual()){ isDual = true; comp = getDual();}
+    if (getActual()){ isActual = true; comp = getActual();}
+    if ((isDual && isActual) || (!isDual && !isActual)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- CompTunnel is bad!",
+        &rc);
+      return rc;
+    }
+    // get the Component's VM
+    VM *vm;
+    localrc = comp->getVm(&vm);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc; // bail out
+
+    int const tag = 12345;//TODO: construct a more unique tag to use w/ bridgeVM
+
+    // carry out message transfer according to the tunnel comm pattern
+    if (isDual){
+      // this is a dual component side -> sender
+      for (int i=0; i<localSendToPetList.size(); i++)
+        bridgeVM->send(msg, len, localSendToPetList[i], tag);
+    }else{
+      // this is the actual component side -> receiver
+      bridgeVM->recv(msg, len, localRecvFromPet, tag);
+    }
+    
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::CompTunnel::actual2dual()"
+  int CompTunnel::actual2dual(void *msg, int len){
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // check that dual/actual are uniquely defined
+    Comp *comp = NULL;
+    bool isDual = false;    // initialize
+    bool isActual = false;  // initialize
+    if (getDual()){ isDual = true; comp = getDual();}
+    if (getActual()){ isActual = true; comp = getActual();}
+    if ((isDual && isActual) || (!isDual && !isActual)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- CompTunnel is bad!",
+        &rc);
+      return rc;
+    }
+    // get the Component's VM
+    VM *vm;
+    localrc = comp->getVm(&vm);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc; // bail out
+
+    int const tag = 12345;//TODO: construct a more unique tag to use w/ bridgeVM
+
+    // carry out message transfer according to the tunnel comm pattern
+    if (isActual){
+      // this is a actual component side -> sender
+      for (int i=0; i<localSendToPetList.size(); i++)
+        bridgeVM->send(msg, len, localSendToPetList[i], tag);
+    }else{
+      // this is the dual component side -> receiver
+      bridgeVM->recv(msg, len, localRecvFromPet, tag);
+    }
+    
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
 
 } // namespace ESMCI
   
@@ -459,23 +566,40 @@ ESMC_LogDefault.Write("ServiceLoop: entering", ESMC_LOG_INFO);
     localrc = compTunnel.negotiate();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return; // bail out
+
+    // temporary return code buffer    
+    int rcs[2];
     
     // execution loop phase
-    for (int i=0; i<3; i++){
+    for (;;){
+    
+      // receive instruction about which method to execute from dual component  
+      enum method method;
+      compTunnel.dual2actual(&method, sizeof(enum method));
+//printf("ServiceLoop has received a method through dual2actual: %d\n", method);
+
+      // break condition
+      if (method == METHOD_NONE) break;
       
-      bridgeVM->barrier();  //TODO: for now very simple test for control
+      // execute the method indicated by what was received from the dual comp
+      localrc = comp->execute(method, importState, exportState,
+        *clock, ESMF_VASBLOCKING, 1, &userRc);
+      // log the local error code, but do not bail out since dual component
+      // remains in control
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, NULL);
       
-      localrc = comp->execute(METHOD_INITIALIZE, importState, exportState,
-        *clock, ESMF_VASBLOCKING, 1, &userRc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-        return; // bail out
-      localrc = comp->execute(METHOD_RUN, importState, exportState,
-        *clock, ESMF_VASBLOCKING, 1, &userRc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-        return; // bail out
+      // send the return codes to the controlling dual component
+      rcs[0] = localrc;
+      rcs[1] = userRc;
+      compTunnel.actual2dual(rcs, 2*sizeof(int));
       
     }
-    
+
+    // dual component to know actual component successfully exited service loop
+    rcs[0] = ESMF_SUCCESS;
+    rcs[1] = ESMF_SUCCESS;
+    compTunnel.actual2dual(rcs, 2*sizeof(int));    
+        
 ESMC_LogDefault.Write("ServiceLoop: exiting", ESMC_LOG_INFO);
     
     // return successfully

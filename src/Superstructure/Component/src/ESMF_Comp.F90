@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.226 2011/10/27 21:38:29 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.227 2011/10/29 00:01:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -287,7 +287,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.226 2011/10/27 21:38:29 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.227 2011/10/29 00:01:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -577,7 +577,7 @@ contains
     compp%vm_cargo = ESMF_NULL_POINTER
     nullify(compp%is%statep)
     nullify(compp%es%statep)
-    compp%vm_released = .FALSE.
+    compp%vm_released = .false.
     compp%contextflag = ESMF_CONTEXT_OWN_VM
     
     compp%compStatus = ESMF_COMPSTATUS_ALL_NOTPRESENT
@@ -799,13 +799,28 @@ contains
         ESMF_CONTEXT, rcTOReturn=rc)
       return
     endif
-
+    
+    ! Now deal with garbage collection
     call ESMF_BaseGetStatus(compp%base, baseStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
         
     if (baseStatus == ESMF_STATUS_READY) then
+    
+      ! dual component must terminate the service loop of the actual component
+      if (compp%compTunnel%this /= ESMF_NULL_POINTER) then
+        ! this is indeed a dual component with an open component tunnel
+        call ESMF_CompExecute(compp, method=ESMF_METHOD_NONE, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcTOReturn=rc)) return
+        ! call the tunnel destructor
+        call c_ESMC_CompTunnelDestroy(compp%compTunnel, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     
       if (compp%vm_info /= ESMF_NULL_POINTER) then
         ! shut down this component's VM
@@ -919,7 +934,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: localUserRc  ! return code from user code
-    type(ESMF_Sync_Flag) :: blocking     ! local blocking flag
+    type(ESMF_Sync_Flag)    :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     integer                 :: phaseArg
         
@@ -1006,6 +1021,8 @@ contains
         ESMF_CONTEXT, rcTOReturn=rc)) return
     endif
     
+    localUserRc = ESMF_SUCCESS  ! initialize to success
+    
     ! All of the participating PETs must call in, but also non-participating
     ! PETs that hold a valid VM and show up here enter the callback mechanism.
     if (compp%iAmParticipant .or. compp%compStatus%vmIsPresent) then
@@ -1016,13 +1033,10 @@ contains
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
-      
       ! for threaded VMs (single- or multi-threaded) the child VM will 
-      ! now be running concurrently with the parent VM. This is indicated
-      ! by the following flag:  
-      compp%vm_released = .true.
+      ! now be running concurrently with the parent VM.
 
-      ! sync PETs according to blocking mode
+      ! wait for blocking modes
       if (blocking == ESMF_SYNC_VASBLOCKING .or. blocking == ESMF_SYNC_BLOCKING) then
         ! wait for all child PETs that run in this parent's PET VAS to finish
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
@@ -1032,25 +1046,31 @@ contains
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcTOReturn=rc)) return
-        compp%vm_released = .false.       ! indicate child VM has been caught
-        ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
-        if (blocking == ESMF_SYNC_BLOCKING) then
-          ! the current context _is_ the parent context...
-          call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
-          if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcTOReturn=rc)) return
-          call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
-          if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcTOReturn=rc)) return
-        endif
       endif
-
-      ! pass back userRc
-      if (present(userRc)) userRc = localUserRc
+    endif
+      
+    ! sync PETs according to blocking mode
+    if (blocking == ESMF_SYNC_NONBLOCKING) then
+      compp%vm_released = .true.
+    else
+      compp%vm_released = .false.       ! indicate child VM has been caught
+      ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
+      if (blocking == ESMF_SYNC_BLOCKING) then
+        ! the current context _is_ the parent context...
+        call ESMF_VMGetCurrent(vm=vm, rc=localrc)  ! determine current VM
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcTOReturn=rc)) return
+        call ESMF_VMBarrier(vm=vm, rc=localrc) ! barrier across parent VM
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcTOReturn=rc)) return
+      endif
     endif
 
+    ! pass back userRc
+    if (present(userRc)) userRc = localUserRc
+    
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1937,7 +1957,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: localUserRc  ! return code from user code
-    type(ESMF_Sync_Flag) :: blocking     ! local blocking flag
+    type(ESMF_Sync_Flag)    :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     type(ESMF_Status)       :: baseStatus
 
@@ -1968,24 +1988,31 @@ contains
       return
     endif
 
+    ! set the default mode to ESMF_SYNC_VASBLOCKING
+    if (present(syncflag)) then
+      blocking = syncflag
+    else
+      blocking = ESMF_SYNC_VASBLOCKING
+    endif
+
+    localUserRc = ESMF_SUCCESS  ! initialize to success
+    
     ! check if the child VM, i.e. the VM of this component, is currently marked
     ! as running...
     if (compp%vm_released) then
-      ! wait for all child PETs that run in this parent's PET VAS to finish
-      call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-        compp%vm_cargo, localUserRc, localrc)
-      ! localUserRc - return code of registered user callback method
-      ! localrc     - return code of ESMF internal callback stack
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
-      compp%vm_released = .false.       ! indicate child VM has been caught
-      ! set the default mode to ESMF_SYNC_VASBLOCKING
-      if (present(syncflag)) then
-        blocking = syncflag
-      else
-        blocking = ESMF_SYNC_VASBLOCKING
+      ! check if the calling PET has a present VM (i.e. was SetServices called)
+      if (compp%compStatus%vmIsPresent) then
+        ! wait for all child PETs that run in this parent's PET VAS to finish
+        call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
+          compp%vm_cargo, localUserRc, localrc)
+        ! localUserRc - return code of registered user callback method
+        ! localrc     - return code of ESMF internal callback stack
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcTOReturn=rc)) return
       endif
+      ! reset the released flag
+      compp%vm_released = .false.       ! indicate child VM has been caught
       ! for ESMF_SYNC_BLOCKING _all_ parent PETs will be synced on exit
       if (blocking == ESMF_SYNC_BLOCKING) then
         ! the current context _is_ the parent context...

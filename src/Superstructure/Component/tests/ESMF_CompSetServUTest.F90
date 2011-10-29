@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.35 2011/10/28 18:37:04 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.36 2011/10/29 00:01:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -94,8 +94,6 @@ program ESMF_CompSetServUTest
       configFile="grid.rc", rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    deallocate(petList)
 
 !-------------------------------------------------------------------------
 !   !
@@ -264,7 +262,8 @@ program ESMF_CompSetServUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     cname = "Atmosphere - in its own context"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, petList=petList, &
+      configFile="grid.rc", rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -313,11 +312,7 @@ program ESMF_CompSetServUTest
     !NEX_UTest
     write(name, *) "Calling Component Init"
     write(failMsg, *) "userRc not ESMF_SUCCESS"
-    if ((localPet/2)*2 == localPet) then
-      call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    else      
-      call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
-    endif
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
 !-------------------------------------------------------------------------
@@ -352,7 +347,7 @@ program ESMF_CompSetServUTest
     if ((localPet/2)*2 == localPet) then
       call ESMF_Test((userRc.eq.123456), name, failMsg, result, ESMF_SRCLINE)
     else
-      call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(userRc.eq.ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
     endif
 
 !-------------------------------------------------------------------------
@@ -553,6 +548,8 @@ program ESMF_CompSetServUTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
+
+    deallocate(petList)
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 

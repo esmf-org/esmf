@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.h,v 1.2 2011/10/27 21:38:27 theurich Exp $
+// $Id: ESMCI_CompTunnel.h,v 1.3 2011/10/29 00:01:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -120,8 +120,10 @@ class CompTunnel{
     int setServices(Comp *dualComp);
     int execute(cargotype *cargo);
     int wait(cargotype *cargo);
-    //--------------
+    // --- comm methods --------------
     int negotiate();
+    int dual2actual(void *msg, int len);
+    int actual2dual(void *msg, int len);
 };
 
 //==============================================================================

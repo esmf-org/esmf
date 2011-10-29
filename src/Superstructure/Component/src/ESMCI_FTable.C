@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.61 2011/10/27 21:38:29 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.62 2011/10/29 00:01:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.61 2011/10/27 21:38:29 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.62 2011/10/29 00:01:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -335,18 +335,20 @@ extern "C" {
       *localActualCompRootPet);
     if (*compTunnel == NULL){
       ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", rc);  
-      return;
+      return; // bail out
     }
-    //TODO: figure out where the delete should happen!!!!!!!!
-    //TODO: probably during destroy
     // call into setServices with the internal CompTunnel::SetServices wrapper
     int userRc;
     localrc =dualComp->setServices(ESMCI::CompTunnel::setServicesWrap, &userRc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
-      return;
+      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
+      return; // bail out on userRc b/c setServicesWrap is internal routine
     
-    // take care of userRc still!!!
-    
+    // Now that everything has returned successfully, mark the tunnel as
+    // connected.
+    // This must be done up on this level, so that _all_ PETs that call into
+    // SetServices() have the tunnel set to connected.
     (*compTunnel)->setConnected(true);
     
     // return successfully
@@ -726,8 +728,8 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   cargo->rcCount = 1;           // default
   cargo->esmfrc = new int[1];
   cargo->userrc = new int[1];
-  cargo->esmfrc[0] = ESMF_SUCCESS;  // initialize return code
-  cargo->userrc[0] = 0;             // initialize user return code
+  cargo->esmfrc[0] = ESMF_SUCCESS;  // initialize return code to SUCCESS
+  cargo->userrc[0] = ESMF_SUCCESS;  // initialize user return code to SUCCESS
   cargo->previousCargo = *vm_cargo; // support recursion
   cargo->previousParentFlag = vmplan->parentVMflag;    // support threaded rec.
   cargo->currentMethod = currentMethod;
@@ -800,7 +802,7 @@ void FTN(c_esmc_compwait)(
   if (compTunnel) dualFlag = compTunnel->isConnected();
   
   if (dualFlag){
-    // this is a dual component with an compTunnel that is connected
+    // this is a dual component with a compTunnel that is connected
     
 //printf("c_esmc_compwait(): in the dual component branch\n");
     compTunnel->print();
@@ -2008,6 +2010,9 @@ void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
 //==============================================================================
 char const *FTable::methodString(enum ESMCI::method method){
   switch(method){
+  case ESMCI::METHOD_NONE:
+    return "None";
+    break;
   case ESMCI::METHOD_INITIALIZE:
     return "Initialize";
     break;
@@ -2048,6 +2053,7 @@ char const *FTable::methodString(enum ESMCI::method method){
     return "Register";
     break;
   default:
+    return "Unknown";
     break;
   }
   return NULL;
