@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.29.2.2 2011/10/24 18:43:23 theurich Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.29.2.3 2011/10/31 21:03:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -204,7 +204,7 @@ program ESMF_CompSetServUTest
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !NEX_UTest
-#ifdef ESMF_TESTWITHTHREADS
+#if (defined ESMF_TESTWITHTHREADS && ! defined ESMF_NO_PTHREADS)
     ! The user SetVM() routine will not return ESMF_SUCCESS because it cannot
     ! make the Component threaded due to the fact that it was created with
     ! ESMF_CONTEXT_PARENT_VM. The following logic tests this.
@@ -250,7 +250,8 @@ program ESMF_CompSetServUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     cname = "Atmosphere - in its own context"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, petList=petList, &
+      configFile="grid.rc", rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -539,6 +540,8 @@ program ESMF_CompSetServUTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
+
+    deallocate(petList)
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
 
