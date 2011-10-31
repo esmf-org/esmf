@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.2 2011/10/29 14:59:15 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.3 2011/10/31 05:48:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -131,6 +131,7 @@ module ESMF_CompTunnelUTest_comp_mod
     ! local variables
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
+    type(ESMF_VM)          :: vm 
 
     ! Initialize
     rc = ESMF_SUCCESS
@@ -140,11 +141,24 @@ module ESMF_CompTunnelUTest_comp_mod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
-    ! in order to test blocking/non-blocking dual component feature put the
+      
+    ! In order to test blocking/non-blocking dual component feature put the
     ! actual component to sleep for a few seconds:
-    
     call ESMF_VMWtimeDelay(SLEEPTIME._ESMF_KIND_R8) ! sleep a few seconds
+    
+    ! Need a barrier so that time tests on the dual component PETs will be
+    ! as expected. This is only for testing! Generally this kind of
+    ! synchronization is not desirable.
+    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_VMBarrier(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     call ESMF_LogWrite("Actual Component exit Finalize after sleep", &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -181,7 +195,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.2 2011/10/29 14:59:15 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.3 2011/10/31 05:48:36 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
