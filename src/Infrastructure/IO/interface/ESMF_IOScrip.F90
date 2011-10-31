@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.34 2011/10/24 21:55:00 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.35 2011/10/31 19:45:17 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -787,6 +787,11 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           allocate(src_grid_dims(2))
           call ESMF_ScripInq(srcFile, grid_rank=src_grid_rank, grid_size=srcDim, &
 	      grid_dims=src_grid_dims, grid_corners=src_grid_corner, rc=status)
+	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
+	  ! by SCRIP, thus some of the SCRIP files did not set this value correctly.
+          ! This causes the scrip_test generating wrong output data, i.e.
+          ! the grid coordinates will not be written in the weight file
+          if (src_grid_rank == 1) src_grid_dims(1) = srcDim
           call ESMF_ScripInqUnits(srcFile,units = srcunits, rc=status)
         else
 	  ! If bilinear, we have to switch node and elment, so the nodeCount became srcDim and
@@ -796,20 +801,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
             call ESMF_EsmfInq(srcFile, nodeCount=srcDim,  &
 	        coordDim = srcCoordDim, elementCount=srcNodeDim, rc=status)
-                src_grid_corner =3;
+                src_grid_corner =3
 	  else
             call ESMF_EsmfInq(srcFile, elementCount=srcDim, maxNodePElement=src_grid_corner, &
 	        coordDim = srcCoordDim, nodeCount=srcNodeDim, rc=status)
 	  endif
           call ESMF_EsmfInqUnits(srcFile,units = srcunits, rc=status)
           allocate(src_grid_dims(1))
-          src_grid_dims(1)=1
+          src_grid_dims(1)=srcDim
           src_grid_rank = 1    
         endif 
         if (dstIsScriplocal) then
           allocate(dst_grid_dims(2))
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
 	     grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, rc=status)
+	  ! The grid_dims for an unstructured grie (grid_rank = 1) is not used
+	  ! by SCRIP, thus some of the SCRIP files did not set this value correctly.
+          ! This causes the scrip_test generating wrong output data, i.e.
+          ! the grid coordinates will not be written in the weight file
+          if (dst_grid_rank == 1) dst_grid_dims(1) = dstDim
           call ESMF_ScripInqUnits(dstFile,units = dstunits, rc=status)
         else
 	  ! If bilinear, we have to switch node and elment, so the nodeCount became srcDim and
@@ -819,14 +829,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	       methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
             call ESMF_EsmfInq(dstFile, nodeCount=dstDim,  &
 	        coordDim = dstCoordDim, elementCount=dstNodeDim, rc=status)
-                dst_grid_corner =3;
+                dst_grid_corner =3
 	  else
             call ESMF_EsmfInq(dstFile, elementCount=dstDim, maxNodePElement=dst_grid_corner, &
 	      coordDim = dstCoordDim, nodeCount=dstNodeDim, rc=status)    
 	  endif
           call ESMF_EsmfInqUnits(dstFile,units = dstunits, rc=status)
           allocate(dst_grid_dims(1))
-          dst_grid_dims(1)=1   
+          dst_grid_dims(1)=dstDim   
           dst_grid_rank = 1
         endif
         ! define dimensions
@@ -1256,10 +1266,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
-	     varStr = "nodeCoords";
+	     varStr = "nodeCoords"
 	   else
              ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
-	     varStr = "centerCoords";
+	     varStr = "centerCoords"
            endif
 	   if (ncStatus /= nf90_noerror) then
 	     print *, varStr, " does not exit"
@@ -1426,10 +1436,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod) then
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
-	     varStr = "nodeCoords";
+	     varStr = "nodeCoords"
 	   else
              ncStatus=nf90_inq_varid(ncid1,"centerCoords",VarId)
-	     varStr = "centerCoords";
+	     varStr = "centerCoords"
            endif
 	   if (ncStatus /= nf90_noerror) then
 	     print *, varStr, " does not exit"
@@ -2054,8 +2064,8 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
       rc)) return
 
     ! Decompose the elmt array evenly on all the PEs
-    localcount = elmtCount/PetCnt;
-    remain = mod(elmtCount,PetCnt);
+    localcount = elmtCount/PetCnt
+    remain = mod(elmtCount,PetCnt)
     startElmt = localcount * PetNo+1
     if (PetNo == (PetCnt-1)) localcount = localcount+remain
 
