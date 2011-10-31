@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.3 2011/10/31 05:48:36 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.4 2011/10/31 18:56:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -195,7 +195,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.3 2011/10/31 05:48:36 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.4 2011/10/31 18:56:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -448,9 +448,6 @@ print *, "delayTime (non-blocking) = ", delayTime
   call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+precTime, name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
-  call ESMF_VMWtime(startTime, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Wait for non-blocking Dual Finalize -> wait for Actual Finalize"
