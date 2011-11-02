@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.4 2011/10/31 18:56:32 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.5 2011/11/02 18:42:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
 
+! The SLEEPTIME macro defines the time in seconds that Finalize will delay
 #define SLEEPTIME 2
 
 module ESMF_CompTunnelUTest_comp_mod
@@ -195,7 +196,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.4 2011/10/31 18:56:32 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.5 2011/11/02 18:42:30 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -205,13 +206,14 @@ program ESMF_CompTunnelUTest
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
 
-  integer               :: rc, userRc, petCount, localPet, i
-  integer, allocatable  :: petList(:)
-  type(ESMF_VM)         :: vm
-  type(ESMF_GridComp)   :: actualComp, dualComp
-  real(ESMF_KIND_R8)    :: startTime, endTime, precTime, delayTime
+  integer                :: rc, userRc, petCount, localPet, i
+  integer, allocatable   :: petList(:)
+  type(ESMF_VM)          :: vm
+  type(ESMF_GridComp)    :: actualComp, dualComp
+  real(ESMF_KIND_R8)     :: startTime, endTime, precTime, delayTime
+  character(ESMF_MAXSTR) :: logString
   ! cumulative result: count failures; no failures equals "all pass"
-  integer               :: result = 0
+  integer                :: result = 0
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -232,12 +234,17 @@ program ESMF_CompTunnelUTest
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
+  !------------------------------------------------------------------------
+  ! construct petList for the actual Component
+  
   allocate(petList(ceiling(0.5 * petCount)))
   do i=1, size(petList)
     petList(i) = (i-1)*2  ! only the even numbered PETs
   enddo
   
-  print *, petList
+  write(logString, *) "Actual Component petList = ", petList
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -280,10 +287,17 @@ program ESMF_CompTunnelUTest
   !if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  ! construct petList for the dual Component
+
   allocate(petList(floor(0.5 * petCount)))
   do i=1, size(petList)
     petList(i) = (i-1)*2+1  ! only the odd numbered PETs
   enddo
+
+  write(logString, *) "Dual Component petList = ", petList
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -386,8 +400,10 @@ program ESMF_CompTunnelUTest
   call ESMF_VMWtimePrec(precTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
-print *, "precTime = ", precTime
-  
+  write(logString, *) "precTime = ", precTime
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_VMWtime(startTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -412,7 +428,6 @@ print *, "precTime = ", precTime
   call ESMF_VMWtime(endTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   delayTime = endTime - startTime
-print *, "delayTime (blocking) = ", delayTime
   if (ESMF_GridCompIsPetLocal(dualComp)) then
     ! PETs in Dual Component petList must be blocking
     call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-precTime, name, failMsg, result, ESMF_SRCLINE)
@@ -420,8 +435,11 @@ print *, "delayTime (blocking) = ", delayTime
     ! PETs not in Dual Component petList must not be blocking
     call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
+  write(logString, *) "delayTime (blocking) = ", delayTime
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
-    
+
   call ESMF_VMWtime(startTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
@@ -443,9 +461,11 @@ print *, "delayTime (blocking) = ", delayTime
   call ESMF_VMWtime(endTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   delayTime = endTime - startTime
-print *, "delayTime (non-blocking) = ", delayTime
   ! all PETs must not be blocking
   call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+precTime, name, failMsg, result, ESMF_SRCLINE)
+  write(logString, *) "delayTime (non-blocking) = ", delayTime
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -469,7 +489,6 @@ print *, "delayTime (non-blocking) = ", delayTime
   call ESMF_VMWtime(endTime, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   delayTime = endTime - startTime
-print *, "delayTime (wait) = ", delayTime
   if (ESMF_GridCompIsPetLocal(dualComp)) then
     ! PETs in Dual Component petList must be blocking
     call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-precTime, name, failMsg, result, ESMF_SRCLINE)
@@ -477,6 +496,9 @@ print *, "delayTime (wait) = ", delayTime
     ! PETs not in Dual Component petList must not be blocking
     call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+precTime, name, failMsg, result, ESMF_SRCLINE)
   endif
+  write(logString, *) "delayTime (wait) = ", delayTime
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
