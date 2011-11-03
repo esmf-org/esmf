@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.63 2011/11/03 04:31:22 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.64 2011/11/03 05:28:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.63 2011/11/03 04:31:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.64 2011/11/03 05:28:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1093,47 +1093,6 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   FTN(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, userRc,
     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
-  
-  // return successfully
-  if (rc) *rc = ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Ftable::setServices"
-void FTable::setServices(void *ptr, int *rc) {
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
-  // Check input
-  if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", rc);
-    return;
-  }
-  
-  ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
-
-  // time to startup the VM for this component (if not already started)...
-  ESMCI::VM *vm_parent;
-  localrc = f90comp->getVmParent(&vm_parent);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
-  ESMCI::VMPlan *vmplan_p;
-  localrc = f90comp->getVmPlan(&vmplan_p);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
-  void *vm_info;
-  localrc = f90comp->getVmInfo(&vm_info);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
-  if (vm_info==NULL){
-    // VM for this component has not been started yet
-    vm_info = vm_parent->startup(vmplan_p,
-      ESMCI_FTableCallEntryPointVMHop, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
-    // keep vm_info in a safe place (in parent component) 'till it's used again
-    FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
-  }
-  // ...now the component's VM is started up and placed on hold.
   
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
