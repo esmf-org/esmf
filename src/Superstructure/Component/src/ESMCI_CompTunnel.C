@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.C,v 1.4 2011/11/03 04:31:22 theurich Exp $
+// $Id: ESMCI_CompTunnel.C,v 1.5 2011/11/03 20:17:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -387,7 +387,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
     int *dualPetList = new int[dualPetCount];
     int *actualPetList = new int[actualPetCount];
 
-    // dual and actual comps to exchange petCount info
+    // dual and actual comps to exchange petList info
     if (isDual){
       // this is a dual component side
       for (int i=0; i<dualPetCount; i++)
@@ -455,7 +455,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
           int index = extraLimit + (localPet - limitSum);
           localRecvFromPet = actualPetList[index];
         }else{
-          int index = localPet / (revratio=1);
+          int index = localPet / (revratio+1);
           localRecvFromPet = actualPetList[index];          
         }
       }
