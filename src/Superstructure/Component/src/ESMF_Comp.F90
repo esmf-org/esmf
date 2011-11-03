@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.227 2011/10/29 00:01:57 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.228 2011/11/03 05:32:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -287,7 +287,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.227 2011/10/29 00:01:57 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.228 2011/11/03 05:32:04 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -998,7 +998,11 @@ contains
     if (present(clock)) then
       compp%argclock = clock
     else
-      ! use dummy variable
+      ! use dummy variable -> set to null pointer since this is deep C++ impl.
+      call ESMF_ClockSetThis(dummyclock, ESMF_NULL_POINTER, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcTOReturn=rc)) return
       compp%argclock = dummyclock
     endif
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.39 2011/08/23 05:28:08 eschwab Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.40 2011/11/03 05:32:06 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1340,13 +1340,21 @@ module ESMF_ComplianceICMod
     type(ESMF_Clock), intent(inout)         :: clockCopy
     integer,          intent(out), optional :: rc
     
+    type(ESMF_Pointer)                      :: clockThis
     logical                                 :: clockValid
     
     if (present(rc)) rc = ESMF_SUCCESS
     
     clockValid = .true.
     ! Ensure that the Clock is a valid object
-    if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) then
+    ! Clock has deep C++ implementation, thus must also check this pointer here
+    call ESMF_ClockGetThis(clock, clockThis, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
+      (clockThis == ESMF_NULL_POINTER)) then
       call ESMF_LogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
@@ -1374,6 +1382,7 @@ module ESMF_ComplianceICMod
     type(ESMF_Clock), intent(inout)         :: clockCopy
     integer,          intent(out), optional :: rc
     
+    type(ESMF_Pointer)                      :: clockThis
     logical                                 :: clockValid
     logical                                 :: clockModified
     
@@ -1392,7 +1401,14 @@ module ESMF_ComplianceICMod
     
     clockValid = .true.
     ! Ensure that the Clock is a valid object
-    if (ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) clockValid = .false.
+    ! Clock has deep C++ implementation, thus must also check this pointer here
+    call ESMF_ClockGetThis(clock, clockThis, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=__FILE__)) &
+      return  ! bail out
+    if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
+      (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
     
     if (clockValid) then
       clockModified = .false.
