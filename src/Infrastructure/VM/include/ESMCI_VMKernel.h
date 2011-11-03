@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.12 2011/10/07 23:28:16 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.13 2011/11/03 04:22:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -281,6 +281,8 @@ class VMK{
     int getTid(int i);             // return tid for PET
     int getVas(int i);             // return vas for PET
     int getLpid(int i);            // return lpid for PET
+    
+    int getMaxTag();               // return maximum value of tag
     
     // get() calls
     int getLocalPet() const {return mypet;}
