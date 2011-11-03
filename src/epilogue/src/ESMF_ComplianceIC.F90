@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.40 2011/11/03 05:32:06 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.41 2011/11/03 05:45:32 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -321,10 +321,6 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    if (userrc /= ESMF_SUCCESS) then
-      rc=userrc
-      return ! bail out
-    endif
    
     ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
@@ -396,6 +392,9 @@ module ESMF_ComplianceICMod
       
     ! Stop Compliance Checking: InitializeEpilogue
     !---------------------------------------------------------------------------
+    
+    ! if not bailed for other reasons then pass back the actual userrc
+    rc = userrc
 
   end subroutine ic_init
 
@@ -492,10 +491,6 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    if (userrc /= ESMF_SUCCESS) then
-      rc=userrc
-      return ! bail out
-    endif
 
     ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
@@ -550,6 +545,9 @@ module ESMF_ComplianceICMod
       
     ! Stop Compliance Checking: RunEpilogue
     !---------------------------------------------------------------------------
+
+    ! if not bailed for other reasons then pass back the actual userrc
+    rc = userrc
 
   end subroutine ic_run
 
@@ -638,10 +636,6 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    if (userrc /= ESMF_SUCCESS) then
-      rc=userrc
-      return ! bail out
-    endif
 
     ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
@@ -688,6 +682,9 @@ module ESMF_ComplianceICMod
       
     ! Stop Compliance Checking: FinalizeEpilogue
     !---------------------------------------------------------------------------
+
+    ! if not bailed for other reasons then pass back the actual userrc
+    rc = userrc
 
   end subroutine ic_final
 
