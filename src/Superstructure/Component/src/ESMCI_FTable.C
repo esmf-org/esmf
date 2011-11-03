@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.62 2011/10/29 00:01:57 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.63 2011/11/03 04:31:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.62 2011/10/29 00:01:57 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.63 2011/11/03 04:31:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -343,7 +343,7 @@ extern "C" {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return; // bail out
     if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
-      return; // bail out on userRc b/c setServicesWrap is internal routine
+      return; // bail out on userRc b/c setServicesWrap is an internal routine
     
     // Now that everything has returned successfully, mark the tunnel as
     // connected.
@@ -636,35 +636,36 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   }
 
   // determine whether this is a dual component that is ready to execute
-  bool dualFlag = false;  // initialize
-  if (compTunnel) dualFlag = compTunnel->isConnected();
+  bool dualConnected = false;  // initialize
+  if (compTunnel) dualConnected = compTunnel->isConnected();
   
-  if (dualFlag){
-    // this is a dual component with an compTunnel that is connected
+  if (dualConnected){
+    // this is a dual component with a compTunnel that is connected
 
-    //TODO: check whether "name" is found in dual components ftable. If so thne
+    //TODO: check whether "name" is found in dual components ftable. If so then
     //TODO: consider that an override, and execute dual components method
-    //TODO:  instead
-    
-//printf("in the dual component branch, name: %s\n", name);
-    compTunnel->print();
+    //TODO: instead
     
     localrc = compTunnel->execute(cargo);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &esmfrc)){
+      cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
+      return NULL;
+    }
+    
+    // ...the user return code will not be available until wait() is called
     
   }else{
     // this is a regular component, use the local ftable for user code callback
-//printf("in the actual component branch, name: %s\n", name);
     localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
-    // ...back from user code
-    // put the return codes into cargo 
-    cargo->userrc[mytid] = userrc;
-  }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &esmfrc)){
+      cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
+      return NULL;
+    }
     
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &esmfrc)){
-    cargo->esmfrc[mytid] = esmfrc;
-    return NULL;
+    // ...back from user code
+    cargo->userrc[mytid] = userrc;  // put the user return code into cargo 
   }
-  
+      
   // return successfully
   cargo->esmfrc[mytid] = ESMF_SUCCESS;
   return NULL;
@@ -694,8 +695,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // check to make sure VM has really been started up for this Component
   if (*vm_info == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL, 
-      "No VM was started for this Component - missing SetServices() call?",
-      rc);
+      "No VM was started for this Component - missing SetServices() call?", rc);
     return; // bail out
   }
 
@@ -720,33 +720,35 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   if (i > -1)
     currentMethod = ftable->methodFromIndex(i);
   
-  ESMCI::cargotype *cargo = new ESMCI::cargotype;
-  strcpy(cargo->name, name);    // copy trimmed type string
-  delete[] name;  // delete memory that "newtrim" allocated above
-  cargo->f90comp = f90comp;     // pointer to Fortran component
-  cargo->ftable = ftable;       // pointer to function table
-  cargo->rcCount = 1;           // default
-  cargo->esmfrc = new int[1];
-  cargo->userrc = new int[1];
-  cargo->esmfrc[0] = ESMF_SUCCESS;  // initialize return code to SUCCESS
-  cargo->userrc[0] = ESMF_SUCCESS;  // initialize user return code to SUCCESS
-  cargo->previousCargo = *vm_cargo; // support recursion
-  cargo->previousParentFlag = vmplan->parentVMflag;    // support threaded rec.
-  cargo->currentMethod = currentMethod;
-  if (phase)
-    cargo->currentPhase = *phase;
-  else
-    cargo->currentPhase = 1;    // default
-  *vm_cargo=(void*)cargo;           // store pointer to the cargo structure
+  if (*method != ESMCI::METHOD_WAIT){ // wait does not get new cargo
+    ESMCI::cargotype *cargo = new ESMCI::cargotype;
+    strcpy(cargo->name, name);    // copy trimmed type string
+    cargo->f90comp = f90comp;     // pointer to Fortran component
+    cargo->ftable = ftable;       // pointer to function table
+    cargo->rcCount = 1;           // default
+    cargo->esmfrc = new int[1];
+    cargo->userrc = new int[1];
+    cargo->esmfrc[0] = ESMF_SUCCESS;  // initialize return code to SUCCESS
+    cargo->userrc[0] = ESMF_SUCCESS;  // initialize user return code to SUCCESS
+    cargo->previousCargo = *vm_cargo; // support recursion
+    cargo->previousParentFlag = vmplan->parentVMflag;  // support threaded rec.
+    cargo->currentMethod = currentMethod;
+    if (phase)
+      cargo->currentPhase = *phase;
+    else
+      cargo->currentPhase = 1;    // default
+    *vm_cargo=(void*)cargo;           // store pointer to the cargo structure
   
-  if (cargo->previousCargo != NULL){
-    // this is a recursive method invocation
-    // use the parentVMflag to indicate running in already existing child VM
-    vmplan->parentVMflag = 1; 
+    if (cargo->previousCargo != NULL){
+      // this is a recursive method invocation
+      // use the parentVMflag to indicate running in already existing child VM
+      vmplan->parentVMflag = 1; 
+    }
   }
+  delete[] name;  // delete memory that "newtrim" allocated above
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
-  localrc = vm_parent->enter(vmplan, *vm_info, (void*)cargo);
+  localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return; // bail out
         
@@ -798,18 +800,28 @@ void FTN(c_esmc_compwait)(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
 
   // determine whether this is a dual component that is ready to execute
-  bool dualFlag = false;  // initialize
-  if (compTunnel) dualFlag = compTunnel->isConnected();
+  bool dualConnected = false;  // initialize
+  if (compTunnel) dualConnected = compTunnel->isConnected();
   
-  if (dualFlag){
+  if (dualConnected){
     // this is a dual component with a compTunnel that is connected
+    // -> execute compTunnel::wait() on dual components VM.
     
-//printf("c_esmc_compwait(): in the dual component branch\n");
-    compTunnel->print();
+    ESMCI::State *is = compTunnel->getImportState();
+    ESMCI::State *es = compTunnel->getImportState();
+    ESMCI::Clock **clock = compTunnel->getClock();
+
+    ESMCI::Clock *clockP = NULL; // default initialize
+    if (clock) clockP = *clock;
     
-    localrc = compTunnel->wait(cargo);
+    int userRc = ESMC_RC_NOT_IMPL;
+    
+    localrc = f90comp->execute(ESMCI::METHOD_WAIT, is, es, clockP, 
+      ESMF_NONBLOCKING, 1, &userRc);  // nonblocking or else endless recursion
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
+    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
+      return; // bail out too because this is for an internal routine
     
   }
   
@@ -1038,13 +1050,14 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   // TODO: shouldn't need to expand the table here - should be done inside
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
-  localrc = (tabptr)->extend(32, 2); // room for 8 funcs, 2 data
+  localrc = (tabptr)->extend(32, 2); // room for 32 funcs, 2 data
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
   // Set callback function and arguments
   ESMCI::Comp *f90comp = (ESMCI::Comp *)ptr;
-  localrc = (tabptr)->setFuncPtr("Register", (void *)func, f90comp);
+  localrc = (tabptr)->setFuncPtr(methodString(METHOD_SETSERVICES),
+    (void *)func, f90comp);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
@@ -1156,7 +1169,7 @@ void FTable::setVM(void *ptr, void (*func)(), int *userRc, int *rc) {
   // TODO: shouldn't need to expand the table here - should be done inside
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
-  localrc = (tabptr)->extend(32, 2); // room for 8 funcs, 2 data
+  localrc = (tabptr)->extend(32, 2); // room for 32 funcs, 2 data
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
     return;
 
@@ -1635,13 +1648,13 @@ int FTable::callVFuncPtr(
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
       (*vf)((void *)comp, userrc);
       // conditionally set entry point for ServiceLoop
-      if (!strcmp(name, "Register")){
+      if (!strcmp(name, methodString(METHOD_SETSERVICES))){
         localrc = comp->setEntryPoint(METHOD_SERVICELOOP, ServiceLoop);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
           return rc; // bail out
       }      
       // conditionally call into compliance IC for register
-      if (!strcmp(name, "Register")){
+      if (!strcmp(name, methodString(METHOD_SETSERVICES))){
         char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
         bool complianceCheckFlag = false;  // default internal compl. check off
         if (envVar != NULL){
@@ -2051,6 +2064,9 @@ char const *FTable::methodString(enum ESMCI::method method){
     break;
   case ESMCI::METHOD_SETSERVICES:
     return "Register";
+    break;
+  case ESMCI::METHOD_WAIT:
+    return "Wait";
     break;
   default:
     return "Unknown";

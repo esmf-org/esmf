@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 2011/10/29 00:03:08 theurich Exp $ 
+# $Id: makefile,v 1.49 2011/11/03 04:31:24 theurich Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -97,7 +97,7 @@ RUN_ESMF_StdCompMethodsUTestUNI:
 
 RUN_ESMF_CompTunnelUTest:
 	cp -f grid.rc $(ESMF_TESTDIR)
-	$(MAKE) TNAME=CompTunnel NP=5 ftest
+	$(MAKE) TNAME=CompTunnel NP=8 ftest
 
 # ---
 

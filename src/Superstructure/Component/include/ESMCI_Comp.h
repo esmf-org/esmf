@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.25 2011/10/25 23:05:39 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.26 2011/11/03 04:31:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ enum method { METHOD_NONE=0,
   METHOD_WRITERESTART, METHOD_READRESTART, METHOD_SERVICELOOP,
   METHOD_INITIALIZEIC, METHOD_RUNIC, METHOD_FINALIZEIC, 
   METHOD_WRITERESTARTIC, METHOD_READRESTARTIC, METHOD_SERVICELOOPIC,
-  METHOD_SETSERVICES };
+  METHOD_SETSERVICES, METHOD_WAIT};
 
 
 // class definition

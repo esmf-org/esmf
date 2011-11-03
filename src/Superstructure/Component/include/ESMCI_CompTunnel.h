@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.h,v 1.3 2011/10/29 00:01:55 theurich Exp $
+// $Id: ESMCI_CompTunnel.h,v 1.4 2011/11/03 04:31:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,6 +62,7 @@ class CompTunnel{
     VM *bridgeVM;
     //--------------
     //-- vars for the current negotiation prototype - may move into inter-VM --
+    int tag;            // safe tag for bridgeVM communications
     int interLocalPet;  // local PET in terms of bridgeVM
     int interRootPet;   // this side's rootPET in terms of bridgeVM
     int localPet;       // local PET in terms of this side's VM
@@ -69,30 +70,32 @@ class CompTunnel{
     std::vector<int> localSendToPetList;  // other side's PETs terms of bridgeVM
     int localRecvFromPet; // other side's PET that sends in terms of bridgeVM 
     //--------------
+  private:
+    void zeroOut(void){
+      connected = false;
+      dual = NULL;
+      actual = NULL;
+      method = METHOD_NONE;
+      int phase = 0;
+      importState = NULL;
+      exportState = NULL;
+      clock = NULL;
+      localActualComp = NULL;
+      localSendToPetList.resize(0);
+    }
   public:
     // native C++ constructors/destructors
     CompTunnel(void){
-      connected = false;
-      dual = NULL;
-      actual = NULL;
-      localActualComp = NULL;
-      localSendToPetList.resize(0);
+      zeroOut();
     }
     CompTunnel(Comp *localActualComp_, int localActualCompRootPet_){
-      connected = false;
-      dual = NULL;
-      actual = NULL;
+      zeroOut();
       localActualComp = localActualComp_;
       localActualCompRootPet = localActualCompRootPet_;
-      localSendToPetList.resize(0);
     }
     CompTunnel(VM *bridgeVM_){
-      connected = false;
-      dual = NULL;
-      actual = NULL;
-      localActualComp = NULL;
+      zeroOut();
       bridgeVM = bridgeVM_;
-      localSendToPetList.resize(0);
     }
     ~CompTunnel(void){
       connected = false;
@@ -114,11 +117,15 @@ class CompTunnel{
     void setImportState(State *state){ importState=state;}
     void setExportState(State *state){ exportState=state;}
     void setClock(Clock **clock_){ clock=clock_;}
+    State *getImportState()const{ return importState; }
+    State *getExportState()const{ return exportState; }
+    Clock **getClock()const{ return clock; }
     //--------------
     int print(void)const;
     static void setServicesWrap(Comp *dualComp, int *rc);
     int setServices(Comp *dualComp);
     int execute(cargotype *cargo);
+    static void waitWrap(Comp *dualComp, int *rc);
     int wait(cargotype *cargo);
     // --- comm methods --------------
     int negotiate();
