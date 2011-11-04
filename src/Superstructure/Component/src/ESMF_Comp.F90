@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.228 2011/11/03 05:32:04 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.229 2011/11/04 00:44:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -188,6 +188,7 @@ module ESMF_CompMod
     type(ESMF_VMPlan)   :: vmplan           ! reference to VMPlan
     type(ESMF_Pointer)  :: vm_info          ! holding pointer to info
     type(ESMF_Pointer)  :: vm_cargo         ! holding pointer to cargo
+    integer             :: vm_recursionCount  ! keep track of recursion level
 
     type(ESMF_State)    :: is, es   ! hold state args refs for thread-safety
     type(ESMF_Clock)    :: argclock ! hold clock arg ref for thread-safety
@@ -287,7 +288,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.228 2011/11/03 05:32:04 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.229 2011/11/04 00:44:15 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -575,6 +576,7 @@ contains
     nullify(compp%petlist)
     compp%vm_info = ESMF_NULL_POINTER
     compp%vm_cargo = ESMF_NULL_POINTER
+    compp%vm_recursionCount = 0
     nullify(compp%is%statep)
     nullify(compp%es%statep)
     compp%vm_released = .false.
@@ -1033,7 +1035,7 @@ contains
       ! callback into user code
       call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
         compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
-        phaseArg, localrc)
+        phaseArg, compp%vm_recursionCount, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return

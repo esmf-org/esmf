@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.64 2011/11/03 05:28:24 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.65 2011/11/04 00:44:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.64 2011/11/03 05:28:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.65 2011/11/04 00:44:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -685,6 +685,7 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   ESMCI::FTable **ptr,        // p2 to the ftable of this component
   enum ESMCI::method *method, // method type
   int *phase,                 // phase selector
+  int *recursionCount,        // keeping track of recursion level of component
   int *rc                     // return code
   ){
        
@@ -720,7 +721,12 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   if (i > -1)
     currentMethod = ftable->methodFromIndex(i);
   
-  if (*method != ESMCI::METHOD_WAIT){ // wait does not get new cargo
+  // support for recursion _and_ re-enterance for non-blocking mode
+  bool newCargoFlag = true;   // initialize
+  if (recursionCount && *recursionCount==0 && *vm_cargo)
+    newCargoFlag = false; // this not a recusion but a re-enterance
+  
+  if (newCargoFlag){
     ESMCI::cargotype *cargo = new ESMCI::cargotype;
     strcpy(cargo->name, name);    // copy trimmed type string
     cargo->f90comp = f90comp;     // pointer to Fortran component
@@ -747,6 +753,9 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   }
   delete[] name;  // delete memory that "newtrim" allocated above
 
+  // increment recursionCount before entering child VM
+  if (recursionCount) (*recursionCount)++;
+
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
@@ -759,6 +768,9 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   // child VM, not failure or success of the callback.
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
+  
+  // decrement recursionCount again
+  if (recursionCount) (*recursionCount)--;
   
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -1086,7 +1098,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   void *vm_cargo = NULL;
   enum method reg = METHOD_SETSERVICES;
   FTN(c_esmc_ftablecallentrypointvm)(f90comp, &vm_parent, &vmplan_p, &vm_info,
-    &vm_cargo, &tabptr, &reg, NULL, &localrc);
+    &vm_cargo, &tabptr, &reg, NULL, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   
   // wait for the register routine to return

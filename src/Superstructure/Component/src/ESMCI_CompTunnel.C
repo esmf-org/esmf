@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.C,v 1.5 2011/11/03 20:17:43 theurich Exp $
+// $Id: ESMCI_CompTunnel.C,v 1.6 2011/11/04 00:44:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -138,14 +138,34 @@ printf("calling CompTunnel::execute() for name: %s\n", cargo->name);
       
 printf("in CompTunnel::execute() ... call CompTunnel::wait, cargo=%p\n", cargo);
 
-      localrc = wait(cargo);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;  // bail out
-      
+      if (outstandingWaitFlag){
+        // only call into wait() if there is an outstanding interaction
+printf("in CompTunnel::execute() ... call CompTunnel::wait really calling\n");
+        localrc = wait(cargo);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+          return rc;  // bail out
+        outstandingWaitFlag = false;  // reset the flag
+      }
 
     }else if (bridgeVM){
       
 printf("in CompTunnel::execute() ... call CompTunnel::dual2actual() with method %d\n", method);
+
+      // first test whether this an outstanding connection that needs wait
+      if (outstandingWaitFlag){
+        if (method==METHOD_NONE){
+          // for wrapup call it is o.k. to just swallow the return codes
+          localrc = wait(cargo);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+            return rc;  // bail out
+          outstandingWaitFlag = false;  // reset the flag
+        }else{
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+            "- An outstanding connection first requires a CompTunnel::wait()!",
+            &rc);
+          return rc;  // bail out
+        }
+      }
 
       // send method info to actual component
       localrc = dual2actual(&method, sizeof(enum method));
@@ -156,7 +176,10 @@ printf("in CompTunnel::execute() ... call CompTunnel::dual2actual() with method 
       localrc = dual2actual(&phase, sizeof(int));
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
         return rc;  // bail out
-
+      
+      // indicate that there is an outstanding connection that needs a wait
+      outstandingWaitFlag = true;   // set the flag
+      
     }else if (localActualComp){
       // the actual component is local
       //TODO: NOT SURE THIS WORKS ANYMORE!!!
@@ -452,7 +475,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
         int extraLimit = dualPetCount % actualPetCount;
         int limitSum = (revratio+1)*extraLimit;
         if (localPet >= limitSum){
-          int index = extraLimit + (localPet - limitSum);
+          int index = extraLimit + (localPet - limitSum) / revratio;
           localRecvFromPet = actualPetList[index];
         }else{
           int index = localPet / (revratio+1);
@@ -469,7 +492,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
         int extraLimit = actualPetCount % dualPetCount;
         int limitSum = (revratio+1)*extraLimit;
         if (localPet >= limitSum){
-          int index = extraLimit + (localPet - limitSum);
+          int index = extraLimit + (localPet - limitSum) / revratio;
           localRecvFromPet = dualPetList[index];
         }else{
           int index = localPet / (revratio+1);

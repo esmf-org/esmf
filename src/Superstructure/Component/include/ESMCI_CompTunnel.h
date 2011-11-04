@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.h,v 1.4 2011/11/03 04:31:21 theurich Exp $
+// $Id: ESMCI_CompTunnel.h,v 1.5 2011/11/04 00:44:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,6 +70,7 @@ class CompTunnel{
     std::vector<int> localSendToPetList;  // other side's PETs terms of bridgeVM
     int localRecvFromPet; // other side's PET that sends in terms of bridgeVM 
     //--------------
+    bool outstandingWaitFlag; // indicate whether a local wait call is required
   private:
     void zeroOut(void){
       connected = false;
@@ -82,6 +83,7 @@ class CompTunnel{
       clock = NULL;
       localActualComp = NULL;
       localSendToPetList.resize(0);
+      outstandingWaitFlag = false;
     }
   public:
     // native C++ constructors/destructors
