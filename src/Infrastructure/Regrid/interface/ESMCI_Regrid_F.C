@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.67 2011/10/04 19:35:32 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.68 2011/11/04 22:34:14 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ namespace ESMCI {
 // prototypes from below
 bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts);
 bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
-void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise);
+void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
 
 // external C functions
 extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -94,44 +94,70 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
   try {
 
-#if 0
-    bool concave;
-    bool clockwise;
+#if 1
+    //// Precheck Meshes for errors
+    bool concave=false;
+    bool clockwise=false;
+    bool degenerate=false;
 
-    // Check mesh elements 
-    check_for_concave_or_clkwise(srcmesh, &concave, &clockwise);
-    
+    // Check source mesh elements 
+    if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+      // Check cells for conservative
+      cnsrv_check_for_mesh_errors(srcmesh, false, &concave, &clockwise, &degenerate);
+    } else {
+#if 0
+      // STILL NEED TO FINISH THIS
+      // Check cell nodes for non-conservative
+      noncnsrv_check_for_mesh_errors(srcmesh, true, &concave, &clockwise, &degenerate);
+#endif     
+    }
+
     // Concave
     if (concave) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "- Src mesh contains a concave element", &localrc)) throw localrc;
+         "- Src contains a concave cell", &localrc)) throw localrc;
     }
 
     // Clockwise
     if (clockwise) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-       "- Src mesh contains an element whos nodes are clockwise", &localrc)) throw localrc;
+       "- Src contains a cell whose corners are clockwise", &localrc)) throw localrc;
     }
 
-    // Only check dst mesh elements for conservative because for others just nodes are used
+    // Degenerate
+    if (degenerate) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+         "- Src contains a cell that has corners close enough that the cell collapses to a line or point", &localrc)) throw localrc;
+    }
+
+    // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
+    // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check mesh elements 
-      check_for_concave_or_clkwise(dstmesh, &concave, &clockwise);
+      cnsrv_check_for_mesh_errors(dstmesh, false, &concave, &clockwise, &degenerate);
       
       // Concave
       if (concave) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                "- Dst mesh contains a concave element", &localrc)) throw localrc;
+        "- Dst contains a concave cell", &localrc)) throw localrc;
       }
       
       // Clockwise
       if (clockwise) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                "- Dst mesh contains an element whos nodes are clockwise", &localrc)) throw localrc;
+         "- Dst contains a cell whose corners are clockwise", &localrc)) throw localrc;
+      }
+
+      // Degenerate
+      if (degenerate) {
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "- Dst contains a cell which has corners close enough that the cell collapses to a line or point", &localrc)) throw localrc;
       }
     }
 #endif
@@ -543,7 +569,7 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
 }
 
 
-void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
+void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
   
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
@@ -555,10 +581,14 @@ void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
   // Init variables
   *concave=false;
   *clockwise=false;
+  *degenerate=false;
 
   // Get coord field
   MEField<> *cfield = mesh.GetCoordField();
-  
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("elem_mask");  
+
   // Get dimensions
   int sdim=mesh.spatial_dim();
   int pdim=mesh.parametric_dim();
@@ -573,9 +603,28 @@ void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
         
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
+
+        // Skip masked elements
+        if (mptr != NULL) {
+          double *m=mptr->data(elem);
+          if (*m > 0.5) continue;
+        }
         
         // Get the coords
         get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+        
+        // Get rid of 0 len edges
+        remove_0len_edges2D(&num_poly_nodes, poly_coords);
+
+        // Check if degenerate
+        if (num_poly_nodes <3) {
+          if (ignore_degenerate) {
+            continue;
+          } else {
+            *degenerate=true;
+            return;
+          }
+        }
         
         // Get elem rotation
         bool left_turn;
@@ -602,9 +651,28 @@ void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
         
+        // Skip masked elements
+        if (mptr != NULL) {
+          double *m=mptr->data(elem);
+          if (*m > 0.5) continue;
+        }
+
         // Get the coords
         get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
-        
+
+        // Get rid of 0 len edges
+        remove_0len_edges3D(&num_poly_nodes, poly_coords);
+
+        // Check if degenerate
+        if (num_poly_nodes <3) {
+          if (ignore_degenerate) {
+            continue;
+          } else {
+            *degenerate=true;
+            return;
+          }
+        } 
+       
         // Get elem rotation
         bool left_turn;
         bool right_turn;
@@ -617,7 +685,10 @@ void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
             return;
           } else {
             *clockwise=true;
-            return;
+            // printf(" clockwise element=%d\n",elem.get_id());
+            // printf(" num nodes=%d\n",num_poly_nodes);
+            // write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
+           return;
           }
         }
       }
@@ -628,6 +699,141 @@ void check_for_concave_or_clkwise(Mesh &mesh, bool *concave, bool *clockwise) {
 
 }
 
+#if 0
+// Right now I think the only thing that'll mess up the non-conservative is concave elements
+void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
+  
+  // Declare polygon information
+#define  MAX_NUM_POLY_COORDS  60
+#define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
+#define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
+  int num_poly_nodes;
+  double poly_coords[MAX_NUM_POLY_COORDS];
+  
+  // Init variables
+  *concave=false;
+  *clockwise=false;
+  *degenerate=false;
 
+  // Get coord field
+  MEField<> *cfield = mesh.GetCoordField();
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("mask");  
+
+  // Get dimensions
+  int sdim=mesh.spatial_dim();
+  int pdim=mesh.parametric_dim();
+    
+  // Compute area depending on dimensions
+  if (pdim==2) {
+    if (sdim==2) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        // Get the element
+        const MeshObj &elem = *ei; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+
+       
+        /// NEED TO CHANGE THIS TO WORK WITH ELEMENT NODES (OR MAKE A FUNCTION?)
+        // Skip masked elements
+        if (mptr != NULL) {
+          double *m=mptr->data(elem);
+          if (*m > 0.5) continue;
+        }
+        
+        // Get the coords
+        get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+        
+        // Get rid of 0 len edges
+        remove_0len_edges2D(&num_poly_nodes, poly_coords);
+
+        // Check if degenerate
+        if (num_poly_nodes <3) {
+          if (ignore_degenerate) {
+            continue;
+          } else {
+            *degenerate=true;
+            return;
+          }
+        }
+        
+        // Get elem rotation
+        bool left_turn;
+        bool right_turn;
+        rot_2D_2D_cart(num_poly_nodes, poly_coords, &left_turn, &right_turn);
+        
+        // Look for errors
+        if (right_turn) {
+          if (left_turn) { 
+            *concave=true;
+            return;
+          } else {
+            *clockwise=true;
+            return;
+          }
+        }
+      }
+    } else if (sdim==3) {
+      MeshDB::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        // Get the element
+        const MeshObj &elem = *ei; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+
+       /// NEED TO CHANGE THIS TO WORK WITH ELEMENT NODES (OR MAKE A FUNCTION?)        
+        // Skip masked elements
+        if (mptr != NULL) {
+          double *m=mptr->data(elem);
+          if (*m > 0.5) continue;
+        }
+
+        // Get the coords
+        get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+
+        // Get rid of 0 len edges
+        remove_0len_edges3D(&num_poly_nodes, poly_coords);
+
+        // Check if degenerate
+        if (num_poly_nodes <3) {
+          if (ignore_degenerate) {
+            continue;
+          } else {
+            *degenerate=true;
+            return;
+          }
+        } 
+       
+        // Get elem rotation
+        bool left_turn;
+        bool right_turn;
+        rot_2D_3D_sph(num_poly_nodes, poly_coords, &left_turn, &right_turn);
+        
+        // Look for errors
+        if (right_turn) {
+          if (left_turn) { 
+            *concave=true;
+            return;
+          } else {
+            *clockwise=true;
+            // printf(" clockwise element=%d\n",elem.get_id());
+            // printf(" num nodes=%d\n",num_poly_nodes);
+            // write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
+           return;
+          }
+        }
+      }
+    }
+  }
+
+  // TODO: Check to see if 3D elements are in correct order.
+
+}
+
+#endif
 
 #undef  ESMC_METHOD
