@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.51 2011/10/20 01:08:05 eschwab Exp $
+% $Id: Attribute_pack.tex,v 1.52 2011/11/04 22:05:14 murphysj Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -61,20 +61,20 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
-     {\tt Agency} & An administrative unit of government.& DoD, DOE, DOI, NASA, NOAA, NSF\\
-     {\tt Author} & The person who created the content of a book, article, or other source. & N/A\\
-     {\tt CodingLanguage} & The computer language in which a unit of software is written. & C, C++, F77, F90, Java\\
-     {\tt ComponentLongName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out. & N/A\\
-     {\tt ComponentShortName} & A version of the component name that contains acronyms. & N/A\\
-     {\tt Discipline} & A subject, theme, category, or general area of interest.& Aerosol, Fisheries, Climate, Carbon Cycle, Hydrology, Land, Ocean, Polar, Sediment, Storm Surge, Turbulence, Weather, Wave, Weather Prediction \\
-     {\tt Institution} & An organization associated with a model component, simulation, or dataset.& N/A\\
-     {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& CCA, ESMF, Flume, FMS, OASIS, SWMF \\
-     {\tt PhysicalDomain} & A description of the geographic range being simulated. & Atmosphere, Earth System, Ice, Lake, Land Ocean, River\\
-     {\tt Version} & A specific form or variation of an artifact, i.e. a unit of software or metadata. & N/A\\ 
+     {\tt Agency} & An administrative unit of government.& DoD, DOE, DOI, NASA, NOAA, NSF\\ 
+     {\tt Author} & The person who created the content of a book, article, or other source. & N/A\\ 
+     {\tt CodingLanguage} & The computer language in which a unit of software is written. & C, C++, F77, F90, Java\\ 
+     {\tt ComponentLongName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out. & N/A\\ 
+     {\tt ComponentShortName} & A version of the component name that contains acronyms. & N/A\\ 
+     {\tt Discipline} & A subject, theme, category, or general area of interest.& Aerosol, Fisheries, Climate, Carbon Cycle, Hydrology, Land, Ocean, Polar, Sediment, Storm Surge, Turbulence, Weather, Wave, Weather Prediction \\ 
+     {\tt Institution} & An organization associated with a model component, simulation, or dataset.& N/A\\ 
+     {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& CCA, ESMF, Flume, FMS, OASIS, SWMF \\ 
+     {\tt PhysicalDomain} & A description of the geographic range being simulated. & Atmosphere, Earth System, Ice, Lake, Land Ocean, River\\ 
+     {\tt Version} & A specific form or variation of an artifact, i.e. a unit of software or metadata. & N/A\\
      \hline\hline
 \end{tabular}
 
@@ -106,7 +106,8 @@ There are many attributes that are used to describe components. There are curren
     \end{itemize}
 \end{itemize}
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
+
+\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
@@ -150,7 +151,7 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package describes the platform a particular simulation is run on. It must be created in conjunction with the CIM Main Package (see above). This package is nested within the CIM Main Package (above); see the description in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
@@ -217,7 +218,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
      \hline\hline
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
@@ -245,7 +246,7 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies maintained by \htmladdnormallink{METAFOR}{http://metaforclimate.eu/}.  One or more values can be set (via an array) for a property name.
 \end{itemize}
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
@@ -268,7 +269,7 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package is used to specify any number of custom, user-defined attributes of a component and have them output in valid CIM XML format.  This differs from the scientific properties package above in that the names and values are custom, not part of any controlled vocabulary.  It also differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.  One or more values can be set (via an array) for an attribute name.
 \end{itemize}
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{2cm}}
+\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
@@ -305,7 +306,7 @@ There is currently only 1 predefined State-level Attribute package:
 
 \begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
     \hline\hline
-    {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+    {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\ 
     \hline\hline
     {\tt Intent} & An indication of whether a state is imported into or exported from a particular model component. This refers to coupling, and not history output. & Export,Import \\
     \hline\hline
@@ -384,7 +385,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: ESG has the ability to list variables as either import or export variables. This should not be confused with the ESMF State Attribute Package, which has similiar attributes. This attribute is assigned to individual variables.   This package nests the CF Extended and CF General packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
      \hline\hline
      {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
      \hline\hline
@@ -412,7 +413,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: The CF standard for fields contains an optional standard\_name Attribute. Standard names are controlled vocabularies and not every variable in the earth system sciences contains a standard name. Because of this, ESMF implemented this optional Attribute in its own package. This package nests the CF General package (below) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
     \hline\hline
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
@@ -436,7 +437,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item  Description: The climate and forecast (CF) convention contains metadata that is designed to promote the processing and sharing of files created with the NetCDF API. The CF conventions are increasingly gaining acceptance and have been adopted by a number of projects and groups as a primary standard. The conventions define metadata that provide a definitive description of what the data in each variable represents, and the spatial and temporal properties of the data. This enables users of data from different sources to decide which quantities are comparable, and facilitates building applications with powerful extraction, regridding, and display capabilities. The ESMF CF Attribute package contains the three mandatory Attributes required to describe fields. 
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
     \hline\hline
     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
     \hline\hline
@@ -485,7 +486,7 @@ There are 2 grid attribute packages in ESMF.
     \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
 \end{itemize}
 
-\begin{longtable}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{longtable}{|p{5cm}|p{5cm}|p{35mm}|}
 \hline\hline
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
@@ -493,7 +494,7 @@ There are 2 grid attribute packages in ESMF.
 {\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & N/A \\ 
 {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid. &  Logically rectangular, Pixel-based catchment, Structured triangular, Unstructured triangular\\ 
 {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere".& Ellipsoid, Plane, Sphere\\ 
-{\tt GridType} & A text description of the grid that uses common terminology. & Gnomonic,Cubed Sphere,Displaced Pole, Icosahedral geodesic, Reduced gaussian, Regular lat lon, Spectral gaussian, Tripolar, Yin Yang\\ 
+{\tt GridType} & A text description of the grid that uses common terminology. & Gnomonic, Cubed Sphere, Displaced Pole, Icosahedral geodesic, Reduced gaussian, Regular lat lon, Spectral gaussian, Tripolar, Yin Yang\\ 
 {\tt HorizontalResolution} & The number of points within the horizontal domain of a model or grid. & N/A \\
 {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & True, False\\ 
 {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & True, False\\ 
@@ -527,7 +528,7 @@ There are 2 grid attribute packages in ESMF.
     \item Description: This package contains two Attributes required by ESMF to generate grids from a file. They describe the decomposition of a grid across ESMF DEs.  This package nests the GridSpec General package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{longtable}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{longtable}{|p{5cm}|p{5cm}|p{35mm}|}
 \hline\hline
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
@@ -545,7 +546,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
 
 \noindent
 
-\begin{longtable}{|p{7cm}|p{5cm}|p{2cm}}
+\begin{longtable}{|p{7cm}|p{5cm}|p{15mm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
      \hline\hline
