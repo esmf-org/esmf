@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.7 2011/11/04 00:44:16 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.8 2011/11/04 22:21:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -223,7 +223,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.7 2011/11/04 00:44:16 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.8 2011/11/04 22:21:01 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -535,6 +535,19 @@ program ESMF_CompTunnelUTest
 !-------------------------------------------------------------------------------  
   
   if (petCount /= 8) goto 10  ! skip all of the exhaustive tests of not on 8PET
+  
+  !------------------------------------------------------------------------
+  ! The exhaustive tests break into three dual-actual pairs: A, B, C. The dual,
+  ! i.e. front-end component for all these pairs is always defined on the same
+  ! PETs, but the actual components are on different PETs. Calling into the
+  ! dual components with non-blocking syncflag thus allows concurrent execution
+  ! of the actual components. The layout across the 8 PETs is as follows:
+  !
+  !   PET:        0     1     2     3     4     5     6     7
+  !   pair-A:           dual  act.  act.  dual        act.
+  !   pair-B:     act.  dual              dual
+  !   pair-C:           dual              dual  act.        act.
+  !------------------------------------------------------------------------
   
   ! --- create A's ---
 
