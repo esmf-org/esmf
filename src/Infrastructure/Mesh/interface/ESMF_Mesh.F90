@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.76.2.4 2011/09/03 00:03:14 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.76.2.5 2011/11/04 23:36:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.76.2.4 2011/09/03 00:03:14 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.76.2.5 2011/11/04 23:36:55 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.76.2.4 2011/09/03 00:03:14 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.76.2.5 2011/11/04 23:36:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1348,7 +1348,7 @@ end function ESMF_MeshCreateFromFile
        Mesh%origElemStart=startElmt  ! position of first element
        Mesh%origElemCount=ElemCnt
     endif
-
+    
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
@@ -1532,10 +1532,8 @@ end function ESMF_MeshCreateFromUnstruct
     
     if (PetNo == 0) then
         ! this is a serial call into C code for now
-        scrip_file_len = len_trim(filename)
-        esmf_file_len = len_trim(esmffilename)
-        call c_ConvertSCRIP(filename, scrip_file_len, &
-          esmffilename, esmf_file_len, dualflag, localrc )
+        call c_ConvertSCRIP(filename, esmffilename,  &
+          dualflag, localrc )
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif

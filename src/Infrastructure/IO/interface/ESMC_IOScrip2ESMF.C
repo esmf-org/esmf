@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.7.2.2 2011/09/21 04:56:40 theurich Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.7.2.3 2011/11/04 23:36:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -21,6 +21,8 @@
 
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -176,12 +178,21 @@ FIELD* search_bucket(double lon, double lat) {
   return NULL;
 }
   
-void handle_error(int status) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "handle_error"
+bool handle_error(int status) {
 #ifdef ESMF_NETCDF
+  char errmsg[128];
+  int rc;
   if (status != NC_NOERR) {
-    fprintf(stderr, "%s\n", nc_strerror(status));
-    exit(-1);
+    sprintf(errmsg, "NetCDF error: %s", nc_strerror(status));
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,errmsg,&rc);
+    return true;
+  } else {
+    return false;
   }
+#else
+  return false;
 #endif
 }
 
@@ -288,18 +299,73 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
     }
   }
 }
-      
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_nc_create"
+extern "C" {
+  void FTN(c_nc_create)(
+			  char *infile,
+			  int *mode,
+			  ESMC_Logical *largefileflag,
+			  int *ncid,
+			  int *rc,
+			  ESMCI_FortranStrLenArg infileLen)
+  {
+    bool oldversion = false;
+    int status;
+    int id;
+    char *c_infile;
+
+#ifdef ESMF_NETCDF
+
+#ifndef NC_64BIT_OFFSET
+    oldversion = true;
+#define NC_64BIT_OFFSET 0
+#endif
+
+    *rc = 1;
+
+    // ensure C conform string termination
+    c_infile=NULL;
+    c_infile=ESMC_F90toCstring(infile,infileLen);
+    if (c_infile == NULL) {
+      ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",rc);
+      return; // bail out
+    }
+
+    if (*largefileflag == ESMF_TRUE && oldversion) {
+      fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: 64 bit file format is not supported in this version of NetCDF library",rc);
+      return; //bail out
+    }
+    if (*largefileflag == ESMF_TRUE) {
+      status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
+      if (handle_error(status)) return; //bail out
+    } else {
+      status = nc_create(c_infile, *mode, &id);
+      if (handle_error(status)) return; //bail out
+    }
+    *rc = 0;
+    *ncid = id;
+    delete [] c_infile;
+    return;
+#else
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,"Have to compile with ESMF_NETCDF environment variable defined",rc);
+  return;
+#endif
+  }
+}
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_convertscrip"
 extern "C" { 
 void FTN(c_convertscrip)(
   char *infile,
-  int *infileLen,
   char *outfile,
-  int *outfileLen,
   int *dualflag,
   int *rc,
-  ESMCI_FortranStrLenArg name_l0,
-  ESMCI_FortranStrLenArg name_l1,
-  ESMCI_FortranStrLenArg name_l2)
+  ESMCI_FortranStrLenArg infileLen,
+  ESMCI_FortranStrLenArg outfileLen)
 {
   int ncid1, ncid2;
   int gsdimid, gcdimid, grdimid;
@@ -331,48 +397,47 @@ void FTN(c_convertscrip)(
   size_t len;
   double rad2deg = 180.0/M_PI;
 
+  *rc = 1;
 #ifdef ESMF_NETCDF
   // ensure C conform string termination
   c_infile=NULL;
-  c_infile=ESMC_F90toCstring(infile,*infileLen);
+  c_infile=ESMC_F90toCstring(infile,infileLen);
   if (c_infile == NULL) {
-    fprintf(stderr, "SCRIP file name not valid \n");
-    *rc = -1;
+    ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",rc);
     return; // bail out
   }
 
   c_outfile=NULL;
-  c_outfile=ESMC_F90toCstring(outfile,*outfileLen);
+  c_outfile=ESMC_F90toCstring(outfile,outfileLen);
   if (c_outfile == NULL) {
-    fprintf(stderr, "output file name from converter not valid \n");
-    *rc = -1;
+    ESMC_LogDefault.MsgAllocError("Fail to allocate output NetCDF filename",rc);
     return; // bail out
   }
   
   // Open intput SCRIP file
   status = nc_open(c_infile, NC_NOWRITE, &ncid1);  
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   // inquire dimension ids
   status = nc_inq_dimid(ncid1, "grid_size", &gsdimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_inq_dimid(ncid1, "grid_corners", &gcdimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_inq_dimid(ncid1, "grid_rank", &grdimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   // Get dimension values
   status = nc_inq_dimlen(ncid1, gsdimid, &gsdim);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_inq_dimlen(ncid1, gcdimid, &gcdim);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_inq_dimlen(ncid1, grdimid, &grdim);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   if (grdim > 1) {
     fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
-    *rc = -1;
-    return; // bail out
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The grid_rank is not equal 1.", rc);
+    return;
   }
 
   noarea = 0;
@@ -386,13 +451,13 @@ void FTN(c_convertscrip)(
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
     fprintf(stderr, "%s: Either grid_center_lat or grid_center_lon does not exist.\n",c_infile);
-    *rc = -1;
-    return; // bail out
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND,"Either grid_center_lon or grid_center_lat does not exist.", rc);
+    return;
   }
   status = nc_inq_varid(ncid1, "grid_corner_lat", &colatid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_inq_varid(ncid1, "grid_corner_lon", &colonid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_inq_varid(ncid1, "grid_imask", &maskid);
   if (status != NC_NOERR) nomask = 1;
 
@@ -400,15 +465,15 @@ void FTN(c_convertscrip)(
   cornerlats = (double*)malloc(sizeof(double)*gcdim*gsdim);
   cornerlons = (double*)malloc(sizeof(double)*gcdim*gsdim);
   status = nc_get_var_double(ncid1, colatid, cornerlats);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_get_var_double(ncid1, colonid, cornerlons);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   // get units of grid_cornor_lon
   status = nc_inq_attlen(ncid1, colonid, "units", &len);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_get_att_text(ncid1, colonid, "units", units);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   units[len] = '\0';
 
   // convert radian to degree
@@ -417,7 +482,7 @@ void FTN(c_convertscrip)(
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_corner_lon is not degrees nor radians.\n",c_infile);
-    *rc = -1;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
     return;
   }
   if (!strncmp(units, "radians", 7)) {
@@ -510,98 +575,98 @@ void FTN(c_convertscrip)(
   if (*dualflag == 0) {
     // create the output netcdf file
     status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
 
     // define the dimensions
     status = nc_def_dim(ncid2, "nodeCount", totalnodes, &vertdimid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     status = nc_def_dim(ncid2, "elementCount", gsdim, &celldimid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     status = nc_def_dim(ncid2, "maxNodePElement", gcdim, & vpcdimid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     
     // define the variables
     dims[0]=vertdimid;
     dims[1]=vdimid;
     status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     strbuf = "degrees";
     status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     dims[0]=celldimid;
     dims[1]=vpcdimid;
     status = nc_def_var(ncid2,"elementConn", NC_INT, 2, dims, &cellid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     strbuf = "Node indices that define the element connectivity";
     status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf)+1, strbuf);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     fillvalue = -1;
     status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     strbuf = "Number of nodes per element";
     status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf)+1, strbuf);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     if (!nocenter) {
       dims[0]=celldimid;
       dims[1]=vdimid;
       status = nc_def_var(ncid2, "centerCoords", NC_DOUBLE, 2, dims, &ccoordid);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       strbuf = "degrees";
       status = nc_put_att_text(ncid2, ccoordid, "units", strlen(strbuf)+1, strbuf);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
     } 
     if (!noarea) {
       status = nc_def_var(ncid2, "elementArea", NC_DOUBLE, 1, dims, &caid);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       // copy the units and long_name attributes if they exist in the input file
       int attid;
       status = nc_inq_attid(ncid1, areaid, "units", &attid);
       if (status == NC_NOERR) {
         status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
-        if (status != NC_NOERR) handle_error(status);
+        if (handle_error(status)) return; // bail out;
       }    
       status = nc_inq_attid(ncid1, areaid, "long_name", &attid);
       if (status == NC_NOERR) {
         status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
-        if (status != NC_NOERR) handle_error(status);
+        if (handle_error(status)) return; // bail out;
       }
     }
     if (!nomask) {
       status = nc_def_var(ncid2, "elementMask", NC_INT, 1, dims, &cmid);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
-      // if (status != NC_NOERR) handle_error(status);
+      // if (handle_error(status)) return; // bail out;
     }
  
     // Global Attribute
     strbuf = "unstructured";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     strbuf = "0.9";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     time(&tloc);
     strbuf2 = ctime(&tloc);
     strbuf2[strlen(strbuf2)-1] = '\0';
     status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     
     status=nc_enddef(ncid2);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     
     nc_put_var_double(ncid2, vertexid, nodelatlon); 
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
     nc_put_var_int(ncid2, cellid, cells);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
 
     nc_put_var_uchar(ncid2, edgeid, edges);
-    if (status != NC_NOERR) handle_error(status);
+    if (handle_error(status)) return; // bail out;
 
 
     free(edges);
@@ -612,22 +677,22 @@ void FTN(c_convertscrip)(
     if (!nocenter) {
       inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
       status = nc_get_var_double(ncid1, ctlatid, inbuf);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
 	inbuf1[i*2+1]=inbuf[i];
       }
       status = nc_get_var_double(ncid1, ctlonid, inbuf);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
 	inbuf1[i*2]=inbuf[i];
       }
       // get units of grid_center_lon
       status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       status = nc_get_att_text(ncid1, ctlonid, "units", units);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       units[len] = '\0';
       // convert radian to degree
       for (i=0; i<len; i++) {
@@ -635,8 +700,8 @@ void FTN(c_convertscrip)(
       }
       if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
           fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-          *rc = -1;
-          return;
+	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
+	  return;
       }
       if (!strncmp(units, "radians", 7)) {
 	for (i=0; i<gsdim*2; i++) {
@@ -648,27 +713,28 @@ void FTN(c_convertscrip)(
       counts[0]=gsdim;
       counts[1]=2;
       status = nc_put_vara_double(ncid2, ccoordid, starts, counts, inbuf1);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       free(inbuf1);
     }  
     if (!noarea) {
       status = nc_get_var_double(ncid1, areaid, inbuf);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       status = nc_put_var_double(ncid2, caid, inbuf);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
     }
     free(inbuf);
     if (!nomask) {
       inbuf2=(int*)malloc(sizeof(int)*gsdim);
       status = nc_get_var_int(ncid1, maskid, inbuf2);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       status = nc_put_var_int(ncid2, cmid, inbuf2);
-      if (status != NC_NOERR) handle_error(status);
+      if (handle_error(status)) return; // bail out;
       free(inbuf2);
     }
     nc_close(ncid1);
     nc_close(ncid2);
     free(totalneighbors);
+    *rc = 0;
     return;
   }
   // Now create the dual mesh using the cell coordinates.  The
@@ -690,22 +756,22 @@ void FTN(c_convertscrip)(
   inbuf = (double*)malloc(sizeof(double)*gsdim);
   inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
   status = nc_get_var_double(ncid1, ctlatid, inbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   // copy inbuf to inbuf1
   for (i=0; i<gsdim; i++) {
     inbuf1[i*2+1]=inbuf[i];
   }
   status = nc_get_var_double(ncid1, ctlonid, inbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   // copy inbuf to inbuf1
   for (i=0; i<gsdim; i++) {
     inbuf1[i*2]=inbuf[i];
   }
   // get units of grid_center_lon
   status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_get_att_text(ncid1, ctlonid, "units", units);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   units[len]='\0';
   // convert radian to degree
   for (i=0; i<len; i++) {
@@ -713,7 +779,7 @@ void FTN(c_convertscrip)(
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-    *rc = -1;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
     return;
   }
   if (!strncmp(units, "radians", 7)) {
@@ -738,8 +804,8 @@ void FTN(c_convertscrip)(
       dualcells[i1*maxconnection+dualcellcounts[i1]]=i+1;
       dualcellcounts[i1]++;
       if (dualcellcounts[i1] > maxconnection) {
-	printf("Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-	*rc = -1;
+	fprintf(stderr, "Vertex %d exceed maximal connections %d\n", i1, maxconnection);
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"Unrecoveable internal error",rc);
 	return; // bail out
       }
     }
@@ -766,68 +832,68 @@ void FTN(c_convertscrip)(
   // create the output netcdf file
 
   status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   // define the dimensions
   status = nc_def_dim(ncid2, "nodeCount", gsdim, &vertdimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_def_dim(ncid2, "elementCount", totalnodes, &celldimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_def_dim(ncid2, "maxNodePElement", maxconnection, & vpcdimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   // define the variables
   dims[0]=vertdimid;
   dims[1]=vdimid;
   status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   strbuf = "degrees";
   status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   dims[0]=celldimid;
   dims[1]=vpcdimid;
   status = nc_def_var(ncid2,"elementConn", NC_INT, 2, dims, &cellid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   strbuf = "Node indices that define the element connectivity";
   status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf), strbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   fillvalue = -1;
   status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   strbuf = "Number of nodes per element";
   status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf), strbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   dims[0]=vertdimid;
  
   // Global Attribute
   strbuf = "unstructured";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   strbuf = "0.9";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(c_infile), c_infile);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   strbuf="Dual mesh generated using the cell center coordinates";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "description", strlen(strbuf), strbuf);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   time(&tloc);
   strbuf2 = ctime(&tloc);
   strbuf2[strlen(strbuf2)-1] = '\0';
   status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   nc_enddef(ncid2);
   nc_put_var_double(ncid2, vertexid, inbuf1); 
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   nc_put_var_int(ncid2, cellid, dualcells);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
   nc_put_var_uchar(ncid2, edgeid, totalneighbors);
-  if (status != NC_NOERR) handle_error(status);
+  if (handle_error(status)) return; // bail out;
 
   free(totalneighbors);
   free(dualcells);
@@ -835,15 +901,14 @@ void FTN(c_convertscrip)(
   free(inbuf1);
   nc_close(ncid2);
   nc_close(ncid1);
-  free(c_infile);
-  free(c_outfile);
+  delete [] c_infile;
+  delete [] c_outfile;
 
   *rc = 0;
   return;
 
 #else
-  fprintf(stderr, "Have to compile with ESMF_NETCDF environment variable defined\n");
-  *rc = -1;
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,"Have to compile with ESMF_NETCDF environment variable defined",rc);
   return;
 #endif
 }

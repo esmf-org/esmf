@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.27.2.3 2011/09/26 18:29:17 theurich Exp $
+! $Id: ESMF_IOScrip.F90,v 1.27.2.4 2011/11/04 23:36:54 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -14,11 +14,6 @@
 !
 !     ESMF IOScrip Module
       module ESMF_IOScripMod
-!
-!==============================================================================
-!
-! This file contains the Grid class definition and all Grid class
-! methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -620,7 +615,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer, parameter :: nf90_noerror = 0
       character(len=256) :: errmsg
       character(len=20) :: varStr
-      logical :: largeFileFlaglocal
+      type(ESMF_Logical) :: largeFileFlaglocal
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -667,31 +662,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
      !Read the variables from the input grid files at PET0
       if (PetNo == 0) then
-        ! Check if srcFile and dstFile exists
-        if (.not. present(srcFile)) then
+         ! Check if srcFile and dstFile exists
+         if (.not. present(srcFile)) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
 		  msg="- The srcFile argument does not exist on PET0 ", &
                   ESMF_CONTEXT, rcToReturn=rc)
 	     return
-        endif
-        if (.not. present(dstFile)) then
+         endif
+         if (.not. present(dstFile)) then
              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
 		  msg="- The dstFile argument does not exist on PET0 ",  &
                   ESMF_CONTEXT, rcToReturn=rc)
 	     return
-        endif
-        ! Create output file and create dimensions and variables
-	if (largeFileFlaglocal) then
-         ncStatus = nf90_create(trim(wgtFile), &
-		    or(NF90_CLOBBER,NF90_64BIT_OFFSET), ncid)
-	else
-         ncStatus = nf90_create(trim(wgtFile), NF90_CLOBBER, ncid)
-	endif
-         if (CDFCheckError (ncStatus, &
-           ESMF_METHOD, &
-           ESMF_SRCLINE,&
-	   trim(wgtFile),&
-           rc)) return
+         endif
+         ! Create output file and create dimensions and variables
+	 call c_nc_create(wgtFile, NF90_CLOBBER, &
+		largeFileFlaglocal, ncid, status)
+	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+		ESMF_CONTEXT, rcToReturn=rc)) return
          
          ! global variables
          if (present(title)) then

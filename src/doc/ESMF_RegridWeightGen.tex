@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.37.2.3 2011/09/26 18:29:20 theurich Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.37.2.4 2011/11/04 23:36:57 theurich Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -241,7 +241,11 @@ where
 
     --64bit_offset    - an optional argument specifying that the weight file will
                         be created in the NetCDF 64-bit offset format to allow
-			variables larger than 2GB.
+			variables larger than 2GB.  Note the 64-bit offset format
+			is not supported in the NetCDF version earlier than 3.6.0.
+			An error message will be generated if this flag is
+			specified while the application is linked with a NetCDF 
+			library earlier	than 3.6.0.
 \end{verbatim}
 
 
