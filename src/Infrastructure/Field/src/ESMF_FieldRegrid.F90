@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.83.2.1 2011/10/13 21:14:17 theurich Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.83.2.2 2011/11/04 23:52:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.83.2.1 2011/10/13 21:14:17 theurich Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.83.2.2 2011/11/04 23:52:39 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -307,7 +307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       real(ESMF_KIND_R8),          pointer,      optional :: weights(:)
       type(ESMF_Field),            intent(inout),optional :: srcFracField
       type(ESMF_Field),            intent(inout),optional :: dstFracField
-      integer,                      intent(out), optional :: rc 
+      integer,                     intent(out),  optional :: rc 
 !
 ! !STATUS:
 ! \apiStatusCompatible
@@ -355,12 +355,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !     \item [{[routehandle]}]
-!           The handle that implements the regrid and that can be used in later 
-!           {\tt ESMF\_FieldRegrid}.
+!           The communication handle that implements the regrid operation and that can be used later in 
+!           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
+!           user doesn't need it, then they can indicate that by not requesting it. 
+!           The time to compute the {\tt routehandle} can be a significant fraction of the time 
+!           taken by this method, so if it's not needed then not requesting it is worthwhile.  
 !     \item [{[indices]}] 
-!           The indices for the sparse matrix.
+!           The indices for a sparse matrix which interpolates from {\tt srcField} to 
+!           {\tt dstField}. This argument is a 2D array containing pairs of source and destination
+!           sequence indices corresponding to the coefficients in the {\tt weights} argument. 
+!           The first dimension of {\tt indices} is of size 2. {\tt indices(1,:)} specifes 
+!           the sequence index of the source element in the {\tt srcField}. {\tt indices(2,:)} specifes 
+!           the sequence index of the destination element in the {\tt dstField}. The second dimension of 
+!           {\tt indices} steps through the list of pairs, i.e. {\tt size(indices,2)==size(weights)}.
+!           The {\tt indices} array is allocated by the method and the user is responsible for deallocating it. 
 !     \item [{[weights]}] 
-!           The weights for the sparse matrix.
+!           The list of coefficients for a sparse matrix which interpolates from {\tt srcField} to 
+!           {\tt dstField}. The {\tt weights} array is allocated by the method and the user is responsible for 
+!           deallocating it. 
 !     \item [{[srcFracField]}] 
 !           The fraction of each source cell participating in the regridding. Only 
 !           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
