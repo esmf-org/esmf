@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.347 2011/09/09 16:28:23 theurich Exp $
+#  $Id: common.mk,v 1.348 2011/11/07 20:59:37 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2850,7 +2850,8 @@ tree_html:chkdir_doc $(HTMLFILES)
 
 clean_doc:
 	@cd $(ESMF_BUILD)/src/doc ;\
-	$(MAKE) tree_clean 
+	$(MAKE) tree_clean ; \
+        $(ESMF_RM) $(ESMF_BUILD)/doc
 
 #-------------------------------------------------------------------------------
 # Recursive calls
