@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.21.2.1 2011/09/03 00:03:22 theurich Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.21.2.2 2011/11/07 17:18:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.21.2.1 2011/09/03 00:03:22 theurich Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.21.2.2 2011/11/07 17:18:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -700,7 +700,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !    \item type(ESMF\_Field), intent(in)             :: fieldList(:)
 !    \item type(ESMF\_FieldBundle), intent(in)       :: fieldbundleList(:)
 !    \item type(ESMF\_RouteHandle), intent(in)       :: routehandleList(:)
-!    \item type(ESMF\_State), intent(in)             :: stateList(:)
+!    \item type(ESMF\_State), intent(in)             :: nestedStateList(:)
 !    \end{description}
 !
 ! The arguments are:
@@ -876,7 +876,7 @@ StateAddListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbundle
       end subroutine ESMF_StateAddRouteHandleList
 
 !------------------------------------------------------------------------------
-StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
+StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%statep%base)
 
 
 !------------------------------------------------------------------------------
@@ -908,7 +908,7 @@ StateAddListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%stat
 !    \item type(ESMF\_Field), intent(in)             :: fieldList(:)
 !    \item type(ESMF\_FieldBundle), intent(in)       :: fieldbundleList(:)
 !    \item type(ESMF\_RouteHandle), intent(in)       :: routehandleList(:)
-!    \item type(ESMF\_State), intent(in)             :: stateList(:)
+!    \item type(ESMF\_State), intent(in)             :: nestedStateList(:)
 !    \end{description}
 !
 ! The arguments are:
@@ -1084,7 +1084,7 @@ StateAddRepListMacro(ESMF_FieldBundle,FieldBundle,fieldbundleList,field,fieldbun
       end subroutine ESMF_StateAddRpRouteHandleList
 
 !------------------------------------------------------------------------------
-StateAddRepListMacro(ESMF_State,State,nestedstateList,state,nestedstateList(i)%statep%base)
+StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%statep%base)
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
