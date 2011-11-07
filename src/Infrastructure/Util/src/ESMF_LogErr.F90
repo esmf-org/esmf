@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.103 2011/07/06 02:19:18 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.103.2.1 2011/11/07 18:20:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -149,15 +149,12 @@ type ESMF_LogPrivate
     sequence        
      
     integer                                         ::  maxElements
-    integer                                         ::  stream 
     integer                              	    ::  fIndex
     integer                                         ::  unitNumber
     integer                                         ::  petNumber	
     logical					    ::  stopprogram
     logical					    ::  pad ! memory alignment
     type(ESMF_Logical)                              ::  flushImmediately    
-    type(ESMF_Logical)                              ::  rootOnly    
-    type(ESMF_Logical)                              ::  verbose  
     type(ESMF_Logical)			            ::  flushed 
     type(ESMF_Logical)			            ::  dirty
     type(ESMF_LogKind_Flag)			    ::  logkindflag      
@@ -1215,19 +1212,16 @@ end function ESMF_LogFoundError
 ! !IROUTINE: ESMF_LogGet - Return information about a log object
 
 ! !INTERFACE: 
-      subroutine ESMF_LogGet(log, verbose, flush, rootOnly,    &
-                             logmsgAbort, logkindflag, stream, &
+      subroutine ESMF_LogGet(log, flush,    &
+                             logmsgAbort, logkindflag, &
                              maxElements, trace, rc)
 !
 ! !ARGUMENTS:
 !      
       type(ESMF_Log),optional, intent(in)        :: log         	
-      type(ESMF_Logical), intent(out), optional  :: verbose	       
       type(ESMF_Logical), intent(out), optional  :: flush	       
-      type(ESMF_Logical), intent(out), optional  :: rootOnly	       
       type(ESMF_LogMsg_Flag), pointer, optional  :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag     	
-      integer, intent(out),optional              :: stream      	
       integer, intent(out),optional              :: maxElements
       logical, intent(out),optional              :: trace	
       integer, intent(out),optional              :: rc          	
@@ -1242,12 +1236,8 @@ end function ESMF_LogFoundError
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !            of the default Log.
-!      \item [{[verbose]}]
-!            Verbose flag.
 !      \item [{[flush]}]
 !            Flush flag.
-!      \item [{[rootOnly]}]
-!	     Root only flag.
 !      \item [{[logmsgAbort]}]
 !            Returns an array containing current message halt settings.
 !            If the array is not pre-allocated, {\tt ESMF\_LogGet} will
@@ -1256,12 +1246,6 @@ end function ESMF_LogFoundError
 !            callers responsibility to deallocate the array.
 !      \item [{[logkindflag]}]
 !            Defines either single or multilog.
-!      \item [{[stream]}]
-!            The type of stream, with the following valid values and meanings:
-!            \begin{description}
-!              \item 0 \  free;
-!              \item 1 \  preordered.
-!            \end{description}
 !      \item [{[maxElements]}]
 !            Maximum number of elements in the Log.
 !      \item [{[trace]}]
@@ -1298,20 +1282,11 @@ end function ESMF_LogFoundError
 
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-	if (present(verbose)) then
-          verbose=alog%verbose
-        endif
 	if (present(flush)) then
           flush=alog%flushImmediately
         endif
-	if (present(rootOnly)) then
-          rootOnly=alog%rootOnly
-        endif
 	if (present(logkindflag)) then
           logkindflag=alog%logkindflag
-        endif
-	if (present(stream)) then
-          stream=alog%stream
         endif
 	if (present(maxElements)) then
           maxElements=alog%maxElements	
@@ -1475,7 +1450,6 @@ end subroutine ESMF_LogInitialize
     endif
 
     alog%maxElements = 10
-    alog%stream = 0
     alog%fIndex = 1
 
     call f_ESMF_VMGlobalGet(alog%petNumber)
@@ -1485,8 +1459,6 @@ end subroutine ESMF_LogInitialize
 
     alog%stopprogram = .false.
     alog%flushImmediately = ESMF_FALSE
-    alog%rootOnly = ESMF_FALSE
-    alog%verbose = ESMF_FALSE
     alog%flushed = ESMF_FALSE
     alog%dirty = ESMF_FALSE
     alog%FileIsOpen=ESMF_FALSE
@@ -1591,23 +1563,20 @@ end subroutine ESMF_LogOpen
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSet(log, verbose, flush, rootOnly,  &
-                           logmsgAbort, stream, maxElements, logmsgList,  &
+	subroutine ESMF_LogSet(log, flush,  &
+                           logmsgAbort, maxElements, logmsgList,  &
                            errorMask, trace, rc)
 !
 ! !ARGUMENTS:
 !	
-      type(ESMF_Log),      intent(inout), optional :: log 		   
-      logical,             intent(in),    optional :: verbose		   
-      logical,             intent(in),    optional :: flush		   
-      logical,             intent(in),    optional :: rootOnly		   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgAbort(:)		   
-      integer,             intent(in),    optional :: stream		   
-      integer,             intent(in),    optional :: maxElements 	   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgList(:) 	   
+      type(ESMF_Log),      intent(inout), optional :: log	   
+      logical,             intent(in),    optional :: flush	   
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgAbort(:)
+      integer,             intent(in),    optional :: maxElements
+      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgList(:)
       integer,             intent(in),    optional :: errorMask(:)
-      logical,             intent(in),    optional :: trace	   
-      integer,             intent(out),   optional :: rc  		   
+      logical,             intent(in),    optional :: trace
+      integer,             intent(out),   optional :: rc
 	
 !
 ! !DESCRIPTION:
@@ -1617,38 +1586,37 @@ end subroutine ESMF_LogOpen
 !      \begin{description}
 !
 !      \item [{[log]}]
-!            An optional {\tt ESMF\_Log} object that can be used instead
-!            of the default Log.
-!      \item [{[verbose]}]
-!            Verbose flag.
-!      \item [{[rootOnly]}]
-!	     Root only flag.
+!            An optional {\tt ESMF\_Log} object.  The default is to use the
+!            default log that was opened at {\tt ESMF\_Initialize} time.
+!      \item [{[flush]}]
+!	     If set to {\tt .true.}, flush log messages immediately, rather
+!            than buffering them.  Default is to flush after {\tt maxElements}
+!            messages.
 !      \item [{[logmsgAbort]}]
 !            Sets the condition on which ESMF aborts.  The array
-!            can contain any combination of ESMF\_LOGMSG named constants.  These
+!            can contain any combination of {\tt ESMF\_LOGMSG} named constants.  These
 !            named constants are described in section \ref{const:logmsgflag}.
-!      \item [{[stream]}]
-!            The type of stream, with the following valid values and meanings:
-!            \begin{description}
-!              \item 0 \  free;
-!              \item 1 \  preordered. 
-!            \end{description}
+!            Default is to always continue processing.
 !      \item [{[maxElements]}]
-!            Maximum number of elements in the Log.
+!            Maximum number of elements in the Log buffer before flushing occurs.
+!            Default is to flush when 10 messages have been accumulated.
 !      \item [{[logmsgList]}]
 !            An array of message types that will be logged.  Log write requests
-!            not matching the list will be ignored.  By default all messages
-!            will be logged.  If an empty array is provided, no messages will be logged.
+!            not matching the list will be ignored.  If an empty array is
+!            provided, no messages will be logged.
 !            See section \ref{const:logmsgflag} for a list of
-!            valid message types.  
+!            valid message types.  By default, all non-trace messages will be
+!            logged.
 !      \item [{[errorMask]}]
 !            List of error codes that will {\em not} be logged as errors.
+!            Default is to log all error codes. 
 !      \item [{[trace]}]
 !	     \begin{sloppypar}
-!            If set to true, calls such as {\tt ESMF\_LogFoundError},
+!            If set to {\tt .true.}, calls such as {\tt ESMF\_LogFoundError},
 !            {\tt ESMF\_LogFoundAllocError}, and {\tt ESMF\_LogFoundDeallocError}
-!            will be logged as a tool for program flow tracing.  This may generate
-!            voluminous output in the log.
+!            will be logged as a tool for program flow tracing.  This may
+!            generate voluminous output in the log.  Default is to not trace
+!            these calls.
 !	     \end{sloppypar}
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1688,22 +1656,13 @@ end subroutine ESMF_LogOpen
         return
       endif
     
-      if (present(verbose)) then
-        alog%verbose=verbose
-      endif
       if (present(flush)) then
         alog%flushImmediately=flush
-      endif
-      if (present(rootOnly)) then
-        alog%rootOnly=rootOnly
       endif
       if (present(logmsgAbort)) then
         if (associated (alog%logmsgAbort)) deallocate (alog%logmsgAbort)
         allocate (alog%logmsgAbort(size (logmsgAbort)))
         alog%logmsgAbort = logmsgAbort
-      endif
-      if (present(stream)) then
-        alog%stream=stream
       endif
       if (present(maxElements)) then
         if (maxElements>0 .AND. alog%maxElements/=maxElements) then
