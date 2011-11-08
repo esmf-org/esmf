@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.133 2011/10/04 05:36:51 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.134 2011/11/08 23:57:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.133 2011/10/04 05:36:51 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.134 2011/11/08 23:57:09 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1245,7 +1245,7 @@
 !          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 1
-!     \item[calendar]
+!     \item[{[calendar]}]
 !          \begin{sloppypar}
 !          Associated {\tt Calendar}.  Defaults to calendar
 !          {\tt ESMF\_CALKIND\_NOCALENDAR} or default specified in
