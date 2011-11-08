@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrUTest.C,v 1.8 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMC_LogErrUTest.C,v 1.9 2011/11/08 21:27:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,8 @@ int main(void){
   char name[80];
   char failMsg[80];
   int result = 0;
-  int trueFalseRc;
+  int rc;
+  bool flush;
 
   const char *msg = "C LogErr Write Message";
   int msgtype = ESMC_LOG_INFO;
@@ -42,13 +43,23 @@ int main(void){
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  rc = ESMF_FAILURE;
+
+  flush = true;
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set Log to flush after every message"); 
+  strcpy(failMsg, "Did not return ESMF_TRUE");
+  rc = ESMC_LogSet(flush);
+  ESMC_Test((rc!=ESMF_TRUE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Write a Log Message"); 
   strcpy(failMsg, "Did not return ESMF_TRUE");
-  trueFalseRc = ESMC_LogWrite(msg, msgtype);
-  ESMC_Test((trueFalseRc=ESMF_TRUE), name, failMsg, &result, __FILE__, __LINE__,
-    0);
+  rc = ESMC_LogWrite(msg, msgtype);
+  ESMC_Test((rc!=ESMF_TRUE), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------

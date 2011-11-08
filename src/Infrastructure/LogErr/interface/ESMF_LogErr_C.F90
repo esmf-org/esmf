@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.19 2011/07/01 16:07:21 rokuingh Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.20 2011/11/08 21:27:26 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.19 2011/07/01 16:07:21 rokuingh Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.20 2011/11/08 21:27:26 rokuingh Exp $'
 !==============================================================================
 
   subroutine f_esmf_logwrite0(msg,logmsgList,rc)
@@ -33,7 +33,7 @@
     implicit none
     
     character(len=*), intent(in)                :: msg
-    type(ESMF_LogMsg_Flag), intent(in)              :: logmsgList
+    type(ESMF_LogMsg_Flag), intent(in)          :: logmsgList
     integer, intent(out)                        :: rc
 
     ! Initialize return code; assume routine not implemented
@@ -51,7 +51,7 @@
     implicit none
 
     character(len=*), intent(in)                :: msg
-    type(ESMF_LogMsg_Flag), intent(in)              :: logmsgList
+    type(ESMF_LogMsg_Flag), intent(in)          :: logmsgList
     integer, intent(in)                         :: line
     character(len=*), intent(in)                :: file
     character(len=*), intent(in)                :: method
@@ -64,3 +64,20 @@
                        line=line, file=file, method=method, rc=rc)
 
   end subroutine f_esmf_logwrite1
+
+  subroutine f_esmf_logset(flush, rc)
+    use ESMF_UtilTypesMod    ! ESMF base class
+    use ESMF_BaseMod         ! ESMF base class
+    use ESMF_LogErrMod
+    
+    implicit none
+
+    logical, intent(in)   :: flush
+    integer, intent(out)  :: rc
+
+    ! Initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+
+    call ESMF_LogSet(flush=flush, rc=rc)
+
+  end subroutine f_esmf_logset

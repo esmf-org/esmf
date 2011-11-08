@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.13 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_LogErr.h,v 1.14 2011/11/08 21:27:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -87,8 +87,9 @@ private:
     bool MsgFoundError(int rcToCheck,const char msg[],int LINE,const char FILE[],
          const char method[],int *rcToReturn);
     void Open(const char filename[]);
-    bool Write(const char msg[],int msgtype);
-    bool Write(const char msg[],int msgtype,int LINE,const char FILE[],
+    int  Set(bool flush);
+    int  Write(const char msg[],int msgtype);
+    int  Write(const char msg[],int msgtype,int LINE,const char FILE[],
          const char method[]);       
 // !PUBLIC Variables:          
     std::FILE *ESMC_LogFile;
@@ -109,6 +110,7 @@ private:
 // the default global log object
 extern ESMCI::LogErr ESMC_LogDefault;
 extern "C" {
+ void FTN(f_esmf_logset)(bool *flush, int *rc);
  void FTN(f_esmf_logwrite0)(const char *msg, int *msgtype, int *rc, ESMCI_FortranStrLenArg mlen);
  void FTN(f_esmf_logwrite1)(const char *msg, int *msgtype,
                             int *line, const char *file, const char *method, int *rc,

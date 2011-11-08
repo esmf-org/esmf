@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.84 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMC_LogErr.h,v 1.85 2011/11/08 21:27:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,6 +74,31 @@ int ESMC_LogWrite(
 //  \item[msgtype]
 //    The message type.  Can be one of ESMC\_LOG\_INFO, ESMC\_LOG\_WARNING,
 //    or ESMF\_LOG\_ERROR.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogSet - Set Log properties
+//
+// !INTERFACE:
+int ESMC_LogSet(
+  bool flush       // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Set Log properties.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[flush]
+//    If set to .true., flush log messages immediately, rather than buffering 
+//    them. Default is to flush after 10 messages.
 //  \end{description}
 //
 //EOP

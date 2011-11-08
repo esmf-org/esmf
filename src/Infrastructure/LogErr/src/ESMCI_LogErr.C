@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.17 2011/05/03 22:48:30 theurich Exp $
+// $Id: ESMCI_LogErr.C,v 1.18 2011/11/08 21:27:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.17 2011/05/03 22:48:30 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.18 2011/11/08 21:27:28 rokuingh Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -432,7 +432,7 @@ void LogErr::Close(
 //
 // !INTERFACE:
 
-bool LogErr::Write(
+int LogErr::Write(
 
 // !RETURN VALUE:
 //  bool
@@ -455,7 +455,7 @@ bool LogErr::Write(
     if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
     FTN(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
 
-    return (rc == ESMF_SUCCESS) ? true : false;
+    return rc;
 }
 
 //----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ bool LogErr::Write(
 //
 // !INTERFACE:
 
-bool LogErr::Write(
+int LogErr::Write(
 
 // !RETURN VALUE:
 //  bool
@@ -490,7 +490,36 @@ bool LogErr::Write(
     FTN(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
                           strlen(msg), strlen(FILE), strlen(method));
 
-    return (rc == ESMF_SUCCESS) ? true : false;
+    return rc;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: Set - set Log parameters
+//
+// !INTERFACE:
+
+int LogErr::Set(
+
+// !RETURN VALUE:
+//  integer return code
+//
+// !ARGUMENTS:
+    bool flush
+    )
+// !DESCRIPTION:
+// Sets log parameters
+//EOP
+{
+    int rc;
+    
+    // Initialize return code; assume routine not implemented
+    rc = ESMC_RC_NOT_IMPL;
+
+    if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return ESMF_SUCCESS;
+    FTN(f_esmf_logset)(&flush, &rc);
+
+    return rc;
 }
 
 //----------------------------------------------------------------------------
