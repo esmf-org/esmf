@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.85 2011/10/28 22:34:16 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.86 2011/11/08 17:49:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.85 2011/10/28 22:34:16 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.86 2011/11/08 17:49:51 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -289,7 +289,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        regridmethod, &
                                        polemethod, regridPoleNPnts, & 
                                        unmappedaction, &
-                                       routehandle, indices, weights, & 
+                                       routehandle, &
+                                       indices, weights, &  ! DEPRECATED 
+                                       factorList, factorIndexList, & 
                                        srcFracField, dstFracField, rc)
 !      
 ! !ARGUMENTS:
@@ -303,8 +305,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                     intent(in),   optional :: regridPoleNPnts
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
       type(ESMF_RouteHandle),      intent(inout),optional :: routehandle
-      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:)
-      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)
+      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:) ! DEPRECATED  
+      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)   ! DEPRECATED 
+      real(ESMF_KIND_R8),          pointer,      optional :: factorList(:)
+      integer(ESMF_KIND_I4),       pointer,      optional :: factorIndexList(:,:)
       type(ESMF_Field),            intent(inout),optional :: srcFracField
       type(ESMF_Field),            intent(inout),optional :: dstFracField
       integer,                     intent(out),  optional :: rc 
@@ -361,18 +365,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The time to compute the {\tt routehandle} can be a significant fraction of the time 
 !           taken by this method, so if it's not needed then not requesting it is worthwhile.  
 !     \item [{[indices]}] 
+!           DEPRECATED ARGUMENT! Please use argument {\tt factorIndexList} instead.
+!     \item [{[weights]}] 
+!           DEPRECATED ARGUMENT! Please use argument {\tt factorList} instead.
+!     \item [{[factorList]}] 
+!           The list of coefficients for a sparse matrix which interpolates from {\tt srcField} to 
+!           {\tt dstField}. The array coming out of this variable is in the appropriate format to be used
+!           in other ESMF sparse matrix multiply calls, for example {\tt ESMF\_FieldSMMStore()}. 
+!           The {\tt factorList} array is allocated by the method and the user is responsible for 
+!           deallocating it. 
+!     \item [{[factorIndexList]}] 
 !           The indices for a sparse matrix which interpolates from {\tt srcField} to 
 !           {\tt dstField}. This argument is a 2D array containing pairs of source and destination
-!           sequence indices corresponding to the coefficients in the {\tt weights} argument. 
-!           The first dimension of {\tt indices} is of size 2. {\tt indices(1,:)} specifes 
-!           the sequence index of the source element in the {\tt srcField}. {\tt indices(2,:)} specifes 
+!           sequence indices corresponding to the coefficients in the {\tt factorList} argument. 
+!           The first dimension of {\tt factorIndexList} is of size 2. {\tt factorIndexList(1,:)} specifes 
+!           the sequence index of the source element in the {\tt srcField}. {\tt factorIndexList(2,:)} specifes 
 !           the sequence index of the destination element in the {\tt dstField}. The second dimension of 
-!           {\tt indices} steps through the list of pairs, i.e. {\tt size(indices,2)==size(weights)}.
-!           The {\tt indices} array is allocated by the method and the user is responsible for deallocating it. 
-!     \item [{[weights]}] 
-!           The list of coefficients for a sparse matrix which interpolates from {\tt srcField} to 
-!           {\tt dstField}. The {\tt weights} array is allocated by the method and the user is responsible for 
-!           deallocating it. 
+!           {\tt factorIndexList} steps through the list of pairs, i.e. {\tt size(factorIndexList,2)==size(factorIndexList)}.
+!           The array coming out of this variable is in the appropriate format to be used
+!           in other ESMF sparse matrix multiply calls, for example {\tt ESMF\_FieldSMMStore()}. 
+!           The {\tt factorIndexList} array is allocated by the method and the user is responsible for deallocating it. 
 !     \item [{[srcFracField]}] 
 !           The fraction of each source cell participating in the regridding. Only 
 !           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
@@ -426,11 +438,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer              :: srcIsSphere, dstIsSphere
         type(ESMF_RegridConserve) :: regridConserveG2M
         real(ESMF_KIND_R8), pointer :: fracFptr(:)
+        integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
+        real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
 
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! Warnings for deprecated arguments
+        if (present(indices)) then
+           call ESMF_LogWrite("The use of argument 'indices' in call " // &
+                "ESMF_FieldRegridStore() is DEPRECATED! Use argumemt 'factorIndexList' " // &
+                "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        if (present(weights)) then
+           call ESMF_LogWrite("The use of argument 'weights' in call " // &
+                "ESMF_FieldRegridStore() is DEPRECATED! Use argumemt 'factorList' " // &
+                "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
 
         ! global vm for now
         call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -464,7 +496,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Set this for now just to not have to remove it everywhere
         ! TODO get rid of it. 
         lregridScheme = ESMF_REGRID_SCHEME_NATIVE
-
 
 
         ! Handle optional method argument
@@ -703,7 +734,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           else
               if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- D can currently only do bilinear or patch regridding on a mesh built on nodes", & 
+                 msg="- can currently only do bilinear or patch regridding on a mesh built on nodes", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
               endif
@@ -714,15 +745,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! the 'mesh only' interface of the regrid.
 
         ! call into the Regrid mesh interface
-        call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
-              lregridmethod, &
-              localpolemethod, localRegridPoleNPnts, &
-              lregridScheme, &
-              unmappedaction, routehandle, &
-              indices, weights, localrc)
-        if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        if (present(weights) .or. present(factorList) .or. &
+             present(indices) .or. present(factorIndexList)) then
+           call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
+                lregridmethod, &
+                localpolemethod, localRegridPoleNPnts, &
+                lregridScheme, &
+                unmappedaction, routehandle, &
+                tmp_indices, tmp_weights, localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! attach sparse matrix to appropriate output variable
+           if (present(weights)) weights=>tmp_weights
+           if (present(factorList)) factorList=>tmp_weights
+           if (present(indices)) indices=>tmp_indices
+           if (present(factorIndexList)) factorIndexList=>tmp_indices
+
+           ! deallocate if not being passed out
+           if (.not. (present(weights) .or. present(factorList))) deallocate(tmp_weights)
+           if (.not. (present(indices) .or. present(factorIndexList))) deallocate(tmp_indices)
+        else
+           call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
+                lregridmethod, &
+                localpolemethod, localRegridPoleNPnts, &
+                lregridScheme, &
+                unmappedaction, routehandle, &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
 
         ! Get Fraction info
         if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
