@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.62 2011/08/26 21:50:22 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.63 2011/11/08 05:01:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -451,7 +451,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
     // cached DELayout information
     int deCount;              // total number of DEs
     int localDeCount;         // number of DEs that map onto localVAS
-    int *localDeList;         // list of local DEs
+    int *localDeToDeMap;      // list of local DEs
     int *deVASList;           // list of VASs for all DEs
     
   public:

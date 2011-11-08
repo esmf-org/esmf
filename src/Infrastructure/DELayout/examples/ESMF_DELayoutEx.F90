@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.30 2011/06/30 05:58:46 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.31 2011/11/08 05:02:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@ program ESMF_DELayoutEx
   
   ! local variables
   integer:: rc, i, localPET, petCount, localDeCount, myDe, workDe
-  integer, allocatable:: commWeights(:,:), compWeights(:), localDeList(:)
+  integer, allocatable:: commWeights(:,:), compWeights(:), localDeToDeMap(:)
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
   logical:: oneToOneFlag
@@ -247,11 +247,11 @@ endif
   if (.not. oneToOneFlag) then
     ! handle the unexpected case of general DE to PET mapping
   endif
-  allocate(localDeList(1))
-  call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  allocate(localDeToDeMap(1))
+  call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
-  myDe = localDeList(1)
-  deallocate(localDeList)
+  myDe = localDeToDeMap(1)
+  deallocate(localDeToDeMap)
 !EOC  
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
@@ -270,14 +270,14 @@ endif
 !BOC
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
-  allocate(localDeList(localDeCount))
-  call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  allocate(localDeToDeMap(localDeCount))
+  call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
   do i=1, localDeCount
-    workDe = localDeList(i)
+    workDe = localDeToDeMap(i)
 !    print *, "I am PET", localPET, " and I am working on DE ", workDe
   enddo
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
 !EOC  
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
@@ -302,11 +302,11 @@ endif
 !BOC
   call ESMF_DELayoutGet(delayout, vasLocalDeCount=localDeCount, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
-  allocate(localDeList(localDeCount))
-  call ESMF_DELayoutGet(delayout, vasLocalDeList=localDeList, rc=rc)
+  allocate(localDeToDeMap(localDeCount))
+  call ESMF_DELayoutGet(delayout, vasLocalDeToDeMap=localDeToDeMap, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
   do i=1, localDeCount
-    workDe = localDeList(i)
+    workDe = localDeToDeMap(i)
     print *, "I am PET", localPET, &
              " and I am offering service for DE ", workDe
     reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
@@ -319,7 +319,7 @@ endif
       if (rc /= ESMF_SUCCESS) finalrc=rc
     endif
   enddo
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
 !EOC  
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99

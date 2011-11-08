@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.6 2011/10/10 22:32:14 theurich Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.7 2011/11/08 05:02:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@ module ESMF_ArraySMMUTest_comp_mod
     type(ESMF_DistGrid)   :: srcDistgrid, dstDistgrid
     type(ESMF_Array)      :: srcArray, dstArray
     integer               :: i, j, petCount, localPet, localDeCount
-    integer, allocatable  :: localDeList(:)
+    integer, allocatable  :: localDeToDeMap(:)
     integer, pointer      :: farrayPtr(:)
     integer               :: seed(4,6), value
     integer               :: factorList(18), factorIndexList(2,18)
@@ -325,9 +325,9 @@ module ESMF_ArraySMMUTest_comp_mod
       file=FILENAME)) &
       return  ! bail out
     
-    allocate(localDeList(0:localDeCount-1))
+    allocate(localDeToDeMap(0:localDeCount-1))
     
-    call ESMF_ArrayGet(dstArray, localDeList=localDeList, rc=rc)
+    call ESMF_ArrayGet(dstArray, localDeToDeMap=localDeToDeMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -341,7 +341,7 @@ module ESMF_ArraySMMUTest_comp_mod
         file=FILENAME)) &
         return  ! bail out
       
-      select case (localDeList(i))
+      select case (localDeToDeMap(i))
       case (0)
         if (farrayPtr(1) == -66) then
           call ESMF_LogWrite("Correct result verified in dstArray on DE 0", &
@@ -410,7 +410,7 @@ module ESMF_ArraySMMUTest_comp_mod
           
     enddo
     
-    deallocate(localDeList)
+    deallocate(localDeToDeMap)
     
     call ESMF_ArrayDestroy(srcArray, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -470,7 +470,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.6 2011/10/10 22:32:14 theurich Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.7 2011/11/08 05:02:02 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

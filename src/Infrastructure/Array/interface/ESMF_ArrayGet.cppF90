@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.73 2011/09/01 19:12:51 rokuingh Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.74 2011/11/08 05:01:58 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -29,6 +29,10 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! INCLUDES
 ^include "ESMF.h"
+
+! The following macro is used to get around the first pass preprocessing,
+! which treats the string concatenation operator // as an inline comment.
+^define CONCAT /
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -75,7 +79,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.73 2011/09/01 19:12:51 rokuingh Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.74 2011/11/08 05:01:58 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -137,16 +141,16 @@ contains
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
     computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
-    delayout, deCount, localDeCount, localDeList, name, rc)
+    delayout, deCount, localDeCount, localDeToDeMap, localDeList, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),          intent(out), optional :: arrayspec
-    type(ESMF_TypeKind_Flag),           intent(out), optional :: typekind
+    type(ESMF_TypeKind_Flag),      intent(out), optional :: typekind
     integer,                       intent(out), optional :: rank
     type(ESMF_LocalArray), target, intent(out), optional :: localarrayList(:)
-    type(ESMF_Index_Flag),          intent(out), optional :: indexflag
+    type(ESMF_Index_Flag),         intent(out), optional :: indexflag
     integer,               target, intent(out), optional :: distgridToArrayMap(:)
     integer,               target, intent(out), optional :: distgridToPackedArrayMap(:)
     integer,               target, intent(out), optional :: arrayToDistGridMap(:)
@@ -172,7 +176,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),           intent(out), optional :: delayout
     integer,                       intent(out), optional :: deCount
     integer,                       intent(out), optional :: localDeCount
-    integer,                       intent(out), optional :: localDeList(:)
+    integer,                       intent(out), optional :: localDeToDeMap(:)
+    integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED
     character(len=*),              intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
 !         
@@ -308,10 +313,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[localDeCount]}]
 !     Upon return this holds the number of PET-local DEs defined in the
 !     DELayout associated with the Array object.
+!   \item[{[localDeToDeMap]}]
+!     Upon return this holds the list of DEs associated with the local PET.
+!     The provided argument must at least be of size {\tt localDeCount}.
 !   \item[{[localDeList]}]
-!     Upon return this holds the list of DE ids for the PET-local
-!     DEs defined in the DELayout associated with the Array object.
-!     The provided argument must be of size {\tt localDeCount}.
+!     Deprecated argument! Use argument {\tt localDeToDeMap} instead.
 !   \item [{[name]}]
 !     Name of the Array object.
 !   \item[{[rc]}]
@@ -517,7 +523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Obtain DELayout information
     call ESMF_DELayoutGet(opt_delayout, deCount=deCount, &
-      localDeCount=localDeCount, localDeList=localDeList, rc=localrc)
+      localDeCount=localDeCount, localDeToDeMap=localDeToDeMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -529,6 +535,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! extra code to deal with deprecated arguments -> will be removed eventually
+    if (present(localDeList)) then
+      call ESMF_LogWrite("The use of argument 'localDeList' in call " CONCAT/ &
+        "ESMF_ArrayGet() is DEPRECATED! Use argumemt 'localDeToDeMap' " CONCAT/ &
+        "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (present(localDeToDeMap)) then
+        localDeList = localDeToDeMap
+      else
+        call ESMF_DELayoutGet(opt_delayout, localDeToDeMap=localDeList, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
     endif
 
     ! Return successfully
@@ -596,7 +619,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer             :: deCount        ! helper variable
     integer             :: localDeCount   ! helper variable
     integer             :: localDeArg     ! helper variable
-    integer, allocatable:: localDeList(:) ! helper variable
+    integer, allocatable:: localDeToDeMap(:) ! helper variable
     integer             :: de             ! helper variable
     integer             :: rank           ! helper variable
     integer, allocatable:: arrayToDistgridMap(:)  ! helper variable
@@ -657,12 +680,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_DistGridGet(distgrid, indexCountPDe=indexCountInternal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    allocate(localDeList(0:localDeCount-1))
-    call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=localrc)
+    allocate(localDeToDeMap(0:localDeCount-1))
+    call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    de=localDeList(localDeArg)
-    deallocate(localDeList)
+    de=localDeToDeMap(localDeArg)
+    deallocate(localDeToDeMap)
     count = indexCountInternal(distgridDim, de)
     deallocate(indexCountInternal)
       

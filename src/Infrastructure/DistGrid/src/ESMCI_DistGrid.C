@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.66 2011/09/01 23:29:02 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.67 2011/11/08 05:02:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.66 2011/09/01 23:29:02 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.67 2011/11/08 05:02:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -414,7 +414,7 @@ DistGrid *DistGrid::create(
       sizeof(int)*dimCount*deCount);
     distgrid->indexListPDimPLocalDe = new int*[dimCount*localDeCount];
     for (int i=0; i<localDeCount; i++){
-      int de = dg->delayout->getLocalDeList()[i];
+      int de = dg->delayout->getLocalDeToDeMap()[i];
       for (int j=0; j<dimCount; j++){
         int size = distgrid->indexCountPDimPDe[de*dimCount+j];
         distgrid->indexListPDimPLocalDe[i*dimCount+j] = new int[size];
@@ -1951,10 +1951,10 @@ int DistGrid::construct(
   indexCountPDimPDe = new int[dimCount*deCount];
   memcpy(indexCountPDimPDe, indexCountPDimPDeArg, sizeof(int)*dimCount*deCount);
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   indexListPDimPLocalDe = new int*[dimCount*localDeCount];
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     for (int k=0; k<dimCount; k++){
       indexListPDimPLocalDe[i*dimCount+k] =
         new int[indexCountPDimPDe[de*dimCount+k]];
@@ -1998,7 +1998,7 @@ int DistGrid::construct(
     elementCountPCollPLocalDe[i] = new int[localDeCount];
     for (int j=0; j<localDeCount; j++){
       arbSeqIndexListPCollPLocalDe[i][j] = NULL;
-      elementCountPCollPLocalDe[i][j] = elementCountPDe[localDeList[i]];
+      elementCountPCollPLocalDe[i][j] = elementCountPDe[localDeToDeMap[i]];
     }
   }
   if (regDecompArg){
@@ -2166,7 +2166,7 @@ int DistGrid::fillSeqIndexList(
     }else{
       // default seq indices -> generate on the fly and fill in
       if ((seqIndexList)->extent[0] <
-        (getElementCountPDe())[delayout->getLocalDeList()[localDe]]){
+        (getElementCountPDe())[delayout->getLocalDeToDeMap()[localDe]]){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of seqIndexList array insufficiently sized", &rc);
         return rc;
@@ -2175,7 +2175,7 @@ int DistGrid::fillSeqIndexList(
       // TODO: use MultiDimIndexLoop class for the following multi-dim loop
       int *ii = new int[dimCount];     // index tuple basis 0
       const int *iiEnd = getIndexCountPDimPDe() + dimCount *
-        delayout->getLocalDeList()[localDe];
+        delayout->getLocalDeToDeMap()[localDe];
       // reset counters
       int index = 0;
       for (int j=0; j<dimCount; j++)
@@ -2596,12 +2596,12 @@ int DistGrid::print()const{
   }
   printf("indexListPDimPLocalDe (dims separated by / ):\n");
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   for (int i=0; i<localDeCount; i++){
-    printf(" for localDE %d - DE %d: ", i, localDeList[i]);
+    printf(" for localDE %d - DE %d: ", i, localDeToDeMap[i]);
     for (int j=0; j<dimCount; j++){
       printf(" (");
-      for (int k=0; k<indexCountPDimPDe[localDeList[i]*dimCount+j]; k++){
+      for (int k=0; k<indexCountPDimPDe[localDeToDeMap[i]*dimCount+j]; k++){
         if (k!=0) printf(", ");
         printf("%d", indexListPDimPLocalDe[i*dimCount+j][k]);
       }
@@ -2619,7 +2619,7 @@ int DistGrid::print()const{
     for (int j=0; j<localDeCount; j++){
       printf(" for collocation %d, localDE %d - DE %d - "
         " elementCountPCollPLocalDe %d: ", collocationTable[i], j,
-        localDeList[j], elementCountPCollPLocalDe[i][j]);
+        localDeToDeMap[j], elementCountPCollPLocalDe[i][j]);
       if (arbSeqIndexListPCollPLocalDe[i][j]){
         printf("(");
         for (int k=0; k<elementCountPCollPLocalDe[i][j]; k++){
@@ -2783,7 +2783,7 @@ bool DistGrid::isLocalDeOnEdgeL(
   }
   
   // determine which tile localDe is located on
-  int de = delayout->getLocalDeList()[localDe];
+  int de = delayout->getLocalDeToDeMap()[localDe];
   bool onEdge = true;            // assume local De is on edge
   if (elementCountPDe[de]){
     // local De is associated with elements
@@ -2866,7 +2866,7 @@ bool DistGrid::isLocalDeOnEdgeU(
   }
   
   // determine which tile localDe is located on
-  int de = delayout->getLocalDeList()[localDe];
+  int de = delayout->getLocalDeToDeMap()[localDe];
   bool onEdge = true;            // assume local De is on edge
   if (elementCountPDe[de]){
     // local De is associated with elements
@@ -3051,7 +3051,7 @@ int DistGrid::getSequenceIndexLocalDe(
       "- Specified local DE out of bounds", rc);
     return -1;
   }
-  int de = delayout->getLocalDeList()[localDe];
+  int de = delayout->getLocalDeToDeMap()[localDe];
   for (int i=0; i<dimCount; i++){
     //TODO: this does _not_ support multiple collocations w/ arb seqIndices 
     //TODO: it assumes that arbSeqIndices may only exist on the first colloc.
@@ -3079,8 +3079,8 @@ int DistGrid::getSequenceIndexLocalDe(
     seqindex = arbSeqIndexListPCollPLocalDe[0][localDe][linExclusiveIndex];
   }else{
     // determine the sequentialized index by construction of default tile rule
-    const int *localDeList = delayout->getLocalDeList();
-    int tile = tileListPDe[localDeList[localDe]];  // tiles are basis 1 !!!!
+    const int *localDeToDeMap = delayout->getLocalDeToDeMap();
+    int tile = tileListPDe[localDeToDeMap[localDe]];  // tiles are basis 1 !!!!
     if (tile == 0){
       // means that the localDe does not have any elements thus not on tile
       seqindex = -1;  // indicate no seqIndex
@@ -3998,7 +3998,7 @@ int DistGrid::setCollocationPDim(
   // no arbitrary sequence indices by default
   arbSeqIndexListPCollPLocalDe = new int**[diffCollocationCount];
   elementCountPCollPLocalDe = new int*[diffCollocationCount];
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   for (int i=0; i<diffCollocationCount; i++){
     arbSeqIndexListPCollPLocalDe[i] = new int*[localDeCount];
     elementCountPCollPLocalDe[i] = new int[localDeCount];
@@ -4008,7 +4008,7 @@ int DistGrid::setCollocationPDim(
       for (int k=0; k<dimCount; k++){
         if ((collocationPDim[k]==collocationTable[i])){
           elementCountPCollPLocalDe[i][j] *=
-            indexCountPDimPDe[localDeList[j]*dimCount+k];
+            indexCountPDimPDe[localDeToDeMap[j]*dimCount+k];
         }
       }
     }

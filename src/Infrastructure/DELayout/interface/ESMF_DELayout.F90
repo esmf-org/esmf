@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.104 2011/09/01 19:12:57 rokuingh Exp $
+! $Id: ESMF_DELayout.F90,v 1.105 2011/11/08 05:02:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.104 2011/09/01 19:12:57 rokuingh Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.105 2011/11/08 05:02:07 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -980,8 +980,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
-    vasMap, oneToOneFlag, pinflag, localDeCount, localDeList, &
-    vasLocalDeCount, vasLocalDeList, rc)
+    vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, localDeList, &
+    vasLocalDeCount, vasLocalDeToDeMap, vasLocalDeList, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)            :: delayout
@@ -993,9 +993,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                  intent(out), optional :: oneToOneFlag
     type(ESMF_Pin_Flag),      intent(out), optional :: pinflag
     integer,                  intent(out), optional :: localDeCount
-    integer, target,          intent(out), optional :: localDeList(:)
+    integer, target,          intent(out), optional :: localDeToDeMap(:)
+    integer, target,          intent(out), optional :: localDeList(:)     ! DEPRECATED
     integer,                  intent(out), optional :: vasLocalDeCount
-    integer, target,          intent(out), optional :: vasLocalDeList(:)
+    integer, target,          intent(out), optional :: vasLocalDeToDeMap(:)
+    integer, target,          intent(out), optional :: vasLocalDeList(:)  ! DEPRECATED
     integer,                  intent(out), optional :: rc  
 !
 ! !STATUS:
@@ -1031,14 +1033,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        options.
 !     \item[{[localDeCount]}]
 !        Upon return this holds the number of DEs associated with the local PET.
-!     \item[{[localDeList]}]
+!     \item[{[localDeToDeMap]}]
 !        Upon return this holds the list of DEs associated with the local PET.
 !        The provided argument must at least be of size {\tt localDeCount}.
+!     \item[{[localDeList]}]
+!        Deprecated argument! Use argument {\tt localDeToDeMap} instead.
 !     \item[{[vasLocalDeCount]}]
 !        Upon return this holds the number of DEs associated with the local VAS.
-!     \item[{[vasLocalDeList]}]
+!     \item[{[vasLocalDeToDeMap]}]
 !        Upon return this holds the list of DEs associated with the local VAS.
 !        The provided argument must at least be of size {\tt vasLocalDeCount}.
+!     \item[{[vasLocalDeList]}]
+!        Deprecated argument! Use argument {\tt vasLocalDeToDeMap} instead.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1063,8 +1069,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                 :: localrc                ! local return code
     type(ESMF_InterfaceInt) :: petMapArg              ! helper variable
     type(ESMF_InterfaceInt) :: vasMapArg              ! helper variable
-    type(ESMF_InterfaceInt) :: localDeListArg         ! helper variable
-    type(ESMF_InterfaceInt) :: vasLocalDeListArg      ! helper variable
+    type(ESMF_InterfaceInt) :: localDeToDeMapArg      ! helper variable
+    type(ESMF_InterfaceInt) :: vasLocalDeToDeMapArg   ! helper variable
     type(ESMF_Logical)      :: oneToOneFlagArg        ! helper variable
     
     ! initialize return code; assume routine not implemented
@@ -1095,17 +1101,51 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     vasMapArg = ESMF_InterfaceIntCreate(vasMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    localDeListArg = ESMF_InterfaceIntCreate(localDeList, rc=localrc)
+    localDeToDeMapArg = ESMF_InterfaceIntCreate(localDeToDeMap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    vasLocalDeListArg = ESMF_InterfaceIntCreate(vasLocalDeList, rc=localrc)
+    vasLocalDeToDeMapArg = ESMF_InterfaceIntCreate(vasLocalDeToDeMap, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! extra code to deal with deprecated arguments -> will be removed eventually
+    if (present(localDeList)) then
+      call ESMF_LogWrite("The use of argument 'localDeList' in call "// &
+        "ESMF_DELayoutGet() is DEPRECATED! Use argumemt 'localDeToDeMap' "// &
+        "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (.not.present(localDeToDeMap)) then
+        call ESMF_InterfaceIntDestroy(localDeToDeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        localDeToDeMapArg = ESMF_InterfaceIntCreate(localDeList, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
+    if (present(vasLocalDeList)) then
+      call ESMF_LogWrite("The use of argument 'vasLocalDeList' in call "// &
+        "ESMF_DELayoutGet() is DEPRECATED! Use argument 'vasLocalDeToDeMap' "// &
+        "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      if (.not.present(vasLocalDeToDeMap)) then
+        call ESMF_InterfaceIntDestroy(vasLocalDeToDeMapArg, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        vasLocalDeToDeMapArg = ESMF_InterfaceIntCreate(vasLocalDeList, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+    endif
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutGet(delayout, vm, deCount, petMapArg, vasMapArg, &
-      oneToOneFlagArg, pinflag, localDeCount, localDeListArg, &
-      vasLocalDeCount, vasLocalDeListArg, localrc)
+      oneToOneFlagArg, pinflag, localDeCount, localDeToDeMapArg, &
+      vasLocalDeCount, vasLocalDeToDeMapArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     if (present (oneToOneFlag)) &
@@ -1125,12 +1165,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_InterfaceIntDestroy(vasMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(localDeListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(localDeToDeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_InterfaceIntDestroy(vasLocalDeListArg, rc=localrc)
+    call ESMF_InterfaceIntDestroy(vasLocalDeToDeMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! finish dealing with deprecated arguments -> will be removed eventually
+    if (present(localDeList) .and. present(localDeToDeMap)) then
+      localDeList = localDeToDeMap
+    endif
+    if (present(vasLocalDeList) .and. present(vasLocalDeToDeMap)) then
+      vasLocalDeList = vasLocalDeToDeMap
+    endif
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1146,15 +1194,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutGetDeprecated - Get DELayout internals
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutGetDeprecated(delayout, deCount, dimCount, localDeCount, &
-    localDeList, localDe, oneToOneFlag, logRectFlag, deCountPerDim, rc)
+  subroutine ESMF_DELayoutGetDeprecated(delayout, deCount, dimCount, &
+    localDeCount, localDeToDeMap, localDe, oneToOneFlag, logRectFlag, &
+    deCountPerDim, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)            :: delayout
     integer,              intent(out), optional :: deCount
     integer,              intent(out), optional :: dimCount
     integer,              intent(out), optional :: localDeCount
-    integer, target,      intent(out), optional :: localDeList(:)
+    integer, target,      intent(out), optional :: localDeToDeMap(:)
     integer,              intent(out), optional :: localDe
     type(ESMF_Logical),   intent(out), optional :: oneToOneFlag
     type(ESMF_Logical),   intent(out), optional :: logRectFlag
@@ -1175,7 +1224,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        {\tt ESMF\_DELayout} object's coordinate tuples.
 !     \item[{[localDeCount]}]
 !        Upon return this holds the number of DEs associated with the local PET.
-!     \item[{[localDeList]}]
+!     \item[{[localDeToDeMap]}]
 !        Upon return this holds the list of DEs associated with the local PET.
 !     \item[{[localDe]}]
 !        Upon return this holds the DE associated with the local PET. If the
@@ -1202,8 +1251,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer                 :: len_localDeList, len_deCountPerDim
-    integer, pointer        :: opt_localDeList(:), opt_deCountPerDim(:)
+    integer                 :: len_localDeToDeMap, len_deCountPerDim
+    integer, pointer        :: opt_localDeToDeMap(:), opt_deCountPerDim(:)
     integer, target         :: dummy(1)     ! used to satisfy the C interface...
 
     ! initialize return code; assume routine not implemented
@@ -1214,12 +1263,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     
     ! Deal with optional array arguments
-    if (present(localDeList)) then
-      len_localDeList = size(localDeList)
-      opt_localDeList => localDeList
+    if (present(localDeToDeMap)) then
+      len_localDeToDeMap = size(localDeToDeMap)
+      opt_localDeToDeMap => localDeToDeMap
     else
-      len_localDeList = 0
-      opt_localDeList => dummy
+      len_localDeToDeMap = 0
+      opt_localDeToDeMap => dummy
     endif
     if (present(deCountPerDim)) then
       len_deCountPerDim = size(deCountPerDim)
@@ -1230,9 +1279,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_DELayoutGetDeprecated(delayout, deCount, dimCount, localDeCount, &
-      opt_localDeList(1), len_localDeList, localDe, oneToOneFlag, logRectFlag, &
-      opt_deCountPerDim(1), len_deCountPerDim, localrc)
+    call c_ESMC_DELayoutGetDeprecated(delayout, deCount, dimCount, &
+      localDeCount, opt_localDeToDeMap(1), len_localDeToDeMap, localDe, &
+      oneToOneFlag, logRectFlag, opt_deCountPerDim(1), len_deCountPerDim, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

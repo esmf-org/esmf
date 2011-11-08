@@ -1,5 +1,4 @@
-
-// $Id: ESMCI_Grid.C,v 1.125 2011/07/21 21:40:31 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.126 2011/11/08 05:02:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.125 2011/07/21 21:40:31 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.126 2011/11/08 05:02:20 theurich Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -1589,11 +1588,11 @@ int Grid::getExclusiveUBound(
   } else {
     // Get some useful information
     int distgridDimCount = dimCount-distDimCount+1;
-    const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+    const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
     const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
 
     // Get the Global DE from the local DE
-    int de = localDeList[localDEArg];
+    int de = localDeToDeMap[localDEArg];
 
     // exlc. region for each DE ends at indexCountPDimPDe of the associated
     // DistGrid
@@ -1658,10 +1657,10 @@ int Grid::getDistExclusiveLBound(
       lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
   } else {
     // Get some useful information
-    const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+    const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
 
     // Get the Global DE from the local DE
-    int de = localDeList[localDEArg];
+    int de = localDeToDeMap[localDEArg];
 
     // Set Bound based on distgrid info
     for (int i=0; i<distDimCount; i++){
@@ -1739,11 +1738,11 @@ int Grid::getDistExclusiveUBound(
   }
 
   // Get some useful information
-  const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+  const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
 
   // Get the Global DE from the local DE
-  int de = localDeList[localDEArg];
+  int de = localDeToDeMap[localDEArg];
 
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
   // DistGrid
@@ -5221,7 +5220,7 @@ static  void _free3D(Type ****array)
     const int localDECount=delayout->getLocalDeCount();
 
     // Get map between local and global DEs
-    const int *localDEList=delayout->getLocalDeList();
+    const int *localDEList=delayout->getLocalDeToDeMap();
    
     // Get map between DEs and tiles
     const int *DETileList = distgrid->getTileListPDe();
@@ -6617,7 +6616,7 @@ void GridIter::setDEBnds(
 
   // Temporarily set min/max
   int localrc;
-  const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeList();
+  const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
   const int *DETileList = staggerDistgrid->getTileListPDe();
   int tile=DETileList[localDEList[localDE]];
 
@@ -6998,10 +6997,10 @@ int GridIter::getDE(
   if (done) return -1;
   
   // Get some useful information
-  const int *localDeList = staggerDistgrid->getDELayout()->getLocalDeList();
+  const int *localDeToDeMap = staggerDistgrid->getDELayout()->getLocalDeToDeMap();
   
   // Output DE
-  return localDeList[curDE];
+  return localDeToDeMap[curDE];
 }
 //-----------------------------------------------------------------------------
 
@@ -7615,7 +7614,7 @@ void GridCellIter::setDEBnds(
 
   // Temporarily set min/max
   int localrc;
-  const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeList();
+  const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
   const int *DETileList = staggerDistgrid->getTileListPDe();
   int tile=DETileList[localDEList[localDE]];
 
@@ -7910,10 +7909,10 @@ int GridCellIter::getDE(
   if (done) return -1;
   
   // Get some useful information
-  const int *localDeList = staggerDistgrid->getDELayout()->getLocalDeList();
+  const int *localDeToDeMap = staggerDistgrid->getDELayout()->getLocalDeToDeMap();
   
   // Output DE
-  return localDeList[curDE];
+  return localDeToDeMap[curDE];
 }
 //-----------------------------------------------------------------------------
 
@@ -9455,11 +9454,11 @@ int Grid::getDistExclusiveUBound(
   }
 
   // Get some useful information
-  const int *localDeList = distgridArg->getDELayout()->getLocalDeList();
+  const int *localDeToDeMap = distgridArg->getDELayout()->getLocalDeToDeMap();
   const int *indexCountPDimPDe = distgridArg->getIndexCountPDimPDe();
 
   // Get the Global DE from the local DE
-  int de = localDeList[localDEArg];
+  int de = localDeToDeMap[localDEArg];
 
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
   // DistgridArg
@@ -9551,10 +9550,10 @@ int Grid::getDistExclusiveLBound(
       lBndArg[i] = 1; // excl. region starts at (1,1,1...) 
   } else {
     // Get some useful information
-    const int *localDeList = distgridArg->getDELayout()->getLocalDeList();
+    const int *localDeToDeMap = distgridArg->getDELayout()->getLocalDeToDeMap();
 
     // Get the Global DE from the local DE
-    int de = localDeList[localDEArg];
+    int de = localDeToDeMap[localDEArg];
 
     // Set Bound based on distgridArg info
     for (int i=0; i<distDimCount; i++){

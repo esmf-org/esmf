@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.36 2011/06/30 04:01:29 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.37 2011/11/08 05:02:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -542,7 +542,7 @@ extern "C" {
       }
       if ((*indexList)->extent[0] <
         ((*ptr)->getIndexCountPDimPDe())[(*ptr)->getDELayout()->
-        getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim]){
+        getLocalDeToDeMap()[localDe] * (*ptr)->getDimCount()+dim]){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of indexList array size insufficiently", rc);
         return;
@@ -550,7 +550,7 @@ extern "C" {
       // fill in the values
       memcpy((*indexList)->array, indexListPtr,
         sizeof(int) * (*ptr)->getIndexCountPDimPDe()[((*ptr)->getDELayout()->
-        getLocalDeList()[localDe] * (*ptr)->getDimCount()+dim)]);
+        getLocalDeToDeMap()[localDe] * (*ptr)->getDimCount()+dim)]);
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;

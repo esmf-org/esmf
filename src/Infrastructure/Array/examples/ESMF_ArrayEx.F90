@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.79 2011/08/26 21:31:36 theurich Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.80 2011/11/08 05:01:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_ArrayEx
   integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
   integer, allocatable:: connectionList(:,:)
   integer, allocatable:: arrayToDistGridMap(:)
-  integer, allocatable:: localDeList(:)
+  integer, allocatable:: localDeToDeMap(:)
   integer, allocatable:: exclusiveLBound(:,:), exclusiveUBound(:,:)
   integer, allocatable:: totalLWidth(:,:), totalUWidth(:,:)
   integer, allocatable:: totalLBound(:,:), totalUBound(:,:)
@@ -498,9 +498,9 @@ program ESMF_ArrayEx
 ! Obtain the {\tt larrayList} on every PET.
 !EOE
 !BOC
-  allocate(localDeList(0:localDeCount-1))
+  allocate(localDeToDeMap(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, &
-    localDeList=localDeList, rc=rc)
+    localDeToDeMap=localDeToDeMap, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -570,25 +570,25 @@ program ESMF_ArrayEx
     call ESMF_LocalArrayGet(larrayList(de), myFarray, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     ! initialize the DE-local array
-    myFarray = 0.1d0 * localDeList(de)
+    myFarray = 0.1d0 * localDeToDeMap(de)
     ! first time through the total region of array    
-!    print *, "myFarray bounds for DE=", localDeList(de), &
+!    print *, "myFarray bounds for DE=", localDeToDeMap(de), &
 !      lbound(myFarray),  ubound(myFarray)
     do j=exclusiveLBound(2, de), exclusiveUBound(2, de)
       do i=exclusiveLBound(1, de), exclusiveUBound(1, de)
-!        print *, "Excl region DE=", localDeList(de), &
+!        print *, "Excl region DE=", localDeToDeMap(de), &
 !        ": array(",i,",",j,")=",  myFarray(i,j)
       enddo
     enddo
     do j=computationalLBound(2, de), computationalUBound(2, de)
       do i=computationalLBound(1, de), computationalUBound(1, de)
-!        print *, "Excl region DE=", localDeList(de), &
+!        print *, "Excl region DE=", localDeToDeMap(de), &
 !        ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
     do j=totalLBound(2, de), totalUBound(2, de)
       do i=totalLBound(1, de), totalUBound(1, de)
-!        print *, "Total region DE=", localDeList(de), &
+!        print *, "Total region DE=", localDeToDeMap(de), &
 !        ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
@@ -598,7 +598,7 @@ program ESMF_ArrayEx
       exclusiveUBound(2, de)+totalUWidth(2, de)
       do i=exclusiveLBound(1, de)-totalLWidth(1, de), &
         exclusiveUBound(1, de)+totalUWidth(1, de)
-!        print *, "Excl region DE=", localDeList(de), &
+!        print *, "Excl region DE=", localDeToDeMap(de), &
 !        ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
@@ -606,7 +606,7 @@ program ESMF_ArrayEx
 !EOC
 
   deallocate(larrayList)
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
   call ESMF_ArrayDestroy(array, rc=rc) ! finally destroy the array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
@@ -1308,9 +1308,9 @@ program ESMF_ArrayEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   allocate(larrayList(0:localDeCount-1))
-  allocate(localDeList(0:localDeCount-1))
+  allocate(localDeToDeMap(0:localDeCount-1))
   call ESMF_ArrayGet(array, localarrayList=larrayList, &
-    localDeList=localDeList, rc=rc)
+    localDeToDeMap=localDeToDeMap, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
@@ -1338,11 +1338,11 @@ program ESMF_ArrayEx
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-    print *, "localPet: ", localPet, "DE ",localDeList(de)," [", lbound(myFarray1D), &
-      ubound(myFarray1D),"]"
+    print *, "localPet: ", localPet, "DE ",localDeToDeMap(de)," [", &
+      lbound(myFarray1D), ubound(myFarray1D),"]"
   enddo
   deallocate(larrayList)
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
   call ESMF_ArrayDestroy(array, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
