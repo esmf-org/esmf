@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.39 2011/11/08 17:49:52 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.40 2011/11/09 17:40:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -307,7 +307,8 @@
       !EX_UTest
       ! Test regrid matrix
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test using matrix (factorList, factorIndexList) from ESMF_FieldRegridStore() in ESMF_FieldSMMStore()"
+      write(name, *) "Test using matrix (factorList, factorIndexList) " // &
+                     "from ESMF_FieldRegridStore() in ESMF_FieldSMMStore()"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -325,7 +326,8 @@
       !EX_UTest
       ! Test regrid matrix
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test using DEPRECATED matrix arguments (weights, indices) from ESMF_FieldRegridStore() in ESMF_FieldSMMStore()"
+      write(name, *) "Test using DEPRECATED matrix arguments (weights, indices) " // &
+                     "from ESMF_FieldRegridStore() in ESMF_FieldSMMStore()"
 
       ! initialize 
       rc=ESMF_SUCCESS
