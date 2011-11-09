@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.105 2011/11/08 05:02:07 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.106 2011/11/09 23:49:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.105 2011/11/08 05:02:07 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.106 2011/11/09 23:49:39 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -980,8 +980,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
-    vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, localDeList, &
-    vasLocalDeCount, vasLocalDeToDeMap, vasLocalDeList, rc)
+    vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, &
+    localDeList, &      ! DEPRECATED ARGUMENT
+    vasLocalDeCount, vasLocalDeToDeMap, &
+    vasLocalDeList, &   ! DEPRECATED ARGUMENT
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),      intent(in)            :: delayout
@@ -994,60 +997,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Pin_Flag),      intent(out), optional :: pinflag
     integer,                  intent(out), optional :: localDeCount
     integer, target,          intent(out), optional :: localDeToDeMap(:)
-    integer, target,          intent(out), optional :: localDeList(:)     ! DEPRECATED
+    integer, target,          intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
     integer,                  intent(out), optional :: vasLocalDeCount
     integer, target,          intent(out), optional :: vasLocalDeToDeMap(:)
-    integer, target,          intent(out), optional :: vasLocalDeList(:)  ! DEPRECATED
+    integer, target,          intent(out), optional :: vasLocalDeList(:)  ! DEPRECATED ARGUMENT
     integer,                  intent(out), optional :: rc  
 !
 ! !STATUS:
 ! \apiStatusCompatible
 !
 ! !DESCRIPTION:
-!     Access to DELayout information.
+!   Access to DELayout information.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout] 
-!        Queried {\tt ESMF\_DELayout} object.
-!     \item[{[vm]}]
-!        Upon return this holds the {\tt ESMF\_VM} object on which the delayout
-!        is defined.
-!     \item[{[deCount]}]
-!        Upon return this holds the total number of DEs.
-!     \item[{[petMap]}]
-!        Upon return this holds the list of PETs against which the DEs are 
-!        mapped. The {\tt petMap} argument must at least be of size
-!        {\tt deCount}.
-!     \item[{[vasMap]}]
-!        Upon return this holds the list of VASs against which the DEs are 
-!        mapped. The {\tt vasMap} argument must at least be of size
-!        {\tt deCount}.
-!     \item[{[oneToOneFlag]}]
-!        Upon return this holds {\tt .TRUE.} if the specified 
-!        {\tt ESMF\_DELayout} describes a 1-to-1 mapping between DEs and PETs,
-!        {\tt .FALSE.} otherwise.
-!     \item[{[pinflag]}]
-!        Upon return this flag will indicate the type of DE pinning. 
-!        See section \ref{const:pin_flag} for a list of valid pinning 
-!        options.
-!     \item[{[localDeCount]}]
-!        Upon return this holds the number of DEs associated with the local PET.
-!     \item[{[localDeToDeMap]}]
-!        Upon return this holds the list of DEs associated with the local PET.
-!        The provided argument must at least be of size {\tt localDeCount}.
-!     \item[{[localDeList]}]
-!        Deprecated argument! Use argument {\tt localDeToDeMap} instead.
-!     \item[{[vasLocalDeCount]}]
-!        Upon return this holds the number of DEs associated with the local VAS.
-!     \item[{[vasLocalDeToDeMap]}]
-!        Upon return this holds the list of DEs associated with the local VAS.
-!        The provided argument must at least be of size {\tt vasLocalDeCount}.
-!     \item[{[vasLocalDeList]}]
-!        Deprecated argument! Use argument {\tt vasLocalDeToDeMap} instead.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[delayout] 
+!     Queried {\tt ESMF\_DELayout} object.
+!   \item[{[vm]}]
+!     The {\tt ESMF\_VM} object on which {\tt delayout} is defined.
+!   \item[{[deCount]}]
+!     The total number of DEs in the DELayout.
+!   \item[{[petMap]}]
+!     List of PETs against which the DEs are mapped. The {\tt petMap} 
+!     argument must at least be of size {\tt deCount}.
+!   \item[{[vasMap]}]
+!     List of VASs against which the DEs are mapped. The {\tt vasMap}
+!     argument must at least be of size {\tt deCount}.
+!   \item[{[oneToOneFlag]}]
+!     A value of {\tt .TRUE.} indicates that {\tt delayout} maps each DE to a
+!     single PET, and each PET maps to a single DE. All other layouts return
+!     a value of {\tt .FALSE.}.
+!   \item[{[pinflag]}]
+!     The type of DE pinning. See section \ref{const:pin_flag} for a list
+!     of valid pinning options.
+!   \item[{[localDeCount]}]
+!     The number of DEs in the DELayout associated with the local PET.
+!   \item[{[localDeToDeMap]}]
+!     Mapping between the localDe indices and the (global) DEs associated with
+!     the local PET. ESMF localDe indices are discussed in section ???. The
+!     provided argument must be of size {\tt localDeCount}.
+!   \item[{[localDeList]}]
+!     DEPRECATED ARGUMENT! Use argument {\tt localDeToDeMap} instead.
+!   \item[{[vasLocalDeCount]}]
+!     The number of DEs in the DELayout associated with the local VAS.
+!   \item[{[vasLocalDeToDeMap]}]
+!     Mapping between the localDe indices and the (global) DEs associated with
+!     the local VAS. ESMF localDe indices are discussed in section ???. The
+!     provided argument must be of size {\tt vasLocalDeCount}.
+!   \item[{[vasLocalDeList]}]
+!     DEPRECATED ARGUMENT! Use argument {\tt vasLocalDeToDeMap} instead.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP
 !

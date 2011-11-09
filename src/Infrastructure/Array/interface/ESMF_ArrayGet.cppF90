@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.74 2011/11/08 05:01:58 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.75 2011/11/09 23:49:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.74 2011/11/08 05:01:58 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.75 2011/11/09 23:49:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -141,7 +141,9 @@ contains
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
     computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
-    delayout, deCount, localDeCount, localDeToDeMap, localDeList, name, rc)
+    delayout, deCount, localDeCount, localDeToDeMap, &
+    localDeList, &    ! DEPRECATED ARGUMENT
+    name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: array
@@ -177,7 +179,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: deCount
     integer,                       intent(out), optional :: localDeCount
     integer,                       intent(out), optional :: localDeToDeMap(:)
-    integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED
+    integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
     character(len=*),              intent(out), optional :: name
     integer,                       intent(out), optional :: rc  
 !         
@@ -306,18 +308,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt size(indexCountPDe) == (/dimCount, deCount/)}.
 !     \end{sloppypar}
 !   \item[{[delayout]}]
-!     Upon return this holds the associated {\tt ESMF\_DELayout} object.
+!     The associated {\tt ESMF\_DELayout} object.
 !   \item[{[deCount]}]
-!     Upon return this holds the total number of DEs defined in the DELayout
-!     associated with the Array object.
+!     The total number of DEs in the Array.
 !   \item[{[localDeCount]}]
-!     Upon return this holds the number of PET-local DEs defined in the
-!     DELayout associated with the Array object.
+!     The number of DEs in the Array associated with the local PET.
 !   \item[{[localDeToDeMap]}]
-!     Upon return this holds the list of DEs associated with the local PET.
-!     The provided argument must at least be of size {\tt localDeCount}.
+!     Mapping between the localDe indices and the (global) DEs associated with
+!     the local PET. ESMF localDe indices are discussed in section ???. The
+!     provided argument must be of size {\tt localDeCount}.
 !   \item[{[localDeList]}]
-!     Deprecated argument! Use argument {\tt localDeToDeMap} instead.
+!     DEPRECATED ARGUMENT! Use argument {\tt localDeToDeMap} instead.
 !   \item [{[name]}]
 !     Name of the Array object.
 !   \item[{[rc]}]
@@ -327,7 +328,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer                       :: localrc        ! local return code
-    type(ESMF_TypeKind_Flag)           :: opt_typekind           ! helper variable
+    type(ESMF_TypeKind_Flag)      :: opt_typekind           ! helper variable
     integer                       :: opt_rank               ! helper variable
     type(ESMF_Pointer), pointer   :: opt_localarrayPtrList(:)   ! helper variable
     integer                       :: len_localarrayPtrList, i   ! helper variable
@@ -540,7 +541,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! extra code to deal with deprecated arguments -> will be removed eventually
     if (present(localDeList)) then
       call ESMF_LogWrite("The use of argument 'localDeList' in call " CONCAT/ &
-        "ESMF_ArrayGet() is DEPRECATED! Use argumemt 'localDeToDeMap' " CONCAT/ &
+        "ESMF_ArrayGet() is DEPRECATED! Use argument 'localDeToDeMap' " CONCAT/ &
         "instead.", ESMF_LOGMSG_WARNING, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
