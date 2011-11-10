@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.31 2011/11/08 05:02:03 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.32 2011/11/10 05:45:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@ program ESMF_DELayoutEx
   implicit none
   
   ! local variables
-  integer:: rc, i, localPET, petCount, localDeCount, myDe, workDe
+  integer:: rc, i, localPET, petCount, localDeCount, myDe, workDe, localDe
   integer, allocatable:: commWeights(:,:), compWeights(:), localDeToDeMap(:)
   type(ESMF_VM):: vm
   type(ESMF_DELayout):: delayout
@@ -229,52 +229,95 @@ if (petCount == 4) then
 endif
 
 !BOE
-! \subsubsection{Working with a DELayout - simple 1-to-1 DE to PET mapping}
+! \subsubsection{Working with a DELayout - simple 1-to-1 DE-to-PET mapping}
 ! 
-! The simplest case is a DELayout with as many DEs as PETs where each DE is 
-! against a separate PET. This of course implies that the number of
-! DEs equals the number of PETs. This special 1-to-1 DE to PET
-! mapping is very common and many codes assume this mapping. The following 
-! example code shows how a DELayout can be queried about its mapping.
+! The simplest case is a DELayout where there is exactly one DE for every PET.
+! Of course this implies that the number of DEs equals the number of PETs. 
+! This special 1-to-1 DE-to-PET mapping is very common and many applications
+! assume it. The following example shows how a DELayout can be queried about
+! its mapping.
+!
+! First a default DELayout is created where the number of DEs equals the number
+! of PETs, and are associated 1-to-1.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) goto 99
+!BOE
+! Next the DELayout is queried for the {\tt oneToOneFlag}, and the user code
+! makes a decision based on its value.
+!EOE
 !BOC
   call ESMF_DELayoutGet(delayout, oneToOneFlag=oneToOneFlag, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
   if (.not. oneToOneFlag) then
-    ! handle the unexpected case of general DE to PET mapping
+    ! handle the unexpected case of not dealing with a 1-to-1 mapping
+  else
+!EOC
+!BOE
+! 1-to-1 mapping is guaranteed in this branch and the following code can
+! work under the simplifying assumption that every PET holds exactly one DE:
+!EOE
+!BOC  
+    allocate(localDeToDeMap(1))
+    call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
+    if (rc /= ESMF_SUCCESS) finalrc=rc
+    myDe = localDeToDeMap(1)
+    deallocate(localDeToDeMap)
   endif
-  allocate(localDeToDeMap(1))
-  call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
-  if (rc /= ESMF_SUCCESS) finalrc=rc
-  myDe = localDeToDeMap(1)
-  deallocate(localDeToDeMap)
 !EOC  
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
 
 !BOE
-! \subsubsection{Working with a DELayout - general DE to PET mapping}
+! \subsubsection{Working with a DELayout - general DE-to-PET mapping}
+! \label{DELayout_general_mapping}
 ! 
-! In general a DELayout may describe a DE to PET mapping that is not 1-to-1. The
-! following example shows how code can be written in a general form that will 
-! work on all PETs for DELayouts with general or 1-to-1 DE to PET mapping.
+! In general a DELayout may map any number (including zero) DEs against
+! a single PET. This situation can be detected by querying the DELayout for
+! the {\tt oneToOneFlag}. If this flag comes back as {\tt .false.} the 
+! DELayout describes a more general DE-to-PET layout. The following example
+! shows how code can be be written to work for any DELayout.
+!
+! First a DELayout is created with two more DEs than there are PETs. The 
+! DELayout will consequently map some DEs to the same PET.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(deCount=petCount+2, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) goto 99
+!BOE
+! The first piece of information needed on each PET is the {\tt localDeCount}.
+! This number may be different on each PET and indicates how many DEs are 
+! mapped against the local PET.
+!EOE
 !BOC
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
+!EOC  
   if (rc /= ESMF_SUCCESS) finalrc=rc
-  allocate(localDeToDeMap(localDeCount))
+!BOE
+! The DELayout can further be queried for a list of DEs that are held by
+! the local PET. This information is provided by the {\tt localDeToDeMap}
+! argument. In ESMF a {\tt localDe} is an index that enumerates the DEs that
+! are associated with the local PET. In many cases the exact bounds of the
+! {\tt localDe} index range, e.g. $[0...localDeCount-1]$, or $[1...localDeCount]$ 
+! does not matter, since it only affects how user code indexes into variables
+! the user allocated, and therefore set the specific bounds. However, there are 
+! a few Array and Field level calls that take {\tt localDe} input arguments. In 
+! all those cases where the {\tt localDe} index variable is passed into an ESMF
+! call as an input argument, it {\em must} be defined with a range starting at
+! zero, i.e. $[0...localDeCount-1]$.
+!
+! For consistency with Array and Field, the following code uses a 
+! $[0...localDeCount-1]$ range for the {\tt localDe} index variable, 
+! although it is not strictly necessary here:
+!BOC
+  allocate(localDeToDeMap(0:localDeCount-1))
   call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
   if (rc /= ESMF_SUCCESS) finalrc=rc
-  do i=1, localDeCount
-    workDe = localDeToDeMap(i)
+  do localDe=0, localDeCount-1
+    workDe = localDeToDeMap(localDe)
 !    print *, "I am PET", localPET, " and I am working on DE ", workDe
   enddo
   deallocate(localDeToDeMap)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.75 2011/11/09 23:49:37 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.76 2011/11/10 05:45:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.75 2011/11/09 23:49:37 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.76 2011/11/10 05:45:30 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -314,9 +314,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[localDeCount]}]
 !     The number of DEs in the Array associated with the local PET.
 !   \item[{[localDeToDeMap]}]
-!     Mapping between the localDe indices and the (global) DEs associated with
-!     the local PET. ESMF localDe indices are discussed in section ???. The
-!     provided argument must be of size {\tt localDeCount}.
+!     Mapping between localDe indices and the (global) DEs associated with
+!     the local PET. The localDe index variables are discussed in sections
+!     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
+!     The provided actual argument must be of size {\tt localDeCount}.
 !   \item[{[localDeList]}]
 !     DEPRECATED ARGUMENT! Use argument {\tt localDeToDeMap} instead.
 !   \item [{[name]}]

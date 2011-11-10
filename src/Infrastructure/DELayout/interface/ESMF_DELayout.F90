@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.106 2011/11/09 23:49:39 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.107 2011/11/10 05:45:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.106 2011/11/09 23:49:39 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.107 2011/11/10 05:45:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1033,17 +1033,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[localDeCount]}]
 !     The number of DEs in the DELayout associated with the local PET.
 !   \item[{[localDeToDeMap]}]
-!     Mapping between the localDe indices and the (global) DEs associated with
-!     the local PET. ESMF localDe indices are discussed in section ???. The
-!     provided argument must be of size {\tt localDeCount}.
+!     Mapping between localDe indices and the (global) DEs associated with
+!     the local PET. The localDe index variables are discussed in sections
+!     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
+!     The provided actual argument must be of size {\tt localDeCount}.
 !   \item[{[localDeList]}]
 !     DEPRECATED ARGUMENT! Use argument {\tt localDeToDeMap} instead.
 !   \item[{[vasLocalDeCount]}]
 !     The number of DEs in the DELayout associated with the local VAS.
 !   \item[{[vasLocalDeToDeMap]}]
-!     Mapping between the localDe indices and the (global) DEs associated with
-!     the local VAS. ESMF localDe indices are discussed in section ???. The
-!     provided argument must be of size {\tt vasLocalDeCount}.
+!     Mapping between localDe indices and the (global) DEs associated with
+!     the local VAS. The localDe index variables are discussed in sections
+!     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
+!     The provided actual argument must be of size {\tt localDeCount}.
 !   \item[{[vasLocalDeList]}]
 !     DEPRECATED ARGUMENT! Use argument {\tt vasLocalDeToDeMap} instead.
 !   \item[{[rc]}] 
