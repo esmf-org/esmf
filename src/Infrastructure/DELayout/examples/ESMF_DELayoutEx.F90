@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.32 2011/11/10 05:45:31 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.33 2011/11/10 06:08:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -275,10 +275,12 @@ endif
 ! \label{DELayout_general_mapping}
 ! 
 ! In general a DELayout may map any number (including zero) DEs against
-! a single PET. This situation can be detected by querying the DELayout for
-! the {\tt oneToOneFlag}. If this flag comes back as {\tt .false.} the 
-! DELayout describes a more general DE-to-PET layout. The following example
-! shows how code can be be written to work for any DELayout.
+! a single PET. The exact situation can be detected by querying the DELayout
+! for the {\tt oneToOneFlag}. If this flag comes back as {\tt .true.} then the 
+! DELayout maps exactly one DE against each PET, but if it comes back as
+! {\tt .false.} the DELayout describes a more general DE-to-PET layout. The 
+! following example shows how code can be be written to work for a general
+! DELayout.
 !
 ! First a DELayout is created with two more DEs than there are PETs. The 
 ! DELayout will consequently map some DEs to the same PET.
