@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.40 2011/11/09 17:40:03 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.41 2011/11/10 20:11:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -8910,17 +8910,15 @@ write(*,*) "LOCALRC=",localrc
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
+  ! NOTE THAT THE FOLLOWING METHOD USES ARGUMENTS THAT ARE DEPRECATED. 
+  ! Please use (factorList, factorIndexList) instead of (weights, indices)  
+  ! See test_RegridMatrixFactor() for an example of their use. 
   call ESMF_FieldRegridStore( &
 	  srcFieldA, &
           dstField=fieldB, &
 	  unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
-
-          ! NOTE THAT THE FOLLOWING ARGUMENTS ARE DEPRECATED. 
-          ! Please use (factorList, factorIndexList) instead.  
-          ! See test_RegridMatrixFactor() for an example of their use. 
-          weights=weights, indices=indices,        &
-
-          regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          weights=weights, indices=indices,          & ! DEPRECATED
+          regridmethod=ESMF_REGRIDMETHOD_BILINEAR,   &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
