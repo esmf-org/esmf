@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.25 2011/10/12 22:59:54 theurich Exp $
+! $Id: NUOPC.F90,v 1.26 2011/11/11 23:10:18 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -596,12 +596,17 @@ module NUOPC
 !BOP
 ! !IROUTINE: NUOPC_TimePrint - Formatted print ot time information
 ! !INTERFACE:
-  subroutine NUOPC_TimePrint(time, string, rc)
+  subroutine NUOPC_TimePrint(time, string, unit, rc)
 ! !ARGUMENTS:
-    type(ESMF_Time)                               :: time
-    character(*),           intent(in),  optional :: string
-    integer,                intent(out), optional :: rc
+    type(ESMF_Time), intent(in)            :: time
+    character(*),    intent(in),  optional :: string
+    character(*),    intent(out), optional :: unit
+    integer,         intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Write a formated time with or without {\tt string}
+!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
+!   string variable. If {\tt unit} is not present then the output is written to
+!   the default external unit (typically that would be stdout).
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -615,12 +620,22 @@ module NUOPC
       file=FILENAME)) &
       return  ! bail out
   
-    if (present(string)) then
-      write (*, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
-        yy, mm, dd, h, m, s, ms
+    if (present(unit)) then
+      if (present(string)) then
+        write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
+          yy, mm, dd, h, m, s, ms
+      else
+        write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
+          yy, mm, dd, h, m, s, ms
+      endif
     else
-      write (*, "(I4, I3, I3, I3, I3, I3, I4)") &
-        yy, mm, dd, h, m, s, ms
+      if (present(string)) then
+        write (*, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
+          yy, mm, dd, h, m, s, ms
+      else
+        write (*, "(I4, I3, I3, I3, I3, I3, I4)") &
+          yy, mm, dd, h, m, s, ms
+      endif
     endif
     
   end subroutine
@@ -630,13 +645,17 @@ module NUOPC
 !BOP
 ! !IROUTINE: NUOPC_ClockPrintCurrTime - Formatted print ot current time
 ! !INTERFACE:
-  subroutine NUOPC_ClockPrintCurrTime(clock, string, rc)
+  subroutine NUOPC_ClockPrintCurrTime(clock, string, unit, rc)
 ! !ARGUMENTS:
-    type(ESMF_Clock)                              :: clock
-    character(*),           intent(in),  optional :: string
-    integer,                intent(out), optional :: rc
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Formatted print of the current time in clock.
+!   Write the formated current time of {\tt clock} with or without {\tt string}
+!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
+!   string variable. If {\tt unit} is not present then the output is written to
+!   the default external unit (typically that would be stdout).
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -649,7 +668,7 @@ module NUOPC
       file=FILENAME)) &
       return  ! bail out
     
-    call NUOPC_TimePrint(currTime, string, rc=rc)
+    call NUOPC_TimePrint(currTime, string, unit, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -662,13 +681,17 @@ module NUOPC
 !BOP
 ! !IROUTINE: NUOPC_ClockPrintStartTime - Formatted print ot start time
 ! !INTERFACE:
-  subroutine NUOPC_ClockPrintStartTime(clock, string, rc)
+  subroutine NUOPC_ClockPrintStartTime(clock, string, unit, rc)
 ! !ARGUMENTS:
-    type(ESMF_Clock)                              :: clock
-    character(*),           intent(in),  optional :: string
-    integer,                intent(out), optional :: rc
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Formatted print of the start time in clock.
+!   Write the formated start time of {\tt clock} with or without {\tt string}
+!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
+!   string variable. If {\tt unit} is not present then the output is written to
+!   the default external unit (typically that would be stdout).
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -681,7 +704,7 @@ module NUOPC
       file=FILENAME)) &
       return  ! bail out
     
-    call NUOPC_TimePrint(startTime, string, rc=rc)
+    call NUOPC_TimePrint(startTime, string, unit, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -693,13 +716,17 @@ module NUOPC
 !BOP
 ! !IROUTINE: NUOPC_ClockPrintStopTime - Formatted print ot stop time
 ! !INTERFACE:
-  subroutine NUOPC_ClockPrintStopTime(clock, string, rc)
+  subroutine NUOPC_ClockPrintStopTime(clock, string, unit, rc)
 ! !ARGUMENTS:
-    type(ESMF_Clock)                              :: clock
-    character(*),           intent(in),  optional :: string
-    integer,                intent(out), optional :: rc
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Formatted print of the stop time in clock.
+!   Write the formated stop time of {\tt clock} with or without {\tt string}
+!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
+!   string variable. If {\tt unit} is not present then the output is written to
+!   the default external unit (typically that would be stdout).
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -712,7 +739,7 @@ module NUOPC
       file=FILENAME)) &
       return  ! bail out
     
-    call NUOPC_TimePrint(stopTime, string, rc=rc)
+    call NUOPC_TimePrint(stopTime, string, unit, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
