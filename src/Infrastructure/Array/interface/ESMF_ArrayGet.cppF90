@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.76 2011/11/10 05:45:30 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.77 2011/11/11 17:55:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.76 2011/11/10 05:45:30 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.77 2011/11/11 17:55:52 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -319,7 +319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
 !     The provided actual argument must be of size {\tt localDeCount}.
 !   \item[{[localDeList]}]
-!     DEPRECATED ARGUMENT! Use argument {\tt localDeToDeMap} instead.
+!     \apiDeprecatedArgWithReplacement{localDeToDeMap}
 !   \item [{[name]}]
 !     Name of the Array object.
 !   \item[{[rc]}]

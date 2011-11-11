@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.107 2011/11/10 05:45:33 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.108 2011/11/11 17:55:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.107 2011/11/10 05:45:33 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.108 2011/11/11 17:55:55 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1038,7 +1038,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
 !     The provided actual argument must be of size {\tt localDeCount}.
 !   \item[{[localDeList]}]
-!     DEPRECATED ARGUMENT! Use argument {\tt localDeToDeMap} instead.
+!     \apiDeprecatedArgWithReplacement{localDeToDeMap}
 !   \item[{[vasLocalDeCount]}]
 !     The number of DEs in the DELayout associated with the local VAS.
 !   \item[{[vasLocalDeToDeMap]}]
@@ -1047,7 +1047,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
 !     The provided actual argument must be of size {\tt localDeCount}.
 !   \item[{[vasLocalDeList]}]
-!     DEPRECATED ARGUMENT! Use argument {\tt vasLocalDeToDeMap} instead.
+!     \apiDeprecatedArgWithReplacement{vasLocalDeToDeMap}
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
