@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.10 2011/11/08 21:27:26 rokuingh Exp $
+// $Id: ESMC_LogErr.C,v 1.11 2011/11/14 21:24:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,12 +35,12 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_LogErr.C,v 1.10 2011/11/08 21:27:26 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_LogErr.C,v 1.11 2011/11/14 21:24:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
 
-int ESMC_LogSet(bool flush){
+int ESMC_LogSet(int flush){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_LogSet()"
 

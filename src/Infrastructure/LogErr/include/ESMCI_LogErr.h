@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.14 2011/11/08 21:27:25 rokuingh Exp $
+// $Id: ESMCI_LogErr.h,v 1.15 2011/11/14 21:24:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@ private:
     bool MsgFoundError(int rcToCheck,const char msg[],int LINE,const char FILE[],
          const char method[],int *rcToReturn);
     void Open(const char filename[]);
-    int  Set(bool flush);
+    int  Set(int flush);
     int  Write(const char msg[],int msgtype);
     int  Write(const char msg[],int msgtype,int LINE,const char FILE[],
          const char method[]);       

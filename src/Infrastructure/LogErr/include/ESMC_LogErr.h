@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.85 2011/11/08 21:27:25 rokuingh Exp $
+// $Id: ESMC_LogErr.h,v 1.86 2011/11/14 21:24:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@ int ESMC_LogWrite(
 //
 // !INTERFACE:
 int ESMC_LogSet(
-  bool flush       // in
+  int flush       // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -97,7 +97,7 @@ int ESMC_LogSet(
 //  The arguments are:
 //  \begin{description}
 //  \item[flush]
-//    If set to .true., flush log messages immediately, rather than buffering 
+//    If set to ESMF\_TRUE, flush log messages immediately, rather than buffering 
 //    them. Default is to flush after 10 messages.
 //  \end{description}
 //

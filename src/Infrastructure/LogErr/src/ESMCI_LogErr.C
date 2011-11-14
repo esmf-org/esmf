@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.18 2011/11/08 21:27:28 rokuingh Exp $
+// $Id: ESMCI_LogErr.C,v 1.19 2011/11/14 21:24:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.18 2011/11/08 21:27:28 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.19 2011/11/14 21:24:25 rokuingh Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -505,7 +505,7 @@ int LogErr::Set(
 //  integer return code
 //
 // !ARGUMENTS:
-    bool flush
+    int flush
     )
 // !DESCRIPTION:
 // Sets log parameters
@@ -515,9 +515,14 @@ int LogErr::Set(
     
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
+    
+    // cast flush to bool
+    bool lflush = false;
+    
+    lflush = static_cast<bool> (flush);
 
     if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return ESMF_SUCCESS;
-    FTN(f_esmf_logset)(&flush, &rc);
+    FTN(f_esmf_logset)(&lflush, &rc);
 
     return rc;
 }

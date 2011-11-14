@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrUTest.C,v 1.9 2011/11/08 21:27:30 rokuingh Exp $
+// $Id: ESMC_LogErrUTest.C,v 1.10 2011/11/14 21:24:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -45,21 +45,30 @@ int main(void){
 
   rc = ESMF_FAILURE;
 
-  flush = true;
+  flush = ESMF_TRUE;
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Set Log to flush after every message"); 
-  strcpy(failMsg, "Did not return ESMF_TRUE");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_LogSet(flush);
-  ESMC_Test((rc!=ESMF_TRUE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  flush = ESMF_FALSE;
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Set Log to flush after every tenth message"); 
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_LogSet(flush);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Write a Log Message"); 
-  strcpy(failMsg, "Did not return ESMF_TRUE");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_LogWrite(msg, msgtype);
-  ESMC_Test((rc!=ESMF_TRUE), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
