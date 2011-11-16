@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.h,v 1.18 2011/10/14 05:58:50 eschwab Exp $
+// $Id: ESMCI_Calendar.h,v 1.19 2011/11/16 22:47:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@ class Calendar {
     ESMC_I4 secondsPerDay;        // TODO:  fractional secondsPerDay  sN/sD
     ESMC_I4 secondsPerYear;       // TODO:  fractional secondsPerYear yN/yD
     Fraction daysPerYear; // w: integer number of days per year
-;                         // n: fractional number of days per year (numerator)
+                          // n: fractional number of days per year (numerator)
                           // d:                                    (denominator)
                           // e.g. for Venus, w=0, n=926, d=1000
 
