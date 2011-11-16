@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.348 2011/11/07 20:59:37 theurich Exp $
+#  $Id: common.mk,v 1.349 2011/11/16 23:14:23 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -866,6 +866,9 @@ endif
 
 # - Shared library
 ESMF_SL_SUFFIX        = so
+ifeq ($(ESMF_OS),Darwin)
+ESMF_SL_SUFFIX        = dylib
+endif
 ESMF_SL_LIBS_TO_MAKE  = libesmf
 ESMF_SL_LIBLINKER     = $(ESMF_CXXCOMPILER)
 ESMF_SL_LIBOPTS      +=
@@ -2910,7 +2913,7 @@ endif
 #-------------------------------------------------------------------------------
 # Suffixes
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .r .rm .so .cppF90
+.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .r .rm $(ESMF_SL_SUFFIX) .cppF90
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files
@@ -3097,7 +3100,7 @@ endif
 
 
 #-------------------------------------------------------------------------------
-#  Build shared library from regular lib (.so from .a)
+#  Build shared library from regular archive
 #-------------------------------------------------------------------------------
 shared:
 	@if [ "$(ESMF_SL_LIBS_TO_MAKE)" != "" ] ; then \
