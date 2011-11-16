@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.53 2011/11/08 17:49:54 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.54 2011/11/16 23:00:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1412,7 +1412,11 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
        return
     endif
 
-   ! Put source entries in sorted order
+   ! Put source indices for each run of destination
+   ! indices in sorted order to allow weights with 
+   ! the same indices to be merged below. Note
+   ! runs with less than 3 entries are not sorted because
+   ! they will be handled correctly by the merge code below. 
     beg=1
     dstInd=inFactorIndexList(2,1)
     do i=2,inListCount
@@ -1427,6 +1431,12 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
           dstInd=inFactorIndexList(2,i)
        endif
     enddo
+
+    ! If long enough sort [beg,inListCount], because it's not handled above 
+    if ((inListCount)-beg+1 >2) then
+       call hsort_array(inFactorIndexList(:,beg:inListCount), inFactorList(beg:inListCount))
+    endif
+
 
     ! Loop counting unique entries
     outListCount=1 ! 1 because counting switches below
