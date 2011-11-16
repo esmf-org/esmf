@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.134 2011/11/08 23:57:09 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.135 2011/11/16 17:04:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.134 2011/11/08 23:57:09 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.135 2011/11/16 17:04:43 w6ws Exp $'
 
 !==============================================================================
 !
@@ -687,46 +687,46 @@
 !     \item[{[dd]}]
 !          Integer day of the month.
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).
+!          Integer Julian-day, or Modified Julian-day (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian-day, or Modified Julian-day (large, >= 64-bit).
 !     \item[{[h]}]
-!          Integer hours.
+!          Integer hour.
 !     \item[{[m]}]
-!          Integer minutes.
+!          Integer minute.
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).
+!          Integer second (>= 32-bit).
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
+!          Integer second (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer millisecond.
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microsecond.
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanosecond.
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision day.
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hour.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minute.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision second.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision millisecond.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microsecond.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanosecond.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}.
@@ -1154,17 +1154,17 @@
 !     Julian date-to-Julian day algorithm.  The Custom calendar will have
 !     user-defined values for yy, yy\_i8, mm, and dd.
 !
-!     The Julian day specifier, d or d\_i8, can only be used with the
-!     Julian-day and Modified Julian Day calendars, and has a valid range
+!     The Julian-day specifier, d or d\_i8, can only be used with the
+!     Julian-day and Modified Julian-day calendars, and has a valid range
 !     depending on the word size.  For a signed 32-bit d, the range for
 !     Julian-day is [+/- 24855].  For a signed 64-bit d or d\_i8, the valid
-!     range for Julian-day is [+/- 106,751,991,167,300].  The Julian day
+!     range for Julian-day is [+/- 106,751,991,167,300].  The Julian-day
 !     number system adheres to the conventional standard where the reference
 !     day of d=0 corresponds to 11/24/-4713 in the proleptic Gregorian calendar
 !     and 1/1/-4712 in the proleptic Julian calendar.  See~\cite{Meyer2} and
 !     ~\cite{JDNcalculator}.
 !
-!     The Modified Julian Day, introduced by space scientists in the late
+!     The Modified Julian-Day, introduced by space scientists in the late
 !     1950's, is defined as Julian-day - 2400000.5.  See~\cite{MJD}.
 !
 !     Note that d and d\_i8 are not valid for the No-Calendar.  To remain
@@ -1199,50 +1199,50 @@
 !     \item[{[dd]}]
 !          Integer day of the month.  Default = 1
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
+!          Integer Julian-day, or Modified Julian-day (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian days (large, >= 64-bit).
+!          Integer Julian-day, or Modified Julian-day (large, >= 64-bit).
 !          Default = 0
 !     \item[{[h]}]
-!          Integer hours.  Default = 0
+!          Integer hour.  Default = 0
 !     \item[{[m]}]
-!          Integer minutes.  Default = 0
+!          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).  Default = 0
+!          Integer second (>= 32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).  Default = 0
+!          Integer second (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0
+!          Integer millisecond.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0
+!          Integer microsecond.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0
+!          Integer nanosecond.  Default = 0
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.
+!          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.
+!          Double precision hour.  Default = 0.0.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.
+!          Double precision minute.  Default = 0.0.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.
+!          Double precision second.  Default = 0.0.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.
+!          Double precision millisecond.  Default = 0.0.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.
+!          Double precision microsecond.  Default = 0.0.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0.
+!          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !          Default = 0
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 1
 !     \item[{[calendar]}]
