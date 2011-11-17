@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.12.2.4 2011/10/13 02:48:58 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.12.2.5 2011/11/17 06:21:58 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -94,12 +94,22 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
     
     ! reconcile the States
+#ifdef CONCURRENT_PROTO
+    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+#else
     call ESMF_StateReconcile(importState, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+#ifdef CONCURRENT_PROTO
+    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+#else
     call ESMF_StateReconcile(exportState, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -178,13 +188,23 @@ module NUOPC_Connector
       file=FILENAME)) &
       return  ! bail out
 
-    ! reconcile the States
+    ! re-reconcile the States
+#ifdef CONCURRENT_PROTO
+    call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+#else
     call ESMF_StateReconcile(importState, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+#ifdef CONCURRENT_PROTO
+    call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
+      rc=rc)
+#else
     call ESMF_StateReconcile(exportState, rc=rc)
+#endif
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -333,6 +353,14 @@ module NUOPC_Connector
 
     enddo
     
+#ifdef CONCURRENT_PROTO
+    !debugging:
+    call AttributeUpdateAll(importState)
+    
+    !debugging:
+    call AttributeUpdate(importState)
+#endif
+
     ! SPECIALIZE by calling into attached method to precompute routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ComputeRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -380,6 +408,9 @@ module NUOPC_Connector
     type(ESMF_VM)             :: vm
     integer                   :: localrc
     logical                   :: existflag
+#ifdef CONCURRENT_PROTO
+    integer                   :: rootPet
+#endif
 
     rc = ESMF_SUCCESS
     
@@ -418,13 +449,9 @@ module NUOPC_Connector
         return  ! bail out
     endif
     
-    ! update the timestamp on all of the dst fields to that on the src side
-    call NUOPC_FieldBundleUpdateTime(is%wrap%srcFields, is%wrap%dstFields, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+#ifdef CONCURRENT_PROTO
+print *, "Connector after Regrid"
+#endif
 
     ! get current VM because AttributeUpdate needs it
     !TODO: AttributeUpdate should have VM optional and this is obsolete
@@ -434,15 +461,37 @@ module NUOPC_Connector
       file=FILENAME)) &
       return  ! bail out
     
-    ! ensure that Attributes are correctly updated across the exportState    
-    !TODO: rootList should be that of owner of importState, because that is
-    !TODO: the petList on which attributes (timestamp) have been set ->
-    !TODO: not sure how to find this out here... -> for now use PET 0 and hope!
-    call ESMF_AttributeUpdate(exportState, vm=vm, rootList=(/0/), rc=rc)
+#ifdef CONCURRENT_PROTO
+    ! get the rootPet attribute out of the importState
+    call ESMF_AttributeGet(importState, name="rootPet", value=rootPet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    
+print *, "Connector before AttributeUpdate w/ root:", rootPet
+#endif
+
+    ! ensure that Attributes are correctly updated across the importState    
+    !TODO: hopefully some day the dependency on rootList will be removed.
+    call ESMF_AttributeUpdate(importState, vm=vm, rootList=(/0,1/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  
+#ifdef CONCURRENT_PROTO
+print *, "Connector after AttributeUpdate"
+#endif
+
+    ! update the timestamp on all of the dst fields to that on the src side
+    call NUOPC_FieldBundleUpdateTime(is%wrap%srcFields, is%wrap%dstFields, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -513,5 +562,91 @@ module NUOPC_Connector
       return  ! bail out
       
   end subroutine
+  
+#ifdef CONCURRENT_PROTO
+  !-----------------------------------------------------------------------------
+  
+  subroutine AttributeUpdate(state, rc)
+    type(ESMF_State)::state
+    integer, intent(out), optional :: rc
+    
+    ! local variables
+    type(ESMF_VM)             :: vm
+    integer                   :: localrc
+    integer                   :: rootPet
+
+    if(present(rc)) rc = ESMF_SUCCESS
+    
+    ! get current VM because AttributeUpdate needs it
+    !TODO: AttributeUpdate should have VM optional and this is obsolete
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    ! get the rootPet attribute out of the importState
+    call ESMF_AttributeGet(state, name="rootPet", value=rootPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+print *, "ConnectorAttributeUpdate before AttributeUpdate w/ root:", rootPet
+
+    ! ensure that Attributes are correctly updated across the importState    
+    !TODO: hopefully some day the dependency on rootList will be removed.
+    call ESMF_AttributeUpdate(state, vm=vm, rootList=(/rootPet/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+print *, "ConnectorAttributeUpdate after AttributeUpdate"
+
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  subroutine AttributeUpdateAll(state, rc)
+    type(ESMF_State)::state
+    integer, intent(out), optional :: rc
+    
+    ! local variables
+    type(ESMF_VM)             :: vm
+    integer                   :: localrc
+    integer                   :: rootPet
+
+    if(present(rc)) rc = ESMF_SUCCESS
+    
+    ! get current VM because AttributeUpdate needs it
+    !TODO: AttributeUpdate should have VM optional and this is obsolete
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    ! get the rootPet attribute out of the importState
+    call ESMF_AttributeGet(state, name="rootPet", value=rootPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+print *, "ConnectorAttributeUpdateAll before AttributeUpdate w/ root:", rootPet
+
+    ! ensure that Attributes are correctly updated across the importState    
+    !TODO: hopefully some day the dependency on rootList will be removed.
+    call ESMF_AttributeUpdate(state, vm=vm, rootList=(/0,1/), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+print *, "ConnectorAttributeUpdateAll after AttributeUpdate"
+
+  end subroutine
+#endif
 
 end module

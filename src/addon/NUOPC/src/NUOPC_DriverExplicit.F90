@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.11.2.4 2011/10/13 21:16:16 theurich Exp $
+! $Id: NUOPC_DriverExplicit.F90,v 1.11.2.5 2011/11/17 06:21:58 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
 
@@ -104,10 +104,11 @@ module NUOPC_DriverExplicit
     logical                   :: clockIsPresent
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j
-    character(ESMF_MAXSTR)    :: iString, jString, compName
+    character(ESMF_MAXSTR)    :: iString, jString, compName, msgString
     type(type_RunElement), pointer  :: runElement
     integer, pointer          :: l_petList(:)
     logical                   :: existflag
+    integer                   :: rootPet
 
     rc = ESMF_SUCCESS
     
@@ -170,13 +171,20 @@ module NUOPC_DriverExplicit
       
       l_petList => is%wrap%modelPetLists(i)%petList
       if (associated(l_petList)) then
-print *, "create model", i, " with petList", l_petList
+        write (msgString, *) "Creating model component #", i, " with petList:", &
+          l_petList
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
           trim(adjustl(iString)), petList=l_petList, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-print *, "create model", i, " without petList"
+        write (msgString, *) "Creating model component #", i, " without petList."
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
           trim(adjustl(iString)), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -188,13 +196,25 @@ print *, "create model", i, " without petList"
         stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
+        
       is%wrap%modelES(i) = ESMF_StateCreate(name="modelComp "// &
         trim(adjustl(iString))//" Export State", &
         stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
+      ! set rootPet Attribute on the states to help during AttributeUpdate 
+      rootPet = 0   ! initialize
+      if (associated(l_petList)) rootPet = l_petList(1)
+      call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootPet", &
+        value=rootPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_AttributeSet(is%wrap%modelES(i), name="rootPet", &
+        value=rootPet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
       !TODO: need to take into account the petLists for the i,j models
 
       do j=1, is%wrap%modelCount
@@ -391,7 +411,7 @@ print *, "create model", i, " without petList"
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j, phase
-    character(ESMF_MAXSTR)    :: iString, jString, pString
+    character(ESMF_MAXSTR)    :: iString, jString, pString, msgString
     type(type_RunElement), pointer  :: runElement
     character(ESMF_MAXSTR)    :: modelName
 
@@ -415,11 +435,12 @@ print *, "create model", i, " without petList"
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-      trim(modelName)//" entered Run with current time: ", rc=rc)
+      trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! time stepping loop
     do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
@@ -482,22 +503,24 @@ print *, "create model", i, " without petList"
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
       call NUOPC_ClockPrintCurrTime(internalClock, &
-        trim(modelName)//" time stepping loop, current time: ", rc=rc)
+        trim(modelName)//" time stepping loop, current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
     enddo ! end of time stepping loop
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-      trim(modelName)//" leaving Run with current time: ", rc=rc)
+      trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
   end subroutine
   
@@ -579,6 +602,7 @@ print *, "create model", i, " without petList"
     enddo
     
     ! destroy modelComps and their import and export States + connectorComps
+    ! and also petLists that were set by the user (and ownership transferred)
     do i=1, is%wrap%modelCount
       write (iString, *) i
       call ESMF_GridCompDestroy(is%wrap%modelComp(i), rc=rc)
@@ -597,11 +621,17 @@ print *, "create model", i, " without petList"
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       enddo
+      if (associated(is%wrap%modelPetLists(i)%petList)) then
+        deallocate(is%wrap%modelPetLists(i)%petList, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of transferred petList failed.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
     enddo
-
+    
     ! deallocate lists inside the internal state
     deallocate(is%wrap%modelComp, is%wrap%modelIS, is%wrap%modelES, &
-      is%wrap%connectorComp, stat=stat)
+      is%wrap%modelPetLists, is%wrap%connectorComp, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out

@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.6.2.2 2011/08/19 19:05:10 theurich Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.6.2.3 2011/11/17 06:21:58 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -89,7 +89,7 @@ module NUOPC_ModelExplicitBase
     type(ESMF_Clock)        :: internalClock
     logical                 :: allCurrent
     logical                 :: existflag
-    character(ESMF_MAXSTR)  :: modelName
+    character(ESMF_MAXSTR)  :: modelName, msgString
 
     rc = ESMF_SUCCESS
     
@@ -114,11 +114,12 @@ module NUOPC_ModelExplicitBase
       return  ! bail out
 
     call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-      trim(modelName)//" entered Run with current time: ", rc=rc)
+      trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! SPECIALIZE by calling into optional attached method
     call ESMF_MethodExecute(gcomp, label=label_CheckImport, &
@@ -165,11 +166,12 @@ module NUOPC_ModelExplicitBase
         return  ! bail out
     
       call NUOPC_ClockPrintCurrTime(internalClock, &
-        trim(modelName)//" time stepping loop, current time: ", rc=rc)
+        trim(modelName)//" time stepping loop, current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
     enddo ! end of time stepping loop
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -178,11 +180,12 @@ module NUOPC_ModelExplicitBase
       return  ! bail out
       
     call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-      trim(modelName)//" leaving Run with current time: ", rc=rc)
+      trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! SPECIALIZE by calling into optional attached method
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
