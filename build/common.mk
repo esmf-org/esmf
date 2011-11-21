@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.349 2011/11/16 23:14:23 theurich Exp $
+#  $Id: common.mk,v 1.350 2011/11/21 22:20:27 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -863,6 +863,7 @@ endif
 ifneq ($(origin ESMF_SED), environment)
 ESMF_SED = $(ESMF_SEDDEFAULT)
 endif
+ESMF_LIB_SUFFIX       = a
 
 # - Shared library
 ESMF_SL_SUFFIX        = so
@@ -1228,14 +1229,8 @@ FPPFLAGS        += $(addprefix $(ESMF_FPPPREFIX), $(CPPFLAGS))
 
 #-------------------------------------------------------------------------------
 # common variables
-ifneq ($(ESMF_OS),MinGW)
-LIBNAME		= $(ESMF_LIBDIR)/$(LIBBASE).a
-ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
-else
-# The Microsoft linker prefers .lib over .a
-LIBNAME         = $(ESMF_LIBDIR)/$(LIBBASE).lib
-ESMFLIB         = $(ESMF_LIBDIR)/libesmf.lib
-endif
+LIBNAME		= $(ESMF_LIBDIR)/$(LIBBASE).$(ESMF_LIB_SUFFIX)
+ESMFLIB		= $(ESMF_LIBDIR)/libesmf.$(ESMF_LIB_SUFFIX)
 SOURCE		= $(SOURCEC) $(SOURCEF)
 OBJS		= $(OBJSC) $(OBJSF)
 #-------------------------------------------------------------------------------

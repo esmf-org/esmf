@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14 2011/08/03 19:20:24 w6ws Exp $
+# $Id: build_rules.mk,v 1.15 2011/11/21 22:20:20 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -187,6 +187,7 @@ ESMF_ARDEFAULT              = lib
 ESMF_ARCREATEFLAGSDEFAULT   =
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -extract:
 ESMF_RANLIBDEFAULT          = true
+ESMF_LIB_SUFFIX             = lib
 
 ############################################################
 # Blank out variables to prevent rpath encoding
