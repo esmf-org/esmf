@@ -1,4 +1,4 @@
-% $Id: common_commands.tex,v 1.7 2011/11/10 22:34:47 oehmke Exp $
+% $Id: common_commands.tex,v 1.8 2011/11/23 19:53:41 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -11,6 +11,10 @@
 \newcommand{\apiStatusCompatible}{Backward compatible starting with ESMF 5.2.0r.\\}
 \newcommand{\apiStatusCompatibleWithExceptions}{Backward compatible starting with ESMF 5.2.0r - {\em except those arguments indicated below}.\\}
 \newcommand{\apiStatusCompatibleException}{{\sc Status:}{\em This argument is excluded from the backward compatibility statement}.\\}
+
+\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF version #1.\\}
+\newcommand{\apiStatusLastChangedVersion}[1]{This interface was last changed in ESMF version #1.\\}
+
 \newcommand{\apiDeprecatedArg}{DEPRECATED ARGUMENT!}
 \newcommand{\apiDeprecatedArgWithReplacement}[1]{DEPRECATED ARGUMENT! Please use the argument {\tt #1} instead.}
 

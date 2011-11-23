@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.87 2011/11/10 22:35:33 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.88 2011/11/23 19:53:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.87 2011/11/10 22:35:33 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.88 2011/11/23 19:53:39 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -291,7 +291,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                        unmappedaction, &
                                        routehandle, &
                                        factorList, factorIndexList, & 
-                                       weights, indices, &  ! DEPRECATED 
+                                       weights, indices, &  ! DEPRECATED ARGUMENTS
                                        srcFracField, dstFracField, rc)
 !      
 ! !ARGUMENTS:
@@ -307,14 +307,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle),      intent(inout),optional :: routehandle
       real(ESMF_KIND_R8),          pointer,      optional :: factorList(:)
       integer(ESMF_KIND_I4),       pointer,      optional :: factorIndexList(:,:)
-      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)   ! DEPRECATED 
-      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:) ! DEPRECATED  
+      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)   ! DEPRECATED ARGUMENT
+      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:) ! DEPRECATED ARGUMENT 
       type(ESMF_Field),            intent(inout),optional :: srcFracField
       type(ESMF_Field),            intent(inout),optional :: dstFracField
       integer,                     intent(out),  optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusLastChangedVersion{5.2.0rp1}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
