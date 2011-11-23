@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.107 2011/11/18 19:57:27 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.108 2011/11/23 22:23:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1844,14 +1844,15 @@ end subroutine ESMF_LogSetError
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-      recursive subroutine ESMF_LogWrite(msg, logmsgFlag, logmsgList, keywordEnforcer,  &
-                                         line, file, method, log, rc)
+      recursive subroutine ESMF_LogWrite(msg, logmsgFlag,  &
+                                         logmsgList,  & DEPRECATED ARGUMENT
+                        keywordEnforcer, line, file, method, log, rc)
 !
 !
 ! !ARGUMENTS:
-      character(len=*),       intent(in)    	     :: msg
+      character(len=*),       intent(in)             :: msg
       type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgFlag
-      type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgList ! DEPRECATED
+      type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgList ! DEPRECATED ARGUMENT
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in),   optional :: line
       character(len=*),       intent(in),   optional :: file
@@ -1861,7 +1862,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusLastChangedVersion{5.2.0rp1}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
@@ -1880,7 +1884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            The type of message.  See Section~\ref{const:logmsgflag} for
 !            possible values.
 !      \item [logmsgList]
-!            DEPRECATED!  Please use {\tt logmsgFlag} instead.
+!            \apiDeprecatedArgWithReplacement{logmsgFlag}
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
