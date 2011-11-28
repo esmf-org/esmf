@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.352 2011/11/28 21:49:43 theurich Exp $
+#  $Id: common.mk,v 1.353 2011/11/28 22:05:14 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -603,6 +603,7 @@ ESMF_OPENMPDEFAULT          = ON
 
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
+ESMF_ARCREATEPREFIX         =
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
@@ -863,7 +864,12 @@ endif
 ifneq ($(origin ESMF_SED), environment)
 ESMF_SED = $(ESMF_SEDDEFAULT)
 endif
+
+# - Archive library
 ESMF_LIB_SUFFIX       = a
+ifeq ($(ESMF_OS),MinGW)
+ESMF_LIB_SUFFIX       = lib
+endif
 
 # - Shared library
 ESMF_SL_SUFFIX        = so
@@ -2911,7 +2917,7 @@ endif
 #-------------------------------------------------------------------------------
 # Suffixes (TODO: seems that the last three have become obsolete *gjt*)
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .cc .r .rm
+.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cc .r .rm
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files
@@ -3003,72 +3009,35 @@ $(ESMF_LOCOBJDIR)/%.o : %.C
 	$(ESMF_F90COMPILEFREECPP_CMD) $(ESMF_SO_F90COMPILEOPTS) $<
 	$(ESMF_F90LINKER) $(ESMF_SO_F90LINKOPTS) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)
 
-.F90.a:
+.F90.$(ESMF_LIB_SUFFIX):
 	$(ESMF_F90COMPILEFREECPP_CMD) $<
-ifeq ($(ESMF_OS),MinGW)
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-else
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-.f90.a:
+.f90.$(ESMF_LIB_SUFFIX):
 	$(ESMF_F90COMPILEFREENOCPP_CMD) $<
-ifeq ($(ESMF_OS),MinGW)
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-else
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-.F.a:
+.F.$(ESMF_LIB_SUFFIX):
 	$(ESMF_F90COMPILEFIXCPP_CMD) $<
-ifeq ($(ESMF_OS),MinGW)
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-else
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-.f.a:
+.f.$(ESMF_LIB_SUFFIX):
 	$(ESMF_F90COMPILEFIXNOCPP_CMD) $<
-ifeq ($(ESMF_OS),MinGW)
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-else
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-.c.a:
+.c.$(ESMF_LIB_SUFFIX):
 	$(ESMF_CXXCOMPILE_CMD) $<
-ifeq ($(ESMF_OS),MinGW)
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-else
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-.C.a:
+.C.$(ESMF_LIB_SUFFIX):
 	$(ESMF_CXXCOMPILE_CMD) $<
-ifeq ($(ESMF_OS),MinGW)
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-else
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(LIBNAME) $*.o
-endif
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
-
-ifeq ($(ESMF_OS),MinGW)
-# The Microsoft linker prefers .lib over .a
-.F90.lib:
-	$(ESMF_F90COMPILEFREECPP_CMD) $<
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-	$(ESMF_RM) $*.o
-
-.C.lib:
-	$(ESMF_CXXCOMPILE_CMD) $<
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:$(LIBNAME) $*.o
-	$(ESMF_RM) $*.o
-endif
 
 # The rules below generate a valid Fortran file using gcc as a preprocessor:
 # The -P option prevents putting #line directives in the output, and
@@ -3129,13 +3098,8 @@ defer:
 ifeq ($(ESMF_OS),MinGW)
 ifeq ($(ESMF_COMPILER),gfortran)
 	cd $(ESMF_OBJDIR) ; \
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) \
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(ESMFLIB) \
 		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
-else
-	cd $(ESMF_OBJDIR) ; \
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) -OUT:libesmf.lib \
-		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o)) ; \
-	$(ESMF_MV) libesmf.lib $(ESMFLIB)
 endif
 else
 	cd $(ESMF_OBJDIR) ; \
