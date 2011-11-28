@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.13 2011/11/03 04:22:33 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.14 2011/11/28 06:39:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -494,6 +494,20 @@ class ComPat{
   // communication patterns
   void totalExchange(VMK *vmk);
 }; // ComPat
+
+
+
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+// Socket based VMKernel prototyping
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+int socketServer(void);
+int socketClient(void);
 
 
 } // namespace ESMCI

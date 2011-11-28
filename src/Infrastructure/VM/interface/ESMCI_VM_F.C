@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.18 2011/10/17 21:38:49 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.19 2011/11/28 06:39:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1247,6 +1247,36 @@ extern "C" {
     int rc;
     ESMCI::VMId *vmID = ESMCI::VM::getCurrentID(&rc);  // get current vmID
     ESMCI::VM::addFObject(fobject, *objectID, vmID);
+  }
+    
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Socket based VM entry point
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  void FTN(c_esmci_vmksocketserver)(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmksocketserver()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    localrc = ESMCI::socketServer();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return; // bail out
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+  
+  void FTN(c_esmci_vmksocketclient)(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmci_vmksocketclient()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    localrc = ESMCI::socketClient();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return; // bail out
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
 #undef  ESMC_METHOD

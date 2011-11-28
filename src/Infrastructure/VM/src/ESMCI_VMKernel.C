@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.26 2011/11/03 04:22:35 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.27 2011/11/28 06:39:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -288,7 +288,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   int initialized;
   MPI_Initialized(&initialized);
   if (!initialized){
-#ifdef ESMF_MPICH   
+#ifdef ESMF_MPICH
     // MPICH1.2 is not standard compliant and needs valid args
     // make copy of argc and argv for MPICH because it modifies them and
     // the original values are needed to delete the memory during finalize()
@@ -821,7 +821,7 @@ void VMK::destruct(){
 #endif
         }
       }
-    }    
+    }
     delete [] sendChannel;
     delete [] recvChannel;
   }
@@ -832,7 +832,7 @@ void VMK::destruct(){
   for (int i=0; i<npets; i++)
     delete [] cid[i];
   delete [] cid;
-}  
+}
 
 
 static void *vmk_spawn(void *arg){
@@ -1175,7 +1175,7 @@ void *VMK::startup(class VMKPlan *vmp,
     if (vmp->myvms == NULL){
       fprintf(stderr, "VM_ERROR: No vm objects provided.\n");
       MPI_Abort(default_mpi_c, 0);
-    } 
+    }
     sarg[i].myvm = vmp->myvms[i];
   }
   // next, determine new_npets and new_mypet_base ...
@@ -4816,7 +4816,7 @@ void VMK::wtimeprec(double *prec){
       wtime(&t2);
     dt = t2 - t1;
     if (dt > temp_prec) temp_prec = dt;
-  }  
+  }
   *prec = temp_prec;
 }
 
@@ -5103,4 +5103,700 @@ namespace ESMCI{
       iiStart = iiEnd;
     }while (iiStart < localPet+petCount);
   }
+} // namespace ESMCI
+
+
+
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+// Socket based VMKernel prototyping
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+#ifdef ESMF_OS_MinGW
+
+#include <Windows.h>
+#include <Winsock.h>
+#define ESMF_NO_SOCKOPT
+
+#else
+
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#endif
+
+#include <errno.h>
+
+#define SERVER "fudge"    // happens to be where I run the server side right now
+#define PORT 54320        // just a random port for prototype testing
+
+// LogErr
+#include "ESMCI_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
+
+namespace ESMCI {
+
+  int const SOCKERR_UNSPEC        = -1;
+  int const SOCKERR_TIMEOUT       = -2;
+  int const SOCKERR_DISCONNECT    = -3;
+
+  int socketServerInit(
+    int port,               // port number
+    double timeout          // timeout in seconds
+  ){
+    //--------------------------------------------------------------------------
+    // Attempt to open an INET socket as server and wait for a client to connect
+    // The return value are:
+    // >SOCKERR_UNSPEC  -- successfully connected socket
+    // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+    // SOCKERR_TIMEOUT  -- timeout condition was reached
+    //--------------------------------------------------------------------------
+
+    fprintf(stderr, "Hi there from socketServerInit()\n");
+    
+    // create an inet/stream socket
+    int sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock < 0){
+      perror("socketServerInit: socket()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+#ifndef ESMF_NO_SOCKOPT    
+    // allow immediate address + port reuse in bind
+    int value = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) < 0){
+      perror("socketServerInit: setsockopt()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+#endif    
+    // bind the hosts address + a port to it
+    struct sockaddr_in name;
+    name.sin_family = AF_INET;
+    name.sin_port = htons(port);
+    name.sin_addr.s_addr = INADDR_ANY;  // system to fill in automatically
+    if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
+      perror("socketServerInit: bind()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    // turn it into a server socket that is listening for connections
+    if (listen(sock, 1) < 0){
+      perror("socketServerInit: listen()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    // make socket non-blocking
+    int sockFlags = fcntl(sock, F_GETFL);
+    fcntl(sock, F_SETFL, sockFlags | O_NONBLOCK);   // Add non-blocking flag
+    // accept incoming connection from client -> but limit to time out
+    double t0, t1;
+    VMK::wtime(&t0);
+    VMK::wtime(&t1);
+    int newSock;
+    
+//TODO: I think using select would be a better use here    
+    
+    while (((newSock = accept(sock, NULL, NULL)) < 0) && (t1 - t0 <= timeout)){
+      VMK::wtime(&t1);
+    }
+    fprintf(stderr, "socketServerInit waited: %g\n", t1-t0);
+    
+    // close the original socket
+    if (close(sock) < 0){
+      perror("socketServerInit: close()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+
+    if (newSock < 0){
+      if ((t1-t0) > timeout)
+        return SOCKERR_TIMEOUT; // bail out
+      // error condition on accept()
+      perror("socketServerInit: accept()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    
+    // newSock socket does _not_ inherit the non-blocking setting
+    // return successfully
+    fprintf(stderr, "socketServerInit: CONNECTED!\n");
+    return newSock; // return the connected socket
+  }
+
+  // ------------------------------------------------------------------------
+  
+  int socketClientInit(
+    char const *serverName, // server by name
+    int port,               // port number
+    double timeout          // timeout in seconds
+  ){
+    //--------------------------------------------------------------------------
+    // Attempt to open an INET socket and connect to the specified server.
+    // The return value are:
+    // >SOCKERR_UNSPEC  -- successfully connected socket
+    // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+    // SOCKERR_TIMEOUT  -- timeout condition was reached
+    //--------------------------------------------------------------------------
+    
+    fprintf(stderr, "Hi there from socketClientInit()\n");
+
+    // construct the server address (here just use SERVER macro)
+    struct hostent *server = gethostbyname(serverName);
+    if (server == NULL){
+      perror("socketClientInit: gethostbyname()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    struct sockaddr_in name;
+    name.sin_family = AF_INET;
+    name.sin_port = htons(port);
+    name.sin_addr = *(struct in_addr *)server->h_addr;
+
+    // create an inet/stream socket
+    int sock = socket(PF_INET, SOCK_STREAM, 0);
+    if (sock < 0){
+      perror("socketClientInit: socket()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    
+    // make socket non-blocking
+    int sockFlags = fcntl(sock, F_GETFL, 0);
+    fcntl(sock, F_SETFL, sockFlags | O_NONBLOCK); // Set non-blocking flag
+
+    // start timing
+    double t0, t1;
+    VMK::wtime(&t0);
+    VMK::wtime(&t1);
+    
+    // timeout loop
+    bool connected = false;
+    while ((t1-t0) < timeout){
+      // try to open connection 
+      if (connect(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
+        // connection has not (yet) been established
+        if (errno==ECONNABORTED){
+          // on some systems, e.g. linux, repeated call to connect may give this
+          perror("socketClientInit connect(), but continue");
+          VMK::wtime(&t1);  // update the endtime
+          continue;         // next attempt
+        }
+        // check for unexpected error conditions and bail
+        if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK){
+          perror("socketClientInit: connect()");
+          return SOCKERR_UNSPEC;  // bail out
+        }
+        // wait in select
+        fd_set sendfds;
+        FD_ZERO(&sendfds);
+        FD_SET(sock, &sendfds);
+        struct timeval timev = {1, 0};  // 1s wait time in select
+        if (select(FD_SETSIZE, NULL, &sendfds, NULL, &timev) < 0){
+          perror("socketClientInit: select()");
+          return SOCKERR_UNSPEC;  // bail out
+        }
+        if (FD_ISSET(sock, &sendfds)){
+          // look at SO_ERROR to determine success or failure to connect
+          int error;
+          socklen_t len = sizeof(error);
+          if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0){
+            perror("socketClientInit: getsockopt()");
+            return SOCKERR_UNSPEC;  // bail out
+          }
+          VMK::wtime(&t1);
+          fprintf(stderr, "socketClientInit: getsockopt() at %g SO_ERROR: "
+            "%s\n", t1-t0, strerror(error));
+          if (error==0){
+            // successful connection was made
+            connected = true;
+            break;
+          }else if (error!=ECONNREFUSED){
+            // bail if this wasn't just a straight refusal due to absent server
+            fprintf(stderr, "socketClientInit: getsockopt() error and bail: "
+              "%s\n", strerror(error));
+            return SOCKERR_UNSPEC;  // bail out
+          }
+        }else{
+          fprintf(stderr, "socketClientInit: select: TIMEOUT!\n");
+        }
+      }else{
+        // connection was established right away
+        connected = true;
+        break;
+      }
+      // update the endtime
+      VMK::wtimedelay(1.);  // 1s delay to lower load on network
+      VMK::wtime(&t1);
+    }
+    // reset socket to be blocking
+    sockFlags = fcntl(sock, F_GETFL, 0);
+    fcntl(sock, F_SETFL, sockFlags & (~O_NONBLOCK));
+    
+    fprintf(stderr, "socketClientInit waited: %g\n", t1-t0);    
+
+    if (!connected){
+      fprintf(stderr, "socketClientInit: TIMEOUT!\n");
+      close(sock);
+      return SOCKERR_TIMEOUT;
+    }
+    
+    // return successfully
+    fprintf(stderr, "socketClientInit: CONNECTED!\n");
+    return sock;  // return the connected socket
+  }
+
+  // ------------------------------------------------------------------------
+
+  int socketFinal(
+    int sock,         // connected socket to be finalized
+    double timeout    // timeout in seconds
+  ){
+    //--------------------------------------------------------------------------
+    // Attempt to cleanly take down a socket connection.
+    // The return value are:
+    // 0                -- successfully disconnect hand-shake
+    // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+    // SOCKERR_TIMEOUT  -- timeout condition was reached
+    //--------------------------------------------------------------------------
+
+    fprintf(stderr, "Hi there from socketFinal()\n");
+
+    int const bufferSize = 1024;
+    char buffer[bufferSize];
+    if (shutdown(sock, 1) < 0){ // send EOF to other side
+      perror("socketFinal: shutdown()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    fd_set recvfds;
+    struct timeval timev = {1, 0};  // 1s wait time in select
+    int len;
+    
+    // start timing
+    double t0, t1;
+    VMK::wtime(&t0);
+    VMK::wtime(&t1);
+    
+    // timeout loop
+    while ((t1-t0) < timeout){
+    
+      FD_ZERO(&recvfds);
+      FD_SET(sock, &recvfds);
+      if (select(FD_SETSIZE, &recvfds, NULL, NULL, &timev) < 0){
+        perror("socketFinal: select()");
+        return SOCKERR_UNSPEC;  // bail out
+      }
+      if (FD_ISSET(sock, &recvfds)){
+        if ((len=recv(sock, buffer, bufferSize, 0)) < 0){
+          perror("socketFinal: recv()");
+          return SOCKERR_UNSPEC;  // bail out
+        }
+        if (len==0) break;  // received EOF from other side
+        fprintf(stderr, "after shutdown received: len=%d\n", len);
+      }
+      // update the endtime
+      VMK::wtime(&t1);
+    }
+   
+    fprintf(stderr, "socketFinal waited: %g\n", t1-t0);    
+
+    // return timeout condition
+    if ((t1-t0) >= timeout){
+      // complete shutdown
+      if (shutdown(sock, 2) < 0){ // send EOF to other side
+        perror("socketFinal: shutdown()");
+        return SOCKERR_UNSPEC;  // bail out
+      }
+      return SOCKERR_TIMEOUT; // bail out
+    }
+    
+
+    // close the socket
+    if (close(sock) < 0){
+      perror("socketFinal: close()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+
+    // return successfully
+    return 0;
+  }
+    
+  // ------------------------------------------------------------------------
+
+  int socketSend(
+    int sock,             // socket holding the connection
+    void const *buffer,   // data buffer
+    size_t size,          // number of bytes to send out of buffer
+    double timeout        // timeout in seconds
+  ){
+    //--------------------------------------------------------------------------
+    // Attempt to send data through a socket connection.
+    // The return value are:
+    // >SOCKERR_UNSPEC  -- number of bytes sent
+    // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+    // SOCKERR_TIMEOUT  -- timeout condition was reached
+    //--------------------------------------------------------------------------
+
+    fprintf(stderr, "Hi there from socketSend()\n");
+    
+    int waitSeconds = timeout;
+    int waitMicro   = (timeout - waitSeconds)*1000000;
+    
+    fd_set sendfds;
+    FD_ZERO(&sendfds);
+    FD_SET(sock, &sendfds);
+    struct timeval timev = {waitSeconds, waitMicro};
+    
+    int len;
+    
+    if (select(FD_SETSIZE, NULL, &sendfds, NULL, &timev) < 0){
+      perror("socketSend: select()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    if (FD_ISSET(sock, &sendfds)){
+      if ((len=send(sock, buffer, size, 0)) < 0){
+        perror("socketSend: send()");
+        return SOCKERR_UNSPEC;  // bail out
+      }
+      if (len!=size){
+        fprintf(stderr, "socketSend: incorrect number of bytes sent!\n");
+        return SOCKERR_UNSPEC;  // bail out
+      }
+    }else{
+      fprintf(stderr, "socketSend: select() TIMEOUT!\n");
+      return SOCKERR_TIMEOUT;
+    }
+    
+    // return successfully
+    return len;
+  }
+    
+  // ------------------------------------------------------------------------
+
+  int socketRecv(
+    int sock,             // socket holding the connection
+    void *buffer,         // data buffer
+    size_t size,          // size of buffer in bytes
+    double timeout        // timeout in seconds
+  ){
+    //--------------------------------------------------------------------------
+    // Attempt to receive data through a socket connection.
+    // The return value are:
+    // >0                 -- number of bytes received
+    // SOCKERR_UNSPEC     -- unspecified error, may be fatal, prints perror()
+    // SOCKERR_TIMEOUT    -- timeout condition was reached
+    // SOCKERR_DISCONNECT -- the other side has disconnected
+    //--------------------------------------------------------------------------
+
+    fprintf(stderr, "Hi there from socketRecv()\n");
+    
+    int waitSeconds = timeout;
+    int waitMicro   = (timeout - waitSeconds)*1000000;
+    
+    // attempted recv with a timeout based on select
+    fd_set recvfds;
+    FD_ZERO(&recvfds);
+    FD_SET(sock, &recvfds);
+    struct timeval timev = {waitSeconds, waitMicro};
+
+    int len;
+    
+    if (select(FD_SETSIZE, &recvfds, NULL, NULL, &timev) < 0){
+      perror("socketRecv: select()");
+      return SOCKERR_UNSPEC;  // bail out
+    }
+    if (FD_ISSET(sock, &recvfds)){
+      if ((len=recv(sock, buffer, size, 0)) < 0){
+        perror("socketRecv: recv()");
+        return SOCKERR_UNSPEC;  // bail out
+      }
+      if (len==0){
+        perror("socketRecv: recv()");
+        return SOCKERR_DISCONNECT;  // bail out
+      }
+    }else{
+      fprintf(stderr, "socketRecv: select() TIMEOUT!\n");
+      return SOCKERR_TIMEOUT;
+    }
+    
+    // return successfully
+    return len;
+  }
+    
+  // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+  // The following two calls are just code to help prototype the above
+  // socket based methods. They are called from two independent MPI apps.
+  // ------------------------------------------------------------------------
+  // ------------------------------------------------------------------------
+
+  int socketServer(void){
+    
+    fprintf(stderr, "Hi there from socketServer()\n");
+    
+    // attempt to open and connect a server socket
+    int sock = socketServerInit(PORT, 60.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketServerInit() no client connected\n");
+      return 0;   // bail out, but don't indicate abort
+    }
+    
+    // prepare buffer for following tests    
+    int const bufferSize = 256;
+    char buffer[bufferSize];
+    int len;
+
+    // simple ping-pong test using blocking send/recv
+    sprintf(buffer, "Hi, this is the PING message!");
+    if (send(sock, buffer, strlen(buffer)+1, 0) < 0){
+      perror("server: send()");
+      return 0;   // bail out, but don't indicate abort
+    }
+    VMK::wtimedelay(3);  // delay the receive for 3s
+    if ((len=recv(sock, buffer, bufferSize, 0)) < 0){
+      perror("server: recv()");
+      return 0;   // bail out, but don't indicate abort
+    }
+    fprintf(stderr, "server received: len=%d :: %s\n", len, buffer);
+    
+    // attempt a clean disconnect
+    if (socketFinal(sock, 20.) <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketFinal() handshake failed\n");
+      return 0;   // bail out, but don't indicate abort
+    }
+    
+    VMK::wtimedelay(20.);
+    
+    // attempt to re-open and connect a server socket (while client is gone)
+    sock = socketServerInit(PORT, 5.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketServerInit() failed"
+        " - expected\n");
+    }else{
+      fprintf(stderr, "socketServer: socketServerInit() unexpected connect\n");
+      return 0;   // bail out, but don't indicate abort
+    }
+    
+    // attempt to re-open and connect a server socket (with client now there)
+    sock = socketServerInit(PORT, 10.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketServerInit() failed\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // attempted send with timeout based on select
+    sprintf(buffer, "Hi, this is the SELECT message!");
+    if (socketSend(sock, buffer, strlen(buffer)+1, 10.) <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketSend() failed\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+        
+    // attempt a clean disconnect
+    if (socketFinal(sock, 2.) <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketFinal() handshake failed"
+        " - expected\n");
+    }else{
+      fprintf(stderr, "socketServer: socketFinal() unexpected handshake\n");
+//      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // attempt to re-open and connect a server socket
+    sock = socketServerInit(PORT, 30.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketServer: socketServerInit() failed\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // send an integer back and forth in a fault tolerant way
+    int data;
+    int i;
+    for (i=0; i<10; i++){
+      if (socketRecv(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketServer: socketRecv() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketServer: recv'd data = %d\n", data);
+      ++data; // server increments the integer
+      if (socketSend(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketServer: socketSend() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketServer:   sent data = %d\n", data);
+
+      // at iteration 5 take a long break which the other side will time out on
+      if (i==5){
+        fprintf(stderr, "socketServer: taking a 4s delay now...\n");
+        VMK::wtimedelay(4.);
+      }
+    }
+    
+    if (i!=10){
+      // the previous comm loop was interrupted due to connection issues
+      if (socketFinal(sock, 5.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketServer: socketFinal() handshake failed\n");
+      }
+      // attempt to re-open and connect a server socket
+      sock = socketServerInit(PORT, 30.);
+      if (sock <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketServer: socketServerInit() failed\n");
+      }
+    }
+    
+    // again send an integer back and forth in a fault tolerant way
+    for (i=0; i<10; i++){
+      if (socketRecv(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketServer: socketRecv() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketServer: recv'd data = %d\n", data);
+      ++data; // server increments the integer
+      if (socketSend(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketServer: socketSend() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketServer:   sent data = %d\n", data);
+
+      // at iteration 5 a catastrophic event happens - division by zero CRASH
+      if (i==5){
+        fprintf(stderr, "socketServer: oh no, divide by zero CRASH...\n");
+        int b = 53/0; // trigger failure
+      }
+    }
+    
+    // return successfully
+    return 0;
+  }
+  
+  // ------------------------------------------------------------------------
+
+  int socketClient(void){
+    
+    fprintf(stderr, "Hi there from socketClient()\n");
+    
+    // attempt to open an connect a client socket
+    int sock = socketClientInit(SERVER, PORT, 60.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // prepare buffer for following tests    
+    int const bufferSize = 256;
+    char buffer[bufferSize];
+    int len;
+
+    // simple ping-pong test using blocking send/recv
+    if ((len=recv(sock, buffer, bufferSize, 0)) < 0){
+      perror("client: recv()");
+      return -1;  // bail out
+    }
+    fprintf(stderr, "client received: len=%d :: %s\n", len, buffer);
+    sprintf(buffer, "Hi, this is the PONG message!");
+    if (send(sock, buffer, strlen(buffer)+1, 0) < 0){
+      perror("client: send()");
+      return -1;  // bail out
+    }
+
+    // attempt a clean disconnect
+    if (socketFinal(sock, 20.) <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // attempt to reconnect with server (while it isn't up)
+    sock = socketClientInit(SERVER, PORT, 10.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketClientInit() failed to connect"
+        " - expected\n");
+    }else{
+      fprintf(stderr, "socketClient: socketClientInit() unexpected connect\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    VMK::wtimedelay(20.);
+    
+    // attempt to reconnect with server (now it should be there)
+    sock = socketClientInit(SERVER, PORT, 10.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // attempted recv with a timeout based on select
+    if ((len=socketRecv(sock, buffer, bufferSize, 10.)) <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketRecv() failed\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    fprintf(stderr, "socketClient: received %d bytes: %s\n", len, buffer);
+    
+    VMK::wtimedelay(10.);
+    
+    // attempt a clean disconnect
+    if (socketFinal(sock, 2.) <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // attempt to reconnect with server
+    sock = socketClientInit(SERVER, PORT, 20.);
+    if (sock <= SOCKERR_UNSPEC){
+      fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
+      return 0;  // bail out, but don't indicate abort
+    }
+    
+    // send an integer back and forth in a fault tolerant way
+    int data = 0; // initialize
+    int i;
+    for (i=0; i<10; i++){
+      if (socketSend(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketSend() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketClient:   sent data = %d\n", data);
+      if (socketRecv(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketRecv() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketClient: recv'd data = %d\n", data);
+    }
+    
+    if (i!=10){
+      // the previous comm loop was interrupted due to connection issues
+      if (socketFinal(sock, 5.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
+      }
+      // attempt to reconnect with server
+      sock = socketClientInit(SERVER, PORT, 20.);
+      if (sock <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
+      }
+    }
+    
+    // again send an integer back and forth in a fault tolerant way
+    data = 0; // initialize
+    for (i=0; i<10; i++){
+      if (socketSend(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketSend() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketClient:   sent data = %d\n", data);
+      if (socketRecv(sock, &data, sizeof(data), 1.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketRecv() failed - break loop\n");
+        break;
+      }
+      fprintf(stderr, "socketClient: recv'd data = %d\n", data);
+    }
+    
+    if (i!=10){
+      // the previous comm loop was interrupted due to connection issues
+      if (socketFinal(sock, 5.) <= SOCKERR_UNSPEC){
+        fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
+      }
+    }
+
+    // return successfully
+    return 0;
+  }
+  
 } // namespace ESMCI
