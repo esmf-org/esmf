@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.13 2011/02/23 01:20:19 w6ws Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.13.4.1 2011/11/28 23:28:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.13 2011/02/23 01:20:19 w6ws Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.13.4.1 2011/11/28 23:28:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -172,10 +172,10 @@ void FTN(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
       *exclusiveLBound = 1; // excl. region starts at (1,1,1...) 
   } else {
     // Get some useful information
-    const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+    const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
 
     // Get the Global DE from the local DE
-    int de = localDeList[localDE];
+    int de = localDeToDeMap[localDE];
 
     // obtain indexList for this DE and dim
     const int *indexList =
@@ -234,11 +234,11 @@ void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
   }
 
   // Get some useful information
-  const int *localDeList = distgrid->getDELayout()->getLocalDeList();
+  const int *localDeToDeMap = distgrid->getDELayout()->getLocalDeToDeMap();
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
 
   // Get the Global DE from the local DE
-  int de = localDeList[localDE];
+  int de = localDeToDeMap[localDE];
 
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
   // DistGrid

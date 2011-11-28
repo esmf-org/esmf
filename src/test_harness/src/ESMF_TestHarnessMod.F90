@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessMod.F90,v 1.69 2011/07/06 17:21:35 rokuingh Exp $
+! $Id: ESMF_TestHarnessMod.F90,v 1.69.2.1 2011/11/28 23:28:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@ logical                       :: checkpoint = .FALSE.
   ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
   ! integer ::de, localDeCount, dimCount 
   ! integer :: i1, i2
-  ! integer, allocatable ::  localDeList(:)
+  ! integer, allocatable ::  localDeToDeMap(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
   ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   ! type(ESMF_Index_Flag) :: indexflag
@@ -399,7 +399,7 @@ logical                       :: checkpoint = .FALSE.
   ! debug
   ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
   ! integer :: i1, i2, de, localDeCount, dimCount 
-  ! integer, allocatable ::  localDeList(:)
+  ! integer, allocatable ::  localDeToDeMap(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
   ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   ! type(ESMF_Index_Flag) :: indexflag
@@ -770,7 +770,7 @@ logical                       :: checkpoint = .FALSE.
   ! debug
   ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
   ! integer :: i1, i2, de, localDeCount, dimCount 
-  ! integer, allocatable ::  localDeList(:)
+  ! integer, allocatable ::  localDeToDeMap(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
   ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   ! type(ESMF_Index_Flag) :: indexflag
@@ -2358,7 +2358,7 @@ logical                       :: checkpoint = .FALSE.
 
   ! local integer variables
   integer :: de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
+  integer, allocatable ::  localDeToDeMap(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer :: i1, i2, i3, i4, i5, i6, i7
   ! integer :: irank, k, tensorsize, fsize(7)
@@ -2385,11 +2385,11 @@ logical                       :: checkpoint = .FALSE.
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList(localDeCount), stat=allocRcToTest)
+  allocate(localDeToDeMap(localDeCount), stat=allocRcToTest)
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//          &
-     " localDeList in populate_redist_array", rcToReturn=rc)) then
+     " localDeToDeMap in populate_redist_array", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
+  call ESMF_ArrayGet(array, localDeToDeMap=localDeToDeMap, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
@@ -2443,7 +2443,7 @@ logical                       :: checkpoint = .FALSE.
                    "array list", rcToReturn=rc)) return
 
            do i1=LBnd(1,de), UBnd(1,de)
-              farrayPtr1(i1) = localDeList(de) + 1000.0d0*i1
+              farrayPtr1(i1) = localDeToDeMap(de) + 1000.0d0*i1
            enddo    !   i1
         enddo    ! de
      case(2)
@@ -2458,7 +2458,7 @@ logical                       :: checkpoint = .FALSE.
 
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
-                 farrayPtr2(i1,i2) = localDeList(de) + 1000.0d0*i1 + 0.001d0*i2
+                 farrayPtr2(i1,i2) = localDeToDeMap(de) + 1000.0d0*i1 + 0.001d0*i2
               enddo   !   i2
            enddo    !   i1
         enddo    ! de
@@ -2475,7 +2475,7 @@ logical                       :: checkpoint = .FALSE.
            do i1=LBnd(1,de), UBnd(1,de)
               do i2=LBnd(2,de), UBnd(2,de)
                  do i3=LBnd(3,de), UBnd(3,de)
-                    farrayPtr3(i1,i2,i3) = localDeList(de) + 1.0d4*i1 + 10.0d2*i2 &
+                    farrayPtr3(i1,i2,i3) = localDeToDeMap(de) + 1.0d4*i1 + 10.0d2*i2 &
                           + 1.0d-2*i3
                  enddo   !   i3
               enddo   !   i2
@@ -2495,7 +2495,7 @@ logical                       :: checkpoint = .FALSE.
               do i2=LBnd(2,de), UBnd(2,de)
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
-                       farrayPtr4(i1,i2,i3,i4) = localDeList(de) + 1.0d4*i1         &
+                       farrayPtr4(i1,i2,i3,i4) = localDeToDeMap(de) + 1.0d4*i1         &
                              + 1.0d2*i2 + 1.0d-2*i3 + 1.0d-4*i4 
                     enddo   !   i4
                  enddo   !   i3
@@ -2517,7 +2517,7 @@ logical                       :: checkpoint = .FALSE.
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
                        do i5=LBnd(5,de), UBnd(5,de)
-                          farrayPtr5(i1,i2,i3,i4,i5) = localDeList(de) + 1.0d4*i1   &
+                          farrayPtr5(i1,i2,i3,i4,i5) = localDeToDeMap(de) + 1.0d4*i1   &
                              + 1.0d2*i2 + 1.0d0*i3 + 1.0d-2*i4  + 1.0d-4*i5
                        enddo   !   i5
                     enddo   !   i4
@@ -2541,7 +2541,7 @@ logical                       :: checkpoint = .FALSE.
                     do i4=LBnd(4,de), UBnd(4,de)
                        do i5=LBnd(5,de), UBnd(5,de)
                        do i6=LBnd(6,de), UBnd(6,de)
-                       farrayPtr6(i1,i2,i3,i4,i5,i6) = localDeList(de) +            &
+                       farrayPtr6(i1,i2,i3,i4,i5,i6) = localDeToDeMap(de) +            &
                              1.0d5*i1 + 1.0d3*i2 + 1.0d1*i3 + 1.0d-1*i4        &
                              + 1.0d-3*i5 + 1.0d-5*i6
                        enddo   !   i6
@@ -2568,7 +2568,7 @@ logical                       :: checkpoint = .FALSE.
                        do i5=LBnd(5,de), UBnd(5,de)
                        do i6=LBnd(6,de), UBnd(6,de)
                        do i7=LBnd(7,de), UBnd(7,de)
-                          farrayPtr7(i1,i2,i3,i4,i5,i6,i7) = localDeList(de) +      &
+                          farrayPtr7(i1,i2,i3,i4,i5,i6,i7) = localDeToDeMap(de) +      &
                              1.0d5*i1 + 1.0d3*i2 + 1.0d1*i3 + 1.0d-1*i4        &
                              + 1.0d-3*i5 + 1.0d-5*i6 + 1.0d0*i7
                        enddo   !   i7
@@ -2604,7 +2604,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! clean up allocated arrays
   !-----------------------------------------------------------------------------
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
   deallocate(LBnd, UBnd)
   deallocate(larrayList)
 
@@ -2639,7 +2639,7 @@ logical                       :: checkpoint = .FALSE.
 
   ! local integer variables
   integer :: de, localDeCount, dimCount 
-  integer, allocatable ::  localDeList(:)
+  integer, allocatable ::  localDeToDeMap(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer :: i1, i2, i3, i4, i5, i6, i7
   ! integer :: irank, k, tensorsize, fsize(7)
@@ -2667,11 +2667,11 @@ logical                       :: checkpoint = .FALSE.
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList(localDeCount), stat=allocRcToTest )
+  allocate(localDeToDeMap(localDeCount), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
-     " localDeList in populate_array_value", rcToReturn=rc)) then
+     " localDeToDeMap in populate_array_value", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array, localDeList=localDeList, rc=localrc)
+  call ESMF_ArrayGet(array, localDeToDeMap=localDeToDeMap, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
@@ -2874,7 +2874,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! clean up allocated arrays
   !-----------------------------------------------------------------------------
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
   deallocate(LBnd, UBnd)
   deallocate(larrayList)
 
@@ -2911,7 +2911,7 @@ logical                       :: checkpoint = .FALSE.
   ! local integer variables
   integer :: de, i1, i2, i3, i4, i5, i6, i7, k
   integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
-  integer, allocatable ::  localDeList1(:), localDeList2(:)
+  integer, allocatable ::  localDeToDeMap1(:), localDeToDeMap2(:)
   integer, allocatable :: LBnd(:,:), UBnd(:,:) 
   integer, allocatable :: LBnd2(:,:), UBnd2(:,:) 
   ! integer :: irank, tensorsize, fsize(7)
@@ -2955,11 +2955,11 @@ logical                       :: checkpoint = .FALSE.
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE count from array", &
           rcToReturn=rc)) return
 
-  allocate(localDeList1(localDeCount1), stat=allocRcToTest )
+  allocate(localDeToDeMap1(localDeCount1), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
-     " localDeList1 in compare redist array", rcToReturn=rc)) then
+     " localDeToDeMap1 in compare redist array", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array1, localDeList=localDeList1, rc=localrc)
+  call ESMF_ArrayGet(array1, localDeToDeMap=localDeToDeMap1, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
@@ -2990,17 +2990,17 @@ logical                       :: checkpoint = .FALSE.
      return
   endif
 
-  allocate(localDeList2(localDeCount2), stat=allocRcToTest )
+  allocate(localDeToDeMap2(localDeCount2), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
-     " localDeList2 in compare redist array", rcToReturn=rc)) then
+     " localDeToDeMap2 in compare redist array", rcToReturn=rc)) then
   endif
-  call ESMF_ArrayGet(array2, localDeList=localDeList2, rc=localrc)
+  call ESMF_ArrayGet(array2, localDeToDeMap=localDeToDeMap2, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting local DE list from array",  &
           rcToReturn=rc)) return
 
-  ! check localDeList for agreement
+  ! check localDeToDeMap for agreement
   do de=1, localDeCount2
-     if( localDeList2(de) /= localDeList1(de) ) then
+     if( localDeToDeMap2(de) /= localDeToDeMap1(de) ) then
         localrc = ESMF_FAILURE
         call ESMF_LogSetError(ESMF_FAILURE, msg="local De lists do not agree",   &
                  rcToReturn=localrc)
@@ -3349,7 +3349,7 @@ logical                       :: checkpoint = .FALSE.
   ! clean up allocated arrays
   !-----------------------------------------------------------------------------
   deallocate(larrayList1, larrayList2)
-  deallocate(localDeList1, localDeList2)
+  deallocate(localDeToDeMap1, localDeToDeMap2)
   deallocate(LBnd, UBnd)
   deallocate( LBnd2, UBnd2 )
 

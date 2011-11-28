@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.84.2.1 2011/10/13 02:41:39 theurich Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.84.2.2 2011/11/28 23:28:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -4955,7 +4955,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -5201,7 +5201,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -5443,7 +5443,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -5701,7 +5701,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -5951,7 +5951,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -6203,7 +6203,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -6425,7 +6425,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -6867,7 +6867,7 @@ contains
             call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
                 computationalLBound=aclb, computationalUBound=acub, &
                 totalLBound=atlb, totalUBound=atub, &
-                localDeCount=ldec, localDeList=ldel, &
+                localDeCount=ldec, localDeToDeMap=ldel, &
                 undistLBound=audlb, undistUBound=audub, &
                 rc=localrc)
             if (ESMF_LogFoundError(localrc, &

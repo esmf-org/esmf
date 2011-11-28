@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.36 2011/07/13 04:11:03 rokuingh Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.36.2.1 2011/11/28 23:28:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.36 2011/07/13 04:11:03 rokuingh Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.36.2.1 2011/11/28 23:28:31 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -275,7 +275,7 @@ program ESMF_GridArbitraryUTest
 	maxIndexPTile=maxIndex, &
 	elementCountPTile=localCount2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-  call ESMF_DELayoutGet(delayout, deCount=deCount, localdeList=deList, rc=localrc)
+  call ESMF_DELayoutGet(delayout, deCount=deCount, localDeToDeMap=deList, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   allocate(localCount3(deCount))
   call ESMF_DistGridGet(distgrid,  elementCountPDe=localCount3, &
@@ -728,7 +728,7 @@ program ESMF_GridArbitraryUTest
 	elementCountPTile=localCount2, rc=localrc)
 
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_DELayoutGet(delayout, deCount=deCount, localdeList=deList, rc=localrc)
+  call ESMF_DELayoutGet(delayout, deCount=deCount, localDeToDeMap=deList, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   allocate(localCount3(deCount))
   call ESMF_DistGridGet(distgrid,  elementCountPDe=localCount3, &
