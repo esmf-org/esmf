@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.45 2011/06/30 05:58:49 theurich Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.45.2.1 2011/11/28 23:18:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ program ESMF_DistGridEx
   integer, allocatable:: minIndex(:,:), maxIndex(:,:), regDecomp(:,:)
   integer, allocatable:: deBlockList(:,:,:)
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
-  integer, allocatable:: localDeList(:), arbSeqIndexList(:)
+  integer, allocatable:: localDeToDeMap(:), arbSeqIndexList(:)
   ! result code
   integer :: finalrc
   
@@ -199,11 +199,11 @@ program ESMF_DistGridEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  allocate(localDeList(0:localDeCount-1))
-  call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  allocate(localDeToDeMap(0:localDeCount-1))
+  call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   do localDe=0, localDeCount-1
-    de = localDeList(localDe)
+    de = localDeToDeMap(localDe)
     do dim=1, 2
       allocate(localIndexList(dimExtent(dim, de))) ! allocate list 
                                                    ! to hold indices
@@ -215,7 +215,7 @@ program ESMF_DistGridEx
       deallocate(localIndexList)
     enddo
   enddo
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
   deallocate(dimExtent)
 !EOC  
   call ESMF_DistGridDestroy(distgrid, rc=rc)

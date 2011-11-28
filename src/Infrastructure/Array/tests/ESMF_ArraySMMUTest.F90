@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.4.2.2 2011/08/29 18:03:15 theurich Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.4.2.3 2011/11/28 23:18:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.4.2.2 2011/08/29 18:03:15 theurich Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.4.2.3 2011/11/28 23:18:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -180,7 +180,7 @@ contains
     type(ESMF_DistGrid)   :: srcDistgrid, dstDistgrid
     type(ESMF_Array)      :: srcArray, dstArray
     integer               :: i, j, petCount, localPet, localDeCount
-    integer, allocatable  :: localDeList(:)
+    integer, allocatable  :: localDeToDeMap(:)
     integer, pointer      :: farrayPtr(:)
     integer               :: seed(4,6), value
     integer               :: factorList(18), factorIndexList(2,18)
@@ -373,9 +373,9 @@ contains
       file=FILENAME)) &
       return  ! bail out
     
-    allocate(localDeList(0:localDeCount-1))
+    allocate(localDeToDeMap(0:localDeCount-1))
     
-    call ESMF_ArrayGet(dstArray, localDeList=localDeList, rc=rc)
+    call ESMF_ArrayGet(dstArray, localDeToDeMap=localDeToDeMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -389,7 +389,7 @@ contains
         file=FILENAME)) &
         return  ! bail out
       
-      select case (localDeList(i))
+      select case (localDeToDeMap(i))
       case (0)
         if (farrayPtr(1) == -66) then
           call ESMF_LogWrite("Correct result verified in dstArray on DE 0", &
@@ -458,7 +458,7 @@ contains
           
     enddo
     
-    deallocate(localDeList)
+    deallocate(localDeToDeMap)
     
     call ESMF_ArrayDestroy(srcArray, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

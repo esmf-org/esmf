@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.45 2011/06/24 17:53:12 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.45.2.1 2011/11/28 23:18:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.45 2011/06/24 17:53:12 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.45.2.1 2011/11/28 23:18:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -534,11 +534,11 @@ int DELayout::construct(
     }else
       deList[i] = -1;           // indicate not a local DE
   }
-  localDeList = new int[localDeCount];  // allocate space to hold local de ids
+  localDeToDeMap = new int[localDeCount];  // allocate space to hold local DEs
   int j=0;
   for (int i=0; i<deCount; i++)
     if (deInfoList[i].pet == localPet){
-      localDeList[j]=i;
+      localDeToDeMap[j]=i;
       ++j;
     }
     
@@ -546,11 +546,11 @@ int DELayout::construct(
   vasLocalDeCount = 0;               // reset vas-local de count
   for (int i=0; i<deCount; i++)
     if (deInfoList[i].vas == localVas) ++vasLocalDeCount;
-  vasLocalDeList = new int[vasLocalDeCount];  // vas-local de id list
+  vasLocalDeToDeMap = new int[vasLocalDeCount];  // vas-local de id list
   j=0;
   for (int i=0; i<deCount; i++)
     if (deInfoList[i].vas == localVas){
-      vasLocalDeList[j]=i;
+      vasLocalDeToDeMap[j]=i;
       ++j;
     }
     
@@ -878,12 +878,12 @@ int DELayout::destruct(){
       
     // oldstyle and newstyle DELayout alike must delete the following members
     delete [] deInfoList;
-    delete [] localDeList;
+    delete [] localDeToDeMap;
     delete [] deList;
 
     if (!oldstyle){
       // this is only for newstyle DELayouts
-      delete [] vasLocalDeList;
+      delete [] vasLocalDeToDeMap;
       delete [] localServiceOfferCount;
       delete [] serviceMutexFlag;
       if (vm!=NULL){
@@ -934,11 +934,11 @@ int DELayout::ESMC_DELayoutFillLocal(int mypet){
     }else
       deList[i] = -1;           // indicate not a local DE
   }
-  localDeList = new int[localDeCount];  // allocate space to hold local de ids
+  localDeToDeMap = new int[localDeCount];  // allocate space to hold local DEs
   int j=0;
   for (int i=0; i<deCount; i++)
     if (deInfoList[i].pet == mypet){
-      localDeList[j]=i;
+      localDeToDeMap[j]=i;
       ++j;
     }
 
@@ -1101,8 +1101,8 @@ int DELayout::getDeprecated(
   int  *deCountArg,           // out - Total number of DEs
   int  *ndim,                 // out - Number of dimensions in coordinate tuple
   int  *localDeCountArg,      // out - number of DEs for my PET instance
-  int  *localDeListArg,       // out - list DEs for my PET instance
-  int  len_localDeList,       // in  - number of elements in localDeListArg
+  int  *localDeToDeMapArg,    // out - list DEs for my PET instance
+  int  len_localDeToDeMap,    // in  - number of elements in localDeToDeMapArg
   int *localDe,               // out - local DE id for 1-to-1 layouts
   ESMC_Logical *oneToOneFlag, // out - 1-to-1 layout flag
   ESMC_Logical *logRectFlag,  // out - logical rectangular layout flag
@@ -1133,9 +1133,9 @@ int DELayout::getDeprecated(
   if (localDeCountArg != ESMC_NULL_POINTER)
     *localDeCountArg = localDeCount;
   
-  if (len_localDeList >= localDeCount)
+  if (len_localDeToDeMap >= localDeCount)
     for (int i=0; i<localDeCount; i++)
-      localDeListArg[i] = localDeList[i];
+      localDeToDeMapArg[i] = localDeToDeMap[i];
   
   if (localDe != ESMC_NULL_POINTER){
     if (!oldstyle){
@@ -1144,7 +1144,7 @@ int DELayout::getDeprecated(
       return rc;
     }else{
       if (localDeCount >= 1)  // at least 1 DE on this PET -> return 1st
-        *localDe = localDeList[0];
+        *localDe = localDeToDeMap[0];
       else{
         *localDe = -1;    // mark invalid
         return ESMC_RC_CANNOT_GET;
@@ -1314,7 +1314,7 @@ int DELayout::print()const{
     printf("--- local DELayout section ---\n");
     printf("localDeCount=%d\n", localDeCount);
     for (int i=0; i<localDeCount; i++)
-      printf("  localDeList[%d]=%d\n", i, localDeList[i]);
+      printf("  localDeToDeMap[%d]=%d\n", i, localDeToDeMap[i]);
     printf("ndim = %d\n", ndim);
     for (int i=0; i<deCount; i++){
       printf("[%d]: ", i);
@@ -1347,11 +1347,11 @@ int DELayout::print()const{
     printf("--- PET-local DELayout section ---\n");
     printf("localDeCount=%d\n", localDeCount);
     for (int i=0; i<localDeCount; i++)
-      printf("  localDeList[%d]=%d\n", i, localDeList[i]);
+      printf("  localDeToDeMap[%d]=%d\n", i, localDeToDeMap[i]);
     printf("--- VAS-local DELayout section ---\n");
     printf("vasLocalDeCount=%d\n", vasLocalDeCount);
     for (int i=0; i<vasLocalDeCount; i++)
-      printf("  vasLocalDeList[%d]=%d\n", i, vasLocalDeList[i]);
+      printf("  vasLocalDeToDeMap[%d]=%d\n", i, vasLocalDeToDeMap[i]);
   }
   printf("--- ESMCI::DELayout::print() end ---\n");
 
@@ -1623,12 +1623,12 @@ DELayout *DELayout::deserialize(
   }
 
   a->localDeCount = 0;  // proxy objects don't have local DEs
-  a->localDeList = new int[a->localDeCount];
+  a->localDeToDeMap = new int[a->localDeCount];
   a->deList = new int[a->deCount];
   for (int i=0; i<a->deCount; i++)
     a->deList[i] = -1;                         // indicate not a local DE
   a->vasLocalDeCount = 0;  // proxy objects don't have local DEs
-  a->vasLocalDeList = new int[a->vasLocalDeCount];
+  a->vasLocalDeToDeMap = new int[a->vasLocalDeCount];
   a->localServiceOfferCount = new int[a->vasLocalDeCount];
   a->serviceMutexFlag = new int[a->vasLocalDeCount];
   a->serviceMutex = new VMK::ipmutex*[a->vasLocalDeCount];
@@ -1695,27 +1695,27 @@ ServiceReply DELayout::serviceOffer(
   
   // DE to PET pinning is more restrictive -> check first
   if (pinFlag == ESMF_PIN_DE_TO_PET){
-    // search for de in localDeList
+    // search for de in localDeToDeMap
     int i;
     for (i=0; i<localDeCount; i++)
-      if (localDeList[i] == de) break;
+      if (localDeToDeMap[i] == de) break;
     if (i==localDeCount){
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
 //      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-//        "- Specified DE is not in localDeList", rc);
+//        "- Specified DE is not in localDeToDeMap", rc);
       return reply;
     }
   }
   int ii;
-  // search for de in vasLocalDeList
+  // search for de in vasLocalDeToDeMap
   for (ii=0; ii<vasLocalDeCount; ii++)
-    if (vasLocalDeList[ii] == de) break;
+    if (vasLocalDeToDeMap[ii] == de) break;
   if (ii==vasLocalDeCount){
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
 //    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-//      "- Specified DE is not in vasLocalDeList", rc);
+//      "- Specified DE is not in vasLocalDeToDeMap", rc);
     return reply;
   }
   
@@ -1779,27 +1779,27 @@ int DELayout::serviceComplete(
   
   // DE to PET pinning is more restrictive -> check first
   if (pinFlag == ESMF_PIN_DE_TO_PET){
-    // search for de in localDeList
+    // search for de in localDeToDeMap
     int i;
     for (i=0; i<localDeCount; i++)
-      if (localDeList[i] == de) break;
+      if (localDeToDeMap[i] == de) break;
     if (i==localDeCount){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
 //      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-//        "- Specified DE is not in localDeList", &rc);
+//        "- Specified DE is not in localDeToDeMap", &rc);
       return rc;
     }
   }
   int ii;
-  // search for de in vasLocalDeList
+  // search for de in vasLocalDeToDeMap
   for (ii=0; ii<vasLocalDeCount; ii++)
-    if (vasLocalDeList[ii] == de) break;
+    if (vasLocalDeToDeMap[ii] == de) break;
   if (ii==vasLocalDeCount){
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
 //    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-//      "- Specified DE is not in vasLocalDeList", &rc);
+//      "- Specified DE is not in vasLocalDeToDeMap", &rc);
     return rc;
   }
   

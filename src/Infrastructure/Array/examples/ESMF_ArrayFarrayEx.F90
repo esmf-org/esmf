@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.26 2011/06/30 05:58:28 theurich Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.26.2.1 2011/11/28 23:18:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -16,6 +16,7 @@
 
 !BOE
 ! \subsubsection{Array from native Fortran array with 1 DE per PET}
+! \label{Array_from_native_1_to_1}
 ! 
 ! The create call of the {\tt ESMF\_Array} class has been overloaded
 ! extensively to facilitate the need for generality while keeping simple

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.36 2011/06/24 17:53:09 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.36.2.1 2011/11/28 23:18:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     de_type *deInfoList;// list that holds all of this layout's DE info
     // --- local section ---
     int localDeCount; // number of DEs associated with instantiating PET
-    int *localDeList; // list that holds all of the de indices for this PET
+    int *localDeToDeMap; // list that holds all of the de indices for this PET
     int *deList;      // localDE index for DE or -1 if not local
     
     int oldstyle;   // if this flag is set then this is an oldstyle delayout
@@ -86,7 +86,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_Pin_Flag pinFlag; // type of resources DEs are pinned to    
     
     int vasLocalDeCount;// number of DEs associated with local VAS
-    int *vasLocalDeList;// list that holds all of the de indices for this VAS
+    int *vasLocalDeToDeMap;// list that holds all of the de indices for this VAS
     
     // - DEPRECATED section
     int ndim;       // dimensionality of this layout
@@ -124,17 +124,17 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout);
     // get() and set()
-    VM *getVM()                     const {return vm;}
-    int getDeCount()                const {return deCount;}
-    const int *getDeList()          const {return deList;}
-    int getLocalDeCount()           const {return localDeCount;}
-    const int *getLocalDeList()     const {return localDeList;}
-    int getVasLocalDeCount()        const {return vasLocalDeCount;}
-    const int *getVasLocalDeList()  const {return vasLocalDeList;}
-    int getPet(int i)               const {return deInfoList[i].pet;}
-    int getVas(int i)               const {return deInfoList[i].vas;}
-    ESMC_Logical getOneToOneFlag()  const {return oneToOneFlag;}
-    ESMC_Pin_Flag getPinFlag()      const {return pinFlag;}
+    VM *getVM()                       const {return vm;}
+    int getDeCount()                  const {return deCount;}
+    const int *getDeList()            const {return deList;}
+    int getLocalDeCount()             const {return localDeCount;}
+    const int *getLocalDeToDeMap()    const {return localDeToDeMap;}
+    int getVasLocalDeCount()          const {return vasLocalDeCount;}
+    const int *getVasLocalDeToDeMap() const {return vasLocalDeToDeMap;}
+    int getPet(int i)                 const {return deInfoList[i].pet;}
+    int getVas(int i)                 const {return deInfoList[i].vas;}
+    ESMC_Logical getOneToOneFlag()    const {return oneToOneFlag;}
+    ESMC_Pin_Flag getPinFlag()        const {return pinFlag;}
     int getDEMatchDE(int DEid, DELayout &layoutMatch, int *deMatchCount, 
       int *deMatchList, int len_deMatchList)const;
     int getDEMatchPET(int DEid, VM &vmMatch, int *petMatchCount,

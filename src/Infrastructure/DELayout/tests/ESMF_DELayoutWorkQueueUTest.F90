@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.28.2.1 2011/10/13 03:02:55 theurich Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.28.2.2 2011/11/28 23:18:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@ module ESMF_DELayoutWQUTest_mod
     type(ESMF_VM):: vm
     type(ESMF_DELayout):: delayout
     integer:: petCount, localPet, localDeCount, i, workDe, k, deCount
-    integer, allocatable:: localDeList(:)
+    integer, allocatable:: localDeToDeMap(:)
     type(ESMF_ServiceReply_Flag):: reply
     real:: x
     
@@ -84,13 +84,13 @@ module ESMF_DELayoutWQUTest_mod
 
     call ESMF_DELayoutGet(delayout, vasLocalDeCount=localDeCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    allocate(localDeList(localDeCount))
-    call ESMF_DELayoutGet(delayout, vasLocalDeList=localDeList, rc=rc)
+    allocate(localDeToDeMap(localDeCount))
+    call ESMF_DELayoutGet(delayout, vasLocalDeToDeMap=localDeToDeMap, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     do k=1, 4
       do i=1, localDeCount
-        workDe = localDeList(i)
+        workDe = localDeToDeMap(i)
 !        print *, "I am PET", localPET, " and I am offering service for DE ", workDe
         reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
@@ -107,7 +107,7 @@ module ESMF_DELayoutWQUTest_mod
       enddo
     enddo    
     
-    deallocate(localDeList)
+    deallocate(localDeToDeMap)
     
     call ESMF_DELayoutDestroy(delayout, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.17 2011/06/24 18:29:42 theurich Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.17.2.1 2011/11/28 23:18:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -124,8 +124,8 @@ extern "C" {
   void FTN(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
     int *deCount, ESMCI::InterfaceInt **petMap, ESMCI::InterfaceInt **vasMap,
     ESMC_Logical *oneToOneFlag, ESMC_Pin_Flag *pinFlag,
-    int *localDeCount, ESMCI::InterfaceInt **localDeList,
-    int *vasLocalDeCount, ESMCI::InterfaceInt **vasLocalDeList, int *rc){
+    int *localDeCount, ESMCI::InterfaceInt **localDeToDeMap,
+    int *vasLocalDeCount, ESMCI::InterfaceInt **vasLocalDeToDeMap, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutget()"
     // Initialize return code; assume routine not implemented
@@ -175,40 +175,40 @@ extern "C" {
       *pinFlag = (*ptr)->getPinFlag();
     if (ESMC_NOT_PRESENT_FILTER(localDeCount) != ESMC_NULL_POINTER)
       *localDeCount = (*ptr)->getLocalDeCount();
-    if (*localDeList != NULL){
-      // localDeList was provided -> do some error checking
-      if ((*localDeList)->dimCount != 1){
+    if (*localDeToDeMap != NULL){
+      // localDeToDeMap was provided -> do some error checking
+      if ((*localDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- localDeList array must be of rank 1", rc);
+          "- localDeToDeMap array must be of rank 1", rc);
         return;
       }
-      if ((*localDeList)->extent[0] < (*ptr)->getLocalDeCount()){
+      if ((*localDeToDeMap)->extent[0] < (*ptr)->getLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of localDeList array must be of size 'localDeCount'",
+          "- 1st dim of localDeToDeMap array must be of size 'localDeCount'",
           rc);
         return;
       }
       // fill in values
-      memcpy((*localDeList)->array, (*ptr)->getLocalDeList(),
+      memcpy((*localDeToDeMap)->array, (*ptr)->getLocalDeToDeMap(),
         sizeof(int)*(*ptr)->getLocalDeCount());
     }
     if (ESMC_NOT_PRESENT_FILTER(vasLocalDeCount) != ESMC_NULL_POINTER)
       *vasLocalDeCount = (*ptr)->getVasLocalDeCount();
-    if (*vasLocalDeList != NULL){
-      // vasLocalDeList was provided -> do some error checking
-      if ((*vasLocalDeList)->dimCount != 1){
+    if (*vasLocalDeToDeMap != NULL){
+      // vasLocalDeToDeMap was provided -> do some error checking
+      if ((*vasLocalDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- vasLocalDeList array must be of rank 1", rc);
+          "- vasLocalDeToDeMap array must be of rank 1", rc);
         return;
       }
-      if ((*vasLocalDeList)->extent[0] < (*ptr)->getVasLocalDeCount()){
+      if ((*vasLocalDeToDeMap)->extent[0] < (*ptr)->getVasLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of vasLocalDeList array must be of size 'vasLocalDeCount'",
-          rc);
+          "- 1st dim of vasLocalDeToDeMap array must be of size "
+          "'vasLocalDeCount'", rc);
         return;
       }
       // fill in values
-      memcpy((*vasLocalDeList)->array, (*ptr)->getVasLocalDeList(),
+      memcpy((*vasLocalDeToDeMap)->array, (*ptr)->getVasLocalDeToDeMap(),
         sizeof(int)*(*ptr)->getVasLocalDeCount());
     }
     // return successfully
@@ -252,8 +252,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_delayoutgetdeprecated)(ESMCI::DELayout **ptr,
-    int *deCount, int *dimCount, int *localDeCount, int *localDeList,
-    int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 
+    int *deCount, int *dimCount, int *localDeCount, int *localDeToDeMap,
+    int *len_localDeToDeMap, int *localDe, ESMC_Logical *oneToOneFlag, 
     ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
     int *rc){
 #undef  ESMC_METHOD
@@ -265,7 +265,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(deCount), 
       ESMC_NOT_PRESENT_FILTER(dimCount), 
       ESMC_NOT_PRESENT_FILTER(localDeCount),
-      localDeList, *len_localDeList, 
+      localDeToDeMap, *len_localDeToDeMap, 
       ESMC_NOT_PRESENT_FILTER(localDe), 
       ESMC_NOT_PRESENT_FILTER(oneToOneFlag), 
       ESMC_NOT_PRESENT_FILTER(logRectFlag),

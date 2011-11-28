@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.135.2.1 2011/08/29 18:15:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.135.2.2 2011/11/28 23:18:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.135.2.1 2011/08/29 18:15:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.135.2.2 2011/11/28 23:18:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -205,9 +205,9 @@ Array::Array(
     }
   }
   
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     contiguousFlag[i] = 1;  // initialize as contiguous
     int pI = 0; // initialize packed index
     for (int jj=0; jj<rank; jj++){
@@ -573,7 +573,7 @@ Array *Array::create(
   for (int i=0; i<tensorCount; i++)
     tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
   
-  // delayout -> deCount, localDeCount, localDeList
+  // delayout -> deCount, localDeCount, localDeToDeMap
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   if ((localDeCount > 0) && (localDeCount != larrayCount)){
@@ -582,7 +582,7 @@ Array *Array::create(
       rc);
     return ESMC_NULL_POINTER;
   }
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   // distgrid -> indexCountPDimPDe[]
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   // check on indexflag
@@ -597,7 +597,7 @@ Array *Array::create(
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
   // DistGrid
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     for (int j=0; j<dimCount; j++)
       if (int k=distgridToPackedArrayMap[j])
         exclusiveUBound[i*redDimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
@@ -605,7 +605,7 @@ Array *Array::create(
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
     for (int i=0; i<localDeCount; i++){
-      int de = localDeList[i];
+      int de = localDeToDeMap[i];
       for (int j=0; j<dimCount; j++){
         // check that this DE/dim has a contiguous index list
         const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
@@ -1254,10 +1254,10 @@ Array *Array::create(
   for (int i=0; i<tensorCount; i++)
     tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
   
-  // delayout -> deCount, localDeCount, localDeList
+  // delayout -> deCount, localDeCount, localDeToDeMap
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   // distgrid -> indexCountPDimPDe[]
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   // check on indexflag
@@ -1286,7 +1286,7 @@ Array *Array::create(
   // exlc. region for each DE ends at indexCountPDimPDe of the associated
   // DistGrid
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     for (int j=0; j<dimCount; j++)
       if (int k=distgridToPackedArrayMap[j])
         exclusiveUBound[i*redDimCount+k-1] = indexCountPDimPDe[de*dimCount+j];
@@ -1294,7 +1294,7 @@ Array *Array::create(
   // optionally shift origin of exclusive region to pseudo global index space
   if (indexflag == ESMF_INDEX_GLOBAL){
     for (int i=0; i<localDeCount; i++){
-      int de = localDeList[i];
+      int de = localDeToDeMap[i];
       for (int j=0; j<dimCount; j++){
         // check that this DE/dim has a contiguous index list
         const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
@@ -2604,10 +2604,10 @@ int Array::print()const{
   printf("deCount = %d\n", deCount);
   int localDeCount = delayout->getLocalDeCount();
   printf("localDeCount = %d\n", localDeCount);
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   const int redDimCount = rank - tensorCount;
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     printf("~ local data in LocalArray for DE %d ~\n", de);
     larrayList[i]->print();
     if (exclusiveElementCountPDe[de]){
@@ -3108,7 +3108,7 @@ int Array::gather(
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   
   int redDimCount = rank - tensorCount;
   
@@ -3121,7 +3121,7 @@ int Array::gather(
   // non-blocking send, so no problem with too many outstanding comms here
   char **sendBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     if (tileListPDe[de] != tile) continue; // skip to next local DE
     sendBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     int sendSize =
@@ -3328,7 +3328,7 @@ int Array::gather(
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
     for (int i=0; i<localDeCount; i++){
-      int de = localDeList[i];
+      int de = localDeToDeMap[i];
       if (tileListPDe[de] == tile){
         // this DE is located on receiving tile -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
@@ -3363,7 +3363,7 @@ int Array::gather(
     delete [] recvBuffer;
   }
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     if (tileListPDe[de] != tile) continue; // skip to next local DE
     if (!contiguousFlag[i])
       delete [] sendBuffer[i];
@@ -3507,7 +3507,7 @@ int Array::scatter(
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeList = delayout->getLocalDeList();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   
   int redDimCount = rank - tensorCount;
   
@@ -3520,7 +3520,7 @@ int Array::scatter(
   // non-blocking receive, so no problem with too many outstanding comms here
   char **recvBuffer = new char*[localDeCount];
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     if (tileListPDe[de] != tile) continue; // skip to next local DE
     recvBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
     int recvSize =
@@ -3707,7 +3707,7 @@ int Array::scatter(
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
     int commhListCount = 0;  // reset
     for (int i=0; i<localDeCount; i++){
-      int de = localDeList[i];
+      int de = localDeToDeMap[i];
       if (tileListPDe[de] == tile){
         // this DE is located on receiving tile -> must send info to rootPet
         for (int j=0; j<dimCount; j++){
@@ -3738,7 +3738,7 @@ int Array::scatter(
     
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
-    int de = localDeList[i];
+    int de = localDeToDeMap[i];
     if (tileListPDe[de] != tile) continue; // skip to next local DE
     if (!contiguousFlag[i]){
       // only if this DE has a non-contiguous decomposition the contiguous
@@ -4387,18 +4387,18 @@ int Array::redistStore(
     const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
     int *const*srcArbSeqIndexCountPCollPLocalDe =
       srcArray->distgrid->getElementCountPCollPLocalDe();
-    const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
+    const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
     int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
     factorListCount = 0;  // init
     for (int i=0; i<srcLocalDeCount; i++)
-      factorListCount += srcElementCountPDe[srcLocalDeList[i]];
+      factorListCount += srcElementCountPDe[srcLocalDeToDeMap[i]];
     // set up factorIndexList
     srcN = 1; // 1 component seqIndex
     dstN = 1; // 1 component seqIndex
     factorIndexList = new int[(srcN+dstN)*factorListCount];
     int jj = 0; // reset
     for (int i=0; i<srcLocalDeCount; i++){
-      int de = srcLocalDeList[i];
+      int de = srcLocalDeToDeMap[i];
       //TODO: this is hardcoded for first collocation only
       int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
       const int *srcArbSeqIndexListPLocalDe =
@@ -6130,7 +6130,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     int localPet;
     int localDeCount;
     int const *localDeElementCount;
-    int const *localDeList;
+    int const *localDeToDeMap;
     Interval const *seqIndexInterval;
     SeqIndexFactorLookup *seqIndexFactorLookup;
     bool tensorMixFlag;
@@ -6142,7 +6142,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int localPet_,
       int localDeCount_,
       int const *localDeElementCount_,
-      int const *localDeList_,
+      int const *localDeToDeMap_,
       Interval const *seqIndexInterval_,
       SeqIndexFactorLookup *seqIndexFactorLookup_,
       bool tensorMixFlag_,
@@ -6153,7 +6153,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       localPet = localPet_;
       localDeCount = localDeCount_;
       localDeElementCount = localDeElementCount_;
-      localDeList = localDeList_;
+      localDeToDeMap = localDeToDeMap_;
       seqIndexInterval = seqIndexInterval_;
       seqIndexFactorLookup = seqIndexFactorLookup_;
       tensorMixFlag = tensorMixFlag_;
@@ -6180,7 +6180,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int *bufferInt = (int *)buffer;
       int jj = 0; // reset
       for (int j=0; j<localDeCount; j++){
-        int de = localDeList[j];  // global DE number
+        int de = localDeToDeMap[j];  // global DE number
         for (int k=0; k<localDeElementCount[j]; k++){
           int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
           if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
@@ -6212,7 +6212,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int seqIndexMax = seqIndexInterval[localPet].max;
       int seqIndexCount = seqIndexInterval[localPet].count;
       for (int j=0; j<localDeCount; j++){
-        int de = localDeList[j];  // global DE number
+        int de = localDeToDeMap[j];  // global DE number
         for (int k=0; k<localDeElementCount[j]; k++){
           int seqIndex = linSeqList[j][k].seqIndex.decompSeqIndex;
           if (seqIndex >= seqIndexMin && seqIndex <= seqIndexMax){
@@ -6745,11 +6745,11 @@ int Array::sparseMatMulStore(
 
   // determine local srcElementCount
   int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
-  const int *srcLocalDeList = srcArray->delayout->getLocalDeList();
+  const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
   int *srcLocalDeElementCount = new int[srcLocalDeCount];
   int srcElementCount = 0;   // initialize
   for (int i=0; i<srcLocalDeCount; i++){
-    int de = srcLocalDeList[i];  // global DE index
+    int de = srcLocalDeToDeMap[i];  // global DE index
     srcLocalDeElementCount[i] = srcArray->exclusiveElementCountPDe[de]
       * srcArray->tensorElementCount;
     srcElementCount += srcLocalDeElementCount[i];
@@ -6760,7 +6760,7 @@ int Array::sparseMatMulStore(
   vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
   // determine local dstElementCount
   int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
-  const int *dstLocalDeList = dstArray->delayout->getLocalDeList();
+  const int *dstLocalDeToDeMap = dstArray->delayout->getLocalDeToDeMap();
   int *dstLocalDeElementCount = new int[dstLocalDeCount];
   int dstElementCount = 0;   // initialize
   for (int i=0; i<dstLocalDeCount; i++){
@@ -6775,7 +6775,7 @@ int Array::sparseMatMulStore(
         }
       }
     }else{
-      int de = dstLocalDeList[i];  // global DE index
+      int de = dstLocalDeToDeMap[i];  // global DE index
       dstLocalDeElementCount[i] = dstArray->exclusiveElementCountPDe[de]
         * dstArray->tensorElementCount;
     }
@@ -7282,7 +7282,7 @@ int Array::sparseMatMulStore(
       localPet,
       srcLocalDeCount,
       srcLocalDeElementCount,
-      srcLocalDeList,
+      srcLocalDeToDeMap,
       srcSeqIndexInterval,
       srcSeqIndexFactorLookup,
       tensorMixFlag,
@@ -7429,7 +7429,7 @@ int Array::sparseMatMulStore(
       localPet,
       dstLocalDeCount,
       dstLocalDeElementCount,
-      dstLocalDeList,
+      dstLocalDeToDeMap,
       dstSeqIndexInterval,
       dstSeqIndexFactorLookup,
       tensorMixFlag,
@@ -8136,11 +8136,11 @@ int sparseMatMulStoreEncodeXXE(
   
   int dataSizeSrc = ESMC_TypeKindSize(typekindSrc);
   int srcLocalDeCount = srcDelayout->getLocalDeCount();
-  const int *srcLocalDeList = srcDelayout->getLocalDeList();
+  const int *srcLocalDeToDeMap = srcDelayout->getLocalDeToDeMap();
   
   int dataSizeDst = ESMC_TypeKindSize(typekindDst);
   int dstLocalDeCount = dstDelayout->getLocalDeCount();
-  const int *dstLocalDeList = dstDelayout->getLocalDeList();
+  const int *dstLocalDeToDeMap = dstDelayout->getLocalDeToDeMap();
   
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
@@ -8349,7 +8349,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       int srcDe = recvnbPartnerDeList[i];
       int srcPet;   //TODO: DE-based comms
       srcDelayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
-      int dstDe = dstLocalDeList[j];
+      int dstDe = dstLocalDeToDeMap[j];
       // fill values into recvnbVector
       ArrayHelper::RecvnbElement recvnbElement;
       recvnbElement.srcPet = srcPet;
@@ -8569,7 +8569,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, &rc)) return rc;
       // prepare DE/PET info
-      int srcDe = srcLocalDeList[j];
+      int srcDe = srcLocalDeToDeMap[j];
       int dstDe = sendnbPartnerDeList[i];
       int dstPet;   //TODO: DE-based comms
       dstDelayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
@@ -9766,7 +9766,7 @@ bool ArrayElement::hasValidSeqIndex(
 //EOPI
 //-----------------------------------------------------------------------------
   int rank = array->getRank();
-  int de = array->getDELayout()->getLocalDeList()[localDe];
+  int de = array->getDELayout()->getLocalDeToDeMap()[localDe];
   int iOff = de * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   for (int i=0; i<rank; i++){
@@ -10099,8 +10099,8 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   this->delayout = delayout;
   delayout->getDeprecated(&deCount, &decompRank, &localDeCount, NULL, 0,
     NULL, NULL, NULL, NULL, 0);
-  localDeList = new int[localDeCount];
-  delayout->getDeprecated(NULL, NULL, NULL, localDeList, localDeCount, NULL,
+  localDeToDeMap = new int[localDeCount];
+  delayout->getDeprecated(NULL, NULL, NULL, localDeToDeMap, localDeCount, NULL,
     NULL, NULL, NULL, 0);
   deVASList = new int[deCount];
   for (int de=0; de<deCount; de++)
@@ -10256,7 +10256,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   int *temp_counts = new int[rank];
   int de;
   for (int i=0; i<localDeCount; i++){
-    de = localDeList[i];
+    de = localDeToDeMap[i];
     if (delayout->serviceOffer(de, NULL) == ESMCI::SERVICEREPLY_ACCEPT){
       for (int j=0; j<rank; j++)
         temp_counts[j] = localFullUBound[de][j] - localFullLBound[de][j] + 1;
@@ -10424,7 +10424,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     vm->broadcast(buffer, blockSize, rootPET);
     // loop over local DEs
     for (int ide=0; ide<localDeCount; ide++){
-      int de = localDeList[ide];
+      int de = localDeToDeMap[ide];
       if (delayout->serviceOffer(de, NULL) == ESMCI::SERVICEREPLY_ACCEPT){
         // the localPet's offer was accepted by DELayout
         // check whether this DE's fullBox intersects the current block...
@@ -10827,7 +10827,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // determine localDE index
   int localDe;
   for (localDe=0; localDe<localDeCount; localDe++)
-    if (localDeList[localDe] == de) break;
+    if (localDeToDeMap[localDe] == de) break;
   // pack arguments to pass into ScatterThread
   thargArray[localDe].array = this;
   thargArray[localDe].vm = vm;
@@ -10911,7 +10911,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   // loop over local DEs
   int primeFlag = 1;
   for (int localDe=0; localDe<localDeCount; localDe++){
-    int de = localDeList[localDe];
+    int de = localDeToDeMap[localDe];
     if (delayout->serviceOffer(de, NULL) == ESMCI::SERVICEREPLY_ACCEPT){
       // the localPet's offer was accepted by DELayout
       // get info out of the associated localArray
@@ -11203,7 +11203,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   // determine localDE index
   int localDe;
   for (localDe=0; localDe<localDeCount; localDe++)
-    if (localDeList[localDe] == de) break;
+    if (localDeToDeMap[localDe] == de) break;
   // determine VAS for rootPET
   int rootVAS = vm->getVas(rootPET);
   // check that t/k matches (on all PETs!)
@@ -11507,7 +11507,7 @@ int ESMC_newArray::ESMC_newArrayWait(
   // determine localDE index
   int localDe;
   for (localDe=0; localDe<localDeCount; localDe++)
-    if (localDeList[localDe] == de) break;
+    if (localDeToDeMap[localDe] == de) break;
   int *cc = &(commhArray[localDe].commhandleCount);  // to simplify usage
   int *pc = &(commhArray[localDe].pthidCount);       // to simplify usage
 #if (VERBOSITY > 9)
@@ -11938,10 +11938,10 @@ void *ESMC_newArrayScatterThread(
   int localPet = vm->getLocalPet();
   // determine localDE index
   int localDeCount = array->localDeCount;
-  int *localDeList = array->localDeList;
+  int *localDeToDeMap = array->localDeToDeMap;
   int localDe;
   for (localDe=0; localDe<localDeCount; localDe++)
-    if (localDeList[localDe] == de) break;
+    if (localDeToDeMap[localDe] == de) break;
   // determine VAS for rootPET
   int rootVAS = vm->getVas(rootPET);
   // receive some of larray's meta info from scatter root method

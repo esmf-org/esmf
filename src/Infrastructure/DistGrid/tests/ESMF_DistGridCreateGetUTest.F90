@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.36 2011/06/30 05:58:51 theurich Exp $
+! $Id: ESMF_DistGridCreateGetUTest.F90,v 1.36.2.1 2011/11/28 23:18:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.36 2011/06/30 05:58:51 theurich Exp $'
+    '$Id: ESMF_DistGridCreateGetUTest.F90,v 1.36.2.1 2011/11/28 23:18:25 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,7 @@ program ESMF_DistGridCreateGetUTest
   integer, allocatable:: elementCountPTile(:), deToTileMap(:), elementCountPDe(:)
   integer, allocatable:: minIndexPTile(:,:), maxIndexPTile(:,:)
   integer, allocatable:: minIndexPDe(:,:), maxIndexPDe(:,:)
-  integer, allocatable:: indexCountPDe(:,:), localDeList(:)
+  integer, allocatable:: indexCountPDe(:,:), localDeToDeMap(:)
   integer, allocatable:: indexList(:), seqIndexList(:)
   integer, allocatable:: deBlockList(:,:,:)
   integer, allocatable:: arbSeqIndexList(:)
@@ -352,24 +352,24 @@ program ESMF_DistGridCreateGetUTest
     
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "DELayoutGet() - localDeList"
+  write(name, *) "DELayoutGet() - localDeToDeMap"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(localDeList(0:localDeCount-1))
-  call ESMF_DELayoutGet(delayout, localDeList=localDeList, rc=rc)
+  allocate(localDeToDeMap(0:localDeCount-1))
+  call ESMF_DELayoutGet(delayout, localDeToDeMap=localDeToDeMap, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Verify localDeList"
+  write(name, *) "Verify localDeToDeMap"
   write(failMsg, *) "Wrong result"
-  call ESMF_Test((localDeList(0) == localPet), &
+  call ESMF_Test((localDeToDeMap(0) == localPet), &
     name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridGet() - indexList(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(indexList(indexCountPDe(1,localDeList(0))))
+  allocate(indexList(indexCountPDe(1,localDeToDeMap(0))))
   call ESMF_DistGridGet(distgrid, localDe=0, dim=1, indexList=indexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate(indexList)
@@ -386,13 +386,13 @@ program ESMF_DistGridCreateGetUTest
   !NEX_UTest
   write(name, *) "verify elementCount"
   write(failMsg, *) "Did not match"
-  call ESMF_Test((elementCount.eq.elementCountPDe(localDeList(0))), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((elementCount.eq.elementCountPDe(localDeToDeMap(0))), name, failMsg, result, ESMF_SRCLINE)
     
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridGet() - seqIndexList(:)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  allocate(seqIndexList(elementCountPDe(localDeList(0))))
+  allocate(seqIndexList(elementCountPDe(localDeToDeMap(0))))
   call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
@@ -401,7 +401,7 @@ program ESMF_DistGridCreateGetUTest
   write(name, *) "Verify seqIndexList(:)"
   write(failMsg, *) "Wrong result"
   loopResult = .true.
-  do i=1, elementCountPDe(localDeList(0))
+  do i=1, elementCountPDe(localDeToDeMap(0))
     if (seqIndexList(i) /= seqIndexList(1)+(i-1)) &
       loopResult = .false.
   enddo
@@ -409,7 +409,7 @@ program ESMF_DistGridCreateGetUTest
     name, failMsg, result, ESMF_SRCLINE)
   deallocate(seqIndexList)
   deallocate(elementCountPDe)
-  deallocate(localDeList)
+  deallocate(localDeToDeMap)
 
   !------------------------------------------------------------------------
   !NEX_UTest
