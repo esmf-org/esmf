@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.350 2011/11/21 22:20:27 w6ws Exp $
+#  $Id: common.mk,v 1.351 2011/11/28 17:30:09 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2906,9 +2906,9 @@ endif
 
 
 #-------------------------------------------------------------------------------
-# Suffixes
+# Suffixes (TODO: seems that the last three have become obsolete *gjt*)
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 $(SUFFIXES) .C .cc .r .rm $(ESMF_SL_SUFFIX) .cppF90
+.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .cc .r .rm
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files
