@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.108 2011/11/23 22:23:53 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.109 2011/11/28 05:22:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1844,8 +1844,8 @@ end subroutine ESMF_LogSetError
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-      recursive subroutine ESMF_LogWrite(msg, logmsgFlag,  &
-                                         logmsgList,  & DEPRECATED ARGUMENT
+      recursive subroutine ESMF_LogWrite(msg, logmsgFlag, &
+                                         logmsgList,      & ! DEPRECATED ARGUMENT
                         keywordEnforcer, line, file, method, log, rc)
 !
 !
