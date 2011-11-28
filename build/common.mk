@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.351 2011/11/28 17:30:09 theurich Exp $
+#  $Id: common.mk,v 1.352 2011/11/28 21:49:43 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -869,6 +869,9 @@ ESMF_LIB_SUFFIX       = a
 ESMF_SL_SUFFIX        = so
 ifeq ($(ESMF_OS),Darwin)
 ESMF_SL_SUFFIX        = dylib
+endif
+ifeq ($(ESMF_OS),Cygwin)
+ESMF_SL_SUFFIX        = dll.a
 endif
 ESMF_SL_LIBS_TO_MAKE  = libesmf
 ESMF_SL_LIBLINKER     = $(ESMF_CXXCOMPILER)

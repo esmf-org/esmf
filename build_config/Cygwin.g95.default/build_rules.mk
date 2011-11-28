@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2011/03/16 18:36:25 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2011/11/28 21:49:45 theurich Exp $
 #
 # Cygwin.g95.default
 #
@@ -175,6 +175,5 @@ ESMF_CXXLINKOPTS += -Wl,--enable-auto-import
 ############################################################
 # Shared library options
 #
-ESMF_SL_SUFFIX         = dll.a
 ESMF_SL_LIBOPTS       += -shared
 ESMF_SL_LIBLIBS       += -L$(ESMF_F90LIBFULLPATH) -lf95
