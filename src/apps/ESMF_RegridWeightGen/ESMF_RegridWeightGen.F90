@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.44.2.6 2011/10/28 17:46:16 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.44.2.7 2011/11/28 23:38:05 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -26,8 +26,8 @@ program ESMF_RegridWeightGen
       type(ESMF_Field)   :: srcField, dstField
       type(ESMF_Field)   :: srcFracField, dstFracField
       type(ESMF_ArraySpec) :: arrayspec
-      integer(ESMF_KIND_I4), pointer:: indices(:,:)
-      real(ESMF_KIND_R8), pointer :: weights(:)
+      integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
+      real(ESMF_KIND_R8), pointer :: factorList(:)
       character(len=256) :: srcfile, dstfile, wgtfile
       character(len=40)  :: method, flag
       integer(ESMF_KIND_I4) :: maskvals(1)
@@ -52,8 +52,8 @@ program ESMF_RegridWeightGen
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
       logical            :: wasCompacted, largeFileFlag
-      integer(ESMF_KIND_I4), pointer:: compactedIndices(:,:)
-      real(ESMF_KIND_R8), pointer :: compactedWeights(:)
+      integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
+      real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
       logical :: ignoreUnmapped
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
 
@@ -656,7 +656,7 @@ program ESMF_RegridWeightGen
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedaction=unmappedaction, &
-	    indices=indices, weights=weights, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
             regridmethod = ESMF_REGRIDMETHOD_BILINEAR, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
 	    rc=rc)
@@ -667,7 +667,7 @@ program ESMF_RegridWeightGen
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedaction=unmappedaction, &
-	    indices=indices, weights=weights, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
             regridmethod = ESMF_REGRIDMETHOD_PATCH, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
 	    rc=rc)
@@ -678,7 +678,7 @@ program ESMF_RegridWeightGen
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedaction=unmappedaction, &
-	    indices=indices, weights=weights, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = ESMF_REGRIDMETHOD_CONSERVE, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
@@ -701,7 +701,7 @@ program ESMF_RegridWeightGen
          else
             call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-            call ESMF_MeshMergeSplitSrcInd(srcMesh,indices,rc)
+            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
 
@@ -711,7 +711,7 @@ program ESMF_RegridWeightGen
          else
             call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-            call ESMF_MeshMergeSplitDstInd(dstMesh,weights,indices,rc)
+            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          endif
       endif
@@ -719,19 +719,19 @@ program ESMF_RegridWeightGen
       ! Compact weight matrix
       ! (only compact if one of the grids is irregular, because that's when the repeated entries occur)
       if ((.not. srcIsReg) .or. (.not. dstIsReg)) then
-         call compactMatrix(weights, indices, &
+         call compactMatrix(factorList, factorIndexList, &
                             wasCompacted, &
-                            compactedWeights, compactedIndices, &
+                            compactedFactorList, compactedFactorIndexList, &
                             rc)
          if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
          ! If the list was compacted get rid of the old lists and 
          ! point to the new lists
          if (wasCompacted) then
-            deallocate(weights)
-            weights=>compactedWeights
-            deallocate(indices)
-            indices=>compactedIndices
+            deallocate(factorList)
+            factorList=>compactedFactorList
+            deallocate(factorIndexList)
+            factorIndexList=>compactedFactorIndexList
          endif
       endif
 
@@ -740,10 +740,10 @@ program ESMF_RegridWeightGen
       ! destination fraction depends on the src mask, dst mask, and the weight
       if (method .eq. 'bilinear' .or. method .eq. 'patch') then
 	if (dstIsReg) then
-	   call computeFracGrid(dstGrid, vm, indices, dstFrac, rc)
+	   call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         else
-	   call computeFracMesh(dstMesh, vm, indices, dstFrac, rc)
+	   call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         endif
       else if (method .eq. 'conserve') then
@@ -769,21 +769,21 @@ program ESMF_RegridWeightGen
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
          if (isConserve) then
-            call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
+            call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodflag, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
-            call ESMF_OutputScripWeightFile(wgtfile, weights, indices,  &
+            call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
 	           dstIsScrip=dstIsScrip, method = methodflag, dstFrac=dstFrac, &
 		   largeFileFlag=largeFileFlag, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	  endif
       else 
-	 call ESMF_OutputScripWeightFile(wgtfile, weights, indices, rc=rc)
+	 call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList, rc=rc)
          if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
       endif
 
@@ -1412,7 +1412,11 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
        return
     endif
 
-   ! Put source entries in sorted order
+   ! Put source indices for each run of destination
+   ! indices in sorted order to allow weights with 
+   ! the same indices to be merged below. Note
+   ! runs with less than 3 entries are not sorted because
+   ! they will be handled correctly by the merge code below. 
     beg=1
     dstInd=inFactorIndexList(2,1)
     do i=2,inListCount
@@ -1427,6 +1431,12 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
           dstInd=inFactorIndexList(2,i)
        endif
     enddo
+
+    ! If long enough sort [beg,inListCount], because it's not handled above 
+    if ((inListCount)-beg+1 >2) then
+       call hsort_array(inFactorIndexList(:,beg:inListCount), inFactorList(beg:inListCount))
+    endif
+
 
     ! Loop counting unique entries
     outListCount=1 ! 1 because counting switches below
