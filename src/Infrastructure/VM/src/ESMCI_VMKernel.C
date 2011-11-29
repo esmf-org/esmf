@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.32 2011/11/29 19:47:46 w6ws Exp $
+// $Id: ESMCI_VMKernel.C,v 1.33 2011/11/29 23:02:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -5141,7 +5141,7 @@ namespace ESMCI {
 #include <Windows.h>
 #include <Winsock.h>
 typedef int socklen_t;
-// #define ESMF_NO_SOCKOPT
+typedef char* value_ptr_t;
 #define EALREADY WSAEALREADY
 #define ECONNREFUSED WSAECONNREFUSED
 #define EINPROGRESS WSAEINPROGRESS
@@ -5155,6 +5155,7 @@ typedef int socklen_t;
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
+typedef void* value_ptr_t;
 
 #endif
 
@@ -5194,18 +5195,13 @@ namespace ESMCI {
       perror("socketServerInit: socket()");
       return SOCKERR_UNSPEC;  // bail out
     }
-#ifndef ESMF_NO_SOCKOPT
     // allow immediate address + port reuse in bind
     int value = 1;
-#if !defined (ESMF_OS_MinGW)
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) < 0){
-#else
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*) &value, sizeof(value)) < 0) {
-#endif
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (value_ptr_t)&value,
+      sizeof(value)) < 0){
       perror("socketServerInit: setsockopt()");
       return SOCKERR_UNSPEC;  // bail out
     }
-#endif
     // bind the hosts address + a port to it
     struct sockaddr_in name;
     name.sin_family = AF_INET;
@@ -5346,11 +5342,8 @@ namespace ESMCI {
           // look at SO_ERROR to determine success or failure to connect
           int error;
           socklen_t len = sizeof(error);
-#if !defined (ESMF_OS_MinGW)
-          if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0){
-#else
-          if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (char *)&error, &len) < 0) {
-#endif
+          if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (value_ptr_t)&error, &len)
+            < 0){
             perror("socketClientInit: getsockopt()");
             return SOCKERR_UNSPEC;  // bail out
           }
@@ -5517,11 +5510,7 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     if (FD_ISSET(sock, &sendfds)){
-#if !defined (ESMF_OS_MinGW)
-      if ((len=send(sock, buffer, size, 0)) < 0){
-#else
-      if ((len=send(sock, (char *)buffer, size, 0)) < 0) {
-#endif
+      if ((len=send(sock, (value_ptr_t)buffer, size, 0)) < 0){
         perror("socketSend: send()");
         return SOCKERR_UNSPEC;  // bail out
       }
@@ -5573,11 +5562,7 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     if (FD_ISSET(sock, &recvfds)){
-#if !defined (ESMF_OS_MinGW)
-      if ((len=recv(sock, buffer, size, 0)) < 0){
-#else
-      if ((len=recv(sock, (char *) buffer, size, 0)) < 0) {
-#endif
+      if ((len=recv(sock, (value_ptr_t)&buffer, size, 0)) < 0){
         perror("socketRecv: recv()");
         return SOCKERR_UNSPEC;  // bail out
       }

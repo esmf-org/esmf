@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.10 2011/11/29 19:55:09 w6ws Exp $
+// $Id: ESMCI_WebServLowLevelSocket.C,v 1.11 2011/11/29 23:02:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -30,19 +30,21 @@
 
 #include <string.h>
 
-#if !defined (ESMF_OS_MinGW)
+#ifdef ESMF_OS_MinGW
+
+#include <Windows.h>
+#define sleep(secs) Sleep(secs*1000)
+#include <Winsock.h>
+typedef char* value_ptr_t;
+
+#else
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#else
-#include <Windows.h>
-#define sleep(secs) Sleep(secs*1000)
-#include <Winsock.h>
-#endif
+typedef void* value_ptr_t;
 
-#ifdef ESMF_NO_SOCKETS
-#define ESMF_NO_SOCKOPT
 #endif
 
 #include "ESMCI_WebServSocketUtils.h"
@@ -53,7 +55,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.10 2011/11/29 19:55:09 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.11 2011/11/29 23:02:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -234,17 +236,15 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 	}
 
 	//***
-	// Set the SO_REUSEADDR to true so that the server can be restarted quickly
-	// without rejecting the bind (This isn't supported on all platforms, so
-	// we'll need to put a compile-time condition around it)
+	// Set the SO_REUSEADDR to true so that the server can be restarted
+        // quickly without rejecting the bind
 	//***
-#ifndef ESMF_NO_SOCKOPT
+#ifdef SO_REUSEADDR
+        // Turns out that the platform that doesn't have this macro defined
+        // (frost Bluegene/L) doesn't really support sockets at all!
 	int	optVal = 1;
-#if !defined (ESMF_OS_MinGW)
-	setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal));
-#else
-        setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, (char *)&optVal, sizeof (optVal));
-#endif
+	setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, (value_ptr_t)&optVal,
+          sizeof(optVal));
 #endif
 
 	struct sockaddr_in	server;
