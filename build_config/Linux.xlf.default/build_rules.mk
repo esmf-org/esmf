@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19 2011/07/08 19:24:51 theurich Exp $
+# $Id: build_rules.mk,v 1.20 2011/11/29 19:30:46 theurich Exp $
 #
 # Linux.xlf.default
 #
@@ -62,9 +62,9 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
 
 ############################################################
-# BlueGene/L does not have support for socket options
+# BlueGene/L does not have support for sockets
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SOCKOPT
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SOCKETS
 
 ############################################################
 # BlueGene/L does not have support for Pthreads

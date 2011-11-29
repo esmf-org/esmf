@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.30 2011/11/29 17:59:26 w6ws Exp $
+// $Id: ESMCI_VMKernel.C,v 1.31 2011/11/29 19:30:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -770,7 +770,7 @@ void VMK::destruct(){
 #if (VERBOSITY > 9)
         printf("deleting shmp=%p for sendChannel[%d], mypet=%d\n", 
           shmp, i, mypet);
-#endif          
+#endif
         delete shmp;
       }else if (sendChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
 #ifdef ESMF_NO_POSIXIPC
@@ -804,7 +804,7 @@ void VMK::destruct(){
 #if (VERBOSITY > 9)
           printf("deleting shmp=%p for recvChannel[%d], mypet=%d\n", 
             shmp, i, mypet);
-#endif          
+#endif
           delete shmp;
         }else if (recvChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
 #ifdef ESMF_NO_POSIXIPC
@@ -1089,7 +1089,7 @@ static void *vmk_block(void *arg){
 #endif
 #if (VERBOSITY > 5)
   fprintf(stderr, "blocker is past back-sync #2\n");  
-#endif  
+#endif
   volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
@@ -1618,7 +1618,7 @@ void *VMK::startup(class VMKPlan *vmp,
                   new_commarray[pet1Index][pet2Index].comm_type =
                     VM_COMM_TYPE_MPI1;  // default for selfcommunication
                 }
-#endif               
+#endif
                 ++pet2Index;
               }
             }
@@ -3094,7 +3094,7 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
     // increment sendCount
     ++sendCount;
     pipcmp->sendCount = sendCount%SHARED_NONBLOCK_CHANNELS;
-#endif    
+#endif
     break;
   case VM_COMM_TYPE_MPIUNI:
     // Shared memory hack for mpiuni
@@ -5116,6 +5116,26 @@ namespace ESMCI{
 //==============================================================================
 //==============================================================================
 
+#ifdef ESMF_NO_SOCKETS
+//==============================================================================
+// dummy interfaces to satisfy upper ESMF layers:
+
+namespace ESMCI {
+  int socketServer(void){
+    // return successfully
+    return 0;
+  }
+  int socketClient(void){
+    // return successfully
+    return 0;
+  }
+} // namespace ESMCI
+
+//==============================================================================
+#else
+//==============================================================================
+// real socket based implementation:
+
 #ifdef ESMF_OS_MinGW
 
 #include <Windows.h>
@@ -5174,14 +5194,14 @@ namespace ESMCI {
       perror("socketServerInit: socket()");
       return SOCKERR_UNSPEC;  // bail out
     }
-#ifndef ESMF_NO_SOCKOPT    
+#ifndef ESMF_NO_SOCKOPT
     // allow immediate address + port reuse in bind
     int value = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) < 0){
       perror("socketServerInit: setsockopt()");
       return SOCKERR_UNSPEC;  // bail out
     }
-#endif    
+#endif
     // bind the hosts address + a port to it
     struct sockaddr_in name;
     name.sin_family = AF_INET;
@@ -5846,3 +5866,5 @@ namespace ESMCI {
   }
   
 } // namespace ESMCI
+//==============================================================================
+#endif
