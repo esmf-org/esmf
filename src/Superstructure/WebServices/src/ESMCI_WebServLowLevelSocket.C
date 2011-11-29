@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.9 2011/11/29 19:30:52 theurich Exp $
+// $Id: ESMCI_WebServLowLevelSocket.C,v 1.10 2011/11/29 19:55:09 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -39,7 +39,6 @@
 #include <Windows.h>
 #define sleep(secs) Sleep(secs*1000)
 #include <Winsock.h>
-#define ESMF_NO_SOCKOPT
 #endif
 
 #ifdef ESMF_NO_SOCKETS
@@ -54,7 +53,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.9 2011/11/29 19:30:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.10 2011/11/29 19:55:09 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -241,7 +240,11 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 	//***
 #ifndef ESMF_NO_SOCKOPT
 	int	optVal = 1;
+#if !defined (ESMF_OS_MinGW)
 	setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal));
+#else
+        setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, (char *)&optVal, sizeof (optVal));
+#endif
 #endif
 
 	struct sockaddr_in	server;

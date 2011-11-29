@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSecureSocket.C,v 1.2 2011/11/29 19:30:52 theurich Exp $
+// $Id: ESMCI_WebServSecureSocket.C,v 1.3 2011/11/29 19:55:09 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSecureSocket.C,v 1.2 2011/11/29 19:30:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_WebServSecureSocket.C,v 1.3 2011/11/29 19:55:09 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -234,7 +234,11 @@ int  ESMCI_WebServSecureSocket::serverConnect(
 	//***
 #ifndef ESMF_NO_SOCKOPT
 	int	optVal = 1;
+#if !defined (ESMF_OS_MinGW)
 	setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, &optVal, sizeof(optVal));
+#else
+        setsockopt(theTSock, SOL_SOCKET, SO_REUSEADDR, (char*)&optVal, sizeof (optVal));
+#endif
 #endif
 
 	struct sockaddr_in	server;
