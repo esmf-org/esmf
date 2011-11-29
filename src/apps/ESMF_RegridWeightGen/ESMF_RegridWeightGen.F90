@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.54 2011/11/16 23:00:05 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.55 2011/11/29 06:31:41 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -29,6 +29,7 @@ program ESMF_RegridWeightGen
       integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
       real(ESMF_KIND_R8), pointer :: factorList(:)
       character(len=256) :: srcfile, dstfile, wgtfile
+      character(len=256) :: srcmeshname, dstmeshname
       character(len=40)  :: method, flag
       integer(ESMF_KIND_I4) :: maskvals(1)
       integer            :: index
@@ -40,14 +41,15 @@ program ESMF_RegridWeightGen
       logical            :: isConserve, srcIsSphere, dstIsSphere
       logical            :: addCorners,convertToDual
       type(ESMF_MeshLoc) :: meshloc
-      logical            :: srcIsScrip, dstIsScrip, srcIsReg, dstIsReg
+      logical            :: srcIsReg, dstIsReg
+      type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
       logical            :: srcIsRegional, dstIsRegional, typeSetFlag
       character(len=256) :: methodStr
       type(ESMF_RegridMethod_Flag) :: methodflag
       real(ESMF_KIND_R8), pointer :: srcArea(:)
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
-      character(len=256) :: commandbuf1(3)
+      character(len=256) :: commandbuf1(5)
       integer            :: commandbuf2(15)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
@@ -159,17 +161,22 @@ program ESMF_RegridWeightGen
            endif
          endif
 
-         typeSetFlag = .false. 
-         srcIsScrip = .true.
-         dstIsScrip = .true.
+         typeSetFlag = .false.  
+         srcFileType = ESMF_FILEFORMAT_SCRIP
+         dstFileType = ESMF_FILEFORMAT_SCRIP
          srcIsRegional = .false.
          dstIsRegional = .false.
          call ESMF_UtilGetArgIndex('-t', argindex=index, rc=rc)
          if (index /= -1) then
            call ESMF_UtilGetArg(index+1, argvalue=flag)
 	   if (trim(flag) .eq. 'ESMF') then
-             srcIsScrip = .false.
-             dstIsScrip = .false.
+	     srcFileType = ESMF_FILEFORMAT_ESMFMESH
+             dstFileType = ESMF_FILEFORMAT_ESMFMESH
+             !write(*,*)
+             !print *, 'Set src and dst grid file types to ESMF.'
+	   else if (trim(flag) .eq. 'UGRID') then
+	     srcFileType = ESMF_FILEFORMAT_UGRID
+             dstFileType = ESMF_FILEFORMAT_UGRID
              !write(*,*)
              !print *, 'Set src and dst grid file types to ESMF.'
            else if (trim(flag) .ne. 'SCRIP') then
@@ -185,16 +192,18 @@ program ESMF_RegridWeightGen
            call ESMF_UtilGetArg(index+1, argvalue=flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
-             if ((trim(flag) .eq. 'ESMF' .and. srcIsScrip) .or.   &
-	        (trim(flag) .eq. 'SCRIP' .and. .not. srcIsScrip)) then
+             if ((trim(flag) .eq. 'ESMF' .and. srcFileType == ESMF_FILEFORMAT_UGRID) .or.   &
+                (trim(flag) .eq. 'UGRID' .and. srcFileType == ESMF_FILEFORMAT_ESMFMESH) .or.   &
+	        (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP)) then
                 write(*,*)
 	        print *, 'ERROR: Source file type conflict: --src_type and -t.' 
                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	        srcIsScrip = .false.
 	     end if
            endif
            if (trim(flag) .eq. 'ESMF') then
-	     srcIsScrip = .false.
+	     srcFileType = ESMF_FILEFORMAT_ESMFMESH
+           else if (trim(flag) .eq. 'UGRID') then
+	     srcFileType = ESMF_FILEFORMAT_UGRID
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown --src_type: must be either ESMF or SCRIP.'
@@ -207,21 +216,47 @@ program ESMF_RegridWeightGen
            call ESMF_UtilGetArg(index+1, argvalue=flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
-             if ((trim(flag) .eq. 'ESMF' .and. dstIsScrip) .or.   &
-	        (trim(flag) .eq. 'SCRIP' .and. .not. dstIsScrip)) then
+             if ((trim(flag) .eq. 'ESMF' .and. dstFileType == ESMF_FILEFORMAT_UGRID) .or.   &
+                (trim(flag) .eq. 'UGRID' .and. dstFileType == ESMF_FILEFORMAT_ESMFMESH) .or.   &
+	        (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP)) then
                 write(*,*)
 	        print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	        dstIsScrip = .false.
 	     end if
            endif
            if (trim(flag) .eq. 'ESMF') then
-	     dstIsScrip = .false.
+	     dstFileType = ESMF_FILEFORMAT_ESMFMESH
+           elseif (trim(flag) .eq. 'UGRID') then
+	     dstFileType = ESMF_FILEFORMAT_UGRID
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown --dst_type: must be either ESMF or SCRIP.'
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
+         endif
+
+         ! If the src grid type is UGRID, get the dummy variable name in the file
+	 if (srcFileType == ESMF_FILEFORMAT_UGRID) then
+	    call ESMF_UtilGetArgIndex('--src_meshname', argindex=index, rc=rc)
+            if (index == -1) then
+	         write(*,*)
+                 print *, 'ERROR: The argument --src_meshname is missing.'
+                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
+            else
+                 call ESMF_UtilGetArg(index+1, argvalue=srcMeshName)	   
+            endif
+         endif
+
+         ! If the dst grid type is UGRID, get the dummy variable name in the file
+	 if (dstFileType == ESMF_FILEFORMAT_UGRID) then
+	    call ESMF_UtilGetArgIndex('--dst_meshname', argindex=index, rc=rc)
+            if (index == -1) then
+	         write(*,*)
+                 print *, 'ERROR: The argument --dst_meshname is missing.'
+                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
+            else
+                 call ESMF_UtilGetArg(index+1, argvalue=dstMeshName)	   
+            endif
          endif
 
          ignoreUnmapped=.false.
@@ -262,7 +297,7 @@ program ESMF_RegridWeightGen
         end if
 
         ! Should I have only PetNO=0 to open the file and find out the size?
-         if (srcIsScrip) then
+         if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=rc)
 	   if (rc /= ESMF_SUCCESS) then 
              write(*,*)
@@ -278,7 +313,7 @@ program ESMF_RegridWeightGen
          else
 	   srcIsReg = .false.
 	 endif
-     	 if (dstIsScrip) then
+     	 if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=rc)
            if (rc /= ESMF_SUCCESS) then
              write(*,*)
@@ -298,10 +333,13 @@ program ESMF_RegridWeightGen
 	print *, "  Source File: ", trim(srcfile)
 	print *, "  Destination File: ", trim(dstfile)
   	print *, "  Weight File: ", trim(wgtfile)
-        if (srcIsScrip) then 
+        if (srcFileType == ESMF_FILEFORMAT_SCRIP) then 
             print *, "  Source File is in SCRIP format"
-        else
+        elseif (srcFileType == ESMF_FILEFORMAT_ESMFMESH) then 
             print *, "  Source File is in ESMF format"
+        else
+            print *, "  Source File is in UGRID format, dummy variable: ", &
+		trim(srcMeshName)
         endif
         if (srcIsRegional) then
 	   print *, "  Source Grid is a regional grid"
@@ -313,10 +351,13 @@ program ESMF_RegridWeightGen
         else
 	   print *, "  Source Grid is an unstructured grid"
         endif
-        if (dstIsScrip) then 
-	    print *, "  Destination File is in SCRIP format"
+        if (dstFileType == ESMF_FILEFORMAT_SCRIP) then 
+            print *, "  Destination File is in SCRIP format"
+        elseif (dstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
+            print *, "  Destination File is in ESMF format"
         else
-	    print *, "  Destination File is in ESMF format"
+            print *, "  Destination File is in UGRID format, dummy variable: ", & 
+		trim(dstMeshName)
 	endif
         if (dstIsRegional) then
 	   print *, "  Destination Grid is a regional grid"
@@ -350,22 +391,24 @@ program ESMF_RegridWeightGen
         commandbuf1(1)=srcfile
         commandbuf1(2)=dstfile
         commandbuf1(3)=wgtfile
+        commandbuf1(4)=srcMeshName
+	commandbuf1(5)=dstMeshName
 
         ! Broadcast the command line arguments to all the PETs
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*5, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
         commandbuf2(:)=0
-        if (srcIsScrip) commandbuf2(1)=1
+        commandbuf2(1)=srcFileType%fileformat
         if (srcIsReg)   commandbuf2(2)=1
-        if (dstIsScrip) commandbuf2(3)=1
+        commandbuf2(3)=dstFileType%fileformat
         if (dstIsReg)   commandbuf2(4)=1
         if (method .eq. 'patch') commandbuf2(5)=1
         if (method .eq. 'conserve') commandbuf2(5)=2
         commandbuf2(6)=poleptrs
         if (srcIsRegional) commandbuf2(7)=1
         if (dstIsRegional) commandbuf2(8)=1
-	if (srcIsScrip) then 
+	if (srcFileType == ESMF_FILEFORMAT_SCRIP) then 
            commandbuf2(9)=srcrank
            if (srcrank == 1) then
               commandbuf2(10) = srcdims(1)
@@ -375,7 +418,7 @@ program ESMF_RegridWeightGen
               commandbuf2(11) = srcdims(2)
            endif
         endif
-        if (dstIsScrip) then
+        if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
            commandbuf2(12)=dstrank
            if (dstrank == 1) then
               commandbuf2(13) = dstdims(1)
@@ -391,29 +434,23 @@ program ESMF_RegridWeightGen
         call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*5, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         srcfile = commandbuf1(1)
         dstfile = commandbuf1(2)
         wgtfile = commandbuf1(3)
+        srcMeshName = commandbuf1(4)
+	dstMeshName = commandbuf1(5)
 
         call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        if (commandbuf2(1)==1) then
-           srcIsScrip = .true.
-        else
-           srcIsScrip = .false.
-        end if
+	srcFileType%fileformat = commandbuf2(1)
         if (commandbuf2(2)==1) then
            srcIsReg = .true.
         else
            srcIsReg = .false.
         end if
-        if (commandbuf2(3)==1) then
-           dstIsScrip = .true.
-        else
-           dstIsScrip = .false.
-        end if
+	dstFileType%fileformat = commandbuf2(3)
         if (commandbuf2(4)==1) then
            dstIsReg = .true.
         else
@@ -447,12 +484,12 @@ program ESMF_RegridWeightGen
            dstIsRegional = .false.
         end if
         allocate(srcdims(2), dstdims(2))
-        if (srcIsScrip) then
+        if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
            srcrank = commandbuf2(9)
            srcdims(1)=commandbuf2(10)
            srcdims(2)=commandbuf2(11)
         endif
-        if (dstIsScrip) then
+        if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
            dstrank = commandbuf2(12)
            dstdims(1)=commandbuf2(13)
            dstdims(2)=commandbuf2(14)
@@ -537,7 +574,7 @@ program ESMF_RegridWeightGen
      endif
      !Read in the srcfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh
-     if (srcIsScrip) then
+     if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
 	if(srcIsReg) then
            srcGrid = ESMF_GridCreate(srcfile,(/xpart,ypart/), addCornerStagger=addCorners, &
                        isSphere=srcIsSphere, rc=rc)
@@ -562,8 +599,8 @@ program ESMF_RegridWeightGen
 	endif
       else
 	! if srcfile is not SCRIP, it is always unstructured
-	srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
-                    rc=rc)
+	srcMesh = ESMF_MeshCreate(srcfile, srcFileType, convert3D=.true., &
+                    meshname = trim(srcMeshName), rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=rc)
@@ -592,7 +629,7 @@ program ESMF_RegridWeightGen
    	  ydim = dstdims(2)/ypart
         enddo
      endif
-     if (dstIsScrip) then
+     if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
 	if(dstIsReg) then
            dstGrid = ESMF_GridCreate(dstfile,(/xpart, ypart/), addCornerStagger=addCorners, &
                        isSphere=dstIsSphere, rc=rc)
@@ -612,8 +649,8 @@ program ESMF_RegridWeightGen
 	endif
       else
 	! if dstfile is not SCRIP, it is always unstructured
-	dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., &
-                    rc=rc)
+	dstMesh = ESMF_MeshCreate(dstfile, dstFileType, convert3D=.true., &
+                    meshname = trim(dstMeshName), rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -770,16 +807,18 @@ program ESMF_RegridWeightGen
       if (PetNo == 0) then
          if (isConserve) then
             call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	           dstIsScrip=dstIsScrip, method = methodflag, &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
-		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, rc=rc)
+		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
             call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
-	           srcFile=srcfile, dstFile=dstfile, srcIsScrip=srcIsScrip,&
-	           dstIsScrip=dstIsScrip, method = methodflag, dstFrac=dstFrac, &
-		   largeFileFlag=largeFileFlag, rc=rc)
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, dstFrac=dstFrac, &
+		   largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, rc=rc)
             if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	  endif
       else 
@@ -1581,9 +1620,11 @@ subroutine PrintUsage()
      print *, "                      [--method|-m] [bilinear|patch|conservative]"
      print *, "                      [--pole|-p] [all|none|<N>]"
      print *, "                      [--ignore_unmapped|-i]"
-     print *, "                      --src_type [SCRIP|ESMF]" 
-     print *, "                      --dst_type [SCRIP|ESMF]"
-     print *, "                      -t [SCRIP|ESMF]"
+     print *, "                      --src_type [SCRIP|ESMF|UGRID]" 
+     print *, "                      --dst_type [SCRIP|ESMF|UGRID]"
+     print *, "                      -t [SCRIP|ESMF|UGRID]"
+     print *, "                      --src_meshname src_mesh_variable"
+     print *, "                      --dst_meshname dst_mesh_variable"
      print *, "                      -r"
      print *, "where"
      print *, "--source or -s - a required argument specifying the source grid file"
@@ -1599,10 +1640,10 @@ subroutine PrintUsage()
      print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
      print *, "                          the default is to stop with an error."
      print *, "--src_type - an optional argument specifying the source grid file type."
-     print *, "             The ESMF type is only available for the unstructured grid."
+     print *, "             The ESMF and UGRID types are only available for the unstructured grid."
      print *, "             The default option is SCRIP."
      print *, "--dst_type - an optional argument specifying the destination grid file type."
-     print *, "             The ESMF type is only available for the unstructured grid."
+     print *, "             The ESMF and UGRID types are only available for the unstructured grid."
      print *, "             The default option is SCRIP."
      print *, "-t         - an optional argument specifying the file types for both the source"
      print *, "             and the destination grid files.  The default option is SCRIP."
