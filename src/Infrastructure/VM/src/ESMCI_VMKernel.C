@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.29 2011/11/29 16:42:04 w6ws Exp $
+// $Id: ESMCI_VMKernel.C,v 1.30 2011/11/29 17:59:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -33,7 +33,6 @@
 #include <unistd.h>
 #else
 #include <windows.h>
-typedef int socklen_t;
 #endif
 
 // On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
@@ -5121,7 +5120,12 @@ namespace ESMCI{
 
 #include <Windows.h>
 #include <Winsock.h>
+typedef int socklen_t;
 #define ESMF_NO_SOCKOPT
+#define EALREADY WSAEALREADY
+#define ECONNREFUSED WSAECONNREFUSED
+#define EINPROGRESS WSAEINPROGRESS
+#define EWOULDBLOCK WSAEWOULDBLOCK
 
 #else
 
@@ -5301,11 +5305,7 @@ namespace ESMCI {
         }
 #endif
         // check for unexpected error conditions and bail
-#if !defined (ESMF_OS_MinGW)
         if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK){
-#else
-        if (errno!=WSAEINPROGRESS && errno!=WSAEALREADY && errno!=WSAEWOULDBLOCK) {
-#endif
           perror("socketClientInit: connect()");
           return SOCKERR_UNSPEC;  // bail out
         }
@@ -5337,11 +5337,7 @@ namespace ESMCI {
             // successful connection was made
             connected = true;
             break;
-#if !defined (ESMF_OS_MinGW)
           }else if (error!=ECONNREFUSED){
-#else
-          } else if (error != WSAECONNREFUSED) {
-#endif
             // bail if this wasn't just a straight refusal due to absent server
             fprintf(stderr, "socketClientInit: getsockopt() error and bail: "
               "%s\n", strerror(error));
