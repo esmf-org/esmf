@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.46 2011/09/29 22:07:56 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.47 2011/11/29 06:20:28 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -23,8 +23,10 @@ For a discussion of installing and accessing ESMF applications such as this one 
 
 As described above, this tool reads in
 two grid files and outputs weights for interpolation
-between the two grids. The input and output files are all in NetCDF format. The grid files are either in 
-the same format~\ref{sec:scripgridformat} as is used as an input to SCRIP~\cite{ref:SCRIP}, or in the ESMF unstructured grid format~\ref{sec:example:UnstructFromFile}. The weight file is the same format~\ref{sec:weightfileformat} as is 
+between the two grids. The input and output files are all in NetCDF format. The grid files can be defined in three
+different formats:  the SCRIP format~\ref{sec:scripgridformat} as is used as an input to SCRIP~\cite{ref:SCRIP}, 
+the ESMF unstructured grid format~\ref{sec:example:UnstructFromFile} or the proposed CF unstructured grid 
+\htmladdnormallink{(UGRID)}{http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model}. The weight file is the same format~\ref{sec:weightfileformat} as is 
 output by SCRIP. The interpolation weights can be generated with
 the bilinear, patch, or first order conservative methods decribed below. Masking is supported for 2D logically rectangular (i.e. with grid\_rank=2) grids in the SCRIP format. This application 
 can do regrid weight generation from a global or regional source grid to a global or regional destination grid.
@@ -32,7 +34,7 @@ It assumes that the source and destination grids are on a sphere and that the co
 the files are latitude and longitude values. The coordinates can either be in degrees or radians (this is indicated by the ``units'' attribute attached to the value). 
 As is true with many global models, this application currently assumes the latitude and longitude refer to positions on a perfect sphere, as opposed to a more complex 
 and accurate representation of the earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't require this level of detail in representing the earth's shape, but it could be added in the future if necessary.)  This file based regrid weight generation application 
-is parallel. This application is used in the 
+is parallel. This application is used in the
 \htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}, so that can serve as an example of its use.
 
 This application requires the NetCDF libary to read the grid files and write
@@ -145,13 +147,15 @@ ESMF_RegridWeightGen  [--help]
                       [--method|-m] [bilinear|patch|conserve] 
                       [--pole|-p] [none|all|teeth|1|2|..] 
                       [--ignore_unmapped|-i]
-                      --src_type [SCRIP|ESMF] 
-                      --dst_type [SCRIP|ESMF]
-                      -t [SCRIP|ESMF]
+                      --src_type [SCRIP|ESMF|UGRID] 
+                      --dst_type [SCRIP|ESMF|UGRID]
+                      -t [SCRIP|ESMF|UGRID]
                       -r
                       --src_regional
                       --dst_regional
 		      --64bit_offset
+                      --src_meshname dummy_var_name
+		      --dst_meshname dummy_var_name
 
 where
   --help              - print the usage message 
@@ -213,13 +217,13 @@ where
                         point is found. 
 
     --src_type        - an optional argument specifying the source grid file 
-                        type.  The value could be either SCRIP or ESMF.  
-                        Currently, the ESMF file type is only available for 
+                        type.  The value could be one of SCRIP, ESMF or UGRID.  
+                        The ESMF and UGRID file types are only available for 
                         the unstructured grid. The default option is SCRIP.
 
     --dst_type        - an optional argument specifying the destination grid 
-                        file type. The value could be either SCRIP or ESMF.  
-                        Currently, the ESMF file type is only available for 
+                        file type. The value could be one of SCRIP, ESMF or UGRID.  
+                        The ESMF and UGRID file types are only available for 
                         the unstructured grid. The default option is SCRIP.
 
     -t                - an optional argument specifying the file types for 
@@ -246,6 +250,15 @@ where
 			An error message will be generated if this flag is
 			specified while the application is linked with a NetCDF 
 			library earlier	than 3.6.0.
+
+    --src_meshname    - this argument is required if the source grid type is
+                        UGRID. It defines the dummy variable name that has all the
+			topology information stored in its attributes.
+
+    --dst_meshname    - this argument is required if the destination grid type is
+                        UGRID. It defines the dummy variable name that has all the
+			topology information stored in its attributes.
+
 \end{verbatim}
 
 
