@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.139 2011/07/19 16:48:37 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.140 2011/11/29 06:15:07 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -647,6 +647,22 @@
 
 
 !------------------------------------------------------------------------------
+!
+  type ESMF_FileFormat_Flag
+  sequence
+ ! private
+    integer :: fileformat
+  end type
+
+  type(ESMF_FileFormat_Flag), parameter :: &
+        ESMF_FILEFORMAT_VTK = ESMF_FileFormat_Flag(1), &
+        ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
+        ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
+        ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
+        ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5)
+
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -771,8 +787,12 @@
 
       public ESMF_PointerPrint
 
-       public ESMF_UnmappedAction_Flag, ESMF_UNMAPPEDACTION_ERROR, &
+      public ESMF_UnmappedAction_Flag, ESMF_UNMAPPEDACTION_ERROR, &
                                    ESMF_UNMAPPEDACTION_IGNORE
+
+      public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
+		 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
+    	 	ESMF_FILEFORMAT_UGRID
 
       
 !  Overloaded = operator functions
@@ -799,6 +819,7 @@ interface operator (==)
   module procedure ESMF_unmappedactioneq
   module procedure ESMF_ioeq
   module procedure ESMF_RegridPoleEq
+  module procedure ESMF_FileFormatEq
 end interface
 
 interface operator (/=)
@@ -812,6 +833,7 @@ interface operator (/=)
   module procedure ESMF_frne
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
+  module procedure ESMF_FileFormatNe
 end interface
 
 interface assignment (=)
@@ -1218,5 +1240,49 @@ function ESMF_RegridPoleNe(rp1, rp2)
 
  ESMF_RegridPoleNe = (rp1%polemethod /= rp2%polemethod)
 end function
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatEq"
+function ESMF_FileFormatEq(FileFormat1, FileFormat2)
+
+! !RETURN VALUE:
+      logical :: ESMF_FileFormatEq
+
+! !ARGUMENTS:
+
+      type (ESMF_FileFormat_Flag), intent(in) :: &
+         FileFormat1,      &! Two igrid statuses to compare for
+         FileFormat2        ! equality
+
+      ESMF_FileFormatEq = (FileFormat1%fileformat == &
+                              FileFormat2%fileformat)
+
+end function ESMF_FileFormatEq
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FileFormatNe"
+ function ESMF_FileFormatNe(FileFormat1, FileFormat2)
+
+! !RETURN VALUE:
+      logical :: ESMF_FileFormatNe
+
+! !ARGUMENTS:
+
+      type (ESMF_FileFormat_Flag), intent(in) :: &
+         FileFormat1,      &! Two FileFormatType Statuses to compare for
+         FileFormat2        ! inequality
+
+
+      ESMF_FileFormatNe = (FileFormat1%fileformat /= &
+                                 FileFormat2%fileformat)
+
+end function ESMF_FileFormatNe
+
+
+
+!------------------------------------------------------------------------------
+
+
 
       end module ESMF_UtilTypesMod
