@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.1 2011/11/29 06:03:25 peggyli Exp $
+! $Id: ESMF_IOUGrid.F90,v 1.2 2011/11/29 17:27:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -241,7 +241,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
     integer :: dimIds(1), nodeDim
     character(len=256):: errmsg, nodeCoordString, nodeCoordNames(2), elmtConnName
 
- #ifdef ESMF_NETCDF
+#ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
