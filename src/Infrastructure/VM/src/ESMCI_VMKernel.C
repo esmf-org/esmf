@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.28 2011/11/28 15:30:29 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.29 2011/11/29 16:42:04 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -33,6 +33,7 @@
 #include <unistd.h>
 #else
 #include <windows.h>
+typedef int socklen_t;
 #endif
 
 // On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
@@ -5192,8 +5193,13 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     // make socket non-blocking
+#if !defined (ESMF_OS_MinGW)
     int sockFlags = fcntl(sock, F_GETFL);
     fcntl(sock, F_SETFL, sockFlags | O_NONBLOCK);   // Add non-blocking flag
+#else
+    unsigned long nbio_on = 1;
+    ioctlsocket (sock, FIONBIO, &nbio_on);  // Set non-blocking flag
+#endif
     // accept incoming connection from client -> but limit to time out
     double t0, t1;
     VMK::wtime(&t0);
@@ -5208,7 +5214,11 @@ namespace ESMCI {
     fprintf(stderr, "socketServerInit waited: %g\n", t1-t0);
     
     // close the original socket
+#if !defined (ESMF_OS_MinGW)
     if (close(sock) < 0){
+#else
+    if (closesocket(sock) < 0) {
+#endif
       perror("socketServerInit: close()");
       return SOCKERR_UNSPEC;  // bail out
     }
@@ -5263,8 +5273,13 @@ namespace ESMCI {
     }
     
     // make socket non-blocking
+#if !defined (ESMF_OS_MinGW)
     int sockFlags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, sockFlags | O_NONBLOCK); // Set non-blocking flag
+#else
+    unsigned long nbio_on = 1;
+    ioctlsocket (sock, FIONBIO, &nbio_on); // Set non-blocking flag
+#endif
 
     // start timing
     double t0, t1;
@@ -5277,14 +5292,20 @@ namespace ESMCI {
       // try to open connection 
       if (connect(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
         // connection has not (yet) been established
+#if !defined (ESMF_OS_MinGW)
         if (errno==ECONNABORTED){
           // on some systems, e.g. linux, repeated call to connect may give this
           perror("socketClientInit connect(), but continue");
           VMK::wtime(&t1);  // update the endtime
           continue;         // next attempt
         }
+#endif
         // check for unexpected error conditions and bail
+#if !defined (ESMF_OS_MinGW)
         if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK){
+#else
+        if (errno!=WSAEINPROGRESS && errno!=WSAEALREADY && errno!=WSAEWOULDBLOCK) {
+#endif
           perror("socketClientInit: connect()");
           return SOCKERR_UNSPEC;  // bail out
         }
@@ -5301,7 +5322,11 @@ namespace ESMCI {
           // look at SO_ERROR to determine success or failure to connect
           int error;
           socklen_t len = sizeof(error);
+#if !defined (ESMF_OS_MinGW)
           if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0){
+#else
+          if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (char *)&error, &len) < 0) {
+#endif
             perror("socketClientInit: getsockopt()");
             return SOCKERR_UNSPEC;  // bail out
           }
@@ -5312,7 +5337,11 @@ namespace ESMCI {
             // successful connection was made
             connected = true;
             break;
+#if !defined (ESMF_OS_MinGW)
           }else if (error!=ECONNREFUSED){
+#else
+          } else if (error != WSAECONNREFUSED) {
+#endif
             // bail if this wasn't just a straight refusal due to absent server
             fprintf(stderr, "socketClientInit: getsockopt() error and bail: "
               "%s\n", strerror(error));
@@ -5331,14 +5360,23 @@ namespace ESMCI {
       VMK::wtime(&t1);
     }
     // reset socket to be blocking
+#if !defined (ESMF_OS_MinGW)
     sockFlags = fcntl(sock, F_GETFL, 0);
     fcntl(sock, F_SETFL, sockFlags & (~O_NONBLOCK));
+#else
+    unsigned long nbio_off = 0;
+    ioctlsocket (sock, FIONBIO, &nbio_off);
+#endif
     
     fprintf(stderr, "socketClientInit waited: %g\n", t1-t0);    
 
     if (!connected){
       fprintf(stderr, "socketClientInit: TIMEOUT!\n");
+#if !defined (ESMF_OS_MinGW)
       close(sock);
+#else
+      closesocket (sock);
+#endif
       return SOCKERR_TIMEOUT;
     }
     
@@ -5413,7 +5451,11 @@ namespace ESMCI {
     
 
     // close the socket
+#if !defined (ESMF_OS_MinGW)
     if (close(sock) < 0){
+#else
+    if (closesocket (sock) < 0) {
+#endif
       perror("socketFinal: close()");
       return SOCKERR_UNSPEC;  // bail out
     }
@@ -5455,7 +5497,11 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     if (FD_ISSET(sock, &sendfds)){
+#if !defined (ESMF_OS_MinGW)
       if ((len=send(sock, buffer, size, 0)) < 0){
+#else
+      if ((len=send(sock, (char *)buffer, size, 0)) < 0) {
+#endif
         perror("socketSend: send()");
         return SOCKERR_UNSPEC;  // bail out
       }
@@ -5507,7 +5553,11 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     if (FD_ISSET(sock, &recvfds)){
+#if !defined (ESMF_OS_MinGW)
       if ((len=recv(sock, buffer, size, 0)) < 0){
+#else
+      if ((len=recv(sock, (char *) buffer, size, 0)) < 0) {
+#endif
         perror("socketRecv: recv()");
         return SOCKERR_UNSPEC;  // bail out
       }
