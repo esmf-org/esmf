@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.81 2011/09/29 21:57:23 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.82 2011/11/29 06:13:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.81 2011/09/29 21:57:23 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.82 2011/11/29 06:13:31 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -50,6 +50,7 @@ module ESMF_MeshMod
   use ESMF_RHandleMod
   use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
   use ESMF_IOScripMod
+  use ESMF_IOUGridMod
  
   implicit none
 
@@ -120,18 +121,6 @@ module ESMF_MeshMod
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2)
 
-  type ESMF_FileFormat_Flag
-  sequence
- ! private
-    integer :: fileformat
-  end type
-
-  type(ESMF_FileFormat_Flag), parameter :: &
-        ESMF_FILEFORMAT_VTK = ESMF_FileFormat_Flag(1), &
-        ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
-        ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
-        ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4)
-
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -142,10 +131,6 @@ module ESMF_MeshMod
   public ESMF_Mesh               
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
          ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
-  
-  public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
-	 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID
-    
   public ESMF_MeshLoc
   public ESMF_MESHLOC_NODE, ESMF_MESHLOC_ELEMENT
 
@@ -185,7 +170,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.81 2011/09/29 21:57:23 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.82 2011/11/29 06:13:31 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -199,39 +184,6 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateFromPointer
      module procedure ESMF_MeshCreateFromFile
    end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_FileFormatEqual
-
-! !DESCRIPTION:
-!     This interface overloads the equality operator for the specific
-!     ESMF GridFileFormatType.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (/=)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_FileFormatNotEqual
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF GridFileFormatType.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -1002,7 +954,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, filetypeflag, convert3D, &
-                 convertToDual, rc)
+                 convertToDual, meshname, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1012,6 +964,7 @@ contains
     type(ESMF_FileFormat_Flag), intent(in)            :: filetypeflag
     logical,                    intent(in),  optional :: convert3D
     logical,                    intent(in),  optional :: convertToDual
+    character(len=*),           intent(in),  optional :: meshname
     integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -1026,14 +979,17 @@ contains
 !   \item[filetypeflag] 
 !         The file type of the grid file to be read, please see Section~\ref{const:fileformat}
 !         for a list of valid options. 
-!   \item[convert3D] 
+!   \item[{[convert3D]}] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
-!   \item[convertToDual] 
+!   \item[{[convertToDual]}] 
 !         if TRUE, the mesh will be converted to its dual. If not specified,
 !         defaults to true. Converting to dual is not supported with
 !         file type {\tt ESMF\_FILEFORMAT\_ESMFMESH}, so when using that file type
 !         this parameter has no effect.
+!   \item[{[meshname]}]
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1058,18 +1014,24 @@ contains
     endif
 
 
-    if (filetypeflag .eq. ESMF_FILEFORMAT_SCRIP) then
+    if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
           localConvertToDual, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (filetypeflag .eq. ESMF_FILEFORMAT_ESMFMESH) then
-	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, localConvert3D, localrc)
+    elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
+	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+	   localConvert3D, filetype=filetypeflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+	   localConvert3D, filetype=filetypeflag, meshname = meshname, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-                 msg="- the filetypeflag has to be either ESMF_FILEFORMAT_ESMFMESH or ESMF_FILEFORMAT_SCRIP", & 
+                 msg="- unrecognized filetypeflag", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
@@ -1098,7 +1060,7 @@ end function ESMF_MeshCreateFromFile
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, convert3D, rc)
+    function ESMF_MeshCreateFromUnstruct(filename, convert3D, filetype, meshname, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1106,6 +1068,8 @@ end function ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
     logical, intent(in)                       :: convert3D
+    type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
+    character(len=*), optional, intent(in)    :: meshname
     integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
@@ -1117,6 +1081,11 @@ end function ESMF_MeshCreateFromFile
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
+!   \item [{[filetype]}]
+!         The type of grid file
+!   \item[{[meshname]}]
+!         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+!         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1162,11 +1131,26 @@ end function ESMF_MeshCreateFromFile
     integer                             :: spatialDim
     integer                             :: parametricDim
     integer                             :: lni,ti
-
+    type(ESMF_FileFormat_Flag)          :: filetypelocal
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Read the mesh definition from the file
+    if (present(filetype)) then
+	filetypelocal = filetype
+    else
+	filetypelocal = ESMF_FILEFORMAT_ESMFMESH
+    endif
+
+    if (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+	if (.not. present(meshname)) then
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+                             msg="- meshname argument is missing", & 
+                             ESMF_CONTEXT, rcToReturn=rc) 
+        endif
+    endif
 
     ! get global vm information
     !
@@ -1179,11 +1163,22 @@ end function ESMF_MeshCreateFromFile
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! Read the mesh definition from the file
-    call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
-	startElmt, convertToDeg=.true., rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+    if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
+       call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+                                 startElmt, convertToDeg=.TRUE., rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+    elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+       call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
+                                   elmtNum, startElmt, convertToDeg=.TRUE., rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
+                             msg="- unrecognized filetype", & 
+                             ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
 
     ! Total number of nodes for the global mesh
     NodeCnt = ubound (nodeCoords, 2)
@@ -1314,8 +1309,6 @@ end function ESMF_MeshCreateFromFile
       myStartElmt = myStartElmt+localElmTable(i)
     end do
     deallocate(localElmTable)
-
-    ! print *, PetNo, ' My start cell and total local ', myStartElmt, TotalElements, TotalConnects
 
     ! allocate element arrays for the local elements
     allocate (ElemId(TotalElements))
@@ -1538,7 +1531,8 @@ end function ESMF_MeshCreateFromUnstruct
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     call ESMF_VMBarrier(vm)
-    ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,convert3D, rc=localrc)
+    ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,&
+	convert3D, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
@@ -3051,75 +3045,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if  (present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_MeshMergeSplitDstInd
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FileFormatEqual"
-!BOPI
-! !IROUTINE: ESMF_FileFormatEqual - Equality of FileFormats
-!
-! !INTERFACE:
-      function ESMF_FileFormatEqual(FileFormat1, FileFormat2)
-
-! !RETURN VALUE:
-      logical :: ESMF_FileFormatEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_FileFormat_Flag), intent(in) :: &
-         FileFormat1,      &! Two igrid statuses to compare for
-         FileFormat2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF_FileFormat_Flag statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[FileFormat1, FileFormat2]
-!          Two igrid statuses to compare for equality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_FileFormatEqual = (FileFormat1%fileformat == &
-                              FileFormat2%fileformat)
-
-      end function ESMF_FileFormatEqual
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FileFormatNotEqual"
-!BOPI
-! !IROUTINE: ESMF_FileFormatNotEqual - Non-equality of FileFormats
-!
-! !INTERFACE:
-      function ESMF_FileFormatNotEqual(FileFormat1, FileFormat2)
-
-! !RETURN VALUE:
-      logical :: ESMF_FileFormatNotEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_FileFormat_Flag), intent(in) :: &
-         FileFormat1,      &! Two FileFormatType Statuses to compare for
-         FileFormat2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF_FileFormat_Flag statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[FileFormat1, FileFormat2]
-!          Two statuses of FileFormats to compare for inequality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_FileFormatNotEqual = (FileFormat1%fileformat /= &
-                                 FileFormat2%fileformat)
-
-      end function ESMF_FileFormatNotEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
