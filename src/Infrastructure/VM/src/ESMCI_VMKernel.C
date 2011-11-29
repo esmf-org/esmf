@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.31 2011/11/29 19:30:51 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.32 2011/11/29 19:47:46 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -5141,7 +5141,7 @@ namespace ESMCI {
 #include <Windows.h>
 #include <Winsock.h>
 typedef int socklen_t;
-#define ESMF_NO_SOCKOPT
+// #define ESMF_NO_SOCKOPT
 #define EALREADY WSAEALREADY
 #define ECONNREFUSED WSAECONNREFUSED
 #define EINPROGRESS WSAEINPROGRESS
@@ -5197,7 +5197,11 @@ namespace ESMCI {
 #ifndef ESMF_NO_SOCKOPT
     // allow immediate address + port reuse in bind
     int value = 1;
+#if !defined (ESMF_OS_MinGW)
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) < 0){
+#else
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*) &value, sizeof(value)) < 0) {
+#endif
       perror("socketServerInit: setsockopt()");
       return SOCKERR_UNSPEC;  // bail out
     }
