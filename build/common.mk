@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.353 2011/11/28 22:05:14 theurich Exp $
+#  $Id: common.mk,v 1.354 2011/11/29 21:39:48 w6ws Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3096,11 +3096,9 @@ shared:
 #-------------------------------------------------------------------------------
 defer:
 ifeq ($(ESMF_OS),MinGW)
-ifeq ($(ESMF_COMPILER),gfortran)
 	cd $(ESMF_OBJDIR) ; \
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(ESMFLIB) \
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)`$(ESMF_DIR)/scripts/path_mingw2win $(ESMFLIB)` \
 		$(notdir $(wildcard $(ESMF_OBJDIR)/*.o))
-endif
 else
 	cd $(ESMF_OBJDIR) ; \
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMFLIB) \
