@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.47 2011/11/29 06:20:28 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.48 2011/11/30 18:29:22 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -26,7 +26,10 @@ two grid files and outputs weights for interpolation
 between the two grids. The input and output files are all in NetCDF format. The grid files can be defined in three
 different formats:  the SCRIP format~\ref{sec:scripgridformat} as is used as an input to SCRIP~\cite{ref:SCRIP}, 
 the ESMF unstructured grid format~\ref{sec:example:UnstructFromFile} or the proposed CF unstructured grid 
-\htmladdnormallink{(UGRID)}{http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model}. The weight file is the same format~\ref{sec:weightfileformat} as is 
+\htmladdnormallink{(UGRID)}{http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model}. 
+Currently, we only support the \htmladdnormallink{(2D flexible mesh topology)}{http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model#DeltaresCFproposalforUnstructuredGriddatamodel-2Dflexiblemesh(mixedtriangles%2Cquadrilaterals%2Cetc.)topology.}. with mixed triangles, quadrilaterals, etc. 
+
+The weight file is the same format~\ref{sec:weightfileformat} as is 
 output by SCRIP. The interpolation weights can be generated with
 the bilinear, patch, or first order conservative methods decribed below. Masking is supported for 2D logically rectangular (i.e. with grid\_rank=2) grids in the SCRIP format. This application 
 can do regrid weight generation from a global or regional source grid to a global or regional destination grid.
