@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.1 2011/11/30 05:17:48 theurich Exp $
+# $Id: build_rules.mk,v 1.2 2011/11/30 22:23:30 theurich Exp $
 #
-# Unicos.pgi.default
+# Unicos.pathscale.default
 #
 
 ############################################################
