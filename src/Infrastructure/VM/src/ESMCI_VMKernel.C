@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.34 2011/11/30 01:12:22 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.35 2011/11/30 01:17:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -5287,7 +5287,7 @@ namespace ESMCI {
     struct sockaddr_in name;
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
-    name.sin_addr = *(struct in_addr *)(server->h_addr);
+    name.sin_addr = *(struct in_addr *)(server->h_addr_list[0]);
 
     // create an inet/stream socket
     int sock = socket(PF_INET, SOCK_STREAM, 0);
