@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.33 2011/11/29 23:02:41 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.34 2011/11/30 01:12:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -5562,7 +5562,7 @@ namespace ESMCI {
       return SOCKERR_UNSPEC;  // bail out
     }
     if (FD_ISSET(sock, &recvfds)){
-      if ((len=recv(sock, (value_ptr_t)&buffer, size, 0)) < 0){
+      if ((len=recv(sock, (value_ptr_t)buffer, size, 0)) < 0){
         perror("socketRecv: recv()");
         return SOCKERR_UNSPEC;  // bail out
       }
