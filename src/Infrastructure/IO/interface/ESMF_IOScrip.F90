@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.37 2011/11/30 00:14:07 theurich Exp $
+! $Id: ESMF_IOScrip.F90,v 1.38 2011/11/30 21:26:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -30,6 +30,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod   
+      use ESMF_UtilMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
@@ -259,7 +260,7 @@ subroutine ESMF_ScripInqUnits(filename, units, rc)
     ! if len != 7, something is wrong, check the value.  If it starts 
     ! with Degrees/degrees/Radians/radians, ignore the garbage after the
     ! word.  Otherwise, return the whole thing
-    call ESMF_StringLowerCase(buffer(1:len))
+    call ESMF_StringLowerCase(buffer(1:len), rc=rc)
     if ((len > 7) .and. (buffer(1:7) .eq. 'degrees' .or.  &
       buffer(1:7) .eq. 'radians')) then
       units = buffer(1:7)
@@ -349,7 +350,7 @@ end subroutine ESMF_ScripInqUnits
         errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
-      call ESMF_StringLowerCase(units(1:len))
+      call ESMF_StringLowerCase(units(1:len), rc=rc)
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -394,7 +395,7 @@ end subroutine ESMF_ScripInqUnits
 	errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
-      call ESMF_StringLowerCase(units(1:len))
+      call ESMF_StringLowerCase(units(1:len), rc=rc)
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -457,7 +458,7 @@ end subroutine ESMF_ScripInqUnits
 	errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
-      call ESMF_StringLowerCase(units(1:len))
+      call ESMF_StringLowerCase(units(1:len), rc=rc)
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -502,7 +503,7 @@ end subroutine ESMF_ScripInqUnits
         errmsg,&
         rc)) return
       ! if units is not "degrees" or "radians" return errors
-      call ESMF_StringLowerCase(units(1:len))
+      call ESMF_StringLowerCase(units(1:len), rc=rc)
       if (units(1:7) .ne. 'degrees' .and. units(1:7) .ne. 'radians') then
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
@@ -2051,7 +2052,7 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
     ! if len != 7, something is wrong, check the value.  If it starts 
     ! with Degrees/degrees/Radians/radians, ignore the garbage after the
     ! word.  Otherwise, return the whole thing
-    call ESMF_StringLowerCase(buffer(1:len))
+    call ESMF_StringLowerCase(buffer(1:len), rc=rc)
     if ((len > 7) .and. (buffer(1:7) .eq. 'degrees' .or.  &
       buffer(1:7) .eq. 'radians')) then
       units = buffer(1:7)
@@ -2176,7 +2177,7 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     ! if len != 7, something is wrong, check the value.  If it starts 
     ! with Degrees/degrees/Radians/radians, ignore the garbage after the
     ! word.  Otherwise, return the whole thing
-    call ESMF_StringLowerCase(units(1:len))
+    call ESMF_StringLowerCase(units(1:len), rc=rc)
     if ((len > 7) .and. (units(1:7) .ne. 'degrees' .and. &
       units(1:7) .ne. 'radians')) then
        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
