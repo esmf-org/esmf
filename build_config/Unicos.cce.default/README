@@ -1,0 +1,5 @@
+Settings for Unicos/lc on Cray XT, using the Cray Compiler Environment (CCE) suite.
+
+Requires the following environment settings:
+
+ESMF_COMPILER cce
