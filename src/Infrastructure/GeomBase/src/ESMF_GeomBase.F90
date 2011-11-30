@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.19 2011/06/30 13:44:20 feiliu Exp $
+! $Id: ESMF_GeomBase.F90,v 1.20 2011/11/30 00:15:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,23 +33,14 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod   
-      use ESMF_BaseMod          ! ESMF base class
-      use ESMF_LogErrMod
-      use ESMF_ArrayMod
-      use ESMF_LocalArrayMod    ! ESMF local array class
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
-      use ESMF_VMMod
-      use ESMF_DELayoutMod
       use ESMF_StaggerLocMod
       use ESMF_DistGridMod
-      use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
-      use ESMF_ArraySpecMod
       use ESMF_GridMod
       use ESMF_MeshMod
       use ESMF_LocStreamMod
       use ESMF_XGridMod
-      use ESMF_XGridCreateMod
       use ESMF_XGridGetMod
 
 !     NEED TO ADD MORE HERE
@@ -156,7 +147,7 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.19 2011/06/30 13:44:20 feiliu Exp $'
+      '$Id: ESMF_GeomBase.F90,v 1.20 2011/11/30 00:15:10 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -246,7 +237,7 @@ end interface
        integer,               intent(in),  optional :: gridToFieldMap(:)
        integer,               intent(in),  optional :: ungriddedLBound(:)
        integer,               intent(in),  optional :: ungriddedUBound(:)
-       type(ESMF_DIstGrid),   intent(out), optional :: distgrid
+       type(ESMF_DistGrid),   intent(out), optional :: distgrid
        integer,               intent(out)           :: distgridToArrayMap(:)
        integer,               intent(out)           :: undistLBound(:)
        integer,               intent(out)           :: undistUBound(:)
@@ -1637,7 +1628,6 @@ end module ESMF_GeomBaseMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_geombasecollectgarbage()"
     use ESMF_UtilTypesMod
-    use ESMF_BaseMod
     use ESMF_LogErrMod
     use ESMF_GeomBaseMod
 

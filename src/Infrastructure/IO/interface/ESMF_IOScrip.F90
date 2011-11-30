@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.36 2011/11/29 06:06:37 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.37 2011/11/30 00:14:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -30,7 +30,6 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_UtilTypesMod   
-      use ESMF_UtilMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
       use ESMF_VMMod
