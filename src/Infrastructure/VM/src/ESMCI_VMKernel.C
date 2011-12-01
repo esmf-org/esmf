@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.35 2011/11/30 01:17:19 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.36 2011/12/01 22:41:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -5161,8 +5161,8 @@ typedef void* value_ptr_t;
 
 #include <errno.h>
 
-#define SERVER "fudge"    // happens to be where I run the server side right now
-#define PORT 54320        // just a random port for prototype testing
+#define SERVERFILE "server.txt"   // file containing server name
+#define PORT 54320                // a random port for prototype testing
 
 // LogErr
 #include "ESMCI_LogErr.h"
@@ -5278,7 +5278,7 @@ namespace ESMCI {
     
     fprintf(stderr, "Hi there from socketClientInit()\n");
 
-    // construct the server address (here just use SERVER macro)
+    // construct the server address
     struct hostent *server = gethostbyname(serverName);
     if (server == NULL){
       perror("socketClientInit: gethostbyname()");
@@ -5325,7 +5325,8 @@ namespace ESMCI {
         }
 #endif
         // check for unexpected error conditions and bail
-        if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK){
+        if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK
+          && errno!=ECONNREFUSED){
           perror("socketClientInit: connect()");
           return SOCKERR_UNSPEC;  // bail out
         }
@@ -5729,8 +5730,20 @@ namespace ESMCI {
     
     fprintf(stderr, "Hi there from socketClient()\n");
     
+    FILE *fp = fopen(SERVERFILE, "r");
+    if (fp == NULL){
+      fprintf(stderr, "socketClient: failed opening SERVERFILE\n");
+      return -1;  // bail out
+    }
+    
+    char serverName[80];
+    fscanf(fp, "%s", serverName);
+    fclose(fp);
+    
+    fprintf(stderr, "socketClient: connecting to server: %s\n", serverName);
+    
     // attempt to open an connect a client socket
-    int sock = socketClientInit(SERVER, PORT, 60.);
+    int sock = socketClientInit(serverName, PORT, 60.);
     if (sock <= SOCKERR_UNSPEC){
       fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
       return 0;  // bail out, but don't indicate abort
@@ -5760,7 +5773,7 @@ namespace ESMCI {
     }
     
     // attempt to reconnect with server (while it isn't up)
-    sock = socketClientInit(SERVER, PORT, 10.);
+    sock = socketClientInit(serverName, PORT, 10.);
     if (sock <= SOCKERR_UNSPEC){
       fprintf(stderr, "socketClient: socketClientInit() failed to connect"
         " - expected\n");
@@ -5772,7 +5785,7 @@ namespace ESMCI {
     VMK::wtimedelay(20.);
     
     // attempt to reconnect with server (now it should be there)
-    sock = socketClientInit(SERVER, PORT, 10.);
+    sock = socketClientInit(serverName, PORT, 10.);
     if (sock <= SOCKERR_UNSPEC){
       fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
       return 0;  // bail out, but don't indicate abort
@@ -5794,7 +5807,7 @@ namespace ESMCI {
     }
     
     // attempt to reconnect with server
-    sock = socketClientInit(SERVER, PORT, 20.);
+    sock = socketClientInit(serverName, PORT, 20.);
     if (sock <= SOCKERR_UNSPEC){
       fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
       return 0;  // bail out, but don't indicate abort
@@ -5822,7 +5835,7 @@ namespace ESMCI {
         fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
       }
       // attempt to reconnect with server
-      sock = socketClientInit(SERVER, PORT, 20.);
+      sock = socketClientInit(serverName, PORT, 20.);
       if (sock <= SOCKERR_UNSPEC){
         fprintf(stderr, "socketClient: socketClientInit() failed to connect\n");
       }

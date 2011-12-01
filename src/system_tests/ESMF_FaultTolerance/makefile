@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2011/12/01 18:58:25 theurich Exp $ 
+# $Id: makefile,v 1.2 2011/12/01 22:41:41 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -33,23 +33,27 @@ CLOBBERDIRS =
 
 
 RUN_FaultTolerance:
+	cp -f server.txt $(ESMF_TESTDIR)
 	$(MAKE) TNAME=FaultTolerance NP=4 stest &
 	sleep 2
 	$(MAKE) TNAME=FaultToleranceCompA NP=2 stest
 
 RUN_FaultToleranceTV:
-	mpirun -tv -np 4 /mochahome/gerhard/WorkNASA/Projects/Support_ESMF/ESMF.devel/test/testg/Linux.gfortran.32.mpich.default/ESMF_FaultToleranceSTest &
+	cp -f server.txt $(ESMF_TESTDIR)
+	mpirun -tv -np 4 $(ESMF_TESTDIR)/ESMF_FaultToleranceSTest &
 	sleep 25
 	$(MAKE) TNAME=FaultToleranceCompA NP=2 stest 
 
 
 RUN_FaultToleranceSingle:
+	cp -f server.txt $(ESMF_TESTDIR)
 	$(MAKE) TNAME=FaultTolerance NP=4 stest &
 
 
 RUN_FaultToleranceMochaFudge:
+	cp -f server.txt $(ESMF_TESTDIR)
 	$(MAKE) TNAME=FaultTolerance NP=4 stest &
 	sleep 2
-	ssh fudge "cd /mochahome/gerhard/WorkNASA/Projects/Support_ESMF/ESMF.devel/src/system_tests/ESMF_FaultTolerance; /opt/GCC/4.5.2/mpich/1.2.7.1gjt/bin/mpirun -np 2 /mochahome/gerhard/WorkNASA/Projects/Support_ESMF/ESMF.devel/test/testg/Linux.gfortran.32.mpich.default/ESMF_FaultToleranceCompASTest >& /mochahome/gerhard/WorkNASA/Projects/Support_ESMF/ESMF.devel/test/testg/Linux.gfortran.32.mpich.default/ESMF_FaultToleranceCompASTest.stdout"
-	cat PET*.Log > /mochahome/gerhard/WorkNASA/Projects/Support_ESMF/ESMF.devel/test/testg/Linux.gfortran.32.mpich.default/ESMF_FaultToleranceCompASTest.Log
+	ssh fudge "cd /mochahome/gerhard/WorkNASA/Projects/Support_ESMF/ESMF.devel/src/system_tests/ESMF_FaultTolerance; /opt/GCC/4.5.2/mpich/1.2.7.1gjt/bin/mpirun -np 2 $(ESMF_TESTDIR)/ESMF_FaultToleranceCompASTest >& $(ESMF_TESTDIR)/ESMF_FaultToleranceCompASTest.stdout"
+	cat PET*.Log > $(ESMF_TESTDIR)/ESMF_FaultToleranceCompASTest.Log
 	rm PET*.Log
