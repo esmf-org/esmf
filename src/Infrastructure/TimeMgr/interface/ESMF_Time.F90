@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.135 2011/11/16 17:04:43 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.136 2011/12/05 19:20:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.135 2011/11/16 17:04:43 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.136 2011/12/05 19:20:36 w6ws Exp $'
 
 !==============================================================================
 !
@@ -687,9 +687,9 @@
 !     \item[{[dd]}]
 !          Integer day of the month.
 !     \item[{[d]}]
-!          Integer Julian-day, or Modified Julian-day (>= 32-bit).
+!          Integer Julian date, or Modified Julian date (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian-day, or Modified Julian-day (large, >= 64-bit).
+!          Integer Julian date, or Modified Julian date (large, >= 64-bit).
 !     \item[{[h]}]
 !          Integer hour.
 !     \item[{[m]}]
@@ -1140,7 +1140,7 @@
 !     For Gregorian, Julian, and No-Leap calendars, mm is [1-12] and dd is
 !     [1-28,29,30, or 31], depending on the value of mm and whether yy or
 !     yy\_i8 is a leap year.  For the 360-day calendar, mm is [1-12] and dd is
-!     [1-30].  For the Julian-day, Modified Julian-day, and No-calendar,
+!     [1-30].  For Julian Day, Modified Julian Day, and No-calendar,
 !     yy, yy\_i8, mm, and dd are invalid inputs, since these calendars do not
 !     define them.  When valid, the yy and yy\_i8 arguments should be fully
 !     specified, e.g. 2003 instead of 03.  yy and yy\_i8 ranges are only
@@ -1154,18 +1154,18 @@
 !     Julian date-to-Julian day algorithm.  The Custom calendar will have
 !     user-defined values for yy, yy\_i8, mm, and dd.
 !
-!     The Julian-day specifier, d or d\_i8, can only be used with the
-!     Julian-day and Modified Julian-day calendars, and has a valid range
+!     The Julian date specifier, d or d\_i8, can only be used with the
+!     Julian Day and Modified Julian Day calendars, and has a valid range
 !     depending on the word size.  For a signed 32-bit d, the range for
-!     Julian-day is [+/- 24855].  For a signed 64-bit d or d\_i8, the valid
-!     range for Julian-day is [+/- 106,751,991,167,300].  The Julian-day
+!     Julian date is [+/- 24855].  For a signed 64-bit d or d\_i8, the valid
+!     range for Julian date is [+/- 106,751,991,167,300].  The Julian date
 !     number system adheres to the conventional standard where the reference
 !     day of d=0 corresponds to 11/24/-4713 in the proleptic Gregorian calendar
 !     and 1/1/-4712 in the proleptic Julian calendar.  See~\cite{Meyer2} and
 !     ~\cite{JDNcalculator}.
 !
-!     The Modified Julian-Day, introduced by space scientists in the late
-!     1950's, is defined as Julian-day - 2400000.5.  See~\cite{MJD}.
+!     The Modified Julian date system, introduced by space scientists in the late
+!     1950's, is defined as Julian Day - 2400000.5.  See~\cite{MJD}.
 !
 !     Note that d and d\_i8 are not valid for the No-Calendar.  To remain
 !     consistent with non-Earth calendars added to ESMF in the future, ESMF
@@ -1199,10 +1199,11 @@
 !     \item[{[dd]}]
 !          Integer day of the month.  Default = 1
 !     \item[{[d]}]
-!          Integer Julian-day, or Modified Julian-day (>= 32-bit).  Default = 0
+!          Integer Julian Day, or Modified Julian Day (>= 32-bit).  Must not be
+!          specified with Gregorian calendars.  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian-day, or Modified Julian-day (large, >= 64-bit).
-!          Default = 0
+!          Integer Julian Day, or Modified Julian Day (large, >= 64-bit).  Must not be
+!          specified with Gregorian calendars.  Default = 0
 !     \item[{[h]}]
 !          Integer hour.  Default = 0
 !     \item[{[m]}]

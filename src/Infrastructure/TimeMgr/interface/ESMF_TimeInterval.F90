@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.125 2011/09/01 19:13:06 rokuingh Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.126 2011/12/05 19:20:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.125 2011/09/01 19:13:06 rokuingh Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.126 2011/12/05 19:20:36 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1065,54 +1065,54 @@
 !     \item[timeinterval]
 !          The object instance to query.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).
+!          Integer year (>= 32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).
+!          Integer year (large, >= 64-bit).
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).
+!          Integer month (>= 32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).
+!          Integer month (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).
+!          Integer Julian Day, or Modified Julian Day (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian Day, or Modified Julian Day (large, >= 64-bit).
 !     \item[{[h]}]
-!          Integer hours.
+!          Integer hour.
 !     \item[{[m]}]
-!          Integer minutes.
+!          Integer minute.
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).
+!          Integer second (>= 32-bit).
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
+!          Integer second (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer millisecond.
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microsecond.
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanosecond.
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision day.
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hour.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minute.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision second.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision millisecond.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microsecond.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanosecond.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
@@ -1295,54 +1295,54 @@
 !          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
 !          previously set.  Mutually exclusive with endTimeIn and calendarIn.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).
+!          Integer year (>= 32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).
+!          Integer year (large, >= 64-bit).
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).
+!          Integer month (>= 32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).
+!          Integer month (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).
+!          Integer Julian, or Modified Julian, day (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !     \item[{[h]}]
-!          Integer hours.
+!          Integer hour.
 !     \item[{[m]}]
-!          Integer minutes.
+!          Integer minute.
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).
+!          Integer second (>= 32-bit).
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
+!          Integer second (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer millisecond.
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microsecond.
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanosecond.
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision day.
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hour.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minute.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision second.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision millisecond.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microsecond.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanosecond.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
@@ -1530,54 +1530,54 @@
 !          mutually exclusive with, calkindflagIn below.  Primarily for
 !          specifying a custom calendar kind.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).
+!          Integer year (>= 32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).
+!          Integer year (large, >= 64-bit).
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).
+!          Integer month (>= 32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).
+!          Integer month (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).
+!          Integer Julian, or Modified Julian, day (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !     \item[{[h]}]
-!          Integer hours.
+!          Integer hour.
 !     \item[{[m]}]
-!          Integer minutes.
+!          Integer minute.
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).
+!          Integer second (>= 32-bit).
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
+!          Integer second (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer millisecond.
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microsecond.
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanosecond.
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision day.
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hour.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minute.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision second.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision millisecond.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microsecond.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanosecond.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit). 
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit). 
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
@@ -1762,54 +1762,54 @@
 !          calendarIn above.  More convenient way of specifying a built-in
 !          calendar kind.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).
+!          Integer year (>= 32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).
+!          Integer year (large, >= 64-bit).
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).
+!          Integer month (>= 32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).
+!          Integer month (large, >= 64-bit).
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).
+!          Integer Julian, or Modified Julian, day (>= 32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !     \item[{[h]}]
-!          Integer hours.
+!          Integer hour.
 !     \item[{[m]}]
-!          Integer minutes.
+!          Integer minute.
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).
+!          Integer second (>= 32-bit).
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
+!          Integer second (large, >= 64-bit).
 !     \item[{[ms]}]
-!          Integer milliseconds.
+!          Integer millisecond.
 !     \item[{[us]}]
-!          Integer microseconds.
+!          Integer microsecond.
 !     \item[{[ns]}]
-!          Integer nanoseconds.
+!          Integer nanosecond.
 !     \item[{[d\_r8]}]
-!          Double precision days.
+!          Double precision day.
 !     \item[{[h\_r8]}]
-!          Double precision hours.
+!          Double precision hour.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.
+!          Double precision minute.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.
+!          Double precision second.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
+!          Double precision millisecond.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.
+!          Double precision microsecond.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
+!          Double precision nanosecond.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
@@ -2140,58 +2140,58 @@
 !     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).  Default = 0
+!          Integer year (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).  Default = 0
+!          Integer year (large, >= 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).  Default = 0
+!          Integer month (>= 32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).  Default = 0
+!          Integer month (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, day (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !          Default = 0
 !     \item[{[h]}]
-!          Integer hours.  Default = 0
+!          Integer hour.  Default = 0
 !     \item[{[m]}]
-!          Integer minutes.  Default = 0
+!          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).  Default = 0
+!          Integer second (>= 32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).  Default = 0
+!          Integer second (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0
+!          Integer millisecond.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0
+!          Integer microsecond.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0
+!          Integer nanosecond.  Default = 0
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.
+!          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.
+!          Double precision hour.  Default = 0.0.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.
+!          Double precision minute.  Default = 0.0.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.
+!          Double precision second.  Default = 0.0.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.
+!          Double precision millisecond.  Default = 0.0.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.
+!          Double precision microsecond.  Default = 0.0.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0.
+!          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !          Default = 0
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
@@ -2300,58 +2300,58 @@
 !          in time.  If not set, and calendar also not set, calendar interval 
 !          "floats" across all calendars and times.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).  Default = 0
+!          Integer year (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).  Default = 0
+!          Integer year (large, >= 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).  Default = 0
+!          Integer month (>= 32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).  Default = 0
+!          Integer month (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, day (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !          Default = 0
 !     \item[{[h]}]
-!          Integer hours.  Default = 0
+!          Integer hour.  Default = 0
 !     \item[{[m]}]
-!          Integer minutes.  Default = 0
+!          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).  Default = 0
+!          Integer second (>= 32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).  Default = 0
+!          Integer second (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0
+!          Integer millisecond.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0
+!          Integer microsecond.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0
+!          Integer nanosecond.  Default = 0
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.
+!          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.
+!          Double precision hour.  Default = 0.0.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.
+!          Double precision minute.  Default = 0.0.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.
+!          Double precision second.  Default = 0.0.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.
+!          Double precision millisecond.  Default = 0.0.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.
+!          Double precision microsecond.  Default = 0.0.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0.
+!          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !          Default = 0
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8).
+!          Integer denominator of fractional second (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
@@ -2467,58 +2467,58 @@
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
 !          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).  Default = 0
+!          Integer year (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).  Default = 0
+!          Integer year (large, >= 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).  Default = 0
+!          Integer month (>= 32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).  Default = 0
+!          Integer month (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, day (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !          Default = 0
 !     \item[{[h]}]
-!          Integer hours.  Default = 0
+!          Integer hour.  Default = 0
 !     \item[{[m]}]
-!          Integer minutes.  Default = 0
+!          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).  Default = 0
+!          Integer second (>= 32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).  Default = 0
+!          Integer second (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0
+!          Integer millisecond.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0
+!          Integer microsecond.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0
+!          Integer nanosecond.  Default = 0
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.
+!          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.
+!          Double precision hour.  Default = 0.0.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.
+!          Double precision minute.  Default = 0.0.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.
+!          Double precision second.  Default = 0.0.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.
+!          Double precision millisecond.  Default = 0.0.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.
+!          Double precision microsecond.  Default = 0.0.
 !     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0.
+!          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !          Default = 0
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8).
+!          Integer numerator of fractional second (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8).
+!          Integer denominator of fractional second (sN\_i8/sD\_i8).
 !                                                           (large, >= 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
@@ -2630,58 +2630,58 @@
 !          calendar above.  More convenient way of specifying a built-in 
 !          calendar kind.
 !     \item[{[yy]}]
-!          Integer years (>= 32-bit).  Default = 0
+!          Integer year (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).  Default = 0
+!          Integer year (large, >= 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer months (>= 32-bit).  Default = 0
+!          Integer month (>= 32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).  Default = 0
+!          Integer month (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian, or Modified Julian, days (>= 32-bit).  Default = 0
+!          Integer Julian, or Modified Julian, day (>= 32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian, or Modified Julian, days (large, >= 64-bit).
+!          Integer Julian, or Modified Julian, day (large, >= 64-bit).
 !          Default = 0
 !     \item[{[h]}]
-!          Integer hours.  Default = 0
+!          Integer hour.  Default = 0
 !     \item[{[m]}]
-!          Integer minutes.  Default = 0
+!          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer seconds (>= 32-bit).  Default = 0
+!          Integer second (>= 32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).  Default = 0
+!          Integer second (large, >= 64-bit).  Default = 0
 !     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0
+!          Integer millisecond.  Default = 0
 !     \item[{[us]}]
-!          Integer microseconds.  Default = 0
+!          Integer microsecond.  Default = 0
 !     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0
+!          Integer nanosecond.  Default = 0
 !     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.
+!          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.
+!          Double precision hour.  Default = 0.0.
 !     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.
+!          Double precision minute.  Default = 0.0.
 !     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.
+!          Double precision second.  Default = 0.0.
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.
+!          Double precision millisecond.  Default = 0.0.
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.
+!          Double precision microsecond.  Default = 0.0.
 !     \item[{[ns\_r8]}]
 !          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
-!          Integer numerator of fractional seconds (sN/sD).
+!          Integer numerator of fractional second (sN/sD).
 !          Default = 0
 !     \item[{[sN\_i8]}]
-!          Integer numerator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
-!          Integer denominator of fractional seconds (sN/sD).
+!          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
-!          Integer denominator of fractional seconds (sN\_i8/sD\_i8)
+!          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, >= 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
