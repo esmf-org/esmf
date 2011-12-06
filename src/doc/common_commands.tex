@@ -1,4 +1,4 @@
-% $Id: common_commands.tex,v 1.9 2011/12/06 00:11:01 theurich Exp $
+% $Id: common_commands.tex,v 1.10 2011/12/06 01:13:17 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,12 +8,11 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\newcommand{\apiStatusCompatible}{Backward compatible starting with ESMF 5.2.0r.\\}
-\newcommand{\apiStatusCompatibleWithExceptions}{Backward compatible starting with ESMF 5.2.0r - {\em except those arguments indicated below}.\\}
-\newcommand{\apiStatusCompatibleException}{{\sc Status:}{\em This argument is excluded from the backward compatibility statement}.\\}
-
-\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF versions starting at #1. Code written to compile with any ESMF release since #1 will also compile with the current ESMF release.}
+\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF versions starting at #1. Code written to compile with an ESMF release since #1 will also compile with the current ESMF release.}
 \newcommand{\apiStatusModifiedSinceVersion}[1]{This interface was modified since ESMF version #1 was released. Code written to compile with the current ESMF release is not automatically guaranteed to compile against previous ESMF releases. If this sort of user code compatibility with earlier ESMF versions is desired then care must be taken to limit the use of this interface to features that were available in ESMF release #1.}
+
+\newcommand{\apiStatusCompatibleVersionExceptions}[1]{This interface is backward compatible with ESMF versions starting at #1 - {\em except those arguments indicated below}. Code written to compile with any ESMF release since #1 will also compile with the current ESMF release.}
+\newcommand{\apiStatusCompatibleException}{{\sc Status:}{\em This argument is excluded from the backward compatibility statement}.\\}
 
 \newcommand{\apiDeprecatedArg}{DEPRECATED ARGUMENT!}
 \newcommand{\apiDeprecatedArgWithReplacement}[1]{DEPRECATED ARGUMENT! Please use the argument {\tt #1} instead.}
