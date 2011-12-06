@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.108 2011/11/11 17:55:55 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.109 2011/12/06 00:10:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.108 2011/11/11 17:55:55 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.109 2011/12/06 00:10:56 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1004,7 +1004,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.2.0rp1] Deprecate arguments {\tt localDeList} and {\tt vasLocalDeList}
+!                 in favor of new arguments {\tt localDeToDeMap} and 
+!                 {\tt vasLocalDeList}, respectively. The new argument names
+!                 better describe the returned information and correctly uses
+!                 the {\tt Map} suffix. This was pointed out by user request.
+! \end{description}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Access to DELayout information.

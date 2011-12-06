@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.109 2011/11/28 05:22:11 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.110 2011/12/06 00:10:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_LogErr.F90"
+!==============================================================================
 !
-!     ESMF LogErr Module
-      module ESMF_LogErrMod
+!     ESMF LogErr module
+module ESMF_LogErrMod
 !
 !==============================================================================
 !
@@ -1864,7 +1865,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusLastChangedVersion{5.2.0rp1}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.2.0rp1] Deprecate argument {\tt logmsgList} in favor of new argument
+!                 {\tt logmsgFlag}. This corrects an inconsistent use of the
+!                 {\tt List} suffix on the argument name. In ESMF this suffix
+!                 indicates one dimensional array arguments.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
