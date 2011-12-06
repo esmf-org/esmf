@@ -1,0 +1,5 @@
+Settings for Unicos/lc on Cray XT/XE/XK, using gfortran and g++ out of the GNU Compiler Collection.
+
+Requires the following environment settings:
+
+ESMF_COMPILER gfortran
