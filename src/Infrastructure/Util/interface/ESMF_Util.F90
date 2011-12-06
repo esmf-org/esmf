@@ -1,4 +1,4 @@
-! $Id: ESMF_Util.F90,v 1.57 2011/07/06 23:36:03 w6ws Exp $
+! $Id: ESMF_Util.F90,v 1.58 2011/12/06 01:15:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Util.F90,v 1.57 2011/07/06 23:36:03 w6ws Exp $'
+               '$Id: ESMF_Util.F90,v 1.58 2011/12/06 01:15:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -600,7 +600,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,      intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! This method returns a copy of a command line argument specified
@@ -778,7 +780,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! This method returns the number of command line arguments specified
@@ -849,7 +853,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,      intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! This method searches for, and returns the index of a desired command

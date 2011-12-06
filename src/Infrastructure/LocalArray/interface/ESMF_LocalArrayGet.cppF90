@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayGet.cppF90,v 1.33 2011/08/25 01:56:05 rokuingh Exp $
+! $Id: ESMF_LocalArrayGet.cppF90,v 1.34 2011/12/06 01:15:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,9 @@ module ESMF_LocalArrayGetMod
 !   integer,             intent(out), optional :: rc @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! Return a Fortran pointer to the data buffer, or return a Fortran pointer @\
@@ -210,7 +212,7 @@ module ESMF_LocalArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 character(*), parameter, private :: version = &
-  '$Id: ESMF_LocalArrayGet.cppF90,v 1.33 2011/08/25 01:56:05 rokuingh Exp $'
+  '$Id: ESMF_LocalArrayGet.cppF90,v 1.34 2011/12/06 01:15:27 theurich Exp $'
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -282,7 +284,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: rc             
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Returns information about the {\tt ESMF\_LocalArray}.

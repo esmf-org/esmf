@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.78 2011/12/06 00:10:54 theurich Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.79 2011/12/06 01:15:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.78 2011/12/06 00:10:54 theurich Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.79 2011/12/06 01:15:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -593,7 +593,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc  
 !         
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Get internal information per local DE, per dim.
@@ -745,7 +747,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,                    intent(out), optional   :: rc  @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 !   Access Fortran array pointer to the specified DE-local memory allocation of @\
@@ -852,7 +856,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Provide access to {\tt ESMF\_LocalArray} object that holds data for

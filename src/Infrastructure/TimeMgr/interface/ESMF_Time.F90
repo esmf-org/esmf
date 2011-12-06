@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.136 2011/12/05 19:20:36 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.137 2011/12/06 01:15:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.136 2011/12/05 19:20:36 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.137 2011/12/06 01:15:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -127,7 +127,9 @@
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Set {\tt time1} equal to {\tt time2}.  This is the default Fortran
@@ -171,7 +173,9 @@
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_Time} class to increment
@@ -212,7 +216,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_Time} class to decrement
@@ -252,7 +258,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_Time} class to return the
@@ -297,7 +305,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Time} class to return 
@@ -340,7 +350,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Time} class to return 
@@ -383,7 +395,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_Time} class to return 
@@ -426,7 +440,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_Time} class to return 
@@ -469,7 +485,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (>) operator for the {\tt ESMF\_Time} class to return 
@@ -512,7 +530,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (>=) operator for the {\tt ESMF\_Time} class to return 
@@ -604,7 +624,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the value of {\tt time} in units specified by the user
@@ -851,7 +873,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns {\tt .true.} if given time is in a leap year, and {\tt .false.}
@@ -909,7 +933,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns {\tt .true.} if the Calendars in these Times are
@@ -1130,7 +1156,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Initializes an {\tt ESMF\_Time} with a set of user-specified units
@@ -1308,7 +1336,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the system real time (wall clock time), and returns it as an

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.145 2011/10/14 14:37:52 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.146 2011/12/06 01:15:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.145 2011/10/14 14:37:52 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.146 2011/12/06 01:15:31 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -167,7 +167,9 @@
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Assign {\tt calendar1} as an alias to the same {\tt ESMF\_Calendar} 
@@ -524,7 +526,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates and sets a {\tt calendar} to the given built-in
@@ -608,7 +612,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates a complete (deep) copy of a given {\tt ESMF\_Calendar}.
@@ -777,7 +783,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Releases resources associated with this {\tt ESMF\_Calendar}.
@@ -880,7 +888,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets one or more of an {\tt ESMF\_Calendar}'s properties.
@@ -1048,7 +1058,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1092,7 +1104,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1157,7 +1171,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1337,7 +1353,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets {\tt calendar} to the given built-in {\tt ESMF\_CalKind\_Flag}. 
@@ -1424,7 +1442,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets properties in a custom {\tt ESMF\_Calendar}.
@@ -1627,7 +1647,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Checks whether a {\tt calendar} is valid.  

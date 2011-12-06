@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.82 2011/11/29 06:13:31 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.83 2011/12/06 01:15:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.82 2011/11/29 06:13:31 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.83 2011/12/06 01:15:29 theurich Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -170,7 +170,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.82 2011/11/29 06:13:31 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.83 2011/12/06 01:15:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -237,7 +237,9 @@ module ESMF_MeshMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign mesh1 as an alias to the same ESMF Mesh object in memory
@@ -274,7 +276,9 @@ module ESMF_MeshMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether mesh1 and mesh2 are valid aliases to the same ESMF
@@ -317,7 +321,9 @@ module ESMF_MeshMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether mesh1 and mesh2 are {\it not} valid aliases to the
@@ -1639,7 +1645,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out),  optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !  This call removes internal memory associated with {\tt mesh}. 

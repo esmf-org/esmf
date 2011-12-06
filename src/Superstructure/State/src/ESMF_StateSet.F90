@@ -1,4 +1,4 @@
-! $Id: ESMF_StateSet.F90,v 1.13 2011/06/15 17:27:20 w6ws Exp $
+! $Id: ESMF_StateSet.F90,v 1.14 2011/12/06 01:15:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateSet.F90,v 1.13 2011/06/15 17:27:20 w6ws Exp $'
+      '$Id: ESMF_StateSet.F90,v 1.14 2011/12/06 01:15:42 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -96,7 +96,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      Sets the status of the {\tt needed} flag for the data item

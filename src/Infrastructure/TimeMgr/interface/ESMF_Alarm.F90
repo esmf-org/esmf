@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.114 2011/09/01 19:13:05 rokuingh Exp $
+! $Id: ESMF_Alarm.F90,v 1.115 2011/12/06 01:15:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.114 2011/09/01 19:13:05 rokuingh Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.115 2011/12/06 01:15:30 theurich Exp $'
 
 !==============================================================================
 !
@@ -139,7 +139,9 @@
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Assign {\tt alarm1} as an alias to the same {\tt ESMF\_Alarm} object in 
@@ -315,7 +317,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Alarm}.
@@ -445,7 +449,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates a complete (deep) copy of a given {\tt ESMF\_Alarm}.
@@ -501,7 +507,9 @@
 !     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -559,7 +567,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Disables an {\tt ESMF\_Alarm}.
@@ -607,7 +617,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Enables an {\tt ESMF\_Alarm} to function.
@@ -674,7 +686,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets one or more of an {\tt ESMF\_Alarm}'s properties.
@@ -811,7 +825,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} is enabled.
@@ -866,7 +882,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} is ringing.
@@ -925,7 +943,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Check if {\tt alarm} is sticky.
@@ -981,7 +1001,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Unset an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
@@ -1177,7 +1199,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Turn off an {\tt ESMF\_Alarm}; unsets ringing state.  For a sticky
@@ -1230,7 +1254,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Turn on an {\tt ESMF\_Alarm}; sets ringing state.
@@ -1293,7 +1319,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1414,7 +1442,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Set an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
@@ -1471,7 +1501,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Performs a validation check on an {\tt ESMF\_Alarm}'s properties.
@@ -1527,7 +1559,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} was ringing on the previous clock timestep.
@@ -1588,7 +1622,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Check if {\tt ESMF\_Alarm} will ring on the next clock timestep, either

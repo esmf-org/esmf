@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.42 2011/10/20 16:49:19 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.43 2011/12/06 01:15:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.42 2011/10/20 16:49:19 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.43 2011/12/06 01:15:37 theurich Exp $'
 
 !==============================================================================
 !
@@ -2096,7 +2096,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Destroys an {\tt ESMF\_XGrid}, releasing the resources associated

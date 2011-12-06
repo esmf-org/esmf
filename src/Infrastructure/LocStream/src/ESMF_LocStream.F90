@@ -1,4 +1,4 @@
-! $Id: ESMF_LocStream.F90,v 1.70 2011/08/25 01:56:03 rokuingh Exp $
+! $Id: ESMF_LocStream.F90,v 1.71 2011/12/06 01:15:26 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -136,7 +136,7 @@ module ESMF_LocStreamMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocStream.F90,v 1.70 2011/08/25 01:56:03 rokuingh Exp $'
+    '$Id: ESMF_LocStream.F90,v 1.71 2011/12/06 01:15:26 theurich Exp $'
 
 !==============================================================================
 !
@@ -246,7 +246,9 @@ end interface
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign locstream1 as an alias to the same ESMF LocStream object in memory
@@ -283,7 +285,9 @@ end interface
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether locstream1 and locstream2 are valid aliases to the same ESMF
@@ -326,7 +330,9 @@ end interface
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether locstream1 and locstream2 are {\it not} valid aliases to the
@@ -1860,7 +1866,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,              intent(out),  optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Deallocate an {\tt ESMF\_LocStream} object and appropriate 

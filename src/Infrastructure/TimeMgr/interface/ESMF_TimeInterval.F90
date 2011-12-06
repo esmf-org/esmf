@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.126 2011/12/05 19:20:36 w6ws Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.127 2011/12/06 01:15:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.126 2011/12/05 19:20:36 w6ws Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.127 2011/12/06 01:15:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -150,7 +150,9 @@
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -196,7 +198,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (+) operator for the {\tt ESMF\_TimeInterval} class to
@@ -237,7 +241,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -277,7 +283,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
@@ -315,7 +323,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -356,7 +366,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
@@ -481,7 +493,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the Fortran intrinsic MOD() function for the
@@ -525,7 +539,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
@@ -649,7 +665,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_TimeInterval} class to
@@ -692,7 +710,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_TimeInterval} class to
@@ -735,7 +755,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 !DESCRIPTION:
 !     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
@@ -778,7 +800,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 !DESCRIPTION:
 !     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
@@ -821,7 +845,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 !DESCRIPTION:
 !     Overloads the (>) operator for the {\tt ESMF\_TimeInterval} class to
@@ -864,7 +890,9 @@
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 !DESCRIPTION:
 !     Overloads the (>=) operator for the {\tt ESMF\_TimeInterval} class to
@@ -949,7 +977,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns the absolute value of {\tt timeinterval}.
@@ -1035,7 +1065,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
@@ -1260,7 +1292,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
@@ -1493,7 +1527,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
@@ -1728,7 +1764,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the value of {\tt timeinterval} in units specified by the
@@ -1916,7 +1954,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns the negative absolute value of {\tt timeinterval}.
@@ -2122,7 +2162,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
@@ -2277,7 +2319,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
@@ -2440,7 +2484,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
@@ -2608,7 +2654,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
@@ -2731,7 +2779,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Checks whether a {\tt timeinterval} is valid.

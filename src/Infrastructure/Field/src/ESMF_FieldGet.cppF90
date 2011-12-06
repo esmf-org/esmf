@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cppF90,v 1.95 2011/08/25 01:55:57 rokuingh Exp $
+! $Id: ESMF_FieldGet.cppF90,v 1.96 2011/12/06 01:15:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ module ESMF_FieldGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGet.cppF90,v 1.95 2011/08/25 01:55:57 rokuingh Exp $'
+    '$Id: ESMF_FieldGet.cppF90,v 1.96 2011/12/06 01:15:21 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -141,7 +141,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc     
 !
 ! !STATUS:
-! \apiStatusCompatibleWithExceptions
+! \begin{itemize}
+! \item\apiStatusCompatibleVersionExceptions{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Query an {\tt ESMF\_Field} for various things.  All arguments after
@@ -637,7 +639,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,          intent(out), optional :: rc @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! Get a Fortran pointer to DE-local memory allocation within {\tt field}. @\
@@ -816,7 +820,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! This method returns the bounds information of a field that consists of a

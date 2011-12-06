@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetAllocBounds.F90,v 1.4 2011/08/25 01:55:58 rokuingh Exp $
+! $Id: ESMF_FieldGetAllocBounds.F90,v 1.5 2011/12/06 01:15:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ module ESMF_FieldGetAllocBoundsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.4 2011/08/25 01:55:58 rokuingh Exp $'
+    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.5 2011/12/06 01:15:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -118,7 +118,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Compute the lower and upper bounds of Fortran data array that can later
