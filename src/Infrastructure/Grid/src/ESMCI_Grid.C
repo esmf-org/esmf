@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.126 2011/11/08 05:02:20 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.127 2011/12/07 20:07:18 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.126 2011/11/08 05:02:20 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.127 2011/12/07 20:07:18 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -4486,8 +4486,10 @@ int Grid::getStaggerDistgrid(
       delete staggerEdgeUWidthIntInt;
       delete [] staggerEdgeUWidthIntIntArray;
 
-      if (connListWPoles!=NULL) delete connListWPoles;
-
+      if (connListWPoles!=NULL) {
+        if (connListWPoles->array !=NULL) delete connListWPoles->array;
+        delete connListWPoles;
+      }
 #if 0
       // Get connection List with pole added back in
       InterfaceInt *connListWPoles=NULL;
