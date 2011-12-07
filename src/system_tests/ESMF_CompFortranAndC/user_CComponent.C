@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.17 2011/10/11 20:45:49 rokuingh Exp $
+// $Id: user_CComponent.C,v 1.18 2011/12/07 22:43:37 oehmke Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -13,6 +13,9 @@
 
 // ESMF header -- provides access to the entire public ESMF C API
 #include "ESMC.h"
+
+ESMC_Mesh tmp_mesh;
+
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -72,7 +75,10 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   // Create a Mesh from VTK file
   mesh = ESMC_MeshCreate(pdim, sdim, rc);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
-  
+
+  // Hold this to be deleted later, because getting a C mesh from a C field broken  
+  tmp_mesh=mesh;
+
   // Read input files' header data
   *rc = ESMC_MeshVTKHeader("data/testmesh", &num_elem, &num_node, &conn_size);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
@@ -220,7 +226,8 @@ void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // get the Mesh object from the Field
-  mesh = ESMC_FieldGetMesh(field, rc);
+  // THIS CALL IS BROKEN RIGHT NOW, SO DON'T USE
+  //  mesh = ESMC_FieldGetMesh(field, rc);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // destroy Field object
@@ -228,7 +235,10 @@ void myFinalInC(ESMC_GridComp gcomp, ESMC_State importState,
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // destroy Mesh object
-  *rc = ESMC_MeshDestroy(&mesh);
+  // Destroy object holding mesh (tmp_mesh) saved from before, 
+  // because ESMC_FieldGetMesh() is broken
+  //*rc = ESMC_MeshDestroy(&mesh);
+  *rc = ESMC_MeshDestroy(&tmp_mesh);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 }
 
