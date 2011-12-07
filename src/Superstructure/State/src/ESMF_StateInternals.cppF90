@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.12 2011/08/10 14:21:11 w6ws Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.13 2011/12/07 00:47:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.12 2011/08/10 14:21:11 w6ws Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.13 2011/12/07 00:47:15 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -453,6 +453,12 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
         	ESMF_ERR_PASSTHRU, &
         	ESMF_CONTEXT, rcToReturn=rc)) return
           end do
+          
+          if (associated (scwrap)) then
+            deallocate (scwrap, stat=memstat)
+            if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+          end if
 
           call ESMF_ContainerDestroy (stypep%stateContainer, rc=localrc)
           if (ESMF_LogFoundError (localrc, &
@@ -1100,10 +1106,12 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
       if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) then
-        deallocate (siwrap, stat=memstat)
-	if (ESMF_LogFoundDeallocError(memstat, &
+        if (associated(siwrap)) then
+          deallocate (siwrap, stat=memstat)
+	  if (ESMF_LogFoundDeallocError(memstat, &
         	 msg="space for serialization", &
         	 ESMF_CONTEXT, rcToReturn=rc)) continue
+        endif         
         return
       end if
 
