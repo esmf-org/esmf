@@ -1,4 +1,4 @@
-% $Id: common_commands.tex,v 1.10 2011/12/06 01:13:17 theurich Exp $
+% $Id: common_commands.tex,v 1.11 2011/12/07 23:26:36 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,10 +8,11 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF versions starting at #1. Code written to compile with an ESMF release since #1 will also compile with the current ESMF release.}
-\newcommand{\apiStatusModifiedSinceVersion}[1]{This interface was modified since ESMF version #1 was released. Code written to compile with the current ESMF release is not automatically guaranteed to compile against previous ESMF releases. If this sort of user code compatibility with earlier ESMF versions is desired then care must be taken to limit the use of this interface to features that were available in ESMF release #1.}
+\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF versions starting at #1. Code which compiles with the #1 and later versions of this interface will also compile with this interface in the current ESMF release.}
+\newcommand{\apiStatusModifiedSinceVersion}[1]{This interface was modified since ESMF version #1 was released. Code which compiles with this interface in the current ESMF release is not automatically guaranteed to compile with previous ESMF releases (even #1 and later). If this sort of user code compatibility with the #1 ESMF release is desired then care must be taken to limit the use of this interface to features that were available in the #1 release. \\
+Changes made after the #1 release:}
 
-\newcommand{\apiStatusCompatibleVersionExceptions}[1]{This interface is backward compatible with ESMF versions starting at #1 - {\em except those arguments indicated below}. Code written to compile with any ESMF release since #1 will also compile with the current ESMF release.}
+\newcommand{\apiStatusCompatibleVersionExceptions}[1]{This interface is backward compatible with ESMF versions starting at #1 - {\em except those arguments indicated below}.}
 \newcommand{\apiStatusCompatibleException}{{\sc Status:}{\em This argument is excluded from the backward compatibility statement}.\\}
 
 \newcommand{\apiDeprecatedArg}{DEPRECATED ARGUMENT!}
