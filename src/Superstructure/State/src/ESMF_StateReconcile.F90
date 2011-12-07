@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.103 2011/07/06 20:25:43 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.103.2.1 2011/12/07 19:29:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.103 2011/07/06 20:25:43 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.103.2.1 2011/12/07 19:29:19 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -712,6 +712,9 @@
         if (ESMF_LogFoundDeallocError(memstat, &
                                  msg="Deallocating buffer for local buf list", &
                                        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+         
+    if (associated(si%siwrap)) then
         deallocate(si%siwrap, stat=memstat)
         if (ESMF_LogFoundDeallocError(memstat, &
                                  msg="Deallocating item pointers", &
