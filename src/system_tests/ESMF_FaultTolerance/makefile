@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2011/12/01 22:41:41 theurich Exp $ 
+# $Id: makefile,v 1.3 2011/12/08 02:26:02 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,6 +31,13 @@ CLEANDIRS   =
 CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
+
+RUN_FaultToleranceMain:
+	cp -f server.txt $(ESMF_TESTDIR)
+	$(MAKE) TNAME=FaultTolerance NP=4 stest
+
+RUN_FaultToleranceCompA:
+	$(MAKE) TNAME=FaultToleranceCompA NP=2 stest
 
 RUN_FaultTolerance:
 	cp -f server.txt $(ESMF_TESTDIR)
