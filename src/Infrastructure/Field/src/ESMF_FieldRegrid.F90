@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.90 2011/12/06 01:15:21 theurich Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.91 2011/12/08 00:34:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.90 2011/12/06 01:15:21 theurich Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.91 2011/12/08 00:34:10 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -322,9 +322,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[5.2.0rp1] Deprecate arguments {\tt weights} and {\tt indices} in favor
-!                 of new arguments {\tt factorList} and {\tt factorIndexList},
-!                 respectively. This corrects an inconsistency with all other
+! \item[5.2.0rp1] Add arguments {\tt factorList} and {\tt factorIndexList}.
+!                 Deprecate arguments {\tt weights} and {\tt indices}. 
+!                 This corrects an inconsistency with all other
 !                 ESMF methods that take these arguments.
 ! \end{description}
 ! \end{itemize}

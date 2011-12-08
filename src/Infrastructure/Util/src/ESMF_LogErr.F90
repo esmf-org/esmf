@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.111 2011/12/06 01:15:34 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.112 2011/12/08 00:34:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -1879,10 +1879,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[5.2.0rp1] Deprecate argument {\tt logmsgList} in favor of new argument
-!                 {\tt logmsgFlag}. This corrects an inconsistent use of the
-!                 {\tt List} suffix on the argument name. In ESMF this suffix
-!                 indicates one dimensional array arguments.
+! \item[5.2.0rp1] Add argument {\tt logmsgFlag}.
+!                 Deprecate argument {\tt logmsgList}.
+!                 This corrects an inconsistent use of the {\tt List} suffix on
+!                 the argument name. In ESMF this suffix indicates one 
+!                 dimensional array arguments.
 ! \end{description}
 ! \end{itemize}
 !
