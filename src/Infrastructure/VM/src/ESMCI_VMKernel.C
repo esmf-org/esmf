@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.36 2011/12/01 22:41:39 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.37 2011/12/08 23:33:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -4880,24 +4880,33 @@ void VMK::ipshmdeallocate(void *pointer){
 #ifndef ESMF_NO_PTHREADS
   pthread_mutex_lock(ipshmMutex);
 #endif
-  ipshmAlloc *ipshmTemp = *ipshmTop; // start at the current top of the list
-  while (ipshmTemp != NULL){
-    if (ipshmTemp->allocation == pointer) break;
-    ipshmTemp = ipshmTemp->next;
-  }
-  if (ipshmTemp!=NULL){
-    // found the allocation
-    --(ipshmTemp->auxCounter); // count this thread's deallocate call
-    if (ipshmTemp->auxCounter == 0){
-      // this was the last thread to call deallocate for this allocation
-      //printf("freeing %p\n", pointer);
-      free(pointer);
-      // Cannot deallocate the allocation element in list here without
-      // disturbing list structure which is shared between threads.
-      // It is anyway safer to do a centralized deallocation of this structure
-      // during VM shutdown as it gives a chance to free any remaining
-      // pointers that are still allocated in order to prevent memory leaks
-      // because of improper user code.
+
+  if (getNthreads(getMypet()) == 1){
+    // PET is in single-thread group -> much simpler and faster
+    // don't do anything here, and have the VMK::finalize() take care of it
+  }else{
+    // PET is part of a multi-thread group -> need to search for entry
+    // maybe using a std::map would help for more efficient search as number
+    // of objects increases
+    ipshmAlloc *ipshmTemp = *ipshmTop; // start at the current top of the list
+    while (ipshmTemp != NULL){
+      if (ipshmTemp->allocation == pointer) break;
+      ipshmTemp = ipshmTemp->next;
+    }
+    if (ipshmTemp!=NULL){
+      // found the allocation
+      --(ipshmTemp->auxCounter); // count this thread's deallocate call
+      if (ipshmTemp->auxCounter == 0){
+        // this was the last thread to call deallocate for this allocation
+        //printf("freeing %p\n", pointer);
+        free(pointer);
+        // Cannot deallocate the allocation element in list here without
+        // disturbing list structure which is shared between threads.
+        // It is anyway safer to do a centralized deallocation of this structure
+        // during VM shutdown as it gives a chance to free any remaining
+        // pointers that are still allocated in order to prevent memory leaks
+        // because of improper user code.
+      }
     }
   }
 #ifndef ESMF_NO_PTHREADS
