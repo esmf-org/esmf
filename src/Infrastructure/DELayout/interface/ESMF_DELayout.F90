@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.102.2.2 2011/11/28 23:18:16 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.102.2.3 2011/12/08 02:04:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.102.2.2 2011/11/28 23:18:16 theurich Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.102.2.3 2011/12/08 02:04:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -178,7 +178,9 @@ module ESMF_DELayoutMod
 !   type(ESMF_DELayout) :: delayout2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign delayout1 as an alias to the same ESMF DELayout object in memory
@@ -213,7 +215,9 @@ module ESMF_DELayoutMod
 !   type(ESMF_DELayout), intent(in) :: delayout2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether delayout1 and delayout2 are valid aliases to the same ESMF
@@ -255,7 +259,9 @@ module ESMF_DELayoutMod
 !   type(ESMF_DELayout), intent(in) :: delayout2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether delayout1 and delayout2 are {\it not} valid aliases to the
@@ -429,7 +435,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DELayout} object on the basis of optionally provided
@@ -548,7 +556,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DELayout} with exactly specified DE to PET mapping.
@@ -644,7 +654,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout) :: ESMF_DELayoutCreateHintWeights
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DELayout} on the basis of computational and 
@@ -930,7 +942,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out),  optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Destroy an {\tt ESMF\_DELayout} object.
@@ -1004,7 +1018,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.2.0rp1] Add arguments {\tt localDeToDeMap} and {\tt vasLocalDeToDeMap}.
+!                 Deprecate arguments {\tt localDeList} and {\tt vasLocalDeList}. 
+!                 The new argument names correctly use the {\tt Map} suffix and
+!                 better describe the returned information.
+!                 This was pointed out by user request.
+! \end{description}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Access to DELayout information.
@@ -1576,7 +1600,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Prints internal information about the specified {\tt ESMF\_DELayout} 
@@ -1634,7 +1660,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   The PET who's service offer was accepted for {\tt de} must use 
@@ -1693,7 +1721,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ServiceReply_Flag) :: ESMF_DELayoutServiceOffer
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1764,7 +1794,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      Validates that the {\tt delayout} is internally consistent.

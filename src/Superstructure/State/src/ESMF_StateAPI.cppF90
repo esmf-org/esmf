@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.21.2.2 2011/11/07 17:18:56 theurich Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.21.2.3 2011/12/08 02:04:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.21.2.2 2011/11/07 17:18:56 theurich Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.21.2.3 2011/12/08 02:04:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -218,7 +218,9 @@ module ESMF_StateAPIMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign state1 as an alias to the same ESMF State object in memory
@@ -255,7 +257,9 @@ module ESMF_StateAPIMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether state1 and state2 are valid aliases to the same ESMF
@@ -298,7 +302,9 @@ module ESMF_StateAPIMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether state1 and state2 are {\it not} valid aliases to the
@@ -436,7 +442,9 @@ contains
 !    integer,          intent(out),  optional :: rc
 !     
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      Add a reference to a single <item> to an existing 
@@ -687,7 +695,9 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !    integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Add a list of items to a {\tt ESMF\_State}. It is an error if any item in
@@ -893,7 +903,9 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 !    integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Add or replace a list of items to an {\tt ESMF\_State}.  If an item in
@@ -1115,7 +1127,9 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
       integer,                intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_State}, set default characteristics for
@@ -1242,7 +1256,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       integer,          intent(out),  optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Releases resources associated with this {\tt ESMF\_State}. Actual
@@ -1323,7 +1339,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns the requested information about this {\tt ESMF\_State}.
@@ -1587,7 +1605,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      \begin{sloppypar}
@@ -1719,7 +1739,9 @@ StateGetMacro(ESMF_FieldBundle,FieldBundle,fieldbundle,fbp)
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns the type for the item named

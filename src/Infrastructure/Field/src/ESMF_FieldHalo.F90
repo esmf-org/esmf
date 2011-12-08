@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHalo.F90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $
+! $Id: ESMF_FieldHalo.F90,v 1.1.2.3 2011/12/08 02:04:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldHaloMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldHalo.F90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $'
+    '$Id: ESMF_FieldHalo.F90,v 1.1.2.3 2011/12/08 02:04:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -113,7 +113,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Execute a precomputed Field halo operation for {\tt field}. The {\tt field}
@@ -208,7 +210,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Release resouces associated with a Field halo operation.
@@ -265,7 +269,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Store a Field halo operation over the data in {\tt field}. By default,

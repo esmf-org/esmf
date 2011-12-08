@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.1.2.4 2011/10/13 21:14:17 theurich Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.1.2.5 2011/12/08 02:04:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.1.2.4 2011/10/13 21:14:17 theurich Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.1.2.5 2011/12/08 02:04:37 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -92,7 +92,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
@@ -228,7 +230,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Release resouces associated with a Field sparse matrix multiplication. After this call
@@ -282,7 +286,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION: 
 ! 
@@ -641,7 +647,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION: 
 !

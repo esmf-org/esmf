@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.57.2.1 2011/09/03 00:03:00 theurich Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.57.2.2 2011/12/08 02:04:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ module ESMF_ArraySpecMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArraySpec.F90,v 1.57.2.1 2011/09/03 00:03:00 theurich Exp $'
+    '$Id: ESMF_ArraySpec.F90,v 1.57.2.2 2011/12/08 02:04:30 theurich Exp $'
 
 !==============================================================================
 
@@ -114,7 +114,9 @@ module ESMF_ArraySpecMod
 !   type(ESMF_ArraySpec) :: arrayspec2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Set {\tt arrayspec1} equal to {\tt arrayspec2}. This is the default 
@@ -156,7 +158,9 @@ module ESMF_ArraySpecMod
 !   type(ESMF_ArraySpec), intent(in) :: arrayspec2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Overloads the (==) operator for the {\tt ESMF\_ArraySpec} class to return 
@@ -195,7 +199,9 @@ module ESMF_ArraySpecMod
 !   type(ESMF_ArraySpec), intent(in) :: arrayspec2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Overloads the (/=) operator for the {\tt ESMF\_ArraySpec} class to return 
@@ -311,7 +317,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Returns information about the contents of an {\tt ESMF\_ArraySpec}.
@@ -362,7 +370,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Print ArraySpec internals. \\
@@ -413,7 +423,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Creates a description of the data -- the typekind, the rank,
@@ -477,7 +489,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc  
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Validates that the {\tt arrayspec} is internally consistent.

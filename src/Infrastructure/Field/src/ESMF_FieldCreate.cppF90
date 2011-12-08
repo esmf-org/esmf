@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.118.2.1 2011/10/13 21:10:24 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.118.2.2 2011/12/08 02:04:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -69,7 +69,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.118.2.1 2011/10/13 21:10:24 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.118.2.2 2011/12/08 02:04:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -140,7 +140,9 @@ module ESMF_FieldCreateMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign field1 as an alias to the same ESMF Field object in memory
@@ -177,7 +179,9 @@ module ESMF_FieldCreateMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether field1 and field2 are valid aliases to the same ESMF
@@ -220,7 +224,9 @@ module ESMF_FieldCreateMod
 !
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether field1 and field2 are {\it not} valid aliases to the
@@ -1480,7 +1486,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc              
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -1652,7 +1660,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc              
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -1858,7 +1868,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,               intent(out), optional :: rc                
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field}.  This version of creation
@@ -2048,7 +2060,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,               intent(out), optional :: rc                @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Grid}. @\
@@ -2282,7 +2296,9 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !   integer,               intent(out), optional :: rc                @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Grid}. @\
@@ -4533,7 +4549,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Releases resources associated with the {\tt ESMF\_Field}.  If an 

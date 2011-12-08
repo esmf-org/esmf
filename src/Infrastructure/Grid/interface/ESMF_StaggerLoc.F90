@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.26.2.1 2011/09/03 00:03:09 theurich Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.26.2.2 2011/12/08 02:04:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.26.2.1 2011/09/03 00:03:09 theurich Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.26.2.2 2011/12/08 02:04:40 theurich Exp $'
 
 
 !==============================================================================
@@ -250,7 +250,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, optional                     :: rc 
 
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !    Sets a custom {\tt staggerloc} to a position in a cell by using the array
@@ -314,7 +316,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, optional                     :: rc 
 
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Sets a particular dimension of a custom {\tt staggerloc} to a position in a cell 
@@ -374,7 +378,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, optional,     intent(out) :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Return an {\tt ESMF\_StaggerLoc} as a printable string.
@@ -634,7 +640,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, optional,      intent(out) :: rc 
 
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Print the internal data members of an {\tt ESMF\_StaggerLoc} object. \\

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldScatter.cppF90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $
+! $Id: ESMF_FieldScatter.cppF90,v 1.1.2.3 2011/12/08 02:04:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ module ESMF_FieldScatterMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldScatter.cppF90,v 1.1.2.2 2011/08/19 21:28:31 theurich Exp $'
+      '$Id: ESMF_FieldScatter.cppF90,v 1.1.2.3 2011/12/08 02:04:37 theurich Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldScatter
@@ -88,7 +88,9 @@ contains
 ! @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 !   Scatter the data of {\tt farray} located on {\tt rootPET} @\

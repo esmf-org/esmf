@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.47.2.1 2011/09/03 00:03:05 theurich Exp $
+! $Id: ESMF_FieldPr.F90,v 1.47.2.2 2011/12/08 02:04:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -92,7 +92,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Prints information about the {\tt field} to {\tt stdout}.

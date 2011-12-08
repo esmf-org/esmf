@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.16 2011/07/01 18:04:47 theurich Exp $
+! $Id: ESMF_IOUtil.F90,v 1.16.2.1 2011/12/08 02:04:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.16 2011/07/01 18:04:47 theurich Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.16.2.1 2011/12/08 02:04:51 theurich Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -115,7 +115,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Call the system-dependent routine to force output on a specific
@@ -179,7 +181,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Scan for, and return, a free Fortran I/O unit number.

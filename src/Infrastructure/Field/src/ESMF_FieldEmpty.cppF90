@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEmpty.cppF90,v 1.28.2.1 2011/10/13 02:41:37 theurich Exp $
+! $Id: ESMF_FieldEmpty.cppF90,v 1.28.2.2 2011/12/08 02:04:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@ module ESMF_FieldEmptyMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldEmpty.cppF90,v 1.28.2.1 2011/10/13 02:41:37 theurich Exp $'
+    '$Id: ESMF_FieldEmpty.cppF90,v 1.28.2.2 2011/12/08 02:04:37 theurich Exp $'
 
 !------------------------------------------------------------------------------
 !BOPI 
@@ -147,7 +147,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer, intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
@@ -372,7 +374,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  integer, intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
@@ -1404,7 +1408,9 @@ end subroutine ESMF_FieldEmptyCompTK
 ! @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
@@ -1621,7 +1627,9 @@ TypeKindRankDeclarationMacro(FieldEmptyComp)
 ! @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
@@ -1815,7 +1823,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompPtr)
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -2038,7 +2048,9 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGrid)
 !   integer,               intent(out), optional :: rc @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! This call completes an {\tt ESMF\_Field} allocated with the @\
@@ -4102,7 +4114,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc               
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
@@ -4186,7 +4200,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer, intent(out), optional        :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}

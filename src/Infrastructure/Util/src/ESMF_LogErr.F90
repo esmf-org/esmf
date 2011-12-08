@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.103.2.1 2011/11/07 18:20:00 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.103.2.2 2011/12/08 02:04:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,9 +10,10 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_LogErr.F90"
+!==============================================================================
 !
-!     ESMF LogErr Module
-      module ESMF_LogErrMod
+!     ESMF LogErr module
+module ESMF_LogErrMod
 !
 !==============================================================================
 !
@@ -632,7 +633,9 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This routine closes the user log file(s) associated with {\tt log}.
@@ -745,7 +748,9 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This subroutine flushes the file buffer associated with {\tt log}.
@@ -796,7 +801,7 @@ type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords belo
           (alog%flushed == ESMF_FALSE) .AND. &
 	  (alog%dirty == ESMF_TRUE))  then	
 	do j=1, alog%fIndex-1
-          write (alog%unitNumber, '(2a,3i2.2,a,i6.6,6a)', advance='no')  &
+          write (alog%unitNumber, '(2a,3i2.2,a,i3.3,5a)', advance='no')  &
               alog%LOG_ENTRY(j)%d, " ", &
               alog%LOG_ENTRY(j)%h, &
               alog%LOG_ENTRY(j)%m, &
@@ -872,7 +877,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} when a Fortran status code
@@ -985,7 +992,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} when a Fortran status code
@@ -1099,7 +1108,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} for ESMF return codes that indicate
@@ -1569,14 +1580,14 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-      type(ESMF_Log),      intent(inout), optional :: log	   
-      logical,             intent(in),    optional :: flush	   
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgAbort(:)
-      integer,             intent(in),    optional :: maxElements
-      type(ESMF_LogMsg_Flag), intent(in), optional :: logmsgList(:)
-      integer,             intent(in),    optional :: errorMask(:)
-      logical,             intent(in),    optional :: trace
-      integer,             intent(out),   optional :: rc
+      type(ESMF_Log),         intent(inout), optional :: log
+      logical,                intent(in),    optional :: flush
+      type(ESMF_LogMsg_Flag), intent(in),    optional :: logmsgAbort(:)
+      integer,                intent(in),    optional :: maxElements
+      type(ESMF_LogMsg_Flag), intent(in),    optional :: logmsgList(:)
+      integer,                intent(in),    optional :: errorMask(:)
+      logical,                intent(in),    optional :: trace
+      integer,                intent(out),   optional :: rc
 	
 !
 ! !DESCRIPTION:
@@ -1748,7 +1759,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This subroutine sets the {\tt rcToReturn} value to {\tt rcToCheck} if
@@ -1844,27 +1857,39 @@ end subroutine ESMF_LogSetError
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-      recursive subroutine ESMF_LogWrite(msg, logmsgList, keywordEnforcer,  &
-                                         line, file, method, log, rc)
+      recursive subroutine ESMF_LogWrite(msg, logmsgFlag, &
+                                         logmsgList,      & ! DEPRECATED ARGUMENT
+                        keywordEnforcer, line, file, method, log, rc)
 !
 !
 ! !ARGUMENTS:
-      character(len=*),   intent(in)              :: msg	    
-      type(ESMF_LogMsg_Flag), intent(in)          :: logmsgList    
+      character(len=*),       intent(in)             :: msg
+      type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgFlag
+      type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgList ! DEPRECATED ARGUMENT
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,            intent(in),    optional :: line	    
-      character(len=*),   intent(in),    optional :: file	    
-      character(len=*),   intent(in),    optional :: method     
-      type(ESMF_Log),     intent(inout), optional :: log	    
-      integer,            intent(out),   optional :: rc	    
+      integer,                intent(in),   optional :: line
+      character(len=*),       intent(in),   optional :: file
+      character(len=*),       intent(in),   optional :: method
+      type(ESMF_Log),         intent(inout),optional :: log
+      integer,                intent(out),  optional :: rc
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.2.0rp1] Add argument {\tt logmsgFlag}.
+!                 Deprecate argument {\tt logmsgList}.
+!                 This corrects an inconsistent use of the {\tt List} suffix on
+!                 the argument name. In ESMF this suffix indicates one 
+!                 dimensional array arguments.
+! \end{description}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
-!      A message is passed in along with the {\tt logmsgList}, {\tt line}, 
+!      A message is passed in along with the {\tt logmsgFlag}, {\tt line}, 
 !      {\tt file} and {\tt method}.  If the write to the {\tt ESMF\_Log}
 !      is successful, the function will return a logical {\tt true}.  This 
 !      function is the base function used by all the other {\tt ESMF\_Log} 
@@ -1875,9 +1900,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! 
 !      \item [msg]
 !            User-provided message string.
-!      \item [logmsgList]
+!      \item [logmsgFlag]
 !            The type of message.  See Section~\ref{const:logmsgflag} for
 !            possible values.
+!      \item [logmsgList]
+!            \apiDeprecatedArgWithReplacement{logmsgFlag}
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
@@ -1899,14 +1926,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end subroutine f_ESMF_VMAbort
     end interface
     
+    integer                         :: argcase
+    type(ESMF_LogMsg_Flag)          :: local_logmsgflag
+
     character(len=10)               :: t
     character(len=8)                :: d
+    integer                         :: timevals(8)
+
     !character(len=7)               :: lt
     character(len=32)               :: tmethod
     character(len=ESMF_MAXPATHLEN)  :: tfile
     integer			    :: tline
     integer                         :: i
-    integer                         :: h, m, s, ms, y, mn, dy
     integer			    :: rc2, index
     type(ESMF_LogPrivate), pointer  :: alog
     
@@ -1927,6 +1958,36 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rc=ESMF_RC_NOT_IMPL
     endif
 
+    argcase = 0
+    argcase = argcase + merge (1, 0, present (logmsgFlag))
+    argcase = argcase + merge (2, 0, present (logmsgList))
+    select case (argcase)
+    case (0)
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ": Add required logmsgFlag arument."
+      if (present(rc)) then
+        rc=ESMF_RC_ARG_INCOMP
+      end if
+      return
+
+    case (1)
+      local_logmsgflag = logmsgFlag
+
+    case (2)
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ": Deprecated: Use logmsgFlag instead of logmsgList."
+      local_logmsgflag = logmsgList
+
+    case (3)
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ": Do not specify both logmsgFlag and logmsgList.  Use logmsgFlag."
+      if (present(rc)) then
+        rc=ESMF_RC_ARG_INCOMP
+      end if
+      return
+
+    end select
+
     if (associated(alog)) then
 
       if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
@@ -1940,7 +2001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (associated (alog%logmsgList)) then
           do, i=1, size (alog%logmsgList)
-             if (logmsgList == alog%logmsgList(i)) then
+             if (local_logmsgflag == alog%logmsgList(i)) then
                exit
              end if
           end do
@@ -1953,9 +2014,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         index = alog%fIndex
       
-    	alog%dirty = ESMF_TRUE    
-    	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
-    	call DATE_AND_TIME(d,t)	
+    	alog%dirty = ESMF_TRUE
+    	call DATE_AND_TIME(date=d, time=t, values=timevals)	
     	alog%LOG_ENTRY(index)%methodflag = .FALSE.
     	alog%LOG_ENTRY(index)%lineflag = .FALSE.
     	alog%LOG_ENTRY(index)%fileflag = .FALSE.
@@ -1974,23 +2034,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		alog%LOG_ENTRY(index)%fileflag = .TRUE.
 		alog%LOG_ENTRY(index)%file = tfile
     	endif
-    	select case (logmsgList%mtype)
+    	select case (local_logmsgflag%mtype)
         case (:0, size (ESMF_LogMsgString)+1:)
             alog%LOG_ENTRY(index)%lt="INTERNAL ERROR"
         case default
-            alog%LOG_ENTRY(index)%lt= ESMF_LogMsgString(logmsgList%mtype)
+            alog%LOG_ENTRY(index)%lt= ESMF_LogMsgString(local_logmsgflag%mtype)
     	end select	
-    	alog%LOG_ENTRY(alog%fIndex)%d = d
-    	alog%LOG_ENTRY(alog%fIndex)%h = h
-    	alog%LOG_ENTRY(alog%fIndex)%m = m
-    	alog%LOG_ENTRY(alog%fIndex)%s = s
-    	alog%LOG_ENTRY(alog%fIndex)%ms = ms	
+    	alog%LOG_ENTRY(alog%fIndex)%d  = d
+    	alog%LOG_ENTRY(alog%fIndex)%h  = timevals(5)
+    	alog%LOG_ENTRY(alog%fIndex)%m  = timevals(6)
+    	alog%LOG_ENTRY(alog%fIndex)%s  = timevals(7)
+    	alog%LOG_ENTRY(alog%fIndex)%ms = timevals(8)
     	alog%LOG_ENTRY(alog%fIndex)%msg = msg
 	alog%flushed = ESMF_FALSE
 
         if (associated (alog%logmsgAbort)) then
           do, i=1, size (alog%logmsgAbort)
-            if (logmsgList%mtype == alog%logmsgAbort(i)%mtype) then
+            if (local_logmsgflag%mtype == alog%logmsgAbort(i)%mtype) then
               alog%stopprogram=.true.
               call ESMF_LogClose(ESMF_LogDefault, rc=rc2)
               exit
@@ -2025,9 +2085,9 @@ end subroutine ESMF_LogWrite
       subroutine ESMF_LogEntryCopy(logEntryIn, logEntryOut, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_LogEntry), intent(inout)  :: logEntryIn
-        type(ESMF_LogEntry), intent(out)    :: logEntryOut
-        integer, intent(out), optional      :: rc
+        type(ESMF_LogEntry), intent(inout)         :: logEntryIn
+        type(ESMF_LogEntry), intent(out)           :: logEntryOut
+        integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !      This routine copies the internals from one log entry to another.

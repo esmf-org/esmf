@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayCreate.cppF90,v 1.56 2011/07/01 03:56:40 theurich Exp $
+! $Id: ESMF_LocalArrayCreate.cppF90,v 1.56.2.1 2011/12/08 02:04:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ module ESMF_LocalArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.56 2011/07/01 03:56:40 theurich Exp $'
+    '$Id: ESMF_LocalArrayCreate.cppF90,v 1.56.2.1 2011/12/08 02:04:45 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -229,7 +229,9 @@ end interface
 !   type(ESMF_LocalArray) :: localarray2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign localarray1 as an alias to the same ESMF LocalArray object in memory
@@ -265,7 +267,9 @@ end interface
 !   type(ESMF_LocalArray), intent(in) :: localarray2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether localarray1 and localarray2 are valid aliases to the same ESMF
@@ -309,7 +313,9 @@ end interface
 !   type(ESMF_LocalArray), intent(in) :: localarray2
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Test whether localarray1 and localarray2 are {\it not} valid aliases to the
@@ -481,7 +487,9 @@ end function
     integer,                  intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -636,7 +644,9 @@ end function
     integer,              intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
@@ -716,7 +726,9 @@ end function
     integer,               intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !  Perform a deep copy of an existing {\tt ESMF\_LocalArray} object. The return
@@ -783,7 +795,9 @@ end function
 !   integer,             intent(out), optional :: rc   @\
 ! @\
 ! !STATUS: @\
-! \apiStatusCompatible @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{5.2.0r} @\
+! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 ! Creates an {\tt ESMF\_LocalArray} based on a Fortran array pointer. @\
@@ -1020,7 +1034,9 @@ TypeKindRankDeclarationMacro(LocalArrCreateByPtr)
     integer,                intent(out),  optional  :: rc
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Destroys an {\tt ESMF\_LocalArray}, releasing all resources associated

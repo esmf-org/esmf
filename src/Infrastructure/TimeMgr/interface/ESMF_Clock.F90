@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.125.2.1 2011/09/03 00:03:15 theurich Exp $
+! $Id: ESMF_Clock.F90,v 1.125.2.2 2011/12/08 02:04:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.125.2.1 2011/09/03 00:03:15 theurich Exp $'
+      '$Id: ESMF_Clock.F90,v 1.125.2.2 2011/12/08 02:04:48 theurich Exp $'
 
 !==============================================================================
 !
@@ -133,7 +133,9 @@
 ! 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Assign {\tt clock1} as an alias to the same {\tt ESMF\_Clock} object in 
@@ -298,7 +300,9 @@
 !   
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -437,7 +441,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Clock}.    
@@ -540,7 +546,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Creates a deep copy of a given {\tt ESMF\_Clock}, but does not copy its
@@ -600,7 +608,9 @@
 !     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -693,7 +703,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets one or more of the properties of an {\tt ESMF\_Clock}.
@@ -830,7 +842,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the {\tt alarm} whose name is the value of alarmname in the 
@@ -897,7 +911,9 @@
 !   
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Gets the {\tt clock}'s list of alarms and/or number of alarms.
@@ -1041,7 +1057,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Calculates what the next time of the {\tt clock} will be, based on
@@ -1104,7 +1122,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns true if currentTime is greater than or equal to stopTime
@@ -1162,7 +1182,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns true if clock is in {\tt ESMF\_DIRECTION\_REVERSE}, and false if 
@@ -1220,7 +1242,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns true if the {\tt clock} has reached or exceeded its stop time,
@@ -1276,7 +1300,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Returns true if the {\tt clock}'s stop time is set and enabled,
@@ -1464,7 +1490,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     \begin{sloppypar}
@@ -1594,7 +1622,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Disables a {\tt ESMF\_Clock}'s stop time; {\tt ESMF\_ClockIsStopTime()}
@@ -1645,7 +1675,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Enables a {\tt ESMF\_Clock}'s stop time, allowing
@@ -1698,7 +1730,9 @@
     
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Sets a {\tt clock}'s current time to the wall clock time.  It is
@@ -1749,7 +1783,9 @@
 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Checks whether a {\tt clock} is valid.  

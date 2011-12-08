@@ -1,4 +1,4 @@
-! $Id: ESMF_StateVa.F90,v 1.20 2011/06/23 15:54:37 rokuingh Exp $
+! $Id: ESMF_StateVa.F90,v 1.20.2.1 2011/12/08 02:04:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -66,7 +66,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateVa.F90,v 1.20 2011/06/23 15:54:37 rokuingh Exp $'
+      '$Id: ESMF_StateVa.F90,v 1.20.2.1 2011/12/08 02:04:59 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -97,7 +97,9 @@
       integer,          intent(out), optional :: rc 
 !
 ! !STATUS:
-! \apiStatusCompatible
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
 !
 ! !DESCRIPTION:
 !     Validates that the {\tt state} is internally consistent.

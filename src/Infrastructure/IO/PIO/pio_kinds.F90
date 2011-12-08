@@ -11,7 +11,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.3.2.1 2011/09/01 18:26:49 theurich Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.3.2.2 2011/12/08 02:04:42 theurich Exp $
 !  CVS:$Name:  $
 
 ! !USES:
