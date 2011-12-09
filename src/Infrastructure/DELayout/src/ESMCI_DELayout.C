@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.46 2011/11/08 05:02:09 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.47 2011/12/09 01:05:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.46 2011/11/08 05:02:09 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.47 2011/12/09 01:05:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -864,6 +864,8 @@ int DELayout::destruct(){
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
+//fprintf(stderr, "DELayout::destruct\n");
+
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     if (oldstyle){
       // oldstyle DELayout has several more allocations that need to be deleted

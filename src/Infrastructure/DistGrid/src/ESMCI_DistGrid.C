@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.67 2011/11/08 05:02:15 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.68 2011/12/09 01:05:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.67 2011/11/08 05:02:15 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.68 2011/12/09 01:05:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2042,6 +2042,8 @@ int DistGrid::destruct(bool followCreator){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+//fprintf(stderr, "DistGrid::destruct\n");
 
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
