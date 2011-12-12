@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.2 2011/11/29 17:27:35 theurich Exp $
+! $Id: ESMF_IOUGrid.F90,v 1.3 2011/12/12 18:49:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -236,10 +236,11 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
     integer:: localrc, ncStatus
     integer :: VarId, meshId, pos
     integer :: ncid, local_rank
-    integer :: localFillValue
+    integer :: localFillValue, indexBase, offset
     real(ESMF_KIND_R8), pointer :: nodeXcoordsLocal(:), nodeYcoordsLocal(:)
     integer :: dimIds(1), nodeDim
     character(len=256):: errmsg, nodeCoordString, nodeCoordNames(2), elmtConnName
+    integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
@@ -360,7 +361,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
     endif
     
     ! faceNodeConnX and faceNodeConnY are the node coordinates for a given cell (element).
-    ! In the UGRID standard, face_node_connectivity variable contains the indices (zero-based)
+    ! In the UGRID standard, face_node_connectivity variable contains the indices
     ! to the nodes, rather than the actually coodinates.  This is used to write the weight
     ! file in the SCRIP format.
     if (present(faceNodeConnX)) then 
@@ -384,6 +385,11 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
           rc)) return
+        ! Get start_index attribute to find out the index base (0 or 1)
+        ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
+        ! if not defined, default to 0-based
+        if (ncStatus /= nf90_noerror) indexBase = 0
+
         dim1 = size(faceNodeConnX,1)
         dim2 = size(faceNodeConnX,2)
         allocate(elemConn(dim1,dim2) )
@@ -394,11 +400,17 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
           rc)) return
 	faceNodeConnX(:,:)=localFillValue
 	faceNodeConnY(:,:)=localFillValue
+        !adjust index to 1-based of the start_index is 0
+        if (indexBase == 1) then
+	   offset = 0
+        else
+           offset = 1
+        endif
         do i=1,dim1
 	  do j=1,dim2
 		if (elemConn(i,j) /= localFillValue) then
-		   faceNodeConnX(i,j) = nodeXcoordsLocal(elemConn(i,j)+1)
-		   faceNodeConnY(i,j) = nodeYcoordsLocal(elemConn(i,j)+1)
+		   faceNodeConnX(i,j) = nodeXcoordsLocal(elemConn(i,j)+offset)
+		   faceNodeConnY(i,j) = nodeYcoordsLocal(elemConn(i,j)+offset)
 	        endif
           enddo
         enddo
@@ -444,7 +456,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     character(len=256) :: nodeCoordString
     character(len=80), allocatable :: nodeCoordNames(:)
     integer :: pos0, pos, pos1, pos2, n, yesNode
-    integer :: len
+    integer :: len, indexBase
     character(len=24) :: units
     real(ESMF_KIND_R8) :: rad2deg
     logical :: convertToDegLocal
@@ -622,10 +634,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     
     enddo
 
-    ! Get element connectivity
-    ! For the timebeing, if it does not exist, bail out
-    ! Since it is an optional attribute, the correct solution is to construct the face_node_connectivity
-    ! by using the edge_node_connectivity and face_edge_connectivity
+    ! Get element connectivity, if it does not exist, bail out
     errmsg = "Attribute face_node_connectivity in "//trim(filename)
     ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
     if (CDFCheckError (ncStatus, &
@@ -640,12 +649,16 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
       ESMF_SRCLINE, errmsg, &
       rc)) return
     ! Get elmt conn fill value (if there are triangles mixed with squares, eg)
-    errmsg = "Attribute "//trim(elmtConnName)//"_FillValue in "//trim(filename)
+    errmsg = "Attribute "//trim(elmtConnName)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
+    ! Get start_index attribute to find out the index base (0 or 1)
+    ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
+    ! if not defined, default to 0-based
+    if (ncStatus /= nf90_noerror) indexBase = 0
     ! Get dimensions of element connectivity (transposed) (for allocation)
     errmsg = "Dimensions of "//trim(elmtConnName)//" in "//trim(filename)
     ncStatus = nf90_inquire_variable (ncid, VarId, dimids=DimIds)
@@ -680,19 +693,30 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
       rc)) return
 
     ! Get the number of nodes for each element
+    ! if indexBase is 0, change it to 1 based index
     elmtNums(:)=MaxNodePerElmt
-    do i=1,localcount
-      do j=1,MaxNodePerElmt
-	! change 0-base to 1-base
-        if (elmtConn(j,i) /= localFillValue) then 
-	   elmtConn(j,i)=elmtConn(j,i)+1
-	else
-	   ! find the first FillValue
-	   elmtNums(i) = j-1
-	   exit
-	endif
-       enddo	
-    enddo
+    if (indexBase == 0) then
+      do i=1,localcount
+        do j=1,MaxNodePerElmt
+	  ! change 0-base to 1-base
+          if (elmtConn(j,i) /= localFillValue) then 
+	     elmtConn(j,i)=elmtConn(j,i)+1
+	  else
+	     ! find the first FillValue
+	     elmtNums(i) = j-1
+	     exit
+	  endif
+         enddo	
+      enddo
+    else
+      do i=1,localcount
+        j = MaxNodePerElmt
+        do while (elmtConn(j,i) == localFillValue)
+	  j = j - 1
+        enddo
+        elmtNums(i) = j
+      enddo
+    endif
 
     ! Deallocations
     deallocate( nodeCoordNames, nodeCoord1D )
