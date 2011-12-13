@@ -1,0 +1,5 @@
+Settings for Unicos/lc on Cray XT, using the PathScale compiler suite.
+
+Requires the following environment settings:
+
+ESMF_COMPILER pathscale
