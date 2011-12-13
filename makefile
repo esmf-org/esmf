@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.124 2011/06/29 20:25:58 theurich Exp $
+# $Id: makefile,v 1.124.2.1 2011/12/13 23:28:31 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -63,7 +63,7 @@ script_info:
 	-@echo "C++ Compiler version:"; $(ESMF_CXXCOMPILER_VERSION); echo "" 
 	-@echo "--------------------------------------------------------------"
 	-@echo "Preprocessor version:"
-	@$(ESMF_CPP) --version $(ESMF_DIR)/scpripts/empty.C
+	@$(ESMF_CPP) --version $(ESMF_DIR)/scripts/empty.C
 	-@echo "" 
 	-@echo "--------------------------------------------------------------"
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
