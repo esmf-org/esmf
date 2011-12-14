@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.129 2011/12/07 21:57:11 w6ws Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.130 2011/12/14 21:39:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.129 2011/12/07 21:57:11 w6ws Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.130 2011/12/14 21:39:19 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1097,25 +1097,25 @@
 !     \item[timeinterval]
 !          The object instance to query.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).
+!          Integer year (32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).
+!          Integer year (large, 64-bit).
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).
+!          Integer month (32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).
+!          Integer month (large, 64-bit).
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).
+!          Integer Julian day, or Modified Julian day (32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !     \item[{[h]}]
 !          Integer hour.
 !     \item[{[m]}]
 !          Integer minute.
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).
+!          Integer second (32-bit).
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).
+!          Integer second (large, 64-bit).
 !     \item[{[ms]}]
 !          Integer millisecond.
 !     \item[{[us]}]
@@ -1140,12 +1140,12 @@
 !          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
 !          (yy, mm, and/or d).
@@ -1329,25 +1329,25 @@
 !          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
 !          previously set.  Mutually exclusive with endTimeIn and calendarIn.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).
+!          Integer year (32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).
+!          Integer year (large, 64-bit).
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).
+!          Integer month (32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).
+!          Integer month (large, 64-bit).
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).
+!          Integer Julian day, or Modified Julian day (32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !     \item[{[h]}]
 !          Integer hour.
 !     \item[{[m]}]
 !          Integer minute.
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).
+!          Integer second (32-bit).
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).
+!          Integer second (large, 64-bit).
 !     \item[{[ms]}]
 !          Integer millisecond.
 !     \item[{[us]}]
@@ -1372,12 +1372,12 @@
 !          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
 !          (yy, mm, and/or d).
@@ -1566,25 +1566,25 @@
 !          mutually exclusive with, calkindflagIn below.  Primarily for
 !          specifying a custom calendar kind.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).
+!          Integer year (32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).
+!          Integer year (large, 64-bit).
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).
+!          Integer month (32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).
+!          Integer month (large, 64-bit).
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).
+!          Integer Julian day, or Modified Julian day (32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !     \item[{[h]}]
 !          Integer hour.
 !     \item[{[m]}]
 !          Integer minute.
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).
+!          Integer second (32-bit).
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).
+!          Integer second (large, 64-bit).
 !     \item[{[ms]}]
 !          Integer millisecond.
 !     \item[{[us]}]
@@ -1609,12 +1609,12 @@
 !          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit). 
+!                                                           (large, 64-bit). 
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit). 
+!                                                           (large, 64-bit). 
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
 !          (yy, mm, and/or d).
@@ -1800,25 +1800,25 @@
 !          calendarIn above.  More convenient way of specifying a built-in
 !          calendar kind.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).
+!          Integer year (32-bit).
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).
+!          Integer year (large, 64-bit).
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).
+!          Integer month (32-bit).
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).
+!          Integer month (large, 64-bit).
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).
+!          Integer Julian day, or Modified Julian day (32-bit).
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !     \item[{[h]}]
 !          Integer hour.
 !     \item[{[m]}]
 !          Integer minute.
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).
+!          Integer second (32-bit).
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).
+!          Integer second (large, 64-bit).
 !     \item[{[ms]}]
 !          Integer millisecond.
 !     \item[{[us]}]
@@ -1843,12 +1843,12 @@
 !          Integer numerator of fractional second (sN/sD).
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
 !          (yy, mm, and/or d).
@@ -2182,26 +2182,26 @@
 !     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !          Default = 0
 !     \item[{[h]}]
 !          Integer hour.  Default = 0
 !     \item[{[m]}]
 !          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0
 !     \item[{[ms]}]
 !          Integer millisecond.  Default = 0
 !     \item[{[us]}]
@@ -2227,14 +2227,14 @@
 !          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2344,26 +2344,26 @@
 !          in time.  If not set, and calendar also not set, calendar interval 
 !          "floats" across all calendars and times.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !          Default = 0
 !     \item[{[h]}]
 !          Integer hour.  Default = 0
 !     \item[{[m]}]
 !          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0
 !     \item[{[ms]}]
 !          Integer millisecond.  Default = 0
 !     \item[{[us]}]
@@ -2389,14 +2389,14 @@
 !          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8).
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2513,26 +2513,26 @@
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
 !          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !          Default = 0
 !     \item[{[h]}]
 !          Integer hour.  Default = 0
 !     \item[{[m]}]
 !          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0
 !     \item[{[ms]}]
 !          Integer millisecond.  Default = 0
 !     \item[{[us]}]
@@ -2558,14 +2558,14 @@
 !          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8).
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8).
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2678,26 +2678,26 @@
 !          calendar above.  More convenient way of specifying a built-in 
 !          calendar kind.
 !     \item[{[yy]}]
-!          Integer year (<= 32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
-!          Integer year (large, <= 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0
 !     \item[{[mm]}]
-!          Integer month (<= 32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0
 !     \item[{[mm\_i8]}]
-!          Integer month (large, <= 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (<= 32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
 !     \item[{[d\_i8]}]
-!          Integer Julian day, or Modified Julian day (large, <= 64-bit).
+!          Integer Julian day, or Modified Julian day (large, 64-bit).
 !          Default = 0
 !     \item[{[h]}]
 !          Integer hour.  Default = 0
 !     \item[{[m]}]
 !          Integer minute.  Default = 0
 !     \item[{[s]}]
-!          Integer second (<= 32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0
 !     \item[{[s\_i8]}]
-!          Integer second (large, <= 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0
 !     \item[{[ms]}]
 !          Integer millisecond.  Default = 0
 !     \item[{[us]}]
@@ -2723,14 +2723,14 @@
 !          Default = 0
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 0
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
 !          Default = 1
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
-!                                                           (large, <= 64-bit).
+!                                                           (large, 64-bit).
 !          Default = 1
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
