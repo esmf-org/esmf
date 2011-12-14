@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.13 2011/10/24 21:33:20 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.14 2011/12/14 00:32:55 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -544,6 +544,11 @@ void FTN(c_convertscrip)(
       }
     }
     // copy temp array back to cell, fill with unfilled space with -1
+    if (count < 3) {
+      //      printf("degenarate cells index %d, edges %d\n", i, count);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"A cell with less than 3 edges were found", rc);
+      return;
+    }
     edges[i]=count;
     for (j=0; j<count; j++) {
       cells[i1+j]=temp[j];
@@ -814,6 +819,11 @@ void FTN(c_convertscrip)(
   for (i=0; i<totalnodes; i++) {
     // numedges = find_cells(i+1, totalneighbors[i], cells, gcdim, gsdim, celltbl);
     numedges = dualcellcounts[i];
+    if (numedges < 3) {
+      //      printf("degenarate cells index %d, edges %d\n", i, numedges);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"A cell with less than 3 edges were found", rc);
+      return;
+    }
     // order the cell center coordinates in counter-clockwise order
     // lonbuf and latbuf contains the center vertex coordinates
     // next points to the cell_vertex location where we will fill
