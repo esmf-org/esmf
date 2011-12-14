@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.76.2.3 2011/12/08 02:04:28 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.76.2.4 2011/12/14 00:06:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.76.2.3 2011/12/08 02:04:28 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.76.2.4 2011/12/14 00:06:03 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1357,6 +1357,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! garbage collection
+    call ESMF_InterfaceIntDestroy(haloLDepthArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterfaceIntDestroy(haloUDepthArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Mark routehandle object as being created
     call ESMF_RouteHandleSetInitCreated(routehandle, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
