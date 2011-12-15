@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.139 2011/12/14 21:39:19 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.140 2011/12/15 23:19:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.139 2011/12/14 21:39:19 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.140 2011/12/15 23:19:36 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1182,7 +1182,7 @@
 !     Julian date-to-Julian day algorithm.  The Custom calendar will have
 !     user-defined values for yy, yy\_i8, mm, and dd.
 !
-!     The Julian day specifier, d or d\_i8, can only be used with the
+!     The Julian date specifier, d or d\_i8, can only be used with the
 !     Julian Day and Modified Julian Day calendars, and has a valid range
 !     depending on the word size.  For a signed 32-bit d, the range for
 !     Julian day is [+/- 24855].  For a signed 64-bit d\_i8, the valid
@@ -1219,33 +1219,33 @@
 !     \item[time]
 !          The object instance to initialize.
 !     \item[{[yy]}]
-!          Integer year (32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0.
 !     \item[{[yy\_i8]}]
-!          Integer year (large, 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0.
 !     \item[{[mm]}]
-!          Integer month.  Default = 1
+!          Integer month.  Default = 1.
 !     \item[{[dd]}]
-!          Integer day of the month.  Default = 1
+!          Integer day of the month.  Default = 1.
 !     \item[{[d]}]
 !          Integer Julian Day, or Modified Julian Day (32-bit).  Must not be
-!          specified with Gregorian calendars.  Default = 0
+!          specified with Gregorian calendars.  Default = 0.
 !     \item[{[d\_i8]}]
 !          Integer Julian Day, or Modified Julian Day (large, 64-bit).  Must not be
-!          specified with Gregorian calendars.  Default = 0
+!          specified with Gregorian calendars.  Default = 0.
 !     \item[{[h]}]
-!          Integer hour.  Default = 0
+!          Integer hour.  Default = 0.
 !     \item[{[m]}]
-!          Integer minute.  Default = 0
+!          Integer minute.  Default = 0.
 !     \item[{[s]}]
-!          Integer second (32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0.
 !     \item[{[s\_i8]}]
-!          Integer second (large, 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0.
 !     \item[{[ms]}]
-!          Integer millisecond.  Default = 0
+!          Integer millisecond.  Default = 0.
 !     \item[{[us]}]
-!          Integer microsecond.  Default = 0
+!          Integer microsecond.  Default = 0.
 !     \item[{[ns]}]
-!          Integer nanosecond.  Default = 0
+!          Integer nanosecond.  Default = 0.
 !     \item[{[d\_r8]}]
 !          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -1262,18 +1262,18 @@
 !          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional second (sN/sD).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
-!          Default = 1
+!          Default = 1.
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 1
+!          Default = 1.
 !     \item[{[calendar]}]
 !          \begin{sloppypar}
 !          Associated {\tt Calendar}.  Defaults to calendar

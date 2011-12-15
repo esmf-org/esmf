@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.130 2011/12/14 21:39:19 w6ws Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.131 2011/12/15 23:19:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.130 2011/12/14 21:39:19 w6ws Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.131 2011/12/15 23:19:36 w6ws Exp $'
 
 !==============================================================================
 !
@@ -2182,32 +2182,32 @@
 !     \item[timeinterval]
 !          The object instance to initialize.
 !     \item[{[yy]}]
-!          Integer year (32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0.
 !     \item[{[yy\_i8]}]
-!          Integer year (large, 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0.
 !     \item[{[mm]}]
-!          Integer month (32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0.
 !     \item[{[mm\_i8]}]
-!          Integer month (large, 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0.
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0.
 !     \item[{[d\_i8]}]
 !          Integer Julian day, or Modified Julian day (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[h]}]
-!          Integer hour.  Default = 0
+!          Integer hour.  Default = 0.
 !     \item[{[m]}]
-!          Integer minute.  Default = 0
+!          Integer minute.  Default = 0.
 !     \item[{[s]}]
-!          Integer second (32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0.
 !     \item[{[s\_i8]}]
-!          Integer second (large, 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0.
 !     \item[{[ms]}]
-!          Integer millisecond.  Default = 0
+!          Integer millisecond.  Default = 0.
 !     \item[{[us]}]
-!          Integer microsecond.  Default = 0
+!          Integer microsecond.  Default = 0.
 !     \item[{[ns]}]
-!          Integer nanosecond.  Default = 0
+!          Integer nanosecond.  Default = 0.
 !     \item[{[d\_r8]}]
 !          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2224,18 +2224,18 @@
 !          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional second (sN/sD).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
-!          Default = 1
+!          Default = 1.
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 1
+!          Default = 1.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2344,32 +2344,32 @@
 !          in time.  If not set, and calendar also not set, calendar interval 
 !          "floats" across all calendars and times.
 !     \item[{[yy]}]
-!          Integer year (32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0.
 !     \item[{[yy\_i8]}]
-!          Integer year (large, 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0.
 !     \item[{[mm]}]
-!          Integer month (32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0.
 !     \item[{[mm\_i8]}]
-!          Integer month (large, 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0.
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0.
 !     \item[{[d\_i8]}]
 !          Integer Julian day, or Modified Julian day (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[h]}]
-!          Integer hour.  Default = 0
+!          Integer hour.  Default = 0.
 !     \item[{[m]}]
-!          Integer minute.  Default = 0
+!          Integer minute.  Default = 0.
 !     \item[{[s]}]
-!          Integer second (32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0.
 !     \item[{[s\_i8]}]
-!          Integer second (large, 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0.
 !     \item[{[ms]}]
-!          Integer millisecond.  Default = 0
+!          Integer millisecond.  Default = 0.
 !     \item[{[us]}]
-!          Integer microsecond.  Default = 0
+!          Integer microsecond.  Default = 0.
 !     \item[{[ns]}]
-!          Integer nanosecond.  Default = 0
+!          Integer nanosecond.  Default = 0.
 !     \item[{[d\_r8]}]
 !          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2386,18 +2386,18 @@
 !          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional second (sN/sD).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
-!          Default = 1
+!          Default = 1.
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8).
 !                                                           (large, 64-bit).
-!          Default = 1
+!          Default = 1.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2513,32 +2513,32 @@
 !          it contains a calendar.  Alternate to, and mutually exclusive with, 
 !          calkindflag below.  Primarily for specifying a custom calendar kind.
 !     \item[{[yy]}]
-!          Integer year (32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0.
 !     \item[{[yy\_i8]}]
-!          Integer year (large, 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0.
 !     \item[{[mm]}]
-!          Integer month (32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0.
 !     \item[{[mm\_i8]}]
-!          Integer month (large, 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0.
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0.
 !     \item[{[d\_i8]}]
 !          Integer Julian day, or Modified Julian day (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[h]}]
-!          Integer hour.  Default = 0
+!          Integer hour.  Default = 0.
 !     \item[{[m]}]
-!          Integer minute.  Default = 0
+!          Integer minute.  Default = 0.
 !     \item[{[s]}]
-!          Integer second (32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0.
 !     \item[{[s\_i8]}]
-!          Integer second (large, 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0.
 !     \item[{[ms]}]
-!          Integer millisecond.  Default = 0
+!          Integer millisecond.  Default = 0.
 !     \item[{[us]}]
-!          Integer microsecond.  Default = 0
+!          Integer microsecond.  Default = 0.
 !     \item[{[ns]}]
-!          Integer nanosecond.  Default = 0
+!          Integer nanosecond.  Default = 0.
 !     \item[{[d\_r8]}]
 !          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2555,18 +2555,18 @@
 !          Double precision nanosecond.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional second (sN/sD).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8).
 !                                                           (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
-!          Default = 1
+!          Default = 1.
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8).
 !                                                           (large, 64-bit).
-!          Default = 1
+!          Default = 1.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2678,32 +2678,32 @@
 !          calendar above.  More convenient way of specifying a built-in 
 !          calendar kind.
 !     \item[{[yy]}]
-!          Integer year (32-bit).  Default = 0
+!          Integer year (32-bit).  Default = 0.
 !     \item[{[yy\_i8]}]
-!          Integer year (large, 64-bit).  Default = 0
+!          Integer year (large, 64-bit).  Default = 0.
 !     \item[{[mm]}]
-!          Integer month (32-bit).  Default = 0
+!          Integer month (32-bit).  Default = 0.
 !     \item[{[mm\_i8]}]
-!          Integer month (large, 64-bit).  Default = 0
+!          Integer month (large, 64-bit).  Default = 0.
 !     \item[{[d]}]
-!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0
+!          Integer Julian day, or Modified Julian day (32-bit).  Default = 0.
 !     \item[{[d\_i8]}]
 !          Integer Julian day, or Modified Julian day (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[h]}]
-!          Integer hour.  Default = 0
+!          Integer hour.  Default = 0.
 !     \item[{[m]}]
-!          Integer minute.  Default = 0
+!          Integer minute.  Default = 0.
 !     \item[{[s]}]
-!          Integer second (32-bit).  Default = 0
+!          Integer second (32-bit).  Default = 0.
 !     \item[{[s\_i8]}]
-!          Integer second (large, 64-bit).  Default = 0
+!          Integer second (large, 64-bit).  Default = 0.
 !     \item[{[ms]}]
-!          Integer millisecond.  Default = 0
+!          Integer millisecond.  Default = 0.
 !     \item[{[us]}]
-!          Integer microsecond.  Default = 0
+!          Integer microsecond.  Default = 0.
 !     \item[{[ns]}]
-!          Integer nanosecond.  Default = 0
+!          Integer nanosecond.  Default = 0.
 !     \item[{[d\_r8]}]
 !          Double precision day.  Default = 0.0.
 !     \item[{[h\_r8]}]
@@ -2720,18 +2720,18 @@
 !          Double precision nanoseconds.  Default = 0.0.
 !     \item[{[sN]}]
 !          Integer numerator of fractional second (sN/sD).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sN\_i8]}]
 !          Integer numerator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 0
+!          Default = 0.
 !     \item[{[sD]}]
 !          Integer denominator of fractional second (sN/sD).
-!          Default = 1
+!          Default = 1.
 !     \item[{[sD\_i8]}]
 !          Integer denominator of fractional second (sN\_i8/sD\_i8)
 !                                                           (large, 64-bit).
-!          Default = 1
+!          Default = 1.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
