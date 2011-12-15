@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2010/11/30 19:41:47 theurich Exp $
+# $Id: build_rules.mk,v 1.21 2011/12/15 18:45:50 rokuingh Exp $
 #
 # Darwin.gfortran.default
 #
@@ -202,7 +202,6 @@ ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Blank out variables to prevent rpath encoding
-#
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
 
@@ -217,6 +216,6 @@ ESMF_F90LINKLIBS += -lstdc++
 ESMF_CXXLINKLIBS += -lgfortran
 
 ############################################################
-# Blank out shared library options
-#
-ESMF_SL_LIBS_TO_MAKE  =
+# Shared library options
+ESMF_SL_LIBOPTS  += -dynamiclib
+ESMF_SL_LIBLIBS  += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
