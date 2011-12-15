@@ -1,4 +1,4 @@
-!  $Id: ESMF_SolverUtil_C.F90,v 1.8 2011/01/05 20:05:45 svasquez Exp $
+!  $Id: ESMF_SolverUtil_C.F90,v 1.9 2011/12/15 23:11:27 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_SolverUtil_C.F90,v 1.8 2011/01/05 20:05:45 svasquez Exp $'
+!      '$Id: ESMF_SolverUtil_C.F90,v 1.9 2011/12/15 23:11:27 peggyli Exp $'
 !==============================================================================
    subroutine f_esmf_lapack_iworksize(minmn,iworksize)
     
@@ -33,14 +33,10 @@
      integer, intent(in)              :: minmn 
      integer, intent(out)             :: iworksize
 
-#if defined (ESMF_LAPACK)
      integer, external :: ILAENV
 
      integer :: smlsiz              
      integer ::  nlvl
-#endif
-
-#if defined (ESMF_LAPACK)
  
     smlsiz=ILAENV(9,'DGELSD',' ',0,0,0,0)   
  
@@ -48,11 +44,6 @@
            LOG(2.0) ) + 1, 0 )
    
     iworksize = 3*minmn*nlvl+11*minmn +10 
-#else
-! The following is to eliminate compiler warnings when LAPACK
-! is not used.
-    iworksize = merge (0, 0, minmn == 0)
-#endif
 
   end subroutine f_esmf_lapack_iworksize
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_PatchRecovery.C,v 1.9 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_PatchRecovery.C,v 1.10 2011/12/15 23:11:45 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -33,18 +33,14 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.9 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.10 2011/12/15 23:11:45 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
-#ifdef ESMF_LAPACK
 extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 
 extern "C" void FTN(dgelsd)(int *,int *, int*, double*, int*, double*, int*,double*, double*, int*, double *, int*, int *, int *);
 
 extern "C" void FTN(f_esmf_lapack_iworksize)(int *,int *);
-#endif
-
-          
 
 namespace ESMCI {
 
@@ -264,8 +260,6 @@ struct DGELSD_Solver {
 void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double> &mat, std::vector<Real> &rhs, Real coeff[])
 {
 
-#ifdef ESMF_LAPACK
-
 #ifdef RESIDUALS
 Par::Out() << "A(" << m << "," << n << ")=" << std::endl;
 for (UInt i = 0; i < m; i++) {
@@ -355,11 +349,6 @@ Par::Out() << "B=" << std::endl;
       coeff[r*ncoef+c] = rhs[r*ldb+c];
     }
   }
-
-#else
-  Throw() << "Please reconfigure with lapack enabled";
-#endif
-
 }
 
 };
@@ -372,8 +361,6 @@ template <>
 struct DGELSD_Solver<double> {
 void operator()(UInt ncoef, int ldb, int m, int n, int nrhs, std::vector<double> &mat, std::vector<double> &rhs, double coeff[])
 {
-
-#ifdef ESMF_LAPACK
 
 #ifdef RESIDUALS
 std::vector<double> saverhs = rhs;
@@ -466,11 +453,6 @@ if (err > 1e-10) Par::Out() << "\tnsamples=" << m << std::endl;
       coeff[r*ncoef+c] = rhs[r*ldb+c];
     }
   }
-
-#else
-  Throw() << "Please reconfigure with lapack enabled";
-#endif
-
 }
 
 };
@@ -505,14 +487,10 @@ Par::Out() << std::endl;
 }
 #endif
 
-#ifdef ESMF_LAPACK
   FTN(dgelsy)(
     &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 
   if (info !=0) Throw() << "Bad dgelsy solve, info=" << info;
-#else
-  Throw() << "Please reconfigure with lapack enabled";
-#endif
 
 // Apply the pseudo inverse
   std::vector<Real> b = rhs; // ughh
@@ -571,12 +549,8 @@ std::vector<double> saverhs = rhs;
 std::vector<double> matsav = mat;
 #endif
 
-#ifdef ESMF_LAPACK
   FTN(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
-#else
-  Throw() << "Please recompile with ESMF_LAPACK enabled";
-#endif
 
 #ifdef RESIDUALS
 Par::Out() << "A(" << m << "," << n << ")=" << std::endl;
