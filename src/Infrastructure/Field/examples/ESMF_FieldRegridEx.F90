@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.52 2011/09/01 21:50:19 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.53 2011/12/15 19:03:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.52 2011/09/01 21:50:19 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.53 2011/12/15 19:03:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -301,7 +301,7 @@ program ESMF_FieldRegridEx
 ! use, the term bilinear interpolation is used for 3D interpolation in ESMF as well, although it should more properly be referred 
 ! to as trilinear interpolation.
 !
-! Patch (or higher-order) interpolation is the ESMF version of a techique called ``patch recovery'' commonly
+! Patch (or higher-order) interpolation is the ESMF version of a technique called ``patch recovery'' commonly
 ! used in finite element modeling~\cite{PatchInterp1}~\cite{PatchInterp2}. It typically results in better approximations to 
 ! values and derivatives when compared to bilinear interpolation.
 ! Patch interpolation works by constructing multiple polynomial patches to represent

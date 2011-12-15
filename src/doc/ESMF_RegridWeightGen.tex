@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.49 2011/11/30 22:55:41 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.50 2011/12/15 19:03:16 rokuingh Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -92,7 +92,7 @@ many textbooks.  Each destination point is mapped to a location in the source Me
 to the source points surrounding it is used to calculate the interpolation weights. 
 
  This application can also be used to generate patch interpolation weights. Patch
-interpolation is the ESMF version of a techique called ``patch recovery'' commonly
+interpolation is the ESMF version of a technique called ``patch recovery'' commonly
 used in finite element modeling~\cite{PatchInterp1}~\cite{PatchInterp2}. It typically results in better approximations to values and derivatives when compared to bilinear interpolation.  
 Patch interpolation works by constructing multiple polynomial patches to represent
 the data in a source element. For 2D grids, these polynomials 
