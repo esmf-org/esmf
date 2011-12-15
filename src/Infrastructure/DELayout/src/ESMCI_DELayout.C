@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.47 2011/12/09 01:05:22 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.48 2011/12/15 19:05:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.47 2011/12/09 01:05:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.48 2011/12/15 19:05:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1442,8 +1442,8 @@ int DELayout::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if (inquireflag != ESMF_INQUIREONLY) {
-    if ((*length - *offset) < sizeof(DELayout)) {
+  if (inquireflag != ESMF_INQUIREONLY){
+    if ((*length - *offset) < sizeof(DELayout)){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
       "- Buffer too short to add a DELayout object", &rc);
       return rc;
@@ -1454,8 +1454,8 @@ int DELayout::serialize(
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
   ESMC_AttReconcileFlag attreconflag = ESMC_ATTRECONCILE_OFF;
-  localrc = this->ESMC_Base::ESMC_Serialize(buffer,length,offset,attreconflag,
-                                            inquireflag);
+  localrc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset,
+    attreconflag, inquireflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
 
@@ -1464,7 +1464,7 @@ int DELayout::serialize(
   if (r!=0) *offset += 8-r;  // alignment
   cp = (char *)(buffer + *offset);
   ip = (int *)cp;
-  if (inquireflag != ESMF_INQUIREONLY) {
+  if (inquireflag != ESMF_INQUIREONLY){
     *ip++ = deCount;
     *ip++ = oldstyle;
     if (oldstyle){
@@ -1472,8 +1472,9 @@ int DELayout::serialize(
       // to be sent now.
       *ip++ = ndim;
     }
-  } else
+  }else{
     ip += oldstyle ? 3 : 2;
+  }
 
   if (!oldstyle){
     dp = (ESMC_Pin_Flag *)ip;
@@ -1484,8 +1485,8 @@ int DELayout::serialize(
     ip = (int *)dp;
   }
 
-  if (inquireflag != ESMF_INQUIREONLY) {  
-    for (i=0, dep=deInfoList; i<deCount; i++, dep++) {
+  if (inquireflag != ESMF_INQUIREONLY){
+    for (i=0, dep=deInfoList; i<deCount; i++, dep++){
       *ip++ = dep->de;
       *ip++ = dep->pet;
       *ip++ = dep->vas;
@@ -1499,41 +1500,46 @@ int DELayout::serialize(
           *ip++ = dep->coord[j];
       }
     }
-  } else {
-    ip += 3*deCount;
-    if (oldstyle) {
-      ip += deCount + deCount * dep->nconnect * 2;
-      ip += deCount * ndim;
+  }else{
+    for (i=0, dep=deInfoList; i<deCount; i++, dep++){
+      ip += 3*deCount;
+      if (oldstyle){
+        ip += 1 + 2*dep->nconnect + ndim;
+      }
     }
   }
   
   // this has to come before dims, since they are not allocated unless
   // logRectFlag is true.
   lp = (ESMC_Logical *)ip;
-  if (inquireflag != ESMF_INQUIREONLY) {
+  if (inquireflag != ESMF_INQUIREONLY){
     *lp++ = oneToOneFlag;
     if (oldstyle)
       *lp++ = logRectFlag;
-  } else
+  }else{
     lp += oldstyle ? 1 : 2;
+  }
   
   ip = (int *)lp;
   if (oldstyle){
-    if (logRectFlag == ESMF_TRUE)
-      if (inquireflag != ESMF_INQUIREONLY)
+    if (logRectFlag == ESMF_TRUE){
+      if (inquireflag != ESMF_INQUIREONLY){
         for (i=0; i<ndim; i++) 
           *ip++ = dims[i];
-      else
+      }else{
         ip += ndim;
+      }
+    }
   }
 
   cp = (char *)ip;
 
   *offset = (cp - buffer);
  
-  if (inquireflag == ESMF_INQUIREONLY)
+  if (inquireflag == ESMF_INQUIREONLY){
     if (*offset < sizeof (DELayout))
       *offset = sizeof (DELayout);
+  }
  
   // return successfully
   rc = ESMF_SUCCESS;
