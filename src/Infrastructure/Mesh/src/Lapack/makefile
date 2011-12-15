@@ -1,3 +1,5 @@
+# $Id: makefile,v 1.2 2011/12/15 23:19:38 peggyli Exp $
+
 ALL: build_here
 
 SOURCEC  =
