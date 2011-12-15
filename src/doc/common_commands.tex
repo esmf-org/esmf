@@ -1,4 +1,4 @@
-% $Id: common_commands.tex,v 1.12 2011/12/15 19:30:36 theurich Exp $
+% $Id: common_commands.tex,v 1.13 2011/12/15 21:32:00 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -8,8 +8,8 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
-\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF versions starting at #1. If code using this interface compiles with a version of ESMF from #1 up to the current version, then it will compile with the current version.}
-\newcommand{\apiStatusModifiedSinceVersion}[1]{This interface was modified since ESMF version #1. The fact that code using this interface compiles with the current ESMF version does not guaranteed that it compiles with previous versions of this interface. If user code compatibility with version #1 is desired then care must be taken to limit the use of this interface to features that were available in the #1 release. \\
+\newcommand{\apiStatusCompatibleVersion}[1]{This interface is backward compatible with ESMF versions starting at #1. If code using this interface compiles with any version of ESMF from #1 up to the current version, then it will compile with the current version.}
+\newcommand{\apiStatusModifiedSinceVersion}[1]{This interface was modified since ESMF version #1. The fact that code using this interface compiles with the current ESMF version does not guarantee that it compiles with previous versions of this interface. If user code compatibility with version #1 is desired then care must be taken to limit the use of this interface to features that were available in the #1 release. \\
 Changes made after the #1 release:}
 
 \newcommand{\apiStatusCompatibleVersionExceptions}[1]{This interface is backward compatible with ESMF versions starting at #1 - {\em except those arguments indicated below}.}
