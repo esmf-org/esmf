@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.2 2011/12/15 23:20:20 peggyli Exp $
+# $Id: makefile,v 1.3 2011/12/16 06:06:02 theurich Exp $
 
 ALL: build_here
 
 SOURCEC  =
-SOURCEF  = \
-      dcopy.f  ddot.f  dger.f  dnrm2.f  drot.f  dscal.f  dswap.f  dtrmm.f  dtrmv.f  idamax.f
+SOURCEF  = dcopy.f  ddot.f  dger.f  dnrm2.f  drot.f  dscal.f  dswap.f  dtrmm.f \
+           dtrmv.f  idamax.f dgemv.f dgemm.f dtrsm.f daxpy.f
 
 SOURCEH  =
 
