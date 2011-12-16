@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshObjConn.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_MeshObjConn.C,v 1.11 2011/12/16 02:04:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshObjConn.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MeshObjConn.C,v 1.11 2011/12/16 02:04:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -558,10 +558,10 @@ void edge_info(obj_iter node_begin, obj_iter node_end,
   } // elems
 }
 
-template void edge_info<>(MeshObj **node_begin,
-               MeshObj** node_end,
-               MeshObj** elem_begin,
-               MeshObj** elem_end,
+template void edge_info<>(std::vector<MeshObj*>::iterator node_begin,
+               std::vector<MeshObj*>::iterator node_end,
+               std::vector<MeshObj*>::iterator elem_begin,
+               std::vector<MeshObj*>::iterator elem_end,
                int *ordinal, // out
                int *polarity, // out
                bool
