@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessGridMod.F90,v 1.36 2011/06/30 06:01:37 theurich Exp $
+! $Id: ESMF_TestHarnessGridMod.F90,v 1.37 2011/12/17 02:56:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -222,7 +222,7 @@
   character(THARN_MAXSTR) :: ltmp, lchar
   character(THARN_MAXSTR) :: gtype, gunits
 
-  logical :: flag = .true.
+  logical :: flag
 
   ! local integer variables
   integer :: ntmp, grank, gsize
@@ -608,7 +608,7 @@
   character(THARN_MAXSTR) :: gtype, gunits, gtag
   type(character_array) :: wchar(10)
 
-  logical :: flag = .true.
+  logical :: flag
 
   ! local integer variables
   integer :: ntmp, grank, gsize
