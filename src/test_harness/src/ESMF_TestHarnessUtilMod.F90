@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUtilMod.F90,v 1.18 2011/02/23 20:19:39 w6ws Exp $
+! $Id: ESMF_TestHarnessUtilMod.F90,v 1.19 2011/12/17 02:38:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -885,7 +885,7 @@ integer :: rootPet = Harness_rootPet
   character(THARN_MAXSTR) :: lchar, ltmp
   integer :: int_tmp
 
-  logical :: flag = .true.
+  logical :: flag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -1005,7 +1005,7 @@ integer :: rootPet = Harness_rootPet
   character(THARN_MAXSTR) :: lchar, ltmp
   real(ESMF_KIND_R8) :: flt_tmp
 
-  logical :: flag = .true.
+  logical :: flag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
@@ -1124,7 +1124,7 @@ integer :: rootPet = Harness_rootPet
   ! local character strings
   character(THARN_MAXSTR) :: ltmp, lchar
 
-  logical :: flag = .true.
+  logical :: flag
 
   ! initialize return flag
   localrc = ESMF_RC_NOT_IMPL
