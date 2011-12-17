@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessParser.F90,v 1.13 2011/06/30 06:01:37 theurich Exp $
+! $Id: ESMF_TestHarnessParser.F90,v 1.14 2011/12/17 03:08:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -509,7 +509,7 @@ logical                       :: checkpoint = .FALSE.
   character(THARN_MAXSTR) :: ltmp
   character(THARN_MAXSTR) :: lchar, lchar1, lchar2
   
-  logical :: flag = .true.
+  logical :: flag
 
 ! local integer variables
   integer :: n, nn, k, pos, kcol, ncount, npds, ntmp
@@ -521,7 +521,7 @@ logical                       :: checkpoint = .FALSE.
   integer :: allocRcToTest
 
 ! local logical variable
-  logical :: endflag = .false.
+  logical :: endflag
   logical :: cflag, dflag, gflag
 
   ! initialize return flag

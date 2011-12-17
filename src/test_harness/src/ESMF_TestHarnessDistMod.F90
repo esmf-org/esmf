@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessDistMod.F90,v 1.25 2011/06/30 06:01:37 theurich Exp $
+! $Id: ESMF_TestHarnessDistMod.F90,v 1.26 2011/12/17 03:08:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
   real(ESMF_KIND_R8) :: tvalue
 
   ! local logical
-  logical :: flag = .true.
+  logical :: flag
 
   ! local integer variables
   integer :: ntmp, src_rank, dst_rank
