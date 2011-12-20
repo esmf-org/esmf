@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.140 2011/12/15 23:19:36 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.141 2011/12/20 18:19:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.140 2011/12/15 23:19:36 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.141 2011/12/20 18:19:36 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1182,7 +1182,7 @@
 !     Julian date-to-Julian day algorithm.  The Custom calendar will have
 !     user-defined values for yy, yy\_i8, mm, and dd.
 !
-!     The Julian date specifier, d or d\_i8, can only be used with the
+!     The Julian day specifier, d or d\_i8, can only be used with the
 !     Julian Day and Modified Julian Day calendars, and has a valid range
 !     depending on the word size.  For a signed 32-bit d, the range for
 !     Julian day is [+/- 24855].  For a signed 64-bit d\_i8, the valid
