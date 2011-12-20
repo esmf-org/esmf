@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.27 2011/03/16 18:36:44 theurich Exp $
+# $Id: build_rules.mk,v 1.28 2011/12/20 06:51:43 theurich Exp $
 #
 # Linux.g95.default
 #
@@ -99,9 +99,9 @@ ESMF_OPENMP := OFF
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
-ESMF_F90COMPILEOPTS       +=
-ESMF_F90LINKOPTS          +=
-ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
+ESMF_F90COMPILEOPTS       += -fno-second-underscore
+ESMF_F90LINKOPTS          += -fno-second-underscore
+ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
 ESMF_F90COMPILEOPTS       += -fno-second-underscore
