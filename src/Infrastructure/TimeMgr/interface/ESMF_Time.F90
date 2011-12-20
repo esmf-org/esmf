@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.141 2011/12/20 18:19:36 w6ws Exp $
+! $Id: ESMF_Time.F90,v 1.142 2011/12/20 19:58:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.141 2011/12/20 18:19:36 w6ws Exp $'
+      '$Id: ESMF_Time.F90,v 1.142 2011/12/20 19:58:59 w6ws Exp $'
 
 !==============================================================================
 !
@@ -1186,7 +1186,7 @@
 !     Julian Day and Modified Julian Day calendars, and has a valid range
 !     depending on the word size.  For a signed 32-bit d, the range for
 !     Julian day is [+/- 24855].  For a signed 64-bit d\_i8, the valid
-!     range for Julian day is [+/- 106,751,991,167,300].  The Julian date
+!     range for Julian day is [+/- 106,751,991,167,300].  The Julian day
 !     number system adheres to the conventional standard where the reference
 !     day of d=0 corresponds to 11/24/-4713 in the proleptic Gregorian calendar
 !     and 1/1/-4712 in the proleptic Julian calendar.  See~\cite{Meyer2} and
