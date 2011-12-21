@@ -1,4 +1,4 @@
-! $Id: ESMF_LAPACKUTest.F90,v 1.13 2011/06/30 06:00:17 theurich Exp $
+! $Id: ESMF_LAPACKUTest.F90,v 1.14 2011/12/21 05:32:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@ program ESMF_LAPACKUTest
 
   integer, parameter :: dp_k = kind (1.0d0)
 
-  integer, parameter :: n = 1234, nrhs = 12
+  integer, parameter :: n = 123, nrhs = 12
   real(dp_k) :: a(n, n), b(n, nrhs)
   integer :: pivs(n)
 
