@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.98.2.2 2011/09/13 22:47:32 theurich Exp $
+% $Id: ESMF_install.tex,v 1.98.2.3 2011/12/22 23:07:21 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -99,13 +99,13 @@ The {\tt ESMF\_NETCDF\_INCLUDE}, {\tt ESMF\_NETCDF\_LIBPATH}, and
 {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.  This option is useful for systems 
 which have the Fortran and C bindings archived in seperate library files; 
 the C++ bindings are always in a separate library file.  
-The {\tt ESMF\_NETLIB\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
+The {\tt ESMF\_NETCDF\_INCLUDE} and {\tt ESMF\_NETCDF\_LIBPATH}
 environment variables will also be used, if defined.
 
 \item[{\tt "standard"}] {\tt ESMF\_NETCDF\_LIBS} will be set to 
 {\tt "-lnetcdf\_c++ -lnetcdf"}.  This option is useful when the Fortran and 
 C bindings are archived together in the same library file, alongside the 
-always separate C++ bindings library file.  The {\tt ESMF\_NETLIB\_INCLUDE} 
+always separate C++ bindings library file.  The {\tt ESMF\_NETCDF\_INCLUDE} 
 and {\tt ESMF\_NETCDF\_LIBPATH} environment variables will also be used, 
 if defined.
 
