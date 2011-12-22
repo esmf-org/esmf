@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.37 2011/12/08 23:33:30 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.38 2011/12/22 20:47:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -2892,7 +2892,15 @@ int VMK::send(const void *message, int size, int dest, int tag){
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-    if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
+    if (tag == -1){
+      tag = 1000*mypet+dest;  // default tag to simplify debugging
+      // make sure to stay below max tag
+      int maxTag = getMaxTag();
+      if (maxTag > 0)
+        tag = tag%maxTag;
+      else
+        tag = 0;
+    }
     localrc = MPI_Send(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c);
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
@@ -3052,7 +3060,15 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
     if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
 //fprintf(stderr, "MPI_Isend: ch=%p\n", (*ch)->mpireq);
-    if (tag == -1) tag = 1000*mypet+dest;   // default tag to simplify debugging
+    if (tag == -1){
+      tag = 1000*mypet+dest;  // default tag to simplify debugging
+      // make sure to stay below max tag
+      int maxTag = getMaxTag();
+      if (maxTag > 0)
+        tag = tag%maxTag;
+      else
+        tag = 0;
+    }
     localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*ch)->mpireq);
 #ifndef ESMF_NO_PTHREADS
@@ -3157,8 +3173,16 @@ int VMK::recv(void *message, int size, int source, int tag, status *status){
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
-    if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
-    else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
+    if (tag == -1){
+      tag = 1000*source+mypet;  // default tag to simplify debugging
+      // make sure to stay below max tag
+      int maxTag = getMaxTag();
+      if (maxTag > 0)
+        tag = tag%maxTag;
+      else
+        tag = 0;
+    }else if (tag == VM_ANY_TAG)
+      tag = MPI_ANY_TAG;
     int mpiSource;
     if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
     else mpiSource = lpid[source];
@@ -3348,8 +3372,16 @@ int VMK::recv(void *message, int size, int source, commhandle **ch, int tag){
     if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
 //fprintf(stderr, "MPI_Irecv: ch=%p\n", (*ch)->mpireq);
-    if (tag == -1) tag = 1000*source+mypet; // default tag to simplify debugging
-    else if (tag == VM_ANY_TAG) tag = MPI_ANY_TAG;
+    if (tag == -1){
+      tag = 1000*source+mypet;  // default tag to simplify debugging
+      // make sure to stay below max tag
+      int maxTag = getMaxTag();
+      if (maxTag > 0)
+        tag = tag%maxTag;
+      else
+        tag = 0;
+    }else if (tag == VM_ANY_TAG)
+      tag = MPI_ANY_TAG;
     int mpiSource;
     if (source == VM_ANY_SRC) mpiSource = MPI_ANY_SOURCE;
     else mpiSource = lpid[source];
@@ -5034,6 +5066,14 @@ void sync_reset(shmsync *shms){
     *(shms->buffer_done[i]) = 0;
 }
 
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+// ComPat: abstract class providing basic communication patters
+//==============================================================================
+//==============================================================================
+//==============================================================================
 
 namespace ESMCI{
   void ComPat::totalExchange(VMK *vmk){
