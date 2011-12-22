@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_init.tex,v 1.23 2011/07/01 17:09:03 theurich Exp $
+% CVS $Id: code_conv_init.tex,v 1.24 2011/12/22 00:46:31 rokuingh Exp $
 
 
 \subsection{Initialization Standardization Instructions}
@@ -594,169 +594,96 @@ The standardization yields this:\\
 CAUTION: The following lists are very much outdated!!!
 
 \begin{table}[t]
-\begin{tabular}{ll}
+\begin{tabular}{llll}
 
-{\bf Class} & {\bf Type} \\ \hline
+{\bf Class} & {\bf Type} & {\bf Fortran} & {\bf ESMF} \\ \hline
 
-ESMF\_Access               &  Parameter \\
-ESMF\_Alarm                &  Deep \\
-ESMF\_AlarmList\_Flag      & Parameter \\
-ESMF\_AllocFlag            &  Parameter \\
-ESMF\_Array                & Deep \\
-ESMF\_ArrayBundle          &  Deep \\
-ESMF\_ArrayHaloHandle       & Deep \\
-ESMF\_ArrayInterpolateHandle & Deep \\
-ESMF\_ArrayRedistHandle     & Deep \\
-ESMF\_ArraySpec             & Shallow\\
-ESMF\_Attribute             & Shallow\\
-ESMF\_Base                  & Deep \\
-ESMF\_BaseTime              & Shallow\\
-ESMF\_Sync\_Flag          & Parameter \\
-ESMF\_FieldBundle                & Deep \\
-ESMF\_FieldBundleCongruentData   & Shallow\\
-ESMF\_FieldBundleDataMap         & Shallow\\
-ESMF\_FieldBundleFieldAccess     & Shallow\\
-ESMF\_FieldBundleFieldInterleave & Shallow\\
-ESMF\_FieldBundleType            & Deep \\ 
-ESMF\_CWrap                 & Deep \\
-ESMF\_Calendar              & Deep \\
-ESMF\_CalKind\_Flag         & Parameter \\
-ESMF\_Clock                 & Deep \\
-ESMF\_CommHandle            & Deep \\
-ESMF\_CommTable             & Deep \\
-ESMF\_CompClass             & Deep \\
-ESMF\_CompType\_Flag              & Parameter \\
-ESMF\_Config                & Deep \\
-ESMF\_ConfigAttrUsed        & Shallow\\
-ESMF\_Context\_Flag           & Parameter \\
-ESMF\_CoordIndex            & Parameter \\
-ESMF\_CoordOrder            & Parameter \\
-ESMF\_CoordSystem           & Parameter \\
-ESMF\_CplComp               & Deep \\
-ESMF\_DELayout              & Deep \\
-ESMF\_DELayoutServiceReply  & Parameter \\
-ESMF\_DataHolder            & Shallow\\
-ESMF\_DataKind              & Parameter \\
-ESMF\_DataType              & Parameter \\
-ESMF\_DataValue             & Ignore\\
-ESMF\_Pin\_Flag             & Parameter \\
-
-\end{tabular}
-\end{table}
-
-
-
-\begin{table}[t]
-\begin{tabular}{ll}
-
-{\bf Class} & {\bf Type} \\ \hline
-
-ESMF\_DataType              & Parameter \\
-ESMF\_DataValue             & Ignore\\
-ESMF\_Pin\_Flag             & Parameter \\
-ESMF\_Decomp\_Flag            & Parameter \\
-ESMF\_Direction\_Flag             & Parameter \\
-ESMF\_DistGrid              & Deep \\
-ESMF\_Field                 & Deep \\
-ESMF\_FieldDataMap          & Shallow\\
-ESMF\_FieldType             & Deep \\
-ESMF\_Fraction              & Shallow\\
-ESMF\_Grid                  & Deep \\
-ESMF\_GridClass             & Deep \\
-ESMF\_GridComp              & Deep \\
-ESMF\_GridHorzStagger       & Parameter \\
-ESMF\_GridMask              & Shallow\\
-ESMF\_GridMaskType          & Parameter \\
-ESMF\_GridSpecific          & Shallow\\
-ESMF\_GridStatus\_Flag            & Parameter \\
-ESMF\_GridStorage           & Parameter \\
-ESMF\_GridStructure         & Parameter \\
-ESMF\_GridType              & Parameter \\
-ESMF\_GridVertStagger       & Parameter \\
-ESMF\_GridVertType          & Parameter \\
-ESMF\_HaloDirection         & Shallow\\
-ESMF\_HaltType              & Parameter \\
-ESMF\_Index\_Flag             & Parameter \\
-ESMF\_IndexOrder            & Parameter \\
-ESMF\_InterfaceInt          & Ignore\\
-ESMF\_InterleaveFlag        & Parameter \\
-ESMF\_InterleaveType        & Shallow\\
-ESMF\_LOGENTRY              & Shallow\\
-ESMF\_LocalArray            & Deep \\
-ESMF\_LocalFieldBundle           & Shallow\\
-ESMF\_LocalField            & Shallow\\
+ESMF\_Alarm                 & Deep            & public & public  \\
+ESMF\_AlarmList\_Flag       & Parameter       & public & public  \\
+ESMF\_Array                 & Deep            & &  \\
+ESMF\_ArrayBundle           & Deep            & &  \\
+ESMF\_ArraySpec             & Shallow         & &  \\
+ESMF\_Attribute             & Shallow         & &  \\
+ESMF\_Base                  & Deep            & &  \\
+ESMF\_BaseTime              & Shallow         & &  \\
+ESMF\_CWrap                 & Deep            & &  \\
+ESMF\_Calendar              & Deep            & &  \\
+ESMF\_CalKind\_Flag         & Parameter       & &  \\
+ESMF\_Clock                 & Deep            & &  \\
+ESMF\_CommHandle            & Deep            & &  \\
+ESMF\_CommTable             & Deep            & &  \\
+ESMF\_CompClass             & Deep            & &  \\
+ESMF\_CompType\_Flag        & Parameter       & &  \\
+ESMF\_Config                & Deep            & &  \\
+ESMF\_ConfigAttrUsed        & Shallow         & &  \\
+ESMF\_Context\_Flag         & Parameter       & &  \\
+ESMF\_CoordOrder            & Parameter       & &  \\
+ESMF\_CplComp               & Deep            & &  \\
+ESMF\_DELayout              & Deep            & &  \\
+ESMF\_DataHolder            & Shallow         & &  \\
+ESMF\_DataValue             & Ignore          & &  \\
+ESMF\_Decomp\_Flag          & Parameter       & &  \\
+ESMF\_Direction\_Flag       & Parameter       & &  \\
+ESMF\_DistGrid              & Deep            & &  \\
+ESMF\_Field                 & Deep            & &  \\
+ESMF\_FieldBundle           & Deep            & &  \\
+ESMF\_FieldBundleDataMap    & Shallow         & &  \\
+ESMF\_FieldBundleType       & Deep            & &  \\
+ESMF\_FieldDataMap          & Shallow         & &  \\
+ESMF\_FieldType             & Deep            & &  \\
+ESMF\_Fraction              & Shallow         & &  \\
+ESMF\_Grid                  & Deep            & &  \\
+ESMF\_GridComp              & Deep            & &  \\
+ESMF\_GridStatus\_Flag      & Parameter       & &  \\
+ESMF\_Index\_Flag           & Parameter       & &  \\
+ESMF\_InterfaceInt          & Ignore          & &  \\
 
 \end{tabular}
 \end{table}
 
 \begin{table}[t]
-\begin{tabular}{ll}
+\begin{tabular}{llll}
 
-{\bf Class} & {\bf Type} \\ \hline
+{\bf Class} & {\bf Type} & {\bf Fortran} & {\bf ESMF} \\ \hline
 
-ESMF\_Log                   & Shallow\\
-ESMF\_LogRectGrid           & Shallow\\
-ESMF\_LogKind\_Flag               & Parameter \\
-ESMF\_Logical               & Ignore\\
-ESMF\_Mask                  & Shallow\\
-ESMF\_LogMsg\_Flag               & Parameter \\
-ESMF\_NeededFlag            & Parameter \\
-ESMF\_ObjectID              & Shallow\\
-ESMF\_PackFlag              & Parameter \\
-ESMF\_PhysCoord             & Deep \\
-ESMF\_PhysCoordType         & Shallow\\
-ESMF\_PhysGrid              & Deep \\
-ESMF\_PhysGridOrientation   & Parameter \\
-ESMF\_PhysGridType          & Shallow\\
-ESMF\_PhysLocation          & Shallow\\
-ESMF\_PhysRegion            & Shallow\\
-ESMF\_Pointer               & Ignore\\
-ESMF\_RTable                & Deep \\
-ESMF\_ReadyFlag             & Parameter \\
-ESMF\_Reduce\_Flag            & Parameter \\
-ESMF\_Region\_Flag            & Parameter \\
-ESMF\_RegionType            & Parameter \\
-ESMF\_RegridDistrbOpt       & Parameter \\
-ESMF\_RegridIndex           & Deep \\
-ESMF\_RegridIndexType       & Shallow\\
-ESMF\_RegridMethod\_Flag    & Parameter \\
-ESMF\_RegridNormOpt         & Parameter \\
-ESMF\_RelLoc                & Parameter \\
-ESMF\_ReqForRestartFlag     & Parameter \\
-ESMF\_Route                 & Deep \\
-ESMF\_RouteHandle           & Deep \\
-ESMF\_RouteOptions          & Parameter \\
-ESMF\_State                 & Deep \\
-ESMF\_StateClass            & Deep \\
-ESMF\_StateItem             & Shallow\\
-ESMF\_StateItem\_Flag       & Parameter \\
-ESMF\_StateIntent\_Flag     & Parameter \\
-ESMF\_Status                & Parameter \\
-ESMF\_TVWrapperI4           & Shallow\\
-ESMF\_TVWrapperR8           & Shallow\\
-ESMF\_End\_Flag       & Parameter \\
-ESMF\_Time                  & Shallow\\
-ESMF\_TimeInterval          & Shallow\\
-ESMF\_TransformValues       & Deep \\
+ESMF\_LOGENTRY              & Shallow         & &  \\
+ESMF\_LocalArray            & Deep            & &  \\
+ESMF\_Log                   & Shallow         & &  \\
+ESMF\_LogKind\_Flag         & Parameter       & &  \\
+ESMF\_Logical               & Ignore          & &  \\
+ESMF\_Mask                  & Shallow         & &  \\
+ESMF\_LogMsg\_Flag          & Parameter       & &  \\
+ESMF\_NeededFlag            & Parameter       & &  \\
+ESMF\_ObjectID              & Shallow         & &  \\
+ESMF\_Pin\_Flag             & Parameter       & &  \\
+ESMF\_PhysGrid              & Deep            & &  \\
+ESMF\_Pointer               & Ignore          & &  \\
+ESMF\_ReadyFlag             & Parameter       & &  \\
+ESMF\_Reduce\_Flag          & Parameter       & &  \\
+ESMF\_Region\_Flag          & Parameter       & &  \\
+ESMF\_RegridMethod\_Flag    & Parameter       & &  \\
+ESMF\_RelLoc                & Parameter       & &  \\
+ESMF\_ReqForRestartFlag     & Parameter       & &  \\
+ESMF\_Route                 & Deep            & &  \\
+ESMF\_RouteHandle           & Deep            & &  \\
+ESMF\_StaggerLoc            & Shallow         & &  \\
+ESMF\_State                 & Deep            & &  \\
+ESMF\_StateClass            & Deep            & &  \\
+ESMF\_StateItem             & Shallow         & &  \\
+ESMF\_StateItem\_Flag       & Parameter       & &  \\
+ESMF\_StateIntent\_Flag     & Parameter       & &  \\
+ESMF\_Status                & Parameter       & &  \\
+ESMF\_Sync\_Flag            & Parameter       & &  \\
+ESMF\_End\_Flag             & Parameter       & &  \\
+ESMF\_Time                  & Shallow         & &  \\
+ESMF\_TimeInterval          & Shallow         & &  \\
+ESMF\_VM                    & Deep            & &  \\
+ESMF\_VMId                  & Deep            & &  \\
+ESMF\_VMPlan                & Deep            & &  \\
+ESMF\_ValidFlag             & Parameter       & &  \\
 
 \end{tabular}
 \end{table}
-
-\begin{table}[t]
-\begin{tabular}{ll}
-
-{\bf Class} &  {\bf Type} \\ \hline
-
-ESMF\_VM                    & Deep \\
-ESMF\_VMId                  & Deep \\
-ESMF\_VMPlan                & Deep \\
-ESMF\_ValidFlag             & Parameter \\
-ESMF\_XPacket               & Shallow\\
-
-\end{tabular}
-\end{table}
-
-
 
 
 
