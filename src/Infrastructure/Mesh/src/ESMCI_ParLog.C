@@ -1,4 +1,4 @@
-// $Id: ESMCI_ParLog.C,v 1.6 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_ParLog.C,v 1.7 2011/12/22 18:36:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -13,11 +13,12 @@
 
 #include <mpi.h>
 #include <cstdlib>
+#include <cstdio>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ParLog.C,v 1.6 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_ParLog.C,v 1.7 2011/12/22 18:36:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {

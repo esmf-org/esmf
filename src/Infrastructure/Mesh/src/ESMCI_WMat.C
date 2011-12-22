@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.15 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_WMat.C,v 1.16 2011/12/22 18:36:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -14,11 +14,12 @@
 #include <Mesh/include/ESMCI_MeshUtils.h>
 
 #include <algorithm>
+#include <cstdio>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.15 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.16 2011/12/22 18:36:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
