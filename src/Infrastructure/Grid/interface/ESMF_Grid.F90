@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246.2.5 2011/12/08 02:04:40 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.6 2011/12/23 01:36:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246.2.5 2011/12/08 02:04:40 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.6 2011/12/23 01:36:55 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3793,7 +3793,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
- ! XMRKX
+
    ! Set Default coordSys
    if (present(coordSys)) then
       coordSysLocal=coordSys
@@ -10601,9 +10601,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! cells on the DE in that dimension.
 !
 ! Section \ref{example:2DIrregUniGrid} shows an example
-! of using this method to create a 2D Grid with uniformly spaced 
+! of using an irregular distribution to create a 2D Grid with uniformly spaced 
 ! coordinates.  This creation method can also be used as the basis for
 ! grids with rectilinear coordinates or curvilinear coordinates.
+!
+! For consistency's sake the {\tt ESMF\_GridEmptyComplete()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridEmptyCreate()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
 !
 ! The arguments are:
 ! \begin{description}
@@ -10898,6 +10904,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! occur.  The default is to divide the range as evenly as possible. Currently this call
 ! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
+! For consistency's sake the {\tt ESMF\_GridEmptyComplete()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridEmptyCreate()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[grid]
@@ -11187,6 +11199,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Currently this call
 ! only supports creating a 2D or 3D Grid, and thus, for example, {\tt maxIndex} must be of size 2 or 3. 
 !
+! For consistency's sake the {\tt ESMF\_GridEmptyComplete()} call
+! should be executed in the same set or a subset of the PETs in which the
+! {\tt ESMF\_GridEmptyCreate()} call was made. If the call
+! is made in a subset, the Grid objects outside that subset will
+! still be "empty" and not usable. 
 !
 ! The arguments are:
 ! \begin{description}
