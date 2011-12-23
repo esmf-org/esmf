@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.38 2011/12/22 20:47:10 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.39 2011/12/23 02:39:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -4720,6 +4720,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
     // This is a very simplistic, probably very bad peformance implementation.
     int size=0;
     switch (type){
+    case vmBYTE:
+      size=1;
+      break;
     case vmI4:
       size=4;
       break;
