@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19 2011/11/28 21:49:47 theurich Exp $
+# $Id: build_rules.mk,v 1.20 2011/12/23 21:03:37 theurich Exp $
 #
 # Cygwin.gfortran.default
 #
@@ -100,8 +100,8 @@ ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
 # Fortran symbol convention
 #
 ifeq ($(ESMF_FORTRANSYMBOLS),default)
-ESMF_F90COMPILEOPTS       += -fno-second-underscore
-ESMF_F90LINKOPTS          += -fno-second-underscore
+ESMF_F90COMPILEOPTS       +=
+ESMF_F90LINKOPTS          +=
 ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_singleunderscore)
@@ -110,8 +110,8 @@ ESMF_F90LINKOPTS          += -fno-second-underscore
 ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_SINGLEUNDERSCORE
 else
 ifeq ($(ESMF_FORTRANSYMBOLS),lowercase_doubleunderscore)
-ESMF_F90COMPILEOPTS       +=
-ESMF_F90LINKOPTS          +=
+ESMF_F90COMPILEOPTS       += -fsecond-underscore
+ESMF_F90LINKOPTS          += -fsecond-underscore
 ESMF_CXXCOMPILEOPTS       += -DESMF_LOWERCASE_DOUBLEUNDERSCORE
 else
 $(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)

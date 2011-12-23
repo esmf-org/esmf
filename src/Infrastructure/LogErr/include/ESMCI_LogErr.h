@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.15 2011/11/14 21:24:22 rokuingh Exp $
+// $Id: ESMCI_LogErr.h,v 1.16 2011/12/23 21:05:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -110,9 +110,9 @@ private:
 // the default global log object
 extern ESMCI::LogErr ESMC_LogDefault;
 extern "C" {
- void FTN(f_esmf_logset)(bool *flush, int *rc);
- void FTN(f_esmf_logwrite0)(const char *msg, int *msgtype, int *rc, ESMCI_FortranStrLenArg mlen);
- void FTN(f_esmf_logwrite1)(const char *msg, int *msgtype,
+ void FTN_X(f_esmf_logset)(bool *flush, int *rc);
+ void FTN_X(f_esmf_logwrite0)(const char *msg, int *msgtype, int *rc, ESMCI_FortranStrLenArg mlen);
+ void FTN_X(f_esmf_logwrite1)(const char *msg, int *msgtype,
                             int *line, const char *file, const char *method, int *rc,
                             ESMCI_FortranStrLenArg mlen, ESMCI_FortranStrLenArg flen,
 			    ESMCI_FortranStrLenArg mdlen);

@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.18 2011/12/07 22:43:37 oehmke Exp $
+// $Id: user_CComponent.C,v 1.19 2011/12/23 21:06:03 theurich Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -249,7 +249,7 @@ extern "C" {
   // The SetServices entry point must ensure to have external C linkage,
   // so it can be called from Fortran.
   
-  void FTN(my_setservicesinc)(ESMC_GridComp gcomp, int *rc){
+  void FTN_X(my_setservicesinc)(ESMC_GridComp gcomp, int *rc){
     // set entry points for standard Component methods Init(), Run(), Finalize()
     
     // initialize return code

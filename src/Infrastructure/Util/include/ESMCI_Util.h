@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.44 2011/10/10 05:59:57 eschwab Exp $
+// $Id: ESMCI_Util.h,v 1.45 2011/12/23 21:05:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -163,9 +163,9 @@ char *ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen);
 int  ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen, char *dst, ESMCI_FortranStrLenArg dlen);
 int  ESMC_CtoF90string(const char *src, char *dst, ESMCI_FortranStrLenArg dlen);
 extern "C" {
-void  FTN(esmf_f90tocstring)(const char *src, char *dst, int *rc, 
+void  FTN_X(esmf_f90tocstring)(const char *src, char *dst, int *rc, 
                              /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
-void  FTN(esmf_ctof90string)(const char *src, char *dst, int *rc, 
+void  FTN_X(esmf_ctof90string)(const char *src, char *dst, int *rc, 
                              /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
 }
 
@@ -177,8 +177,8 @@ const char *ESMC_TypeKindString(ESMC_TypeKind dk);
 const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {
-void FTN(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
-void FTN(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
+void FTN_X(esmf_pointertoint)(int *n, short *s, ESMC_POINTER *len);
+void FTN_X(esmf_pointerdifference)(int *n, short *s1, short *s2, int *len);
 
 }
 

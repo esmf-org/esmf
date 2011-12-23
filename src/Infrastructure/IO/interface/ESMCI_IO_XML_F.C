@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML_F.C,v 1.6 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_IO_XML_F.C,v 1.7 2011/12/23 21:05:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@ namespace ESMCI{
 extern "C" {
 
        //--------------------------------------------------------------------
-       void FTN(c_esmc_io_xmlcreate)(IO_XML **ptr,
+       void FTN_X(c_esmc_io_xmlcreate)(IO_XML **ptr,
                                     int *nameLen,
                                     const char *name,
                                     int *fileNameLen,
@@ -58,13 +58,13 @@ extern "C" {
        }
 
        //--------------------------------------------------------------------
-       void FTN(c_esmc_io_xmldestroy)(IO_XML **ptr, int *status) {
+       void FTN_X(c_esmc_io_xmldestroy)(IO_XML **ptr, int *status) {
           int rc = ESMCI_IO_XMLDestroy(ptr);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
        //--------------------------------------------------------------------
-       void FTN(c_esmc_io_xmlread)(IO_XML **ptr,
+       void FTN_X(c_esmc_io_xmlread)(IO_XML **ptr,
                                   int *fileNameLen,
                                   const char *fileName,
                                   int *schemaFileNameLen,

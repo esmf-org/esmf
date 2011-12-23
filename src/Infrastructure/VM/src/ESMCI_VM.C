@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.27 2011/12/23 02:52:16 w6ws Exp $
+// $Id: ESMCI_VM.C,v 1.28 2011/12/23 21:05:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,19 +59,19 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.27 2011/12/23 02:52:16 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.28 2011/12/23 21:05:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
-  void FTN(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
-  void FTN(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
-  void FTN(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
-  void FTN(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
-  void FTN(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
-  void FTN(f_esmf_compcollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+  void FTN_X(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_compcollectgarbage)(void *fobject, int *localrc);
 }
 //==============================================================================
 
@@ -638,37 +638,37 @@ void VM::shutdown(
           // The following loop deallocates deep Fortran ESMF objects
           for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
-              FTN(f_esmf_fieldcollectgarbage)
+              FTN_X(f_esmf_fieldcollectgarbage)
                 (&(matchTable_FObjects[i][k].fobject),&localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_FIELDBUNDLE.objectID){
-              FTN(f_esmf_fbundlecollectgarbage)(
+              FTN_X(f_esmf_fbundlecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
-              FTN(f_esmf_geombasecollectgarbage)(
+              FTN_X(f_esmf_geombasecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_LOCSTREAM.objectID){
-              FTN(f_esmf_locstreamcollectgarbage)(
+              FTN_X(f_esmf_locstreamcollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_STATE.objectID){
-              FTN(f_esmf_statecollectgarbage)(
+              FTN_X(f_esmf_statecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_COMPONENT.objectID){
-              FTN(f_esmf_compcollectgarbage)(
+              FTN_X(f_esmf_compcollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
@@ -1491,7 +1491,7 @@ void VM::addFObject(
   int size = matchTable_FObjects[i].size();
   matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
   void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
-  FTN(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
+  FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
   matchTable_FObjects[i][size].objectID = objectID;
 }
 //-----------------------------------------------------------------------------
@@ -1704,37 +1704,37 @@ void VM::finalize(
     // The following loop deallocates deep Fortran ESMF objects
     for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
       if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
-        FTN(f_esmf_fieldcollectgarbage)(&(matchTable_FObjects[0][k].fobject),
+        FTN_X(f_esmf_fieldcollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           rc)) return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_FIELDBUNDLE.objectID){
-        FTN(f_esmf_fbundlecollectgarbage)(
+        FTN_X(f_esmf_fbundlecollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
-        FTN(f_esmf_geombasecollectgarbage)(&(matchTable_FObjects[0][k].fobject),
+        FTN_X(f_esmf_geombasecollectgarbage)(&(matchTable_FObjects[0][k].fobject),
           &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_LOCSTREAM.objectID){
-        FTN(f_esmf_locstreamcollectgarbage)(
+        FTN_X(f_esmf_locstreamcollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_STATE.objectID){
-        FTN(f_esmf_statecollectgarbage)(
+        FTN_X(f_esmf_statecollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_COMPONENT.objectID){
-        FTN(f_esmf_compcollectgarbage)(
+        FTN_X(f_esmf_compcollectgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;

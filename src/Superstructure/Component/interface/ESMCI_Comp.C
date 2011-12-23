@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.22 2011/10/25 23:05:37 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.23 2011/12/23 21:05:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -41,67 +41,67 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.22 2011/10/25 23:05:37 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.23 2011/12/23 21:05:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
 //==============================================================================
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN(f_esmf_compexecute)(const ESMCI::Comp *comp,
+  void FTN_X(f_esmf_compexecute)(const ESMCI::Comp *comp,
     enum ESMCI::method *method,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   
-  void FTN(f_esmf_compgetvminfo)(const ESMCI::Comp *compp, void **vm_info,
+  void FTN_X(f_esmf_compgetvminfo)(const ESMCI::Comp *compp, void **vm_info,
     int *rc);
-  void FTN(f_esmf_compgetvm)(const ESMCI::Comp *compp, ESMCI::VM **vm,
+  void FTN_X(f_esmf_compgetvm)(const ESMCI::Comp *compp, ESMCI::VM **vm,
     int *rc);
-  void FTN(f_esmf_compgetvmparent)(const ESMCI::Comp *compp,
+  void FTN_X(f_esmf_compgetvmparent)(const ESMCI::Comp *compp,
     ESMCI::VM **vmparent, int *rc);
-  void FTN(f_esmf_compgetvmplan)(const ESMCI::Comp *compp,
+  void FTN_X(f_esmf_compgetvmplan)(const ESMCI::Comp *compp,
     ESMCI::VMPlan **vmplan, int *rc);
-  void FTN(f_esmf_compgetftable)(const ESMCI::Comp *compp,
+  void FTN_X(f_esmf_compgetftable)(const ESMCI::Comp *compp,
     ESMCI::FTable **ftable, int *rc);
-  void FTN(f_esmf_compgettunnel)(const ESMCI::Comp *comp, 
+  void FTN_X(f_esmf_compgettunnel)(const ESMCI::Comp *comp, 
     ESMCI::CompTunnel **tunnel, int *rc);
 
-  void FTN(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name, 
+  void FTN_X(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name, 
     char const *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
-  void FTN(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
-  void FTN(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
+  void FTN_X(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
+  void FTN_X(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_gridcomprun)(const ESMCI::GridComp *gcomp,
+  void FTN_X(f_esmf_gridcomprun)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_gridcompfinalize)(const ESMCI::GridComp *gcomp,
+  void FTN_X(f_esmf_gridcompfinalize)(const ESMCI::GridComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp, int *rc);
+  void FTN_X(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp, int *rc);
   
-  void FTN(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char const *name, 
+  void FTN_X(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char const *name, 
     char const *configFile, ESMCI::Clock **clock, 
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
-  void FTN(f_esmf_cplcompdestroy)(ESMCI::CplComp *comp, int *rc);
-  void FTN(f_esmf_cplcompinitialize)(const ESMCI::CplComp *gcomp,
+  void FTN_X(f_esmf_cplcompdestroy)(ESMCI::CplComp *comp, int *rc);
+  void FTN_X(f_esmf_cplcompinitialize)(const ESMCI::CplComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_cplcomprun)(const ESMCI::CplComp *gcomp,
+  void FTN_X(f_esmf_cplcomprun)(const ESMCI::CplComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_cplcompfinalize)(const ESMCI::CplComp *gcomp,
+  void FTN_X(f_esmf_cplcompfinalize)(const ESMCI::CplComp *gcomp,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
-  void FTN(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp, int *rc);
+  void FTN_X(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp, int *rc);
 };
 //==============================================================================
 
@@ -360,7 +360,7 @@ int Comp::execute(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
   
-  FTN(f_esmf_compexecute)(this, &method, importState, exportState, &clock,
+  FTN_X(f_esmf_compexecute)(this, &method, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -406,7 +406,7 @@ int Comp::getVmInfo(
     return rc;
   }
   
-  FTN(f_esmf_compgetvminfo)(this, vm_info, &localrc);
+  FTN_X(f_esmf_compgetvminfo)(this, vm_info, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -449,7 +449,7 @@ int Comp::getVm(
     return rc;
   }
   
-  FTN(f_esmf_compgetvm)(this, vm, &localrc);
+  FTN_X(f_esmf_compgetvm)(this, vm, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -492,7 +492,7 @@ int Comp::getVmParent(
     return rc;
   }
   
-  FTN(f_esmf_compgetvmparent)(this, vmparent, &localrc);
+  FTN_X(f_esmf_compgetvmparent)(this, vmparent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -535,7 +535,7 @@ int Comp::getVmPlan(
     return rc;
   }
   
-  FTN(f_esmf_compgetvmplan)(this, vmplan, &localrc);
+  FTN_X(f_esmf_compgetvmplan)(this, vmplan, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -578,7 +578,7 @@ int Comp::getFTable(
     return rc;
   }
   
-  FTN(f_esmf_compgetftable)(this, ftable, &localrc);
+  FTN_X(f_esmf_compgetftable)(this, ftable, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -621,7 +621,7 @@ int Comp::getTunnel(
     return rc;
   }
   
-  FTN(f_esmf_compgettunnel)(this, tunnel, &localrc);
+  FTN_X(f_esmf_compgettunnel)(this, tunnel, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -662,7 +662,7 @@ GridComp *GridComp::create(
   
   GridComp *comp = new GridComp;
   
-  FTN(f_esmf_gridcompcreate)(comp, name,
+  FTN_X(f_esmf_gridcompcreate)(comp, name,
     configFile, &clock, &localrc, strlen(name), strlen(configFile));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;
@@ -706,7 +706,7 @@ int GridComp::destroy(
     return rc;
   }
   
-  FTN(f_esmf_gridcompdestroy)(comp, &localrc);
+  FTN_X(f_esmf_gridcompdestroy)(comp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -760,7 +760,7 @@ int GridComp::initialize(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
   
-  FTN(f_esmf_gridcompinitialize)(this, importState, exportState, &clock,
+  FTN_X(f_esmf_gridcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -815,7 +815,7 @@ int GridComp::run(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
-  FTN(f_esmf_gridcomprun)(this, importState, exportState, &clock,
+  FTN_X(f_esmf_gridcomprun)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -870,7 +870,7 @@ int GridComp::finalize(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
   
-  FTN(f_esmf_gridcompfinalize)(this, importState, exportState, &clock,
+  FTN_X(f_esmf_gridcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -915,7 +915,7 @@ int GridComp::print(
     return rc;
   }
   
-  FTN(f_esmf_gridcompprint)(this, &localrc);
+  FTN_X(f_esmf_gridcompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -956,7 +956,7 @@ CplComp *CplComp::create(
   
   CplComp *comp = new CplComp;
   
-  FTN(f_esmf_cplcompcreate)(comp, name, configFile, &clock, &localrc,
+  FTN_X(f_esmf_cplcompcreate)(comp, name, configFile, &clock, &localrc,
     strlen(name), strlen(configFile));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return comp;
@@ -1000,7 +1000,7 @@ int CplComp::destroy(
     return rc;
   }
   
-  FTN(f_esmf_cplcompdestroy)(comp, &localrc);
+  FTN_X(f_esmf_cplcompdestroy)(comp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -1054,7 +1054,7 @@ int CplComp::initialize(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
-  FTN(f_esmf_cplcompinitialize)(this, importState, exportState, &clock,
+  FTN_X(f_esmf_cplcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -1109,7 +1109,7 @@ int CplComp::run(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
-  FTN(f_esmf_cplcomprun)(this, importState, exportState, &clock,
+  FTN_X(f_esmf_cplcomprun)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -1164,7 +1164,7 @@ int CplComp::finalize(
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
-  FTN(f_esmf_cplcompfinalize)(this, importState, exportState, &clock,
+  FTN_X(f_esmf_cplcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -1209,7 +1209,7 @@ int CplComp::print(
     return rc;
   }
   
-  FTN(f_esmf_cplcompprint)(this, &localrc);
+  FTN_X(f_esmf_cplcompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   

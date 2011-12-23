@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.8 2011/06/30 06:00:10 theurich Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.9 2011/12/23 21:05:58 theurich Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -223,7 +223,7 @@ Fortran {\tt ESMF\_TypeKind\_Flag} parameters mostly appear in calls to C routin
          ...
           !-set tk
          ...
-         call FTN(c_ESMC_VMAllFullReduce( ..., tk, ...  )
+         call FTN_X(c_ESMC_VMAllFullReduce( ..., tk, ...  )
          ...
          ...
 \end{verbatim}
@@ -239,7 +239,7 @@ The {\tt ESMC\_TypeKind} parameter names declared are:
 
 In C, {\tt ESMC\_TypeKind} parameters are used to tailor computation to the type and kind of user data arguments being processed. e.g
 \begin{verbatim}
-  void FTN(c_esmc_vmallfullreduce)(.., ESMC_TypeKind *dtk, ..,int *rc){
+  void FTN_X(c_esmc_vmallfullreduce)(.., ESMC_TypeKind *dtk, ..,int *rc){
     .....      
     switch (*dtk){
     case ESMC_TYPEKIND_I4:

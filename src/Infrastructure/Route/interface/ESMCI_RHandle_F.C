@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.13 2011/06/21 04:04:53 w6ws Exp $
+// $Id: ESMCI_RHandle_F.C,v 1.14 2011/12/23 21:05:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-  void FTN(c_esmc_routehandlecreate)(ESMCI::RouteHandle **ptr, int *rc){
+  void FTN_X(c_esmc_routehandlecreate)(ESMCI::RouteHandle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandlecreate()"
     // Initialize return code; assume routine not implemented
@@ -51,7 +51,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandledestroy)(ESMCI::RouteHandle **ptr, int *rc){
+  void FTN_X(c_esmc_routehandledestroy)(ESMCI::RouteHandle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandledestroy()"
     // Initialize return code; assume routine not implemented
@@ -65,7 +65,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandleprepxxe)(ESMCI::RouteHandle **ptr, int *rc){
+  void FTN_X(c_esmc_routehandleprepxxe)(ESMCI::RouteHandle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandleprepxxe()"
     // Initialize return code; assume routine not implemented
@@ -94,7 +94,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandleappendclear)(ESMCI::RouteHandle **ptr, 
+  void FTN_X(c_esmc_routehandleappendclear)(ESMCI::RouteHandle **ptr, 
     ESMCI::RouteHandle **rh, int *rraShift, int *vectorLengthShift, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandleappendclear()"
@@ -124,7 +124,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandlegettype)(ESMCI::RouteHandle **ptr, int *htype,
+  void FTN_X(c_esmc_routehandlegettype)(ESMCI::RouteHandle **ptr, int *htype,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandlegettype()"
@@ -136,7 +136,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandlesettype)(ESMCI::RouteHandle **ptr, int *htype,
+  void FTN_X(c_esmc_routehandlesettype)(ESMCI::RouteHandle **ptr, int *htype,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandlesettype()"
@@ -151,7 +151,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, char *opts,
+  void FTN_X(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, char *opts,
     int *rc, ESMCI_FortranStrLenArg opts_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandlevalidate()"
@@ -166,7 +166,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, char *opts, 
+  void FTN_X(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, char *opts, 
     int *rc, ESMCI_FortranStrLenArg opts_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandleprint()"

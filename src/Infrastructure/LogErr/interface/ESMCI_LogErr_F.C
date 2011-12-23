@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr_F.C,v 1.3 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_LogErr_F.C,v 1.4 2011/12/23 21:05:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr_F.C,v 1.3 2011/01/05 20:05:44 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr_F.C,v 1.4 2011/12/23 21:05:18 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -54,7 +54,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_LogFinalize - Finalize global Error Log
 //
 // !INTERFACE:
-      void FTN(c_esmc_logfinalize)(
+      void FTN_X(c_esmc_logfinalize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -83,7 +83,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_LogGetErrMessage - initialize global Error Log
 //
 // !INTERFACE:
-      void FTN(c_esmc_loggeterrormsg)(
+      void FTN_X(c_esmc_loggeterrormsg)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -113,7 +113,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_LogInitialize - initialize global Error Log
 //
 // !INTERFACE:
-      void FTN(c_esmc_loginitialize)(
+      void FTN_X(c_esmc_loginitialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -160,7 +160,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_LogSet - set values in global default Error Log
 //
 // !INTERFACE:
-      void FTN(c_esmc_logset)(
+      void FTN_X(c_esmc_logset)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -193,7 +193,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_LogTimeStamp - Get Time Stamp
 //
 // !INTERFACE:
-      void FTN(c_esmc_timestamp)(
+      void FTN_X(c_esmc_timestamp)(
 //
 // !RETURN VALUE:
 //    none.  timestamp is passed thru the parameter list

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base_F.C,v 1.4 2011/01/05 20:05:41 svasquez Exp $
+// $Id: ESMCI_Base_F.C,v 1.5 2011/12/23 21:04:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseCreate - create and initialize a new Base object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_basecreate)(
+      void FTN_X(c_esmc_basecreate)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -99,7 +99,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseDestroy - release resources from a Base object
 //
 // !INTERFACE:
-      void FTN(c_esmc_basedestroy)(
+      void FTN_X(c_esmc_basedestroy)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -130,7 +130,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BasePrint - print Base object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_baseprint)(
+      void FTN_X(c_esmc_baseprint)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -183,7 +183,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseSerialize - Serialize Base object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_baseserialize)(
+      void FTN_X(c_esmc_baseserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -226,7 +226,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseDeserialize - Deserialize Base object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_basedeserialize)(
+      void FTN_X(c_esmc_basedeserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -274,7 +274,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseValidate - print Base object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_basevalidate)(
+      void FTN_X(c_esmc_basevalidate)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -324,7 +324,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_GetName - return the object name to a Fortran caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_getname)(
+      void FTN_X(c_esmc_getname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -365,7 +365,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_SetName - set the object name from an F90 caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_setname)(
+      void FTN_X(c_esmc_setname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -428,7 +428,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_GetClassName - return the object name to a Fortran caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_getclassname)(
+      void FTN_X(c_esmc_getclassname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -463,7 +463,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_GetID - return the object id to the caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_getid)(
+      void FTN_X(c_esmc_getid)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -501,7 +501,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_SetID - set an object id 
 //
 // !INTERFACE:
-      void FTN(c_esmc_setid)(
+      void FTN_X(c_esmc_setid)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -537,7 +537,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_GetVMId - return the object's VMId to the caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_getvmid)(
+      void FTN_X(c_esmc_getvmid)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -573,7 +573,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_SetVMId - allocate space and set the object's VMId 
 //
 // !INTERFACE:
-      void FTN(c_esmc_setvmid)(
+      void FTN_X(c_esmc_setvmid)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -610,7 +610,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseSetBaseStatus - set baseStatus in Base object
 //
 // !INTERFACE:
-      void FTN(c_esmc_basesetbasestatus)(
+      void FTN_X(c_esmc_basesetbasestatus)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -642,7 +642,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseGetBaseStatus - get baseStatus from Base object
 //
 // !INTERFACE:
-      void FTN(c_esmc_basegetbasestatus)(
+      void FTN_X(c_esmc_basegetbasestatus)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -675,7 +675,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseSetStatus - set status in Base object
 //
 // !INTERFACE:
-      void FTN(c_esmc_basesetstatus)(
+      void FTN_X(c_esmc_basesetstatus)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -707,7 +707,7 @@ extern "C" {
 // !IROUTINE:  c_ESMC_BaseGetStatus - get status from Base object
 //
 // !INTERFACE:
-      void FTN(c_esmc_basegetstatus)(
+      void FTN_X(c_esmc_basegetstatus)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list

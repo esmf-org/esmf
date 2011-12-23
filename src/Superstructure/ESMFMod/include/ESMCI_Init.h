@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.h,v 1.12 2011/06/16 05:56:57 eschwab Exp $
+// $Id: ESMCI_Init.h,v 1.13 2011/12/23 21:05:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -55,14 +55,14 @@ int ESMCI_Finalize(void);
 
 // prototypes for fortran interface routines
 extern "C" {
-   void FTN(f_esmf_frameworkinitialize)(int *language, 
+   void FTN_X(f_esmf_frameworkinitialize)(int *language, 
                                         char *defaultConfigFileName,
                                         ESMC_CalKind_Flag *defaultCalendar,
                                         char *defaultLogFileName,
                                         ESMC_LogType *defaultLogType,
                                         int *rc, ESMCI_FortranStrLenArg count1,
 					ESMCI_FortranStrLenArg count2);
-   void FTN(f_esmf_frameworkfinalize)(int *rc);
+   void FTN_X(f_esmf_frameworkfinalize)(int *rc);
 };
 
 

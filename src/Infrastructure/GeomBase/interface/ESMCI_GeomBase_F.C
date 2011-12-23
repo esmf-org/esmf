@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomBase_F.C,v 1.5 2011/01/05 20:05:43 svasquez Exp $
+// $Id: ESMCI_GeomBase_F.C,v 1.6 2011/12/23 21:04:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_GeomBase_F.C,v 1.5 2011/01/05 20:05:43 svasquez Exp $";
+             "$Id: ESMCI_GeomBase_F.C,v 1.6 2011/12/23 21:04:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -43,7 +43,7 @@ extern "C" {
 //
 
 // non-method functions
-  void FTN(c_esmc_geombaseserialize)(int *geomtype, int * staggerloc,
+  void FTN_X(c_esmc_geombaseserialize)(int *geomtype, int * staggerloc,
 				     int *meshloc, int *xgridside, int *xgridindex, 
 				     char *buffer, int *length, int *offset,
 				     ESMC_InquireFlag *inquireflag, int *localrc,
@@ -84,7 +84,7 @@ extern "C" {
 } 
 
 
-  void FTN(c_esmc_geombasedeserialize)(int *geomtype, int * staggerloc,
+  void FTN_X(c_esmc_geombasedeserialize)(int *geomtype, int * staggerloc,
 				       int *meshloc, int *xgridside, int *xgridindex, 
 				       char *buffer, int *offset, int *localrc,
 				       ESMCI_FortranStrLenArg buffer_l){

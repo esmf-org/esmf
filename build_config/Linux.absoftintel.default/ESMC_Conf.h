@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.16 2011/01/05 20:05:39 svasquez Exp $"
+"$Id: ESMC_Conf.h,v 1.17 2011/12/23 21:03:55 theurich Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -18,7 +18,8 @@ Licensed under the University of Illinois-NCSA License.
 
 #define PARCH_linux
 
-#define FTN(func) func##_
+#define FTN_X(func) func##_
+#define FTNX(func) func##_
 
 #if defined (__cplusplus)
 // Typedef to match the data type of the 'hidden' string length

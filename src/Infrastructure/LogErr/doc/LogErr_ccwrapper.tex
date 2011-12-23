@@ -55,7 +55,7 @@
   
 \bigskip{\sf INTERFACE:}
 \begin{verbatim} 
- void FTN(c_esmf_logclosefile)(\end{verbatim}{\em RETURN VALUE:}
+ void FTN_X(c_esmf_logclosefile)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}         ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -73,7 +73,7 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}    void FTN(c_esmf_logopenfile)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    void FTN_X(c_esmf_logopenfile)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}         LogErr *log, 
          int *numFiles, 
@@ -94,7 +94,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}    void FTN(esmf_loginfo)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    void FTN_X(esmf_loginfo)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       ESMC_Log* log,
        char* fmt,...)\end{verbatim}
@@ -118,7 +118,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}      void FTN(c_esmf_logwarnmsg)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      void FTN_X(c_esmf_logwarnmsg)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       LogErr *log,
        int *errCode,
@@ -144,7 +144,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       void FTN(c_esmf_logwarn)(
+\begin{verbatim}       void FTN_X(c_esmf_logwarn)(
    !RETURN VALUES:
    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}        LogErr *log,
@@ -169,7 +169,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}        void FTN(c_esmf_logsetflush)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}        void FTN_X(c_esmf_logsetflush)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}    
        ESMC_Log* log)\end{verbatim}
@@ -187,7 +187,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}      void FTN(c_esmf_logsetnotflush)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      void FTN_X(c_esmf_logsetnotflush)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       ESMC_Log* log)
  \end{verbatim}
@@ -206,7 +206,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}     void FTN(c_esmf_logsetverbose)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     void FTN_X(c_esmf_logsetverbose)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}      ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -223,7 +223,7 @@
 
                          
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}      void FTN(c_esmf_logsetnotverbose)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      void FTN_X(c_esmf_logsetnotverbose)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      NONE\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log) \end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -241,7 +241,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}      int  FTN(c_esmf_loggetunit)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int  FTN_X(c_esmf_loggetunit)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      A Fortran Unit Number\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}      LogErr *log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -261,7 +261,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}     void FTN(c_esmf_logerrmsg)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     void FTN_X(c_esmf_logerrmsg)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     LogErr *log,
      int *errCode,
@@ -288,7 +288,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}      void FTN(c_esmf_logerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      void FTN_X(c_esmf_logerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}      LogErr *log,
       int *errCode,
@@ -313,7 +313,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}     void FTN(esmf_logsethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     void FTN_X(esmf_logsethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -332,7 +332,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}    void FTN(c_esmf_logsetnothaltonerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}    void FTN_X(c_esmf_logsetnothaltonerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -351,7 +351,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim} void FTN(c_esmf_logsethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim} void FTN_X(c_esmf_logsethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -369,7 +369,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}     void FTN(c_esmf_logsetnothaltonwarn)( \end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}     void FTN_X(c_esmf_logsetnothaltonwarn)( \end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       ESMC_Log* log)
                         \end{verbatim}
@@ -388,7 +388,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim} void FTN(c_esmf_loggetverbose)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim} void FTN_X(c_esmf_loggetverbose)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log, ESMC_Logical* verbose)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -405,7 +405,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim} void FTN(c_esmf_loggetflush)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim} void FTN_X(c_esmf_loggetflush)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log, ESMC_Logical* flush)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -422,7 +422,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim} void FTN(c_esmf_loggethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim} void FTN_X(c_esmf_loggethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log,ESMC_Logical* haltOnErr)\end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -439,7 +439,7 @@
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim} void FTN(c_esmf_loggethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim} void FTN_X(c_esmf_loggethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}     ESMC_Log* log,ESMC_Logical* haltOnWarn)\end{verbatim}
 {\sf DESCRIPTION:\\ }

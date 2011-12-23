@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.15 2011/10/11 20:45:46 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.16 2011/12/23 21:04:53 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ static const char *const version = "$Id: ESMCI_Field.C,v 1.15 2011/10/11 20:45:4
 //-----------------------------------------------------------------------------
 extern "C" {
 // Prototypes of the Fortran interface functions.
-void FTN(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer, 
+void FTN_X(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer, 
     ESMC_ArraySpec *arrayspec, 
     int *gridToFieldMap, int *len1, 
     int *ungriddedLBound, int *len2,
@@ -71,7 +71,7 @@ void FTN(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer,
     int *rc,
     ESMCI_FortranStrLenArg nlen);
 
-void FTN(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
+void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
     ESMC_TypeKind *typekind, 
     int *gridToFieldMap, int *len1, 
     int *ungriddedLBound, int *len2,
@@ -80,30 +80,30 @@ void FTN(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer,
     int *rc,
     ESMCI_FortranStrLenArg nlen);
 
-void FTN(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
+void FTN_X(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
 
-void FTN(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
+void FTN_X(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
   int *rc);
 
-void FTN(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
+void FTN_X(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
   int *rc);
 
-void FTN(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer,
+void FTN_X(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer,
   int *rc);
 
-void FTN(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
+void FTN_X(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 
-void FTN(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
+void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
 
-void FTN(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   void *routehandlep, ESMC_RegridMethod *regridmethod, 
   ESMC_UnmappedAction *unmappedaction, int *rc);
 
-void FTN(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, int *rc);
 
-void FTN(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
+void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 
 }
 
@@ -186,7 +186,7 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
   
-    FTN(f_esmf_fieldcreatemeshas)(field, mesh.ptr, &arrayspec, 
+    FTN_X(f_esmf_fieldcreatemeshas)(field, mesh.ptr, &arrayspec, 
         gtfm->array, &gtfm->extent[0], 
         uglb->array, &uglb->extent[0], 
         ugub->array, &ugub->extent[0], 
@@ -273,7 +273,7 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
   
-    FTN(f_esmf_fieldcreatemeshtk)(field, mesh.ptr, &typekind, 
+    FTN_X(f_esmf_fieldcreatemeshtk)(field, mesh.ptr, &typekind, 
         gtfm->array, &gtfm->extent[0], 
         uglb->array, &uglb->extent[0], 
         ugub->array, &ugub->extent[0], 
@@ -318,7 +318,7 @@ namespace ESMCI {
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
     
-    FTN(f_esmf_fielddestroy)(field, &localrc);
+    FTN_X(f_esmf_fielddestroy)(field, &localrc);
 
     delete field;
     localrc = ESMF_SUCCESS;
@@ -352,7 +352,7 @@ namespace ESMCI {
 
     ESMC_Mesh mesh;
     mesh.ptr = NULL; // initialize
-    FTN(f_esmf_fieldgetmesh)(this, &(mesh.ptr), &localrc);
+    FTN_X(f_esmf_fieldgetmesh)(this, &(mesh.ptr), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return mesh;
     
@@ -387,7 +387,7 @@ namespace ESMCI {
 
     ESMC_Array array;
     array.ptr = NULL; // initialize
-    FTN(f_esmf_fieldgetarray)(this, (ESMCI::Array **)&(array.ptr), &localrc);
+    FTN_X(f_esmf_fieldgetarray)(this, (ESMCI::Array **)&(array.ptr), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return array;
     
@@ -420,7 +420,7 @@ namespace ESMCI {
     int rc=ESMC_RC_NOT_IMPL;
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_fieldprint)(this, &localrc);
+    FTN_X(f_esmf_fieldprint)(this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
@@ -453,7 +453,7 @@ namespace ESMCI {
     int rc=ESMC_RC_NOT_IMPL;
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_fieldcast)(fc, this, &localrc);
+    FTN_X(f_esmf_fieldcast)(fc, this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
@@ -492,7 +492,7 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
   
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
-    FTN(f_esmf_regridstore)(fieldpsrc, fieldpdst, routehandlep,
+    FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, routehandlep,
         regridMethod, unmappedAction, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
@@ -529,7 +529,7 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
   
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
-    FTN(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, &localrc);
+    FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 
@@ -563,7 +563,7 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
   
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
-    FTN(f_esmf_regridrelease)(&routehandlep, &localrc);
+    FTN_X(f_esmf_regridrelease)(&routehandlep, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 

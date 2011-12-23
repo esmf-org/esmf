@@ -51,7 +51,7 @@ using std::string;
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_State.C,v 1.24 2011/04/28 18:53:46 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_State.C,v 1.25 2011/12/23 21:05:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -64,32 +64,32 @@ static const char *const version = "$Id: ESMCI_State.C,v 1.24 2011/04/28 18:53:4
 //-----------------------------------------------------------------------------
 extern "C" {
 
-  void FTN(f_esmf_statecreate)(ESMCI::State* state, char* name, int* rc,
+  void FTN_X(f_esmf_statecreate)(ESMCI::State* state, char* name, int* rc,
 				ESMCI_FortranStrLenArg nlen);
 
-  void FTN(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 
+  void FTN_X(f_esmf_stateaddarray)(ESMCI::State* state, ESMCI::Array** array, 
                                  int* rc);
 
-  void FTN(f_esmf_stateaddfield)(ESMCI::State* state, ESMCI::Field* field,
+  void FTN_X(f_esmf_stateaddfield)(ESMCI::State* state, ESMCI::Field* field,
                                  int* rc);
   
-  void FTN(f_esmf_stateprint)(ESMCI::State* state, int* rc);
+  void FTN_X(f_esmf_stateprint)(ESMCI::State* state, int* rc);
 
-  void FTN(f_esmf_stategetarray)(ESMCI::State* state, char* name, 
+  void FTN_X(f_esmf_stategetarray)(ESMCI::State* state, char* name, 
                                  ESMCI::Array** array, int* rc, 
                                  ESMCI_FortranStrLenArg nlen);
 
-  void FTN(f_esmf_stategetfield)(ESMCI::State* state, char* name, 
+  void FTN_X(f_esmf_stategetfield)(ESMCI::State* state, char* name, 
                                  ESMCI::Field* field, int* rc, 
                                  ESMCI_FortranStrLenArg nlen);
   
-  void FTN(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
+  void FTN_X(f_esmf_statedestroy)(ESMCI::State* state, int* rc);
 
-  void FTN(f_esmf_stategetnumitems)(ESMCI::State* state, 
+  void FTN_X(f_esmf_stategetnumitems)(ESMCI::State* state, 
                                     int*          itemCount, 
                                     int*          rc);
 
-  void FTN(f_esmf_stategetitemnames)(ESMCI::State*              state, 
+  void FTN_X(f_esmf_stategetitemnames)(ESMCI::State*              state, 
                                      int*                       numItems, 
                                      char*                      itemNameList, 
                                      ESMCI::ESMC_StateItemType* itemTypeList, 
@@ -158,7 +158,7 @@ namespace ESMCI {
     }
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_statecreate)(state, fName, &localrc, nlen);
+    FTN_X(f_esmf_statecreate)(state, fName, &localrc, nlen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
       delete[] fName;
       return ESMC_NULL_POINTER;
@@ -201,7 +201,7 @@ namespace ESMCI {
   
       
     // Invoque the fortran interface through the F90-C++ "glue" code
-     FTN(f_esmf_stateaddarray)(this, &array, &localrc);
+     FTN_X(f_esmf_stateaddarray)(this, &array, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
        return localrc;
 
@@ -240,7 +240,7 @@ namespace ESMCI {
   
       
     // Invoque the fortran interface through the F90-C++ "glue" code
-     FTN(f_esmf_stateaddfield)(this, field, &localrc);
+     FTN_X(f_esmf_stateaddfield)(this, field, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
        return localrc;
 
@@ -290,7 +290,7 @@ namespace ESMCI {
     }
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_stategetarray)(this, fName, array, &localrc, nlen);
+    FTN_X(f_esmf_stategetarray)(this, fName, array, &localrc, nlen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)){
       delete[] fName;
       return localrc;
@@ -349,7 +349,7 @@ namespace ESMCI {
     *field = fieldMem;  // point to this new allocation
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_stategetfield)(this, fName, fieldMem, &localrc, nlen);
+    FTN_X(f_esmf_stategetfield)(this, fName, fieldMem, &localrc, nlen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)){
       delete[] fName;
       return localrc;
@@ -385,7 +385,7 @@ namespace ESMCI {
     int rc, localrc;
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_stateprint)(this, &localrc);
+    FTN_X(f_esmf_stateprint)(this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return localrc;
 
@@ -427,7 +427,7 @@ namespace ESMCI {
     localrc = ESMC_RC_NOT_IMPL;
 
     // Invoque the fortran interface through the F90-C++ "glue" code
-    FTN(f_esmf_statedestroy)(state, &localrc);
+    FTN_X(f_esmf_statedestroy)(state, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return localrc;
     
@@ -668,7 +668,7 @@ namespace ESMCI {
 
       *numItems = 0;
 
-      FTN(f_esmf_stategetnumitems)(this, numItems, &localrc);
+      FTN_X(f_esmf_stategetnumitems)(this, numItems, &localrc);
 
       rc = localrc;
       return rc;
@@ -729,7 +729,7 @@ namespace ESMCI {
       // Make the fortran call to get the information from the state
       //***
       //printf("In ESMC_StateGetItemNames, before  calling the glue \n");
-      FTN(f_esmf_stategetitemnames)(this, &numItems, 
+      FTN_X(f_esmf_stategetitemnames)(this, &numItems, 
                                     itemNameList, itemTypeList, 
                                     &localrc, ESMF_MAXSTR);
       //printf("In ESMC_StateGetItemNames, after  calling the glue \n");
@@ -820,7 +820,7 @@ namespace ESMCI {
       //***
       // Make the fortran call to get the information from the state
       //***
-      FTN(f_esmf_stategetitemnames)(this, &maxItems, 
+      FTN_X(f_esmf_stategetitemnames)(this, &maxItems, 
                                     itemNameList, itemTypeList, 
                                     &localrc, ESMF_MAXSTR);
 
@@ -903,7 +903,7 @@ namespace ESMCI {
       // Make the fortran call to get the information from the state
       //***
       //printf("In ESMC_StateGetItemNames, before  calling the glue \n");
-      FTN(f_esmf_stategetitemnames)(this, &numItems, 
+      FTN_X(f_esmf_stategetitemnames)(this, &numItems, 
                                     itemNameList, itemTypeList, 
                                     &localrc, ESMF_MAXSTR);
       //printf("In ESMC_StateGetItemNames, after  calling the glue \n");

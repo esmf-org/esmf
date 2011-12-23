@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ.h,v 1.5 2011/08/04 21:12:48 ksaint Exp $
+// $Id: ESMCI_WebServ.h,v 1.6 2011/12/23 21:05:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 extern "C"
 {
 	// service loop from ESMCI_WebServComponentSvr class
-	void FTN(c_esmc_componentsvcloop)(ESMCI::GridComp*    comp,
+	void FTN_X(c_esmc_componentsvcloop)(ESMCI::GridComp*    comp,
                                      ESMCI::State*       importState,
                                      ESMCI::State*       exportState,
                                      ESMCI::Clock*       clock,
@@ -54,7 +54,7 @@ extern "C"
                                      int*        		   rc);
 
 	// registration methods from ESMCI_WebServRegistrarClient class
-	void  FTN(c_esmc_registercomponent)(char*                   compName,
+	void  FTN_X(c_esmc_registercomponent)(char*                   compName,
                                        char*                   compDesc, 
                                        char*                   clientId, 
                                        int*                    portNum,
@@ -63,14 +63,14 @@ extern "C"
                                        ESMCI_FortranStrLenArg  compDescLen,
                                        ESMCI_FortranStrLenArg  clientIdLen);
 
-	void  FTN(c_esmc_unregistercomponent)(char*                   clientId,
+	void  FTN_X(c_esmc_unregistercomponent)(char*                   clientId,
                                          int*                    rc,
                                          ESMCI_FortranStrLenArg  clientIdLen);
 
-	void  FTN(c_esmc_getportnum)(int*  portNum,
+	void  FTN_X(c_esmc_getportnum)(int*  portNum,
                                 int*  rc);
 
-	void  FTN(c_esmc_addoutputfilename)(char*                   filename,
+	void  FTN_X(c_esmc_addoutputfilename)(char*                   filename,
                                        int*                    rc,
                                        ESMCI_FortranStrLenArg  filenameLen);
 };

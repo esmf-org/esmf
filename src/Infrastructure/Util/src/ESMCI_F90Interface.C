@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.C,v 1.13 2011/05/12 03:58:14 theurich Exp $
+// $Id: ESMCI_F90Interface.C,v 1.14 2011/12/23 21:05:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -24,8 +24,8 @@
 //==============================================================================
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN(f_esmf_fortranudtpointersize)(int *size);
-  void FTN(f_esmf_fortranudtpointercopy)(void *dst, void *src);
+  void FTN_X(f_esmf_fortranudtpointersize)(int *size);
+  void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
 }
 //==============================================================================
 
@@ -36,7 +36,7 @@ namespace ESMCI {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "F90ClassHolder()"
     int udtSize;
-    FTN(f_esmf_fortranudtpointersize)(&udtSize);
+    FTN_X(f_esmf_fortranudtpointersize)(&udtSize);
     if (sizeof(ESMCI::F90ClassHolder) < udtSize){
       int localrc = ESMC_RC_NOT_IMPL;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
@@ -44,12 +44,12 @@ namespace ESMCI {
         " determined at runtime", ESMC_CONTEXT, &localrc);
       throw localrc;  // bail out with exception
     }
-    FTN(f_esmf_fortranudtpointercopy)((void *)this, (void *)udtPtr); 
+    FTN_X(f_esmf_fortranudtpointercopy)((void *)this, (void *)udtPtr); 
   }
   
   int F90ClassHolder::castToFortranUDT(void **udtPtr){
     int rc=ESMC_RC_NOT_IMPL;
-    FTN(f_esmf_fortranudtpointercopy)((void *)udtPtr, (void *)this);
+    FTN_X(f_esmf_fortranudtpointercopy)((void *)udtPtr, (void *)this);
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;

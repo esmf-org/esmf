@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.C,v 1.6 2011/11/04 00:44:15 theurich Exp $
+// $Id: ESMCI_CompTunnel.C,v 1.7 2011/12/23 21:05:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ extern "C" {
   // Fortran access point to native class destructor
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_comptunneldestroy"
-  void FTN(c_esmc_comptunneldestroy)(ESMCI::CompTunnel **ptr, int *rc){
+  void FTN_X(c_esmc_comptunneldestroy)(ESMCI::CompTunnel **ptr, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*ptr == NULL){
       ESMC_LogDefault.MsgAllocError("- CompTunnel deallocation", rc);  

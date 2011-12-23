@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface_F.C,v 1.4 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_F90Interface_F.C,v 1.5 2011/12/23 21:05:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@ extern "C" {
   // ESMC_InterfaceInt interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN(c_esmc_interfaceintcreate1d)(ESMCI::InterfaceInt **array, 
+  void FTN_X(c_esmc_interfaceintcreate1d)(ESMCI::InterfaceInt **array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate1d()"
@@ -31,7 +31,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_interfaceintcreate2d)(ESMCI::InterfaceInt **array, 
+  void FTN_X(c_esmc_interfaceintcreate2d)(ESMCI::InterfaceInt **array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate2d()"
@@ -39,7 +39,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_interfaceintcreate3d)(ESMCI::InterfaceInt **array, 
+  void FTN_X(c_esmc_interfaceintcreate3d)(ESMCI::InterfaceInt **array, 
     int *farray, int *len, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintcreate3d()"
@@ -47,7 +47,7 @@ extern "C" {
     *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_interfaceintdestroy)(ESMCI::InterfaceInt **array,
+  void FTN_X(c_esmc_interfaceintdestroy)(ESMCI::InterfaceInt **array,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_interfaceintdestroy()"

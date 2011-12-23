@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.12 2011/06/15 17:38:39 w6ws Exp $
+// $Id: ESMCI_State_F.C,v 1.13 2011/12/23 21:05:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.12 2011/06/15 17:38:39 w6ws Exp $";
+             "$Id: ESMCI_State_F.C,v 1.13 2011/12/23 21:05:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -49,7 +49,7 @@ extern "C" {
 //
 
 // non-method functions
-void FTN(c_esmc_stateserialize)(
+void FTN_X(c_esmc_stateserialize)(
                            int *st, 
                            int *datacount, 
                            char *buffer, int *length, int *offset,
@@ -92,7 +92,7 @@ void FTN(c_esmc_stateserialize)(
 } 
 
 
-void FTN(c_esmc_statedeserialize)(
+void FTN_X(c_esmc_statedeserialize)(
                              int *st, 
                              int *datacount, 
                              char *buffer, int *offset, int *localrc,
@@ -132,7 +132,7 @@ void FTN(c_esmc_statedeserialize)(
 
 #endif
 
-void FTN(c_esmc_stateitemserialize)(int *otype, 
+void FTN_X(c_esmc_stateitemserialize)(int *otype, 
                                char *namep, 
                                char *buffer, int *length, int *offset,
                                ESMC_InquireFlag *inquireflag, int *localrc,
@@ -165,7 +165,7 @@ void FTN(c_esmc_stateitemserialize)(int *otype,
 } 
 
 
-void FTN(c_esmc_stateitemdeserialize)(int *otype, 
+void FTN_X(c_esmc_stateitemdeserialize)(int *otype, 
                                char *namep, 
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg clen,
@@ -192,7 +192,7 @@ void FTN(c_esmc_stateitemdeserialize)(int *otype,
 
 //-----------------------------------------------------------------------------
 
-void FTN(c_esmc_stateread)(State *ptr,
+void FTN_X(c_esmc_stateread)(State *ptr,
                            ESMC_Base **base,
                            int *fileNameLen,
                            const char *fileName,
@@ -213,7 +213,7 @@ void FTN(c_esmc_stateread)(State *ptr,
 
 //-----------------------------------------------------------------------------
 
-void FTN(c_esmc_statewrite)(State *ptr,
+void FTN_X(c_esmc_statewrite)(State *ptr,
                            ESMC_Base **base,
                            int *fileNameLen,
                            const char *fileName,

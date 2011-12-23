@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.19 2011/06/27 18:32:22 theurich Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.20 2011/12/23 21:05:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-  void FTN(c_esmc_localarraycreatenodata)(ESMCI::LocalArray **ptr, int *rank,
+  void FTN_X(c_esmc_localarraycreatenodata)(ESMCI::LocalArray **ptr, int *rank,
     ESMC_TypeKind *tk, ESMCI::LocalArrayOrigin *oflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraycreatenodata()"
@@ -62,7 +62,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_localarraycreatecopy)(ESMCI::LocalArray **ptr, 
+  void FTN_X(c_esmc_localarraycreatecopy)(ESMCI::LocalArray **ptr, 
     ESMCI::LocalArray **larrayOut, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraycreatecopy()"
@@ -83,7 +83,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_localarraysetinfo)(ESMCI::LocalArray **ptr, 
+  void FTN_X(c_esmc_localarraysetinfo)(ESMCI::LocalArray **ptr, 
     struct ESMCI::c_F90ptr *fptr, void XD *base, int *counts, int *lbounds,
     int *ubounds, int *offsets, ESMC_Logical *contig, ESMC_Logical *dealloc,
     int *rc){
@@ -121,7 +121,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetcounts)(ESMCI::LocalArray **ptr, int *counts,
+  void FTN_X(c_esmc_localarraygetcounts)(ESMCI::LocalArray **ptr, int *counts,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetcounts()"
@@ -141,7 +141,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetlbounds)(ESMCI::LocalArray **ptr, int *lbounds,
+  void FTN_X(c_esmc_localarraygetlbounds)(ESMCI::LocalArray **ptr, int *lbounds,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetlbounds()"
@@ -161,7 +161,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetubounds)(ESMCI::LocalArray **ptr, int *ubounds,
+  void FTN_X(c_esmc_localarraygetubounds)(ESMCI::LocalArray **ptr, int *ubounds,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetubounds()"
@@ -181,7 +181,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetrank)(ESMCI::LocalArray **ptr, int *rank,
+  void FTN_X(c_esmc_localarraygetrank)(ESMCI::LocalArray **ptr, int *rank,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetrank()"
@@ -198,7 +198,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygettypekind)(ESMCI::LocalArray **ptr,
+  void FTN_X(c_esmc_localarraygettypekind)(ESMCI::LocalArray **ptr,
     ESMC_TypeKind *typekind, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygettypekind()"
@@ -215,7 +215,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraydestroy)(ESMCI::LocalArray **ptr, int *rc){
+  void FTN_X(c_esmc_localarraydestroy)(ESMCI::LocalArray **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraydestroy()"
     // Initialize return code; assume routine not implemented
@@ -234,7 +234,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraysetbaseaddr)(ESMCI::LocalArray **ptr, void XD *base,
+  void FTN_X(c_esmc_localarraysetbaseaddr)(ESMCI::LocalArray **ptr, void XD *base,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraysetbaseaddr()"
@@ -251,7 +251,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetbaseaddr)(ESMCI::LocalArray **ptr, void **base,
+  void FTN_X(c_esmc_localarraygetbaseaddr)(ESMCI::LocalArray **ptr, void **base,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetbaseaddr()"
@@ -268,7 +268,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraysetfptr)(ESMCI::LocalArray **ptr,
+  void FTN_X(c_esmc_localarraysetfptr)(ESMCI::LocalArray **ptr,
     struct ESMCI::c_F90ptr *fptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraysetfptr()"
@@ -288,7 +288,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetfptr)(ESMCI::LocalArray **ptr,
+  void FTN_X(c_esmc_localarraygetfptr)(ESMCI::LocalArray **ptr,
     struct ESMCI::c_F90ptr *fptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetfptr()"
@@ -308,7 +308,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarrayforcefptr)(ESMCI::LocalArray **ptr, void XD *base,
+  void FTN_X(c_esmc_localarrayforcefptr)(ESMCI::LocalArray **ptr, void XD *base,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarrayforcefptr()"
@@ -328,7 +328,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraysetdealloc)(ESMCI::LocalArray **ptr,
+  void FTN_X(c_esmc_localarraysetdealloc)(ESMCI::LocalArray **ptr,
     ESMC_Logical *dealloc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraysetdealloc()"
@@ -348,7 +348,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraygetdealloc)(ESMCI::LocalArray **ptr,
+  void FTN_X(c_esmc_localarraygetdealloc)(ESMCI::LocalArray **ptr,
     ESMC_Logical *dealloc, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygetdealloc()"
@@ -368,7 +368,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarrayprint)(ESMCI::LocalArray **ptr, char *opts, int *rc,
+  void FTN_X(c_esmc_localarrayprint)(ESMCI::LocalArray **ptr, char *opts, int *rc,
     ESMCI_FortranStrLenArg clen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarrayprint()"
@@ -399,7 +399,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_localarraywrite)(ESMCI::LocalArray **ptr, char *opts,
+  void FTN_X(c_esmc_localarraywrite)(ESMCI::LocalArray **ptr, char *opts,
     char *fname, int *rc,
     ESMCI_FortranStrLenArg optlen,
     ESMCI_FortranStrLenArg flen){
@@ -437,7 +437,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc,
+  void FTN_X(c_esmf_f90ptrsizeprint)(char *p1, char *p2, int *rank, int *rc,
     ESMCI_FortranStrLenArg p1_l,
     ESMCI_FortranStrLenArg p2_l) {
 #undef  ESMC_METHOD

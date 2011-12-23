@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.21 2011/04/25 19:16:50 theurich Exp $
+// $Id: ESMCI_LocalArray.C,v 1.22 2011/12/23 21:05:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,76 +45,76 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.21 2011/04/25 19:16:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.22 2011/12/23 21:05:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
   
 // prototypes for Fortran calls
 extern "C" {
 
-  void FTN(f_esmf_localarrayf90allocate)(ESMCI::LocalArray**, int *, 
+  void FTN_X(f_esmf_localarrayf90allocate)(ESMCI::LocalArray**, int *, 
     ESMC_TypeKind*, int *, int *, int *, int *);
  
-  void FTN(f_esmf_localarrayf90deallocate)(ESMCI::LocalArray**, int*, 
+  void FTN_X(f_esmf_localarrayf90deallocate)(ESMCI::LocalArray**, int*, 
     ESMC_TypeKind *, int *);
  
-  void FTN(f_esmf_localarrayadjust)(ESMCI::LocalArray**, int *,
+  void FTN_X(f_esmf_localarrayadjust)(ESMCI::LocalArray**, int *,
     ESMC_TypeKind*, const int *, const int *, const int *, int *);
 
-  void FTN(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
+  void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
     ESMCI::LocalArray** laOut, int *rc);
   
 #ifndef ESMF_NO_INTEGER_1_BYTE
-  void FTN(f_esmf_fortrantkrptrcopy1di1)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy2di1)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy3di1)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy4di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy1di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy2di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy3di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy4di1)(void *dst, void *src);
 #ifndef ESMF_NO_GREATER_THAN_4D
-  void FTN(f_esmf_fortrantkrptrcopy5di1)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy6di1)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy7di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy5di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy6di1)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy7di1)(void *dst, void *src);
 #endif
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE
-  void FTN(f_esmf_fortrantkrptrcopy1di2)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy2di2)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy3di2)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy4di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy1di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy2di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy3di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy4di2)(void *dst, void *src);
 #ifndef ESMF_NO_GREATER_THAN_4D
-  void FTN(f_esmf_fortrantkrptrcopy5di2)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy6di2)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy7di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy5di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy6di2)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy7di2)(void *dst, void *src);
 #endif
 #endif
-  void FTN(f_esmf_fortrantkrptrcopy1di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy2di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy3di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy4di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy1di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy2di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy3di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy4di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy1dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy2dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy3dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy4dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy1dr8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy2dr8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy3dr8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy4dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy1di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy2di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy3di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy4di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy1di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy2di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy3di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy4di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy1dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy2dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy3dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy4dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy1dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy2dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy3dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy4dr8)(void *dst, void *src);
 #ifndef ESMF_NO_GREATER_THAN_4D
-  void FTN(f_esmf_fortrantkrptrcopy5di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy6di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy7di4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy5di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy6di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy7di8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy5dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy6dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy7dr4)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy5dr8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy6dr8)(void *dst, void *src);
-  void FTN(f_esmf_fortrantkrptrcopy7dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy5di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy6di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy7di4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy5di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy6di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy7di8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy5dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy6dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy7dr4)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy5dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy6dr8)(void *dst, void *src);
+  void FTN_X(f_esmf_fortrantkrptrcopy7dr8)(void *dst, void *src);
 #endif
   
 }
@@ -199,7 +199,7 @@ int LocalArray::construct(
   if (aflag){
     // call into Fortran to do the allocate, also sets internal LocalArray info
     LocalArray *aptr = this;
-    FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &typekind, counts, 
+    FTN_X(f_esmf_localarrayf90allocate)(&aptr, &rank, &typekind, counts, 
       lbound, ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
@@ -262,7 +262,7 @@ int LocalArray::construct(
 
   if (dealloc){
     // must deallocate data allocation
-    FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &typekind, &localrc);
+    FTN_X(f_esmf_localarrayf90deallocate)(&aptr, &rank, &typekind, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
@@ -501,7 +501,7 @@ LocalArray *LocalArray::create(
   larrayOut->dealloc = true;
 
   // call into Fortran copy method, which will use larrayOut's lbound and ubound
-  FTN(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
+  FTN_X(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
   
@@ -584,7 +584,7 @@ LocalArray *LocalArray::create(
       larrayOut->ubound[i] = ubounds[i];
     }
     // adjust the Fortran dope vector to reflect the new bounds
-    FTN(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
+    FTN_X(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
       larrayOut->lbound, larrayOut->ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return NULL;
@@ -1832,26 +1832,26 @@ int LocalArray::tkrPtrCopy(
     case ESMC_TYPEKIND_I1:
     switch (rank){
       case 1:
-      FTN(f_esmf_fortrantkrptrcopy1di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy1di1)(dst, src);
       break;
       case 2:
-      FTN(f_esmf_fortrantkrptrcopy2di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy2di1)(dst, src);
       break;
       case 3:
-      FTN(f_esmf_fortrantkrptrcopy3di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy3di1)(dst, src);
       break;
       case 4:
-      FTN(f_esmf_fortrantkrptrcopy4di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy4di1)(dst, src);
       break;
 #ifndef ESMF_NO_GREATER_THAN_4D
       case 5:
-      FTN(f_esmf_fortrantkrptrcopy5di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy5di1)(dst, src);
       break;
       case 6:
-      FTN(f_esmf_fortrantkrptrcopy6di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy6di1)(dst, src);
       break;
       case 7:
-      FTN(f_esmf_fortrantkrptrcopy7di1)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy7di1)(dst, src);
       break;
 #endif
     }
@@ -1860,26 +1860,26 @@ int LocalArray::tkrPtrCopy(
     case ESMC_TYPEKIND_I2:
     switch (rank){
       case 1:
-      FTN(f_esmf_fortrantkrptrcopy1di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy1di2)(dst, src);
       break;
       case 2:
-      FTN(f_esmf_fortrantkrptrcopy2di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy2di2)(dst, src);
       break;
       case 3:
-      FTN(f_esmf_fortrantkrptrcopy3di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy3di2)(dst, src);
       break;
       case 4:
-      FTN(f_esmf_fortrantkrptrcopy4di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy4di2)(dst, src);
       break;
 #ifndef ESMF_NO_GREATER_THAN_4D
       case 5:
-      FTN(f_esmf_fortrantkrptrcopy5di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy5di2)(dst, src);
       break;
       case 6:
-      FTN(f_esmf_fortrantkrptrcopy6di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy6di2)(dst, src);
       break;
       case 7:
-      FTN(f_esmf_fortrantkrptrcopy7di2)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy7di2)(dst, src);
       break;
 #endif
     }
@@ -1887,104 +1887,104 @@ int LocalArray::tkrPtrCopy(
     case ESMC_TYPEKIND_I4:
     switch (rank){
       case 1:
-      FTN(f_esmf_fortrantkrptrcopy1di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy1di4)(dst, src);
       break;
       case 2:
-      FTN(f_esmf_fortrantkrptrcopy2di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy2di4)(dst, src);
       break;
       case 3:
-      FTN(f_esmf_fortrantkrptrcopy3di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy3di4)(dst, src);
       break;
       case 4:
-      FTN(f_esmf_fortrantkrptrcopy4di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy4di4)(dst, src);
       break;
 #ifndef ESMF_NO_GREATER_THAN_4D
       case 5:
-      FTN(f_esmf_fortrantkrptrcopy5di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy5di4)(dst, src);
       break;
       case 6:
-      FTN(f_esmf_fortrantkrptrcopy6di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy6di4)(dst, src);
       break;
       case 7:
-      FTN(f_esmf_fortrantkrptrcopy7di4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy7di4)(dst, src);
       break;
 #endif
     }
     case ESMC_TYPEKIND_I8:
     switch (rank){
       case 1:
-      FTN(f_esmf_fortrantkrptrcopy1di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy1di8)(dst, src);
       break;
       case 2:
-      FTN(f_esmf_fortrantkrptrcopy2di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy2di8)(dst, src);
       break;
       case 3:
-      FTN(f_esmf_fortrantkrptrcopy3di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy3di8)(dst, src);
       break;
       case 4:
-      FTN(f_esmf_fortrantkrptrcopy4di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy4di8)(dst, src);
       break;
 #ifndef ESMF_NO_GREATER_THAN_4D
       case 5:
-      FTN(f_esmf_fortrantkrptrcopy5di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy5di8)(dst, src);
       break;
       case 6:
-      FTN(f_esmf_fortrantkrptrcopy6di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy6di8)(dst, src);
       break;
       case 7:
-      FTN(f_esmf_fortrantkrptrcopy7di8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy7di8)(dst, src);
       break;
 #endif
     }
     case ESMC_TYPEKIND_R4:
     switch (rank){
       case 1:
-      FTN(f_esmf_fortrantkrptrcopy1dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy1dr4)(dst, src);
       break;
       case 2:
-      FTN(f_esmf_fortrantkrptrcopy2dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy2dr4)(dst, src);
       break;
       case 3:
-      FTN(f_esmf_fortrantkrptrcopy3dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy3dr4)(dst, src);
       break;
       case 4:
-      FTN(f_esmf_fortrantkrptrcopy4dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy4dr4)(dst, src);
       break;
 #ifndef ESMF_NO_GREATER_THAN_4D
       case 5:
-      FTN(f_esmf_fortrantkrptrcopy5dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy5dr4)(dst, src);
       break;
       case 6:
-      FTN(f_esmf_fortrantkrptrcopy6dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy6dr4)(dst, src);
       break;
       case 7:
-      FTN(f_esmf_fortrantkrptrcopy7dr4)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy7dr4)(dst, src);
       break;
 #endif
     }
     case ESMC_TYPEKIND_R8:
     switch (rank){
       case 1:
-      FTN(f_esmf_fortrantkrptrcopy1dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy1dr8)(dst, src);
       break;
       case 2:
-      FTN(f_esmf_fortrantkrptrcopy2dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy2dr8)(dst, src);
       break;
       case 3:
-      FTN(f_esmf_fortrantkrptrcopy3dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy3dr8)(dst, src);
       break;
       case 4:
-      FTN(f_esmf_fortrantkrptrcopy4dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy4dr8)(dst, src);
       break;
 #ifndef ESMF_NO_GREATER_THAN_4D
       case 5:
-      FTN(f_esmf_fortrantkrptrcopy5dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy5dr8)(dst, src);
       break;
       case 6:
-      FTN(f_esmf_fortrantkrptrcopy6dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy6dr8)(dst, src);
       break;
       case 7:
-      FTN(f_esmf_fortrantkrptrcopy7dr8)(dst, src);
+      FTN_X(f_esmf_fortrantkrptrcopy7dr8)(dst, src);
       break;
 #endif
     }

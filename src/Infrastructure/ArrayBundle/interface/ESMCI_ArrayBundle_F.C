@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.36 2011/06/27 18:40:36 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.37 2011/12/23 21:04:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ extern "C" {
 
   // - ESMF-public methods:
 
-  void FTN(c_esmc_arraybundleadd)(ESMCI::ArrayBundle **ptr, 
+  void FTN_X(c_esmc_arraybundleadd)(ESMCI::ArrayBundle **ptr, 
     ESMCI::Array **arrayList, int *arrayCount,
     ESMC_Logical *multiflag, ESMC_Logical *relaxedflag, int *rc){
 #undef  ESMC_METHOD
@@ -94,7 +94,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_arraybundleaddreplace)(ESMCI::ArrayBundle **ptr, 
+  void FTN_X(c_esmc_arraybundleaddreplace)(ESMCI::ArrayBundle **ptr, 
     ESMCI::Array **arrayList, int *arrayCount, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleaddreplace()"
@@ -127,7 +127,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_arraybundlecreate)(ESMCI::ArrayBundle **ptr, 
+  void FTN_X(c_esmc_arraybundlecreate)(ESMCI::ArrayBundle **ptr, 
     ESMCI::Array **arrayList, int *arrayCount,
     ESMC_Logical *multiflag, ESMC_Logical *relaxedflag, 
     char *name, int *len_name, int *rc,
@@ -169,7 +169,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_arraybundledestroy)(ESMCI::ArrayBundle **ptr, int *rc){
+  void FTN_X(c_esmc_arraybundledestroy)(ESMCI::ArrayBundle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundledestroy()"
     // Initialize return code; assume routine not implemented
@@ -182,7 +182,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, char *arrayName,
+  void FTN_X(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, char *arrayName,
     int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc,
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
@@ -210,7 +210,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlegetlistall)(ESMCI::ArrayBundle **ptr,
+  void FTN_X(c_esmc_arraybundlegetlistall)(ESMCI::ArrayBundle **ptr,
     int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlegetlistall()"
@@ -238,7 +238,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlegetitem)(ESMCI::ArrayBundle **ptr, char *arrayName,
+  void FTN_X(c_esmc_arraybundlegetitem)(ESMCI::ArrayBundle **ptr, char *arrayName,
     ESMCI::Array **array, int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlegetitem()"
@@ -268,7 +268,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlegetispresent)(ESMCI::ArrayBundle **ptr,
+  void FTN_X(c_esmc_arraybundlegetispresent)(ESMCI::ArrayBundle **ptr,
     char *arrayName, ESMC_Logical *isPresent, int *rc,
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
@@ -302,7 +302,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlegetcount)(ESMCI::ArrayBundle **ptr,
+  void FTN_X(c_esmc_arraybundlegetcount)(ESMCI::ArrayBundle **ptr,
     char *arrayName, int *arrayCount, int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlegetcount()"
@@ -332,7 +332,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlehalostore)(ESMCI::ArrayBundle **arraybundle,
+  void FTN_X(c_esmc_arraybundlehalostore)(ESMCI::ArrayBundle **arraybundle,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
     ESMCI::InterfaceInt **haloLDepth, ESMCI::InterfaceInt **haloUDepth,
@@ -349,7 +349,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlehalo)(ESMCI::ArrayBundle **arraybundle,
+  void FTN_X(c_esmc_arraybundlehalo)(ESMCI::ArrayBundle **arraybundle,
     ESMCI::RouteHandle **routehandle, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayhalo()"
@@ -366,7 +366,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundleprint)(ESMCI::ArrayBundle **ptr, int *rc){
+  void FTN_X(c_esmc_arraybundleprint)(ESMCI::ArrayBundle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleprint()"
     // Initialize return code; assume routine not implemented
@@ -379,7 +379,7 @@ extern "C" {
     fflush(stdout);
   }
 
-  void FTN(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
     void *factor, int *rc){
@@ -395,7 +395,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN_X(c_esmc_arraybundlerediststorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
@@ -409,7 +409,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundleredist)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN_X(c_esmc_arraybundleredist)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
@@ -427,7 +427,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundleremove)(ESMCI::ArrayBundle **ptr,
+  void FTN_X(c_esmc_arraybundleremove)(ESMCI::ArrayBundle **ptr,
     char *arrayNameList, int *itemCount, ESMC_Logical *multiflag,
     ESMC_Logical *relaxedflag, int *rc, ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
@@ -474,7 +474,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlereplace)(ESMCI::ArrayBundle **ptr,
+  void FTN_X(c_esmc_arraybundlereplace)(ESMCI::ArrayBundle **ptr,
     ESMCI::Array **arrayList, int *itemCount, ESMC_Logical *multiflag, 
     ESMC_Logical *relaxedflag, int *rc){
 #undef  ESMC_METHOD
@@ -521,7 +521,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
  
-  void FTN(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind *typekindFactors, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
@@ -589,7 +589,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN_X(c_esmc_arraybundlesmmstorenf)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     int *rc){
 #undef  ESMC_METHOD
@@ -605,7 +605,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
+  void FTN_X(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
     ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
@@ -623,7 +623,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundleserialize)(ESMCI::ArrayBundle **arraybundle, 
+  void FTN_X(c_esmc_arraybundleserialize)(ESMCI::ArrayBundle **arraybundle, 
     char *buf, int *length, int *offset, ESMC_AttReconcileFlag *attreconflag,
     ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
@@ -638,7 +638,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraybundledeserialize)(ESMCI::ArrayBundle **arraybundle,
+  void FTN_X(c_esmc_arraybundledeserialize)(ESMCI::ArrayBundle **arraybundle,
     char *buf, int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD

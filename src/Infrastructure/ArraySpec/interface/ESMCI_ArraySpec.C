@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.C,v 1.10 2011/02/22 22:27:45 w6ws Exp $
+// $Id: ESMCI_ArraySpec.C,v 1.11 2011/12/23 21:04:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -30,13 +30,13 @@
 extern "C" {
   
 // Prototypes of the Fortran interface functions.
-void FTN(f_esmf_arrayspecset)(ESMCI::ArraySpec *arrayspec, int *rank,
+void FTN_X(f_esmf_arrayspecset)(ESMCI::ArraySpec *arrayspec, int *rank,
   ESMC_TypeKind *typekind, int *rc);
 
-void FTN(f_esmf_arrayspecgetrank)(ESMCI::ArraySpec *arrayspec, int *rank,
+void FTN_X(f_esmf_arrayspecgetrank)(ESMCI::ArraySpec *arrayspec, int *rank,
   int *rc);
 
-void FTN(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
+void FTN_X(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
   ESMC_TypeKind *typekind, int *rc);
 
 }; // extern "C"
@@ -44,7 +44,7 @@ void FTN(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.10 2011/02/22 22:27:45 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.11 2011/12/23 21:04:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -55,7 +55,7 @@ int ArraySpec::set(int rank, ESMC_TypeKind typekind){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  FTN(f_esmf_arrayspecset)(this, &rank, &typekind, &localrc);
+  FTN_X(f_esmf_arrayspecset)(this, &rank, &typekind, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
   // return successfully
@@ -70,7 +70,7 @@ int ArraySpec::getRank(int *rc){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   int rank;
-  FTN(f_esmf_arrayspecgetrank)(this, &rank, &localrc);
+  FTN_X(f_esmf_arrayspecgetrank)(this, &rank, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return -1;  // bail out with invalid rank
   // return successfully
@@ -85,7 +85,7 @@ ESMC_TypeKind ArraySpec::getTypeKind(int *rc){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   ESMC_TypeKind typekind;
-  FTN(f_esmf_arrayspecgettypekind)(this, &typekind, &localrc);
+  FTN_X(f_esmf_arrayspecgettypekind)(this, &typekind, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMF_NOKIND;  // bail out with invalid typekind
   // return successfully

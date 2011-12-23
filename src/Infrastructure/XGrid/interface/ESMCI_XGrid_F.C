@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.9 2011/08/22 16:34:19 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.10 2011/12/23 21:05:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.9 2011/08/22 16:34:19 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.10 2011/12/23 21:05:39 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -61,7 +61,7 @@ extern "C" {
 //
 
 // non-method functions
-void FTN(c_esmc_xgridserialize)(
+void FTN_X(c_esmc_xgridserialize)(
                 int * s, 
                 int * ngridA, int * ngridB, int * flag,
                 char *buffer, int *length, int *offset,
@@ -102,7 +102,7 @@ void FTN(c_esmc_xgridserialize)(
 } 
 
 
-void FTN(c_esmc_xgriddeserialize)(
+void FTN_X(c_esmc_xgriddeserialize)(
                 int * s, 
                 int * ngridA, int * ngridB, int * flag,
                 char *buffer, int *offset, int *localrc,
@@ -136,7 +136,7 @@ void FTN(c_esmc_xgriddeserialize)(
 } 
 
 // non-method functions
-void FTN(c_esmc_smmspecserialize)(
+void FTN_X(c_esmc_smmspecserialize)(
                 int * cellCount, 
                 int * indices, double * weights, 
                 char *buffer, int *length, int *offset,
@@ -157,7 +157,7 @@ void FTN(c_esmc_smmspecserialize)(
 } 
 
 // non-method functions
-void FTN(c_esmc_smmspecdeserialize)(
+void FTN_X(c_esmc_smmspecdeserialize)(
                 int * cellCount, 
                 int * indices, double * weights, 
                 char *buffer, int *offset,
@@ -177,7 +177,7 @@ void FTN(c_esmc_smmspecdeserialize)(
 } 
 
 // xgrid regrid create method tailored for XGrid
-void FTN(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
+void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, Mesh **meshdstpp, 
                    Mesh **mesh,
                    int *compute_midmesh,
@@ -188,7 +188,7 @@ void FTN(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridregrid_create()" 
-  Trace __trace(" FTN(c_esmc_xgridregrid_create)");
+  Trace __trace(" FTN_X(c_esmc_xgridregrid_create)");
   ESMCI::VM *vm = *vmpp;
 
   int localPet = vm->getLocalPet();
@@ -277,7 +277,7 @@ void FTN(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
 
 }
 
-void FTN(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
+void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 
   ESMCI::TempWeights &tw = (**_tw);
 
@@ -297,13 +297,13 @@ void FTN(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, doubl
 }
 
 // mesh merge
-void FTN(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
+void FTN_X(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
                    Mesh **meshpp,
                    //int *regridScheme,
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshmerge()" 
-  Trace __trace(" FTN(meshmerge) ");
+  Trace __trace(" FTN_X(meshmerge) ");
 
   Mesh &srcmesh = **srcmeshpp;
   Mesh &dstmesh = **dstmeshpp;

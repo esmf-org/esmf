@@ -1,4 +1,4 @@
-// $Id: ESMCI_PatchRecovery.C,v 1.10 2011/12/15 23:11:45 peggyli Exp $
+// $Id: ESMCI_PatchRecovery.C,v 1.11 2011/12/23 21:05:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -33,14 +33,14 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.10 2011/12/15 23:11:45 peggyli Exp $";
+static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.11 2011/12/23 21:05:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 
-extern "C" void FTN(dgelsd)(int *,int *, int*, double*, int*, double*, int*,double*, double*, int*, double *, int*, int *, int *);
+extern "C" void FTNX(dgelsd)(int *,int *, int*, double*, int*, double*, int*,double*, double*, int*, double *, int*, int *, int *);
 
-extern "C" void FTN(f_esmf_lapack_iworksize)(int *,int *);
+extern "C" void FTN_X(f_esmf_lapack_iworksize)(int *,int *);
 
 namespace ESMCI {
 
@@ -291,7 +291,7 @@ Par::Out() << std::endl;
 
   // calculate iworksize
   int iworksize=0;
-  FTN(f_esmf_lapack_iworksize)(&minmn, &iworksize);
+  FTN_X(f_esmf_lapack_iworksize)(&minmn, &iworksize);
 
   // Allocate iwork buffer
   std::vector<int> iwork(iworksize, 0);
@@ -299,7 +299,7 @@ Par::Out() << std::endl;
   // calculate work size, by using solver with lwork = -1
   int tmplwork=-1;
   double tmpwork=0;
-  FTN(dgelsd)(
+  FTNX(dgelsd)(
 	      &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank, &tmpwork, &tmplwork, &iwork[0], &info); 
   int worksize = int(tmpwork);
 
@@ -309,7 +309,7 @@ Par::Out() << std::endl;
   
 
   // Call solver
-  FTN(dgelsd)(
+  FTNX(dgelsd)(
 	      &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank, &work[0], &worksize, &iwork[0], &info);
   if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
 
@@ -385,7 +385,7 @@ std::vector<double> matsav = mat;
 
   // calculate iworksize
   int iworksize=0;
-  FTN(f_esmf_lapack_iworksize)(&minmn, &iworksize);
+  FTN_X(f_esmf_lapack_iworksize)(&minmn, &iworksize);
 
   // Allocate iwork buffer
   std::vector<int> iwork(iworksize, 0);
@@ -393,7 +393,7 @@ std::vector<double> matsav = mat;
   // calculate work size, by using solver with lwork = -1
   int tmplwork=-1;
   double tmpwork=0;
-  FTN(dgelsd)(
+  FTNX(dgelsd)(
 	      &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank, &tmpwork, &tmplwork, &iwork[0], &info);
   
   int worksize = int(tmpwork);
@@ -402,7 +402,7 @@ std::vector<double> matsav = mat;
   std::vector<double> work(worksize, 0);
   
   // Call solver
-  FTN(dgelsd)(
+  FTNX(dgelsd)(
 	      &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank, &work[0], &worksize, &iwork[0], &info);
 
   if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
@@ -487,7 +487,7 @@ Par::Out() << std::endl;
 }
 #endif
 
-  FTN(dgelsy)(
+  FTNX(dgelsy)(
     &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 
   if (info !=0) Throw() << "Bad dgelsy solve, info=" << info;
@@ -549,7 +549,7 @@ std::vector<double> saverhs = rhs;
 std::vector<double> matsav = mat;
 #endif
 
-  FTN(dgelsy)(
+  FTNX(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 
 #ifdef RESIDUALS

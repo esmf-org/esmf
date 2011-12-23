@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF_F.C,v 1.4 2011/04/28 18:53:37 rokuingh Exp $
+// $Id: ESMCI_IO_NetCDF_F.C,v 1.5 2011/12/23 21:05:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ extern "C"
 {
 
 //--------------------------------------------------------------------
-void FTN(c_esmc_io_netcdfcreate)(IO_NetCDF**  ptr,
+void FTN_X(c_esmc_io_netcdfcreate)(IO_NetCDF**  ptr,
                                  int*         nameLen,
                                  const char*  name,
                                  ESMC_Base**  base,
@@ -56,7 +56,7 @@ void FTN(c_esmc_io_netcdfcreate)(IO_NetCDF**  ptr,
 }
 
 //--------------------------------------------------------------------
-void FTN(c_esmc_io_netcdfdestroy)(IO_NetCDF**  ptr, 
+void FTN_X(c_esmc_io_netcdfdestroy)(IO_NetCDF**  ptr, 
                                   int*         status) 
 {
    int	rc = ESMCI_IO_NetCDFDestroy(ptr);
@@ -68,7 +68,7 @@ void FTN(c_esmc_io_netcdfdestroy)(IO_NetCDF**  ptr,
 }
 
 //--------------------------------------------------------------------
-void FTN(c_esmc_io_netcdfsetstate)(IO_NetCDF**  ptr,
+void FTN_X(c_esmc_io_netcdfsetstate)(IO_NetCDF**  ptr,
                                    State*       state,
                                    int*         status) 
 {
@@ -90,7 +90,7 @@ void FTN(c_esmc_io_netcdfsetstate)(IO_NetCDF**  ptr,
 // copying the arrays over to the passed in state... I may need to add
 // a State copy method to the State class.
 //--------------------------------------------------------------------
-void FTN(c_esmc_io_netcdfgetstate)(IO_NetCDF**  ptr,
+void FTN_X(c_esmc_io_netcdfgetstate)(IO_NetCDF**  ptr,
                                    State*       state,
                                    int*         status) 
 {
@@ -121,7 +121,7 @@ void FTN(c_esmc_io_netcdfgetstate)(IO_NetCDF**  ptr,
 }
 
 //--------------------------------------------------------------------
-void FTN(c_esmc_io_netcdfread)(IO_NetCDF**  ptr,
+void FTN_X(c_esmc_io_netcdfread)(IO_NetCDF**  ptr,
                                int*         fileNameLen,
                                const char*  fileName,
                                int*         status) 
@@ -138,7 +138,7 @@ void FTN(c_esmc_io_netcdfread)(IO_NetCDF**  ptr,
 }
 
 //--------------------------------------------------------------------
-void FTN(c_esmc_io_netcdfwrite)(IO_NetCDF**  ptr,
+void FTN_X(c_esmc_io_netcdfwrite)(IO_NetCDF**  ptr,
                                 int*         fileNameLen,
                                 const char*  fileName,
                                 int*         status) 

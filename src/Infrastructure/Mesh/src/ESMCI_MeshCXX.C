@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.22 2011/10/17 17:35:26 oehmke Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.23 2011/12/23 21:05:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.22 2011/10/17 17:35:26 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.23 2011/12/23 21:05:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -477,7 +477,7 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
 
 } // MeshCXX::addNodes
 
-extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 
 /**
@@ -561,7 +561,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
        int nsize = *numLNodes = ngids.size();
        int rc1;
        
-       FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
+       FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
        
        ESMC_LogDefault.MsgFoundError(rc1,
 				     ESMCI_ERR_PASSTHRU,
@@ -571,7 +571,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      {
        int esize = *numLElems = egids.size();
        int rc1;
-       FTN(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
+       FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
        
        ESMC_LogDefault.MsgFoundError(rc1,
 				     ESMCI_ERR_PASSTHRU,

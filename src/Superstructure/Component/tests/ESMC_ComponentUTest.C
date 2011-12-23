@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.18 2011/06/28 02:07:26 theurich Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.19 2011/12/23 21:05:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -159,8 +159,8 @@ void myCplRegistrationInC(ESMC_CplComp cplcomp, int *rc){
 }
 
 extern "C"{
-  void FTN(my_registrationinfortran)(ESMC_GridComp comp, int *rc);
-  void FTN(my_cplregistrationinfortran)(ESMC_CplComp comp, int *rc);
+  void FTN_X(my_registrationinfortran)(ESMC_GridComp comp, int *rc);
+  void FTN_X(my_cplregistrationinfortran)(ESMC_CplComp comp, int *rc);
 }
 
 
@@ -337,7 +337,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_GridCompSetServices() using my_RegistrationInFortran()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridCompSetServices(gcomp, FTN(my_registrationinfortran), &userRc);
+  rc = ESMC_GridCompSetServices(gcomp, FTN_X(my_registrationinfortran), &userRc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -446,7 +446,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_CplCompSetServices() using my_RegistrationInFortran()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_CplCompSetServices(cplcomp, FTN(my_cplregistrationinfortran),
+  rc = ESMC_CplCompSetServices(cplcomp, FTN_X(my_cplregistrationinfortran),
     &userRc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

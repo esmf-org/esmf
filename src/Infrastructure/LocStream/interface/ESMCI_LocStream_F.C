@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocStream_F.C,v 1.14 2011/11/08 05:02:24 theurich Exp $
+// $Id: ESMCI_LocStream_F.C,v 1.15 2011/12/23 21:05:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_LocStream_F.C,v 1.14 2011/11/08 05:02:24 theurich Exp $";
+             "$Id: ESMCI_LocStream_F.C,v 1.15 2011/12/23 21:05:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -46,7 +46,7 @@ extern "C" {
 
 
 // non-method functions
-void FTN(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array, 
+void FTN_X(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array, 
 				     int *_localDE, 
                                      int *exclusiveLBound, 
                                      int *exclusiveUBound,
@@ -138,7 +138,7 @@ void FTN(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array,
 } 
 
 // non-method functions
-void FTN(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid, 
+void FTN_X(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid, 
 				 int *_localDE, 
 				 ESMC_IndexFlag *_indexflag, 
                                  int *exclusiveLBound, 
@@ -204,7 +204,7 @@ void FTN(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
 } 
 
 
-void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid, 
+void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid, 
 				 int *_localDE, 
 				 ESMC_IndexFlag *_indexflag, 
                                  int *exclusiveUBound, 
@@ -277,7 +277,7 @@ void FTN(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
 
 #if 1
 // non-method functions
-void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag, 
+void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag, 
                 int *keyCount,
 	        char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
@@ -321,7 +321,7 @@ void FTN(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 } 
 
 
-void FTN(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag, 
+void FTN_X(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag, 
                 int *keyCount, char *buffer, int *offset, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
@@ -349,7 +349,7 @@ void FTN(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag,
 } 
 
 // non-method functions
-void FTN(c_esmc_locstreamkeyserialize)(
+void FTN_X(c_esmc_locstreamkeyserialize)(
 				       int *keyNameLen, char *keyName,
 				       int *unitsLen, char *units,
 				       int *longNameLen, char *longName,
@@ -420,7 +420,7 @@ void FTN(c_esmc_locstreamkeyserialize)(
 } 
   
 
-void FTN(c_esmc_locstreamkeydeserialize)(
+void FTN_X(c_esmc_locstreamkeydeserialize)(
 					 char *keyName,
 					 char *units,
 					 char *longName,

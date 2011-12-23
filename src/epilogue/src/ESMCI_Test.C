@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.17 2011/06/16 05:57:06 eschwab Exp $
+// $Id: ESMCI_Test.C,v 1.18 2011/12/23 21:06:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,    
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.17 2011/06/16 05:57:06 eschwab Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.18 2011/12/23 21:06:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -487,7 +487,7 @@ int TestStart(
 
 //-----------------------------------------------------------------------------
 extern "C"{
-  void FTN(c_esmc_printpassflush)(){
+  void FTN_X(c_esmc_printpassflush)(){
     printf("PASS: \n");
     fflush(stdout);
   }

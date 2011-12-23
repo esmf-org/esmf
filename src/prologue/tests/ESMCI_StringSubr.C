@@ -1,4 +1,4 @@
-// $Id: ESMCI_StringSubr.C,v 1.3 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_StringSubr.C,v 1.4 2011/12/23 21:06:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ typedef void (*FUNC3)(int *, const char *, int *, const char *, int *, int *, in
 
 extern "C" {
 
-void FTN(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
+void FTN_X(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
                     int *i1, int *i2, char *fstr,
                     int *i3, int *i4, int *rc, ESMCI_FortranStrLenArg slen) {
 

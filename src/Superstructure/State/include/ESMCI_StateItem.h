@@ -1,4 +1,4 @@
-// $Id: ESMCI_StateItem.h,v 1.2 2011/05/23 19:40:49 theurich Exp $
+// $Id: ESMCI_StateItem.h,v 1.3 2011/12/23 21:05:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ namespace ESMCI{
 
 extern "C" {
   // Prototypes of the Fortran interface functions.
-  void FTN(f_esmf_stateitemwrapcast)(ESMCI::F90ClassHolder *statItemWrapOut,
+  void FTN_X(f_esmf_stateitemwrapcast)(ESMCI::F90ClassHolder *statItemWrapOut,
     ESMCI::StateItemWrap *stateItemWrapIn, int *rc);
 }
 
@@ -54,7 +54,7 @@ namespace ESMCI{
   int StateItemWrap::castToFortran(F90ClassHolder *fc){
     int localrc = ESMC_RC_NOT_IMPL;
     int rc=ESMC_RC_NOT_IMPL;
-    FTN(f_esmf_stateitemwrapcast)(fc, this, &localrc);
+    FTN_X(f_esmf_stateitemwrapcast)(fc, this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
     // return successfully

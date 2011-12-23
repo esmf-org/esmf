@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.9 2011/08/07 13:25:16 w6ws Exp $
+// $Id: ESMCI_WebServ_F.C,v 1.10 2011/12/23 21:05:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.9 2011/08/07 13:25:16 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.10 2011/12/23 21:05:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ string		theClientId = "";
 // !ROUTINE:  c_esmc_componentsvcloop()
 //
 // !INTERFACE:
-void FTN(c_esmc_componentsvcloop)(
+void FTN_X(c_esmc_componentsvcloop)(
 //
 // !RETURN VALUE:
 //
@@ -125,7 +125,7 @@ printf("Component Server Request Loop\n");
 // !ROUTINE:  c_esmc_registercomponent()
 //
 // !INTERFACE:
-void FTN(c_esmc_registercomponent)(
+void FTN_X(c_esmc_registercomponent)(
 //
 // !RETURN VALUE:
 //
@@ -223,7 +223,7 @@ printf("Successfully notified Registrar of component ready.\n");
 // !ROUTINE:  c_esmc_unregistercomponent()
 //
 // !INTERFACE:
-void FTN(c_esmc_unregistercomponent)(
+void FTN_X(c_esmc_unregistercomponent)(
 //
 // !RETURN VALUE:
 //
@@ -282,7 +282,7 @@ void FTN(c_esmc_unregistercomponent)(
 // !ROUTINE:  c_esmc_getportnum()
 //
 // !INTERFACE:
-void FTN(c_esmc_getportnum)(
+void FTN_X(c_esmc_getportnum)(
 //
 // !RETURN VALUE:
 //
@@ -313,7 +313,7 @@ void FTN(c_esmc_getportnum)(
 // !ROUTINE:  c_esmc_addoutputfilename()
 //
 // !INTERFACE:
-void FTN(c_esmc_addoutputfilename)(
+void FTN_X(c_esmc_addoutputfilename)(
 //
 // !RETURN VALUE:
 //

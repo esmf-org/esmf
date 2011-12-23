@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.53 2011/10/06 16:34:56 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.54 2011/12/23 21:05:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.53 2011/10/06 16:34:56 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.54 2011/12/23 21:05:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -63,7 +63,7 @@ using namespace ESMCI;
  *----------------------------------------------------------------------------*/
 
 
-extern "C" void FTN(c_esmc_meshinit)(char *logfile, int *use_log,
+extern "C" void FTN_X(c_esmc_meshinit)(char *logfile, int *use_log,
    ESMCI_FortranStrLenArg nlen) {
 
   char *lname = ESMC_F90toCstring(logfile, nlen);
@@ -75,7 +75,7 @@ extern "C" void FTN(c_esmc_meshinit)(char *logfile, int *use_log,
 }
 
 
-extern "C" void FTN(c_esmc_meshcreate)(Mesh **meshpp,
+extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
                          int *pdim, int *sdim, int *rc)
 {
 #undef  ESMC_METHOD
@@ -144,7 +144,7 @@ extern "C" void FTN(c_esmc_meshcreate)(Mesh **meshpp,
 
 } // meshcreate
 
-extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
+extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
                double *nodeCoord, int *nodeOwner, int *rc) 
 {
    try {
@@ -233,7 +233,7 @@ extern "C" void FTN(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nod
 
 } 
 
-extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
+extern "C" void FTN_X(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
   try {
@@ -280,7 +280,7 @@ extern "C" void FTN(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
 
 }
 
-extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
+extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
                int *elemType, int *num_elemConn, int *elemConn, int *regridConserve, int *rc) 
 {
    try {
@@ -470,7 +470,7 @@ extern "C" void FTN(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *
 /**
  * Routines for reading in a test VTK mesh to fortran arrays (for testing the array interface)
  */
-extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc,
+extern "C" void FTN_X(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *num_node, int *conn_size, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
   try {
@@ -532,7 +532,7 @@ extern "C" void FTN(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *nu
 
 }
 
-extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nodeCoord,
+extern "C" void FTN_X(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nodeCoord,
                     int *nodeOwner, int *elemId, int *elemType, int *elemConn, int *rc,
     ESMCI_FortranStrLenArg nlen) {
 
@@ -596,7 +596,7 @@ extern "C" void FTN(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *nod
 
 }
 
-extern "C" void FTN(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
+extern "C" void FTN_X(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
 
   try {
 
@@ -639,7 +639,7 @@ extern "C" void FTN(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
 
 }
 
-extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
+extern "C" void FTN_X(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
 
   try {
 
@@ -682,7 +682,7 @@ extern "C" void FTN(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
 
 }
 
-extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 
 /**
@@ -749,7 +749,7 @@ void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
 }
 
 
-extern "C" void FTN(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
+extern "C" void FTN_X(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
 
   // Initialize the parallel environment for mesh (if not already done)
     {
@@ -768,7 +768,7 @@ extern "C" void FTN(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_elem
 }
     
 
-extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
+extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
 
   // Declare id vectors
   std::vector<int> ngids; 
@@ -840,7 +840,7 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
     
     int *indices = (nsize==0)?NULL:&ngids[0];
 
-    FTN(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
 
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU,
@@ -853,7 +853,7 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
     int *indices = (esize==0)?NULL:&egids[0];
 
 
-    FTN(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc1,
       ESMCI_ERR_PASSTHRU,
@@ -866,7 +866,7 @@ extern "C" void FTN(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *
 }
 
 
-extern "C" void FTN(c_esmc_meshinfoserialize)(int *intMeshFreed,
+extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
 	        char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
@@ -902,7 +902,7 @@ extern "C" void FTN(c_esmc_meshinfoserialize)(int *intMeshFreed,
 } 
 
 
-extern "C" void FTN(c_esmc_meshinfodeserialize)(int *intMeshFreed, 
+extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed, 
                                  char *buffer, int *offset, int *localrc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
@@ -927,7 +927,7 @@ extern "C" void FTN(c_esmc_meshinfodeserialize)(int *intMeshFreed,
 } 
 
 
-extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
+extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
 	        char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
@@ -1062,7 +1062,7 @@ extern "C" void FTN(c_esmc_meshserialize)(Mesh **meshpp,
 } 
 
 
-extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp, 
+extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp, 
                                  char *buffer, int *offset, int *rc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
@@ -1187,7 +1187,7 @@ extern "C" void FTN(c_esmc_meshdeserialize)(Mesh **meshpp,
 } 
 
 
-extern "C" void FTN(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
+extern "C" void FTN_X(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
 					double *pnts, int *pets, int *rc){
 
    try {
@@ -1248,7 +1248,7 @@ extern "C" void FTN(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, int 
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-extern "C" void FTN(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int *rc) 
+extern "C" void FTN_X(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int *rc) 
 {
    try {
     Mesh *meshp = *meshpp;
@@ -1332,7 +1332,7 @@ extern "C" void FTN(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int
 ////////////////
 
 
-extern "C" void FTN(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc) {
 
   
   // Declare polygon information
@@ -1447,7 +1447,7 @@ extern "C" void FTN(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *el
 
 
 
-extern "C" void FTN(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
+extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
   
   try {
 
@@ -1543,7 +1543,7 @@ extern "C" void FTN(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *el
 // Output is: tri_ind, which are the 0-based indices of the triangles 
 //             making up the triangulization. tri_ind should be of size 3*(numPnts-2).
 // 
-extern "C" void FTN(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts, 
+extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts, 
 					double *pnts, double *td, int *ti, int *triInd, int *rc){
    try {
 

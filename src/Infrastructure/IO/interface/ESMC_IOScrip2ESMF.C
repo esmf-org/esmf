@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.14 2011/12/14 00:32:55 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.15 2011/12/23 21:05:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -303,7 +303,7 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_nc_create"
 extern "C" {
-  void FTN(c_nc_create)(
+  void FTN_X(c_nc_create)(
 			  char *infile,
 			  int *mode,
 			  ESMC_Logical *largefileflag,
@@ -359,7 +359,7 @@ extern "C" {
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_convertscrip"
 extern "C" { 
-void FTN(c_convertscrip)(
+void FTN_X(c_convertscrip)(
   char *infile,
   char *outfile,
   int *dualflag,

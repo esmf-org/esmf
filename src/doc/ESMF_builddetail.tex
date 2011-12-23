@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.14 2010/10/19 15:45:44 rokuingh Exp $
+%  $Id: ESMF_builddetail.tex,v 1.15 2011/12/23 21:05:56 theurich Exp $
 
 % there is a separate copy of this under build/doc which is
 % now used only by the implementation report.  this was separated
@@ -342,8 +342,13 @@ during compilation of ESMF library code written in C++.
 
 \begin{description}
 
-\item[FTN(func)]
+\item[FTN_X(func)]
 Macro that will correctly expand "func" to match the Fortran symbol convention.
+Use this macro for function names that contain an underscore.
+
+\item[FTNX(func)]
+Macro that will correctly expand "func" to match the Fortran symbol convention.
+Use this macro for function names that do {\em not} contain an underscore.
 
 \item[ESMCI\_FortranStrLenArg]
 Typedef to match the data type of the 'hidden' string length argument that

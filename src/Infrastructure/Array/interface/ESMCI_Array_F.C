@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.51 2011/06/27 16:44:56 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.52 2011/12/23 21:04:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ extern "C" {
 
   // - ESMF-public methods:
         
-  void FTN(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
+  void FTN_X(c_esmc_arraycreatelocalarray)(ESMCI::Array **ptr, 
     ESMCI::LocalArray **larrayList, int *larrayCount,
     ESMCI::DistGrid **distgrid,
     ESMCI::CopyFlag *copyflag,
@@ -87,7 +87,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
+  void FTN_X(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
     ESMCI::ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
     ESMCI::InterfaceInt **distgridToArrayMap,
     ESMCI::InterfaceInt **computationalEdgeLWidthArg,
@@ -124,7 +124,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_arraycreatecopy)(ESMCI::Array **ptr, 
+  void FTN_X(c_esmc_arraycreatecopy)(ESMCI::Array **ptr, 
     ESMCI::Array **arrayOut, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraycreatecopy()"
@@ -137,7 +137,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   
-  void FTN(c_esmc_arraydestroy)(ESMCI::Array **ptr, int *rc){
+  void FTN_X(c_esmc_arraydestroy)(ESMCI::Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraydestroy()"
     // Initialize return code; assume routine not implemented
@@ -148,7 +148,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind *typekind, 
+  void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind *typekind, 
     int *rank, ESMCI::LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
@@ -585,7 +585,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_arraywritec)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arraywritec)(ESMCI::Array **array,
     char *file, char *variableName, bool *append,
     int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
 #undef  ESMC_METHOD
@@ -599,7 +599,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arrayprint)(ESMCI::Array **ptr, int *rc){
+  void FTN_X(c_esmc_arrayprint)(ESMCI::Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayprint()"
     // Initialize return code; assume routine not implemented
@@ -612,7 +612,7 @@ extern "C" {
     fflush(stdout);
   }
 
-  void FTN(c_esmc_arrayvalidate)(ESMCI::Array **ptr, int *rc){
+  void FTN_X(c_esmc_arrayvalidate)(ESMCI::Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayvalidate()"
     // Initialize return code; assume routine not implemented
@@ -623,7 +623,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arrayhalostore)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arrayhalostore)(ESMCI::Array **array,
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
     ESMCI::InterfaceInt **haloLDepth, ESMCI::InterfaceInt **haloUDepth,
@@ -639,7 +639,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arrayhalo)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arrayhalo)(ESMCI::Array **array,
     ESMCI::RouteHandle **routehandle, ESMC_CommFlag *commflag,
     ESMC_Logical *finishedflag, ESMC_Logical *cancelledflag,
     ESMC_Logical *checkflag, int *rc){
@@ -674,7 +674,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
+  void FTN_X(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
     void *factor, int *rc){
@@ -690,7 +690,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
+  void FTN_X(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
 #undef  ESMC_METHOD
@@ -704,7 +704,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arrayredist)(ESMCI::Array **srcArray, ESMCI::Array **dstArray,
+  void FTN_X(c_esmc_arrayredist)(ESMCI::Array **srcArray, ESMCI::Array **dstArray,
     ESMCI::RouteHandle **routehandle, ESMC_CommFlag *commflag,
     ESMC_Logical *finishedflag, ESMC_Logical *cancelledflag,
     ESMC_Logical *checkflag, int *rc){
@@ -740,7 +740,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
+  void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind *typekindFactors, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
@@ -807,7 +807,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
+  void FTN_X(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstorenf()"
@@ -822,7 +822,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraysmm)(ESMCI::Array **srcArray,
+  void FTN_X(c_esmc_arraysmm)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_CommFlag *commflag, ESMC_Logical *finishedflag,
     ESMC_Logical *cancelledflag, ESMC_RegionFlag *zeroflag,
@@ -859,7 +859,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_arraygather)(ESMCI::Array **array, void *farray,
+  void FTN_X(c_esmc_arraygather)(ESMCI::Array **array, void *farray,
     ESMC_TypeKind *typekind, int *rank, int *counts,
     int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
@@ -878,7 +878,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arraygathernotroot)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arraygathernotroot)(ESMCI::Array **array,
     int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraygathernotroot()"
@@ -896,7 +896,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arrayscatter)(ESMCI::Array **array, void *farray,
+  void FTN_X(c_esmc_arrayscatter)(ESMCI::Array **array, void *farray,
     ESMC_TypeKind *typekind, int *rank, int *counts,
     int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
@@ -915,7 +915,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arrayscatternotroot)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arrayscatternotroot)(ESMCI::Array **array,
     int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatternotroot()"
@@ -933,7 +933,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arrayset)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arrayset)(ESMCI::Array **array,
     ESMCI::InterfaceInt **computationalLWidthArg,
     ESMCI::InterfaceInt **computationalUWidthArg, int *rc){
 #undef  ESMC_METHOD
@@ -952,7 +952,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arraysetplocalde)(ESMCI::Array **array,
+  void FTN_X(c_esmc_arraysetplocalde)(ESMCI::Array **array,
     int *localDe, ESMCI::InterfaceInt **rimSeqIndexArg, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysetplocalde()"
@@ -965,7 +965,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_arrayconstructpiodof)(ESMCI::Array **ptr,
+  void FTN_X(c_esmc_arrayconstructpiodof)(ESMCI::Array **ptr,
     int *localDeArg, ESMCI::InterfaceInt **pioDofList, int *pioDofCount,
     int *rc){
 #undef  ESMC_METHOD
@@ -996,7 +996,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;   
   }
   
-  void FTN(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
+  void FTN_X(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
     int *offset, ESMC_AttReconcileFlag *attreconflag,
     ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
@@ -1011,7 +1011,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_arraydeserialize)(ESMCI::Array **array, char *buf,
+  void FTN_X(c_esmc_arraydeserialize)(ESMCI::Array **array, char *buf,
     int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
@@ -1039,7 +1039,7 @@ extern "C" {
 
   // - ESMF-public methods:
 
-  void FTN(c_esmc_newarraycreate)(ESMC_newArray **ptr, ESMC_LocalArray **larray,
+  void FTN_X(c_esmc_newarraycreate)(ESMC_newArray **ptr, ESMC_LocalArray **larray,
     int *haloWidth, int *len_haloWidth, int *deCount, int *rootPET, int *rc){
     int localrc;
 #undef  ESMC_METHOD
@@ -1060,7 +1060,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_newarraydestroy)(ESMC_newArray **ptr, int *rc){
+  void FTN_X(c_esmc_newarraydestroy)(ESMC_newArray **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_newarraydestroy()"
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -1069,7 +1069,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_newarrayprint)(ESMC_newArray **ptr, int *rc){
+  void FTN_X(c_esmc_newarrayprint)(ESMC_newArray **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_newarrayprint()"
     // Call into the actual C++ method wrapped inside LogErr handling
@@ -1078,7 +1078,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_newarrayget)(ESMC_newArray **ptr, int *rank,
+  void FTN_X(c_esmc_newarrayget)(ESMC_newArray **ptr, int *rank,
     ESMCI::DELayout **delayout, ESMC_LocalArray **localArrays, 
     int *len_localArrays, int *globalFullLBound, int *len_globalFullLBound,
     int *globalFullUBound, int *len_globalFullUBound,
@@ -1102,7 +1102,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_newarrayscatterb)(ESMC_newArray **ptr, 
+  void FTN_X(c_esmc_newarrayscatterb)(ESMC_newArray **ptr, 
     ESMC_LocalArray **larray, int *rootPET, ESMCI::VM **vm, int *rc){
     // PET-based blocking scatter
     int localrc;
@@ -1122,7 +1122,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_newarrayscatternbroot)(ESMC_newArray **ptr, 
+  void FTN_X(c_esmc_newarrayscatternbroot)(ESMC_newArray **ptr, 
     ESMC_LocalArray **larray, int *rootPET, ESMC_newArrayCommHandle **commh,
     ESMCI::VM **vm, int *rc){
     // DE-based non-blocking scatter (root call)
@@ -1161,7 +1161,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_newarrayscatternb)(ESMC_newArray **ptr, 
+  void FTN_X(c_esmc_newarrayscatternb)(ESMC_newArray **ptr, 
     ESMC_LocalArray **larray, int *rootPET, int *de, ESMCI::VM **vm, int *rc){
     // DE-based non-blocking scatter
     int localrc;
@@ -1181,7 +1181,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_newarrayreducescalarb)(ESMC_newArray **ptr, void *result,
+  void FTN_X(c_esmc_newarrayreducescalarb)(ESMC_newArray **ptr, void *result,
     ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET, ESMCI::VM **vm, 
     int *rc){
     // PET-based blocking scalar reduce
@@ -1199,7 +1199,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr, void *result,
+  void FTN_X(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr, void *result,
     ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET,
     ESMC_newArrayCommHandle **commh, ESMCI::VM **vm, int *rc){
     // DE-based non-blocking reduce (root call)
@@ -1235,7 +1235,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_newarrayreducescalarnb)(ESMC_newArray **ptr, void *result,
+  void FTN_X(c_esmc_newarrayreducescalarnb)(ESMC_newArray **ptr, void *result,
     ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET, int *de,
     ESMCI::VM **vm, int *rc){
     // PET-based blocking scalar reduce
@@ -1256,7 +1256,7 @@ extern "C" {
   
 // ---- Wait methods ---  
   
-  void FTN(c_esmc_newarraywaitroot)(ESMC_newArray **ptr, int *rootPET,
+  void FTN_X(c_esmc_newarraywaitroot)(ESMC_newArray **ptr, int *rootPET,
     ESMC_newArrayCommHandle **commh, ESMCI::VM **vm, int *rc){
     int localrc;
     ESMCI::VM *opt_vm;
@@ -1290,7 +1290,7 @@ extern "C" {
     *commh = ESMC_NULL_POINTER;
   }
   
-  void FTN(c_esmc_newarraywaitde)(ESMC_newArray **ptr, int *de, ESMCI::VM **vm, 
+  void FTN_X(c_esmc_newarraywaitde)(ESMC_newArray **ptr, int *de, ESMCI::VM **vm, 
     int *rc){
     int localrc;
     ESMCI::VM *opt_vm;

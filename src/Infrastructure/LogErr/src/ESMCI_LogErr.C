@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.19 2011/11/14 21:24:25 rokuingh Exp $
+// $Id: ESMCI_LogErr.C,v 1.20 2011/12/23 21:05:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.19 2011/11/14 21:24:25 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.20 2011/12/23 21:05:20 theurich Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -65,7 +65,7 @@ char listOfFortFileNames[20][32];
 //BOP
 
 extern "C" {
-  void FTN(esmf_breakpoint)(void);
+  void FTN_X(esmf_breakpoint)(void);
 }
 
 namespace ESMCI{
@@ -87,7 +87,7 @@ bool LogErr::AllocError(
 // Allocation error with no message and no cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
     Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOG_ERROR);
@@ -117,7 +117,7 @@ bool LogErr::AllocError(
 // Allocation error with no message but with cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
     Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOG_ERROR,LINE,FILE,
@@ -146,7 +146,7 @@ bool LogErr::MsgAllocError(
 // Allocation error with message and no cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
@@ -180,7 +180,7 @@ bool LogErr::MsgAllocError(
 // Allocation error with message and cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
 
@@ -206,7 +206,7 @@ bool LogErr::DeallocError(
 // Allocation error with no message and no cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
     Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOG_ERROR);
@@ -236,7 +236,7 @@ bool LogErr::DeallocError(
 // Allocation error with no message but with cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
     Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOG_ERROR,LINE,FILE,
@@ -265,7 +265,7 @@ bool LogErr::MsgDeallocError(
 // Allocation error with message and no cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
@@ -299,7 +299,7 @@ bool LogErr::MsgDeallocError(
 // Allocation error with message and cpp macros
 //EOP
 {
-    FTN(esmf_breakpoint)();  // no-op to assist debugging
+    FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
 
@@ -453,7 +453,7 @@ int LogErr::Write(
     rc = ESMC_RC_NOT_IMPL;
 
     if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
-    FTN(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
+    FTN_X(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
 
     return rc;
 }
@@ -487,7 +487,7 @@ int LogErr::Write(
     rc = ESMC_RC_NOT_IMPL;
 
     if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
-    FTN(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
+    FTN_X(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
                           strlen(msg), strlen(FILE), strlen(method));
 
     return rc;
@@ -522,7 +522,7 @@ int LogErr::Set(
     lflush = static_cast<bool> (flush);
 
     if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return ESMF_SUCCESS;
-    FTN(f_esmf_logset)(&lflush, &rc);
+    FTN_X(f_esmf_logset)(&lflush, &rc);
 
     return rc;
 }
@@ -552,7 +552,7 @@ bool LogErr::FoundError(
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
 #endif
     if (rcToCheck!=ESMF_SUCCESS){
-      FTN(esmf_breakpoint)();  // no-op to assist debugging
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
       int i;
       for (i=0; i<errorMaskCount; i++)
         if (errorMask[i] == rcToCheck) break;
@@ -595,7 +595,7 @@ bool LogErr::FoundError(
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
 #endif
     if (rcToCheck!=ESMF_SUCCESS){
-      FTN(esmf_breakpoint)();  // no-op to assist debugging
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
       int i;
       for (i=0; i<errorMaskCount; i++)
         if (errorMask[i] == rcToCheck) break;
@@ -636,7 +636,7 @@ bool LogErr::MsgFoundError(
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
 #endif
     if (rcToCheck!=ESMF_SUCCESS){
-      FTN(esmf_breakpoint)();  // no-op to assist debugging
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
       int i;
       for (i=0; i<errorMaskCount; i++)
         if (errorMask[i] == rcToCheck) break;
@@ -682,7 +682,7 @@ bool LogErr::MsgFoundError(
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMF_SUCCESS;
 #endif
     if (rcToCheck!=ESMF_SUCCESS){
-      FTN(esmf_breakpoint)();  // no-op to assist debugging
+      FTN_X(esmf_breakpoint)();  // no-op to assist debugging
       int i;
       for (i=0; i<errorMaskCount; i++)
         if (errorMask[i] == rcToCheck) break;

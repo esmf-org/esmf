@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util_F.C,v 1.7 2011/01/05 20:05:46 svasquez Exp $
+// $Id: ESMCI_Util_F.C,v 1.8 2011/12/23 21:05:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util_F.C,v 1.7 2011/01/05 20:05:46 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Util_F.C,v 1.8 2011/12/23 21:05:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -63,7 +63,7 @@ extern "C" {
 // MapName routines allow Fortran callable management of STL map containers
 // containing string/int pairs.
  
-void FTN(c_esmc_mapname_add) (MapName **ptr,
+void FTN_X(c_esmc_mapname_add) (MapName **ptr,
                             char *name, // in - name to be entered
                             int *value, // in - associated value
                             int *rc,    // out - return code
@@ -87,7 +87,7 @@ void FTN(c_esmc_mapname_add) (MapName **ptr,
 
 }
 
-void FTN(c_esmc_mapname_create) (MapName **ptr,
+void FTN_X(c_esmc_mapname_create) (MapName **ptr,
                             int *rc     // out - return code
                             ) {
 #undef  ESMC_METHOD
@@ -106,7 +106,7 @@ void FTN(c_esmc_mapname_create) (MapName **ptr,
 
 }
 
-void FTN(c_esmc_mapname_destroy) (MapName **ptr,
+void FTN_X(c_esmc_mapname_destroy) (MapName **ptr,
                             int *rc     // out - return code
                             ) {
 #undef  ESMC_METHOD
@@ -122,7 +122,7 @@ void FTN(c_esmc_mapname_destroy) (MapName **ptr,
 
 }
 
-void FTN(c_esmc_mapname_lookup) (MapName **ptr,
+void FTN_X(c_esmc_mapname_lookup) (MapName **ptr,
                             char *name, // in - name to be looked up
                             int *value, // out - associated value
                             ESMC_Logical *foundflag, // out - true if name was found 
@@ -153,7 +153,7 @@ void FTN(c_esmc_mapname_lookup) (MapName **ptr,
         *rc = ESMF_SUCCESS;
 }
 
-void FTN(c_esmc_mapname_print) (MapName **ptr,
+void FTN_X(c_esmc_mapname_print) (MapName **ptr,
                             char *title, // in - title for printout
                             int *rc,     // out - return code
                             ESMCI_FortranStrLenArg title_len) {
@@ -176,7 +176,7 @@ void FTN(c_esmc_mapname_print) (MapName **ptr,
         *rc = ESMF_SUCCESS;
 }
 
-void FTN(c_esmc_mapname_remove) (MapName **ptr,
+void FTN_X(c_esmc_mapname_remove) (MapName **ptr,
                             char *name, // in - name to be entered
                             int *rc,    // out - return code
                             ESMCI_FortranStrLenArg name_len) {
@@ -193,7 +193,7 @@ void FTN(c_esmc_mapname_remove) (MapName **ptr,
         *rc = ESMF_SUCCESS;
 }
 
-void FTN(c_esmc_mapname_sizeget) (MapName **ptr,
+void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
                             int *size,  // out - # of items in the map
                             int *rc) {  // out - return code
 #undef  ESMC_METHOD
@@ -219,7 +219,7 @@ void FTN(c_esmc_mapname_sizeget) (MapName **ptr,
 // !IROUTINE:  c_ESMC_StringSerialize - Serialize String object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_stringserialize)(
+      void FTN_X(c_esmc_stringserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -280,7 +280,7 @@ void FTN(c_esmc_mapname_sizeget) (MapName **ptr,
 // !IROUTINE:  c_ESMC_StringDeserialize - Deserialize String object 
 //
 // !INTERFACE:
-      void FTN(c_esmc_stringdeserialize)(
+      void FTN_X(c_esmc_stringdeserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -316,7 +316,7 @@ void FTN(c_esmc_mapname_sizeget) (MapName **ptr,
 
 //-----------------------------------------------------------------------------
 
-void FTN(c_pointerprint)(void **ptr){
+void FTN_X(c_pointerprint)(void **ptr){
   printf("ESMF_PointerPrint: %p\n", *ptr);
 }
 

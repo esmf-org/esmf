@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.10 2011/10/10 05:59:59 eschwab Exp $
+// $Id: ESMCI_Util.C,v 1.11 2011/12/23 21:05:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.10 2011/10/10 05:59:59 eschwab Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.11 2011/12/23 21:05:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -392,7 +392,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //
 // !INTERFACE:
 extern "C" {
-    void  FTN(esmf_f90tocstring)(
+    void  FTN_X(esmf_f90tocstring)(
 //
 // !RETURN VALUE:
 //  converts an F90, space padded string into a C++ null terminated string
@@ -454,7 +454,7 @@ extern "C" {
 //
 // !INTERFACE:
 extern "C" {
-    void  FTN(esmf_ctof90string)(
+    void  FTN_X(esmf_ctof90string)(
 //
 // !RETURN VALUE:
 //  converts a C++ null terminated string info an F90, space padded string
@@ -518,7 +518,7 @@ extern "C" {
 //
 // !INTERFACE:
 extern "C" {
-    void  FTN(esmf_pointertoint)(
+    void  FTN_X(esmf_pointertoint)(
 //
 // !RETURN VALUE:
 //  converts a F90 pointer into a normal integer.
@@ -563,7 +563,7 @@ extern "C" {
 //
 // !INTERFACE:
 extern "C" {
-    void  FTN(esmf_pointerdifference)(
+    void  FTN_X(esmf_pointerdifference)(
 //
 // !RETURN VALUE:
 //  converts the difference between 2 F90 pointers into a normal integer.

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.52 2011/07/07 00:15:45 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.53 2011/12/23 21:04:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.52 2011/07/07 00:15:45 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.53 2011/12/23 21:04:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -60,7 +60,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpackaddattribute - add an attribute to an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackaddattribute)(
+      void FTN_X(c_esmc_attpackaddattribute)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackaddattribute()"
@@ -178,7 +178,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpackcreatecustom - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackcreatecustom)(
+      void FTN_X(c_esmc_attpackcreatecustom)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackcreatecustom()"
@@ -277,7 +277,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpackcreatestandard - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackcreatestandard)(
+      void FTN_X(c_esmc_attpackcreatestandard)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackcreatestandard()"
@@ -376,7 +376,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpacknest - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpacknest)(
+      void FTN_X(c_esmc_attpacknest)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpacknest()"
@@ -557,7 +557,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpackcreatestdnest - Setup a standard nested attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackcreatestdnest)(
+      void FTN_X(c_esmc_attpackcreatestdnest)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackcreatestdnest()"
@@ -831,7 +831,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpackremove - Remove the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackremove)(
+      void FTN_X(c_esmc_attpackremove)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackremove()"
@@ -944,7 +944,7 @@ extern "C" {
 //                                              attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackremoveattribute)(
+      void FTN_X(c_esmc_attpackremoveattribute)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackremoveattribute()"
@@ -1076,7 +1076,7 @@ extern "C" {
 // !IROUTINE:  c_esmc_attpackgetcharlist - get attribute from an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetcharlist)(
+      void FTN_X(c_esmc_attpackgetcharlist)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackgetcharlist()"
@@ -1315,7 +1315,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attpackgetvalue - get attribute from an attpack
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetvalue)(
+      void FTN_X(c_esmc_attpackgetvalue)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackgetvalue()"
@@ -1543,7 +1543,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attpackgetapinstnames - get attpack instance names
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetapinstnames)(
+      void FTN_X(c_esmc_attpackgetapinstnames)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackgetapinstnames()"
@@ -1719,7 +1719,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attpackispresent - Query for an Attribute package Attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackispresent)(
+      void FTN_X(c_esmc_attpackispresent)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackispresent()"
@@ -1852,7 +1852,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeMove - Move an attribute between objects
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributemove)(
+      void FTN_X(c_esmc_attributemove)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributemove()"
@@ -1900,7 +1900,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attpacksetcharlist - Set attributes in the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpacksetcharlist)(
+      void FTN_X(c_esmc_attpacksetcharlist)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpacksetcharlist()"
@@ -2079,7 +2079,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attpacksetvalue - Set attributes in the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpacksetvalue)(
+      void FTN_X(c_esmc_attpacksetvalue)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpacksetvalue()"
@@ -2291,7 +2291,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //-----------------------------------------------------------------------------
 
 
-      void FTN(c_esmc_attributeread)(ESMC_Base **base,
+      void FTN_X(c_esmc_attributeread)(ESMC_Base **base,
                                      int *fileNameLen,
                                      const char *fileName,
                                      int *schemaFileNameLen,
@@ -2322,7 +2322,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attributewritetab - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributewritetab)(
+      void FTN_X(c_esmc_attributewritetab)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributewritetab()"
@@ -2441,7 +2441,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attributewritexml - Setup the attribute package
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributewritexml)(
+      void FTN_X(c_esmc_attributewritexml)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributewritexml()"
@@ -2560,7 +2560,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeCopy - copy an attribute between objects
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributecopy)(
+      void FTN_X(c_esmc_attributecopy)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributecopy()"
@@ -2644,7 +2644,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeGetCharList - get attribute list from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetcharlist)(
+      void FTN_X(c_esmc_attributegetcharlist)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributegetcharlist()"
@@ -2793,7 +2793,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetvalue)(
+      void FTN_X(c_esmc_attributegetvalue)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributegetvalue()"
@@ -2928,7 +2928,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttpackGetInfoName - get type and number of items in an attpackattr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attpackgetinfoname)(
+      void FTN_X(c_esmc_attpackgetinfoname)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attpackgetinfoname()"
@@ -3100,7 +3100,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeGetInfoName - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetinfoname)(
+      void FTN_X(c_esmc_attributegetinfoname)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributegetinfoname()"
@@ -3177,7 +3177,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeGetInfoNum - get type and number of items in an attr
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetinfonum)(
+      void FTN_X(c_esmc_attributegetinfonum)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributegetinfonum()"
@@ -3260,7 +3260,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetcount)(
+      void FTN_X(c_esmc_attributegetcount)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributegetcount()"
@@ -3329,7 +3329,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attributeispresent - Query for an Attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributeispresent)(
+      void FTN_X(c_esmc_attributeispresent)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributeispresent()"
@@ -3397,7 +3397,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeLink - Link an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributelink)(
+      void FTN_X(c_esmc_attributelink)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributelink()"
@@ -3454,7 +3454,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeLinkRemove - Remove a link an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributelinkremove)(
+      void FTN_X(c_esmc_attributelinkremove)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributelinkremove()"
@@ -3511,7 +3511,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_esmc_attributeremove - Remove the attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributeremove)(
+      void FTN_X(c_esmc_attributeremove)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributeremove()"
@@ -3572,7 +3572,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeSetCharList - Set String Attribute List on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetcharlist)(
+      void FTN_X(c_esmc_attributesetcharlist)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributesetcharlist()"
@@ -3668,7 +3668,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetvalue)(
+      void FTN_X(c_esmc_attributesetvalue)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributesetvalue()"
@@ -3786,7 +3786,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //                                               in an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetobjsintree)(
+      void FTN_X(c_esmc_attributesetobjsintree)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributesetobjsintree()"
@@ -3869,7 +3869,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //                                           objects in an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetobjchrintree)(
+      void FTN_X(c_esmc_attributesetobjchrintree)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributesetobjchrintree()"
@@ -3919,7 +3919,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   // Re-use c_ESMC_AttributeSetObjsInTree() to set the attribute on the object.
   tk = ESMC_TYPEKIND_CHARACTER;
   count = 1;
-  FTN(c_esmc_attributesetobjsintree)(base, object, name, 
+  FTN_X(c_esmc_attributesetobjsintree)(base, object, name, 
       &tk, &count, (void *)&cvalue, &status, olen, nlen); 
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
@@ -3931,7 +3931,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeUpdate - Update an Attribute
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributeupdate)(
+      void FTN_X(c_esmc_attributeupdate)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributeupdate()"
@@ -3988,7 +3988,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !IROUTINE:  c_ESMC_AttributeUpdateReset - Reset flags in an Attribute hierarchy
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributeupdatereset)(
+      void FTN_X(c_esmc_attributeupdatereset)(
 //
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_attributeupdatereset()"

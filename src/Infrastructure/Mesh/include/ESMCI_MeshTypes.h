@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshTypes.h,v 1.5 2011/01/05 20:05:44 svasquez Exp $
+// $Id: ESMCI_MeshTypes.h,v 1.6 2011/12/23 21:05:21 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,9 +39,6 @@ template<>
 struct richest_type<fad_type,double> {
   typedef fad_type value;
 };
-
-// The good old fortran macro
-#define ESMCI_FTN(a) a##_
 
 } // namespce
 

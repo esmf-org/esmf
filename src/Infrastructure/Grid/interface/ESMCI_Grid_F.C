@@ -47,7 +47,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridcommit)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridcommit)(ESMCI::Grid **grid, 
                                          int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridcommit()"
@@ -65,7 +65,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridcreateempty)(ESMCI::Grid **ptr, 
+  void FTN_X(c_esmc_gridcreateempty)(ESMCI::Grid **ptr, 
 					  int *rc){
     int localrc;
 #undef  ESMC_METHOD
@@ -82,7 +82,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridcreatefromdistgrid)(ESMCI::Grid **ptr, 
+  void FTN_X(c_esmc_gridcreatefromdistgrid)(ESMCI::Grid **ptr, 
     int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
 					  ESMCI::DistGrid **distgrid,
 					  ESMCI::InterfaceInt **distgridToGridMapArg, 
@@ -137,7 +137,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridcreatedistgridarb)(ESMCI::Grid **ptr, 
+  void FTN_X(c_esmc_gridcreatedistgridarb)(ESMCI::Grid **ptr, 
                                          int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
                                          ESMCI::DistGrid **distgrid,
                                          ESMCI::InterfaceInt **distDimArg, 
@@ -190,7 +190,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridget)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridget)(ESMCI::Grid **_grid, 
                            ESMC_TypeKind *_coordTypeKind,
                            int *_dimCount, 
 			   int *_tileCount,
@@ -435,7 +435,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridgetdecomptype)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridgetdecomptype)(ESMCI::Grid **grid, 
 				     ESMC_GridDecompType *decompType,
 				     int *rc) {
 #undef  ESMC_METHOD
@@ -445,7 +445,7 @@ extern "C" {
   }
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridgetindex)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridgetindex)(ESMCI::Grid **grid, 
                                 int *tile, 
 				ESMCI::InterfaceInt **minIndex,
 				ESMCI::InterfaceInt **maxIndex,
@@ -497,7 +497,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridconvertindex)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridconvertindex)(ESMCI::Grid **grid, 
 				    ESMCI::InterfaceInt **gridindex,
 				    int *index1D,
 				    int *rc) {
@@ -541,7 +541,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridgetstatus)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridgetstatus)(ESMCI::Grid **_grid, 
                            ESMC_GridStatus *_status){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetstatus()"
@@ -554,7 +554,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridgetcoordintoarray)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridgetcoordintoarray)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *coord, 
                                          ESMCI::Array **array,
@@ -576,7 +576,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridgetitemintoarray)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridgetitemintoarray)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *item, 
                                          ESMCI::Array **array,
@@ -600,7 +600,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridaddcoord)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridaddcoord)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          ESMCI::InterfaceInt **staggerEdgeLWidthArg, 
                                          ESMCI::InterfaceInt **staggerEdgeUWidthArg, 
@@ -625,7 +625,7 @@ extern "C" {
 
 
 
-  void FTN(c_esmc_gridaddcoordarb)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridaddcoordarb)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *rc) {
     int localrc;
@@ -644,7 +644,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridaddcoordarraylist)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridaddcoordarraylist)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *arrayCount, 
                                          ESMCI::Array **arrayList,
@@ -676,7 +676,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridadditem)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridadditem)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *item,
 			                 ESMC_TypeKind *itemTypeKind,   
@@ -703,7 +703,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridadditemarb)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridadditemarb)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *item,
 			                 ESMC_TypeKind *itemTypeKind,   
@@ -724,7 +724,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridsetcoordfromarray)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridsetcoordfromarray)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *coord, 
                                          ESMCI::Array **array,
@@ -748,7 +748,7 @@ extern "C" {
 
 
   // - ESMF-public methods:        
-  void FTN(c_esmc_gridsetfromdistgrid)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridsetfromdistgrid)(ESMCI::Grid **grid, 
     int *nameLen, char *name, ESMC_TypeKind *coordTypeKind, 
                                        ESMCI::DistGrid **distgrid,
                                        ESMCI::InterfaceInt **distgridToGridMapArg, 
@@ -819,7 +819,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridsetitemfromarray)(ESMCI::Grid **grid, 
+  void FTN_X(c_esmc_gridsetitemfromarray)(ESMCI::Grid **grid, 
 					int *staggerloc, 
 					int *item, 
                                         ESMCI::Array **array,
@@ -845,7 +845,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
+  void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
                                         int *_coord, int *_staggerloc,  
                                         ESMCI::InterfaceInt **_exclusiveLBound,
                                         ESMCI::InterfaceInt **_exclusiveUBound,
@@ -1336,7 +1336,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetitembounds)(ESMCI::Grid **_grid, int *_localDE,
+  void FTN_X(c_esmc_gridgetitembounds)(ESMCI::Grid **_grid, int *_localDE,
    				        int *_staggerloc, int *_item, 
                                         ESMCI::InterfaceInt **_exclusiveLBound,
                                         ESMCI::InterfaceInt **_exclusiveUBound,
@@ -1805,7 +1805,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetplocaldepsloc)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridgetplocaldepsloc)(ESMCI::Grid **_grid, 
 					int *_localDE, int *_staggerloc,  
                                         ESMCI::InterfaceInt **_exclusiveLBound,
                                         ESMCI::InterfaceInt **_exclusiveUBound,
@@ -2043,7 +2043,7 @@ extern "C" {
 
 
   ///////////////////////////////////////////////////////////////////////////////////
-   void FTN(c_esmc_gridgetplocalde)(ESMCI::Grid **_grid, 
+   void FTN_X(c_esmc_gridgetplocalde)(ESMCI::Grid **_grid, 
 				   int *_localDE, 
 				   int *_dimCount,
                                    int *_isLBound,
@@ -2166,7 +2166,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridgetpsloc)(ESMCI::Grid **_grid, 
 				int *_staggerloc,  
    			        ESMCI::DistGrid **_staggerdistgrid,
                                 int *_rc){
@@ -2239,7 +2239,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetpslocptile)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridgetpslocptile)(ESMCI::Grid **_grid, 
                                 int *_tile,
 				int *_staggerloc,  
                                 ESMCI::InterfaceInt **_minIndex,
@@ -2399,7 +2399,7 @@ extern "C" {
    
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_griddestroy)(ESMCI::Grid **ptr, int *rc){
+  void FTN_X(c_esmc_griddestroy)(ESMCI::Grid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_griddestroy()"
 
@@ -2416,7 +2416,7 @@ extern "C" {
 
 
   // - ESMF-public methods:        
-  void FTN(c_esmc_gridluadefault)(int *dimCount, 
+  void FTN_X(c_esmc_gridluadefault)(int *dimCount, 
                                   ESMCI::InterfaceInt **gridEdgeLWidthIn,    	  
                                   ESMCI::InterfaceInt **gridEdgeUWidthIn,    	  
                                   ESMCI::InterfaceInt **gridAlignIn,		  
@@ -2465,7 +2465,7 @@ extern "C" {
   }
 
 
-  void FTN(c_esmc_gridserialize)(ESMCI::Grid **grid, char *buf, int *length,
+  void FTN_X(c_esmc_gridserialize)(ESMCI::Grid **grid, char *buf, int *length,
     int *offset, ESMC_AttReconcileFlag *attreconflag,
     ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
@@ -2480,7 +2480,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_griddeserialize)(ESMCI::Grid **grid, char *buf,
+  void FTN_X(c_esmc_griddeserialize)(ESMCI::Grid **grid, char *buf,
     int *offset, ESMC_AttReconcileFlag *attreconflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
@@ -2498,7 +2498,7 @@ extern "C" {
 
 
 
-  void FTN(c_esmc_gridmatch)(ESMCI::Grid **ptr1, ESMCI::Grid **ptr2,
+  void FTN_X(c_esmc_gridmatch)(ESMCI::Grid **ptr1, ESMCI::Grid **ptr2,
     int *matchResult, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridmatch()"
@@ -2524,7 +2524,7 @@ extern "C" {
 
 
 
-  void FTN(c_esmc_gridvalidate)(ESMCI::Grid **_grid, int *rc){
+  void FTN_X(c_esmc_gridvalidate)(ESMCI::Grid **_grid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridvalidate()"
 
@@ -2641,7 +2641,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetcoordr8)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridgetcoordr8)(ESMCI::Grid **_grid, 
 		       		int *_localDE, int *_staggerloc,  
                                 int *index, ESMC_R8 *coord, int *_rc){
 #undef  ESMC_METHOD
@@ -2696,7 +2696,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
   
-  void FTN(c_esmc_gridgetcoordr4)(ESMCI::Grid **_grid, 
+  void FTN_X(c_esmc_gridgetcoordr4)(ESMCI::Grid **_grid, 
 		       		int *_localDE, int *_staggerloc,  
                                 int *index, ESMC_R4 *coord, int *_rc){
 #undef  ESMC_METHOD
@@ -2750,7 +2750,7 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
 #if 0 // DEBUG
-  void FTN(c_esmc_gridtest)(ESMCI::Grid **_grid, int *rc){
+  void FTN_X(c_esmc_gridtest)(ESMCI::Grid **_grid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridvalidate()"
     int localrc;
@@ -3022,7 +3022,7 @@ extern "C" {
 
   ///////////////////////////////////////////////////////////////////////////////////
 
-  void FTN(c_esmc_gridsetdestroydistgrid)(ESMCI::Grid **gridArg, 
+  void FTN_X(c_esmc_gridsetdestroydistgrid)(ESMCI::Grid **gridArg, 
                                           int *destroyDistgridArg
 					  ){
 #undef  ESMC_METHOD
@@ -3041,7 +3041,7 @@ extern "C" {
 }
 
 
-  void FTN(c_esmc_gridsetdestroydelayout)(ESMCI::Grid **gridArg, 
+  void FTN_X(c_esmc_gridsetdestroydelayout)(ESMCI::Grid **gridArg, 
                                           int *destroyDelayoutArg
 					  ){
 #undef  ESMC_METHOD

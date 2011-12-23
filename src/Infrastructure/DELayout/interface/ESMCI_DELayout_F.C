@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout_F.C,v 1.18 2011/11/08 05:02:07 theurich Exp $
+// $Id: ESMCI_DELayout_F.C,v 1.19 2011/12/23 21:04:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ extern "C" {
 
   // - ESMF-public methods:
 
-  void FTN(c_esmc_delayoutcreatefrompetmap)(ESMCI::DELayout **ptr, int *petMap, 
+  void FTN_X(c_esmc_delayoutcreatefrompetmap)(ESMCI::DELayout **ptr, int *petMap, 
     int *petMapCount, ESMC_Pin_Flag *pinFlag, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutcreatefrompetmap()"
@@ -66,7 +66,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
+  void FTN_X(c_esmc_delayoutcreatedefault)(ESMCI::DELayout **ptr, int *deCount,
     ESMCI::InterfaceInt **deGrouping, ESMC_Pin_Flag *pinFlag, 
     ESMCI::InterfaceInt **petList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
@@ -90,7 +90,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutcreatend)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
+  void FTN_X(c_esmc_delayoutcreatend)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
     int *deCountList, int *deCountListCount, int *petList, int *petListCount,
     int *rc){
 #undef  ESMC_METHOD
@@ -108,7 +108,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutdestroy)(ESMCI::DELayout **ptr, int *rc){
+  void FTN_X(c_esmc_delayoutdestroy)(ESMCI::DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutdestroy()"
     // Initialize return code; assume routine not implemented
@@ -121,7 +121,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
+  void FTN_X(c_esmc_delayoutget)(ESMCI::DELayout **ptr, ESMCI::VM **vm,
     int *deCount, ESMCI::InterfaceInt **petMap, ESMCI::InterfaceInt **vasMap,
     ESMC_Logical *oneToOneFlag, ESMC_Pin_Flag *pinFlag,
     int *localDeCount, ESMCI::InterfaceInt **localDeToDeMap,
@@ -215,7 +215,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutgetdematchde)(ESMCI::DELayout **ptr,
+  void FTN_X(c_esmc_delayoutgetdematchde)(ESMCI::DELayout **ptr,
     int *DEid, ESMCI::DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
     int *len_deMatchList, int *rc){
 #undef  ESMC_METHOD
@@ -233,7 +233,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutgetdematchpet)(ESMCI::DELayout **ptr,
+  void FTN_X(c_esmc_delayoutgetdematchpet)(ESMCI::DELayout **ptr,
     int *DEid, ESMCI::VM **ptrMatch, int *petMatchCount, int *petMatchList,
     int *len_petMatchList, int *rc){
 #undef  ESMC_METHOD
@@ -251,7 +251,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutgetdeprecated)(ESMCI::DELayout **ptr,
+  void FTN_X(c_esmc_delayoutgetdeprecated)(ESMCI::DELayout **ptr,
     int *deCount, int *dimCount, int *localDeCount, int *localDeToDeMap,
     int *len_localDeToDeMap, int *localDe, ESMC_Logical *oneToOneFlag, 
     ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
@@ -276,7 +276,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutgetdelocalinfo)(ESMCI::DELayout **ptr,
+  void FTN_X(c_esmc_delayoutgetdelocalinfo)(ESMCI::DELayout **ptr,
     int *DEid, int *DEcoord, int *len_coord, int *DEcde, int *len_cde, 
     int *DEcw, int *len_cw, int *nDEc, int *pid, int *rc){
 #undef  ESMC_METHOD
@@ -294,7 +294,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutprint)(ESMCI::DELayout **ptr, int *rc){
+  void FTN_X(c_esmc_delayoutprint)(ESMCI::DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutprint()"
     // Initialize return code; assume routine not implemented
@@ -309,7 +309,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_delayoutvalidate)(ESMCI::DELayout **ptr, int *rc){
+  void FTN_X(c_esmc_delayoutvalidate)(ESMCI::DELayout **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutvalidate()"
     // Initialize return code; assume routine not implemented
@@ -322,7 +322,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_delayoutserviceoffer)(ESMCI::DELayout **ptr, int *de,
+  void FTN_X(c_esmc_delayoutserviceoffer)(ESMCI::DELayout **ptr, int *de,
     ESMCI::ServiceReply *reply, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutserviceoffer()"
@@ -339,7 +339,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_delayoutservicecomplete)(ESMCI::DELayout **ptr, int *de,
+  void FTN_X(c_esmc_delayoutservicecomplete)(ESMCI::DELayout **ptr, int *de,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutservicecomplete()"
@@ -353,7 +353,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_delayoutserialize)(ESMCI::DELayout **delayout, char *buf,
+  void FTN_X(c_esmc_delayoutserialize)(ESMCI::DELayout **delayout, char *buf,
     int *length, int *offset, ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
@@ -369,7 +369,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_delayoutdeserialize)(ESMCI::DELayout **delayout, char *buf,
+  void FTN_X(c_esmc_delayoutdeserialize)(ESMCI::DELayout **delayout, char *buf,
     int *offset, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD

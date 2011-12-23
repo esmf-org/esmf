@@ -1,4 +1,4 @@
-// $Id: ESMCI_WordsizeSubr.C,v 1.2 2011/01/05 20:05:48 svasquez Exp $
+// $Id: ESMCI_WordsizeSubr.C,v 1.3 2011/12/23 21:06:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@ extern "C" {
 // verify that we are using the same word sizes on each side of the language
 // boundary - F90 and C++.
 
-void FTN(c_ints)(int *i1, int *i2, int *i3, int *i4,
+void FTN_X(c_ints)(int *i1, int *i2, int *i3, int *i4,
                  int *i5, int *i6, int *i7, int *rc) {
 
       printf("In C++: sizeof(char)     = %d\n", (int) sizeof(char));

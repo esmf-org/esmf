@@ -1,4 +1,4 @@
-// $Id: ESMCI_Polynomial.C,v 1.6 2011/12/15 23:11:45 peggyli Exp $
+// $Id: ESMCI_Polynomial.C,v 1.7 2011/12/23 21:05:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -18,10 +18,10 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Polynomial.C,v 1.6 2011/12/15 23:11:45 peggyli Exp $";
+static const char *const version = "$Id: ESMCI_Polynomial.C,v 1.7 2011/12/23 21:05:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-extern "C" void FTN(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
 
 namespace ESMCI {
 
@@ -135,7 +135,7 @@ void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const s
   std::vector<double> work(lwork, 0);
   double rcond=0.0000000000001;
 
-  FTN(dgelsy)(
+  FTNX(dgelsy)(
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 
   for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];

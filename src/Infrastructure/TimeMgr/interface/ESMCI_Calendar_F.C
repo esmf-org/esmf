@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar_F.C,v 1.9 2011/06/21 04:19:19 w6ws Exp $
+// $Id: ESMCI_Calendar_F.C,v 1.10 2011/12/23 21:05:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@ namespace ESMCI{
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_calendarinitialize)(ESMC_CalKind_Flag *calkindflag, 
+       void FTN_X(c_esmc_calendarinitialize)(ESMC_CalKind_Flag *calkindflag, 
                                            int *status) {
           int rc =
                 ESMCI_CalendarInitialize(
@@ -46,12 +46,12 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarfinalize)(int *status) {
+       void FTN_X(c_esmc_calendarfinalize)(int *status) {
           int rc = ESMCI_CalendarFinalize();
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarcreatebuiltin)(Calendar    **ptr,
+       void FTN_X(c_esmc_calendarcreatebuiltin)(Calendar    **ptr,
                                               int               *nameLen,
                                               const char        *name,
                                               ESMC_CalKind_Flag *calkindflag, 
@@ -66,7 +66,7 @@ extern "C" {
        }
 
        // for daysPerMonth present
-       void FTN(c_esmc_calendarcreatecustom1)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarcreatecustom1)(Calendar **ptr,
                                     int          *nameLen,
                                     const char   *name,
                                     int          *daysPerMonth,
@@ -92,7 +92,7 @@ extern "C" {
        }
 
        // for daysPerMonth missing
-       void FTN(c_esmc_calendarcreatecustom0)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarcreatecustom0)(Calendar **ptr,
                                     int          *nameLen,
                                     const char   *name,
                                     int          *monthsPerYear,
@@ -116,7 +116,7 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_calendarcreatecopy)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarcreatecopy)(Calendar **ptr,
                                            Calendar **calendar,
                                            int *status) {
           *ptr = ESMCI_CalendarCreate(
@@ -124,12 +124,12 @@ extern "C" {
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_calendardestroy)(Calendar **ptr, int *status) {
+       void FTN_X(c_esmc_calendardestroy)(Calendar **ptr, int *status) {
           int rc = ESMCI_CalendarDestroy(ptr);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarsetbuiltin)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarsetbuiltin)(Calendar **ptr,
                                            int *nameLen,
                                            const char *name,
                                            ESMC_CalKind_Flag *calkindflag, 
@@ -144,7 +144,7 @@ extern "C" {
            if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarsetdefaultcal)(Calendar **calendar, 
+       void FTN_X(c_esmc_calendarsetdefaultcal)(Calendar **calendar, 
                                               int *status) {
           int rc =
                 ESMCI_CalendarSetDefault(
@@ -152,7 +152,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarsetdefaultkind)(ESMC_CalKind_Flag *calkindflag, 
+       void FTN_X(c_esmc_calendarsetdefaultkind)(ESMC_CalKind_Flag *calkindflag, 
                                                int *status) {
           int rc =
                 ESMCI_CalendarSetDefault(
@@ -161,7 +161,7 @@ extern "C" {
        }
 
        // for daysPerMonth present
-       void FTN(c_esmc_calendarsetcustom1)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarsetcustom1)(Calendar **ptr,
                                     int          *nameLen,
                                     const char   *name,
                                     int          *daysPerMonth,
@@ -188,7 +188,7 @@ extern "C" {
        }
 
        // for daysPerMonth missing
-       void FTN(c_esmc_calendarsetcustom0)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarsetcustom0)(Calendar **ptr,
                                     int          *nameLen,
                                     const char   *name,
                                     int          *monthsPerYear,
@@ -214,7 +214,7 @@ extern "C" {
        }
 
        // for daysPerMonth present
-       void FTN(c_esmc_calendarget1)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarget1)(Calendar **ptr,
                                     int *nameLen,
                                     int *tempNameLen,
                                     char *tempName,
@@ -252,7 +252,7 @@ extern "C" {
        }
 
        // for daysPerMonth missing
-       void FTN(c_esmc_calendarget0)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarget0)(Calendar **ptr,
                                     int *nameLen,
                                     int *tempNameLen,
                                     char *tempName,
@@ -288,7 +288,7 @@ extern "C" {
            if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarisleapyeari4)(Calendar **ptr, 
+       void FTN_X(c_esmc_calendarisleapyeari4)(Calendar **ptr, 
                                    ESMC_I4 *yy,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -297,7 +297,7 @@ extern "C" {
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_calendarisleapyeari8)(Calendar **ptr, 
+       void FTN_X(c_esmc_calendarisleapyeari8)(Calendar **ptr, 
                                    ESMC_I8 *yy,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -306,7 +306,7 @@ extern "C" {
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_calendareq)(Calendar **calendar1,
+       void FTN_X(c_esmc_calendareq)(Calendar **calendar1,
                                    Calendar **calendar2,
                                    int *esmf_calendarEQ) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar1, *calendar2,
@@ -314,7 +314,7 @@ extern "C" {
            *esmf_calendarEQ = (int) (**calendar1 == **calendar2);
        }
 
-       void FTN(c_esmc_calendarkindeq)(ESMC_CalKind_Flag *calkindflag1,
+       void FTN_X(c_esmc_calendarkindeq)(ESMC_CalKind_Flag *calkindflag1,
                                        ESMC_CalKind_Flag *calkindflag2,
                                        int *esmf_calendarKindEQ) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calkindflag1, *calkindflag2,
@@ -322,7 +322,7 @@ extern "C" {
            *esmf_calendarKindEQ = (int) (*calkindflag1 == *calkindflag2);
        }
 
-       void FTN(c_esmc_calendarcalandkindeq)(Calendar **calendar,
+       void FTN_X(c_esmc_calendarcalandkindeq)(Calendar **calendar,
                                              ESMC_CalKind_Flag *calkindflag,
                                              int *esmf_calendarCalAndKindEQ) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar, *calkindflag,
@@ -330,7 +330,7 @@ extern "C" {
            *esmf_calendarCalAndKindEQ = (int) (**calendar == *calkindflag);
        }
 
-       void FTN(c_esmc_calendarkindandcaleq)(ESMC_CalKind_Flag *calkindflag,
+       void FTN_X(c_esmc_calendarkindandcaleq)(ESMC_CalKind_Flag *calkindflag,
                                              Calendar **calendar,
                                              int *esmf_calendarKindAndCalEQ) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calkindflag, *calendar,
@@ -338,7 +338,7 @@ extern "C" {
            *esmf_calendarKindAndCalEQ = (int) (**calendar == *calkindflag);
        }
 
-       void FTN(c_esmc_calendarne)(Calendar **calendar1,
+       void FTN_X(c_esmc_calendarne)(Calendar **calendar1,
                                    Calendar **calendar2,
                                    int *esmf_calendarNE) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar1, *calendar2,
@@ -346,7 +346,7 @@ extern "C" {
            *esmf_calendarNE = (int) (**calendar1 != **calendar2);
        }
 
-       void FTN(c_esmc_calendarkindne)(ESMC_CalKind_Flag *calkindflag1,
+       void FTN_X(c_esmc_calendarkindne)(ESMC_CalKind_Flag *calkindflag1,
                                        ESMC_CalKind_Flag *calkindflag2,
                                        int *esmf_calendarKindNE) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calkindflag1, *calkindflag2,
@@ -354,7 +354,7 @@ extern "C" {
            *esmf_calendarKindNE = (int) (*calkindflag1 != *calkindflag2);
        }
 
-       void FTN(c_esmc_calendarcalandkindne)(Calendar **calendar,
+       void FTN_X(c_esmc_calendarcalandkindne)(Calendar **calendar,
                                              ESMC_CalKind_Flag *calkindflag,
                                              int *esmf_calendarCalAndKindNE) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar, *calkindflag,
@@ -362,7 +362,7 @@ extern "C" {
            *esmf_calendarCalAndKindNE = (int) (**calendar != *calkindflag);
        }
 
-       void FTN(c_esmc_calendarkindandcalne)(ESMC_CalKind_Flag *calkindflag,
+       void FTN_X(c_esmc_calendarkindandcalne)(ESMC_CalKind_Flag *calkindflag,
                                              Calendar **calendar,
                                              int *esmf_calendarKindAndCalNE) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calkindflag, *calendar,
@@ -370,7 +370,7 @@ extern "C" {
            *esmf_calendarKindAndCalNE = (int) (**calendar != *calkindflag);
        }
 
-       void FTN(c_esmc_calendarreadrestart)(Calendar **ptr, int *nameLen,
+       void FTN_X(c_esmc_calendarreadrestart)(Calendar **ptr, int *nameLen,
                                             const char *name,
                                             int *status,
                                             ESMCI_FortranStrLenArg name_l) {
@@ -381,14 +381,14 @@ extern "C" {
                    ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN(c_esmc_calendarwriterestart)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarwriterestart)(Calendar **ptr,
                                              int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::writeRestart();
            if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarvalidate)(Calendar **ptr,
+       void FTN_X(c_esmc_calendarvalidate)(Calendar **ptr,
                                          const char *options,
                                          int *status,
                                          ESMCI_FortranStrLenArg options_l) {
@@ -398,7 +398,7 @@ extern "C" {
            if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarprint)(Calendar **ptr, const char *options,
+       void FTN_X(c_esmc_calendarprint)(Calendar **ptr, const char *options,
                                       int *status,
                                       ESMCI_FortranStrLenArg options_l) {
            ESMF_CHECK_POINTER(*ptr, status)

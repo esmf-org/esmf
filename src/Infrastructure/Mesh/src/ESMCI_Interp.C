@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.34 2011/10/04 19:35:30 rokuingh Exp $
+// $Id: ESMCI_Interp.C,v 1.35 2011/12/23 21:05:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -38,12 +38,12 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.34 2011/10/04 19:35:30 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.35 2011/12/23 21:05:25 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
 // prototypes of Fortran interfaces used in this source file
-extern "C" void FTN(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
+extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 
 namespace ESMCI {

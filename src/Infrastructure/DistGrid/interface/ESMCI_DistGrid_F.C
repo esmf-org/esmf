@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.37 2011/11/08 05:02:13 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.38 2011/12/23 21:04:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ extern "C" {
 
   // - ESMF-public methods:
         
-  void FTN(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
+  void FTN_X(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
     ESMCI::DistGrid **dg, ESMCI::InterfaceInt **firstExtra,
     ESMCI::InterfaceInt **lastExtra, ESMC_IndexFlag *indexflag,
     ESMCI::InterfaceInt **connectionList, int *rc){
@@ -62,7 +62,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
+  void FTN_X(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
     ESMCI::Decomp_Flag *decompflag, int *decompflagCount, 
@@ -94,7 +94,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 
+  void FTN_X(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **deBlockList,
     ESMCI::InterfaceInt **deLabelList, ESMC_IndexFlag *indexflag, 
@@ -123,7 +123,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridcreaterdfa)(ESMCI::DistGrid **ptr, 
+  void FTN_X(c_esmc_distgridcreaterdfa)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
     ESMCI::Decomp_Flag *decompflag, int *decompflagCount,
@@ -151,7 +151,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgridcreaterdp)(ESMCI::DistGrid **ptr, 
+  void FTN_X(c_esmc_distgridcreaterdp)(ESMCI::DistGrid **ptr, 
     ESMCI::InterfaceInt **minIndex, ESMCI::InterfaceInt **maxIndex,
     ESMCI::InterfaceInt **regDecomp,
     ESMCI::Decomp_Flag *decompflag,
@@ -185,7 +185,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgriddestroy)(ESMCI::DistGrid **ptr, int *rc){
+  void FTN_X(c_esmc_distgriddestroy)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgriddestroy()"
     // Initialize return code; assume routine not implemented
@@ -196,7 +196,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
+  void FTN_X(c_esmc_distgridget)(ESMCI::DistGrid **ptr,
     int *dimCount, int *tileCount,
     ESMCI::InterfaceInt **minIndexPDimPTile,
     ESMCI::InterfaceInt **maxIndexPDimPTile,
@@ -456,7 +456,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
+  void FTN_X(c_esmc_distgridgetplocalde)(ESMCI::DistGrid **ptr,
     int *localDeArg, int *collocationArg, ESMC_Logical *arbSeqIndexFlag,
     ESMCI::InterfaceInt **seqIndexList, int *elementCount, int *rc){
 #undef  ESMC_METHOD
@@ -517,7 +517,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_distgridgetplocaldepdim)(ESMCI::DistGrid **ptr,
+  void FTN_X(c_esmc_distgridgetplocaldepdim)(ESMCI::DistGrid **ptr,
     int *localDeArg, int *dimArg, ESMCI::InterfaceInt **indexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridgetplocaldepdim()"
@@ -556,7 +556,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_distgridmatch)(ESMCI::DistGrid **ptr1, ESMCI::DistGrid **ptr2,
+  void FTN_X(c_esmc_distgridmatch)(ESMCI::DistGrid **ptr1, ESMCI::DistGrid **ptr2,
     ESMCI::DistGridMatch_Flag *matchResult, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridmatch()"
@@ -568,7 +568,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   
-  void FTN(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){
+  void FTN_X(c_esmc_distgridprint)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridprint()"
     // Initialize return code; assume routine not implemented
@@ -581,7 +581,7 @@ extern "C" {
     fflush(stdout);
   }
   
-  void FTN(c_esmc_distgridvalidate)(ESMCI::DistGrid **ptr, int *rc){
+  void FTN_X(c_esmc_distgridvalidate)(ESMCI::DistGrid **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridvalidate()"
     // Initialize return code; assume routine not implemented
@@ -592,7 +592,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridconnection)(
+  void FTN_X(c_esmc_distgridconnection)(
     ESMCI::InterfaceInt **connection, int *tileIndexA,
     int *tileIndexB, ESMCI::InterfaceInt **positionVector,
     ESMCI::InterfaceInt **orientationVector,
@@ -609,7 +609,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgridset)(
+  void FTN_X(c_esmc_distgridset)(
     ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **collocationPDim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridset()"
@@ -622,7 +622,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-  void FTN(c_esmc_distgridsetarbseqindex)(
+  void FTN_X(c_esmc_distgridsetarbseqindex)(
     ESMCI::DistGrid **ptr, ESMCI::InterfaceInt **arbSeqIndex, 
       int *localDe, int *collocation, int *rc){
 #undef  ESMC_METHOD
@@ -637,7 +637,7 @@ extern "C" {
   }
 
 
-  void FTN(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
+  void FTN_X(c_esmc_distgridserialize)(ESMCI::DistGrid **distgrid, char *buf, int *length,
     int *offset, ESMC_InquireFlag *inquireflag, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD
@@ -653,7 +653,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN(c_esmc_distgriddeserialize)(ESMCI::DistGrid **distgrid, char *buf,
+  void FTN_X(c_esmc_distgriddeserialize)(ESMCI::DistGrid **distgrid, char *buf,
     int *offset, int *rc,
     ESMCI_FortranStrLenArg buf_l){
 #undef  ESMC_METHOD

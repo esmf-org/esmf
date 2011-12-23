@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.70 2011/11/21 18:35:35 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.71 2011/12/23 21:05:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -62,12 +62,12 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
 void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
 
 // external C functions
-extern "C" void FTN(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
+extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc);
 
-extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
+extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp,
 		   int *regridMethod, 
@@ -78,7 +78,7 @@ extern "C" void FTN(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
-  Trace __trace(" FTN(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+  Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &srcarray = **arraysrcpp;
   ESMCI::Array &dstarray = **arraydstpp;
@@ -238,7 +238,7 @@ wts.Print(Par::Out());
     if (*has_rh != 0) {
       int localrc;
       enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
-      FTN(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
+      FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
                  &num_entries, &iiptr, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	throw localrc;  // bail out with exception
@@ -292,12 +292,12 @@ wts.Print(Par::Out());
 
 }
 
-extern "C" void FTN(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
+extern "C" void FTN_X(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getiwts()" 
-  Trace __trace(" FTN(regrid_getiwts)()");
+  Trace __trace(" FTN_X(regrid_getiwts)()");
   ESMCI::VM *vm = *vmpp;
   ESMCI::Array &array = **arraypp;
 
@@ -346,12 +346,12 @@ extern "C" void FTN(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
 }
 
 
-extern "C" void FTN(c_esmc_regrid_getarea)(Grid **gridpp,
+extern "C" void FTN_X(c_esmc_regrid_getarea)(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *regridScheme, int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getarea()" 
-  Trace __trace(" FTN(regrid_getarea)()");
+  Trace __trace(" FTN_X(regrid_getarea)()");
   ESMCI::Array &array = **arraypp;
 
   Mesh &mesh = **meshpp;
@@ -390,12 +390,12 @@ extern "C" void FTN(c_esmc_regrid_getarea)(Grid **gridpp,
 
 
 // Assumes array is center stagger loc
-extern "C" void FTN(c_esmc_regrid_getfrac)(Grid **gridpp,
+extern "C" void FTN_X(c_esmc_regrid_getfrac)(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
                    int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_getfrac()" 
-  Trace __trace(" FTN(regrid_getfrac)()");
+  Trace __trace(" FTN_X(regrid_getfrac)()");
 
   ESMCI::Array &array = **arraypp;
   Mesh &mesh = **meshpp;
@@ -440,7 +440,7 @@ extern "C" void FTN(c_esmc_regrid_getfrac)(Grid **gridpp,
 
 // Copy the weights stored in the temporary tw into the fortran arrays.  Also,
 // delete the temp weights.
-extern "C" void FTN(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, double *w) {
+extern "C" void FTN_X(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii, double *w) {
 
   // See if the TempWeights structure is allocated, if not then just leave
   if (*_tw==NULL) return;

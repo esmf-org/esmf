@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.9 2011/06/16 05:56:58 eschwab Exp $
+// $Id: ESMCI_Init.C,v 1.10 2011/12/23 21:05:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ char **globalargv;
     globalargc = 0;
     globalargv = NULL;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, defaultConfigFilename, 
+    FTN_X(f_esmf_frameworkinitialize)((int*)&l, defaultConfigFilename, 
                                     &defaultCalendar, defaultLogFilename, 
                                     &defaultLogType, &rc,
                                     strlen (defaultConfigFilename),
@@ -95,7 +95,7 @@ char **globalargv;
     globalargc = 0;
     globalargv = NULL;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL,
+    FTN_X(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL,
                                     &lt, &rc, 0, 0);
 
     return rc;
@@ -129,7 +129,7 @@ char **globalargv;
     globalargc = argc;
     globalargv = argv;
 
-    FTN(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, 
+    FTN_X(f_esmf_frameworkinitialize)((int*)&l, NULL, &defaultCalendar, NULL, 
                                     &lt, &rc, 0, 0);
 
     return rc;
@@ -155,7 +155,7 @@ char **globalargv;
 
     int rc;
 
-    FTN(f_esmf_frameworkfinalize)(&rc);
+    FTN_X(f_esmf_frameworkfinalize)(&rc);
 
     return rc;
 

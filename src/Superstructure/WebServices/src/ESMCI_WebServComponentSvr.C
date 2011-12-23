@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.14 2011/08/07 00:08:54 w6ws Exp $
+// $Id: ESMCI_WebServComponentSvr.C,v 1.15 2011/12/23 21:05:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -52,21 +52,21 @@
 //***
 extern "C"
 {
-	void FTN(f_esmf_processinit)(ESMCI::GridComp*  comp,
+	void FTN_X(f_esmf_processinit)(ESMCI::GridComp*  comp,
                                 ESMCI::State*     importState,
                                 ESMCI::State*     exportState,
                                 ESMCI::Clock*     clock,
                                 int               phase,
                                 int*              rc);
 
-	void FTN(f_esmf_processrun)(ESMCI::GridComp*  comp,
+	void FTN_X(f_esmf_processrun)(ESMCI::GridComp*  comp,
                                ESMCI::State*     importState,
                                ESMCI::State*     exportState,
                                ESMCI::Clock*     clock,
                                int               phase,
                                int*              rc);
 
-	void FTN(f_esmf_processfinal)(ESMCI::GridComp*  comp,
+	void FTN_X(f_esmf_processfinal)(ESMCI::GridComp*  comp,
                                  ESMCI::State*     importState,
                                  ESMCI::State*     exportState,
                                  ESMCI::Clock*     clock,
@@ -81,7 +81,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.14 2011/08/07 00:08:54 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.15 2011/12/23 21:05:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -1546,7 +1546,7 @@ void  ESMCI_WebServComponentSvr::runInit(
 	// Make the call to the initialization routine
 	//***
 	int	rc = 0;
-   FTN(f_esmf_processinit)(theGridComp,
+   FTN_X(f_esmf_processinit)(theGridComp,
                              theImportState, 
                              theExportState, 
                              theClock, 
@@ -1601,7 +1601,7 @@ void  ESMCI_WebServComponentSvr::runRun(
 	// Make the call to the initialization routine
 	//***
 	int	rc = 0;
-   FTN(f_esmf_processrun)(theGridComp,
+   FTN_X(f_esmf_processrun)(theGridComp,
                           theImportState, 
                           theExportState, 
                           theClock, 
@@ -1658,7 +1658,7 @@ void  ESMCI_WebServComponentSvr::runFinal(
 	// Make the call to the initialization routine
 	//***
 	int	rc = 0;
-   FTN(f_esmf_processfinal)(theGridComp,
+   FTN_X(f_esmf_processfinal)(theGridComp,
                             theImportState, 
                             theExportState, 
                             theClock, 

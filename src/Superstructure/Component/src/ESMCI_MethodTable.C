@@ -1,4 +1,4 @@
-// $Id: ESMCI_MethodTable.C,v 1.1 2011/10/25 23:05:35 theurich Exp $
+// $Id: ESMCI_MethodTable.C,v 1.2 2011/12/23 21:05:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@ extern "C" {
   // call to native class constructor
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtablecreate"
-  void FTN(c_esmc_methodtablecreate)(ESMCI::MethodTable **ptr, int *rc){
+  void FTN_X(c_esmc_methodtablecreate)(ESMCI::MethodTable **ptr, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     (*ptr) = new ESMCI::MethodTable;
     if (*ptr == NULL){
@@ -64,7 +64,7 @@ extern "C" {
   // call to native class destructor
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtabledestroy"
-  void FTN(c_esmc_methodtabledestroy)(ESMCI::MethodTable **ptr, int *rc){
+  void FTN_X(c_esmc_methodtabledestroy)(ESMCI::MethodTable **ptr, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*ptr == NULL){
       ESMC_LogDefault.MsgAllocError("- MethodTable deallocation", rc);  
@@ -78,7 +78,7 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableadd"
-  void FTN(c_esmc_methodtableadd)(ESMCI::MethodTable **ptr,
+  void FTN_X(c_esmc_methodtableadd)(ESMCI::MethodTable **ptr,
     char const *labelArg, void *pointer, int *rc,
     ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
@@ -107,7 +107,7 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableaddshobj"
-  void FTN(c_esmc_methodtableaddshobj)(ESMCI::MethodTable **ptr,
+  void FTN_X(c_esmc_methodtableaddshobj)(ESMCI::MethodTable **ptr,
     char const *labelArg, char const *nameArg, char const *sharedObjArg,
     int *rc, ESMCI_FortranStrLenArg labelLen, ESMCI_FortranStrLenArg nameLen,
     ESMCI_FortranStrLenArg sharedObjLen){
@@ -141,7 +141,7 @@ extern "C" {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableremove"
-  void FTN(c_esmc_methodtableremove)(ESMCI::MethodTable **ptr,
+  void FTN_X(c_esmc_methodtableremove)(ESMCI::MethodTable **ptr,
     char const *label, int *rc, ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -169,7 +169,7 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableexecute"
-  void FTN(c_esmc_methodtableexecute)(ESMCI::MethodTable **ptr,
+  void FTN_X(c_esmc_methodtableexecute)(ESMCI::MethodTable **ptr,
     char const *label, void *object, int *userRc, int *rc,
     ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
@@ -198,7 +198,7 @@ extern "C" {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableexecuteef"
-  void FTN(c_esmc_methodtableexecuteef)(ESMCI::MethodTable **ptr,
+  void FTN_X(c_esmc_methodtableexecuteef)(ESMCI::MethodTable **ptr,
     char const *label, void *object, ESMC_Logical *existflag,
     int *userRc, int *rc,
     ESMCI_FortranStrLenArg labelLen){
