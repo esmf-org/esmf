@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshObjConn.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $
+// $Id: ESMCI_MeshObjConn.C,v 1.10.4.1 2011/12/23 05:52:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshObjConn.C,v 1.10 2011/01/05 20:05:45 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MeshObjConn.C,v 1.10.4.1 2011/12/23 05:52:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -558,7 +558,7 @@ void edge_info(obj_iter node_begin, obj_iter node_end,
   } // elems
 }
 
-template void edge_info<>(MeshObj **node_begin,
+template void edge_info<>(MeshObj** node_begin,
                MeshObj** node_end,
                MeshObj** elem_begin,
                MeshObj** elem_end,
@@ -566,6 +566,21 @@ template void edge_info<>(MeshObj **node_begin,
                int *polarity, // out
                bool
                );
+#ifdef __INTEL_COMPILER
+// The following instantiation is necessary for Intel-12.0.x on Cray systems.
+// Intel-12.0.x on regulare Linux systems do not seem to need this. Also
+// Intel-12.1.x on Cray seems to have fixed the problem again, however, this 
+// work around does not seem to bother any of the Intel compilers, even if they
+// work without it.
+template void edge_info<>(std::vector<MeshObj*>::iterator node_begin,
+               std::vector<MeshObj*>::iterator node_end,
+               std::vector<MeshObj*>::iterator elem_begin,
+               std::vector<MeshObj*>::iterator elem_end,
+               int *ordinal, // out
+               int *polarity, // out
+               bool
+               );
+#endif
 
 template <typename obj_iter>
 void face_info(obj_iter node_begin, obj_iter node_end,
@@ -696,7 +711,7 @@ template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end,
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
-#if defined (__INTEL_COMPILER)
+#ifdef __INTEL_COMPILER
 // Intel's icpc version < 11.0 have a problem with implicit template
 // instantiation if compiled and linked into a shared library.
 // Use explicit instantiation to help these compilers.
