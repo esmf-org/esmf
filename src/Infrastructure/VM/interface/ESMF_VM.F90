@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.155 2011/12/06 01:15:35 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.156 2011/12/23 03:03:47 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -178,6 +178,7 @@ module ESMF_VMMod
   public ESMF_VMIdDestroy
   public ESMF_VMSendVMId
   public ESMF_VMRecvVMId
+  public ESMF_VMAllToAllVVMId
   public ESMF_VMBcastVMId
 
   public ESMF_CommHandleGetInit
@@ -188,7 +189,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.155 2011/12/06 01:15:35 theurich Exp $"
+      "$Id: ESMF_VM.F90,v 1.156 2011/12/23 03:03:47 w6ws Exp $"
 
 !==============================================================================
 
@@ -288,6 +289,7 @@ module ESMF_VMMod
       module procedure ESMF_VMAllToAllVI4
       module procedure ESMF_VMAllToAllVR4
       module procedure ESMF_VMAllToAllVR8
+      module procedure ESMF_VMAllToAllVVMId
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -331,6 +333,7 @@ module ESMF_VMMod
       module procedure ESMF_VMGatherR4
       module procedure ESMF_VMGatherR8
       module procedure ESMF_VMGatherLogical
+      module procedure ESMF_VMGatherFLogical2D
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -3294,6 +3297,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGatherLogical
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherFLogical2D()"
+!BOPI
+! !IROUTINE: ESMF_VMGather - Gather Fortran logical
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMGather()
+  subroutine ESMF_VMGatherFLogical2D(vm, sendData, recvData, count, rootPet, &
+    keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),              intent(in)            :: vm
+    logical, target,            intent(in)            :: sendData(:)
+    logical, target,            intent(out)           :: recvData(:,:)
+    integer,                    intent(in)            :: count
+    integer,                    intent(in)            :: rootPet
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: size
+    logical                 :: blocking
+    type(ESMF_CommHandle)   :: localcommhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface.
+    if (blocking) then
+      call c_ESMC_VMGather(vm, sendData, recvData, size, rootPet, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_VMGatherNB(vm, sendData, recvData, size, rootPet, &
+        localcommhandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Check if we need to pass back the commhandle
+      if (present(commhandle)) then
+        commhandle = localcommhandle  ! copy the commhandle pointer back
+        ! Set init code
+        ESMF_INIT_SET_CREATED(commhandle)
+      endif
+    endif
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGatherFLogical2D
 !------------------------------------------------------------------------------
 
 
@@ -7386,7 +7460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_VMIdCopy(dest, source, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VMId),   intent(out)           :: dest(:)
+    type(ESMF_VMId),   intent(inout)         :: dest(:)
     type(ESMF_VMId),   intent(in)            :: source(:)
     integer,           intent(out), optional :: rc           
 !
@@ -7423,7 +7497,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface
     do, i=1, size (source)
-write (0,*) ESMF_METHOD, ': calling c_ESMC_VMIdCopy, i=', i
       call c_ESMC_VMIdCopy(dest(i), source(i), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 	ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7664,6 +7737,71 @@ write (0,*) ESMF_METHOD, ': calling c_ESMC_VMIdCopy, i=', i
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMIdDestroy_v
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV VMId types
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVVMId(vm,  &
+      sendData, sendCounts, sendOffsets, &
+      recvData, recvCounts, recvOffsets, &
+      keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    type(ESMF_VMId), target,       intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCounts(:)
+    integer,                       intent(in)            :: sendOffsets(:)
+    type(ESMF_VMId), target,       intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCounts(:)
+    integer,                       intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllToAllVVMId(vm,  &
+        sendData, sendCounts, sendOffsets, &
+        recvData, recvCounts, recvOffsets, &
+        localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllToAllVVMId
 !------------------------------------------------------------------------------
 
 
