@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllVUTest.F90,v 1.16 2011/12/23 03:06:46 w6ws Exp $
+! $Id: ESMF_VMAllToAllVUTest.F90,v 1.17 2011/12/23 14:36:25 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_VMAllToAllVUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.16 2011/12/23 03:06:46 w6ws Exp $'
+    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.17 2011/12/23 14:36:25 w6ws Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -251,9 +251,6 @@ program ESMF_VMAllToAllVUTest
   allocate (vmids_array3(nlen1))
   call ESMF_VMIdCreate (vmids_array3, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-flush (6)
-call ESMF_VMBarrier (vm)
-
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -281,17 +278,15 @@ call ESMF_VMBarrier (vm)
   !NEX_UTest
   write(name, *) "AllToAllVMId Test vmids_array1 -> vmids_array2"
   write(failMsg, *) "Did not return ESMF_SUCCESS."
-print *, 'sendCounts: ', sendCounts
-print *, 'sendOffsets: ', sendOffsets
-print *, 'recvCounts: ', recvCounts
-print *, 'recvOffsets: ', recvOffsets
+! print *, 'sendCounts: ', sendCounts
+! print *, 'sendOffsets: ', sendOffsets
+! print *, 'recvCounts: ', recvCounts
+! print *, 'recvOffsets: ', recvOffsets
   call ESMF_VMAllToAllVVMId(vm,  &
       sendData=vmids_array1, sendCounts=sendCounts, sendOffsets=sendOffsets, &
       recvData=vmids_array2, recvCounts=recvCounts, recvOffsets=recvOffsets, &
       rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-flush (6)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -302,8 +297,6 @@ call ESMF_VMBarrier (vm)
       recvData=vmids_array3, recvCounts=sendCounts, recvOffsets=sendOffsets,  &
       rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-flush (6)
-call ESMF_VMBarrier (vm)
 
   !------------------------------------------------------------------------
   !NEX_UTest
