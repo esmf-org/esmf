@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.79.2.1 2011/12/08 02:04:32 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.79.2.2 2011/12/23 05:55:43 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -2336,7 +2336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [config]
 !     Already created {\tt ESMF\_Config} object.
 !   \item [{[tableEnd]}]
-!     If specifed as {\tt TRUE}, end of table mark (::) is checked.
+!     Returns {\tt .true.} if end of table mark (::) is encountered.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
