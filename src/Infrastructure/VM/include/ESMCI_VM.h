@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.h,v 1.15 2011/10/17 21:33:04 w6ws Exp $
+// $Id: ESMCI_VM.h,v 1.16 2011/12/23 02:53:49 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -114,6 +114,8 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int sendVMId(VMId *vmid, int dest);
     int recvVMId(VMId *vmid, int source);
     int bcastVMId(VMId **vmid, int count, int root);
+    int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,
+                      VMId **recvvmid, int *recvcounts, int *recvoffsets);
 };  // class VM
 
 

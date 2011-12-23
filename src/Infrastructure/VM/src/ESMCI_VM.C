@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.26 2011/10/17 21:28:13 w6ws Exp $
+// $Id: ESMCI_VM.C,v 1.27 2011/12/23 02:52:16 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.26 2011/10/17 21:28:13 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.27 2011/12/23 02:52:16 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -118,6 +118,8 @@ static vector<string> esmfRuntimeEnvValue;
 //
 //-----------------------------------------------------------------------------
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VMIdKeyCompare()"
 static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   int i;
   for (i=0; i<vmKeyWidth; i++)
@@ -957,6 +959,104 @@ int VM::recvVMId(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::alltoallvVMId()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::alltoallvVMId
+//
+// !INTERFACE:
+int VM::alltoallvVMId(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMId **sendvmID,              // in  - VMIds to send
+  int *sendcounts,              // in  - VMId send counts
+  int *sendoffsets,             // in  - send offsets
+  VMId **recvvmID,              // out - VMIds to receive
+  int *recvcounts,              // out - VMId receive counts
+  int *recvoffsets              // out - receive offsets
+  ){
+//
+// !DESCRIPTION:
+//    All to all communication {\tt ESMCI::VMId}.  Assumes that the receive VMId
+// array has been pre-allocated and initialized.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  int localrc;
+
+  int petCount = GlobalVM->getNpets();
+  int send_sum=0, recv_sum=0;
+  for (int i=0; i<petCount; i++) {
+    send_sum += sendcounts[i];
+    recv_sum += recvcounts[i];
+  }
+
+  // communicate vmKeys
+  char *send_vmkeys = new char[send_sum];
+  for (int key=0; key<send_sum; key++) {
+    for (int i=0; i<vmKeyWidth; i++) {
+      send_vmkeys[i + key*vmKeyWidth] = sendvmID[key]->vmKey[i];
+// std::cout << ESMC_METHOD << ": sendvmID[" << key << "]->vmKey[" << i;
+// std::cout << "] = " << (int)sendvmID[key]->vmKey[i] << std::endl;
+    }
+  }
+  char *recv_vmkeys = new char[recv_sum];
+  memset (recv_vmkeys, 0, recv_sum);
+  localrc=alltoallv(
+      send_vmkeys, sendcounts, sendoffsets,
+      recv_vmkeys, recvcounts, recvoffsets,
+      vmBYTE);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    delete send_vmkeys;
+    delete recv_vmkeys;
+    return rc;
+  }
+  for (int key=0; key<recv_sum; key++) {
+    for (int i=0; i<vmKeyWidth; i++) {
+      recvvmID[key]->vmKey[i] = recv_vmkeys[i + key*vmKeyWidth];
+// std::cout << ESMC_METHOD << ": recvvmID[" << key << "]->vmKey[" << i;
+// std::cout << "] = " << (int)recvvmID[key]->vmKey[i] << std::endl;
+    }
+  }
+  delete send_vmkeys;
+  delete recv_vmkeys;
+
+  // communicate localIDs
+  int *send_ids = new int[send_sum];
+  for (int i=0; i<send_sum; i++) {
+    send_ids[i] = sendvmID[i]->localID;
+  }
+  int *recv_ids = new int[recv_sum];
+  localrc=alltoallv(
+      send_ids, sendcounts, sendoffsets,
+      recv_ids, recvcounts, recvoffsets,
+      vmI4);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    delete send_ids;
+    delete recv_ids;
+    return rc;
+  }
+  for (int i=0; i<recv_sum; i++) {
+    recvvmID[i]->localID = recv_ids[i];
+  }
+  delete send_ids;
+  delete recv_ids;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+  
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::bcastVMId()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::bcastVMId
@@ -975,7 +1075,8 @@ int VM::bcastVMId(
   ){
 //
 // !DESCRIPTION:
-//    Broadcast {\tt ESMCI::VMId}.
+//    Broadcast {\tt ESMCI::VMId}.  Assumes that the receive VMId
+// array has been pre-allocated and initialized.
 //
 //EOPI
 //-----------------------------------------------------------------------------

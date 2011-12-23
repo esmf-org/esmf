@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.19 2011/11/28 06:39:12 theurich Exp $
+// $Id: ESMCI_VM_F.C,v 1.20 2011/12/23 02:57:59 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1205,6 +1205,24 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     localrc = (*ptr)->recvVMId(*vmid, *source);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN(c_esmc_vmalltoallvvmid)(ESMCI::VM **vm,
+      ESMCI::VMId **sendData, int *sendCounts, int *sendOffsets,
+      ESMCI::VMId **recvData, int *recvCounts, int *recvOffsets, 
+      int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmalltoallvvmid()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    localrc = (*vm)->alltoallvVMId(sendData, sendCounts, sendOffsets,
+                                   recvData, recvCounts, recvOffsets);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return;
     // return successfully
