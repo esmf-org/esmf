@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.2 2011/12/13 23:14:26 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.3 2011/12/23 05:44:31 theurich Exp $
 #
 # Unicos.cce.default
 #
@@ -7,6 +7,7 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = ftn
+ESMF_F90LINKERDEFAULT   = CC
 ESMF_CXXDEFAULT         = CC
 
 ############################################################
@@ -100,16 +101,6 @@ ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
-
-############################################################
-# Link against libesmf.a using the F90 linker front-end
-#
-#ESMF_F90LINKLIBS += -lmpichcxx -lstdc++
-
-############################################################
-# Link against libesmf.a using the C++ linker front-end
-#
-#ESMF_CXXLINKLIBS += -lmpichf90
 
 ############################################################
 # Blank out shared library options
