@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.22.2.2 2011/12/22 22:32:21 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.22.2.3 2011/12/23 00:06:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -1943,6 +1943,16 @@ int VMK::getVas(int i){
 
 int VMK::getLpid(int i){
   return lpid[i];
+}
+
+int VMK::getMaxTag(){
+  int *value;
+  int flag;
+  MPI_Attr_get(MPI_COMM_WORLD, MPI_TAG_UB, &value, &flag);
+  if (flag)
+    return *value;
+  else
+    return 0;
 }
 
 // --- VMKPlan methods ---
