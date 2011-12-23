@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.124.2.3 2011/12/13 23:39:05 theurich Exp $
+// $Id: ESMCI_Grid.C,v 1.124.2.4 2011/12/23 01:40:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.124.2.3 2011/12/13 23:39:05 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.124.2.4 2011/12/23 01:40:32 theurich Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -8982,6 +8982,7 @@ int Grid::getCartCoordDimCount() {
       return -1;
     }
   }
+  return -1; // should never get here, but just to quiet compiler warning on cray
 }
 
 
