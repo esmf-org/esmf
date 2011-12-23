@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.61.2.2 2011/11/28 23:18:06 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.61.2.3 2011/12/23 05:50:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -49,7 +49,50 @@ namespace ESMCI {
   struct SeqIndex;
   class SparseMatrix;
 
-  // class definition
+  // class definitions
+  
+  //============================================================================
+  struct SeqIndex{
+    int decompSeqIndex;
+    int tensorSeqIndex;
+    SeqIndex(){
+      decompSeqIndex = -1;  // invalidate
+      tensorSeqIndex = -1;  // invalidate
+    }
+    void print(){
+      printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+    }
+    bool valid(){
+      if (decompSeqIndex == -1) return false; // invalid seqIndex
+      return true;  // otherwise valid
+    }
+  };  // struct seqIndex
+  bool operator==(SeqIndex a, SeqIndex b);
+  bool operator!=(SeqIndex a, SeqIndex b);
+  bool operator<(SeqIndex a, SeqIndex b);
+  
+  class SeqInd{
+    int n;  // number of components in sequence index
+    int const *index;
+   public:
+    SeqInd(){n=0; index=NULL;}
+    SeqInd(int n_, int const *index_){
+      n = n_;
+      index = index_;
+    }
+    int getIndex(int i)const{return index[i];}
+    void print(){
+      printf("SeqInd: (");
+      int i;
+      for (i=0; i<n-1; i++)
+        printf("%d, ", index[i]);
+      printf("%d)\n", index[i]);
+    }
+  };
+  
+  //todo: try to unify SeqIndex and SeqInd structs!
+  //============================================================================
+  
   
   //============================================================================
   class Array : public ESMC_Base {    // inherits from ESMC_Base class
@@ -294,49 +337,6 @@ namespace ESMCI {
     static int sparseMatMulRelease(RouteHandle *routehandle);
     
   };  // class Array
-  //============================================================================
-  
-  
-  //============================================================================
-  struct SeqIndex{
-    int decompSeqIndex;
-    int tensorSeqIndex;
-    SeqIndex(){
-      decompSeqIndex = -1;  // invalidate
-      tensorSeqIndex = -1;  // invalidate
-    }
-    void print(){
-      printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
-    }
-    bool valid(){
-      if (decompSeqIndex == -1) return false; // invalid seqIndex
-      return true;  // otherwise valid
-    }
-  };  // struct seqIndex
-  bool operator==(SeqIndex a, SeqIndex b);
-  bool operator!=(SeqIndex a, SeqIndex b);
-  bool operator<(SeqIndex a, SeqIndex b);
-  
-  class SeqInd{
-    int n;  // number of components in sequence index
-    int const *index;
-   public:
-    SeqInd(){n=0; index=NULL;}
-    SeqInd(int n_, int const *index_){
-      n = n_;
-      index = index_;
-    }
-    int getIndex(int i)const{return index[i];}
-    void print(){
-      printf("SeqInd: (");
-      int i;
-      for (i=0; i<n-1; i++)
-        printf("%d, ", index[i]);
-      printf("%d)\n", index[i]);
-    }
-  };
-  
-  //todo: try to unify SeqIndex and SeqInd structs!
   //============================================================================
   
   
