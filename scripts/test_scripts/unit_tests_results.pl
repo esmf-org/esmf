@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.21 2011/10/24 16:24:17 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.22 2012/01/04 23:59:01 svasquez Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -77,7 +77,7 @@ use File::Find
 	# processor = 0 for uni_processor
 	# processor = 1 for multi_processor
 	foreach $line (<F>){
-                        push(file_lines, $line);
+                        push(@file_lines, $line);
 			$count=grep(/Non-exhaustive/, @file_lines);
 			if ($count == 1) {
 				$exhaustive=0;
@@ -100,7 +100,7 @@ use File::Find
         find(\&allFiles, '.');
         sub allFiles {
                         # Put all files in a list
-                        push all_files, "$File::Find::name\n" ;
+                        push @all_files, "$File::Find::name\n" ;
         }
         # Get all unit tests files
         @ut_files=grep (/UTest/, @all_files);
@@ -126,7 +126,7 @@ use File::Find
         find(\&wanted_Logfiles, $TEST_DIR);
         sub wanted_Logfiles {
                         # Put all files in a list
-                        push all_files, "$File::Find::name\n" if -e ;
+                        push @all_files, "$File::Find::name\n" if -e ;
         }
         @Log_files=grep (/UTest.Log/, @all_files);
 	# Sort the Log files list
@@ -163,7 +163,7 @@ use File::Find
         foreach $file ( @ut_files) {
                 	open(F,$file);
                 	foreach $line (<F>){
-                                push(file_lines, $line);
+                                push(@file_lines, $line);
         		}       
           		close ($file);
                 
@@ -204,17 +204,17 @@ use File::Find
 				@file_lines = ();
         			$ok=open(F,"$TEST_DIR/$test_file");
         			if (!(defined $ok)) {
-                			push(crashed_list, $file);
+                			push(@crashed_list, $file);
         			}               
 				else {
 					foreach $line (<F>){
-						push(file_lines, $line);
+						push(@file_lines, $line);
 					}
 					close ("$TEST_DIR/$file");
 					#Read the pet count from Log file.
 					$pet_count = &get_pet_count(@file_lines);
 					if ($pet_count == 0) {
-                				push(crashed_list, $file);
+                				push(@crashed_list, $file);
 					}
 					else {
                         			$pass_count=grep( /PASS/, @file_lines);
@@ -226,7 +226,7 @@ use File::Find
 							$pass_count = $pass_count - 1;
 						}
 						if ($pass_count == $test_count){
-							push(pass_list, $file);
+							push(@pass_list, $file);
 						}
 						else {
                         				$fail_count=grep( /FAIL/, @file_lines);
@@ -235,10 +235,10 @@ use File::Find
 								push @fail_test_list, grep (/FAIL/, @file_lines);
 							}
 							if ($test_count != $pass_count + $fail_count) {
-					       			push(crashed_list, $file);
+					       			push(@crashed_list, $file);
                                 			}
 							else {
-								push(fail_list, $file);
+								push(@fail_list, $file);
 							}
 						}
 						$total_pass_count = $total_pass_count + $pass_count;
@@ -268,7 +268,7 @@ use File::Find
 			$ok=open(F,"$TEST_DIR/ESMF_RegridToolUTest.stdout");
                         if (!(defined $ok)) {
 				# if the stdout file is not present put it in the crashed list
-				push(crashed_list, @regrid_test);
+				push(@crashed_list, @regrid_test);
 			}      
 			else { # Read the number of tests from ESMF_RegridToolUTest.stdout
 				$test_string_found = -1;
@@ -288,18 +288,18 @@ use File::Find
 		}
 		CONTINUE: if ($test_string_found == -1) {
 			# The "TEST_COUNT" string was not found inESMF_RegridToolUTest.stdout 
-			push(crashed_list, @regrid_test);
+			push(@crashed_list, @regrid_test);
 		}
 		else {	# Found the "TEST_count" count pass/fails
 			#open the ESMF_RegridToolUTest.Log file
 			$ok=open(F,"$TEST_DIR/ESMF_RegridToolUTest.Log");
                         if (!(defined $ok)) {
 				# no Log file was found
-				push(crashed_list, @regrid_test);
+				push(@crashed_list, @regrid_test);
                         }
 			else {
 				foreach $line (<F>){
-					push(file_lines, $line);
+					push(@file_lines, $line);
                                	}
 				close ("$TEST_DIR/$ESMF_RegridToolUTest.Log");
                                 $pet_count=grep ( /NUMBER_OF_PROCESSORS/, @file_lines);
@@ -313,7 +313,7 @@ use File::Find
 					goto DONE;
 				}
 				if ($pass_count == $regrid_test_count){
-					push(pass_list, @regrid_test);
+					push(@pass_list, @regrid_test);
 				}
 				else {
 					$fail_count=grep( /FAIL/, @file_lines);
@@ -322,10 +322,10 @@ use File::Find
                        			push @fail_test_list, grep (/FAIL/, @file_lines);
 					}
 					if ($regrid_test_count!= $pass_count + $fail_count) {
-						push(crashed_list, @regrid_test);
+						push(@crashed_list, @regrid_test);
 					}
 					else {
-						push(fail_list, @regrid_test);
+						push(@fail_list, @regrid_test);
 					}
 				}
 				$total_pass_count = $total_pass_count + $pass_count;
@@ -341,7 +341,7 @@ use File::Find
        		foreach $file (@crashed_list){
                         # if in crashed list delete it
                         if (grep (/ESMF_RegridToolUTest/, $file) == 0) {
-                                push (new_crashed_list, $file);
+                                push (@new_crashed_list, $file);
                         }
 		}
          }
@@ -391,7 +391,7 @@ use File::Find
 		foreach $file (@fail_test_list){
 			# if not in the list push it in
 			if (grep (/$file/, @sorted_fail_test_list) == 0) {
-				push (sorted_fail_test_list, $file);
+				push (@sorted_fail_test_list, $file);
 			}
 		}	
 		if (!$SUMMARY) { # Print only if full output requested
@@ -406,7 +406,7 @@ use File::Find
 		find(\&wanted3, $TEST_DIR);
 		sub wanted3 {
 			# Put all executable files in a list
-			push all_files, "$File::Find::name\n"  if -x;
+			push @all_files, "$File::Find::name\n"  if -x;
 		}
 		# Get *UTest files
 		@ut_x_files=grep (/UTest/, @all_files);
@@ -438,7 +438,7 @@ use File::Find
 	else {
 		foreach $line (<F>){
 			#Put test harness files in list
-			push (test_harness, $line);
+			push (@test_harness, $line);
 		}
 		# Add "stdout" suffix to test names
 		foreach (@test_harness){
@@ -447,15 +447,15 @@ use File::Find
 		foreach $file (@test_harness) {	
 			open(F,"$TEST_DIR/$file");
 			foreach $line (<F>){
-				push(file_lines, $line);
+				push(@file_lines, $line);
 			}
 			$count=grep ( /PASS/, @file_lines);
 			if ($count != 0) { 
-                                push (harness_pass, $file);
+                                push (@harness_pass, $file);
                                 $harness_pass=$harness_pass + 1;
                         }       
 			else {
-				push (harness_fail, $file);
+				push (@harness_fail, $file);
                                 $harness_fail=$harness_fail + 1;
 			}
                         @file_lines=();

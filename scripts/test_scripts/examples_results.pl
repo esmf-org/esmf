@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.14 2011/10/08 02:24:12 svasquez Exp $
+# $Id: examples_results.pl,v 1.15 2012/01/04 23:59:01 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -40,7 +40,7 @@ use File::Find;
         # processor = 0 for uni_processor
         # processor = 1 for multi_processor
         foreach $line (<F>){
-			push(file_lines, $line);
+			push(@file_lines, $line);
                         $count=grep(/Uniprocessor/, @file_lines);
                         if ($count == 1) {
                                 $processor=0;
@@ -56,7 +56,7 @@ use File::Find;
 	find(\&allFiles, '.'); 
 	sub allFiles {
 			# Put all files in a list
-	 		push all_files, "$File::Find::name\n" ; 
+	 		push @all_files, "$File::Find::name\n" ; 
 	}	
 	# Get all example files
 	@ex_files=grep (/Ex/, @all_files);
@@ -67,14 +67,14 @@ use File::Find;
 	foreach $file ( @ex_files) {
 		open(F,$file);
 		foreach $line (<F>){
-			push(file_lines, $line);
+			push(@file_lines, $line);
 			}
 			close ($file);
 			if ( $processor == 0) {
                                 # Get the uni-PET examples
                                 $count=grep ( /ESMF_EXAMPLE/, @file_lines);
                                 if ($count != 0) {
-                                        push (act_ex_files, $file);
+                                        push (@act_ex_files, $file);
                                         $ex_count=$ex_count + 1;
                                 }
                         }
@@ -82,13 +82,13 @@ use File::Find;
                                 # Get the mult-PET only examples
                                 $count=grep ( /ESMF_MULTI_PROC_EXAMPLE/, @file_lines);
                                 if ($count != 0) {
-                                        push (act_ex_files, $file);
+                                        push (@act_ex_files, $file);
                                         $ex_count=$ex_count + 1;
                                 }
                                 # Include the uni-PET system tests
                                 $count=grep ( /ESMF_EXAMPLE/, @file_lines);
                                 if ($count != 0) {
-                                        push (act_ex_files, $file);
+                                        push (@act_ex_files, $file);
                                         $ex_count=$ex_count + 1;
                                 }
                         }
@@ -139,7 +139,7 @@ use File::Find;
 		find(\&wanted2, '.'); 
 		sub wanted2 {
 				# Put all files in a list
-			 	push all_files, "$File::Find::name\n"  if -e;
+			 	push @all_files, "$File::Find::name\n"  if -e;
 		}
 		# Get *Ex.stdout files
 		@stdout_files=grep (/Ex.stdout/, @all_files);
@@ -160,16 +160,16 @@ use File::Find;
 		foreach $file ( @stdout_ex_files) {
 			open(F,$file);
 			foreach $line (<F>){
-				push(file_lines, $line);
+				push(@file_lines, $line);
 			}
 			close ($file);
 			$count=grep ( /PASS/, @file_lines);
 			if ($count != 0) {
-				push (pass_tests, $file);
+				push (@pass_tests, $file);
 				$pass_count=$pass_count + 1;
 			}
 			else {
-				push (fail_tests, $file);
+				push (@fail_tests, $file);
 			}
 			@file_lines=();
 		}
@@ -240,7 +240,7 @@ use File::Find;
                 	find(\&wanted3, '.');
                 	sub wanted3 {
                                 	# Put all executable files in a list
-                                	push all_files, "$File::Find::name\n"  if -x;
+                                	push @all_files, "$File::Find::name\n"  if -x;
 			}
 			# Get *Ex files
 			@ex_x_files=grep (/Ex/, @all_files);
