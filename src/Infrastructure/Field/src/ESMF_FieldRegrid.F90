@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.92 2011/12/15 21:31:57 theurich Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.93 2012/01/04 23:44:05 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.92 2011/12/15 21:31:57 theurich Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.93 2012/01/04 23:44:05 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1296,7 +1296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif 
 
           ! check grid
-          call checkGrid(Grid,staggerloc,rc=localrc)
+          call checkGrid(Grid,ESMF_STAGGERLOC_CORNER,rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
