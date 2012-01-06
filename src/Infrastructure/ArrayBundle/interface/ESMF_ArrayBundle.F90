@@ -1,7 +1,7 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.76.2.4 2011/12/14 00:06:03 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.76.2.5 2012/01/06 20:42:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Copyright 2002-2012, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.76.2.4 2011/12/14 00:06:03 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.76.2.5 2012/01/06 20:42:19 svasquez Exp $'
 
 !==============================================================================
 ! 

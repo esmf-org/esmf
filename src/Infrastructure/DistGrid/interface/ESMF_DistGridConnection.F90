@@ -1,7 +1,7 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.12.2.1 2011/12/08 02:04:35 theurich Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.12.2.2 2012/01/06 20:43:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Copyright 2002-2012, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 

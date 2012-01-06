@@ -1,7 +1,7 @@
-! $Id: ESMF_Mesh.F90,v 1.76.2.6 2011/12/08 02:04:46 theurich Exp $
+! $Id: ESMF_Mesh.F90,v 1.76.2.7 2012/01/06 20:44:37 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Copyright 2002-2012, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.76.2.6 2011/12/08 02:04:46 theurich Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.76.2.7 2012/01/06 20:44:37 svasquez Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -185,7 +185,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.76.2.6 2011/12/08 02:04:46 theurich Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.76.2.7 2012/01/06 20:44:37 svasquez Exp $'
 
 !==============================================================================
 ! 

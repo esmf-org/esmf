@@ -1,7 +1,7 @@
-// $Id: ESMCI_DistGrid.C,v 1.63.2.3 2011/11/28 23:18:24 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.63.2.4 2012/01/06 20:43:18 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2011, University Corporation for Atmospheric Research, 
+// Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63.2.3 2011/11/28 23:18:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.63.2.4 2012/01/06 20:43:18 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
