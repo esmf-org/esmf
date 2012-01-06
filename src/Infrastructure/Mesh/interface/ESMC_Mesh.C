@@ -1,7 +1,7 @@
-// $Id: ESMC_Mesh.C,v 1.24 2011/10/17 17:35:24 oehmke Exp $
+// $Id: ESMC_Mesh.C,v 1.25 2012/01/06 20:17:49 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2011, University Corporation for Atmospheric Research,
+// Copyright 2002-2012, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.24 2011/10/17 17:35:24 oehmke Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.25 2012/01/06 20:17:49 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;

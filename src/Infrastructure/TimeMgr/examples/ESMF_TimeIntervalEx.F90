@@ -1,7 +1,7 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.43 2011/07/01 16:07:34 rokuingh Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.44 2012/01/06 20:18:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

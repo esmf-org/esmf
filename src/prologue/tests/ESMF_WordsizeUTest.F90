@@ -1,7 +1,7 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.20 2011/06/30 06:00:17 theurich Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.21 2012/01/06 20:19:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

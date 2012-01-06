@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.41 2011/11/10 20:11:13 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.42 2012/01/06 20:16:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

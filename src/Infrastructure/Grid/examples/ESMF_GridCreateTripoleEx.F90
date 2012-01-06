@@ -1,7 +1,7 @@
-! $Id: ESMF_GridCreateTripoleEx.F90,v 1.12 2011/06/30 05:59:03 theurich Exp $
+! $Id: ESMF_GridCreateTripoleEx.F90,v 1.13 2012/01/06 20:16:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

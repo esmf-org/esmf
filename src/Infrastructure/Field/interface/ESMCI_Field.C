@@ -2,7 +2,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2011, University Corporation for Atmospheric Research, 
+// Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.16 2011/12/23 21:04:53 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.17 2012/01/06 20:16:38 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

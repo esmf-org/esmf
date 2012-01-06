@@ -1,7 +1,7 @@
-! $Id: ESMF_XGridUTest.F90,v 1.30 2011/10/11 13:54:24 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.31 2012/01/06 20:18:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

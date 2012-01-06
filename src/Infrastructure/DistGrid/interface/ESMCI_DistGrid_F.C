@@ -1,7 +1,7 @@
-// $Id: ESMCI_DistGrid_F.C,v 1.38 2011/12/23 21:04:51 theurich Exp $
+// $Id: ESMCI_DistGrid_F.C,v 1.39 2012/01/06 20:16:30 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2011, University Corporation for Atmospheric Research, 
+// Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 

@@ -1,7 +1,7 @@
-! $Id: ESMF_GCompEx.F90,v 1.62 2011/06/30 05:59:46 theurich Exp $
+! $Id: ESMF_GCompEx.F90,v 1.63 2012/01/06 20:18:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
