@@ -1,7 +1,7 @@
-// $Id: ESMCI_Init.C,v 1.9 2011/06/16 05:56:58 eschwab Exp $
+// $Id: ESMCI_Init.C,v 1.9.2.1 2012/01/06 21:47:15 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2011, University Corporation for Atmospheric Research, 
+// Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 

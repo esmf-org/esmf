@@ -1,7 +1,7 @@
-! $Id: ESMF_StateReconcile.F90,v 1.103.2.1 2011/12/07 19:29:19 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.103.2.2 2012/01/06 21:47:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research, 
+! Copyright 2002-2012, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.103.2.1 2011/12/07 19:29:19 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.103.2.2 2012/01/06 21:47:30 svasquez Exp $'
 
 !==============================================================================
 ! 

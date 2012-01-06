@@ -1,7 +1,7 @@
-! $Id: ESMF_FortranWordsizeUTest.F90,v 1.16 2011/06/30 05:59:31 theurich Exp $
+! $Id: ESMF_FortranWordsizeUTest.F90,v 1.16.2.1 2012/01/06 21:46:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.16 2011/06/30 05:59:31 theurich Exp $'
+      '$Id: ESMF_FortranWordsizeUTest.F90,v 1.16.2.1 2012/01/06 21:46:31 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
