@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.56 2012/01/06 20:19:32 svasquez Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.57 2012/01/07 00:58:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -544,34 +544,40 @@ program ESMF_RegridWeightGen
 
      ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
      ! otherwise, regrid will not work
-     bigFac = 1
-     do i=2, int(sqrt(float(PetCnt)))
-	if ((PetCnt/i)*i == PetCnt) then
-	  bigFac = i
+     if (PetCnt == 1) then
+	xpart = 1
+	ypart = 1
+     else
+     	bigFac = 1
+     	do i=2, int(sqrt(float(PetCnt)))
+	   if ((PetCnt/i)*i == PetCnt) then
+	      bigFac = i
+           endif
+        enddo
+	xpets = bigFac
+	ypets = PetCnt/xpets
+        if (srcIsReg) then
+	   if ((srcdims(1) <= srcdims(2) .and. xpets <= ypets) .or. &
+	       (srcdims(1) > srcdims(2) .and. xpets > ypets)) then
+	       xpart = xpets
+	       ypart = ypets
+	   else 
+	       xpart = ypets
+	       ypart = xpets
+	   endif
+	   xdim = srcdims(1)/xpart
+	   ydim = srcdims(2)/ypart
+	   do while (xdim <= 1 .and. xpart>1)
+	      xpart = xpart-1
+   	      xdim = srcdims(1)/xpart
+           enddo
+	   do while (ydim <= 1 .and. ypart>1) 
+	      ypart = ypart-1
+   	      ydim = srcdims(2)/ypart
+           enddo
         endif
-     enddo
-     xpets = bigFac
-     ypets = PetCnt/xpets
-     if (srcIsReg) then
-	if ((srcdims(1) <= srcdims(2) .and. xpets <= ypets) .or. &
-	    (srcdims(1) > srcdims(2) .and. xpets > ypets)) then
-	    xpart = xpets
-	    ypart = ypets
-	else 
-	    xpart = ypets
-	    ypart = xpets
-	endif
-	xdim = srcdims(1)/xpart
-	ydim = srcdims(2)/ypart
-	do while (xdim <= 1)
-	  xpart = xpart-1
-   	  xdim = srcdims(1)/xpart
-        enddo
-	do while (ydim <= 1) 
-	  ypart = ypart-1
-   	  ydim = srcdims(2)/ypart
-        enddo
      endif
+
      !Read in the srcfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh
      if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
@@ -609,25 +615,30 @@ program ESMF_RegridWeightGen
 
      !Read in the dstfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh)
-     if (dstIsReg) then
-	if ((dstdims(1) <= dstdims(2) .and. xpets <= ypets) .or. &
-	    (dstdims(1) > dstdims(2) .and. xpets > ypets)) then
-	    xpart = xpets
-	    ypart = ypets
-	else 
-	    xpart = ypets
-	    ypart = xpets
-	endif
-	xdim = dstdims(1)/xpart
-	ydim = dstdims(2)/ypart
-	do while (xdim <= 1)
-	  xpart = xpart-1
-   	  xdim = dstdims(1)/xpart
-        enddo
-	do while (ydim <= 1)
-	  ypart = ypart-1
-   	  ydim = dstdims(2)/ypart
-        enddo
+     if (PetCnt == 1) then
+	xpart = 1
+	ypart = 1
+     else
+        if (dstIsReg) then
+	   if ((dstdims(1) <= dstdims(2) .and. xpets <= ypets) .or. &
+	       (dstdims(1) > dstdims(2) .and. xpets > ypets)) then
+	       xpart = xpets
+	       ypart = ypets
+	   else 
+	       xpart = ypets
+	       ypart = xpets
+	   endif
+	   xdim = dstdims(1)/xpart
+	   ydim = dstdims(2)/ypart
+	   do while (xdim <= 1 .and. xpart>1)
+	     xpart = xpart-1
+   	     xdim = dstdims(1)/xpart
+           enddo
+	   do while (ydim <= 1 .and. ypart>1) 
+	     ypart = ypart-1
+   	     ydim = dstdims(2)/ypart
+           enddo
+        endif
      endif
      if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
 	if(dstIsReg) then
