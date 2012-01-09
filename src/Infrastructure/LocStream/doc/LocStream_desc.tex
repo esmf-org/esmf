@@ -16,13 +16,13 @@ be thought of as a set of observations.  Their locations are generally
 described using Cartesian (x, y, z), or (lat, lon, height) coordinates.
 There is no assumption of any regularity in the positions of the points.
 To make the concept more general, the locations for each data point are
-represented using a construct called {\it keys}, which can include other
-descriptors besides location.
+represented using a construct called {\it keys}.  Keys can include other
+descriptors besides location, including a second set of coordinates.
 
 Although keys are similar in concept to ESMF Attributes they have important
 differences. First, keys always occur as vectors, never as scalars.
 Second, keys are local to the DE: each DE can have a different key
-list with a different number of of elements. Third, the local key 
+list with a different number of elements. Third, the local key 
 list always has the same number of elements as there are local observations
 on that DE.  Finally, keys may be used for the distribution of LocStreams.
 As such, they must be defined before the LocStream is distributed.
@@ -53,8 +53,8 @@ maintained between the points
 (e.g. the class contains no information about which point is the neighbor
 of which other point).
 
-A LocStream is similar to a Mesh consists in that both are collections of irregularly positioned 
-points.  However, the two structures differ in that a Mesh has connectivity
-also: each data point has a set of neighboring data points. There is no requirement that the
-points in a LocStream have connectivity, in fact there is no requirement that a point has 
-any particular spatial relationship to another.
+A LocStream is similar to a Mesh in that both are collections of irregularly positioned 
+points.  However, the two structures differ because a Mesh also has connectivity: 
+each data point has a set of neighboring data points. There is no requirement that the
+points in a LocStream have connectivity, in fact there is no requirement that any two points 
+have any particular spatial relationship at all.
