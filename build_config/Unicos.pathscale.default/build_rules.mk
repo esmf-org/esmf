@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2.2.2 2011/12/13 23:14:30 theurich Exp $
+# $Id: build_rules.mk,v 1.2.2.3 2012/01/09 04:04:31 theurich Exp $
 #
 # Unicos.pathscale.default
 #
@@ -97,12 +97,12 @@ ESMF_CXXLINKRPATHS      =
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += -lmpichcxx -lstdc++
+ESMF_F90LINKLIBS += -lstl -lcxxrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lmpichf90
+ESMF_CXXLINKLIBS += -lpathfortran
 
 ############################################################
 # Blank out shared library options
