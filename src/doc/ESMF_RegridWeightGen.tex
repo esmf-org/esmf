@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.37.2.5 2011/12/22 23:35:30 theurich Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.37.2.6 2012/01/10 04:35:23 theurich Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -139,6 +139,7 @@ as follows:
 
 \begin{verbatim}
 ESMF_RegridWeightGen  [--help]
+                      [--version]
                       [--source|-s] src_grid_filename 
                       [--destination|-d] dst_grid_filename 
                       [--weight|-w] out_weight_file 
@@ -154,7 +155,8 @@ ESMF_RegridWeightGen  [--help]
 		      --64bit_offset
 
 where
-  --help              - print the usage message 
+  --help              - Print the usage message and exit.
+  --version           - Print ESMF version and license information and exit.
   --source or -s      - a required argument specifying the source grid 
                         file name
 
