@@ -1,4 +1,4 @@
-! $Id: ESMF_Info.F90,v 1.10 2011/06/30 06:00:05 theurich Exp $
+! $Id: ESMF_Info.F90,v 1.10.2.1 2012/01/10 04:28:11 theurich Exp $
 
 program ESMF_Info
 
@@ -38,7 +38,7 @@ program ESMF_Info
       print *, "  ESMF_VERSION_REVISION:     ", ESMF_VERSION_REVISION
       print *, "  ESMF_VERSION_PATCHLEVEL:   ", ESMF_VERSION_PATCHLEVEL
       print *, "  ESMF_VERSION_PUBLIC:       ", ESMF_VERSION_PUBLIC
-      print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_PUBLIC
+      print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_BETASNAPSHOT
     end if
   endif
   
