@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246.2.8 2012/01/09 04:13:24 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.9 2012/01/10 04:30:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246.2.8 2012/01/09 04:13:24 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.9 2012/01/10 04:30:53 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5197,13 +5197,15 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
  endif
 
  if (dim1 == 1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Currently can't handle a grid of width 1 in 1st dim, but not in 2nd dim", &
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+ msg="- Currently can't handle a grid thats width 1 in only 1st dim", &
 	  ESMF_CONTEXT, rcToReturn=rc)
      return
  endif
 
  if (dim2 == 1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Currently can't handle a grid of width 1 in 2nd dim, but not in 1st dim", &
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+ msg="- Currently can't handle a grid thats width 1 in only 2nd dim", &
 	  ESMF_CONTEXT, rcToReturn=rc)
      return
  endif
@@ -5256,7 +5258,8 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
   ! Make sure we found a corner
   if (TopCorner == -1) then
-     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG,msg="- Bad corner array in SCRIP file", &
+     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="- Bad corner array in SCRIP file", &
 	  ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
