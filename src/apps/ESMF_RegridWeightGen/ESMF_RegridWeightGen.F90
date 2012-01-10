@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.58 2012/01/09 21:40:45 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.59 2012/01/10 04:15:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1642,6 +1642,8 @@ subroutine PrintUsage()
      print *, "                      --src_meshname src_mesh_variable"
      print *, "                      --dst_meshname dst_mesh_variable"
      print *, "                      -r"
+     print *, "                      --help"
+     print *, "                      --version"
      print *, "where"
      print *, "--source or -s - a required argument specifying the source grid file"
      print *, "                 name"
@@ -1673,11 +1675,15 @@ subroutine PrintUsage()
      print *, "             Without this argument, the src grids is assumed to be global."
      print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
      print *, "             Without this argument, the dst grids is assumed to be global."
+     print *, "--help     - Print this help message and exit."
+     print *, "--version  - Print ESMF version and license information and exit."
      print *, ""
      print *, "For questions, comments, or feature requests please send email to:"
      print *, "esmf_support@list.woc.noaa.gov"
+     print *, ""
      print *, "Visit http://www.earthsystemmodeling.org/ to find out more about the"
      print *, "Earth System Modeling Framework."
+     print *, ""
 end subroutine PrintUsage
 
 subroutine PrintVersionInfo()
@@ -1689,9 +1695,9 @@ subroutine PrintVersionInfo()
        print *, "  ESMF_VERSION_PATCHLEVEL:   ", ESMF_VERSION_PATCHLEVEL
        print *, "  ESMF_VERSION_PUBLIC:       ", ESMF_VERSION_PUBLIC
        print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_BETASNAPSHOT
-
+       print *, ""
        print *, "Earth System Modeling Framework"
-
+       print *, ""
        print *, "Copyright (c) 2002-2012 University Corporation for Atmospheric Research,"
        print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
        print *, "University of Michigan, National Centers for Environmental Prediction,"
@@ -1699,7 +1705,7 @@ subroutine PrintVersionInfo()
        print *, "NASA Goddard Space Flight Center.  All rights reserved."
        print *, ""
        print *, "Permission is hereby granted, free of charge, to any person obtaining a copy"
-       print *, "of this software and associated documentation files (the \"Software\"), to"
+       print *, 'of this software and associated documentation files (the "Software"), to'
        print *, "deal with the Software without restriction, including without limitation the"
        print *, "rights to use, copy, modify, merge, publish, distribute, sublicense, and/or"
        print *, "sell copies of the Software, and to permit persons to whom the Software is"
@@ -1713,13 +1719,14 @@ subroutine PrintVersionInfo()
        print *, "      its contributors may be used to endorse or promote products derived"
        print *, "      from this Software without specific prior written permission."
        print *, ""
-       print *, "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+       print *, 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR'
        print *, "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
        print *, "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE"
        print *, "CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
        print *, "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING"
        print *, "FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
        print *, "WITH THE SOFTWARE."
+       print *, ""
 
 end subroutine PrintVersionInfo
 
