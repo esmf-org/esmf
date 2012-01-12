@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.246.2.9 2012/01/10 04:30:53 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.246.2.10 2012/01/12 02:27:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -301,7 +301,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.246.2.9 2012/01/10 04:30:53 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.246.2.10 2012/01/12 02:27:29 theurich Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5153,46 +5153,21 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 
  ! Handle 1 width cases
  if ((dim1 == 1) .and. (dim2 == 1)) then
-    ! find top left corner
-    topCorner=-1
-    do i=1,4
-       ! compute i plus 1 (ip1)
-       ip1=i+1
-       if (ip1 == 5) ip1=1
-       
-       ! compute i minus 1 (im1)
-       im1=i-1
-       if (im1 == 0) im1=4
-       
-       if ((cornerX2D(i,1) < cornerX2D(im1,1)) .and. &
-            (cornerY2D(i,1) > cornerY2D(ip1,1))) then
-          topCorner=i
-          topRightCorner=im1
-          btmCorner=ip1
-          btmRightCorner=ip1+1
-          if (btmRightCorner == 5) btmRightCorner=1
-         exit
-       endif
-    enddo
-    
-    if (topCorner == -1) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, msg="- Bad corner array in SCRIP file", &
-            ESMF_CONTEXT, rcToReturn=rc)
-       return
-    endif
+   ! Put corner array into Grid in an order
+   ! so that it'll be recoverted to a 
+   ! Mesh element in the same order
 
-    ! Top left corner
-    cornerX(1)=cornerX2D(btmCorner,1)
-    cornerY(1)=cornerY2D(btmCorner,1)    
-    ! Top right corner
-    cornerX(2)=cornerX2D(btmRightCorner,1)
-    cornerY(2)=cornerY2D(btmRightCorner,1)    
-    ! Bottom left corner
-    cornerX(3)=cornerX2D(topCorner,1)
-    cornerY(3)=cornerY2D(topCorner,1)    
-    ! Bottom right corner
-    cornerX(4)=cornerX2D(topRightCorner,1)
-    cornerY(4)=cornerY2D(topRightCorner,1)    
+    cornerX(1)=cornerX2D(1,1)
+    cornerY(1)=cornerY2D(1,1)    
+
+    cornerX(2)=cornerX2D(2,1)
+    cornerY(2)=cornerY2D(2,1)    
+
+    cornerX(3)=cornerX2D(4,1)
+    cornerY(3)=cornerY2D(4,1)    
+
+    cornerX(4)=cornerX2D(3,1)
+    cornerY(4)=cornerY2D(3,1)    
     return
  endif
 
