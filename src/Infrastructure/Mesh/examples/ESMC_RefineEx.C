@@ -1,4 +1,4 @@
-// $Id: ESMC_RefineEx.C,v 1.19 2012/01/06 20:17:45 svasquez Exp $
+// $Id: ESMC_RefineEx.C,v 1.20 2012/01/13 15:26:37 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -34,6 +34,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
+#include <cstdio>
 #include <mpi.h>
 
 /*

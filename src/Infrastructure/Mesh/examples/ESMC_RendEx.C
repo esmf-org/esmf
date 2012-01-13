@@ -1,4 +1,4 @@
-// $Id: ESMC_RendEx.C,v 1.22 2012/01/06 20:17:45 svasquez Exp $
+// $Id: ESMC_RendEx.C,v 1.23 2012/01/13 15:26:37 theurich Exp $
 //==============================================================================
 //
 // Earth System Modeling Framework
@@ -37,6 +37,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
+#include <cstdio>
 
 #if !defined (M_PI)
 // for Windows...
