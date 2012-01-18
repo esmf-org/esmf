@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1.2.3 2011/12/23 05:44:31 theurich Exp $
+# $Id: build_rules.mk,v 1.1.2.4 2012/01/18 04:19:34 theurich Exp $
 #
 # Unicos.cce.default
 #
@@ -47,6 +47,11 @@ endif
 #
 ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v -V
+
+############################################################
+# on XT with CCE optimization level must be set explicitely
+#
+ESMF_OPTLEVELDEFAULT  = 2
 
 ############################################################
 # XT compute nodes do not have support for POSIX IPC (memory mapped files)

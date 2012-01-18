@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2008/10/27 22:18:03 theurich Exp $
+# $Id: makefile,v 1.13.8.1 2012/01/18 04:19:36 theurich Exp $
 
 ALL: build_here 
 
@@ -36,6 +36,15 @@ CLEANFILES  =
 CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
+
+# on Cray XT/XE/XK with the Cray Compiler Suite (CCE) there is a
+# problem compiling the local files with optimization ->
+# solution: turn optimization off
+ifeq ($(ESMF_OS),Unicos)
+ifeq ($(ESMF_COMPILER),cce)
+ESMF_OPTLEVEL = 0
+endif
+endif
 
 # Leave the following line blank.
 DIRS	  = 
