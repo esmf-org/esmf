@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.15.2.2 2012/01/06 20:43:28 svasquez Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.15.2.3 2012/01/18 04:15:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -462,7 +462,7 @@ contains
       routehandle=rh_a2o, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       srcFracField=srcFrac, dstFracField=dstFrac, & 
-      indices=indices, weights=weights, rc=localrc)
+      factorIndexList=indices, factorList=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -477,7 +477,7 @@ contains
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       routehandle=rh_o2a, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
-      indices=indices, weights=weights, rc=localrc)
+      factorIndexList=indices, factorList=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1168,7 +1168,7 @@ contains
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
       srcFracField=srcFrac, dstFracField=dstFrac, & 
-      indices=indices, weights=weights, rc=localrc)
+      factorIndexList=indices, factorList=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1183,7 +1183,7 @@ contains
       routehandle=rh_o2a, &
       regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
       unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
-      indices=indices, weights=weights, rc=localrc)
+      factorIndexList=indices, factorList=weights, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

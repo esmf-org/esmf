@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.50.2.3 2012/01/06 20:43:21 svasquez Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.50.2.4 2012/01/18 04:15:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.50.2.3 2012/01/06 20:43:21 svasquez Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.50.2.4 2012/01/18 04:15:03 theurich Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -368,14 +368,13 @@ program ESMF_FieldRegridEx
 ! are then computed locally on each cell.  This matrix of weights is, finally,
 ! sent back to the destination grid's row decomposition and declared as a 
 ! sparse matrix.  This matrix is embedded in the routeHandle object.
-! Note the coordinates of the source and destination grids upon whilch the source and destination fields are 
+! Note the coordinates of the source and destination grids upon which the source and destination fields are 
 ! defined should be in degrees.  
 !EOE
 
 !BOC
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
                   routeHandle=routeHandle, &
-                  indices=indices, weights=weights, &
                   regridmethod=ESMF_REGRIDMETHOD_BILINEAR, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -421,17 +420,6 @@ program ESMF_FieldRegridEx
   call ESMF_GridDestroy(gridSrc, rc=localrc)
 
   call ESMF_GridDestroy(gridDst, rc=localrc)
-
-#if 0
-  ! Uncomment print statement to print the weights
-  if (associated(indices)) then
-    do i1 = 1, size(indices,1)
-
-    !print *, indices(i1,1), indices(i1,2) , ':', weights(i1)
-    
-    enddo
-  endif
-#endif
 
 10   continue
   call ESMF_Finalize(rc=rc)

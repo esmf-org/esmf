@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.24.2.1 2012/01/06 20:43:21 svasquez Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.24.2.2 2012/01/18 04:15:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.24.2.1 2012/01/06 20:43:21 svasquez Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.24.2.2 2012/01/18 04:15:03 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -299,7 +299,6 @@ program ESMF_FieldRegridEx
                              dstField=dstField, dstMaskValues=(/1/),       &
                              unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
                              routeHandle=routeHandle,                      &
-                             indices=indices, weights=weights,           &
                              regridmethod=ESMF_REGRIDMETHOD_BILINEAR,     &
                              rc=localrc)
 !EOC
@@ -331,14 +330,6 @@ program ESMF_FieldRegridEx
                spherical=spherical_grid, rc=localrc)
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  ! Uncomment print statement to print the weights
-  if (associated(indices)) then
-    do i1 = 1, size(indices,1)
-
-    !print *, indices(i1,1), indices(i1,2) , ':', weights(i1)
-    
-    enddo
-  endif
 #endif
 
   call ESMF_FieldDestroy(srcField, rc=localrc)
