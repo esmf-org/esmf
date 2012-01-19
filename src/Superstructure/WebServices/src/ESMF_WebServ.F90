@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.25 2012/01/06 20:19:29 svasquez Exp $
+! $Id: ESMF_WebServ.F90,v 1.26 2012/01/19 23:49:02 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -553,6 +553,11 @@ contains
 !   routine is run.
 ! \item[{[portNum]}]
 !   Number of the port on which the component service is listening.
+! \item[{[clientId]}]
+!   Identifer of the client responsible for this component service.  If a
+!   Process Controller application manages this component service, then the
+!   clientId is provided to the component service application in the command
+!   line.  Otherwise, the clientId is not necessary.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
