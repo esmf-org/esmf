@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: mpirun,v 1.3 2012/01/18 20:29:02 w6ws Exp $
+# $Id: mpirun,v 1.4 2012/01/19 05:03:19 w6ws Exp $
 
 CYCLE=1
 while [ $CYCLE = 1 ]
@@ -23,8 +23,8 @@ do
 
     --version)
 	echo "ESMF mpirun:"
-	echo "  revision$Revision: 1.3 $"
-	echo "  revision date$Date: 2012/01/18 20:29:02 $"
+	echo "  revision$Revision: 1.4 $"
+	echo "  revision date$Date: 2012/01/19 05:03:19 $"
 	echo "  tag$Name:  $"
 	exit 0
 	;;
@@ -34,12 +34,14 @@ do
     esac
 done
 
-if [ $1 != "" ]; then
+if [ $# -gt 0 ]; then
 # If relative path is used prepend a ./
     progname=`dirname $1`/`basename $1`
-    echo progname = $progname
     shift
 
 # Execute the program
     $progname $*
+    exit $?
 fi
+
+exit 0
