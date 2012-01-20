@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.40 2012/01/06 20:18:17 svasquez Exp $
+// $Id: ESMC_Util.h,v 1.41 2012/01/20 17:02:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,6 +47,9 @@ enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
                      ESMC_TYPEKIND_LOGICAL,
                      ESMC_TYPEKIND_CHARACTER,
                      ESMF_NOKIND=99 };
+
+enum ESMC_MeshLoc_Flag { ESMC_MESHLOC_NODE=1,
+                         ESMC_MESHLOC_ELEMENT };
 
 enum ESMC_RegridMethod { ESMC_REGRIDMETHOD_BILINEAR=0,
                          ESMC_REGRIDMETHOD_PATCH,

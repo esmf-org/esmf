@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.32 2012/01/06 20:16:38 svasquez Exp $
+// $Id: ESMC_Field.C,v 1.33 2012/01/20 17:02:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -65,8 +65,9 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreateMeshTypeKind()"
   ESMC_Field ESMC_FieldCreateMeshTypeKind(ESMC_Mesh mesh, enum ESMC_TypeKind typekind,
-    ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
-    ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc){
+    enum ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt gridToFieldMap, 
+    ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, 
+    const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMF_RC_NOT_IMPL;
@@ -75,7 +76,7 @@ extern "C" {
 
     // Invoque the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, typekind,
-      gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
+      meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
       field.ptr = NULL;  // invalidate
       if (rc!=NULL) *rc = 49987233;

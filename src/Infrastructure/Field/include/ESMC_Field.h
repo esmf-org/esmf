@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.42 2012/01/06 20:16:37 svasquez Exp $
+// $Id: ESMC_Field.h,v 1.43 2012/01/20 17:02:04 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -125,6 +125,7 @@ ESMC_Field ESMC_FieldCreateMeshArraySpec(
 ESMC_Field ESMC_FieldCreateMeshTypeKind(
   ESMC_Mesh mesh,                           // in
   enum ESMC_TypeKind typekind,              // in
+  enum ESMC_MeshLoc_Flag meshloc,           // in
   ESMC_InterfaceInt gridToFieldMap,         // in
   ESMC_InterfaceInt ungriddedLBound,        // in
   ESMC_InterfaceInt ungriddedUBound,        // in
@@ -143,8 +144,10 @@ ESMC_Field ESMC_FieldCreateMeshTypeKind(
 //  \begin{description}
 //  \item[mesh]
 //    A {\tt ESMC\_Mesh} object.
-//  \item[arrayspec]
+//  \item[typekind]
 //    The ESMC\_TypeKind that describes this Field data.
+//  \item[meshloc]
+//    The ESMC\_MeshLoc\_Flag that describes this Field data.
 //  \item[gridToFieldMap]
 //    List with number of elements equal to the grid's dimCount. The list
 //    elements map each dimension of the grid to a dimension in the field by

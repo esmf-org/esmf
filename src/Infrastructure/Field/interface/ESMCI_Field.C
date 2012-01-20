@@ -49,7 +49,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.17 2012/01/06 20:16:38 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.18 2012/01/20 17:02:09 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ void FTN_X(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
-    ESMC_TypeKind *typekind, 
+    ESMC_TypeKind *typekind, ESMC_MeshLoc_Flag *meshloc,
     int *gridToFieldMap, int *len1, 
     int *ungriddedLBound, int *len2,
     int *ungriddedUBound, int *len3,
@@ -218,6 +218,7 @@ namespace ESMCI {
 // !ARGUMENTS:
     ESMC_Mesh mesh, 
     ESMC_TypeKind typekind, 
+    ESMC_MeshLoc_Flag meshloc,
     ESMC_InterfaceInt gridToFieldMap, 
     ESMC_InterfaceInt ungriddedLBound, 
     ESMC_InterfaceInt ungriddedUBound, 
@@ -273,7 +274,7 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
   
-    FTN_X(f_esmf_fieldcreatemeshtk)(field, mesh.ptr, &typekind, 
+    FTN_X(f_esmf_fieldcreatemeshtk)(field, mesh.ptr, &typekind, &meshloc,
         gtfm->array, &gtfm->extent[0], 
         uglb->array, &uglb->extent[0], 
         ugub->array, &ugub->extent[0], 
