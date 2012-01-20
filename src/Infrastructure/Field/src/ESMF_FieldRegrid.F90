@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.83.2.7 2012/01/09 04:13:23 theurich Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.83.2.8 2012/01/20 21:21:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.83.2.7 2012/01/09 04:13:23 theurich Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.83.2.8 2012/01/20 21:21:05 svasquez Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -289,14 +289,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreNX(srcField, dstField, keywordEnforcer, &
-                                       srcMaskValues, dstMaskValues, &
-                                       regridmethod, &
-                                       polemethod, regridPoleNPnts, & 
-                                       unmappedaction, &
-                                       routehandle, &
-                                       factorList, factorIndexList, & 
-                                       weights, indices, &  ! DEPRECATED ARGUMENTS
-                                       srcFracField, dstFracField, rc)
+                              srcMaskValues, dstMaskValues, &
+                              regridmethod, &
+                              polemethod, regridPoleNPnts, & 
+                              unmappedaction, &
+                              routehandle, &
+                              factorList, factorIndexList, & 
+                              weights, indices, &  ! DEPRECATED ARGUMENTS
+                              srcFracField, dstFracField, rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_Field),            intent(in)             :: srcField
@@ -310,9 +310,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
       type(ESMF_RouteHandle),      intent(inout),optional :: routehandle
       real(ESMF_KIND_R8),          pointer,      optional :: factorList(:)
-      integer(ESMF_KIND_I4),       pointer,      optional :: factorIndexList(:,:)
-      real(ESMF_KIND_R8),          pointer,      optional :: weights(:)   ! DEPRECATED ARGUMENT
-      integer(ESMF_KIND_I4),       pointer,      optional :: indices(:,:) ! DEPRECATED ARGUMENT 
+      integer(ESMF_KIND_I4), pointer, optional :: factorIndexList(:,:)
+      real(ESMF_KIND_R8),    pointer, optional :: weights(:)! DEPRECATED ARG
+      integer(ESMF_KIND_I4), pointer, optional :: indices(:,:)!DEPRECATED ARG 
       type(ESMF_Field),            intent(inout),optional :: srcFracField
       type(ESMF_Field),            intent(inout),optional :: dstFracField
       integer,                     intent(out),  optional :: rc 
