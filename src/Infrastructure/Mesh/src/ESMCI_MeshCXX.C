@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.24 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.25 2012/01/25 19:49:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.24 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.25 2012/01/25 19:49:49 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -179,7 +179,9 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
     // Return SUCCESS
     return ESMF_SUCCESS;
   }
-  
+
+
+// TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
 int MeshCXX::addElements(int numElems, int *elemId, 
                          int *elemType, int *elemConn){
 #undef ESMC_METHOD
@@ -327,6 +329,11 @@ int MeshCXX::addElements(int numElems, int *elemId,
     // what is mesh.num_elems?  petlocal?  should it = numElems?
     ThrowAssert(mesh.num_elems() == numElems);
     numLElements = numElems;
+
+    // required to add frac fields to the mesh for conservative regridding
+    Context ctxt; ctxt.flip();
+    MEField<> *elem_frac = mesh.RegisterField("elem_frac",
+                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
     // Perhaps commit will be a separate call, but for now commit the mesh here.
     mesh.build_sym_comm_rel(MeshObj::NODE);
