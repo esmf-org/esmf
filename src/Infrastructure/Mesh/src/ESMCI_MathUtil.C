@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.12 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_MathUtil.C,v 1.13 2012/01/25 22:59:27 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.12 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.13 2012/01/25 22:59:27 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -129,7 +129,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   X[2]=0.0;
 
   // Do multiple iterations, exiting inside loop if solution is good enough
-  for (int i=0; i<100; i++) {
+ for (int i=0; i<100; i++) {
 
     // Calculate Value of function at X
     F[0]=X[0]*X[1]*A[0]+X[0]*B[0]+X[1]*C[0]+X[2]*D[0]+E[0];
@@ -138,7 +138,6 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
 
     // If we're close enough to 0.0 then exit           
     if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) break;
-
 
     // Construct Jacobian
     J[0]=A[0]*X[1]+B[0]; J[1]=A[0]*X[0]+C[0]; J[2]=D[0];

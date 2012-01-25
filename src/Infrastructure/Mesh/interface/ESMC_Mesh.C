@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.25 2012/01/06 20:17:49 svasquez Exp $
+// $Id: ESMC_Mesh.C,v 1.26 2012/01/25 22:59:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.25 2012/01/06 20:17:49 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.26 2012/01/25 22:59:26 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -211,7 +211,39 @@ int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
   }
   
   // call into ESMCI method
-  *num_nodes = mep->numNodes();
+  *num_nodes = mep->getNumLocalNodes();
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//--------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetOwnedNodeCount()"
+int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int* num_nodes){
+  
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh.ptr);
+
+  // init output (because 0 could be legit)
+  *num_nodes=-1;
+
+  // make sure Mesh has been finished
+  if (!mep->isMeshFinished()) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+     "- Mesh must be finished to get owned node count ", &localrc)) return localrc;
+  }
+  
+  // call into ESMCI method
+  *num_nodes = mep->getNumOwnedNodes();
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -242,13 +274,46 @@ int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int* num_elems){
   }
 
   // call into ESMCI method
-  *num_elems = mep->numElements();
+  *num_elems = mep->getNumLocalElements();
 
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
 //--------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetOwnedElementCount()"
+int ESMC_MeshGetOwnedElementCount(ESMC_Mesh mesh, int* num_elems){
+  
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // init output (because 0 could be legit)
+  *num_elems=-1;
+
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh.ptr);
+
+  // make sure Mesh has had it's elements added
+  if (!mep->isMeshFinished()) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+     "- Mesh must be finished to get owned element count ", &localrc)) return localrc;
+  }
+
+  // call into ESMCI method
+  *num_elems = mep->getNumOwnedElements();
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//--------------------------------------------------------------------------
+
 
   //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

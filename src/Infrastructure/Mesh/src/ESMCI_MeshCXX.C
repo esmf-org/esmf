@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.25 2012/01/25 19:49:49 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.26 2012/01/25 22:59:27 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.25 2012/01/25 19:49:49 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.26 2012/01/25 22:59:27 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -91,11 +91,16 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
     (meshCXXp)->meshPointer = meshp;
 
-    // set the number of nodes and elements
+    // Set the number of nodes and elements
     ThrowAssert(meshp->num_elems() == 0);
     meshCXXp->numLElements = meshp->num_elems();
     ThrowAssert(meshp->num_nodes() == 0);
     meshCXXp->numLNodes = meshp->num_nodes();
+
+    // Init to bad value
+    meshCXXp->numOwnedNodes=-1;
+    meshCXXp->numOwnedElements=-1;
+
 
     //cerr << "MeshCXX::create(): meshp = " << meshp;
     //cerr << ".  Setting meshFreed to 0."  << endl;
@@ -342,6 +347,38 @@ int MeshCXX::addElements(int numElems, int *elemId,
     // Mark Mesh as finshed
     level=MeshCXXLevel_Finished;
 
+    // Calc and set the number of owned nodes
+    int num_owned_nodes=0;
+    // NEW MESH interator because the one above has probably been trashed by
+    // changes in the commit, etc. 
+    Mesh::iterator ni2 = mesh.node_begin(), ne2 = mesh.node_end();
+    for (ni2; ni2 != ne2; ++ni2) {
+      MeshObj &node = *ni2;
+   
+      if (!GetAttr(node).is_locally_owned()) continue;
+      
+      num_owned_nodes++;
+    }
+    numOwnedNodes=num_owned_nodes;
+
+    //    printf(" num_owned_nodes=%d num_nodes=%d\n",num_owned_nodes, mesh.num_nodes());
+
+
+    // Calc and set the number of owned elements
+    int num_owned_elems=0;
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+   
+      if (!GetAttr(elem).is_locally_owned()) continue;
+      
+      num_owned_elems++;
+    }   
+    numOwnedElements=num_owned_elems;
+
+
+
+
 #ifdef ESMF_PARLOG
   mesh.Print(Par::Out());
 #endif
@@ -497,6 +534,7 @@ std::vector<int> MeshCXX::getNodeGIDS(){
   std::vector<int> ngid;
 
   UInt nnodes = meshPointer->num_nodes();
+
 
   Mesh::iterator ni = meshPointer->node_begin(), ne = meshPointer->node_end();
 
@@ -797,14 +835,27 @@ int MeshCXX::isMeshFreed(){
 }
 
 
-int MeshCXX::numNodes(){
+#if 0
+int MeshCXX::numLocalNodes(){
    return numLNodes;
 }
 
 
-int MeshCXX::numElements(){
+int MeshCXX::numLocalElements(){
    return numLElements;
 }
+
+
+int MeshCXX::numOwnedNodes(){
+   return numOwnedNodes;
+}
+
+
+int MeshCXX::numOwnedElements(){
+   return numOwnedElements;
+}
+#endif
+
 
 int MeshCXX::meshWrite(const char* fileName){
 

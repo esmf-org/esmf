@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.17 2012/01/06 20:17:53 svasquez Exp $
+// $Id: ESMC_MeshUTest.C,v 1.18 2012/01/25 22:59:29 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -52,10 +52,23 @@ int main(void){
 
   int *nodeDistG;
   int *elemDistG;
+  int localPet, petCount;
+  int numOwnedNodes, numOwnedNodes2;
+  int numOwnedElems, numOwnedElems2;
+
+  ESMC_VM vm;
+
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  // Get parallel information
+  vm=ESMC_VMGetGlobal(&rc);
+  if (rc != ESMF_SUCCESS) return 0;
+
+  rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL, (int *)NULL, (int *)NULL);
+  if (rc != ESMF_SUCCESS) return 0;
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
@@ -120,6 +133,14 @@ int main(void){
     elemConn[i] = elemConn[i]+1;
   }
 
+  // Calculate the number of owned nodes 
+  numOwnedNodes=0;
+  for (int i = 0; i < num_node; i++){
+    if (nodeOwner[i]==localPet) numOwnedNodes++;
+  }
+  // Number of owned elements is the same as the number of local elements
+  numOwnedElems=num_elem;
+
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
@@ -155,9 +176,9 @@ int main(void){
 
   correct=true;
   if (num_node_out != num_node) {
-    correct = false;
-	printf("OUTPUT - num_node_out = %d, and num_node = %d\n", 
-	       num_node_out, num_node);
+   correct = false;
+   printf("%d OUTPUT - num_node_out = %d, and num_node = %d\n", 
+	       localPet, num_node_out, num_node);
   }
 
   ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
@@ -201,6 +222,48 @@ int main(void){
     correct = false;
 	printf("OUTPUT - num_elem_out = %d, and num_elem = %d\n", 
 	       num_elem_out, num_elem);
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetOwnedElementCount");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
+  // Get the number of local elements
+  rc = ESMC_MeshGetOwnedElementCount(mesh, &numOwnedElems2);
+
+  correct=true;
+  if (numOwnedElems2 != numOwnedElems) {
+    correct = false;
+	printf("OUTPUT - num owned elems = %d, and actual num owned elems = %d\n", 
+	       numOwnedElems2, numOwnedElems);
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+            name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest_Multi_Proc_Only
+  strcpy(name, "MeshGetOwnedNodeCount");
+  strcpy(failMsg, "Incorrect result");
+  rc = ESMF_SUCCESS;
+
+  // Get the number of local elements
+  rc = ESMC_MeshGetOwnedNodeCount(mesh, &numOwnedNodes2);
+
+  correct=true;
+  if (numOwnedNodes2 != numOwnedNodes) {
+    correct = false;
+	printf("%d OUTPUT - num owned nodes = %d, and actual num owned nodes = %d\n", 
+	       localPet, numOwnedNodes2, numOwnedNodes);
   }
 
   ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 

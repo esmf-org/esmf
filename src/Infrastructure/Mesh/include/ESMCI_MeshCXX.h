@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.h,v 1.15 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_MeshCXX.h,v 1.16 2012/01/25 22:59:24 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,8 +35,6 @@ namespace ESMCI {
     int meshWrite(const char*);
     int destroy();
     int freeMemory();
-    int numNodes();
-    int numElements();
 
     friend int MeshVTKHeader(const char*, int*, int*, int*);
     friend int MeshVTKBody(const char*, int*, double*, int*, int*, int*, int*);
@@ -53,6 +51,8 @@ namespace ESMCI {
     int* elementDistGrid;
     int numLNodes;
     int numLElements;
+    int numOwnedNodes;
+    int numOwnedElements;
     int meshFreed;
     MeshCXXLevel level;
 
@@ -60,6 +60,10 @@ namespace ESMCI {
     int isNodesAdded() {return (level>=MeshCXXLevel_NodesAdded);}
     int isElemsAdded() {return (level>=MeshCXXLevel_Finished);}
     int isMeshFinished() {return (level>=MeshCXXLevel_Finished);}
+    int getNumLocalNodes() {return numLNodes;}
+    int getNumLocalElements() {return numLElements;}
+    int getNumOwnedNodes() {return numOwnedNodes;}
+    int getNumOwnedElements() {return numOwnedElements;}
   };
 
 } // namespace 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.38 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMC_Mesh.h,v 1.39 2012/01/25 22:59:24 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -313,7 +313,7 @@ int ESMC_MeshFreeMemory(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetLocalElementCount - Get the number of elements in a Mesh owned by the current PET
+// !IROUTINE: ESMC_MeshGetLocalElementCount - Get the number of elements in a Mesh on the current PET
 //
 // !INTERFACE:
 int ESMC_MeshGetLocalElementCount(
@@ -326,7 +326,7 @@ int ESMC_MeshGetLocalElementCount(
 //
 //
 // !DESCRIPTION:
-// Query the number of elements in a mesh owned by the local PET.
+// Query the number of elements in a mesh on the local PET.
 // The arguments are:
 // \begin{description}
 // \item[mesh]
@@ -340,7 +340,7 @@ int ESMC_MeshGetLocalElementCount(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_MeshGetLocalNodeCount - Get the number of nodes in a Mesh owned by the current PET
+// !IROUTINE: ESMC_MeshGetLocalNodeCount - Get the number of nodes in a Mesh on the current PET
 //
 // !INTERFACE:
 int ESMC_MeshGetLocalNodeCount(
@@ -353,7 +353,7 @@ int ESMC_MeshGetLocalNodeCount(
 //
 //
 // !DESCRIPTION:
-// Query the number of nodes in a mesh owned by the local PET.
+// Query the number of nodes in a mesh on the local PET.
 // The arguments are:
 // \begin{description}
 // \item[mesh]
@@ -364,6 +364,64 @@ int ESMC_MeshGetLocalNodeCount(
 //
 //EOP
 //------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetOwnedElementCount - Get the number of elements in a Mesh owned by the current PET
+//
+// !INTERFACE:
+int ESMC_MeshGetOwnedElementCount(
+  ESMC_Mesh mesh,           // in
+  int *elementCount         // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+//
+// !DESCRIPTION:
+// Query the number of elements in a mesh owned by the local PET. This number will be equal or less than the
+// local element count. 
+// The arguments are:
+// \begin{description}
+// \item[mesh]
+//     The mesh
+// \item[elementCount]
+//     The number of elements owned by this PET. 
+// \end{description}
+//
+//EOP
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetOwnedNodeCount - Get the number of nodes in a Mesh owned by the current PET
+//
+// !INTERFACE:
+int ESMC_MeshGetOwnedNodeCount(
+  ESMC_Mesh mesh,          // in
+  int *nodeCount           // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+//
+// !DESCRIPTION:
+// Query the number of nodes in a mesh owned by the local PET.  This number will be equal or less than the
+// local node count. 
+// The arguments are:
+// \begin{description}
+// \item[mesh]
+//     The mesh
+// \item[nodeCount]
+//     The number of nodes owned by this PET. 
+// \end{description}
+//
+//EOP
+//------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 //BOPI
