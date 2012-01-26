@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.6 2012/01/26 16:25:24 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.7 2012/01/26 17:54:23 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.6 2012/01/26 16:25:24 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.7 2012/01/26 17:54:23 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -105,210 +105,6 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   // Set some parameters for seach, eventually move these to .h or get rid of
   // const double normexp = 0.15;
   const double search_tol = 1e-20;
-
-  if(true){
-#if 0
-    // 2d weiler unit tests
-    double p[8]={2.,0.,2.,2.,1.,2.,1.,0.};
-    double q[6]={3.,1.,2.,2.5,0.,0.};
-    double *tmp=new double[20];
-    double *out=new double[20];
-    int num_out;
-    intersect_convex_poly2D(4, p, 3, q, tmp, &num_out, out);
-    { // test 1aa single diff polygon, disjoint, single point connection
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {1.4,0., 1.4,0.5, 1.,0.25};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-    { // test 1ab single diff polygon, disjoint, 0 point connection
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {1.4,0., 1.4,0.5, 1.1,0.25};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-    { // test 1b single diff polygon, p contains q, 2 point connection
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {0.4,0., 1.,0.25, 0.4,0.5};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff); // {1,c,b,C,D,A}, {3,a,B}
-    }
-    { // test 1c single diff polygon, p contains q, 1 point connection
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {0.4,0., 0.99,0.25, 0.4,0.5};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-    { // test 1d single diff polygon, p contains q, 0 point connection
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {0.4,0.01, 0.99,0.25, 0.4,0.5};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-    { // test 1e single diff polygon, q contains p, no connection
-      double p1[6] = {0.4,0.01, 0.99,0.25, 0.4,0.5};
-      double q1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      intersect_convex_poly2D(3, p1, 4, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim3, p1, 4, q1, diff);
-    }
-
-    { // test 1 single diff polygon, intersect
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {0.75,0.75,  1.5,0.5,  1.,1.5};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-
-    { // test 2 2 diff polygons
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {0.26,0.65,  1.53,0.4,  0.24,1.35};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-
-    { // test 3 2 diff polygons
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[6] = {1.24,0.45, 0.46,1.2,  -0.33, 0.19};
-      intersect_convex_poly2D(4, p1, 3, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 3, q1, diff);
-    }
-    { // test 4 quad + quard 8 intersection points
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.};
-      double q1[8] = {-0.2,0.6,  0.49,-0.16,  1.2,0.6,  0.48,1.24};
-      intersect_convex_poly2D(4, p1, 4, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 4, q1, diff);
-
-      int num_p; int *ti, *tri_ind; double *pts, *td;
-      std::vector<polygon>::iterator diff_it = diff.begin(), diff_ie = diff.end();
-      for(;diff_it != diff_ie; ++ diff_it){
-        // for each polygon in diff, use van leer's algorithm to triangulate it
-        num_p = diff_it->points.size();
-        pts = new double [2*diff_it->points.size()];
-        polygon_to_coords(*diff_it, 2, pts);
-        polygon test;
-        coords_to_polygon(num_p, pts, 2, test);
-        td = new double[num_p*2];
-        ti = new int[num_p];
-        tri_ind = new int[3*(num_p-2)];
-        triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
-        //construct_poly_list(num_p, p, tri_ind); 
-        for(int nt = 0; nt < num_p-2; nt ++)
-          printf("%d %d %d\n", tri_ind[nt], tri_ind[nt+1], tri_ind[nt+2]);
-        delete[] pts, td, ti, tri_ind;
-      }
-    }
-
-    { // test 5 quad + quard 8 intersection points
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.}; //<-- subject, low prio, ABCD
-      double q1[8] = {1.88,0.36,1.16,1.,0.48,0.36,1.17,-0.39}; //<-- clip, high prio,abcd
-      intersect_convex_poly2D(4, p1, 4, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 4, q1, diff);
-      // 1,c,2,C,D,A
-
-      int num_p; int *ti, *tri_ind; double *pts, *td;
-      std::vector<polygon>::iterator diff_it = diff.begin(), diff_ie = diff.end();
-      for(;diff_it != diff_ie; ++ diff_it){
-        // for each polygon in diff, use van leer's algorithm to triangulate it
-        num_p = diff_it->points.size();
-        pts = new double [2*diff_it->points.size()];
-        polygon_to_coords(*diff_it, 2, pts);
-        polygon test;
-        coords_to_polygon(num_p, pts, 2, test);
-        td = new double[num_p*2];
-        ti = new int[num_p];
-        tri_ind = new int[3*(num_p-2)];
-        triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
-        //construct_poly_list(num_p, p, tri_ind); 
-        for(int nt = 0; nt < num_p-2; nt ++)
-          printf("%d %d %d\n", tri_ind[nt*3], tri_ind[nt*3+1], tri_ind[nt*3+2]);
-        delete[] pts, td, ti, tri_ind;
-      }
-    }
-
-    { // test 6 quad + quard 8 intersection points
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.}; //<-- subject, low prio
-      double q1[8] = {-0.31,0.4, 0.16,-0.57, 1.34,0.12, 0.52,1.2}; //<-- clip, high prio
-      intersect_convex_poly2D(4, p1, 4, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 4, q1, diff);
-      // {4,3,D}, {2,1,C}
-
-      int num_p; int *ti, *tri_ind; double *pts, *td;
-      std::vector<polygon>::iterator diff_it = diff.begin(), diff_ie = diff.end();
-      for(;diff_it != diff_ie; ++ diff_it){
-        // for each polygon in diff, use van leer's algorithm to triangulate it
-        num_p = diff_it->points.size();
-        pts = new double [2*diff_it->points.size()];
-        polygon_to_coords(*diff_it, 2, pts);
-        polygon test;
-        coords_to_polygon(num_p, pts, 2, test);
-        td = new double[num_p*2];
-        ti = new int[num_p];
-        tri_ind = new int[3*(num_p-2)];
-        triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
-        //construct_poly_list(num_p, p, tri_ind); 
-        for(int nt = 0; nt < num_p-2; nt ++)
-          printf("%d %d %d\n", tri_ind[nt*3], tri_ind[nt*3+1], tri_ind[nt*3+2]);
-        delete[] pts, td, ti, tri_ind;
-      }
-    }
-
-    { // test 7 quad + quard 8 intersection points
-      double p1[8] = {0.,0., 1.,0., 1.,1.,  0.,1.}; //<-- subject, low prio
-      double q1[8] = {-0.1,0.45,0.08,0.,0.91,0.45,0.23,1.17}; //<-- clip, high prio
-      intersect_convex_poly2D(4, p1, 4, q1, tmp, &num_out, out);
-
-      std::vector<polygon> diff;
-      weiler_clip_difference(pdim,sdim4, p1, 4, q1, diff);
-      // {6,4,D}, {1,5,A}, {3,c,b,B,C}
-
-      int num_p; int *ti, *tri_ind; double *pts, *td;
-      std::vector<polygon>::iterator diff_it = diff.begin(), diff_ie = diff.end();
-      for(;diff_it != diff_ie; ++ diff_it){
-        // for each polygon in diff, use van leer's algorithm to triangulate it
-        num_p = diff_it->points.size();
-        pts = new double [2*diff_it->points.size()];
-        polygon_to_coords(*diff_it, 2, pts);
-        polygon test;
-        coords_to_polygon(num_p, pts, 2, test);
-        td = new double[num_p*2];
-        ti = new int[num_p];
-        tri_ind = new int[3*(num_p-2)];
-        triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
-        //construct_poly_list(num_p, p, tri_ind); 
-        for(int nt = 0; nt < num_p-2; nt ++)
-          printf("%d %d %d\n", tri_ind[nt*3], tri_ind[nt*3+1], tri_ind[nt*3+2]);
-        delete[] pts, td, ti, tri_ind;
-      }
-    }
-
-    delete[] tmp;
-    delete[] out;
-#endif
-  }
 
   // Some error checking
   if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
@@ -410,7 +206,7 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   }
 
   // Delete search result list
-  if(zz) Zoltan_Destroy(&zz);
+  // if(zz) Zoltan_Destroy(&zz);
   if(interp) delete interp;
 
 }
