@@ -1,4 +1,4 @@
-// $Id: ESMC_DCatEx.C,v 1.16 2012/01/06 20:17:45 svasquez Exp $
+// $Id: ESMC_DCatEx.C,v 1.17 2012/01/26 16:25:20 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,6 +84,7 @@ int main(int argc, char *argv[]) {
       std::stringstream os;
       os << fname << "." << npart << "." << std::setw(vwidth) << std::setfill('0') << i;
       std::string src_name = os.str();
+      std::cout << "Reading file: " << src_name << '\n';
       Mesh *mesh = new Mesh();
       ReadMesh(*mesh, src_name, false, ESMC_FILE_VTK);
       mesh->Commit();

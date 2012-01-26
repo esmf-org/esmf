@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.31 2012/01/06 20:18:38 svasquez Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.32 2012/01/26 16:24:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -60,11 +60,20 @@
  
     !------------------------------------------------------------------------
     !NEX_UTest
-    ! Create an XGrid from 2 adjacent Grids
+    ! Create an XGrid in 2D
     print *, 'Starting test4'
     call test4(rc)
     write(failMsg, *) ""
     write(name, *) "Creating an XGrid from 2 adjacent Grids"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 3D
+    print *, 'Starting test5'
+    call test5(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 3D"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_Finalize(rc=rc)
@@ -391,7 +400,7 @@ contains
 !------------------------------------------------------------------------
   subroutine test4(rc)
     integer, intent(out)                :: rc
-    integer                             :: localrc, i
+    integer                             :: localrc, i, npet
     type(ESMF_XGrid)                    :: xgrid
     type(ESMF_Grid)                     :: sideA(2), sideB(1)
 
@@ -407,6 +416,11 @@ contains
     localrc = ESMF_SUCCESS
 
     call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, petcount=npet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -451,15 +465,129 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if(npet == 1) then
     ! partially overlap
-    !xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,3.5,3.5,localrc)/), &
-    !  (/make_grid(8,8,1.,1.,0.,0.,localrc)/), &
-    !  rc=localrc)
-    !if (ESMF_LogFoundError(localrc, &
-    !  ESMF_ERR_PASSTHRU, &
-    !  ESMF_CONTEXT, rcToReturn=rc)) return
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,3.5,3.5,localrc)/), &
+      (/make_grid(8,8,1.,1.,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,3.3,3.4,localrc)/), &
+      (/make_grid(8,8,1.,1.,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,3.3,2.4,localrc)/), &
+      (/make_grid(30,30,0.3,0.3,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap subject smaller cell
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,localrc), make_grid(4,4,0.5,1.,2.8,1.4,localrc)/), &
+      (/make_grid(30,30,0.3,0.3,0.,0.,localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap subject bigger cell
+    xgrid = ESMF_XGridCreate((/ &
+        make_grid(4,4,0.5,1.,2.8,1.4,localrc), &
+        make_grid(4,4,1.,1.,0.,0.,localrc) &
+      /), &
+      (/ &
+        make_grid(30,30,0.3,0.3,0.,0.,localrc) &
+      /), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
   end subroutine test4
+
+  subroutine test5(rc)
+    integer, intent(out)                :: rc
+    integer                             :: localrc, i, npet
+    type(ESMF_XGrid)                    :: xgrid
+    type(ESMF_Grid)                     :: sideA(2), sideB(1)
+
+    type(ESMF_VM)                       :: vm
+    real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
+    type(ESMF_RouteHandle)              :: rh_src2xgrid(2), rh_xgrid2dst(1)
+
+    type(ESMF_Mesh)                     :: mesh
+    type(ESMF_Field)                    :: field1, field2
+    type(ESMF_RouteHandle)              :: rh
+
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, petcount=npet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Sew mesh
+    ! right, left
+    xgrid = ESMF_XGridCreate((/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,4.,0.,rc=localrc)/), &
+      (/make_grid_sph(8,8,0.7,0.7,0.,0.,rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! up, down
+    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,0.5,1.,0.,0.,rc=localrc), make_grid_sph(4,4,1.,1.,0.,-4.,rc=localrc)/), &
+      (/make_grid_sph(8,8,1.,1.,0.,-4.,rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(npet == 1) then
+    ! partially overlap
+    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.5,1.,3.5,3.5,rc=localrc)/), &
+      (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
+      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
+      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap subject bigger cell
+    xgrid = ESMF_XGridCreate((/ &
+        make_grid_sph(4,4,0.5,1.,2.8,1.4,rc=localrc), &
+        make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc) &
+      /), &
+      (/make_grid_sph(30,30,0.3,0.3,0.,0.,rc=localrc)/), &
+      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
+      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+  end subroutine test5
+
+  !------------------------------------------------------------------------
+  ! Utility methods
+  !------------------------------------------------------------------------
 
   function make_grid(atm_nx, atm_ny, atm_dx, atm_dy, atm_sx, atm_sy, rc)
 
@@ -545,5 +673,102 @@ contains
     if(present(rc)) rc = ESMF_SUCCESS
 
   end function make_grid
+
+  function make_grid_sph(atm_nx, atm_ny, atm_dx, atm_dy, atm_sx, atm_sy, tag, scheme, rc)
+
+    ! return value
+    type(ESMF_Grid)                           :: make_grid_sph
+    ! arguments
+    integer, intent(in)                       :: atm_nx, atm_ny
+    real(ESMF_KIND_R4), intent(in)            :: atm_dx, atm_dy
+    real(ESMF_KIND_R4), intent(in)            :: atm_sx, atm_sy
+    character(len=*), intent(in), optional    :: tag
+    integer, intent(in) , optional            :: scheme
+    integer, intent(out), optional            :: rc
+
+    ! local variables
+    integer                                   :: localrc, i, j
+    real(ESMF_KIND_R8), pointer               :: coordX(:,:), coordY(:,:)
+    real(ESMF_KIND_R8)                        :: startx, starty
+    integer                                   :: l_scheme
+
+    l_scheme = ESMF_REGRID_SCHEME_REGION3D
+    if(present(scheme)) l_scheme = scheme
+
+    if(l_scheme == ESMF_REGRID_SCHEME_FULL3D) then
+      make_grid_sph = ESMF_GridCreate1PeriDim(maxIndex=(/atm_nx, atm_ny/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,1/), &
+        !regDecomp=(/npet, 1/), &
+        rc=localrc)
+    else
+      make_grid_sph = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
+        indexflag=ESMF_INDEX_GLOBAL, &
+        gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/1,1/), &
+        !regDecomp=(/npet, 1/), &
+        rc=localrc)
+    endif 
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridAddCoord(make_grid_sph, staggerloc=ESMF_STAGGERLOC_CENTER, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_GridAddCoord(make_grid_sph, staggerloc=ESMF_STAGGERLOC_CORNER, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! global indexing
+    ! atm grid is not decomposed in the y direction
+    !startx = lpet*atm_nx/npet*atm_dx
+    startx = atm_sx
+    starty = atm_sy
+    ! compute coord
+    ! X center
+    call ESMF_GridGetCoord(make_grid_sph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=1, farrayPtr=coordX, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Y center
+    call ESMF_GridGetCoord(make_grid_sph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+        coordDim=2, farrayPtr=coordY, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = lbound(coordX,1), ubound(coordX,1)
+      do j = lbound(coordX, 2), ubound(coordX, 2)
+        coordX(i,j) = startx + atm_dx/2. + (i-1)*atm_dx
+        coordY(i,j) = starty + atm_dy/2. + (j-1)*atm_dy
+      enddo
+    enddo
+    print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
+    ! X corner
+    call ESMF_GridGetCoord(make_grid_sph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+        coordDim=1, farrayPtr=coordX, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Y corner
+    call ESMF_GridGetCoord(make_grid_sph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
+        coordDim=2, farrayPtr=coordY, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = lbound(coordX,1), ubound(coordX,1)
+      do j = lbound(coordX, 2), ubound(coordX, 2)
+        coordX(i,j) = startx + (i-1)*atm_dx
+        coordY(i,j) = starty + (j-1)*atm_dy
+      enddo
+    enddo
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end function make_grid_sph
 
 end program ESMF_XGridUTest

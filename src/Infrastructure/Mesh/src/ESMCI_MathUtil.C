@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.13 2012/01/25 22:59:27 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.14 2012/01/26 16:25:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.13 2012/01/25 22:59:27 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.14 2012/01/26 16:25:24 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -288,7 +288,7 @@ double great_circle_area(int n, double *pnts) {
 
 
 
-  double tri_area(double *u, double *v, double *w) {
+  double tri_area(const double * const u, const double * const v, const double * const w) {
 #define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
 #define NORM(a) sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 

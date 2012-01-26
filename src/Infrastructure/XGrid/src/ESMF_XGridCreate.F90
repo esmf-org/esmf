@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.44 2012/01/06 20:18:37 svasquez Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.45 2012/01/26 16:24:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.44 2012/01/06 20:18:37 svasquez Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.45 2012/01/26 16:24:37 feiliu Exp $'
 
 !==============================================================================
 !
@@ -418,6 +418,7 @@ integer, intent(out), optional              :: rc
     integer                       :: l_XGridToSideAScheme, l_XGridToSideBScheme
     integer                       :: l_SideAToSideBScheme
     integer                       :: compute_midmesh
+    real(ESMF_KIND_R8)            :: fraction = 1.0
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -560,12 +561,20 @@ integer, intent(out), optional              :: rc
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_esmc_meshsetfraction(meshAt(1), fraction, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     meshA = meshAt(1)
 
     do i = 2, ngrid_a
       meshAt(i) = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
         ESMF_STAGGERLOC_CORNER, AisSphere, AisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_esmc_meshsetfraction(meshAt(i), fraction, localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -591,12 +600,20 @@ integer, intent(out), optional              :: rc
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    call c_esmc_meshsetfraction(meshBt(1), fraction, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     meshB = meshBt(1)
 
     do i = 2, ngrid_b
       meshBt(i) = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
         ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_esmc_meshsetfraction(meshBt(i), fraction, localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

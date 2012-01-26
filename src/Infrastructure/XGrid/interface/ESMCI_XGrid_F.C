@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.11 2012/01/06 20:18:35 svasquez Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.12 2012/01/26 16:24:36 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.11 2012/01/06 20:18:35 svasquez Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.12 2012/01/26 16:24:36 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -310,6 +310,43 @@ void FTN_X(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
  
   try {
     MeshMerge(srcmesh, dstmesh, meshpp);
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+// mesh set fraction
+void FTN_X(c_esmc_meshsetfraction)(Mesh **meshpp, double * fraction, 
+                   int*rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetfraction()" 
+  Trace __trace(" FTN(meshsetfraction) ");
+
+  Mesh &mesh = **meshpp;
+ 
+  try {
+    MeshSetFraction(mesh, *fraction);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 

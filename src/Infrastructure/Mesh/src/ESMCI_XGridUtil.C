@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.7 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.8 2012/01/26 16:25:24 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -33,58 +33,598 @@
 
 namespace ESMCI{
 
+//
+// Most of the algorithm comes from: http://paulbourke.net/geometry/
+// except the Weiler algorithm motivated by the intersection version.
+// These algorithms are slightly treaked for XGrid implementation.
+//
+
+double dot(const xvector & v1, const xvector & v2){
+  return v1.c[0]*v2.c[0]+v1.c[1]*v2.c[1]+v1.c[2]*v2.c[2];
+}
+xvector cross(const xvector & v1, const xvector & v2){
+  // cross(i) = epsilon(i,j,k)*v1,j*v2,k     i,j,k=1..3
+  return xvector(v1.c[1]*v2.c[2]-v1.c[2]*v2.c[1], 
+                 v1.c[2]*v2.c[0]-v1.c[0]*v2.c[2],
+                 v1.c[0]*v2.c[1]-v1.c[1]*v2.c[0]);
+}
+
+double metric(const xvector & v){
+  return v.metric();
+}
+
+xvector operator -(const xvector & v1, const xvector & v2){
+  return xvector(v1.c[0]-v2.c[0], v1.c[1]-v2.c[1], v1.c[2]-v2.c[2]);
+}
+xvector operator +(const xvector & v1, const xvector & v2){
+  return xvector(v1.c[0]+v2.c[0], v1.c[1]+v2.c[1], v1.c[2]+v2.c[2]);
+}
+xvector operator *(const double ratio, const xvector & v){
+  return xvector(v.c[0]*ratio, v.c[1]*ratio, v.c[2]*ratio);
+}
+
+/**
+ *\brief check if two line segments intersect
+ * @param[in] p1            start point of first line segment
+ * @param[in] p2            end   point of first line segment
+ * @param[in] q1            start point of first line segment
+ * @param[in] q2            end   point of first line segment
+ * @param[out] intersect    intersection coord
+ * @param[out] inbound      whether the intersection is outbound or inbound
+ * @param[out] on_p_seg     whether the intersection is on p line segment
+ * @param[out] on_q_seg     whether the intersection is on q line segment
+ * @return                  if the p and q intersects
+ */
+bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double *intersect, 
+  int & inbound, bool & on_p_seg, bool & on_q_seg){
+
+  double mua,mub;
+  double denom,numera,numerb;
+  double epsilon = 1.e-20;
+  inbound = -1;
+  on_p_seg = true;
+  on_q_seg = true;
+
+  denom  = (q2[1]-q1[1]) * (p2[0]-p1[0]) - (q2[0]-q1[0]) * (p2[1]-p1[1]);
+  numera = (q2[0]-q1[0]) * (p1[1] - q1[1]) - (q2[1]-q1[1]) * (p1[0]-q1[0]);
+  numerb = (p2[0]-p1[0]) * (p1[1]-q1[1]) - (p2[1]-p1[1]) * (p1[0]-q1[0]);
+
+  /* Are the line coincident? Do not consider the lines intersecting in this case. */
+  if (std::fabs(numera) < epsilon && std::fabs(numerb) < epsilon && std::fabs(denom) < epsilon) {
+    //intersect[0] = (p1[0] + p2[0]) / 2;
+    //intersect[1] = (p1[1] + p2[1]) / 2;
+    return false;
+  }
+
+  /* Are the line parallel */
+  if (std::fabs(denom) < epsilon) {
+    intersect[0] = 0.;
+    intersect[1] = 0.;
+    return false;
+  }
+
+  /* Is the intersection outside of the the segments */
+  mua = numera / denom;
+  mub = numerb / denom;
+  if (mua < 0 || mua > 1 || mub < 0 || mub > 1) {
+    intersect[0] = 0.;
+    intersect[1] = 0.;
+    return false;
+  }
+
+  // if intersection is one of the end points
+  if(std::fabs(mua) < epsilon || std::fabs(mua-1.) < epsilon)
+    on_p_seg = false; 
+
+  if(std::fabs(mub) < epsilon || std::fabs(mub-1.) < epsilon) 
+    on_q_seg = false; 
+
+  intersect[0] = p1[0] + mua * (p2[0] - p1[0]);
+  intersect[1] = p1[1] + mua * (p2[1] - p1[1]);
+
+  xvector v1 = xvector(p2[0]-p1[0], p2[1]-p1[1], 0.);
+  xvector v2 = xvector(q2[0]-q1[0], q2[1]-q1[1], 0.);
+
+  inbound = 1;
+  if(dot(v1, v2.normal2D()) < 0.) inbound = 2; // v1 going into v2 in CCW sense
+
+  return true;
+}
+
+/**
+ *\brief check if two line segments intersect
+ * @param[in] p1            start point of first line segment
+ * @param[in] p2            end   point of first line segment
+ * @param[in] q1            start point of first line segment
+ * @param[in] q2            end   point of first line segment
+ * @param[out] intersect    intersection coord
+ * @param[out] inbound      whether the intersection is outbound or inbound
+ * @param[out] on_p_seg     whether the intersection is on p line segment
+ * @param[out] on_q_seg     whether the intersection is on q line segment
+ * @return                  if the p and q intersects
+ */
+bool line_intersect_2D_3D(double *p1, double *p2, double *q1, double *q2, double *intersect, 
+  int & inbound, bool & on_p_seg, bool & on_q_seg){
+
+  double mua,mub;
+  double denom,numera,numerb;
+  double epsilon = 1.e-20;
+  inbound = -1;
+  on_p_seg = true;
+  on_q_seg = true;
+
+  xvector a1 = xvector(xpoint(p1[0],p1[1],p1[2]));
+  xvector a2 = xvector(xpoint(p2[0],p2[1],p2[2]));
+  xvector b1 = xvector(xpoint(q1[0],q1[1],q1[2]));
+  xvector b2 = xvector(xpoint(q2[0],q2[1],q2[2]));
+  xvector v1 = xvector(p2[0]-p1[0], p2[1]-p1[1], p2[2]-p1[2]);
+  xvector v2 = xvector(q2[0]-q1[0], q2[1]-q1[1], q2[2]-q1[2]);
+
+  /*
+   nA = dot(cross(B2-B1,A1-B1),cross(A2-A1,B2-B1));
+   nB = dot(cross(A2-A1,A1-B1),cross(A2-A1,B2-B1));
+   d = dot(cross(A2-A1,B2-B1),cross(A2-A1,B2-B1));
+   A0 = A1 + (nA/d)*(A2-A1);
+   B0 = B1 + (nB/d)*(B2-B1);
+  */
+  denom  = dot(cross(a2-a1,b2-b1), cross(a2-a1,b2-b1));
+  numera = dot(cross(b2-b1,a1-b1), cross(a2-a1,b2-b1));
+  numerb = dot(cross(a2-a1,a1-b1), cross(a2-a1,b2-b1));
+
+  /* Are the lines coincident? Do not consider the lines intersecting in this case. */
+  if (std::fabs(numera) < epsilon && std::fabs(numerb) < epsilon && std::fabs(denom) < epsilon) {
+    return false;
+  }
+
+  /* Are the line parallel */
+  if (std::fabs(denom) < epsilon) {
+    return false;
+  }
+
+  /* Is the intersection outside of the the segments */
+  mua = numera / denom;
+  mub = numerb / denom;
+  if (mua < 0 || mua > 1 || mub < 0 || mub > 1) {
+    return false;
+  }
+
+  // if intersection is one of the end points
+  if(std::fabs(mua) < epsilon || std::fabs(mua-1.) < epsilon)
+    on_p_seg = false; 
+
+  if(std::fabs(mub) < epsilon || std::fabs(mub-1.) < epsilon) 
+    on_q_seg = false; 
+
+  xvector a0 = a1 + mua*(a2-a1);
+  xvector b0 = b1 + mub*(b2-b1);
+
+  // if a0 and b0 does not coincide, then a and b does not intersect.
+  if(std::fabs(metric(b0-a0)) > epsilon) return false;
+
+  inbound = 1;
+  if(dot(v1, v2.normal2D()) < 0.) inbound = 2; // v1 going into v2 in CCW sense
+
+  return true;
+}
+
+/**
+ *\brief                    insert intersection point to a self-closed polgon point list
+ * @param[in,out] final_nodes self-closed polygon
+ * @param[in] nodes         original polygon
+ * @param[in] i             index of starting point of the line segment in original polygon
+ * @param[in] intersect     intersection coord
+ * @param[in] n_inter       rough estimate of number of intersection point for labeling
+ * @param[in] inbound       the intersection point is outbound or inbound
+ * @return                  success or failure
+ */
+int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const std::vector<xpoint> & nodes, int i, 
+  double * intersect, int n_inter, int inbound){
+
+  double epsilon = 1.e-10;
+  xpoint xp;
+  if(sdim == 2)
+    xp = xpoint(intersect[0], intersect[1], '1'+n_inter, true, inbound);
+  else
+    xp = xpoint(intersect[0], intersect[1], intersect[2], '1'+n_inter, true, inbound);
+
+  // shortcut to see if intersect is already in final_nodes list
+  std::list<xpoint>::iterator sit = std::find(final_nodes.begin(), final_nodes.end(), xp);
+  if(sit != final_nodes.end()){
+    if(inbound > sit->inbound) sit->inbound = inbound;
+    sit->intersection = true;
+    return 0;
+  }
+
+  // locate the begining and ending point in final node list that are also in original polygonal list
+  // Since the final node list are updated with intersection points, it will have more segments.
+  // Our job is to find the segment that contains the intersection point and insert it if necessary.
+  std::list<xpoint>::iterator it = std::find(final_nodes.begin(), final_nodes.end(), nodes[i]);
+  if(it == final_nodes.end()) Throw() << "Failed to locate p(subject) vertex.\n";
+
+  xpoint end_point;
+  if((i+1) == nodes.size()) end_point = nodes[0];
+  else end_point = nodes[i+1];
+
+  std::list<xpoint>::iterator it_end = std::find(final_nodes.begin(), final_nodes.end(), end_point);
+
+  // vector of intersection point, find the begin node and end node that holds it.
+  xvector vp = xvector(xp);
+  int success = -1;
+  for(; it != it_end;){
+    std::list<xpoint>::iterator start_point = it;
+    std::list<xpoint>::iterator end_point = ++it;
+    if(end_point == final_nodes.end()) end_point = final_nodes.begin(); // circular
+    xvector v1=xvector(*start_point);
+    xvector v2=xvector(*end_point);
+    double d1 = metric(vp-v1);
+    double d2 = metric(v2-v1);
+    if(d2 == 0.) Throw() << "Cannot have degenerate polygon (2+ nodes have identical coords)\n";
+    double ratio = d1/d2;
+    if((ratio > epsilon) && (ratio < (1-epsilon)) ){
+      final_nodes.insert(end_point, xp);
+      success = 0;
+      break;
+    }else if(std::fabs(ratio) < epsilon || std::fabs(d1-d2) < epsilon){
+      // Don't insert a new point, simply mark start_point as an intersection point and compute new inbound value
+      //final_nodes.insert(start_point, xpoint(intersect[0], intersect[1], '1'+n_inter, true, inbound));
+      if(inbound > start_point->inbound) start_point->inbound=inbound;
+      start_point->intersection=true;
+      success = 0;
+      break;
+    }else if( std::fabs(ratio-1.) < epsilon ) {
+      if(inbound > end_point->inbound) end_point->inbound=inbound;
+      end_point->intersection=true;
+      success = 0;
+      break;
+    }
+    it = end_point;
+  }
+
+  return success;
+}
+
+/**
+ *\brief                    test if a point is inside of a polygon, *on edge point* is considered not inside.
+ * @param[in] nvert         number of vertices of polygon
+ * @param[in] p             polygon coordinates
+ * @param[in] point         point coordinate
+ * @return                  point inside or outside of polygon
+ */
+bool check_angle_sum(int sdim, int n, const double * const p, const double * const point)
+{
+  int i;
+  double m1,m2;
+  double anglesum=0,costheta;
+  double epsilon = 1.e-10;
+  double twopi = 4*std::asin(1.);
+  xpoint p1,p2;
+
+  for (i=0;i<n;i++) {
+
+    for(int j = 0; j < sdim; j ++){
+      p1.c[j] = p[sdim*i+j] - point[j];
+      p2.c[j] = p[sdim*((i+1)%n)+j] - point[j];
+    }
+
+    m1 = metric(p1);
+    m2 = metric(p2);
+    if (m1*m2 <= epsilon)
+      return false;   /* We are on a node, consider this outside: 0 instead of 2pi */
+    else
+      costheta = dot(p1,p2) / (m1*m2);
+
+    anglesum += acos(costheta);
+  }
+  if( std::fabs(anglesum - twopi) < epsilon ) return true;
+  else return false;
+}
+
+/**
+ *\brief                    test if a point is inside of a polygon, *on edge point* is considered not inside.
+ * @param[in] nvert         number of vertices of polygon
+ * @param[in] poly_cd       polygon coordinates
+ * @param[in] point         point coordinate
+ * @return                  point inside or outside of polygon
+ */
+bool point_in_poly(int pdim, int sdim, int nvert, const double * const poly_cd, const double * const point){
+  if(sdim == 2){
+    int i, j; bool c = false; 
+    double testx = point[0], testy = point[1];
+    xpoint xp(point[0], point[1], 'p');
+    for (i = 0, j = nvert-1; i < nvert; j = i++) {
+
+      // Pathological case: treat a point lying on a vertex as outside
+      if(xp == xpoint(poly_cd+i*sdim,2) ||
+         xp == xpoint(poly_cd+j*sdim,2) ) return 0;
+
+      if ( ((poly_cd[i*sdim+1] > testy) != (poly_cd[j*sdim+1]>testy)) &&
+     (testx < (poly_cd[j*sdim]-poly_cd[i*sdim]) * (testy - poly_cd[i*sdim+1]) / 
+       (poly_cd[j*sdim+1] - poly_cd[i*sdim+1]) + poly_cd[i*sdim]) )
+     // if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+     //(testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+         c = !c;
+    }
+    return c;
+  }else if(sdim == 3){
+    return check_angle_sum(sdim, nvert, poly_cd, point);
+  }else
+    Throw() << "cannot handle spatial dimension over 3\n";
+}
+
+/**
+ *\brief                    test if a point is inside of a polygon, *on edge point* is considered not inside.
+ * @param[in] sdim          number of spatial    dimension
+ * @param[in] poly          polygon
+ * @param[in] xpoint        point
+ * @return                  point inside or outside of polygon
+ */
+bool point_in_poly(int pdim, int sdim, const polygon & poly, const xpoint & point){
+  double * coords = new double[sdim*poly.size()];
+  polygon_to_coords(poly, sdim, coords);
+  bool res = point_in_poly(pdim, sdim, poly.size(), coords, point.c);
+  delete [] coords;
+  return res;
+}
+
+/**
+ *\brief                    construct a concave polygon from an enclosing polygon and internal polygon
+ * @param[in] subject       enclosing polygon
+ * @param[in] clip          internal polygon
+ * @return                  a concave polygon with a hold inside defined by the clip polygon
+ */
+polygon make_concave_polygon(const int pdim, const int sdim, const std::vector<xpoint> & subject, 
+  const std::vector<xpoint> & clip){
+  double * cd = new double [sdim*(subject.size()+clip.size())];
+  polygon_to_coords(polygon(subject), sdim, cd);
+  // change to clock wise direction for inner polygon which contains a hole.
+  polygon_to_coords(polygon(clip), sdim, cd+sdim*subject.size(), false);
+  polygon result;
+  coords_to_polygon(subject.size()+clip.size(), cd, sdim, result);
+
+  return result;
+}
+
+/**
+//
+// Test 3 spatial relationship between 2 polygons with this api
+// input argument: subject, clip polygons
+// return: if subject and clip are disjont
+// output argument: s_contains_c, if s contains c
+// output argument: c_contains_s, if c contains s
+*/
+bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std::vector<xpoint> & clip, 
+  bool & s_contains_c, bool & c_contains_s){
+
+  int i; int num_clip_p=clip.size(), num_subject_p=subject.size();
+  bool disjoint = true;
+  s_contains_c = true;
+  c_contains_s = true;
+
+  double * subject_cd = new double[sdim*subject.size()];
+  polygon_to_coords(polygon(subject), sdim, subject_cd);
+  double * clip_cd = new double[sdim*clip.size()];
+  polygon_to_coords(polygon(clip), sdim, clip_cd);
+
+  // check if any p point is in q
+  for(int i = 0; i < subject.size(); i ++)
+    if(point_in_poly(pdim, sdim, num_clip_p, clip_cd, subject_cd+i*sdim)){
+      // if a point is found contained
+      disjoint = false;
+    }else
+      c_contains_s = false;
+
+  // check if any q point is in p
+  for(int i = 0; i < clip.size(); i ++)
+    if(point_in_poly(pdim, sdim, num_subject_p, subject_cd, clip_cd+i*sdim)){
+      // if a point is found contained
+      disjoint = false;
+    }else
+      s_contains_c = false;
+
+  int n_cond = 0;
+  if(disjoint) n_cond ++;
+  if(s_contains_c) n_cond ++;
+  if(c_contains_s) n_cond ++;
+  if(n_cond > 1) Throw() << "Invalid spatial relation between subject and clip\n";
+
+  delete [] subject_cd, clip_cd;
+  return disjoint;
+}
+
 // Assume a counter clock wise order of points in p and q
-int weiler_clip_2D_2D(int num_p, double *p, int num_q, double *q, std::vector<polygon> & difference){
+int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, 
+  std::vector<polygon> & difference){
 
   // return if either of the polygons are empty
   if(num_p == 0 || num_q == 0) return 0;
 
   // prepare subject and clip vertex lists
   std::vector<xpoint> pnodes, qnodes;
-  for(int i = 0; i < num_p; i ++)
-    pnodes.push_back(xpoint(*(p+i), *(p+2*i+1), 'A'+i)); 
-  for(int i = 0; i < num_q; i ++)
-    qnodes.push_back(xpoint(*(q+i), *(q+2*i+1), 'a'+i)); 
+  if(sdim == 2){
+    for(int i = 0; i < num_p; i ++)
+      pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), 'A'+i)); 
+    for(int i = 0; i < num_q; i ++)
+      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), 'a'+i)); 
+  }else if(sdim == 3){
+    for(int i = 0; i < num_p; i ++)
+      pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), *(p+sdim*i+2), 'A'+i)); 
+    for(int i = 0; i < num_q; i ++)
+      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), *(p+sdim*i+2), 'a'+i)); 
+  }
 
   // phase 1, find all intersection points, note degenerated points too
   std::list<xpoint> final_pnodes, final_qnodes, degenerated;
+
+  final_pnodes.resize(num_p);
+  final_qnodes.resize(num_q);
   std::copy(pnodes.begin(), pnodes.end(), final_pnodes.begin());
   std::copy(qnodes.begin(), qnodes.end(), final_qnodes.begin());
 
+  double intersect[sdim];
+  int inbound = -1; bool on_p_seg, on_q_seg;
+
   unsigned int n_inter = 0;
+  unsigned int num_inbinter = 0;
   for(int i = 0; i < num_p; i ++){
     double *p1 = (pnodes[i].c);
     double *p2 = (pnodes[(i+1)%num_p].c);
 
     for(int j = 0; j < num_q; j ++){
 
-      double intersect[2];
       double *q1 = (qnodes[j].c);
-      double *q2 = (qnodes[(j+1)%num_p].c); 
+      double *q2 = (qnodes[(j+1)%num_q].c); 
 
-      if(line_with_seg2D(p1, p2, q2, q1, intersect)){
-        // optimize by move along final node lists in loops, pay attention to degeneracies
-        std::list<xpoint>::iterator it = std::find(final_pnodes.begin(), final_pnodes.end(), pnodes[i]);
-        if(it == final_pnodes.end()) Throw() << "Failed to locate p(subject) vertex.\n";
-        final_pnodes.insert(it, xpoint(intersect[0], intersect[1], '1'+n_inter));
+      bool result = false;
+      if(sdim == 2)
+        result = line_intersect_2D_2D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
+      else
+        result = line_intersect_2D_3D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
 
-        it = std::find(final_qnodes.begin(), final_qnodes.end(), qnodes[i]);
-        if(it == final_qnodes.end()) Throw() << "Failed to locate q(clip) vertex.\n";
-        final_qnodes.insert(it, xpoint(intersect[0], intersect[1], '1'+n_inter));
-      
+      if(result){
+
+        insert_intersect(pdim, sdim, final_pnodes, pnodes, i, intersect, n_inter, inbound);
+        insert_intersect(pdim, sdim, final_qnodes, qnodes, j, intersect, n_inter, inbound);
+
         n_inter++;
+        if(inbound==2) num_inbinter++;
       }
     }
   }
 
-  { // debug: dump final lists
+  // reTally the number of num_inbinter, because intersection points can be coincidental
+  n_inter = 0;
+  num_inbinter = 0;
+  {
+    std::list<xpoint>::const_iterator it = final_pnodes.begin(), eit=final_pnodes.end();
+    for(;it != eit; ++it){
+      if(it->intersection){
+        n_inter ++;
+        if(it->inbound == 2) num_inbinter ++;
+      }
+    }
+  }
+
+  // First, handle the corner cases, no intersect, no inbound point or odd number of inter/inbound point
+  // p: subject, q: clip
+  // No intersection points => a) p and q are disjoint, return p 
+  //                           b) q contains p, return nothing
+  //                           c) p contains q, return concave polygon
+  if(n_inter == 0 || n_inter%2 || num_inbinter == 0 || (n_inter == num_inbinter && num_inbinter%2)) {
+    xpoint p_centroid = polygon(pnodes).centroid(sdim);
+    xpoint q_centroid = polygon(qnodes).centroid(sdim);
+    bool s_contains_c = false, c_contains_s = false;
+    if(disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s)){
+      difference.push_back(polygon(pnodes));
+      return 0;
+    }
+    if(s_contains_c || point_in_poly(pdim, sdim, pnodes, q_centroid) ){
+      difference.push_back(make_concave_polygon(pdim, sdim, pnodes, qnodes));
+      return 0;
+    }
+    if(c_contains_s || point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
+  }
+
+
+  // At this point, we know we have a 'cliping' scenario to deal with
+  if(false){ // debug: dump final lists
 
     std::list<xpoint>::const_iterator it = final_pnodes.begin(), eit=final_pnodes.end();
     for(;it != eit; ++it)
-      std::cout << it->c[0] << ',' << it->c[1] << ',' << it->label << std::endl;
-    it = final_pnodes.begin(), eit=final_pnodes.end();
+      std::cout << it->c[0] << ',' << it->c[1] << ',' << it->c[2] << ',' << it->label << std::endl;
+
+    it = final_qnodes.begin(), eit=final_qnodes.end();
     for(;it != eit; ++it)
-      std::cout << it->c[0] << ',' << it->c[1] << ',' << it->label << std::endl;
+      std::cout << it->c[0] << ',' << it->c[1] << ',' << it->c[2] << ',' << it->label << std::endl;
+  }
+
+  // Phase 2, compute difference
+  {
+
+    unsigned int npts = 0;  // number of inbound points used from p(subject) list
+    bool done = false;
+
+    // Start with the subject polygon
+    std::list<xpoint>::iterator it = final_pnodes.begin();
+    std::list<xpoint> nodes;
+    bool on_subject = true;
+    bool start = false;
+    while(! done){
+      
+      // completed a loop, save this polygon
+      if(it->visited && on_subject) {
+        std::list<xpoint>::iterator tmpit = it;
+        // clear visited attributes
+        for(it = final_pnodes.begin(); it != final_pnodes.end(); ++it) it->visited = false;
+        for(it = final_qnodes.begin(); it != final_qnodes.end(); ++it) it->visited = false;
+        it = tmpit;
+
+        polygon nodal_poly = polygon(nodes);
+        if(nodal_poly.area(sdim) > 0.)
+          difference.push_back(nodal_poly);
+
+        nodes.clear();
+        on_subject = true;
+        start = false;
+        it = std::find(final_pnodes.begin(), final_pnodes.end(), *it);
+        if(it == final_pnodes.end()) Throw() << "it must be on final pnodes list\n";
+        ++it;
+      }
+
+      // if after a traverse, all inbound intersection points are used, then exit
+      if(!start && npts == num_inbinter){
+        done = true;
+        continue;
+      }
+
+      // if p is not an inbound intersection, 
+      //   save p, mark it visited, switch to clip list and move to previous clip polygon node. 
+      // else
+      //   if(star loop) save, mark
+      //   move to the next subject polygon node;
+      if(on_subject){
+        if(it->intersection && it->inbound==2){
+          start = true;
+          it->visited = true;
+          nodes.push_back(*it);
+          it = std::find(final_qnodes.begin(), final_qnodes.end(), *it);
+          if(it == final_qnodes.end()) Throw() << "it must be on final qnodes list\n";
+          it->visited = true; // mark intersection point on q list at the same time
+          if(it == final_qnodes.begin()) it = --final_qnodes.end();
+          else --it;
+          npts ++;
+          on_subject = false;
+        }
+        else{
+          if(start) {
+            it->visited = true;
+            nodes.push_back(*it);
+          }
+          if(it == --final_pnodes.end()) it = final_pnodes.begin();
+          else ++it;
+        }
+      }else{
+        // if q is an intersection, save q, mark it visited, switch to p(subject) list
+        // and move to next subject polygon node
+        // else move to the previous clip polygon node, save, mark visited, 
+        if(it->intersection){
+          it->visited = true;
+          nodes.push_back(*it);
+          it = std::find(final_pnodes.begin(), final_pnodes.end(), *it);
+          if(it == final_pnodes.end()) Throw() << "it must be on final pnodes list\n";
+          it->visited = true; // mark intersection point on p list at the same time
+          if(it == --final_pnodes.end()) it = final_pnodes.begin();
+          else ++it;
+          on_subject = true;
+        }else{
+          if(start) {
+            it->visited = true;
+            nodes.push_back(*it);
+          }
+          if(it == final_qnodes.begin()) it = --final_qnodes.end();
+          else --it;
+        }   
+      }
+    }
   }
 
   return 0;
@@ -203,7 +743,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     for(int in = 0; in < num_edges; in ++)
       nodes.push_back(sintd_cells[i]->operator[](in)->get_node());
 
-    meshmid.add_element(cell, nodes, 1, sintd_cells[i]->get_topo(sdim, pdim));
+    meshmid.add_element(cell, nodes, num_edges, sintd_cells[i]->get_topo(sdim, pdim));
     elem_list[i] = cell;
   }
 
@@ -231,9 +771,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     //*area = sintd_cells[i]->get_area();
   }
 
-  //char str[64]; memset(str, 0, 64);
-  //sprintf(str, "midMesh.vtk.%d", me);
-  //WriteVTKMesh(meshmid, str);
+  char str[64]; memset(str, 0, 64);
+  sprintf(str, "midMesh.vtk.%d", me);
+  WriteVTKMesh(meshmid, str);
   //WriteVTKMesh(srcmesh, "srcMesh.vtk");
   //WriteVTKMesh(dstmesh, "dstMesh.vtk");
 
@@ -312,7 +852,6 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
   // Break up the cell into triangles if it's got more than 4 nodes
   // For some reason quad_3d can't coexist with tri3_3d
   int break_threshold = 4;
-  if(pdim == 2 && sdim == 3) break_threshold = 3;
   if(num_sintd_nodes > break_threshold){
 
     double * coords = new double[3*sdim];
@@ -389,6 +928,49 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
     Throw() << "Regridding error" << std::endl;
 
   return 1;
+}
+
+// p must be allocated before entering this sub with room to hold number of polygon nodes * sdim
+int polygon_to_coords(const struct polygon & poly, const int sdim, double *p, bool ccw_dir){
+  if(ccw_dir){
+    polygon::const_iterator cit = poly.points.begin(), cie = poly.points.end();
+    int np = 0;
+    for(; cit != cie; ++ cit, np++){
+      for(int j = 0; j < sdim; j ++)
+        p[np*sdim+j] = cit->c[j];
+    }
+  }else{
+    polygon::const_reverse_iterator cit = poly.points.rbegin(), cie = poly.points.rend();
+    int np = 0;
+    for(; cit != cie; ++ cit, np++){
+      for(int j = 0; j < sdim; j ++)
+        p[np*sdim+j] = cit->c[j];
+    }
+  }
+  return 0;
+}
+int coords_to_polygon(const int num_p, const double * const p, const int sdim, struct polygon & poly){
+  for(int i = 0; i < num_p; i ++){
+    if(sdim == 2){ 
+      poly.points.push_back(xpoint(p[i*sdim], p[i*sdim+1], 'p'));
+    }else if(sdim == 3){
+      poly.points.push_back(xpoint(p[i*sdim], p[i*sdim+1], p[i*sdim+2], 'p'));
+    }
+    if(poly.area(sdim) < 0.) // if the result polygon is in CW sense, reverse it.
+      std::reverse(poly.points.begin(), poly.points.end());
+  }
+  return 0;
+}
+
+void reverse_coord(int sdim, int num_point, double * cd){
+
+  double * tmp = new double[sdim];
+  for(int i = 0; i < num_point/2; i ++){
+    std::memcpy(tmp, cd+i, sdim*sizeof(double));
+    std::memcpy(cd+i, cd+(num_point-1-i)*sdim, sdim*sizeof(double));
+    std::memcpy(cd+(num_point-1-i)*sdim, tmp, sdim*sizeof(double));
+  }
+  delete [] tmp;
 }
 
 } //namespace

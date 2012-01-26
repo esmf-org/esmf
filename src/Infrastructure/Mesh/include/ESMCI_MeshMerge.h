@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.h,v 1.2 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_MeshMerge.h,v 1.3 2012/01/26 16:25:22 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -36,6 +36,7 @@
 namespace ESMCI {
 
   void MeshMerge(Mesh &mesh1, Mesh &mesh2, Mesh **outMesh);
+  void MeshSetFraction(Mesh & mesh, double fraction);
 
 } //namespace
 
