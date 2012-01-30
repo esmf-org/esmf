@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.18 2012/01/18 00:53:59 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.19 2012/01/30 21:40:46 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(3,3,4,4,1.,1.,0.6,0.6,tag='small test', &
-      maxnpet=2, rc=rc)
+      maxnpet=2, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -63,7 +63,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(4,4,3,3,0.6,0.6,1.,1.,tag='reverse small test', &
-      maxnpet=2, rc=rc)
+      maxnpet=2, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -71,7 +71,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(10,10,14,14,0.1,0.1,0.06,0.06,tag='medium size test A1', &
-      maxnpet=4, rc=rc)
+      maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -79,7 +79,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(10,10,14,14,0.1,0.1,0.06,0.06,tag='reverse medium size test', &
-      maxnpet=4, rc=rc)
+      maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -87,7 +87,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(3,4,4,6,1.,1.,0.6,0.6,tag='uneven small test', &
-      maxnpet=2, rc=rc)
+      maxnpet=2, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -95,7 +95,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(4,6,3,4,0.6,0.6,1.,1.,tag='reverse uneven small test', &
-      maxnpet=2, rc=rc)
+      maxnpet=2, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -103,7 +103,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(80,80,40,40,0.5,0.5,1.,1.,tag='exact large test A2', &
-      maxnpet=8, rc=rc)
+      maxnpet=8, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -111,7 +111,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(40,40,80,80,1.,1.,0.5,0.5,tag='reverse exact large test', &
-      maxnpet=8, rc=rc)
+      maxnpet=8, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -222,13 +222,14 @@ contains
 
 !------------------------------------------------------------------------
   subroutine test_regrid2xg_online(atm_nx, atm_ny, ocn_nx, ocn_ny, atm_dx, atm_dy, &
-    ocn_dx, ocn_dy, atm_sx, atm_sy, ocn_sx, ocn_sy, tag, maxnpet, minnpet, rc)
+    ocn_dx, ocn_dy, atm_sx, atm_sy, ocn_sx, ocn_sy, tag, maxnpet, minnpet, indexflag, rc)
     ! arguments
     integer, intent(in)                       :: atm_nx, atm_ny, ocn_nx, ocn_ny
     real(ESMF_KIND_R4), intent(in)            :: atm_dx, atm_dy, ocn_dx, ocn_dy
     real(ESMF_KIND_R4), intent(in), optional  :: atm_sx, atm_sy, ocn_sx, ocn_sy
     character(len=*), intent(in), optional    :: tag
     integer, intent(in) , optional            :: maxnpet, minnpet
+    type(ESMF_INDEX_FLAG), intent(in), optional :: indexflag
     integer, intent(out), optional            :: rc
 
     ! local variables
@@ -292,7 +293,7 @@ contains
     !------------------------------------
     grid_atm = ESMF_GridCreateNoPeriDim(maxIndex=(/atm_nx, atm_ny/), &
       coordSys=ESMF_COORDSYS_CART, &
-      indexflag=ESMF_INDEX_GLOBAL, &
+      indexflag=indexflag, &
       coordDep1=(/1/), &
       coordDep2=(/2/), &
       rc=localrc)
@@ -361,7 +362,7 @@ contains
     !------------------------------------
     grid_ocn = ESMF_GridCreateNoPeriDim(maxIndex=(/ocn_nx, ocn_ny/), &
       coordSys=ESMF_COORDSYS_CART, &
-      indexflag=ESMF_INDEX_GLOBAL, &
+      indexflag=indexflag, &
       !gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
       !regDecomp=(/npet, 1/), &
       coordDep1=(/1/), &
