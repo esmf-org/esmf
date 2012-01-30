@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.15 2012/01/06 20:17:07 svasquez Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.16 2012/01/30 21:47:06 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -104,12 +104,6 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  if (!grid.hasCoordStaggerLoc(staggerLoc))
    Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
 
-#if 0
- if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
-   Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
-  }
-#endif
- 
  
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
@@ -757,10 +751,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
  bool is_sphere = grid.isSphere();
 
- if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
-   Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
-  }
- 
  // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
    ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
@@ -810,9 +800,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
 
- if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
-   Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
-  }
 
     // Loop elemets of the grid.  Here we loop all elements, both owned and not.
     ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerloc);
@@ -873,10 +860,6 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
       throw localrc;  // bail out with exception
-
-    if (grid.getIndexFlag() != ESMF_INDEX_GLOBAL) {
-      Throw() << "Currently the Grid must be created with indexflag=ESMF_INDEX_GLOBAL to use this functionality";
-    }
     
     // Get coord field
     MEField<> *cfield = mesh.GetCoordField();
