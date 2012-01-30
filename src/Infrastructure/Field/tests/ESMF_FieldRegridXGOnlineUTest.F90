@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.19 2012/01/30 21:40:46 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.20 2012/01/30 22:38:44 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
     !------------------------------------------------------------------------
     !EX_UTest
     call test_regrid2xg_online(10,10,14,14,0.1,0.1,0.06,0.06,tag='medium size test A1', &
-      maxnpet=4, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+      maxnpet=4, indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid online and regrid through xgrid, overlapping cut"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
