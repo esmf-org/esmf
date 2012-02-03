@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.12 2012/01/06 20:17:50 svasquez Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.13 2012/02/03 05:22:31 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_Sintdnode.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
+#include <Mesh/include/ESMCI_Phedra.h>
 
 #include <iostream>
 #include <iterator>
@@ -34,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.12 2012/01/06 20:17:50 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.13 2012/02/03 05:22:31 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -588,10 +589,6 @@ namespace ESMCI {
        return true;
     }
     
-    
-
-    //    if (debug) printf("     t=%f \n",t);
-    
     // We shouldn't be off the ends, but
     // if we are because of rounding then
     // do what makes sense
@@ -613,8 +610,7 @@ namespace ESMCI {
     p[0]=sin[0] + t*(sout[0]-sin[0]);
     p[1]=sin[1] + t*(sout[1]-sin[1]);
     p[2]=sin[2] + t*(sout[2]-sin[2]);
-    return true;
-    
+    return true;    
   }
 
 
@@ -1033,6 +1029,277 @@ void norm_poly3D(int num_p, double *p) {
 #undef  MAX_NUM_POLY_NODES
 #undef  MAX_NUM_POLY_COORDS_3D    
   }
+
+
+
+#if 0
+
+
+
+/*
+             0-----------1-----------5
+             |       1   |           |
+             |   \       |   \   3   |
+             |     \     |     \     |
+             |  0        |   2       |
+             3-----------2-----------6
+             |           |
+             |   \  5    |
+             |     \     |
+             |   4       |
+             7-----------6
+             |           |
+             |   \  7    |
+             |     \     |
+             |  6        |
+ 7-----------4-----------5
+ |           |           |
+ |   \   9   |   \  11   |
+ |     \     |     \     |
+ |  8        |  10       |
+ 3-----------0-----------1
+
+*/
+// Assumes pnts contains 8 points and thus has a size of 8*3
+// Assumes tris contains 12 triangles and thus has a size of 12*3*3
+// Converts hexahdron point list to 12 triangles as shown above
+void convert_hex(double *pnts, double *tris) {
+#define COPYP2T(t,tt,tp,p,pp) (t+9*tt+3*tp)[0]=(p+3*pp)[0]; (t+9*tt+3*tp)[1]=(p+3*pp)[1]; (t+9*tt+3*tp)[2]=(p+3*pp)[2];
+
+  COPYP2T(tris,0,0,pnts,0);  
+  COPYP2T(tris,0,1,pnts,3);  
+  COPYP2T(tris,0,2,pnts,2);  
+
+  COPYP2T(tris,1,0,pnts,0);  
+  COPYP2T(tris,1,1,pnts,2);  
+  COPYP2T(tris,1,2,pnts,1);  
+  
+  COPYP2T(tris,2,0,pnts,1);  
+  COPYP2T(tris,2,1,pnts,2);  
+  COPYP2T(tris,2,2,pnts,6);  
+
+  COPYP2T(tris,3,0,pnts,1);  
+  COPYP2T(tris,3,1,pnts,6);  
+  COPYP2T(tris,3,2,pnts,5);  
+
+  COPYP2T(tris,4,0,pnts,3);  
+  COPYP2T(tris,4,1,pnts,7);  
+  COPYP2T(tris,4,2,pnts,6);  
+
+  COPYP2T(tris,5,0,pnts,3);  
+  COPYP2T(tris,5,1,pnts,6);  
+  COPYP2T(tris,5,2,pnts,2);  
+
+  COPYP2T(tris,6,0,pnts,7);  
+  COPYP2T(tris,6,1,pnts,4);  
+  COPYP2T(tris,6,2,pnts,5);  
+
+  COPYP2T(tris,7,0,pnts,7);  
+  COPYP2T(tris,7,1,pnts,5);  
+  COPYP2T(tris,7,2,pnts,6);  
+
+  COPYP2T(tris,8,0,pnts,7);  
+  COPYP2T(tris,8,1,pnts,3);  
+  COPYP2T(tris,8,2,pnts,0);  
+
+  COPYP2T(tris,9,0,pnts,7);  
+  COPYP2T(tris,9,1,pnts,0);  
+  COPYP2T(tris,9,2,pnts,4);
+
+  COPYP2T(tris,10,0,pnts,4);  
+  COPYP2T(tris,10,1,pnts,0);  
+  COPYP2T(tris,10,2,pnts,1);
+
+  COPYP2T(tris,11,0,pnts,4);  
+  COPYP2T(tris,11,1,pnts,1);  
+  COPYP2T(tris,11,2,pnts,5);
+
+
+#undef COPYP2T
+}
+
+  // HELPER FUNCTION
+  Phedra create_phedra_from_elem(const MeshObj *elem, MEField<> *cfield) {
+#define  MAX_NUM_PHEDRA_NODES 40
+#define  MAX_NUM_PHEDRA_COORDS_3D (3*MAX_NUM_PHEDRA_NODES) 
+
+
+    // Get coord info from element
+    int num_nodes;
+    double node_coords[MAX_NUM_PHEDRA_COORDS_3D];
+    get_elem_coords(elem, cfield, 3, MAX_NUM_PHEDRA_NODES, &num_nodes, node_coords);    
+
+    // Convert to Phedra based on shape
+    if (num_nodes==8) {    
+     double hex_tris[12*3*3];
+     convert_hex(node_coords, hex_tris);
+
+     return Phedra(12,hex_tris);
+    } else {
+      // Only handle Hexahedrons right now
+      Throw() << " Right now 3D conservative only works with hexahedrons";
+    }
+
+
+#undef MAX_NUM_PHEDRA_NODES
+#undef MAX_NUM_PHEDRA_COORDS_3D
+  }
+
+#endif
+
+  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
+  // this call. 
+  void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
+                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
+                                           std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
+
+
+ 
+    Phedra src_phedra=create_phedra_from_elem(src_elem, src_cfield);
+
+    if (src_phedra.is_degenerate()) {
+      Throw() << " Source element is degenerate (has less than 4 faces))";
+    }
+
+    // calculate src volume
+    double src_area=src_phedra.calc_volume(); 
+
+    // if the src_volume is 0 freak out
+    if (src_area == 0.0) {
+      Throw() << "Source Element has 0 volume";
+    }
+
+    // Output src_elem_area
+    *src_elem_area=src_area;    
+
+    // Allocate something to hold intersection and dst volumes
+    std::vector<double> sintd_areas;
+    sintd_areas.resize(dst_elems.size(),0.0);
+
+    std::vector<double> dst_areas;
+    dst_areas.resize(dst_elems.size(),0.0);
+
+    // Loop intersecting and computing volumes of intersection
+    for (int i=0; i<dst_elems.size(); i++) {
+      const MeshObj *dst_elem = dst_elems[i];
+
+      // Create Phedra      
+      Phedra dst_phedra=create_phedra_from_elem(dst_elem, dst_cfield);
+      
+      // if less than a triangle complain
+      if (dst_phedra.is_degenerate()) {
+	Throw() << " Destination element is degenerate (has less than 4 faces)";
+      }
+ 
+      // calculate dst area
+     dst_areas[i]=dst_phedra.calc_volume(); 
+
+#if 0
+     if (dst_elem->get_id()==2011) {
+        char new_filename[1000];
+        sprintf(new_filename,"dst_phedra%d",i);
+        dst_phedra.write_to_vtk(new_filename);
+     }
+#endif
+
+     // if destination area is 0.0, invalidate and go to next
+     if (dst_areas[i]==0.0) {
+       (*valid)[i]=0;
+       (*wgts)[i]=0.0;
+       (*areas)[i]=0.0;
+       sintd_areas[i]=0.0;
+       continue;
+     }
+
+#if 0
+     if ((dst_elem->get_id()==2011) && (src_elem->get_id()==7246)) phedra_debug=true;
+#endif     
+
+     // Intersect dst polyhedra with src polyhedra
+     dst_phedra.intersect(src_phedra);
+
+#if 0
+     phedra_debug=false;
+#endif
+
+      // if intersected element isn't a complete polygon then go to next
+     if (dst_phedra.is_degenerate()) {
+       (*valid)[i]=0;
+       (*wgts)[i]=0.0;
+       (*areas)[i]=0.0;
+       sintd_areas[i]=0.0;
+       continue;
+     }
+     
+     // calculate intersection area
+     sintd_areas[i]=dst_phedra.calc_volume(); 
+     
+     if (sintd_areas[i] <1.0E-20) {
+       (*valid)[i]=0;
+       (*wgts)[i]=0.0;
+       (*areas)[i]=0.0;
+       sintd_areas[i]=0.0;
+       continue;
+     }
+     
+     
+#if 0
+      static double tot=0.0; 
+
+      if (dst_elem->get_id()==2011) {
+        tot+=sintd_areas[i]/dst_areas[i];
+        printf("s: %d dst_area=%f sintd_area=%f area2=%f w=%f tot=%f num_faces=%d \n",src_elem->get_id(), dst_areas[i],sintd_areas[i],sintd_area2,sintd_areas[i]/dst_areas[i],tot,dst_phedra.get_num_faces());
+        char new_filename[1000];
+        sprintf(new_filename,"sintd%dphedra",src_elem->get_id());
+        dst_phedra.write_to_vtk(new_filename);
+        if (src_elem->get_id()==7246) dst_phedra.write_faces_to_vtk("s7246_");
+      }
+#endif
+
+      (*valid)[i]=1;
+
+    }
+
+
+    // Loop calculating weights
+    for (int i=0; i<dst_elems.size(); i++) {
+      if ((*valid)[i]==1) {
+        // calc weight
+        double weight=sintd_areas[i]/dst_areas[i];
+        
+        // If weight is slightly bigger than one because of round off then push it back
+        // if it's way over let it go, so we see it. 
+        if ((weight > 1.0) && (weight < 1.0+1.0E-10)) weight = 1.0;
+        
+        // return weight
+        (*wgts)[i]=weight;
+      }
+    }
+
+    // Loop setting areas
+    for (int i=0; i<dst_elems.size(); i++) {
+      if ((*valid)[i]==1) {
+        // return weight
+        (*areas)[i]=sintd_areas[i];
+      }
+    }
+    
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

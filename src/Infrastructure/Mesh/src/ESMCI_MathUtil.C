@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.14 2012/01/26 16:25:24 feiliu Exp $
+// $Id: ESMCI_MathUtil.C,v 1.15 2012/02/03 05:22:31 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.14 2012/01/26 16:25:24 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.15 2012/02/03 05:22:31 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -365,6 +365,35 @@ double great_circle_area(int n, double *pnts) {
       // Get number of nodes
       *num_nodes=topo->num_nodes;
   }
+
+
+  // Not really a math routine, but useful as a starting point for math routines
+  void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids) {
+
+      // Get number of nodes in element
+      const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
+
+      // make sure that we're not bigger than max size
+      if (topo->num_nodes > max_num_nodes) {
+	Throw() << "Element exceeds maximum poly size";
+      }
+
+      // Get coords of element
+      int k=0;
+      for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
+	const MeshObj &node = *(elem->Relations[s].obj);
+	double *c = cfield->data(node);
+        for (int i=0; i<sdim; i++) {
+	  coords[k]=c[i];
+          k++;
+	}
+        ids[s]=node.get_id();
+      }
+
+      // Get number of nodes
+      *num_nodes=topo->num_nodes;
+  }
+
 
 
 

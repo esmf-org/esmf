@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.16 2012/01/30 21:47:06 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.17 2012/02/03 05:22:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -34,6 +34,7 @@
 #include "Mesh/include/ESMCI_ParEnv.h"
 #include "Mesh/include/ESMCI_DDir.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
+#include "Mesh/include/ESMCI_Phedra.h"
 
 #include <limits>
 #include <iostream>
@@ -102,7 +103,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
  // *** Grid error checking here ***
  if (!grid.hasCoordStaggerLoc(staggerLoc))
-   Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc";
+   Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ";
 
  
  // *** Set some meta-data ***
@@ -902,8 +903,15 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
 	  area=great_circle_area(num_poly_nodes, poly_coords);
 	}
+      } else if (pdim==3) {
+	if (sdim==3) {
+          Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
+          area=tmp_phedra.calc_volume(); 
+        } else {
+          Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
+        }
       } else {
-	Throw() << "Meshes with parametric dimension != 2 not supported for computing areas";
+	Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
       }
 
       

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.55 2012/01/06 20:17:49 svasquez Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.56 2012/02/03 05:22:29 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,12 +35,13 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
+#include "Mesh/include/ESMCI_Phedra.h"
 
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.55 2012/01/06 20:17:49 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.56 2012/02/03 05:22:29 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1411,8 +1412,15 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
 	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
 	  area=great_circle_area(num_poly_nodes, poly_coords);
 	}
+      } else if (pdim==3) {
+	if (sdim==3) {
+          Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
+          area=tmp_phedra.calc_volume(); 
+        } else {
+          Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
+        }
       } else {
-	Throw() << "Meshes with parametric dimension != 2 not supported for computing areas";
+	Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
       }
 
       // Put area into area array

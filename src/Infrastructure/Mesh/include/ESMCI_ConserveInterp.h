@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.h,v 1.10 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_ConserveInterp.h,v 1.11 2012/02/03 05:22:27 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -38,6 +38,13 @@ namespace ESMCI {
                                            std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas,
                                            Mesh * midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
                                            struct Zoltan_Struct * zz);
+
+  void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+                                           double *src_elem_area,
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
+                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
+                                         std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz);
 
   void intersect_convex_poly2D(int num_p, double *p,
              int num_q, double *q,

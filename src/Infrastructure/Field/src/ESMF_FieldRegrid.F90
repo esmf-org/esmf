@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.94 2012/01/06 20:16:40 svasquez Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.95 2012/02/03 05:22:22 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.94 2012/01/06 20:16:40 svasquez Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.95 2012/02/03 05:22:22 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -627,22 +627,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return
             endif
 
-            ! Can only do conservative on 2D right now
+            ! Create the mesh from corner stagger to better represent the
+            ! control volumes
             call ESMF_GridGet(grid=srcGrid, &
                    dimCount=gridDimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            if (gridDimCount .ne. 2) then
+            if (gridDimCount .eq. 2) then
+               srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER
+            else if (gridDimCount .eq. 3) then
+               srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
+            else
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on 2D grids", & 
+                 msg="- can currently only do conservative regridding on 2D or 3D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
             endif
-
-            ! Create the mesh from corner stagger to better represent the
-            ! control volumes (the following simple assign only works because
-            ! we only support 2D right now)
-	    srcStaggerlocG2M=ESMF_STAGGERLOC_CORNER
           else 
             ! If we're not conservative, then use the staggerloc that the field is built upon
 	    srcStaggerlocG2M=srcStaggerloc
@@ -700,22 +700,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return
             endif
 
-            ! Can only do conservative on 2D right now
+            ! Create the mesh from corner stagger to better represent the
+            ! control volumes 
             call ESMF_GridGet(grid=dstGrid, &
                    dimCount=gridDimCount, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-            if (gridDimCount .ne. 2) then
+            if (gridDimCount .eq. 2) then
+               dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER
+            else if (gridDimCount .eq. 3) then
+               dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
+            else
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on 2D grids", & 
+                 msg="- can currently only do conservative regridding on 2D or 3D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
             endif
 
-            ! Create the mesh from corner stagger to better represent the
-            ! control volumes (the following simple assign only works because
-            ! we only support 2D right now)
-	    dstStaggerlocG2M=ESMF_STAGGERLOC_CORNER
           else 
             ! If we're not conservative, then use the staggerloc that the field is built upon
 	    dstStaggerlocG2M=dstStaggerloc
@@ -1221,7 +1222,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Grid)      :: Grid
         type(ESMF_Array)     :: Array
         type(ESMF_Mesh)      :: Mesh
-        type(ESMF_StaggerLoc) :: staggerLoc
+        type(ESMF_StaggerLoc) :: staggerLoc, staggerLocG2M
 	type(ESMF_MeshLoc)   :: meshloc
         real(ESMF_KIND_R8), pointer :: areaFptr(:)
         integer :: gridDimCount, localDECount
@@ -1283,31 +1284,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return
           endif
 
-	  ! Can only do conservative on 2D right now
-          call ESMF_GridGet(grid=Grid, &
+            ! Create the mesh from corner stagger to better represent the
+            ! control volumes 
+            call ESMF_GridGet(grid=Grid, &
                    dimCount=gridDimCount, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          if (gridDimCount .ne. 2) then
+            if (gridDimCount .eq. 2) then
+               staggerlocG2M=ESMF_STAGGERLOC_CORNER
+            else if (gridDimCount .eq. 3) then
+               staggerlocG2M=ESMF_STAGGERLOC_CORNER_VFACE
+            else
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only calculate area on 2D grids", & 
+                 msg="- can currently only do conservative regridding on 2D or 3D grids", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
-                return
-          endif 
+              return
+            endif
+
 
           ! check grid
-          call checkGrid(Grid,ESMF_STAGGERLOC_CORNER,rc=localrc)
+          call checkGrid(Grid, staggerlocG2M, rc=localrc)
+
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Convert Grid to Mesh
-          Mesh = ESMF_GridToMesh(Grid, ESMF_STAGGERLOC_CORNER, isSphere, isLatLonDeg, &
+          Mesh = ESMF_GridToMesh(Grid, staggerlocG2M, isSphere, isLatLonDeg, &
                       maskValues=MaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
 	  ! call into the Regrid GetareaField interface
-          call ESMF_RegridGetArea(Grid, Mesh, Array, ESMF_STAGGERLOC_CORNER, lregridScheme, rc=localrc)
+          call ESMF_RegridGetArea(Grid, Mesh, Array, staggerlocG2M, lregridScheme, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
