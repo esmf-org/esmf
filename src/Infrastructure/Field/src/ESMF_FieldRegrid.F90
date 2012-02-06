@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.95 2012/02/03 05:22:22 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.96 2012/02/06 21:22:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.95 2012/02/03 05:22:22 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.96 2012/02/06 21:22:44 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -125,14 +125,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 !   \begin{sloppypar}
 !   Both {\tt srcField} and {\tt dstField} must be
-!   congruent with the respective Fields used during 
-!   {\tt ESMF\_FieldRegridStore()}. In the case of the Regrid operation congruent 
-!   Fields are built upon the same stagger location and on the same Grid. The routehandle represents
-!   the interpolation between the Grids as they were during the {\tt ESMF\_FieldRegridStore()} call.  
-!   So if the coordinates at the stagger location in the Grids change, a new call to {\tt ESMF\_FieldRegridStore()} 
+!   weakly congruent with the respective Fields used during 
+!   {\tt ESMF\_FieldRegridStore()}. Congruent Fields possess matching DistGrids and the shape of the 
+!   local array tiles matches between the Fields for every DE. For weakly congruent Fields the sizes 
+!   of the undistributed dimensions, that vary faster with memory than the first distributed dimension,
+!   are permitted to be different. This means that the same routehandle can be applied to a large class 
+!   of similar Fields that differ in the number of elements in the left most undistributed dimensions.
+!   You can apply the routehandle between any set of Fields weakly congruent to the original Fields used
+!   to create the routehandle without incurring an error. However, if you want                                     
+!   the routehandle to be the same interpolation between the grid objects upon which the Fields are build as was calculated
+!   with the original {\tt ESMF\_FieldRegridStore()} call, then there
+!   are additional constraints on the grid objects. To be the same interpolation, the grid objects upon which the 
+!   Fields are build must contain the same coordinates at the stagger locations involved in the regridding as 
+!   the original source and destination Fields used in the {\tt ESMF\_FieldRegridStore()} call.  
+!   The routehandle represents the interpolation between the grid objects as they were during the {\tt ESMF\_FieldRegridStore()} call.  
+!   So if the coordinates at the stagger location in the grid objects change, a new call to {\tt ESMF\_FieldRegridStore()} 
 !   is necessary to compute the interpolation between that new set of coordinates.
-!   Note {\tt ESMF\_FieldRegridStore()} assumes the coordinates used in the Grids upon which the Fields are built are
-!   in degrees.  
 !   \end{sloppypar}
 !
 !   The {\tt srcField} and {\tt dstField} arguments are optional in support of

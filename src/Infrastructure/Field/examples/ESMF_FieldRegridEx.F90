@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.56 2012/01/18 01:04:32 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.57 2012/02/06 21:22:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.56 2012/01/18 01:04:32 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.57 2012/02/06 21:22:42 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -263,22 +263,37 @@ program ESMF_FieldRegridEx
 ! Next Fields are built on the source and destination grid objects. These Fields are then passed into {\tt ESMF\_FieldRegridStore()}. The user can either get a 
 ! sparse matrix from this call and/or a {\tt routeHandle}. If the user gets the sparse matrix then they are responsible for deallocating it, but other than that
 ! can use it as they wish. The {\tt routeHandle} can be used in the {\tt ESMF\_FieldRegrid()} call to perform the actual interpolation of data from the source 
-! to the destination field. This interpolation can be repeated for the same set of Fields as long as the coordinates in the associated grid object don't change. 
-! The same {\tt routeHandle} can also be used between any pair of Fields which is weakly congruent to the pair used to create the {\tt routeHandle}
-! and which have the same coordinates in the associated grid object. When finished with the {\tt routeHandle} {\tt ESMF\_FieldRegridRelease()} should be used to 
+! to the destination field. This interpolation can be repeated for the same set of Fields as long as the coordinates at the staggerloc involved in the
+! regridding in the associated grid object don't change. The same {\tt routeHandle} can also be used between any pair of Fields which is weakly congruent 
+! to the pair used to create the {\tt routeHandle}.  Congruent Fields possess matching DistGrids and the shape of the 
+! local array tiles matches between the Fields for every DE. For weakly congruent Fields the sizes                                                               
+! of the undistributed dimensions, that vary faster with memory than the first distributed dimension,                                                            
+! are permitted to be different. This means that the same routehandle can be applied to a large class                                                            
+! of similar Fields that differ in the number of elements in the left most undistributed dimensions.             
+! You can apply the routehandle between any set of Fields weakly congruent to the original Fields used to create the routehandle without 
+! incurring an error. However, if you want                                     
+! the routehandle to be the same interpolation between the grid objects upon which the Fields are build as was calculated                                        
+! with the original {\tt ESMF\_FieldRegridStore()} call, then there                                                                                              
+! are additional constraints on the grid objects. To be the same interpolation, the grid objects upon which the                                                  
+! Fields are build must contain the same coordinates at the stagger locations involved in the regridding as                                                      
+! the original source and destination Fields used in the {\tt ESMF\_FieldRegridStore()} call.                                                                    
+! The routehandle represents the interpolation between the grid objects as they were during the {\tt ESMF\_FieldRegridStore()} call.                             
+! So if the coordinates at the stagger location in the grid objects change, a new call to {\tt ESMF\_FieldRegridStore()}                                         
+! is necessary to compute the interpolation between that new set of coordinates. When finished with the {\tt routeHandle} 
+! {\tt ESMF\_FieldRegridRelease()} should be used to 
 ! free the associated memory. 
 !
 ! ESMF currently supports regridding only on a subset of the full range of Grids and Meshes it supports. 
 ! 
 !
-! In 2D ESMF supports regridding between any combination of the following:
+! In 2D, ESMF supports regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
 ! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
 ! \end{itemize}
 !
 !
-! In 3D ESMF supports regridding between any combination of the following:
+! In 3D, ESMF supports bilinear or conservative regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
 ! \item Unstructured Meshes composed of hexahedrons (e.g. cubes). 
