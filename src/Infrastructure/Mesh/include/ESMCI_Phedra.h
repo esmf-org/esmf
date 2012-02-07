@@ -89,7 +89,7 @@ struct PntAndAngle {
     angle=0.0;
   }
 
-  PntAndAngle &operator=(PntAndAngle &rhs) {
+  PntAndAngle &operator=(const PntAndAngle &rhs) {
     pnt[0]=rhs.pnt[0];
     pnt[1]=rhs.pnt[1];
     pnt[2]=rhs.pnt[2];
