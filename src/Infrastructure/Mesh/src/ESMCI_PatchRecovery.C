@@ -1,4 +1,4 @@
-// $Id: ESMCI_PatchRecovery.C,v 1.12 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_PatchRecovery.C,v 1.13 2012/02/07 22:12:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -33,12 +33,16 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.12 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_PatchRecovery.C,v 1.13 2012/02/07 22:12:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+#ifdef ESMF_LAPACK
+extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,
+  double*,int*, double*,int*,int*);
 
-extern "C" void FTNX(dgelsd)(int *,int *, int*, double*, int*, double*, int*,double*, double*, int*, double *, int*, int *, int *);
+extern "C" void FTNX(dgelsd)(int *,int *, int*, double*, int*, double*,
+  int*,double*, double*, int*, double *, int*, int *, int *);
+#endif
 
 extern "C" void FTN_X(f_esmf_lapack_iworksize)(int *,int *);
 
@@ -299,8 +303,12 @@ Par::Out() << std::endl;
   // calculate work size, by using solver with lwork = -1
   int tmplwork=-1;
   double tmpwork=0;
-  FTNX(dgelsd)(
-	      &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank, &tmpwork, &tmplwork, &iwork[0], &info); 
+#ifdef ESMF_LAPACK  
+  FTNX(dgelsd)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank,
+    &tmpwork, &tmplwork, &iwork[0], &info);
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
   int worksize = int(tmpwork);
 
 
@@ -309,9 +317,13 @@ Par::Out() << std::endl;
   
 
   // Call solver
-  FTNX(dgelsd)(
-	      &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank, &work[0], &worksize, &iwork[0], &info);
+#ifdef ESMF_LAPACK  
+  FTNX(dgelsd)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &s[0], &rcond, &rank,
+    &work[0], &worksize, &iwork[0], &info);
   if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
 
 
 // Apply the pseudo inverse
@@ -393,8 +405,12 @@ std::vector<double> matsav = mat;
   // calculate work size, by using solver with lwork = -1
   int tmplwork=-1;
   double tmpwork=0;
-  FTNX(dgelsd)(
-	      &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank, &tmpwork, &tmplwork, &iwork[0], &info);
+#ifdef ESMF_LAPACK  
+  FTNX(dgelsd)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank,
+    &tmpwork, &tmplwork, &iwork[0], &info);
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
   
   int worksize = int(tmpwork);
 
@@ -402,10 +418,13 @@ std::vector<double> matsav = mat;
   std::vector<double> work(worksize, 0);
   
   // Call solver
-  FTNX(dgelsd)(
-	      &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank, &work[0], &worksize, &iwork[0], &info);
-
+#ifdef ESMF_LAPACK  
+  FTNX(dgelsd)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &s[0], &rcond, &rank,
+    &work[0], &worksize, &iwork[0], &info);
   if (info !=0) Throw() << "Bad dgelsd solve, info=" << info;
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
 
 
 #ifdef RESIDUALS
@@ -487,10 +506,14 @@ Par::Out() << std::endl;
 }
 #endif
 
-  FTNX(dgelsy)(
-    &m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+#ifdef ESMF_LAPACK
+  FTNX(dgelsy)(&m, &n, &m, &mat[0], &m, &id_rhs[0], &ldb, &jpvt[0], &rcond,
+    &rank, &work[0], &lwork, &info);
 
   if (info !=0) Throw() << "Bad dgelsy solve, info=" << info;
+#else
+  Throw() << "Please reconfigure with lapack enabled";
+#endif
 
 // Apply the pseudo inverse
   std::vector<Real> b = rhs; // ughh
@@ -549,8 +572,12 @@ std::vector<double> saverhs = rhs;
 std::vector<double> matsav = mat;
 #endif
 
-  FTNX(dgelsy)(
-    &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
+#ifdef ESMF_LAPACK
+  FTNX(dgelsy)(&m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond,
+    &rank, &work[0], &lwork, &info);
+#else
+  Throw() << "Please recompile with ESMF_LAPACK enabled";
+#endif
 
 #ifdef RESIDUALS
 Par::Out() << "A(" << m << "," << n << ")=" << std::endl;

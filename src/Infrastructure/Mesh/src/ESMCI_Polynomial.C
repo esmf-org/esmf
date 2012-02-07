@@ -1,4 +1,4 @@
-// $Id: ESMCI_Polynomial.C,v 1.8 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_Polynomial.C,v 1.9 2012/02/07 22:12:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -18,10 +18,13 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Polynomial.C,v 1.8 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Polynomial.C,v 1.9 2012/02/07 22:12:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
-extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,double*,int*,double*,int*,int*);
+#ifdef ESMF_LAPACK
+extern "C" void FTNX(dgelsy)(int *,int *,int*,double*,int*,double*,int*,int*,
+  double*,int*,double*,int*,int*);
+#endif
 
 namespace ESMCI {
 
@@ -115,6 +118,7 @@ void set_Ilegendre_coef(UInt K, std::vector<double> &coef) {
 template<typename POLY>
 void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const std::vector<POLY*> &poly, double coef[])
 {
+#ifdef ESMF_LAPACK
   UInt ncoef = poly.size();
   int m = nsamples, n = ncoef, nrhs = 1, info = 0, rank, ldb;
   ldb = std::max(std::max(m,n),1);
@@ -139,7 +143,7 @@ void PolyFit1D(UInt nsamples, const double coord[], const double vals[], const s
     &m, &n, &nrhs, &mat[0], &m, &rhs[0], &ldb, &jpvt[0], &rcond, &rank, &work[0], &lwork, &info);
 
   for (UInt i = 0; i < ncoef; i++) coef[i] = rhs[i];
-
+#endif
 }
 
 template void PolyFit1D(UInt, const double*, const double*, const std::vector<Legendre<double>*> &, double *);

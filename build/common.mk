@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.356 2012/02/07 00:18:42 theurich Exp $
+#  $Id: common.mk,v 1.357 2012/02/07 22:12:32 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -986,19 +986,23 @@ endif
 #-------------------------------------------------------------------------------
 # LAPACK
 #-------------------------------------------------------------------------------
-ifneq ($(origin ESMF_LAPACK), environment)
-ifdef ESMF_LAPACKDEFAULT
-ESMF_LAPACK = $(ESMF_LAPACKDEFAULT)
-endif
-endif
-
-# HACK FOR NOW, until we decide on a long term solution
-# for now ignore what is set on the environment and just use the internal code
+ifndef ESMF_LAPACK
+ifndef ESMF_LAPACK_OFF
 ESMF_LAPACK = internal
-
+ESMF_LAPACK_LIBPATH =
+ESMF_LAPACK_LIBS =
+endif
+endif
 
 ifeq ($(ESMF_LAPACK),OFF)
 ESMF_LAPACK =
+export ESMF_LAPACK_OFF = true
+endif
+
+ifeq ($(ESMF_LAPACK),system)
+ifdef ESMF_LAPACKDEFAULT
+ESMF_LAPACK = $(ESMF_LAPACKDEFAULT)
+endif
 endif
 
 ifeq ($(ESMF_LAPACK),netlib)

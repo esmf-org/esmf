@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.51 2012/01/10 04:19:13 theurich Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.52 2012/02/07 22:12:35 theurich Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -41,10 +41,10 @@ is parallel. This application is used in the
 \htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}, so that can serve as an example of its use.
 
 This application requires the NetCDF libary to read the grid files and write
-out the weight files in NetCDF format.  
-In addition, it also requires the LAPACK library to generate the patch regridding weights.
-To compile ESMF with the NetCDF library and the LAPACK library, please refer to 
-the ``Third Party Libraries'' Section in the ESMF User's Guide for more information.
+out the weight files in NetCDF format.  In addition, it also requires LAPACK
+library calls to generate the patch regridding weights. To compile ESMF with
+the NetCDF library and the LAPACK library, please refer to the ``Third Party
+Libraries'' Section in the ESMF User's Guide for more information.
 
 Internally this application uses the ESMF public API to generate the interpolation weights.
 If a source or destination grid is logically rectangular, then {\tt ESMF\_GridCreate()}~\ref{sec:example:2DLogRecFromScrip} is used to create an ESMF\_Grid object. The cell center 

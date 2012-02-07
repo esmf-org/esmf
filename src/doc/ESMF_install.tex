@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.102 2011/12/13 19:43:32 theurich Exp $
+% $Id: ESMF_install.tex,v 1.103 2012/02/07 22:12:35 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -28,42 +28,48 @@ that allow the user to control them.
 
 \subsubsection{LAPACK}
 \label{sec:lapack}
-The \htmladdnormallink{LAPACK}{http://www.netlib.org/lapack} library is 
-optionally used in the Mesh class to compute patch recovery regridding weights. 
-This regridding method requires solving local least squares problems, and 
-uses the LAPACK {\it DGELSY} solver.
+The patch recovery regridding method of the ESMF Mesh class requires solving
+local least squares problems. It uses the
+\htmladdnormallink{LAPACK}{http://www.netlib.org/lapack} {\it DGELSY} solver 
+to carry out this task.
 
-A few targets are known to always have a vendor-provided LAPACK
-library available.  Where possible, these are incorporated into
-the build environment by default.  
-
-The following environment variables enable, and specify the name and location of
-the desired LAPACK library:
-\begin{description}
-
-\item[ESMF\_LAPACK] Possible value: {\it not set}, {\tt "OFF"}, {\tt "mkl"}, 
-{\tt "netlib"}, {\tt "scsl"}, {\it <userstring>} (default depends on system).
+The following environment variables control whether a minimal set of
+Lapack code that comes with ESMF is used, or whether ESMF should link against
+an externally available Lapack installation. Alternatively, ESMF's
+Lapack-dependent features can be turned off altogether.
 
 \begin{description}
-\item[{\it not set}] ESMF will be compiled with LAPACK-dependent features
-on systems where the library is located in a vendor-defined location.  On
-other systems, the default is OFF.
 
-\item[{\tt "OFF"}] (default on most system) Disables LAPACK-dependent code, regardless of system.
+\item[ESMF\_LAPACK] Possible value: {\tt "internal"} (default), {\tt "OFF"},
+ {\tt "system"}, {\tt "mkl"}, {\tt "netlib"}, {\tt "scsl"}, {\it <userstring>}.
+
+\begin{description}
+\item[{\tt "internal"} (default)] ESMF will be compiled with Lapack-dependent
+features. A minimal set of Lapack/BLAS code included in ESMF will be used
+to satisfy the dependencies.
+
+\item[{\tt "OFF"}] Disables Lapack-dependent code.
  
-\item[{\tt "mkl"}] Use the Intel MKL library.  Sets {\tt ESMF\_LAPACK\_LIBS} to
+\item[{\tt "system"}] A system-dependent external Lapack/BLAS installation
+is used to satisfy the external dependencies of the Lapack-dependent ESMF code.
+Sets {\tt ESMF\_LAPACK\_LIBS} appropriately.
+
+\item[{\tt "mkl"}] The Intel MKL library is used to satisfy the external 
+dependencies of the Lapack-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
 {\tt "-lmkl\_lapack -lmkl"}, unless it is already defined in the user 
 environment.
 
-\item[{\tt "netlib"}] (default for PGI) Sets {\tt ESMF\_LAPACK\_LIBS} to 
+\item[{\tt "netlib"}] The NETLIB library is used to satisfy the external 
+dependencies of the Lapack-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
 {\tt "-llapack -lblas"}, unless it is already defined in the user environment.
 
-\item[{\tt "scsl"}] (default for IRIX64) Sets {\tt ESMF\_LAPACK\_LIBS} to 
+\item[{\tt "scsl"}] The SCSL library is used to satisfy the external 
+dependencies of the Lapack-dependent ESMF code. Sets {\tt ESMF\_LAPACK\_LIBS} to
 {\tt "-lscs"}, unless it is already defined in the user environment.
 
-\item[{\it <userstring>}] Enables LAPACK-dependent code, but does not set a 
-default for {\tt ESMF\_LAPACK\_LIBS}.  {\tt ESMF\_LAPACK\_LIBS}, and if 
-required, {\tt ESMF\_LAPACK\_LIBPATH}, must be explicitly set in the user 
+\item[{\it <userstring>}] Enables ESMF's Lapack-dependent code, but does not set
+a default for {\tt ESMF\_LAPACK\_LIBS}.  {\tt ESMF\_LAPACK\_LIBS}, and if 
+required, {\tt ESMF\_LAPACK\_LIBPATH}, must be set explicitly in the user 
 environment.
 \end{description}
 
@@ -72,11 +78,12 @@ environment.
 Specifies the path where the LAPACK library is located.
 
 \item[ESMF\_LAPACK\_LIBS] Typical value: {\tt "-llapack -lblas"} 
-(default is system dependent).
+(default is dependent on {\tt ESMF\_LAPACK}).
 
 Specifies the linker directive needed to link the LAPACK library to
 the application.  On some systems, the BLAS library must also be included.
 \end{description}
+
 
 \subsubsection{NetCDF}
 \label{sec:netcdf}
