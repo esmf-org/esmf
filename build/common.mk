@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.355 2011/12/16 06:09:36 theurich Exp $
+#  $Id: common.mk,v 1.356 2012/02/07 00:18:42 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -450,7 +450,9 @@ endif
 #-------------------------------------------------------------------------------
 # Set ESMFMKFILE here in order to be available for installcheck target
 #-------------------------------------------------------------------------------
+ifndef ESMFMKFILE
 export ESMFMKFILE = $(ESMF_INSTALL_LIBDIR_ABSPATH)/esmf.mk
+endif
 
 #-------------------------------------------------------------------------------
 # Set ESMF Version variables
@@ -1249,7 +1251,38 @@ SOURCE		= $(SOURCEC) $(SOURCEF)
 OBJS		= $(OBJSC) $(OBJSF)
 #-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+# Test an installation pointed to by ESMFMKFILE
+#-------------------------------------------------------------------------------
 
+ifeq ($(ESMF_TESTESMFMKFILE),ON)
+include $(ESMFMKFILE)
+ESMFLIB =
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/ESMFMod/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Superstructure/State/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Util/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Base/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/VM/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Attribute/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Array/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/ArrayBundle/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/ArraySpec/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/DELayout/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/DistGrid/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/LocalArray/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/LogErr/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/TimeMgr/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Grid/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Route/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/Infrastructure/Field/include
+ESMF_INTERNALINCDIRS  += -I$(ESMF_BUILD)/src/epilogue/include
+export ESMF_AUTO_LIB_BUILD=OFF
+ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
+ESMF_F90COMPILEOPTS   += -DESMF_TESTEXHAUSTIVE 
+ESMF_CXXCOMPILEOPTS   += -DESMF_TESTEXHAUSTIVE 
+endif
+
+endif
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -1378,6 +1411,7 @@ chkdir_locobj:
 # use these targets if the libdir, testdir, etc. must be there already. 
 # this target prints a fail message and exits if not present.
 reqdir_lib:  
+ifneq ($(ESMF_TESTESMFMKFILE),ON)
 	@if [ ! -d $(ESMF_LIBDIR) ]; then \
 	  echo "ESMF library directory not found:" ; \
 	  echo " $(ESMF_LIBDIR) " ; \
@@ -1392,6 +1426,7 @@ reqdir_lib:
           echo " has the same setting as at library build time." ; \
 	  echo "" ; \
           $(MAKE) err ; fi
+endif
 
 reqdir_tests:  
 	@if [ ! -d $(ESMF_TESTDIR) ]; then \
@@ -1416,9 +1451,11 @@ reqdir_examples:
 # the file libesmf.a exists in the lib dir; if not, build it.  if it is there,
 # call it success, even if a source file is more recent than the lib.
 
-reqfile_libesmf:  
+reqfile_libesmf:
+ifneq ($(ESMF_TESTESMFMKFILE),ON)
 	@if [ ! -f $(ESMFLIB) ]; then \
 	  $(MAKE) lib ; fi
+endif
 
 #-------------------------------------------------------------------------------
 # This target used to check that variables which had to have settings
