@@ -1162,6 +1162,12 @@ void convert_hex(double *pnts, double *tris) {
      convert_hex_using_ids(node_coords, node_ids, hex_tris);
 
      return Phedra(12,hex_tris);
+    } else if (num_nodes==4) {
+
+      return Phedra(node_coords,
+                    node_coords+3, 
+                    node_coords+6,
+                    node_coords+9);  
     } else {
       // Only handle Hexahedrons right now
       Throw() << " Right now 3D conservative only works with hexahedrons";
