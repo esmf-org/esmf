@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.20 2012/01/06 20:18:48 svasquez Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.21 2012/02/08 19:58:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,6 +44,7 @@ program ESMF_AttReadFieldEx
 !BOC
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! local variables
@@ -55,7 +56,20 @@ program ESMF_AttReadFieldEx
 
       ! example program result codes
       logical :: xercesPresent
-      integer :: finalrc
+      integer :: finalrc, result
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_AttReadFieldEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
       ! assume Xerces XML C++ API library present until proven otherwise
       xercesPresent = .true.
@@ -141,6 +155,10 @@ program ESMF_AttReadFieldEx
 !EOC
 
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 !BOC
       ! finalize ESMF framework
