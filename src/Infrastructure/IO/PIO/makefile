@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2011/03/14 23:33:11 samsoncheung Exp $
+# $Id: makefile,v 1.12 2012/02/08 19:57:45 theurich Exp $
 
 # locally disable parallel build:
 .NOTPARALLEL:
@@ -23,7 +23,6 @@ CPPFLAGS += -D_PNETCDF
 endif
 
 # - only turn internal PIO compilation on if that is requested
-ifeq ($(ESMF_PIO),internal)
 SOURCEC	  = pnetcdfversion.c topology.c
 SOURCEF	  = pio_kinds.F90 pio_types.F90 pio_support.F90 alloc_mod.F90 \
             pio_utils.F90 ionf_mod.F90 pionfread_mod.F90 pio_msg_mod.F90 \
@@ -33,10 +32,6 @@ SOURCEF	  = pio_kinds.F90 pio_types.F90 pio_support.F90 alloc_mod.F90 \
             box_rearrange.F90 rearrange.F90 piolib_mod.F90 piodarray.F90 \
             pionfatt_mod.F90 pionfput_mod.F90 pionfget_mod.F90 ESMFPIO.F90 \
             pio_nf_utils.F90 pio_msg_callbacks.F90 pio_msg_getput_callbacks.F90
-else
-SOURCEC	  = 
-SOURCEF	  = 
-endif
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
 STOREH	  = 
