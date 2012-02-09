@@ -5,7 +5,7 @@ if [ $esmf_os = UNICOS/mp ]; then
 esmf_os=Unicos
 fi
 if [ $esmf_os = Linux ]; then
-unicos_test=`ls /proc | grep -i cray`
+unicos_test=`ls /proc | grep -i -e cray -e mpt`
 if [ -n "$unicos_test" ]; then
 esmf_os=Unicos
 fi
