@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.34 2012/01/06 20:16:16 svasquez Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.35 2012/02/09 23:15:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,8 +15,10 @@
 !==============================================================================
 
 program ESMF_DELayoutEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -28,8 +30,23 @@ program ESMF_DELayoutEx
   logical:: oneToOneFlag
   type(ESMF_ServiceReply_Flag):: reply
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_DELayoutEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
+
   
   call ESMF_Initialize(vm=vm, defaultlogfilename="DELayoutEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
@@ -369,6 +386,10 @@ endif
   call ESMF_DELayoutDestroy(delayout, rc=rc)
   if (rc /= ESMF_SUCCESS) goto 99
   
+   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+   ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
   ! shut down ESMF
   call ESMF_Finalize(rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.23 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.24 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,20 @@
     integer                 :: finalrc, rc
     type(ESMF_Field)        :: field
     logical :: correct
-    integer :: rank, dimCount
+    integer :: rank, dimCount, result
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_FieldArbGridEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
 
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
@@ -224,6 +237,11 @@
     call ESMF_GridDestroy(grid3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(localArbIndex)
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc=rc)

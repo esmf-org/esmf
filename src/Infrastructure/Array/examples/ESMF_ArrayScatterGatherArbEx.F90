@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.14 2012/01/06 20:15:17 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.15 2012/02/09 23:15:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,20 +15,31 @@
 !==============================================================================
 
 program ESMF_ArrayScatterGatherArbEx
+#include "ESMF.h"
+
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
   ! local variables
   integer :: rc, petCount, localPet, finalrc
-  integer :: i, j
+  integer :: i, j, result
   integer, allocatable :: arbSeqIndexList(:), farray(:,:)
   type(ESMF_VM):: vm
   type(ESMF_DistGrid):: distgrid, distgridAux
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Array):: array, arrayAux
   type(ESMF_RouteHandle):: scatterHandle, gatherHandle
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArrayScatterGatherArbEx"
 
   
 ! ------------------------------------------------------------------------------
@@ -297,6 +308,10 @@ program ESMF_ArrayScatterGatherArbEx
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 10 continue
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

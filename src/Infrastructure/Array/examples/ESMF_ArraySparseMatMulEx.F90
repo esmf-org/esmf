@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.27 2012/01/06 20:15:17 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.28 2012/02/09 23:15:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,8 +15,10 @@
 !==============================================================================
 
 program ESMF_ArraySparseMatMulEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -30,11 +32,21 @@ program ESMF_ArraySparseMatMulEx
   type(ESMF_RouteHandle):: sparseMatMulHandle
   real(ESMF_KIND_R8), allocatable:: factorList(:)
   integer, allocatable:: factorIndexList(:,:)
-  integer :: finalrc
+  integer :: finalrc, result
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
   
   
   integer:: counter,i,j,k
   real(ESMF_KIND_R8), pointer:: farray3d(:,:,:)
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArraySparseMatMulEx"
+
   
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
@@ -598,6 +610,11 @@ program ESMF_ArraySparseMatMulEx
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 10 continue
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

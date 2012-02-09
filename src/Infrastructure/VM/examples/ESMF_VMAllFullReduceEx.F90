@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.19 2012/01/06 20:18:25 svasquez Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.20 2012/02/09 23:15:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -28,8 +28,10 @@
 !------------------------------------------------------------------------------
 
 program ESMF_VMAllFullReduceEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -42,6 +44,20 @@ program ESMF_VMAllFullReduceEx
   integer:: nsize, i
   ! result code
   integer :: finalrc
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_VMAllFullReduceEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMAllFullReduceEx.Log", &
@@ -87,7 +103,11 @@ program ESMF_VMAllFullReduceEx
   ! print the scatter result
   print *, 'Global sum:'
   print *, localPet,' result: ', result
-  
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then

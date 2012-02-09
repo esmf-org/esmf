@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.44 2012/01/06 20:19:15 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.45 2012/02/09 23:15:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -94,9 +94,11 @@ end module ESMF_StateReconcileEx_Mod
 !
 ! This program shows examples of using the State Reconcile function
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
     ! ESMF Framework module
     use ESMF
+    use ESMF_TestMod
     use ESMF_StateReconcileEx_Mod
     implicit none
 
@@ -108,7 +110,20 @@ end module ESMF_StateReconcileEx_Mod
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
 
 !EOC
-    integer :: finalrc
+    integer :: finalrc, result
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_StateReconcileEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
     finalrc = ESMF_SUCCESS
 
 
@@ -236,6 +251,11 @@ end module ESMF_StateReconcileEx_Mod
     if (rc /= ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 20  continue
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
     call ESMF_Finalize(rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

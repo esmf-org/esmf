@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.2 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.2 2012/01/06 20:16:35 svasquez Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -55,11 +55,24 @@
     integer, allocatable                        :: farray(:,:)
     integer, allocatable                        :: farrayDst(:,:)
     integer, allocatable                        :: farraySrc(:,:)
-    integer                                     :: fa_shape(2)
+    integer                                     :: fa_shape(2), result
     integer, pointer                            :: fptr(:,:)
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
     rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldCommEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
     call ESMF_Initialize(defaultlogfilename="FieldCommEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
@@ -217,6 +230,11 @@
     else
        print *, "FAIL: ESMF_FieldCommEx.F90"
     end if
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
     call ESMF_Finalize(rc=rc)
 

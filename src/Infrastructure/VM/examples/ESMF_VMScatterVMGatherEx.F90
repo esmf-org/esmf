@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.20 2012/01/06 20:18:25 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.21 2012/02/09 23:15:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -28,8 +28,10 @@
 !------------------------------------------------------------------------------
 
 program ESMF_VMScatterVMGatherEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -40,7 +42,21 @@ program ESMF_VMScatterVMGatherEx
   integer, allocatable:: array1(:), array2(:)
   integer:: nlen, nsize, i, scatterRoot, gatherRoot
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_VMScatterVMGatherEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMScatterVMGatherEx.Log", &
@@ -96,6 +112,12 @@ program ESMF_VMScatterVMGatherEx
     print *, localPet,' array1: ', array1(i)
   enddo
 !EOC
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
   
   call ESMF_Finalize(rc=rc)
   if (finalrc==ESMF_SUCCESS) then

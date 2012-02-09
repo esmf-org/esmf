@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.37 2012/01/06 20:18:48 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.38 2012/02/09 23:15:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -16,6 +16,7 @@
 !==============================================================================
 
 program ESMF_AttributeUpdateEx
+#include "ESMF.h"
 
 !  !PROGRAM: ESMF\_AttributeUpdateEx - Example of Attribute usage in a distributed environment.
 !
@@ -64,13 +65,27 @@ implicit none
 !EOE
 
 
-      integer                 :: rc, urc, finalrc, petCount, localPet
+      integer                 :: rc, urc, finalrc, petCount, localPet, result
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1
       type(ESMF_GridComp)     :: gridcomp2
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_AttributeUpdateEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, &
@@ -210,6 +225,10 @@ implicit none
       
       call ESMF_StateDestroy(c1exp, rc=rc)
       call ESMF_StateDestroy(c2imp, rc=rc)
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_Finalize(rc=rc)
 

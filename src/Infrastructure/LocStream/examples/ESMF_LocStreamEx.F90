@@ -14,6 +14,7 @@ program ESMF_LocStreamEx
 !==============================================================================
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
+#include "ESMF.h"
 
 
 !  !PROGRAM: ESMF_LocStreamEx - LocStream examples.
@@ -23,6 +24,7 @@ program ESMF_LocStreamEx
 
       ! Use ESMF framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! Parameters
@@ -43,7 +45,21 @@ program ESMF_LocStreamEx
       integer :: i1,i2
       real(ESMF_KIND_R8), pointer :: farrayPtrLonC(:,:)
       real(ESMF_KIND_R8), pointer :: farrayPtrLatC(:,:)
-      integer :: clbnd(2),cubnd(2)
+      integer :: clbnd(2),cubnd(2), result
+
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_LocStreamEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
 
       ! initialize ESMF
@@ -379,6 +395,10 @@ program ESMF_LocStreamEx
    ! Shut down and end.
    !-------------------------------------------------------------------
 10 continue
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.15 2012/01/06 20:16:44 svasquez Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.16 2012/02/09 23:15:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.15 2012/01/06 20:16:44 svasquez Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.16 2012/02/09 23:15:31 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -48,10 +48,23 @@
     integer                                     :: rc, finalrc, lpe, i, halo(2,2,4,4)
     real(ESMF_KIND_R4), pointer                 :: fptr(:,:)
     integer                                     :: excllb(2), exclub(2), sizes(2)
-    integer                                     :: j, k, iter
+    integer                                     :: j, k, iter, result
     type(ESMF_STAGGERLOC)                       :: staggers(4)
     character(len=16)                           :: names(4) 
     real                                        :: PI=3.14159265358
+    character(ESMF_MAXSTR)                      :: testname
+    character(ESMF_MAXSTR)                      :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldBundleHaloEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
     rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
 !------------------------------------------------------------------------------
@@ -283,6 +296,12 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
 
     call ESMF_Finalize(rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE

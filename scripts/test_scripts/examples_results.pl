@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: examples_results.pl,v 1.15 2012/01/04 23:59:01 svasquez Exp $
+# $Id: examples_results.pl,v 1.16 2012/02/09 23:15:18 svasquez Exp $
 # This subroutine is called at the end of the examples, "check_examples" and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 # The results are either complete results or a summary.
@@ -10,14 +10,45 @@ sub examples_results($$$) {
     	my $ESMF_BOPT	= $_[1];
     	my $SUMMARY	= $_[2];
 
+
+# This subroutine reads the number of pets from the *ST.Log files.
+sub get_pet_count {
+
+        my @logFile    = @_;
+
+        # Find # of processors string
+        $count=grep ( /NUMBER_OF_PROCESSORS/, @logFile);
+        if (($count == "") || ($count == 0)){
+                # Did not find the # of processors string
+                return(0);
+        }
+         # Create list of processor count strings
+        @num_procs = grep(/NUMBER_OF_PROCESSORS/, @file_lines);
+        $pet_count_found = 0;
+        foreach (@num_procs){
+                # remove all white spaces
+                s/ //g;
+                $pet_count = 0;
+                ($test_string,$pet_count) = split(/NUMBER_OF_PROCESSORS/, $_);
+                if ($pet_count != 0) {
+                        # Read the number of pets from log file.
+                        return($pet_count);
+                }
+        }
+        #Could not read the number of pets from log file.
+        return(0);
+}
+
+
+
 use File::Find;
 
 # Arrays of examples files
 @act_ex_files = (); 	# Actual example files
 @st_ex_files = ();	# Stripped example file names
 @all_files = (); 	# All files
-@stdout_files = (); 	# Examples stdout files 
-@stdout_ex_files = ();	# stdout that are real examples
+@log_files = (); 	# Examples log files 
+@log_ex_files = ();	# log that are real examples
 @pass_ex_files = ();	# passed examples files
 @file_lines = ();	# file lines
 @ex_x_files = ();	# examples executable files
@@ -115,7 +146,7 @@ use File::Find;
 		s/ESM/ ESM/;# Break it into 2 fields
 		s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
 		s/\./ /; # Break it into 2 fields
-		s/([^ ]*) ([^ ]*)/$1.stdout\n/; # Get rid of the 2nd field
+		s/([^ ]*) ([^ ]*)/$1.Log\n/; # Get rid of the 2nd field
 	}
 	#Sort the list of st_ex_files 
 	@st_ex_files = sort (@st_ex_files);
@@ -141,37 +172,51 @@ use File::Find;
 				# Put all files in a list
 			 	push @all_files, "$File::Find::name\n"  if -e;
 		}
-		# Get *Ex.stdout files
-		@stdout_files=grep (/Ex.stdout/, @all_files);
-		#Sort the list of stdout files.
-		@stdout_files = sort (@stdout_files);
-		# Find the stdout fles that are in the st_ex_files
+		# Get *Ex.Log files
+		@log_files=grep (/Ex.Log/, @all_files);
+		#Sort the list of Log files.
+		@log_files = sort (@log_files);
+		# Find the Log fles that are in the st_ex_files
                	foreach $file ( @st_ex_files) {
-				push @stdout_ex_files, grep (/$file/, @stdout_files);
+				push @log_ex_files, grep (/$file/, @log_files);
 		}
-		#Sort the list of stdout files.
-		@stdout_ex_files = sort (@stdout_ex_files);
+		#Sort the list of log files.
+		@log_ex_files = sort (@log_ex_files);
 
-		# Count the number of PASS and FAIL
-		# push pass examples tests to a list.
+
+                # For each example we need to
+                # find the corresponding Log file.
+                # if it does not exist, add the system test to the crashed list.
+                # If the Log file exists, read the number of processors.
+                # Count the PASSes and compare to the number of processors
+                # If they are not equal put the system test in the crashed list.
+                # Keep track of pass count and failed tests list.
+
 		$count=0;
 		$pass_count=0;
 		$fail_count=0;
-		foreach $file ( @stdout_ex_files) {
+		foreach $file ( @log_ex_files) {
 			open(F,$file);
 			foreach $line (<F>){
 				push(@file_lines, $line);
 			}
 			close ($file);
-			$count=grep ( /PASS/, @file_lines);
-			if ($count != 0) {
-				push (@pass_tests, $file);
-				$pass_count=$pass_count + 1;
-			}
+                        #Read the pet count from Log file.
+                        $pet_count = &get_pet_count(@file_lines);
+                        if ($pet_count != 0) {
+                                $count=grep ( /PASS/, @file_lines);
+                                if ($count == $pet_count) {
+                                        push (@pass_tests, $file);
+                                        $pass_count=$pass_count + 1;
+                                }
+                                else {
+                                        push (@fail_tests, $file);
+                                }
+                        }
 			else {
 				push (@fail_tests, $file);
 			}
-			@file_lines=();
+                @file_lines=();
 		}
 		# Calculate fail_count
 		$fail_count = $ex_count - $pass_count;
@@ -244,19 +289,19 @@ use File::Find;
 			}
 			# Get *Ex files
 			@ex_x_files=grep (/Ex/, @all_files);
-			@stdout_ex_files = (); #Clear the file list.
-                        # Delete the .stdout from each file
+			@log_ex_files = (); #Clear the file list.
+                        # Delete the .Log from each file
                         foreach ( @st_ex_files) {
-                                s/\.stdout//; # Delete stdout
+                                s/\.Log//; # Delete Log
                         }
 
 			# Find the example executable fles that are in the st_ex_files
 			foreach $file ( @st_ex_files) {
-                                	push @stdout_ex_files, grep (/$file/, @ex_x_files);
+                                	push @log_ex_files, grep (/$file/, @ex_x_files);
                 	}
-			# Count the number examples in stdout_ex_files
+			# Count the number examples in log_ex_files
 			$ex_count = 0;
-			foreach $file ( @stdout_ex_files) {
+			foreach $file ( @log_ex_files) {
                              	$ex_count = $ex_count + 1;
                 	}
 			if ($ex_count == 0) {

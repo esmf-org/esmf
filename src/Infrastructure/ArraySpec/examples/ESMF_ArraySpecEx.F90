@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.22 2012/01/06 20:15:37 svasquez Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.23 2012/02/09 23:15:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -22,9 +22,11 @@
 !
 ! This program shows examples of ArraySpec set and get usage
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! local variables 
@@ -34,12 +36,24 @@
 
 
       ! return code
-      integer:: rc
+      integer:: rc, result
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
 !EOC
 
       ! result code
       integer :: finalrc
       finalrc = ESMF_SUCCESS
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArraySpecEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
 
 !BOC
       ! initialize ESMF framework
@@ -76,6 +90,11 @@
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
 !BOC
       ! finalize ESMF framework

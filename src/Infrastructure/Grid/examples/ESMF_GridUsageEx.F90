@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.105 2012/01/06 20:16:55 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.106 2012/02/09 23:15:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -26,12 +26,13 @@ program ESMF_GridCreateEx
 
       ! Use ESMF framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! Parameters
       integer, parameter :: ESMF_Coord1=1, ESMF_Coord2=2, ESMF_Coord3=3
       ! Local variables  
-      integer:: rc, finalrc
+      integer:: rc, finalrc, result
       type(ESMF_VM):: vm
       type(ESMF_ArraySpec) ::  arrayspec2D,arrayspec
 
@@ -61,6 +62,20 @@ program ESMF_GridCreateEx
       integer :: xdim, ydim, zdim
       integer :: ind, localArbIndexCount, remain
       character(len=80) :: filename
+
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_GridUsageEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -3051,6 +3066,12 @@ endif
    ! Shut down and end.
    !-------------------------------------------------------------------
 10 continue  ! exit point if Xerces not present
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

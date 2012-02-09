@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.50 2012/01/06 20:17:35 svasquez Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.51 2012/02/09 23:15:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !
 ! This program shows examples of Log Error writing
 !-----------------------------------------------------------------------------
-
+#include "ESMF.h"
 ! Macros for cpp usage
 ! File define
 #define ESMF_FILENAME "ESMF_LogErrEx.F90"
@@ -33,16 +33,32 @@
 
     ! ESMF Framework module
     use ESMF
+    use ESMF_TestMod
     implicit none
     
     ! return variables
-    integer :: rc1, rc2, rc3, rcToTest, allocRcToTest
+    integer :: rc1, rc2, rc3, rcToTest, allocRcToTest, result
     type(ESMF_LOG) :: alog  ! a log object that is not the default log
     type(ESMF_LogKind_Flag) :: logkindflag
     type(ESMF_Time) :: time
+    type(ESMF_VM) :: vm
     integer, pointer :: intptr(:)
 !EOC
     integer :: finalrc
+
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_LogErrEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
     finalrc = ESMF_SUCCESS
 
 !BOE
@@ -54,7 +70,9 @@
 
 !BOC
     ! Initialize ESMF to initialize the default Log
-    call ESMF_Initialize(rc=rc1, logkindflag=ESMF_LOGKIND_MULTI)
+    call ESMF_Initialize(vm=vm, defaultlogfilename="LogErrEx.Log", &
+                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc1)
+
 !EOC
 
     if (rc1.NE.ESMF_SUCCESS) then
@@ -166,6 +184,11 @@
     if (rc3.NE.ESMF_SUCCESS) then
         finalrc = ESMF_RC_OBJ_BAD
     end if
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
 !BOC
     ! Finalize ESMF to close the default log

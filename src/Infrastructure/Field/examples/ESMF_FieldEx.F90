@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.48 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.49 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -75,7 +75,20 @@
     type(ESMF_FieldStatus_Flag) :: fstatus
 
     real(4) :: PI=3.14159265
-    integer :: finalrc, i, j, k
+    integer :: finalrc, i, j, k, result
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
 
@@ -668,6 +681,12 @@
     call ESMF_ArrayDestroy(array3d, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(farray)
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
 
 !-------------------------------------------------------------------------
     call ESMF_Finalize(rc=rc)

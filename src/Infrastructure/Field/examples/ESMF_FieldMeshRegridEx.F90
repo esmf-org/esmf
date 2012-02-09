@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.27 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.28 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@ program ESMF_MeshEx
 !==============================================================================
 !ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-
+#include "ESMF.h"
 #include "ESMF_Macros.inc"
 
 ! !USES:
@@ -33,7 +33,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.27 2012/01/06 20:16:35 svasquez Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.28 2012/02/09 23:15:30 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -87,6 +87,20 @@ program ESMF_MeshEx
 
   ! result code
   integer :: finalrc, rc, localrc
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_FieldMeshRegridEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="FieldMeshRegridEx.Log", &
@@ -757,6 +771,10 @@ program ESMF_MeshEx
 
 
 10   continue
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
 
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

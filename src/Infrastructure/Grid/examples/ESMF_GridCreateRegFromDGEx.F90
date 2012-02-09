@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.21 2012/01/06 20:16:55 svasquez Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.22 2012/02/09 23:15:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@ program ESMF_GridCreateEx
 !==============================================================================
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
+#include "ESMF.h"
 
 !BOE
 ! \subsubsection{Create a 2D Grid with regular distribution from a DistGrid}~\label{sec:usage:ex:adv:reg}
@@ -36,15 +37,27 @@ program ESMF_GridCreateEx
 !BOC
       ! Use ESMF framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! Local variables  
-      integer:: rc, finalrc
+      integer:: rc, finalrc, result
       type(ESMF_VM):: vm
       type(ESMF_DistGrid) :: distgrid2D
       type(ESMF_Grid) :: grid2D
 !EOC         
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
 
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_GridCreateRegFromDGEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="GridCreateRegFromDGEx.Log", &
@@ -88,6 +101,11 @@ program ESMF_GridCreateEx
 
 
 10 continue
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

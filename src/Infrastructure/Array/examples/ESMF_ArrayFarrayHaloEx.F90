@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.29 2012/01/06 20:15:17 svasquez Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.30 2012/02/09 23:15:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -25,8 +25,10 @@
 !EOE
 !BOC
 program ESMF_ArrayFarrayHaloEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -49,7 +51,20 @@ program ESMF_ArrayFarrayHaloEx
   integer:: petCount
   
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArrayFarrayHaloEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
   
   finalrc = ESMF_SUCCESS
   
@@ -152,6 +167,10 @@ print *, "localSum=", localSum
 !EOC
   
 10 continue
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 !BOC
   call ESMF_Finalize(rc=rc)
 !EOC

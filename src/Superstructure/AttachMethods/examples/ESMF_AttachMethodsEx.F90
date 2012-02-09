@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.5 2012/01/06 20:18:45 svasquez Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.6 2012/02/09 23:15:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -131,9 +131,11 @@ program ESMF_AttachMethodsEx
 !
 ! This program shows examples of Attachable Methods.
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
   ! ESMF Framework module
   use ESMF
+  use ESMF_TestMod
   use producerMod
   use consumerMod
   implicit none
@@ -145,7 +147,21 @@ program ESMF_AttachMethodsEx
   type(ESMF_State):: state
 
   
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_AttachMethodsEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
 
 
@@ -217,6 +233,13 @@ program ESMF_AttachMethodsEx
   endif
 
 10 continue
+
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

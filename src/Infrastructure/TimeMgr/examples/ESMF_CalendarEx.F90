@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.50 2012/01/06 20:18:06 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.51 2012/02/09 23:15:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -22,9 +22,11 @@
 !
 ! This program shows examples of how to create different calendar kinds
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! instantiate calendars
@@ -43,7 +45,20 @@
 !EOC
 
       ! result code
-      integer ::  finalrc
+      integer ::  finalrc, result
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example CalendarEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
       finalrc = ESMF_SUCCESS
 
 !BOC
@@ -195,6 +210,11 @@
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
 !BOC
       ! finalize ESMF framework

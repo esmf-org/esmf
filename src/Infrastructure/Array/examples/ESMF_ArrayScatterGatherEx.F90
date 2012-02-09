@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.21 2012/01/06 20:15:17 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.22 2012/02/09 23:15:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,8 +15,10 @@
 !==============================================================================
 
 program ESMF_ArrayScatterGatherEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -29,7 +31,15 @@ program ESMF_ArrayScatterGatherEx
   type(ESMF_ArraySpec):: arrayspec
   integer(ESMF_KIND_I4), allocatable:: farray(:,:,:)
   real(ESMF_KIND_R8), pointer:: myFarray2D(:,:), myFarray2D2(:,:)
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArrayScatterGatherEx"
   
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
@@ -312,6 +322,11 @@ program ESMF_ArrayScatterGatherEx
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 10 continue
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

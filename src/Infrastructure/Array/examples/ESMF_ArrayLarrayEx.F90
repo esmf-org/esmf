@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.34 2012/01/06 20:15:17 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.35 2012/02/09 23:15:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -30,8 +30,10 @@
 !EOE
 !BOC
 program ESMF_ArrayLarrayEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -58,9 +60,23 @@ program ESMF_ArrayLarrayEx
   
 !EOC
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
   
   finalrc = ESMF_SUCCESS
+
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArrayLarrayEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
   
 !BOC
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayLarrayEx.Log", &
@@ -295,6 +311,11 @@ program ESMF_ArrayLarrayEx
 ! With that ESMF can be shut down cleanly.
 !EOE
 10 continue
+! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
 !BOC
 
   call ESMF_Finalize(rc=rc)

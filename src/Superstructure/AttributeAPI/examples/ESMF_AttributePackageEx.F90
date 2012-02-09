@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.34 2012/01/06 20:18:48 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.35 2012/02/09 23:15:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@ program ESMF_AttributePackageEx
 !==============================================================================
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
+#include "ESMF.h"
 
 !BOE
 ! \subsubsection{Attribute packages} \label{ex:AttributePackageEx}
@@ -41,10 +42,11 @@ program ESMF_AttributePackageEx
 
       ! Use ESMF framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! Local variables  
-      integer                 :: rc, finalrc, petCount, localPet
+      integer                 :: rc, finalrc, petCount, localPet, result
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT,&
                                  CONVKE,CONVPHI
@@ -56,6 +58,19 @@ program ESMF_AttributePackageEx
                                  convESMF,convCC,purpGen
       
       character(ESMF_MAXSTR),dimension(2)   :: attrList         
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_AttributePackageEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -524,6 +539,11 @@ program ESMF_AttributePackageEx
       print *, "End of ESMF_AttributePackage Example"
       print *, "--------------------------------------- "
   endif
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
   call ESMF_Finalize(rc=rc)
   

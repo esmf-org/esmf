@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCustPackEx.F90,v 1.3 2012/01/06 20:18:48 svasquez Exp $
+! $Id: ESMF_AttributeCustPackEx.F90,v 1.4 2012/02/09 23:15:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@ program ESMF_AttributeCustPackEx
 !==============================================================================
 !ESMF_EXAMPLE        String used by test script to count examples.
 !==============================================================================
+#include "ESMF.h"
 
 !BOE
 ! \subsubsection{Custom Attribute package}  \label{ex:AttributeCustPackEx}
@@ -34,14 +35,29 @@ program ESMF_AttributeCustPackEx
 
       ! Use ESMF framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! Local variables  
-      integer                 :: rc, finalrc, petCount, localPet
+      integer                 :: rc, finalrc, petCount, localPet, result
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: customConv, customPurp
       character(ESMF_MAXSTR),dimension(3)   :: customAttrList         
+      character(ESMF_MAXSTR)  :: testname
+      character(ESMF_MAXSTR)  :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_AttributeCustPackEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
 
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
@@ -121,6 +137,12 @@ program ESMF_AttributeCustPackEx
       print *, "End of ESMF_AttributeCustPack Example"
       print *, "------------------------------------ "
   endif
+ 
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
 
   call ESMF_Finalize(rc=rc)
   

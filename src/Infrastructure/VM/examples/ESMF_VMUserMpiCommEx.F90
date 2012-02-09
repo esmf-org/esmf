@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.19 2012/01/06 20:18:26 svasquez Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.20 2012/02/09 23:15:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,22 +32,40 @@
 !------------------------------------------------------------------------------
 
 program ESMF_VMUserMpiCommEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
 #ifndef ESMF_MPIUNI     
   include 'mpif.h'
 #endif
-  
+
   ! local variables
   integer:: rc
+  type(ESMF_VM) :: vm
 #ifndef ESMF_MPIUNI     
   integer:: ierr
 #endif
   integer:: esmfComm, rank
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_FieldRepDimEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
 #ifndef ESMF_MPIUNI     
 !BOC
@@ -72,7 +90,7 @@ program ESMF_VMUserMpiCommEx
 #endif
 !BOC
   if (rank < 2) then
-    call ESMF_Initialize(mpiCommunicator=esmfComm, &
+    call ESMF_Initialize(vm=vm, mpiCommunicator=esmfComm, &
 		    defaultlogfilename="VMUserMpiCommEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     ! Only call ESMF_Initialize() on rank 0 and 1, passing the prepared MPI
@@ -81,6 +99,12 @@ program ESMF_VMUserMpiCommEx
     if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
     ! user code only to execute on the local MPI communicator
     print *, "ESMF application on MPI rank:", rank
+
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
     ! user code finalizes ESMF
 !BOC
     call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
@@ -98,6 +122,9 @@ program ESMF_VMUserMpiCommEx
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
+
+
+
   ! print result
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_VMUserMpiCommEx.F90"

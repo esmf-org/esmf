@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.21 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.22 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,8 +23,8 @@
 !-----------------------------------------------------------------------------
 #include "ESMF.h"
     ! ESMF Framework module
-    use ESMF_TestMod
     use ESMF
+    use ESMF_TestMod
     implicit none
     
     ! Local variables
@@ -56,8 +56,22 @@
     integer, dimension(3,1)                     :: aelb, aeub, aclb, acub, atlb, atub
     integer, dimension(:), allocatable          :: audlb, audub
     integer                                     :: arank, adimCount
-    integer                                     :: finalrc, rc
+    integer                                     :: finalrc, rc, result
     integer                                     :: gridToFieldMap(4) = (/1,0,2,0/)
+
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldRepDimEx"
+
+ 
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
@@ -209,6 +223,12 @@
 !EOC
     print *, "Field with replicated dimension returned"
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
 
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc=rc)

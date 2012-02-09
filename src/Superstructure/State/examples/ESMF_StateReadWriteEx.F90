@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.18 2012/01/06 20:19:15 svasquez Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.19 2012/02/09 23:15:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -30,6 +30,7 @@
 !BOC
     ! ESMF Framework module
     use ESMF
+    use ESMF_TestMod
     implicit none
 
     ! Local variables
@@ -39,7 +40,21 @@
     type(ESMF_VM) :: vm
     integer :: localPet, rc
 !EOC
-    integer :: finalrc
+    integer :: finalrc, result
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_StateReadWriteEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
     finalrc = ESMF_SUCCESS
 
     call ESMF_Initialize(vm=vm, defaultlogfilename="StateReadWriteEx.Log", &
@@ -162,6 +177,12 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
  10 continue  ! Exit point if NetCDF not present (PET 0)
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
     call ESMF_Finalize(rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

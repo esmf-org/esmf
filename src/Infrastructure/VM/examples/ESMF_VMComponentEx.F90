@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.28 2012/01/06 20:18:25 svasquez Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.29 2012/02/09 23:15:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -132,7 +132,9 @@ end module
 
 !BOC
 program ESMF_VMComponentEx
+#include "ESMF.h"
   use ESMF
+  use ESMF_TestMod
   use ESMF_VMComponentEx_gcomp_mod
   implicit none
   
@@ -141,7 +143,21 @@ program ESMF_VMComponentEx
   integer:: rc
   type(ESMF_GridComp):: gcomp
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_VMComponentEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(defaultlogfilename="VMComponentEx.Log", &
@@ -175,7 +191,11 @@ program ESMF_VMComponentEx
   call ESMF_GridCompDestroy(gcomp, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 !BOC  
   call ESMF_Finalize(rc=rc)
 !EOC  

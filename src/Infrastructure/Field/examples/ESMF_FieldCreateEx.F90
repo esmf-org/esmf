@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.111 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.112 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,7 +51,21 @@
     integer :: numElems
     integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
 
-    integer                         :: finalrc, rc
+    integer                         :: finalrc, rc, result
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_FieldCreateEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
@@ -1032,6 +1046,11 @@
 ! Destroy objects
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc=rc)

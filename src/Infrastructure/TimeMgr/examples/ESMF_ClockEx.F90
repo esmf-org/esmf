@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.58 2012/01/06 20:18:06 svasquez Exp $
+! $Id: ESMF_ClockEx.F90,v 1.59 2012/02/09 23:15:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,9 +23,11 @@
 ! This program shows an example of how to create, initialize, advance, and
 ! examine a basic clock
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! instantiate a clock 
@@ -46,7 +48,20 @@
 !EOC
 
       ! result code
-      integer :: finalrc
+      integer :: finalrc, result
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_ClockEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
       finalrc = ESMF_SUCCESS
 
 !BOC
@@ -199,6 +214,11 @@
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
 !BOC
       ! finalize ESMF framework

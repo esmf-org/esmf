@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.26 2012/01/18 00:53:57 oehmke Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.27 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@ program ESMF_FieldRegridEx
 
 
 !------------------------------------------------------------------------------
-
+#include "ESMF.h"
 #include "ESMF_Macros.inc"
 
 ! !USES:
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.26 2012/01/18 00:53:57 oehmke Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.27 2012/02/09 23:15:30 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -77,7 +77,21 @@ program ESMF_FieldRegridEx
   integer :: spherical_grid
 
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_FieldRegridMaskEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="FieldRegridMaskEx.Log", &
@@ -416,6 +430,9 @@ program ESMF_FieldRegridEx
 !EOE
 
 10   continue
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
   call ESMF_Finalize(rc=rc)
 
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

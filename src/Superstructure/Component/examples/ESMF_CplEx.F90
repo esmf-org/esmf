@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.57 2012/01/06 20:18:55 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.58 2012/02/09 23:15:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -251,9 +251,11 @@
 !-------------------------------------------------------------------------
 
     program ESMF_AppMainEx
+#include "ESMF.h"
     
 !   ! The ESMF Framework module
     use ESMF
+    use ESMF_TestMod
     
     ! User supplied modules
     use ESMF_CouplerEx, only: CPL_SetServices
@@ -269,7 +271,21 @@
     type(ESMF_VM) :: vm
     type(ESMF_State) :: importState, exportState
     type(ESMF_CplComp) :: cpl
-    integer :: finalrc
+    integer :: finalrc, result
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_CplEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
     finalrc = ESMF_SUCCESS
         
 !-------------------------------------------------------------------------
@@ -436,6 +452,9 @@
     print *, "Destroy calls returned"
 
     print *, "Application Example 1 finished"
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_Finalize(rc=rc)
 

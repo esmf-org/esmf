@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: sys_tests_results.pl,v 1.29 2012/01/04 23:59:01 svasquez Exp $
+# $Id: sys_tests_results.pl,v 1.30 2012/02/09 23:15:18 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 # The results are either complete results or a summary.
@@ -252,6 +252,9 @@ use File::Find
 				else {
 					push (@fail_tests, $file);
 				}			
+			}
+                        else {
+				push (@fail_tests, $file);
 			}
        		@file_lines=();
                 }

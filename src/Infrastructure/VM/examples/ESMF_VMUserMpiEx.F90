@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.21 2012/01/06 20:18:26 svasquez Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.22 2012/02/09 23:15:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,8 +33,10 @@
 !------------------------------------------------------------------------------
 
 program ESMF_VMUserMpiEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
 #ifndef ESMF_MPIUNI     
@@ -47,7 +49,22 @@ program ESMF_VMUserMpiEx
   integer:: ierr
 #endif
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_VMUserMpiEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
 #ifndef ESMF_MPIUNI     
 !BOC
@@ -62,6 +79,11 @@ program ESMF_VMUserMpiEx
   ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 !BOC
   call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
   ! Calling with endflag=ESMF_END_KEEPMPI instructs ESMF_Finalize() to keep
@@ -75,6 +97,8 @@ program ESMF_VMUserMpiEx
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
+
+
   ! print result
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_VMUserMpiEx.F90"

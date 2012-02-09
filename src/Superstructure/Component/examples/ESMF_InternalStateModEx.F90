@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.13 2012/01/06 20:18:55 svasquez Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.14 2012/02/09 23:15:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -187,13 +187,28 @@ end module
 !EOC
 
 program ESMF_InternalStateModEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   use user_mod
   implicit none
   
   type(ESMF_GridComp) :: comp1
-  integer :: rc, finalrc
+  integer :: rc, finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_InternalStateModEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
   finalrc = ESMF_SUCCESS
       
@@ -218,6 +233,10 @@ program ESMF_InternalStateModEx
 
   call ESMF_GridCompDestroy(comp1, rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
   if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 

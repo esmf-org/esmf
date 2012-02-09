@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMMEx.F90,v 1.2 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldSMMEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldSMMEx.F90,v 1.2 2012/01/06 20:16:35 svasquez Exp $'
+    '$Id: ESMF_FieldSMMEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -48,7 +48,7 @@
     type(ESMF_RouteHandle)                      :: routehandle
     type(ESMF_Array)                            :: srcArray, dstArray
     type(ESMF_ArraySpec)                        :: arrayspec
-    integer                                     :: localrc, lpe, i
+    integer                                     :: localrc, lpe, i, result
 
     integer, allocatable                        :: src_farray(:), dst_farray(:)
     integer                                     :: fa_shape(1), tlb(1), tub(1)
@@ -58,6 +58,20 @@
         
     real(ESMF_KIND_R4), allocatable          :: factorList(:)
     integer, allocatable                        :: factorIndexList(:,:)
+
+    character(ESMF_MAXSTR)                      :: testname
+    character(ESMF_MAXSTR)                      :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldSMMEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
     rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
@@ -395,6 +409,11 @@
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(src_farray2)
     if(allocated(factorList)) deallocate(factorList, factorIndexList)
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
      call ESMF_Finalize(rc=rc)
 

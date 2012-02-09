@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.54 2012/01/06 20:18:55 svasquez Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.55 2012/02/09 23:15:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -219,9 +219,11 @@
 !-------------------------------------------------------------------------
 !   ! Start of the main program.
     program ESMF_AppMainEx
+#include "ESMF.h"
     
 !   ! The ESMF Framework module
     use ESMF
+    use ESMF_TestMod
     
 !   ! User supplied modules, using only the public registration routine.
     use PHYS_Mod, only: PHYS_SetServices
@@ -244,7 +246,22 @@
     type(ESMF_CplComp) :: cpl
         
 !EOC
-    integer :: finalrc
+    integer :: finalrc, result
+
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_AppMainEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
 
@@ -460,6 +477,14 @@
     print *, "Comp Destroy returned"
 
     print *, "Application Example 1 finished"
+
+!EOC
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+!BOC
 
     call ESMF_Finalize(rc=rc)
 !EOC

@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.11 2012/01/06 20:19:25 svasquez Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.12 2012/02/09 23:15:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -131,8 +131,12 @@ end module ESMF_WebServUserModel
 !EOE
 !BOC
 program WebServicesEx
+#include "ESMF.h"
+
   ! ESMF Framework module
   use ESMF
+  use ESMF_TestMod
+
   use ESMF_WebServMod
   use ESMF_WebServUserModel
 
@@ -141,9 +145,23 @@ program WebServicesEx
   ! Local variables
   type(ESMF_GridComp) :: comp1     !! Grid Component
   integer             :: rc        !! Return Code
-  integer             :: finalrc   !! Final return code
+  integer             :: finalrc  !! Final return code
   integer             :: portNum   !! The port number for the listening socket
 !EOC
+  integer             :: result   
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_WebServicesEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 !BOE
 !  The port number specifies the id of the port on the local machine on which
 !  a listening socket will be created.  This socket is used by the service to
@@ -218,6 +236,11 @@ program WebServicesEx
 
 
 10 continue
+ ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+ ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+
 !BOC
   call ESMF_Finalize(rc=rc)
 !EOC

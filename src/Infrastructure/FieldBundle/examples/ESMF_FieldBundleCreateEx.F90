@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.17 2011/07/02 05:53:58 oehmke Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.18 2012/02/09 23:15:31 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -15,10 +15,12 @@
 
 !   ! Example program showing various ways to create a FieldBundle object.
 
-    program ESMF_FieldBundleCreateEx
+program ESMF_FieldBundleCreateEx
+#include "ESMF.h"
 
     ! ESMF Framework module
     use ESMF
+    use ESMF_TestMod
 
     implicit none
     
@@ -33,7 +35,21 @@
 !\end{verbatim}
 !EOP
 
-    integer :: finalrc
+    integer :: finalrc, result
+
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldBundleCreateEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
     finalrc = ESMF_SUCCESS
         
 !-------------------------------------------------------------------------
@@ -220,6 +236,11 @@
 
     call ESMF_GridDestroy(grid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
     if (finalrc.EQ.ESMF_SUCCESS) then
        print *, "PASS: ESMF_FieldBundleCreateEx.F90"

@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.24 2012/01/06 20:18:25 svasquez Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.25 2012/02/09 23:15:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,8 +31,10 @@
 !------------------------------------------------------------------------------
 
 program ESMF_VMGetMPICommunicatorEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   !include 'mpif.h'
@@ -53,7 +55,21 @@ program ESMF_VMGetMPICommunicatorEx
 #endif
 
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_VMGetMPICommunicatorEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMGetMPICommunicatorEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
@@ -73,6 +89,10 @@ program ESMF_VMGetMPICommunicatorEx
   call MPI_Barrier(mpic2, ierr)
 !EOC
 #endif
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.50 2012/01/06 20:17:45 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.51 2012/02/09 23:15:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -17,6 +17,7 @@ program ESMF_MeshEx
 !==============================================================================
 
 
+#include "ESMF.h"
 #include "ESMF_Macros.inc"
 
 ! !USES:
@@ -33,7 +34,7 @@ program ESMF_MeshEx
 
 
   ! individual test result code
-  integer :: finalrc, rc, petCount,localPet, localrc
+  integer :: finalrc, rc, petCount,localPet, localrc, result
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: name
@@ -56,6 +57,20 @@ program ESMF_MeshEx
 
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field
+
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_MeshEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
 
 
   finalrc = ESMF_SUCCESS
@@ -941,6 +956,10 @@ if (petCount .eq. 1) then
 endif ! 1 proc
 
 10   continue
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
 
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

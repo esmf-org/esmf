@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.21 2012/02/08 19:58:42 svasquez Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.22 2012/02/09 23:15:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -63,8 +63,8 @@ program ESMF_AttReadFieldEx
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    write(failMsg, *) "Example failure"
-    write(testname, *) "Example ESMF_AttReadFieldEx"
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_AttReadFieldEx"
 
 
 ! ------------------------------------------------------------------------------

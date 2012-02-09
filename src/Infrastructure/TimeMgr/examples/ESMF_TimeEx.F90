@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.51 2012/01/06 20:18:06 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.52 2012/02/09 23:15:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -22,13 +22,17 @@
 !
 ! This program shows examples of Time initialization and manipulation
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! instantiate two times
       type(ESMF_Time) :: time1, time2
+
+      type(ESMF_VM) :: vm
 
       ! instantiate a time interval
       type(ESMF_TimeInterval) :: timeinterval1
@@ -41,12 +45,25 @@
 !EOC
 
       ! result code
-      integer :: finalrc
+      integer :: finalrc, result
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_TimeEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
       finalrc = ESMF_SUCCESS
 
 !BOC
       ! initialize ESMF framework
-      call ESMF_Initialize(defaultCalKind=ESMF_CALKIND_GREGORIAN, &
+      call ESMF_Initialize(vm=vm, defaultCalKind=ESMF_CALKIND_GREGORIAN, &
         defaultlogfilename="TimeEx.Log", &
         logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
@@ -118,6 +135,12 @@
         print *, "time1 is smaller than or equal to time2"
       endif
 
+!EOC
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
+!BOC
       ! finalize ESMF framework
       call ESMF_Finalize(rc=rc)
 !EOC

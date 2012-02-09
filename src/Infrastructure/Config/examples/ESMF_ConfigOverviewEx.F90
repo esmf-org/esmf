@@ -27,14 +27,19 @@
 ! Note the API section contains a complete description of arguments in
 ! the methods/functions demonstrated in this example.
 !EOE 
+#include "ESMF.h"
 
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! Local variables
-      integer             :: i, j
+      integer             :: i, j, result
       type(ESMF_VM)       :: vm
+
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !BOE
 !\subsubsection{Variable declarations}
@@ -61,6 +66,17 @@
 !--------------------------------------------------------
       integer :: finalrc
       finalrc = ESMF_SUCCESS                      ! Establish initial success
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_ConfigOverviewEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
   
       call ESMF_Initialize(defaultlogfilename="ConfigOverviewEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)                 ! Initialize
@@ -393,6 +409,11 @@
       else
         print *, "FAIL: ESMF_ConfigOverviewEx.F90"
       end if
+ 
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
       call ESMF_Finalize(rc=rc)
 

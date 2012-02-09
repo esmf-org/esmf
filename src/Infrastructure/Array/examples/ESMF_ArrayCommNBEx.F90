@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommNBEx.F90,v 1.17 2012/01/06 20:15:17 svasquez Exp $
+! $Id: ESMF_ArrayCommNBEx.F90,v 1.18 2012/02/09 23:15:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,24 +15,40 @@
 !==============================================================================
 
 program ESMF_ArrayCommNBEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
+ 
   implicit none
   
   ! local variables
-  integer :: rc, petCount, localPet, finalrc
+  integer :: rc, petCount, localPet, finalrc, result
   type(ESMF_VM):: vm
   type(ESMF_DistGrid):: srcDistGrid, dstDistGrid
   type(ESMF_Array):: srcArray, dstArray
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_RouteHandle):: routehandle
   logical:: finishflag
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
+
 
   
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
   finalrc = ESMF_SUCCESS
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_ArrayCommNBEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
   call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayCommNBEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -255,6 +271,11 @@ program ESMF_ArrayCommNBEx
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 10 continue
+
+ ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+ ! file that the scripts grep for.
+  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE

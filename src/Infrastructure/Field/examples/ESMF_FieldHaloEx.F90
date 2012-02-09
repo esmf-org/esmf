@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.2 2012/01/06 20:16:35 svasquez Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.2 2012/01/06 20:16:35 svasquez Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -49,10 +49,23 @@
     type(ESMF_DistGrid)                         :: distgrid
     type(ESMF_VM)                               :: vm
     type(ESMF_RouteHandle)                      :: routehandle
-    integer                                     :: lpe, i
+    integer                                     :: lpe, i, result
 
     real(ESMF_KIND_R8), allocatable         :: tmp_farray(:)
     real(ESMF_KIND_R8), pointer             :: fptr(:)
+
+    character(ESMF_MAXSTR) :: testname
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldHaloEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
         
     rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
@@ -181,6 +194,11 @@
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     deallocate(fptr, tmp_farray)
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
 
      call ESMF_Finalize(rc=rc)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.44 2012/01/06 20:18:06 svasquez Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.45 2012/02/09 23:15:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,9 +23,11 @@
 !
 ! This program shows examples of Time Interval initialization and manipulation
 !-----------------------------------------------------------------------------
+#include "ESMF.h"
 
       ! ESMF Framework module
       use ESMF
+      use ESMF_TestMod
       implicit none
 
       ! instantiate some time intervals
@@ -39,7 +41,22 @@
 !EOC
 
       ! result code
-      integer :: finalrc
+      integer :: finalrc, result
+
+      character(ESMF_MAXSTR) :: testname
+      character(ESMF_MAXSTR) :: failMsg, finalMsg
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+      write(failMsg, *) "Example failure"
+      write(testname, *) "Example ESMF_TimeIntervalEx"
+
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+
+
       finalrc = ESMF_SUCCESS
 
 !BOC
@@ -152,9 +169,14 @@
         print *, "TimeInterval1 is larger than or equal to TimeInterval2"
       end if
 
+!EOC
+
+      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+      ! file that the scripts grep for.
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
       ! finalize ESMF framework
       call ESMF_Finalize(rc=rc)
-!EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

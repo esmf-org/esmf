@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.47 2012/01/06 20:16:26 svasquez Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.48 2012/02/09 23:15:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,8 +15,10 @@
 !==============================================================================
 
 program ESMF_DistGridEx
+#include "ESMF.h"
 
   use ESMF
+  use ESMF_TestMod
   
   implicit none
   
@@ -33,10 +35,22 @@ program ESMF_DistGridEx
   type(ESMF_DistGridConnection), allocatable:: connectionList(:)
   integer, allocatable:: localDeToDeMap(:), arbSeqIndexList(:)
   ! result code
-  integer :: finalrc
+  integer :: finalrc, result
+  character(ESMF_MAXSTR) :: testname
+  character(ESMF_MAXSTR) :: failMsg, finalMsg
   
   
   finalrc = ESMF_SUCCESS
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  write(failMsg, *) "Example failure"
+  write(testname, *) "Example ESMF_DistGridEx"
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
   call ESMF_Initialize(vm=vm, defaultlogfilename="DistGridEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -892,6 +906,11 @@ program ESMF_DistGridEx
 
 
 10 continue
+
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+  ! file that the scripts grep for.
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
