@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.59 2012/01/10 04:15:40 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.60 2012/02/09 22:35:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1639,6 +1639,7 @@ subroutine PrintUsage()
      print *, "                      --src_type [SCRIP|ESMF|UGRID]" 
      print *, "                      --dst_type [SCRIP|ESMF|UGRID]"
      print *, "                      -t [SCRIP|ESMF|UGRID]"
+     print *, "                      --64bit_offset"
      print *, "                      --src_meshname src_mesh_variable"
      print *, "                      --dst_meshname dst_mesh_variable"
      print *, "                      -r"
@@ -1675,6 +1676,15 @@ subroutine PrintUsage()
      print *, "             Without this argument, the src grids is assumed to be global."
      print *, "--dst_regional   - an optional argument specifying the destination grid is regional"
      print *, "             Without this argument, the dst grids is assumed to be global."
+     print *, "--64bit_offset  - an optional argument specifying the output weight file is in"
+     print *, "             NetCDF 64-bit offset format.  This option only works with NetCDF library"
+     print *, "             version 3.6 and above"
+     print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
+     print *, "             variable name that has all the topology information stored in its"
+     print *, "             attributes."
+     print *, "--dst_meshname  - required if the destination grid type is UGRID. It defines the"
+     print *, "             dummy variable name that has all the topology information stored in its"
+     print *, "             attributes."
      print *, "--help     - Print this help message and exit."
      print *, "--version  - Print ESMF version and license information and exit."
      print *, ""
