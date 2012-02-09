@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.65 2012/01/06 20:15:18 svasquez Exp $
+// $Id: ESMCI_Array.h,v 1.66 2012/02/09 19:22:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -39,6 +39,8 @@
 #include "ESMCI_LocalArray.h"
 #include "ESMCI_RHandle.h"
 
+#include <cstdio>
+
 //-------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -61,6 +63,9 @@ namespace ESMCI {
     }
     void print(){
       printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+    }
+    void fprint(std::FILE *fp){
+      fprintf(fp, "SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
     }
     bool valid(){
       if (decompSeqIndex == -1) return false; // invalid seqIndex

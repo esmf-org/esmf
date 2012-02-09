@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.139 2012/01/06 20:15:22 svasquez Exp $
+// $Id: ESMCI_Array.C,v 1.140 2012/02/09 19:22:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.139 2012/01/06 20:15:22 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.140 2012/02/09 19:22:47 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4808,6 +4808,11 @@ bool operator<(SeqIndex a, SeqIndex b){
 
 #define ASMMSTOREPRINT___disable
 
+#ifdef ASMMSTOREPRINT
+  char asmmstoreprintfile[160];
+  FILE *asmmstoreprintfp;
+#endif
+
 
 namespace ArrayHelper{
   
@@ -4920,7 +4925,8 @@ namespace ArrayHelper{
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 #ifdef ASMMSTOREPRINT
-    printf("gjt: XXE::recvnb on localPet %d from Pet %d\n", localPet, srcPet);
+    fprintf(asmmstoreprintfp, "gjt: XXE::recvnb on localPet %d from Pet %d\n",
+      localPet, srcPet);
 #endif
     recvnbIndex = xxe->count;  // store index for the associated wait
     int tag = 0;  // no need for special tags - messages are ordered to match
@@ -5335,12 +5341,14 @@ namespace ArrayHelper{
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
 #ifdef ASMMSTOREPRINT
-      printf("gjt: XXE::sendnb from localPet %d to Pet %d\n", localPet, dstPet);
+      fprintf(asmmstoreprintfp, "gjt: XXE::sendnb from localPet %d to Pet %d\n",
+        localPet, dstPet);
 #endif
       if (count == 1){
         // sendnbRRA out of single contiguous linIndex run
 #ifdef ASMMSTOREPRINT
-        printf("gjt: single contiguous linIndex run on src side\n");
+        fprintf(asmmstoreprintfp, "gjt: single contiguous linIndex run "
+          "on src side\n");
 #endif
         sendnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendnbRRA(predicateBitField,
@@ -5359,7 +5367,8 @@ namespace ArrayHelper{
       }else{
         // use intermediate buffer
 #ifdef ASMMSTOREPRINT
-        printf("gjt: non-contiguous linIndex on src side -> need buffer \n");
+        fprintf(asmmstoreprintfp, "gjt: non-contiguous linIndex on "
+          "src side -> need buffer \n");
 #endif
         // use intermediate buffer
         // memGatherSrcRRA pieces into intermediate buffer
@@ -5395,8 +5404,9 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
 #ifdef ASMMSTOREPRINT
-        printf("gjt - on localPet %d memGatherSrcRRA took dt_tk=%g s and"
-          " dt_byte=%g s for count=%d\n", localPet, dt_tk, dt_byte, count);
+        fprintf(asmmstoreprintfp, "gjt - on localPet %d memGatherSrcRRA took "
+          "dt_tk=%g s and dt_byte=%g s for count=%d\n", localPet, dt_tk,
+          dt_byte, count);
 #endif
         // decide for the fastest option
         if (dt_byte < dt_tk){
@@ -6848,9 +6858,12 @@ int Array::sparseMatMulStore(
   vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));
 
 #ifdef ASMMSTOREPRINT
+  sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
+  asmmstoreprintfp = fopen(asmmstoreprintfile, "a");
   for (int i=0; i<srcLocalDeCount; i++)
     for (int j=0; j<srcLocalDeElementCount[i]; j++)
-      printf("gjt: localPet %d, srcLinSeqList[%d][%d] = %d, %d\n", 
+      fprintf(asmmstoreprintfp, "gjt: localPet %d, srcLinSeqList[%d][%d] = %d, "
+        "%d\n", 
         localPet, i, j, srcLinSeqList[i][j].linIndex,
         srcLinSeqList[i][j].seqIndex);
 #endif
@@ -6935,13 +6948,13 @@ int Array::sparseMatMulStore(
   
 #ifdef ASMMSTOREPRINT
   for (int i=0; i<petCount; i++)
-    printf("gjt: dstSeqIndexMinMaxList[%d(0/1)] = %d/%d\n", i,
-      dstSeqIndexMinMaxList[i*2], dstSeqIndexMinMaxList[i*2+1]);
+    fprintf(asmmstoreprintfp, "gjt: dstSeqIndexMinMaxList[%d(0/1)] = %d/%d\n",
+      i, dstSeqIndexMinMaxList[i*2], dstSeqIndexMinMaxList[i*2+1]);
   for (int i=0; i<dstLocalDeCount; i++)
     for (int j=0; j<dstLocalDeElementCount[i]; j++){
-      printf("gjt: localPet %d, dstLinSeqList[%d][%d] = %d, ", 
+      fprintf(asmmstoreprintfp, "gjt: localPet %d, dstLinSeqList[%d][%d] = %d,",
         localPet, i, j, dstLinSeqList[i][j].linIndex);
-      dstLinSeqList[i][j].seqIndex.print();
+      dstLinSeqList[i][j].seqIndex.fprint(asmmstoreprintfp);
     }
 #endif
 
@@ -7001,8 +7014,8 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[petCount-1].count * srcTensorElementCountEff;
   
 #ifdef ASMMSTOREPRINT
-  printf("gjt: localPet %d, srcElementCountList[localPet] = %d, "
-    "srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
+  fprintf(asmmstoreprintfp, "gjt: localPet %d, srcElementCountList[localPet] = "
+    "%d, srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
     "srcSeqIndexInterval[localPet].min/.max = %d, %d\n",
     localPet, srcElementCountList[localPet], srcSeqIndexMinMax[0],
     srcSeqIndexMinMax[1], srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal,
@@ -7100,7 +7113,8 @@ int Array::sparseMatMulStore(
     dstSeqIndexInterval[petCount-1].count * dstTensorElementCountEff;
   
 #ifdef ASMMSTOREPRINT
-    printf("gjt: localPet %d, dstElementCountList[localPet] = %d, "
+    fprintf(asmmstoreprintfp, "gjt: localPet %d, dstElementCountList[localPet] "
+    "= %d, "
     "dstSeqIndexMinMax = %d / %d, dstSeqIndexMinGlobal/MaxGlobal = %d, %d, "
     "dstSeqIndexInterval[localPet].min/.max = %d, %d\n",
     localPet, dstElementCountList[localPet], dstSeqIndexMinMax[0],
@@ -7540,34 +7554,31 @@ int Array::sparseMatMulStore(
   delete [] srcLocalPartnerIntervalPerPetCount;
 
 #ifdef ASMMSTOREPRINT
-  char asmmstoreprintfile[160];
-  sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
-  FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
-  fprintf(asmmsotreprintfp, "\n========================================"
+  fprintf(asmmstoreprintfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmsotreprintfp, "========================================"
+  fprintf(asmmstoreprintfp, "========================================"
     "========================================\n\n");
   // some serious printing for src info
   for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
-    fprintf(asmmsotreprintfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
+    fprintf(asmmstoreprintfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
       "srcSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
       localPet, i+srcSeqIndexInterval[localPet].min, i,
       srcSeqIndexFactorLookup[i].factorCount);
     for (int j=0; j<srcSeqIndexFactorLookup[i].de.size(); j++)
-      fprintf(asmmsotreprintfp, "%d, ", srcSeqIndexFactorLookup[i].de[j]);
-    fprintf(asmmsotreprintfp, "\n");
+      fprintf(asmmstoreprintfp, "%d, ", srcSeqIndexFactorLookup[i].de[j]);
+    fprintf(asmmstoreprintfp, "\n");
     for (int j=0; j<srcSeqIndexFactorLookup[i].factorCount; j++){
-      fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+      fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
         srcSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
         jj<srcSeqIndexFactorLookup[i].factorList[j].partnerDe.size(); jj++)
-        fprintf(asmmsotreprintfp, "%d, ",
+        fprintf(asmmstoreprintfp, "%d, ",
           srcSeqIndexFactorLookup[i].factorList[j].partnerDe[jj]);
-      fprintf(asmmsotreprintfp, "\n");
-      fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+      fprintf(asmmstoreprintfp, "\n");
+      fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
         *((int *)srcSeqIndexFactorLookup[i].factorList[j].factor));
     }
   }
@@ -7576,29 +7587,28 @@ int Array::sparseMatMulStore(
 #ifdef ASMMSTOREPRINT
   // some serious printing for dst info
   for (int i=0; i<dstSeqIndexInterval[localPet].count; i++){
-    fprintf(asmmsotreprintfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
+    fprintf(asmmstoreprintfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
       "dstSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
       localPet, i+dstSeqIndexInterval[localPet].min, i,
       dstSeqIndexFactorLookup[i].factorCount);
     for (int j=0; j<dstSeqIndexFactorLookup[i].de.size(); j++)
-      fprintf(asmmsotreprintfp, "%d, ", dstSeqIndexFactorLookup[i].de[j]);
-    fprintf(asmmsotreprintfp, "\n");
+      fprintf(asmmstoreprintfp, "%d, ", dstSeqIndexFactorLookup[i].de[j]);
+    fprintf(asmmstoreprintfp, "\n");
     for (int j=0; j<dstSeqIndexFactorLookup[i].factorCount; j++){
-      fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+      fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
         dstSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
         jj<dstSeqIndexFactorLookup[i].factorList[j].partnerDe.size(); jj++)
-        fprintf(asmmsotreprintfp, "%d, ",
+        fprintf(asmmstoreprintfp, "%d, ",
           dstSeqIndexFactorLookup[i].factorList[j].partnerDe[jj]);
-      fprintf(asmmsotreprintfp, "\n");
-      fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+      fprintf(asmmstoreprintfp, "\n");
+      fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
         *((int *)dstSeqIndexFactorLookup[i].factorList[j].factor));
     }
   }
-  fclose(asmmsotreprintfp);
 #endif
 
 #ifdef ASMMSTORETIMING
@@ -7658,18 +7668,14 @@ int Array::sparseMatMulStore(
   delete [] dstSeqIndexInterval;
 
 #ifdef ASMMSTOREPRINT
-  char asmmstoreprintfile[160];
-  sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
-  FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
-  asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
-  fprintf(asmmsotreprintfp, "\n========================================"
+  fprintf(asmmstoreprintfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmsotreprintfp, "========================================"
+  fprintf(asmmstoreprintfp, "========================================"
     "========================================\n\n");
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcLocalDeElementCount[j]; k++){
-      fprintf(asmmsotreprintfp, "localPet: %d, "
+      fprintf(asmmstoreprintfp, "localPet: %d, "
         "srcLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqList[j][k].linIndex,
@@ -7677,17 +7683,17 @@ int Array::sparseMatMulStore(
         srcLinSeqList[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqList[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++){
-        fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmsotreprintfp, "%d, ",
+          fprintf(asmmstoreprintfp, "%d, ",
             srcLinSeqList[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmsotreprintfp, "\n");
-        fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+        fprintf(asmmstoreprintfp, "\n");
+        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqList[j][k].factorList[kk].factor));
       }
     }
@@ -7696,7 +7702,7 @@ int Array::sparseMatMulStore(
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
     for (int k=0; k<dstLocalDeElementCount[j]; k++){
-      fprintf(asmmsotreprintfp, "localPet: %d, "
+      fprintf(asmmstoreprintfp, "localPet: %d, "
         "dstLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqList[j][k].linIndex,
@@ -7704,22 +7710,21 @@ int Array::sparseMatMulStore(
         dstLinSeqList[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqList[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++){
-        fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmsotreprintfp, "%d, ",
+          fprintf(asmmstoreprintfp, "%d, ",
             dstLinSeqList[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmsotreprintfp, "\n");
-        fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+        fprintf(asmmstoreprintfp, "\n");
+        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqList[j][k].factorList[kk].factor));
       }
     }
   }
-  fclose(asmmsotreprintfp);
 #endif
     
   if (haloFlag){
@@ -7783,18 +7788,14 @@ int Array::sparseMatMulStore(
   }
   
 #ifdef ASMMSTOREPRINT
-  //char asmmstoreprintfile[160];
-  //sprintf(asmmstoreprintfile, "asmmstoreprint.%05d", localPet);
-  //FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
-  asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
-  fprintf(asmmsotreprintfp, "\n========================================"
+  fprintf(asmmstoreprintfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmsotreprintfp, "========================================"
+  fprintf(asmmstoreprintfp, "========================================"
     "========================================\n\n");
   // more serious printing
   for (int j=0; j<srcLocalDeCount; j++){
     for (int k=0; k<srcLocalDeElementCount[j]; k++){
-      fprintf(asmmsotreprintfp, "localPet: %d, "
+      fprintf(asmmstoreprintfp, "localPet: %d, "
         "srcLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, srcLinSeqList[j][k].linIndex,
@@ -7802,17 +7803,17 @@ int Array::sparseMatMulStore(
         srcLinSeqList[j][k].seqIndex.tensorSeqIndex,
         srcLinSeqList[j][k].factorCount);
       for (int kk=0; kk<srcLinSeqList[j][k].factorCount; kk++){
-        fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<srcLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmsotreprintfp, "%d, ",
+          fprintf(asmmstoreprintfp, "%d, ",
             srcLinSeqList[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmsotreprintfp, "\n");
-        fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+        fprintf(asmmstoreprintfp, "\n");
+        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqList[j][k].factorList[kk].factor));
       }
     }
@@ -7821,7 +7822,7 @@ int Array::sparseMatMulStore(
   // more serious printing
   for (int j=0; j<dstLocalDeCount; j++){
     for (int k=0; k<dstLocalDeElementCount[j]; k++){
-      fprintf(asmmsotreprintfp, "localPet: %d, "
+      fprintf(asmmstoreprintfp, "localPet: %d, "
         "dstLinSeqList[%d][%d].linIndex = %d, "
         ".seqIndex = %d/%d, .factorCount = %d\n",
         localPet, j, k, dstLinSeqList[j][k].linIndex,
@@ -7829,22 +7830,21 @@ int Array::sparseMatMulStore(
         dstLinSeqList[j][k].seqIndex.tensorSeqIndex,
         dstLinSeqList[j][k].factorCount);
       for (int kk=0; kk<dstLinSeqList[j][k].factorCount; kk++){
-        fprintf(asmmsotreprintfp, "\tfactorList[%d]\n"
+        fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
           "\t\t.partnerDe = ", kk,
           dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqList[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
           jj<dstLinSeqList[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmmsotreprintfp, "%d, ",
+          fprintf(asmmstoreprintfp, "%d, ",
             dstLinSeqList[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmmsotreprintfp, "\n");
-        fprintf(asmmsotreprintfp, "\t\t.factor = %d\n",
+        fprintf(asmmstoreprintfp, "\n");
+        fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqList[j][k].factorList[kk].factor));
       }
     }
   }
-  fclose(asmmsotreprintfp);
 #endif
   
 #ifdef ASMMSTORETIMING
@@ -7935,24 +7935,32 @@ int Array::sparseMatMulStore(
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t15);   //gjt - profile
-  printf("gjt - profile for PET %d:\n"
+  char asmmstoretimingfile[160];
+  sprintf(asmmstoretimingfile, "asmmstoretiming.%05d", localPet);
+  FILE *asmmstoretimingfp = fopen(asmmstoretimingfile, "a");
+  fprintf(asmmstoretimingfp, "\n========================================"
+    "========================================\n");
+  fprintf(asmmstoretimingfp, "========================================"
+    "========================================\n\n");
+  fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
     " t4a1=%g\n t4a2=%g\n t4a3=%g\n t4a=%g\n"
     " t4b1=%g\n t4b2=%g\n t4b3=%g\n t4b=%g\n",
     localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
     t4b-t3);
-  printf("gjt - profile for PET %d:\n"
+  fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
     " t5a1=%g\n t5a=%g\n t5b1=%g\n t5b=%g\n t5c=%g\n"
     " t5d1=%g\n t5d=%g\n t5e1=%g\n t5e=%g\n t5f=%g\n",
     localPet, 
     t5a1-t4, t5a-t4, t5b1-t4, t5b-t4, t5c-t4,
     t5d1-t4, t5d-t4, t5e1-t4, t5e-t4, t5f-t4);
-  printf("gjt - profile for PET %d:\n"
+  fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
     " t7=%g\n t8=%g\n t9=%g\n t10=%g\n t11=%g\n t12=%g\n t13=%g\n t14=%g\n"
     " t15=%g\n",
     localPet, t1-t0, t2-t0, t3-t0, t4-t0, 
     t5-t0, t6-t0, t7-t0, t8-t0, t9-t0, t10-t0, t11-t0, t12-t0, t13-t0, t14-t0,
     t15-t0);
+  fclose(asmmstoretimingfp);
 #endif
   
   }catch(int localrc){
@@ -7968,6 +7976,10 @@ int Array::sparseMatMulStore(
       "- Caught exception", &rc);
     return rc;
   }
+  
+#ifdef ASMMSTOREPRINT
+  fclose(asmmstoreprintfp);
+#endif
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -8174,7 +8186,8 @@ int sparseMatMulStoreEncodeXXE(
 #endif
         
 #ifdef ASMMSTOREPRINT
-printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
+fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
+  localDeFactorCount);
 #endif
     int *index2Ref2 = new int[localDeFactorCount];  // large enough
     int *factorIndexRef = new int[localDeFactorCount];  // large enough
@@ -8316,11 +8329,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 
 #ifdef ASMMSTOREPRINT
     // print:
-    printf("dstArray: %d, %d\n", j, recvnbDiffPartnerDeCount); 
+    fprintf(asmmstoreprintfp, "dstArray: %d, %d\n", j,
+      recvnbDiffPartnerDeCount); 
     for (int i=0; i<recvnbDiffPartnerDeCount; i++)
       for (int k=0; k<dstInfoTable[i].size(); k++)
-        printf("dstInfoTable[%d][%d].seqIndex = %d/%d, .partnerSeqIndex[][] ="
-          " %d/%d\n", i, k,
+        fprintf(asmmstoreprintfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+          ".partnerSeqIndex[][] = %d/%d\n", i, k,
           dstInfoTable[i][k].seqIndex.decompSeqIndex, 
           dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
           dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex, 
@@ -8365,16 +8379,16 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       recvnbElement.petCount = petCount;
       recvnbVector.push_back(recvnbElement);
 #ifdef ASMMSTOREPRINT
-      printf("gjt: recvnbElement localPet %d, srcPet %d, vectorLength=%d\n",
-        localPet, srcPet, recvnbElement.vectorLength);
+      fprintf(asmmstoreprintfp, "gjt: recvnbElement localPet %d, srcPet %d, "
+        "vectorLength=%d\n", localPet, srcPet, vectorLength);
 #endif
     } // for i - recvnbDiffPartnerDeCount
     
 #ifdef ASMMSTORETIMING
     VMK::wtime(&t9e);   //gjt - profile
-    printf("gjt - profile for PET %d, j-loop %d:\n"
-      " t9a=%g\n t9b=%g\n t9c1=%g\n t9c2=%g\n t9d=%g\n t9e=%g\n", localPet, j,
-      t9a-*t8, t9b-*t8, t9c1-*t8, t9c2-*t8, t9d-*t8, t9e-*t8);
+//    printf("gjt - profile for PET %d, j-loop %d:\n"
+//      " t9a=%g\n t9b=%g\n t9c1=%g\n t9c2=%g\n t9d=%g\n t9e=%g\n", localPet, j,
+//      t9a-*t8, t9b-*t8, t9c1-*t8, t9c2-*t8, t9d-*t8, t9e-*t8);
 #endif
     
   } // for j - dstLocalDeCount
@@ -8527,8 +8541,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     // print:
     for (int i=0; i<sendnbDiffPartnerDeCount; i++)
       for (int k=0; k<srcInfoTable[i].size(); k++)
-        printf("srcInfoTable[%d][%d].seqIndex = %d/%d, .partnerSeqIndex[][] ="
-          " %d/%d\n", i, k,
+        fprintf(asmmstoreprintfp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
+          ".partnerSeqIndex[][] = %d/%d\n", i, k,
           srcInfoTable[i][k].seqIndex.decompSeqIndex, 
           srcInfoTable[i][k].seqIndex.tensorSeqIndex, 
           srcInfoTable[i][k].partnerSeqIndex.decompSeqIndex, 
@@ -8589,8 +8603,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
       sendnbElement.petCount = petCount;
       sendnbVector.push_back(sendnbElement);
 #ifdef ASMMSTOREPRINT
-      printf("gjt: sendnbElement localPet %d, dstPet %d, vectorLength=%d\n",
-        localPet, dstPet, sendnbElement.vectorLength);
+      fprintf(asmmstoreprintfp, "gjt: sendnbElement localPet %d, dstPet %d, "
+        "vectorLength=%d\n", localPet, dstPet, vectorLength);
 #endif
     } // for i - sendnbDiffPartnerDeCount
     // garbage collection
@@ -8627,12 +8641,12 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
 #define ASMMSTOREOPTPRINT___disable
   
 #ifdef ASMMSTOREOPTPRINT
-  char asmmstoreprintfile[160];
-  sprintf(asmmstoreprintfile, "asmmstoreoptprint.%05d", localPet);
-  FILE *asmmsotreprintfp = fopen(asmmstoreprintfile, "a");
-  fprintf(asmmsotreprintfp, "\n========================================"
+  char asmmstoreoptprintfile[160];
+  sprintf(asmmstoreoptprintfile, "asmmstoreoptprint.%05d", localPet);
+  FILE *asmmstoreoptprintfp = fopen(asmmstoreoptprintfile, "a");
+  fprintf(asmmstoreoptprintfp, "\n========================================"
     "========================================\n");
-  fprintf(asmmsotreprintfp, "========================================"
+  fprintf(asmmstoreoptprintfp, "========================================"
     "========================================\n\n");
 #endif
   
@@ -8691,7 +8705,7 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     }
     dtAverage /= dtCount;
 #ifdef ASMMSTOREOPTPRINT
-    fprintf(asmmsotreprintfp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
+    fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
       localPet, srcTermProcessing, dtAverage);
 #endif
     // determine optimum srcTermProcessing  
@@ -8710,8 +8724,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   } // srcTermProcessing
 
 #ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmsotreprintfp, "localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs\n", 
-    localPet, srcTermProcessingOpt, dtMin);
+  fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d -> "
+    "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
 #endif
     
   // all PETs vote on srcTermProcessingOpt
@@ -8742,8 +8756,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   }
   
 #ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmsotreprintfp, "localPet: %d, srcTermProcessingOpt=%d -> dtMin=%gs (after vote)\n", 
-    localPet, srcTermProcessingOpt, dtMin);
+  fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d "
+    "(majority vote)\n", localPet, srcTermProcessingOpt);
 #endif
     
 #ifdef ASMMSTORETIMING
@@ -8791,8 +8805,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
     }
     dtAverage /= dtCount;
 #ifdef ASMMSTOREOPTPRINT
-    fprintf(asmmsotreprintfp, "localPet: %d, pipelineDepth=%d -> dtAverage=%gs\n", 
-      localPet, pipelineDepth, dtAverage);
+    fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepth=%d -> "
+      "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
 #endif
     // determine optimum pipelineDepth  
     if (pipelineDepth==1){
@@ -8810,8 +8824,8 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   } // pipelineDepth
   
 #ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmsotreprintfp, "localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs\n", 
-    localPet, pipelineDepthOpt, dtMin);
+  fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d -> "
+    "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
 #endif
     
   // all PETs vote on pipelineDepthOpt
@@ -8841,9 +8855,9 @@ printf("iCount: %d, localDeFactorCount: %d\n", iCount, localDeFactorCount);
   }
 
 #ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmsotreprintfp, "localPet: %d, pipelineDepthOpt=%d -> dtMin=%gs (after vote)\n", 
-    localPet, pipelineDepthOpt, dtMin);
-  fclose(asmmsotreprintfp);
+  fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d "
+    "(majority vote)\n", localPet, pipelineDepthOpt);
+  fclose(asmmstoreoptprintfp);
 #endif
       
 #ifdef ASMMSTORETIMING
@@ -9250,7 +9264,7 @@ int Array::sparseMatMul(
 #define ASMMTIMING___disable
     
 #ifdef ASMMTIMING
-    double t0, t1, t2, t3, t4, t5, t6;            //gjt - profile
+    double t0, t1, t2, t3, t4, t5, t6, t7;            //gjt - profile
     VMK::wtime(&t0);      //gjt - profile
 #endif    
 
@@ -9422,6 +9436,10 @@ int Array::sparseMatMul(
     }
   }
   
+#ifdef ASMMTIMING
+  VMK::wtime(&t5);      //gjt - profile
+#endif
+  
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
     finishedflag, cancelledflag);
@@ -9429,14 +9447,14 @@ int Array::sparseMatMul(
     return rc;
 
 #ifdef ASMMTIMING
-  VMK::wtime(&t5);      //gjt - profile
+  VMK::wtime(&t6);      //gjt - profile
 #endif
   
   // garbage collection
   delete [] rraList;
   
 #ifdef ASMMTIMING
-  VMK::wtime(&t6);      //gjt - profile
+  VMK::wtime(&t7);      //gjt - profile
   VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -9454,8 +9472,9 @@ int Array::sparseMatMul(
     "\tdt3 = %g\n"
     "\tdt4 = %g\n"
     "\tdt5 = %g\n"
-    "\tdt6 = %g\n",
-    localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0);
+    "\tdt6 = %g\n"
+    "\tdt7 = %g\n",
+    localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0, t7-t0);
   fclose(fp);
 #endif
   
