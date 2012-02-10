@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.29 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.30 2012/02/10 22:30:00 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -284,7 +284,7 @@ program ESMF_ArrayFarrayEx
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 !BOC
   call ESMF_Finalize(rc=rc)
