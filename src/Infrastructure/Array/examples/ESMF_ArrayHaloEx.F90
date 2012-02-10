@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloEx.F90,v 1.14 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArrayHaloEx.F90,v 1.15 2012/02/10 22:50:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -106,7 +106,6 @@ program ESMF_ArrayHaloEx
     rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
 !BOE
 ! Without the explicit definition of boundary conditions in the DistGrid
 ! the following inner connections are defined.
