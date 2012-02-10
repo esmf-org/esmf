@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbHaloEx.F90,v 1.15 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArrayArbHaloEx.F90,v 1.16 2012/02/10 18:23:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -555,7 +555,7 @@ program ESMF_ArrayArbHaloEx
 10 continue
 ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
-    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
   call ESMF_Finalize(rc=rc)
