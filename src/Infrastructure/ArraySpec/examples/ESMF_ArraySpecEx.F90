@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.23 2012/02/09 23:15:23 svasquez Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.24 2012/02/10 23:55:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOP
 !\subsubsection{Set ArraySpec values}
@@ -74,7 +74,7 @@
                              typekind=ESMF_TYPEKIND_R8, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOP
 !\subsubsection{Get ArraySpec values}
@@ -89,7 +89,7 @@
       print *, "rank =", myrank
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
       ! file that the scripts grep for.
