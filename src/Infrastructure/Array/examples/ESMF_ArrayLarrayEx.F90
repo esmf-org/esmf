@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayLarrayEx.F90,v 1.35 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArrayLarrayEx.F90,v 1.36 2012/02/10 23:12:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -299,13 +299,21 @@ program ESMF_ArrayLarrayEx
 !BOC
   do de=1, 2
     call ESMF_LocalArrayGet(larrayList(de), farrayPtr, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     deallocate(farrayPtr)
     call ESMF_LocalArrayDestroy(larrayList(de), rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
   enddo
   deallocate(larrayList)
   deallocate(larrayRefList)
   call ESMF_ArrayDestroy(array, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC  
 !BOE
 ! With that ESMF can be shut down cleanly.
@@ -313,7 +321,7 @@ program ESMF_ArrayLarrayEx
 10 continue
 ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
 ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
 !BOC
