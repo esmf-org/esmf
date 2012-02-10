@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.22 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.23 2012/02/10 23:26:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -325,7 +325,7 @@ program ESMF_ArrayScatterGatherEx
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
   
