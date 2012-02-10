@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.28 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.29 2012/02/10 23:40:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -233,6 +233,9 @@ program ESMF_ArraySparseMatMulEx
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
       
     deallocate(factorList)
     deallocate(factorIndexList)
@@ -246,6 +249,9 @@ program ESMF_ArraySparseMatMulEx
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
       
     deallocate(factorList)
     deallocate(factorIndexList)
@@ -254,6 +260,9 @@ program ESMF_ArraySparseMatMulEx
     
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
       
   endif
 !EOC
@@ -403,6 +412,9 @@ program ESMF_ArraySparseMatMulEx
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
       
     deallocate(factorList)
     deallocate(factorIndexList)
@@ -416,6 +428,10 @@ program ESMF_ArraySparseMatMulEx
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       
     deallocate(factorList)
     deallocate(factorIndexList)
@@ -424,6 +440,10 @@ program ESMF_ArraySparseMatMulEx
     
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)  
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
   endif
 !EOC
 
@@ -535,6 +555,10 @@ program ESMF_ArraySparseMatMulEx
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       
     deallocate(factorList)
     deallocate(factorIndexList)
@@ -550,6 +574,10 @@ program ESMF_ArraySparseMatMulEx
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, factorList=factorList, &
       factorIndexList=factorIndexList, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       
     deallocate(factorList)
     deallocate(factorIndexList)
@@ -558,6 +586,10 @@ program ESMF_ArraySparseMatMulEx
     
     call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
       routehandle=sparseMatMulHandle, rc=rc)  
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
   endif
 !EOC
 
@@ -613,7 +645,7 @@ program ESMF_ArraySparseMatMulEx
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
   
