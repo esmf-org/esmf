@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.30 2012/02/09 23:15:20 svasquez Exp $
+! $Id: ESMF_ArrayFarrayHaloEx.F90,v 1.31 2012/02/10 22:42:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -162,9 +162,13 @@ print *, "localSum=", localSum
 !EOE
 !BOC
   call ESMF_ArrayDestroy(array, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
   deallocate(farrayA)
   call ESMF_DistGridDestroy(distgrid, rc=rc)
 !EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 10 continue
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
