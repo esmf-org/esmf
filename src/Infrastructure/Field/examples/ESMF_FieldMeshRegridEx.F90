@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshRegridEx.F90,v 1.28 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldMeshRegridEx.F90,v 1.29 2012/02/13 23:39:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_MeshEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.28 2012/02/09 23:15:30 svasquez Exp $'
+    '$Id: ESMF_FieldMeshRegridEx.F90,v 1.29 2012/02/13 23:39:18 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -619,6 +619,8 @@ program ESMF_MeshEx
          nodeOwners=srcNodeOwners, elementIds=srcElemIds,&
          elementTypes=srcElemTypes, elementConn=srcElemConn, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -628,17 +630,25 @@ program ESMF_MeshEx
   ! Set description of source Field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   ! Create source Field
   srcField = ESMF_FieldCreate(srcMesh, arrayspec, &
                         name="source", rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   ! Get source Field data pointer to put data into
   call ESMF_FieldGet(srcField, 0, fptr1D,  rc=rc)
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Get number of local nodes to allocate space
   ! to hold local node coordinates
   call ESMF_MeshGet(srcMesh, &
          numOwnedNodes=numOwnedNodes, rc=rc)
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Allocate space to hold local node coordinates
   ! (spatial dimension of Mesh*number of local nodes)
@@ -647,6 +657,8 @@ program ESMF_MeshEx
   ! Get local node coordinates
   call ESMF_MeshGet(srcMesh, &
          ownedNodeCoords=ownedNodeCoords, rc=rc)
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Set the source Field to the function 20.0+x+y
   do i=1,numOwnedNodes
@@ -684,6 +696,8 @@ program ESMF_MeshEx
          nodeOwners=dstNodeOwners, elementIds=dstElemIds,&
          elementTypes=dstElemTypes, elementConn=dstElemConn, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Create Destination Field
@@ -692,9 +706,13 @@ program ESMF_MeshEx
   ! Set description of source Field
   call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   ! Create destination Field
   dstField = ESMF_FieldCreate(dstMesh, arrayspec, &
                         name="destination", rc=rc)
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Do Regrid
@@ -708,9 +726,13 @@ program ESMF_MeshEx
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   ! Perform Regrid operation moving data from srcField to dstField
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=rc)
 
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! dstField now contains the interpolated data.
@@ -731,16 +753,26 @@ program ESMF_MeshEx
   ! Free the RouteHandle
   call ESMF_FieldRegridRelease(routeHandle, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   ! Free the Fields
   call ESMF_FieldDestroy(srcField, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_FieldDestroy(dstField, rc=rc)
+
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Free the Meshes
   call ESMF_MeshDestroy(dstMesh, rc=rc)
 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_MeshDestroy(srcMesh, rc=rc)
  
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !EOC
 
    ! Cleanup after example
