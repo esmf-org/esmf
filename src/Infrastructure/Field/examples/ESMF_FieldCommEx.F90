@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.4 2012/02/13 22:35:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.4 2012/02/13 22:35:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -62,6 +62,7 @@
 
     rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -107,23 +108,24 @@
 !BOC 
     ! Get current VM and pet number
     call ESMF_VMGetCurrent(vm, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, localPet=lpe, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Create a 2D Grid and use this grid to create a Field
     ! farray is the Fortran data array that contains data on each PET.
     grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
         regDecomp=(/2,2/), &
         name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, rc=localrc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
     call ESMF_FieldGet(field, farrayPtr=fptr, rc=localrc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !---------Initialize pet specific field data----------------
     !    1        5         10
     ! 1  +--------+---------+
@@ -140,7 +142,7 @@
     ! allocate the Fortran data array on PET 0 to store gathered data
     if(lpe .eq. 0) allocate(farrayDst(10,20))
     call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! check that the values gathered on rootPet are correct
     if(lpe .eq. 0) then
@@ -150,14 +152,14 @@
              if(farrayDst(i*5, j*10) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
           enddo
        enddo
-      if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 
     ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(field, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridDestroy(grid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     if(lpe .eq. 0) deallocate(farrayDst)
 !EOC
 
@@ -178,10 +180,10 @@
     grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
         regDecomp=(/2,2/), &
         name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_I4, rc=localrc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! initialize values to be scattered
     !    1        5         10
@@ -204,24 +206,24 @@
 
     ! scatter the data onto individual PETs of the Field
     call ESMF_FieldScatter(field, farraySrc, rootPet=0, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! verify that the scattered data is properly distributed
     do i = lbound(fptr, 1), ubound(fptr, 1)
         do j = lbound(fptr, 2), ubound(fptr, 2)
             if(fptr(i, j) .ne. lpe) localrc = ESMF_FAILURE
         enddo
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
     ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(field, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridDestroy(grid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     if(lpe .eq. 0) deallocate(farraySrc)
 !EOC
 !------------------------------------------------------------------------------
