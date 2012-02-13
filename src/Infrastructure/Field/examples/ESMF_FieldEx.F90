@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.49 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.50 2012/02/13 23:08:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -136,30 +136,30 @@
     grid3d = ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/), &
             maxIndex=(/xdim,ydim,zdim/), &
             regDecomp=(/2,2,1/), name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_GridGet(grid=grid3d, staggerloc=ESMF_STAGGERLOC_CENTER, &
            distgrid=distgrid3d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_GridGetFieldBounds(grid=grid3d, localDe=0, &
         staggerloc=ESMF_STAGGERLOC_CENTER, totalCount=fa_shape, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     allocate(farray(fa_shape(1), fa_shape(2), fa_shape(3)) )
 
     ! create an Array 
     array3d = ESMF_ArrayCreate(distgrid3d, farray, &
 	indexflag=ESMF_INDEX_DELOCAL, rc=rc) 
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create a Field
     field = ESMF_FieldCreate(grid=grid3d, array=array3d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
     ! retrieve the Fortran data pointer from the Field
     call ESMF_FieldGet(field=field, localDe=0, farrayPtr=farray1, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! retrieve the Fortran data pointer from the Field and bounds
     call ESMF_FieldGet(field=field, localDe=0, farrayPtr=farray1, &
@@ -170,6 +170,7 @@
         exclusiveCount=excl_count, &
         totalCount=total_count, &
         rc=rc)   
+
 
     ! iterate through the total bounds of the field data pointer
     do k = totalLBnd(3), totalUBnd(3)
@@ -182,7 +183,7 @@
         enddo
     enddo
 !EOC
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     print *, "Field Get Data Pointer example returned"
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -210,11 +211,11 @@
         name=name, &
         rc=rc)
 !EOC
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     print *, "Field Get Grid and Array example returned"
 
     call ESMF_FieldDestroy(field, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -246,13 +247,13 @@
     ! create a grid
     grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create a Field from the Grid and arrayspec
     field1 = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
         indexflag=ESMF_INDEX_DELOCAL, &
         staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_FieldGet(field1, localDe=0, farrayPtr=farray2dd, &
         totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
@@ -263,14 +264,14 @@
         enddo
     enddo
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
     print *, "Field creation from Grid, typekind, and rank returned"
 
     call ESMF_GridDestroy(grid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_FieldDestroy(field1, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -301,17 +302,17 @@
     ! create a grid
     grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
           regDecomp=(/2,2/), name="atmgrid", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! setup arrayspec
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create a Field from the Grid and arrayspec
     field1 = ESMF_FieldCreate(grid, arrayspec, &
          indexflag=ESMF_INDEX_DELOCAL, &
          staggerloc=ESMF_STAGGERLOC_CENTER, name="pressure", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_FieldGet(field1, localDe=0, farrayPtr=farray2dd, &
         totalLBound=ftlb, totalUBound=ftub, totalCount=ftc, rc=rc)
@@ -322,11 +323,11 @@
         enddo
     enddo
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
     call ESMF_FieldDestroy(field1, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !   A user can also create an ArraySpec that has a different rank
@@ -355,10 +356,10 @@
 !BOC
     grid2d = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), &
           maxIndex=(/180,360/), regDecomp=(/2,2/), name="atmgrid", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R4, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     field1 = ESMF_FieldCreate(grid2d, arrayspec, &
          indexflag=ESMF_INDEX_DELOCAL, &
@@ -366,7 +367,7 @@
          gridToFieldMap=(/1,2/), &
          ungriddedLBound=(/1/), ungriddedUBound=(/50/), &
          name="pressure", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
     print *, "Field creation from Grid and Arrayspec returned"
@@ -389,25 +390,25 @@
     ! Get necessary information from the Grid
     call ESMF_GridGet(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
         distgrid=distgrid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Create a 2D ESMF_TYPEKIND_R4 arrayspec
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Create a ESMF_Array from the arrayspec and distgrid
     array2d = ESMF_ArrayCreate(arrayspec=arrayspec, &
             distgrid=distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Create a ESMF_Field from the grid and array
     field4 = ESMF_FieldCreate(grid, array2d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
     print *, "Field Create from a Grid and an Array returned"
     call ESMF_FieldDestroy(field4, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -427,13 +428,13 @@
     ! create an empty Field
     field3 = ESMF_FieldEmptyCreate(name="precip", rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! use FieldGet to retrieve the Field Status
     call ESMF_FieldGet(field3, status=fstatus, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !  Once the Field is created, we can verify that the status of the Field
@@ -441,7 +442,7 @@
 !EOE
 !BOC
     ! Test the status of the Field
-    if(fstatus /= ESMF_FIELDSTATUS_EMPTY) finalrc = ESMF_FAILURE
+    if (fstatus /= ESMF_FIELDSTATUS_EMPTY) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
 !BOE
@@ -455,17 +456,17 @@
     call ESMF_FieldEmptySet(field3, grid2d, &
              staggerloc=ESMF_STAGGERLOC_EDGE1, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! use FieldGet to retrieve the Field Status again
     call ESMF_FieldGet(field3, status=fstatus, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! Test the status of the Field
-    if(fstatus /= ESMF_FIELDSTATUS_GRIDSET) finalrc = ESMF_FAILURE
+    if (fstatus /= ESMF_FIELDSTATUS_GRIDSET) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
 !BOE
@@ -481,22 +482,22 @@
     call ESMF_FieldEmptyComplete(field3, typekind=ESMF_TYPEKIND_R8, &
       ungriddedLBound=(/1/), ungriddedUBound=(/5/), rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! use FieldGet to retrieve the Field Status again
     call ESMF_FieldGet(field3, status=fstatus, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! Test the status of the Field
-    if(fstatus /= ESMF_FIELDSTATUS_COMPLETE) finalrc = ESMF_FAILURE
+    if (fstatus /= ESMF_FIELDSTATUS_COMPLETE) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
     print *, "Complete a Field created by ESMF_FieldEmptyCreate returned"
     call ESMF_FieldDestroy(field3, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -540,12 +541,12 @@
 !BOC
     ! create an empty Field
     field3 = ESMF_FieldEmptyCreate(name="precip", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! use FieldGet to retrieve total counts 
     call ESMF_GridGetFieldBounds(grid2d, localDe=0, &
         staggerloc=ESMF_STAGGERLOC_CENTER, totalCount=ftc, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! allocate the 2d Fortran array based on retrieved total counts
     allocate(farray2d(ftc(1), ftc(2)))
@@ -553,9 +554,10 @@
     ! finalize the Field
     call ESMF_FieldEmptyComplete(field3, grid2d, farray2d, rc=rc)
 !EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     print *, "Complete a Field created by ESMF_FieldEmptyCreate returned"
     call ESMF_FieldDestroy(field3, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(farray2d)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
@@ -580,11 +582,11 @@
     ! create a 5d distgrid
     distgrid5d = ESMF_DistGridCreate(minIndex=(/1,1,1,1,1/), &
         maxIndex=(/10,4,10,4,6/), regDecomp=(/2,1,2,1,1/), rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Create a 5d Grid
     grid5d = ESMF_GridCreate(distgrid=distgrid5d, name="grid", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! use FieldGet to retrieve total counts 
     call ESMF_GridGetFieldBounds(grid5d, localDe=0, ungriddedLBound=(/1,2/), &
@@ -593,7 +595,7 @@
         gridToFieldMap=(/3,2,5,4,1/), &
         totalCount=fsize, &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! allocate the 7d Fortran array based on retrieved total counts
     allocate(farray7d(fsize(1), fsize(2), fsize(3), fsize(4), fsize(5), &
@@ -605,7 +607,7 @@
         totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 !BOE
 !  A user can allocate the Fortran array in a different manner using the lower and
@@ -621,7 +623,7 @@
         gridToFieldMap=(/3,2,5,4,1/), &
         totalLBound=flbound, totalUBound=fubound, &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     allocate(farray7d2(flbound(1):fubound(1), flbound(2):fubound(2), &
 		       flbound(3):fubound(3), flbound(4):fubound(4), &
@@ -633,18 +635,18 @@
         totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
         gridToFieldMap=(/3,2,5,4,1/), &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 
     print *, "Field Create from a Grid and a Fortran data pointer returned"
     call ESMF_FieldDestroy(field7d)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_FieldDestroy(field7d2)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridDestroy(grid5d)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_DistGridDestroy(distgrid5d)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(farray7d)
     deallocate(farray7d2)
 
@@ -670,16 +672,14 @@
     call ESMF_FieldDestroy(field1, rc=rc)
 !!EremoveOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !-------------------------------------------------------------------------
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     call ESMF_GridDestroy(grid3d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridDestroy(grid2d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_ArrayDestroy(array3d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(farray)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
