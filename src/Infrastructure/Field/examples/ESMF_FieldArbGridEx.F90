@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.24 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.25 2012/02/13 21:43:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -169,29 +169,29 @@
       minIndex=(/1,1,1/), maxIndex=(/xdim, ydim,zdim/), &
       arbIndexList=localArbIndex,arbIndexCount=localArbIndexCount, &
       name="arb3dgrid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create a 2D arrayspec
     call ESMF_ArraySpecSet(arrayspec2D, rank=2, typekind=ESMF_TYPEKIND_R4, &
          rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create a 2D Field using the Grid and the arrayspec
     field = ESMF_FieldCreate(grid3d, arrayspec2D, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
     call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, &
                        rc=rc)
     if (myPet .eq. 0) print *, 'Field rank, dimCount', &
                                 rank, dimCount
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
     ! verify that the dimension counts are correct
     if (rank .ne. 2) correct = .false.
     if (dimCount .ne. 3) correct = .false.  
 !EOC
     call ESMF_FieldDestroy(field, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !-------------------------------- Example -----------------------------
@@ -217,25 +217,25 @@
 !BOC
     field = ESMF_FieldCreate(grid3d, arrayspec2D,gridToFieldMap=(/0,0,1/), &
             ungriddedLBound=(/1/), ungriddedUBound=(/10/),rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
     call ESMF_FieldGet(field, rank=rank, dimCount=dimCount, &
                        rc=rc)
     if (myPet .eq. 0) print *, 'Field rank, dimCount', &
                                 rank, dimCount
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
     if (rank .ne. 2) correct = .false.
     if (dimCount .ne. 2) correct = .false.  
 !EOC
     print *, "Field with replicated dimension returned"
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! release resources
     call ESMF_FieldDestroy(field, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridDestroy(grid3d, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(localArbIndex)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
