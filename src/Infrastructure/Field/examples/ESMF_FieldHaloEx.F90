@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldHaloEx.F90,v 1.4 2012/02/13 23:29:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloEx.F90,v 1.3 2012/02/09 23:15:30 svasquez Exp $'
+    '$Id: ESMF_FieldHaloEx.F90,v 1.4 2012/02/13 23:29:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -101,10 +101,10 @@
 
     ! Get current VM and pet number
     call ESMF_VMGetCurrent(vm, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, localPet=lpe, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
 ! create 1D distgrid and grid decomposed according to the following diagram:
@@ -116,10 +116,10 @@
 ! +------------+   +----------------+   +---------------+   +--------------+
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/npx/), &
         regDecomp=(/4/), rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! set up initial condition and boundary conditions of the 
     ! temperature Field
@@ -133,7 +133,7 @@
 
         field = ESMF_FieldCreate(grid, fptr, totalUWidth=(/1/), &
 		name="temperature", rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     else if(lpe == 3) then
         allocate(fptr(17), tmp_farray(17))
         fptr = 20.
@@ -144,7 +144,7 @@
 
         field = ESMF_FieldCreate(grid, fptr, totalLWidth=(/1/), &
 		name="temperature", rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     else
         allocate(fptr(18), tmp_farray(18))
         fptr = 20.
@@ -153,12 +153,12 @@
 
         field = ESMF_FieldCreate(grid, fptr, &
             totalLWidth=(/1/), totalUWidth=(/1/), name="temperature", rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 
     ! compute the halo update routehandle of the decomposed temperature Field
     call ESMF_FieldHaloStore(field, routehandle=routehandle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     dt = 0.01
     dx = 1./npx
@@ -178,21 +178,21 @@
      ! call halo update to communicate the values in the halo region to 
      ! neighboring domains
      call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
-     if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
     ! release the halo routehandle
     call ESMF_FieldHaloRelease(routehandle, rc=rc)
 !EOC
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! destroy all objects created in this example to prevent memory leak
     call ESMF_FieldDestroy(field, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_GridDestroy(grid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(fptr, tmp_farray)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
