@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.58 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.59 2012/02/14 20:44:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.58 2012/02/09 23:15:30 svasquez Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.59 2012/02/14 20:44:43 svasquez Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -139,7 +139,7 @@ program ESMF_FieldRegridEx
 
    srcField = ESMF_FieldCreate(gridSrc, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    dstField = ESMF_FieldCreate(gridDst, arrayspec, &
                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -440,6 +440,7 @@ program ESMF_FieldRegridEx
   call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
                "srcmesh", srcArray, &
                spherical=spherical_grid, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
                "dstmesh", dstArray, &
                spherical=spherical_grid, rc=localrc)
@@ -447,13 +448,15 @@ program ESMF_FieldRegridEx
 #endif
 
   call ESMF_GridDestroy(gridSrc, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridDestroy(gridDst, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 10   continue
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize(rc=rc)
 
