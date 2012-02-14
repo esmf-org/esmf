@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.27 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.28 2012/02/14 20:51:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.27 2012/02/09 23:15:30 svasquez Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.28 2012/02/14 20:51:28 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -139,7 +139,7 @@ program ESMF_FieldRegridEx
 
    srcField = ESMF_FieldCreate(gridSrc, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    dstField = ESMF_FieldCreate(gridDst, arrayspec, &
                   staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
@@ -339,6 +339,7 @@ program ESMF_FieldRegridEx
   call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
                "srcmesh", srcArray, &
                spherical=spherical_grid, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
                "dstmesh", dstArray, &
                spherical=spherical_grid, rc=localrc)
