@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSphereRegridEx.F90,v 1.38 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldSphereRegridEx.F90,v 1.39 2012/02/14 21:21:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@ program ESMF_FieldSphereRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.38 2012/02/09 23:15:30 svasquez Exp $'
+    '$Id: ESMF_FieldSphereRegridEx.F90,v 1.39 2012/02/14 21:21:01 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -150,6 +150,7 @@ program ESMF_FieldSphereRegridEx
 
   ! Create source/destination fields
   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    srcField = ESMF_FieldCreate(gridSrc, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
@@ -365,6 +366,7 @@ program ESMF_FieldSphereRegridEx
 
 !BOC
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #ifdef ESMF_LAPACK
   call ESMF_FieldRegridRelease(routeHandle1, rc=localrc)
 #endif
@@ -376,9 +378,11 @@ program ESMF_FieldSphereRegridEx
 !  call ESMF_MeshIO(vm, GridSrc, ESMF_STAGGERLOC_CENTER, &
 !               "srcmesh", srcArray, rc=localrc, &
 !               spherical=spherical_grid)
+!  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !  call ESMF_MeshIO(vm, Griddst, ESMF_STAGGERLOC_CENTER, &
 !               "dstmesh", dstArray, dstArray1, rc=localrc, &
 !               spherical=spherical_grid)
+!  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Free Fields
    call ESMF_FieldDestroy(srcField, rc=localrc)
@@ -393,14 +397,15 @@ program ESMF_FieldSphereRegridEx
 
   ! Free the grids
   call ESMF_GridDestroy(GridSrc, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridDestroy(GridDst, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-10   continue
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
-  call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
   call ESMF_Finalize(rc=rc)
