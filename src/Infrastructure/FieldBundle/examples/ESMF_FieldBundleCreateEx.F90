@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.18 2012/02/09 23:15:31 svasquez Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.19 2012/02/14 21:31:45 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -58,7 +58,7 @@ program ESMF_FieldBundleCreateEx
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
     
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
 !-------------------------------------------------------------------------
@@ -67,19 +67,19 @@ program ESMF_FieldBundleCreateEx
     grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/100,200/), &
                                   regDecomp=(/2,2/), name="atmgrid", rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     field(1) = ESMF_FieldCreate(grid, arrayspec, &
                                 staggerloc=ESMF_STAGGERLOC_CENTER, &
                                 name="pressure", rc=rc)
 !EOC
     
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     field(2) = ESMF_FieldCreate(grid, arrayspec, &
@@ -87,7 +87,7 @@ program ESMF_FieldBundleCreateEx
                                 name="temperature", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     field(3) = ESMF_FieldCreate(grid, arrayspec, &
@@ -95,7 +95,7 @@ program ESMF_FieldBundleCreateEx
                                 name="heat flux", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     bundle1 = ESMF_FieldBundleCreate(fieldList=field(1:3), &
@@ -104,7 +104,7 @@ program ESMF_FieldBundleCreateEx
     print *, "FieldBundle example 1 returned"
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
 !-------------------------------------------------------------------------
@@ -115,19 +115,19 @@ program ESMF_FieldBundleCreateEx
                   staggerloc=ESMF_STAGGERLOC_CENTER, name="rh", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     bundle2 = ESMF_FieldBundleCreate(name="time step 1", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
 !BOC
     call ESMF_FieldBundleAdd(bundle2, (/simplefield/), rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldBundleGet(bundle2, fieldCount=fieldcount, rc=rc)
@@ -135,7 +135,7 @@ program ESMF_FieldBundleCreateEx
     print *, "FieldBundle example 2 returned, fieldcount =", fieldcount
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
 !-------------------------------------------------------------------------
@@ -145,13 +145,13 @@ program ESMF_FieldBundleCreateEx
     bundle3 = ESMF_FieldBundleCreate(name="southern hemisphere", rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldBundleAdd(bundle3, field(1:3), rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldBundleGet(bundle3, fieldCount=fieldcount, rc=rc)
@@ -159,7 +159,7 @@ program ESMF_FieldBundleCreateEx
     print *, "FieldBundle example 3 returned, fieldcount =", fieldcount
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
 !-------------------------------------------------------------------------
@@ -169,25 +169,25 @@ program ESMF_FieldBundleCreateEx
     call ESMF_FieldBundleGet(bundle1, "pressure", field=returnedfield1, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldBundleGet(bundle1, 2, returnedfield2, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldGet(returnedfield2, name=fname2, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_FieldBundleGet(bundle1, name=bname1, rc=rc)
@@ -197,7 +197,7 @@ program ESMF_FieldBundleCreateEx
     print *, "FieldBundle name = ", trim(bname1)
 !EOC
  
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
 !-------------------------------------------------------------------------
@@ -205,26 +205,26 @@ program ESMF_FieldBundleCreateEx
      call ESMF_FieldBundleDestroy(bundle1, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
      call ESMF_FieldBundleDestroy(bundle3, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
      do i=1, 3
          call ESMF_FieldDestroy(field(i),rc=rc)
 !EOC
 
-         if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
      enddo
@@ -232,14 +232,14 @@ program ESMF_FieldBundleCreateEx
      call ESMF_FieldDestroy(simplefield, rc=rc)
 !EOC
 
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_GridDestroy(grid, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
-    call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
     if (finalrc.EQ.ESMF_SUCCESS) then
