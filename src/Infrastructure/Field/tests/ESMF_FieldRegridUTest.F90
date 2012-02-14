@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.43 2012/02/13 23:09:23 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.44 2012/02/14 16:59:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -241,7 +241,7 @@
 #if 0
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !EX_OFF_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Tetrahedral Mesh to 3D Grid"
