@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMEx.F90,v 1.21 2012/02/09 23:15:31 svasquez Exp $
+! $Id: ESMF_FieldBundleSMMEx.F90,v 1.22 2012/02/14 22:28:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.21 2012/02/09 23:15:31 svasquez Exp $'
+    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.22 2012/02/14 22:28:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -99,58 +99,58 @@
 !EOE
 !BOC 
     call ESMF_VMGetCurrent(vm, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, localPet=lpe, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create distgrid and grid
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
         regDecomp=(/4/), &
         rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     grid = ESMF_GridCreate(distgrid=distgrid, &
         gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
         name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create field bundles and fields
     srcFieldBundle = ESMF_FieldBundleCreate(rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     dstFieldBundle = ESMF_FieldBundleCreate(rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     do i = 1, 3
         srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
             totalLWidth=(/1/), totalUWidth=(/2/), &
             rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         call ESMF_FieldGet(srcField(i), localDe=0, farrayPtr=srcfptr, rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         srcfptr = 1
 
         call ESMF_FieldBundleAdd(srcFieldBundle, (/srcField(i)/), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
             totalLWidth=(/1/), totalUWidth=(/2/), &
             rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         call ESMF_FieldGet(dstField(i), localDe=0, farrayPtr=dstfptr, rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         dstfptr = 0
 
         call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
     ! initialize factorList and factorIndexList
@@ -161,18 +161,18 @@
     factorIndexList(2,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
     call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, &
         routehandle, factorList, factorIndexList, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! perform smm
     call ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, &
           rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! verify smm
     do l = 1, 3
         call ESMF_FieldGet(dstField(l), localDe=0, farrayPtr=fptr, &
             exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
         ! Verify that the smm data in dstField(l) is correct.
         ! Before the smm op, the dst Field contains all 0. 
@@ -180,30 +180,30 @@
         ! this is the case.
         !write(*, '(9I3)') l, lpe, fptr
         do i = exlb(1), exub(1)
-            if(fptr(i) .ne. i) finalrc = ESMF_FAILURE
+            if(fptr(i) .ne. i) call ESMF_Finalize(endflag=ESMF_END_ABORT)
         enddo
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
     ! release SMM route handle
     call ESMF_FieldBundleSMMRelease(routehandle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! release all acquired resources
     call ESMF_FieldBundleDestroy(srcFieldBundle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_FieldBundleDestroy(dstFieldBundle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     do l = 1, 3
         call ESMF_FieldDestroy(srcField(l), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
         call ESMF_FieldDestroy(dstField(l), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
     call ESMF_GridDestroy(grid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(factorList, factorIndexList)
 
 !EOC

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.16 2012/02/09 23:15:31 svasquez Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.17 2012/02/14 22:30:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.16 2012/02/09 23:15:31 svasquez Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.17 2012/02/14 22:30:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -114,10 +114,10 @@
 ! halo operation implemented in ESMF.
 !EOE
     call ESMF_VMGetCurrent(vm, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, localPet=lpe, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
     ! create distgrid and grid according to the following decomposition 
@@ -144,17 +144,17 @@
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/256,256/), &
         regDecomp=(/2,2/), &
         rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create field bundles and fields
     fieldBundle = ESMF_FieldBundleCreate(rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! set up exclusive/total region for the fields
     !
@@ -248,21 +248,21 @@
                 totalUWidth=(/halo(2,1,i,lpe), halo(2,2,i,lpe)/), &
                 staggerloc=staggers(i), name=names(i), &
                 rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
         call ESMF_FieldBundleAdd(fieldBundle, (/field(i)/), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
     ! compute the routehandle
     call ESMF_FieldBundleHaloStore(fieldBundle, routehandle=routehandle, &
                                    rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     do iter = 1, 10
         do i = 1, 4
             call ESMF_FieldGet(field(i), farrayPtr=fptr, &
                 exclusiveLBound=excllb, exclusiveUBound=exclub, rc=rc)
-            if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+            if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
             sizes = exclub - excllb
             ! fill the total region with 0.
             fptr = 0.
@@ -277,25 +277,25 @@
         ! it can be verified that the halo regions change from 0. 
         ! to non zero values.
         call ESMF_FieldBundleHalo(fieldbundle, routehandle=routehandle, rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
     ! release halo route handle
     call ESMF_FieldBundleHaloRelease(routehandle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !EOC
 
     ! release all acquired resources
     call ESMF_FieldBundleDestroy(fieldBundle, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     do i = 1, 4
         call ESMF_FieldDestroy(field(i), rc=rc)
-        if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
     call ESMF_GridDestroy(grid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
