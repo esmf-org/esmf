@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.4 2012/02/13 22:35:44 svasquez Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.5 2012/02/14 14:51:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldCommEx.F90,v 1.4 2012/02/13 22:35:44 svasquez Exp $'
+    '$Id: ESMF_FieldCommEx.F90,v 1.5 2012/02/14 14:51:49 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -146,10 +146,27 @@
 
     ! check that the values gathered on rootPet are correct
     if(lpe .eq. 0) then
-       do i = 1, 2
-          do j = 1, 2
-             if(farrayDst(i, j) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
-             if(farrayDst(i*5, j*10) .ne. (i-1)+(j-1)*2) localrc=ESMF_FAILURE
+       do i = 1, 5
+          do j = 1, 10
+             if(farrayDst(i, j) .ne. 0) localrc=ESMF_FAILURE
+          enddo
+       enddo
+      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       do i = 6, 10
+          do j = 1, 10
+             if(farrayDst(i, j) .ne. 1) localrc=ESMF_FAILURE
+          enddo
+       enddo
+      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       do i = 1, 5
+          do j = 11, 20
+             if(farrayDst(i, j) .ne. 2) localrc=ESMF_FAILURE
+          enddo
+       enddo
+      if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+       do i = 6, 10
+          do j = 11, 20
+             if(farrayDst(i, j) .ne. 3) localrc=ESMF_FAILURE
           enddo
        enddo
       if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
