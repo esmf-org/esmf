@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.22 2012/02/09 23:15:30 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.23 2012/02/14 20:59:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -108,15 +108,15 @@
     ! create 4D distgrid
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
         maxIndex=(/6,4,6,4/), regDecomp=(/2,1,2,1/), rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create 4D grid on top of the 4D distgrid
     grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! create 3D arrayspec
     call ESMF_ArraySpecSet(arrayspec, 3, ESMF_TYPEKIND_R8, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
 !BOE
 ! In this example, a user creates a 3D Field with replicated dimension
@@ -132,7 +132,7 @@
         totalLWidth=(/1,1/), totalUWidth=(/4,5/), &
         staggerloc=ESMF_STAGGERLOC_CORNER, &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! get basic information from the field
     call ESMF_FieldGet(field, grid=grid1, array=array, typekind=typekind, &
@@ -140,7 +140,7 @@
         gridToFieldMap=lgridToFieldMap, ungriddedLBound=lungriddedLBound, &
         ungriddedUBound=lungriddedUBound, totalLWidth=ltotalLWidth, &
         totalUWidth=ltotalUWidth, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! get bounds information from the field
     call ESMF_FieldGet(field, localDe=0, farrayPtr=farray, &
@@ -148,14 +148,14 @@
         computationalLBound=fclb, computationalUBound=fcub, &
         computationalCount=fcc, totalLBound=ftlb, totalUBound=ftub, &
         totalCount=ftc, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Next we verify that the field and array bounds agree with each other
 !EOE
 !BOC
     call ESMF_ArrayGet(array, rank=arank, dimCount=adimCount, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     gridrank_repdim = 0
     do i = 1, size(gridToFieldMap)
@@ -176,7 +176,7 @@
         totalLBound=atlb, totalUBound=atub, &
         undistLBound=audlb, undistUBound=audub, &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
     ! verify the ungridded bounds from field match 
     ! undistributed bounds from its underlying array
@@ -184,13 +184,13 @@
         if(lungriddedLBound(i) .ne. audlb(i) ) &
             rc = ESMF_FAILURE
     enddo
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     do i = 1, arank-adimCount
         if(lungriddedUBound(i) .ne. audub(i) ) &
             rc = ESMF_FAILURE
     enddo
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! We then verify the data in the replicated dimension Field can be updated and accessed.
 !EOE
@@ -205,7 +205,7 @@
     ! access and verify
     call ESMF_FieldGet(field, localDe=0, farrayPtr=farray1, &
         rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     do ik = ftlb(3), ftub(3)
      do ij = ftlb(2), ftub(2)
       do ii = ftlb(1), ftub(1)
@@ -214,7 +214,7 @@
       enddo
      enddo
     enddo
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! release resources
     call ESMF_FieldDestroy(field)
@@ -222,7 +222,6 @@
     call ESMF_DistGridDestroy(distgrid)
 !EOC
     print *, "Field with replicated dimension returned"
-    if(rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
