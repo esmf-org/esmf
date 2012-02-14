@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.22 2012/02/09 23:15:33 svasquez Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.23 2012/02/14 22:35:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -62,6 +62,7 @@ program ESMF_GridCreateEx
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="GridCreateRegFromDGEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! First construct a single tile distgrid with regular distribution of the
@@ -72,6 +73,7 @@ program ESMF_GridCreateEx
       distgrid2D = ESMF_DistGridCreate(minIndex=(/1,1/),      &
                           maxIndex=(/20,30/), rc=rc)  
 !EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !    Create a Grid using the distgrid. 
@@ -82,6 +84,8 @@ program ESMF_GridCreateEx
                distgrid=distgrid2D, rc=rc)
 !EOC  
 
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 !BOE
 ! Set the one stagger location as center. 
 !EOE
@@ -90,14 +94,15 @@ program ESMF_GridCreateEx
    call ESMF_GridAddCoord(Grid2D,  &
           staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Get rid of memory
    call ESMF_GridDestroy(Grid2D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Get rid of memory
    call ESMF_DistgridDestroy(distgrid2D, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
 10 continue
