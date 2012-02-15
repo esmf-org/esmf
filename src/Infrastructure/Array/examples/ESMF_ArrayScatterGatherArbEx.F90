@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.16 2012/02/10 23:17:42 svasquez Exp $
+! $Id: ESMF_ArrayScatterGatherArbEx.F90,v 1.17 2012/02/15 22:55:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayScatterGatherArbEx
   type(ESMF_Array):: array, arrayAux
   type(ESMF_RouteHandle):: scatterHandle, gatherHandle
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

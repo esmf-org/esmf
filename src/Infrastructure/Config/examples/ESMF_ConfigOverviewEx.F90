@@ -39,7 +39,7 @@
       type(ESMF_VM)       :: vm
 
       character(ESMF_MAXSTR) :: testname
-      character(ESMF_MAXSTR) :: failMsg, finalMsg
+      character(ESMF_MAXSTR) :: failMsg
 
 !BOE
 !\subsubsection{Variable declarations}

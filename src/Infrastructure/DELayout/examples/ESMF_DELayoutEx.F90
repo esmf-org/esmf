@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.36 2012/02/13 20:36:02 svasquez Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.37 2012/02/15 23:04:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@ program ESMF_DELayoutEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 
 !-------------------------------------------------------------------------

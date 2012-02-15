@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridEx.F90,v 1.48 2012/02/09 23:15:28 svasquez Exp $
+! $Id: ESMF_DistGridEx.F90,v 1.49 2012/02/15 23:05:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DistGridEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
   
   
   finalrc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayFarrayEx.F90,v 1.30 2012/02/10 22:30:00 svasquez Exp $
+! $Id: ESMF_ArrayFarrayEx.F90,v 1.31 2012/02/15 22:55:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ program ESMF_ArrayFarrayEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
   
   finalrc = ESMF_SUCCESS
 

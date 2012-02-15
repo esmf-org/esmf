@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.84 2012/02/10 22:05:53 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.85 2012/02/15 22:55:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ program ESMF_ArrayEx
 !  integer, allocatable:: haloLDepth(:), haloUDepth(:)
 !  type(ESMF_RouteHandle):: haloHandle, haloHandle2
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 
   ! result code

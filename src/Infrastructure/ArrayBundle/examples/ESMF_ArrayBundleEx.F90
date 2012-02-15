@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleEx.F90,v 1.19 2012/02/10 23:45:26 svasquez Exp $
+! $Id: ESMF_ArrayBundleEx.F90,v 1.20 2012/02/15 22:59:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ program ESMF_ArrayBundleEx
   type(ESMF_Array), allocatable:: arrayList(:)
   type(ESMF_ArrayBundle):: arraybundle
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 
   ! result code

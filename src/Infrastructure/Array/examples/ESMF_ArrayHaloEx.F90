@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloEx.F90,v 1.15 2012/02/10 22:50:36 svasquez Exp $
+! $Id: ESMF_ArrayHaloEx.F90,v 1.16 2012/02/15 22:55:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ program ESMF_ArrayHaloEx
   type(ESMF_RouteHandle):: haloHandle, haloHandle2
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
   
   integer                     :: counter,i,j,step
   integer                     :: eLB(2,1), eUB(2,1)

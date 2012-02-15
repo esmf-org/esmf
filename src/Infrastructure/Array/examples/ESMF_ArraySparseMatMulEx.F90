@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.29 2012/02/10 23:40:11 svasquez Exp $
+! $Id: ESMF_ArraySparseMatMulEx.F90,v 1.30 2012/02/15 22:55:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_ArraySparseMatMulEx
   integer :: finalrc, result
 
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
   
   
   integer:: counter,i,j,k
