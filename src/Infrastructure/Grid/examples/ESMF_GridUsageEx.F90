@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.106 2012/02/09 23:15:33 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.107 2012/02/15 00:02:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -199,7 +199,6 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
@@ -254,11 +253,13 @@ if (petcount .eq. 4) then
    grid2D=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/3,7/), &
            countsPerDEDim2=(/7,6/), petMap=petMap, rc=rc)   
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
    call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    deallocate( petMap )
 endif
 
@@ -297,6 +298,7 @@ endif
    grid2D=ESMF_GridCreateNoPeriDim(maxIndex=(/5,5/), & 
          arbIndexList=localArbIndex, arbIndexCount=5, rc=rc)   
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !
@@ -310,12 +312,15 @@ endif
          arbIndexList=localArbIndex, arbIndexCount=5, &
          distDim=(/1,3/), rc=rc)   
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    call ESMF_GridDestroy(grid3D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    deallocate(localArbIndex)
 
 
@@ -347,11 +352,13 @@ endif
                        connflagDim2=(/ESMF_GRIDCONN_POLE, ESMF_GRIDCONN_POLE/), &
                        rc=rc)   
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
 call ESMF_GridDestroy(grid2D,rc=rc)
+if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOEI
 !
@@ -371,12 +378,14 @@ call ESMF_GridDestroy(grid2D,rc=rc)
                        poleStaggerLoc2=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CENTER/), &
                        rc=rc)   
 !EOCI
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
 call ESMF_GridDestroy(grid2D,rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
 !BOEI
@@ -398,6 +407,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
            bipolePos2=(/1,1/), &
            rc=rc)   
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 
@@ -445,6 +455,9 @@ if (petCount .le. 6) then
          coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
          indexflag=ESMF_INDEX_GLOBAL, &
          rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage and associate it with the center
@@ -453,6 +466,10 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array and the bounds
@@ -462,6 +479,9 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordX, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -478,6 +498,10 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordY, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -538,6 +562,10 @@ if (petCount .le. 6) then
          coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
          indexflag=ESMF_INDEX_GLOBAL, &
          rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage and associate it with the center
@@ -547,6 +575,10 @@ if (petCount .le. 6) then
    call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
 
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array and the bounds
    ! of its global indices on the local DE.   
@@ -555,6 +587,10 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordX, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -571,6 +607,10 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordY, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -636,6 +676,10 @@ if (petCount .le. 6) then
             coordDep2=(/2/), & ! 2nd coord is 1D and depends on 2nd Grid dim
             indexflag=ESMF_INDEX_GLOBAL, & 
             rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage and associate it with the center
@@ -644,6 +688,9 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array and the bounds
@@ -653,6 +700,9 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordX, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -669,6 +719,10 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordY, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -727,6 +781,10 @@ if (petCount .le. 6) then
         coordDep2=(/1,2/), & ! 2nd coord is 1D and depends on both Grid dim
         indexflag=ESMF_INDEX_GLOBAL, &
         rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage and associate it with the center
@@ -735,6 +793,10 @@ if (petCount .le. 6) then
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D,  & 
           staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Get the pointer to the first coordinate array and the bounds
@@ -744,6 +806,10 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordX2D, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the first dimension [10-100].
@@ -762,6 +828,10 @@ if (petCount .le. 6) then
           staggerloc=ESMF_STAGGERLOC_CENTER, &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=coordY2D, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension [10-200]
@@ -816,6 +886,10 @@ endif
             coordDep3=(/3/), & ! 3rd coord is 1D and depends on 3rd Grid dim
             indexflag=ESMF_INDEX_GLOBAL,     & ! Use global indices
             rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+	
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage for both center and corner stagger
@@ -824,8 +898,16 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
    call ESMF_GridAddCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CORNER_VCENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
 
    !-------------------------------------------------------------------
@@ -833,6 +915,11 @@ endif
    ! can loop over them when accessing data.
    !-------------------------------------------------------------------
    call ESMF_GridGet(grid3D, localDECount=localDECount, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
+
 
    !-------------------------------------------------------------------
    ! Loop over each localDE when accessing data
@@ -854,6 +941,10 @@ endif
              computationalLBound=lbnd_corner,                 &
              computationalUBound=ubnd_corner,                 &
              farrayPtr=cornerX, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the first dimension.
@@ -872,6 +963,10 @@ endif
              computationalLBound=lbnd_corner,                   &
              computationalUBound=ubnd_corner,                   &
              farrayPtr=cornerY, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the second dimension.
@@ -888,6 +983,10 @@ endif
              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,         &
              computationalLBound=lbnd, computationalUBound=ubnd,&
              farrayPtr=cornerZ, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       !----------------------------------------------------------------
       ! Calculate and set the vertical coordinates
@@ -908,6 +1007,10 @@ endif
              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,          &
              computationalLBound=lbnd, computationalUBound=ubnd, &
              farrayPtr=centerX, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the first dimension.
@@ -924,6 +1027,10 @@ endif
               staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,          &
               computationalLBound=lbnd, computationalUBound=ubnd, &
               farrayPtr=centerY, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       !----------------------------------------------------------------
       ! Calculate and set coordinates in the second dimension.
@@ -940,6 +1047,10 @@ endif
              staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER,         &
              computationalLBound=lbnd, computationalUBound=ubnd,&
              farrayPtr=centerZ, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       !----------------------------------------------------------------
       ! Calculate and set the vertical coordinates
@@ -959,6 +1070,8 @@ endif
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid3D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !BOE
 !\subsubsection{Create an arbitrarily distributed rectilinear Grid with
@@ -1025,6 +1138,10 @@ endif
             arbIndexList = localArbIndex, &
             arbIndexCount = localArbIndexCount, &
             rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Allocate coordinate storage for the center stagger location, the 
@@ -1032,6 +1149,10 @@ endif
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid3D, &
           staggerloc=ESMF_STAGGERLOC_CENTER_VCENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !------------------------------------------------------------------
    ! Fill in the coordinates for the center stagger location. There is
@@ -1042,6 +1163,10 @@ endif
           computationalLBound=lbnd,                 &
           computationalUBound=ubnd,                 &
           farrayPtr=centerX, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
 
    !----------------------------------------------------------------
@@ -1060,6 +1185,10 @@ endif
           staggerloc=ESMF_STAGGERLOC_CENTER,                  &
           computationalLBound=lbnd, computationalUBound=ubnd, &
           farrayPtr=centerY, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !----------------------------------------------------------------
    ! Calculate and set coordinates in the second dimension.
@@ -1076,6 +1205,10 @@ endif
           staggerloc=ESMF_STAGGERLOC_CENTER,               &
           computationalLBound=lbnd, computationalUBound=ubnd,&
           farrayPtr=centerZ, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !----------------------------------------------------------------
    ! Calculate and set the vertical coordinates
@@ -1089,6 +1222,8 @@ endif
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid3D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 
 !BOE
@@ -1116,7 +1251,8 @@ endif
    grid2D = ESMF_GridCreate(filename="data/T42_grid.nc", &
               regDecomp=(/PetCount,1/), addCornerStagger=.true., rc=rc)
 !EOC
-#endif
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !BOE
 !  Where T42\_grid.nc is a 2D global grid of size (128x64) and the resulting Grid is distributed
@@ -1127,7 +1263,9 @@ endif
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+#endif
 #if 1
 !BOE
 !\subsubsection{Create an empty Grid in a parent Component 
@@ -1163,6 +1301,10 @@ endif
 ! the Grid is defined on the appropriate subset of the parent's PETs. 
 !---------------------------------------------------------------------------
    grid2D=ESMF_GridEmptyCreate(rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
 !---------------------------------------------------------------------------
 ! IN THE CHILD COMPONENT:
@@ -1172,22 +1314,34 @@ endif
    call ESMF_GridEmptyComplete(grid2D,             &
                           countsPerDEDim1=(/6,4/),      &
                           countsPerDEDim2=(/10,3,7/), rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
 !---------------------------------------------------------------------------
 ! Add Grid coordinates at the cell center location.
 !---------------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
 !---------------------------------------------------------------------------
 ! Add Grid coordinates at the corner stagger location.
 !---------------------------------------------------------------------------
    call ESMF_GridAddCoord(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
-
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
    call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 #endif
 
 
@@ -1255,7 +1409,10 @@ endif
 ! Setup For Example
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
 !BOC 
@@ -1295,6 +1452,7 @@ endif
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGER_CORNER, &
           coord1=CoordX, coord2=CoordY, rc=rc)
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 
@@ -1352,11 +1510,13 @@ call ESMF_GridDestroy(grid2D,rc=rc)
           coordDep1=(/1,2/), coordDep2=(/1,2/), &
           coordDep3=(/3/), rc=rc)   
 !EOC 
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
 call ESMF_GridDestroy(grid2D,rc=rc)
+if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! By default the local piece of the array on each PET starts at 
@@ -1395,6 +1555,7 @@ call ESMF_GridDestroy(grid2D,rc=rc)
 	    coordDep3 = (/3/), &
             rc=rc)
 !EOC 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -1418,6 +1579,7 @@ call ESMF_GridDestroy(grid3D,rc=rc)
 	    coordDep3 = (/ESMF_DIM_ARB, 3/), &
             rc=rc)
 !EOC 
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -2068,14 +2230,25 @@ endif
 
     ! Get info from Grid
     call ESMF_GridGet(grid2D, distgridToGridMap=distgridToGridMap, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
     ! Get info about staggerloc
     call ESMF_GridGet(grid2D, staggerLoc=ESMF_STAGGERLOC_CORNER, &
            distgrid=staggerDistgrid, &
            rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
     ! construct ArraySpec
     call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
     ! Create an Array based on info from grid
     array=ESMF_ArrayCreate(arrayspec=arrayspec, &
@@ -2120,9 +2293,17 @@ endif
 !BOC
     ! Get distGrid from Grid
     call ESMF_GridGet(grid3D, distgrid=distgrid, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
     ! construct ArraySpec
     call ESMF_ArraySpecSet(arrayspec, rank=2, typekind=ESMF_TYPEKIND_R8, rc=rc)
+!EOC
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
     ! Create an Array based on the presence of distributed dimensions
     array=ESMF_ArrayCreate(arrayspec=arrayspec,distgrid=distgrid, rc=rc)
@@ -2154,6 +2335,7 @@ endif
           staggerLoc=ESMF_STAGGERLOC_CORNER,        &
           coordDim=1, farrayPtr, datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
 !EOCI
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 
@@ -2172,6 +2354,7 @@ endif
           staggerLoc=ESMF_STAGGERLOC_CENTER, 
           indices=(/1,1,1/), coords=(/.5,.5,.5/), rc=rc)
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOEI
 ! The method {\tt ESMF\_GridGetCoord}, allows for a uniform 
@@ -2185,6 +2368,7 @@ endif
           staggerLoc=ESMF_STAGGERLOC_CENTER, 
           indices=(/1,1,1/), coords=outCoords, rc=rc)
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 #ifdef LOCAL_NOT_IMPL
@@ -2207,6 +2391,7 @@ endif
    call ESMF_GridGenCoordsUni(grid, begCoord=(/11.0,10.0,100.0/), &
           endCoord=(/100.0,100.0,0.0/), rc=rc)
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 #ifdef LOCAL_NOT_IMPL
@@ -2226,6 +2411,7 @@ endif
 !BOCI
    call ESMF_GridCalcStaggerLocCoord(grid, srcStaggerLoc=ESMF_STAGGERLOC_CORNER, rc=rc)
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 #ifdef LOCAL_NOT_IMPL
@@ -2247,6 +2433,7 @@ endif
 !BOCI
    call ESMF_GridHalo(grid, rc=rc)
 !EOCI
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 
@@ -2272,18 +2459,23 @@ endif
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOCI
    ! Create the Grid.
    grid=ESMF_GridCreateNoPeriDim(maxIndex=(/100,100,100/), regDecomp=(/5,5,5/), rc=rc)   
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Add a center stagger location 
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Put in the coordinates
    call ESMF_GridGenCoordUni(grid, begCoord=(/0.0,0.0,0.0/), &
           endCoord=(/200.0, 200.0, 200.0/), rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 !EOCI
 #endif
@@ -2342,7 +2534,9 @@ endif
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !removeBOC
    ! Create a grid with the correct size, shape, and distribution to
@@ -2360,12 +2554,14 @@ endif
                            coordDep2=(/1,2/), &
                            petMap=petMap, &
                            rc=rc)   
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
    ! Add a center stagger location and at the same time set {\tt grid} to 
    ! reference the coordinate arrays. 
    call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=farrayPtrX, coord2=farrayPtrY, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 !removeEOC
 
@@ -2393,15 +2589,19 @@ endif
 
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_VMGet(vm, localPet=myPet, petCount=npets, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !removeBOC
    ! Create an empty grid
    grid=ESMF_GridEmptyCreate(rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
    ! Set the Grid type and kind
    grid=ESMF_GridSetCommitShapeTile(coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
    ! Set the grid size and distribution
@@ -2412,15 +2612,18 @@ endif
    ! Set Grid 
    grid=ESMF_GridSetCommitShapeTile(countsPerDEDim1=(/10,10/), &
           countsPerDEDim2=(/10,10/), petMap=petMap, rc=rc)   
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
    ! Set the grid coordinate array index dependency
    grid=ESMF_GridSetCommitShapeTile(coordDep1=(/1,2/), coordDep2=(/1,2/), &
           rc=rc)   
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Create the grid and add a center stagger location and at the same time set {\tt grid} to 
   ! reference the coordinate arrays. 
   call ESMF_GridSetCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                   coord1=farrayPtrX, coord2=farrayPtrY, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !removeEOC
 #endif
@@ -2450,10 +2653,14 @@ endif
    ! Create DistGrid
    distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), &
            rc=rc)  
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    ! Create Grid
    grid3D=ESMF_GridCreate(distGrid=distgrid2D, rc=rc)
 !EOC  
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
@@ -2482,6 +2689,9 @@ endif
    ! Create DistGrid
    distgrid2D = ESMF_DistGridCreate(minIndex=(/1,2/), maxIndex=(/11,22/), &
         rc=rc)  
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    ! Create Grid
    grid2D=ESMF_GridCreate(distGrid=distgrid2D, distgridToGridMap=(/2,1/), &
@@ -2536,6 +2746,7 @@ endif
 !BOCI 
    Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), &
             coordDimCount=(/1,1/) , rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOCI  
 
 !BOEI
@@ -2569,6 +2780,7 @@ endif
    Grid2D=ESMF_GridCreate(maxIndex=(/10,20/), coordDimCount=(/1,1/) , &
                coordDimMap=coordDimMap, rc=rc)
 !EOCI  
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 
 #ifdef LOCAL_NOT_IMPL
@@ -2661,16 +2873,29 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid4D=ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
                                   maxIndex=(/10,10,10,10/), rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    grid4D=ESMF_GridCreate(distgrid=distgrid4D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
 
    ! Set Center
    call ESMF_StaggerLocSet(staggerLoc,loc=(/0,0,0,0/),rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
    call ESMF_GridAddCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    ! Set Corner
    call ESMF_StaggerLocSet(staggerLoc,loc=(/1,1,1,1/),rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
    call ESMF_GridAddCoord(grid4D, staggerLoc=staggerLoc, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -2831,14 +3056,24 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/), &
                                   maxIndex=(/10,10/), rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !BOC 
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, &
             gridEdgeLWidth=(/1,1/), gridEdgeUWidth=(/0,0/), rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    call ESMF_GridAddCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CORNER, &
           staggerEdgeLWidth=(/0,0/), staggerEdgeUWidth=(/0,0/), rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    call ESMF_GridAddCoord(grid2D, &
           staggerLoc=ESMF_STAGGERLOC_CENTER, &
@@ -2881,7 +3116,11 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!
    distgrid2D=ESMF_DistGridCreate(minIndex=(/1,1/), &
                                   maxIndex=(/10,10/), rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
    grid2D=ESMF_GridCreate(distgrid=distgrid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 
 !BOC 
    call ESMF_GridAddCoord(grid2D, &
