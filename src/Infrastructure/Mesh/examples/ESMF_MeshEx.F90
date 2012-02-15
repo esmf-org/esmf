@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.51 2012/02/09 23:15:38 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.52 2012/02/15 23:19:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ program ESMF_MeshEx
   type(ESMF_Field)  ::  field
 
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridEx.F90,v 1.25 2012/02/13 21:43:21 svasquez Exp $
+! $Id: ESMF_FieldArbGridEx.F90,v 1.26 2012/02/15 23:11:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
     logical :: correct
     integer :: rank, dimCount, result
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

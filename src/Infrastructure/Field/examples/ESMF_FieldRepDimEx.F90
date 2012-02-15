@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRepDimEx.F90,v 1.23 2012/02/14 20:59:32 svasquez Exp $
+! $Id: ESMF_FieldRepDimEx.F90,v 1.24 2012/02/15 23:11:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
     integer                                     :: gridToFieldMap(4) = (/1,0,2,0/)
 
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

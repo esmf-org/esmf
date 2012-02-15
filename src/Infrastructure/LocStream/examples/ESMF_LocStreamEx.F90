@@ -48,7 +48,7 @@ program ESMF_LocStreamEx
       integer :: clbnd(2),cubnd(2), result
 
       character(ESMF_MAXSTR) :: testname
-      character(ESMF_MAXSTR) :: failMsg, finalMsg
+      character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

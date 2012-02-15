@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.23 2012/02/14 22:35:27 svasquez Exp $
+! $Id: ESMF_GridCreateRegFromDGEx.F90,v 1.24 2012/02/15 23:15:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@ program ESMF_GridCreateEx
       type(ESMF_Grid) :: grid2D
 !EOC         
       character(ESMF_MAXSTR) :: testname
-      character(ESMF_MAXSTR) :: failMsg, finalMsg
+      character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

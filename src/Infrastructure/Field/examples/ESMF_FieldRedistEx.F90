@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistEx.F90,v 1.4 2012/02/14 20:36:01 svasquez Exp $
+! $Id: ESMF_FieldRedistEx.F90,v 1.5 2012/02/15 23:11:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldRedistEx.F90,v 1.4 2012/02/14 20:36:01 svasquez Exp $'
+    '$Id: ESMF_FieldRedistEx.F90,v 1.5 2012/02/15 23:11:38 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -61,7 +61,7 @@
     integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
 
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

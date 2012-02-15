@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.51 2012/02/09 23:15:36 svasquez Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.52 2012/02/15 23:17:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
     integer :: finalrc
 
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

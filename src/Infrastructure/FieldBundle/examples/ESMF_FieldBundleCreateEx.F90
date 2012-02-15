@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.19 2012/02/14 21:31:45 svasquez Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.20 2012/02/15 23:13:36 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -38,7 +38,7 @@ program ESMF_FieldBundleCreateEx
     integer :: finalrc, result
 
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

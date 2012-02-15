@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.52 2012/02/09 23:15:39 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.53 2012/02/15 23:22:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
       ! result code
       integer :: finalrc, result
       character(ESMF_MAXSTR) :: testname
-      character(ESMF_MAXSTR) :: failMsg, finalMsg
+      character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

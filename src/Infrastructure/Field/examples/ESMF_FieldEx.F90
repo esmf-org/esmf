@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.50 2012/02/13 23:08:49 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.51 2012/02/15 23:11:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@
     real(4) :: PI=3.14159265
     integer :: finalrc, i, j, k, result
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

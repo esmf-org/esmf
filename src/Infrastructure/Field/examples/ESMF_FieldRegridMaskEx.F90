@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMaskEx.F90,v 1.28 2012/02/14 20:51:28 svasquez Exp $
+! $Id: ESMF_FieldRegridMaskEx.F90,v 1.29 2012/02/15 23:11:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.28 2012/02/14 20:51:28 svasquez Exp $'
+    '$Id: ESMF_FieldRegridMaskEx.F90,v 1.29 2012/02/15 23:11:38 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! individual test result code
@@ -80,7 +80,7 @@ program ESMF_FieldRegridEx
   integer :: finalrc, result
 
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

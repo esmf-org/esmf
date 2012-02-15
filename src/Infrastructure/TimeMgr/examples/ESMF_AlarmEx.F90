@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.37 2012/02/09 23:15:39 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.38 2012/02/15 23:22:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -53,7 +53,7 @@
       integer :: finalrc
 
       character(ESMF_MAXSTR) :: testname
-      character(ESMF_MAXSTR) :: failMsg, finalMsg
+      character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
