@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.141 2012/01/06 20:18:20 svasquez Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.142 2012/02/15 16:13:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -815,6 +815,7 @@ interface operator (==)
   module procedure ESMF_tnfeq
   module procedure ESMF_freq
   module procedure ESMF_ifeq
+  module procedure ESMF_inqfeq
   module procedure ESMF_rfeq
   module procedure ESMF_unmappedactioneq
   module procedure ESMF_ioeq
@@ -1184,6 +1185,16 @@ function ESMF_ifeq(if1, if2)
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
 end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_InquireFlag types
+
+function ESMF_inqfeq(inqf1, inqf2)
+  logical ESMF_inqfeq
+  type(ESMF_InquireFlag), intent(in) :: inqf1, inqf2
+
+  ESMF_inqfeq = (inqf1%flag == inqf2%flag)
+end function ESMF_inqfeq
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Region_Flag types
