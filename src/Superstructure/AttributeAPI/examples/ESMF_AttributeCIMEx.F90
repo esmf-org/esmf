@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.46 2012/02/09 23:15:44 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.47 2012/02/15 23:51:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ program ESMF_AttributeCIMEx
       character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
       character(ESMF_MAXSTR), dimension(2)  :: compPropAtt
       character(ESMF_MAXSTR)  :: testname
-      character(ESMF_MAXSTR)  :: failMsg, finalMsg
+      character(ESMF_MAXSTR)  :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

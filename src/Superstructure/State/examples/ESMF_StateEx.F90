@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.49 2012/02/09 23:15:47 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.50 2012/02/15 23:56:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
     logical :: neededFlag(1)
     integer :: result = 0     ! all pass
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
     finalrc = ESMF_SUCCESS
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteEx.F90,v 1.19 2012/02/09 23:15:47 svasquez Exp $
+! $Id: ESMF_StateReadWriteEx.F90,v 1.20 2012/02/15 23:56:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 !EOC
     integer :: finalrc, result
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

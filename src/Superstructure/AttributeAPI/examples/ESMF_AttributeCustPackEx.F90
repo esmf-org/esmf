@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCustPackEx.F90,v 1.4 2012/02/09 23:15:44 svasquez Exp $
+! $Id: ESMF_AttributeCustPackEx.F90,v 1.5 2012/02/15 23:51:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_AttributeCustPackEx
       character(ESMF_MAXSTR)  :: customConv, customPurp
       character(ESMF_MAXSTR),dimension(3)   :: customAttrList         
       character(ESMF_MAXSTR)  :: testname
-      character(ESMF_MAXSTR)  :: failMsg, finalMsg
+      character(ESMF_MAXSTR)  :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

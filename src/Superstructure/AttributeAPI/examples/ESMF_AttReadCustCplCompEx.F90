@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.13 2012/02/09 23:15:44 svasquez Exp $
+! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.14 2012/02/15 23:51:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ program ESMF_AttReadCustCplCompEx
       logical :: xercesPresent
       integer :: finalrc, result
       character(ESMF_MAXSTR) :: testname
-      character(ESMF_MAXSTR) :: failMsg, finalMsg
+      character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.45 2012/02/09 23:15:47 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.46 2012/02/15 23:56:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@ end module ESMF_StateReconcileEx_Mod
 !EOC
     integer :: finalrc, result
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

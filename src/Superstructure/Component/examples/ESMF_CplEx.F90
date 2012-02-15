@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.58 2012/02/09 23:15:46 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.59 2012/02/15 23:53:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -273,7 +273,7 @@
     type(ESMF_CplComp) :: cpl
     integer :: finalrc, result
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

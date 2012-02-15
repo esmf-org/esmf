@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.28 2012/02/09 23:15:46 svasquez Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.29 2012/02/15 23:53:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@ program ESMF_InternalStateEx
   type(testData), pointer :: datap  ! extra level of indirection
   integer :: result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
