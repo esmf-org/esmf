@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.21 2012/02/15 20:04:51 svasquez Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.22 2012/02/15 22:00:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,7 +44,6 @@ program ESMF_VMUserMpiCommEx
 
   ! local variables
   integer:: rc
-  type(ESMF_VM) :: vm
 #ifndef ESMF_MPIUNI     
   integer:: ierr
 #endif
@@ -53,7 +52,7 @@ program ESMF_VMUserMpiCommEx
   integer :: finalrc, result
 
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -61,10 +60,8 @@ program ESMF_VMUserMpiCommEx
   write(failMsg, *) "Example failure"
   write(testname, *) "Example ESMF_VMUserMpiCommEx"
 
-
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
-
 
   finalrc = ESMF_SUCCESS
 #ifndef ESMF_MPIUNI     
@@ -87,10 +84,12 @@ program ESMF_VMUserMpiCommEx
   else
     call MPI_COMM_SPLIT(MPI_COMM_WORLD, 1, 0, esmfComm, ierr)
   endif
+#else
+  rank = 0
 #endif
 !BOC
   if (rank < 2) then
-    call ESMF_Initialize(vm=vm, mpiCommunicator=esmfComm, &
+    call ESMF_Initialize(mpiCommunicator=esmfComm, &
 		    defaultlogfilename="VMUserMpiCommEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     ! Only call ESMF_Initialize() on rank 0 and 1, passing the prepared MPI
@@ -99,7 +98,6 @@ program ESMF_VMUserMpiCommEx
     if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
     ! user code only to execute on the local MPI communicator
     print *, "ESMF application on MPI rank:", rank
-
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
@@ -122,9 +120,6 @@ program ESMF_VMUserMpiCommEx
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
-
-
-
   ! print result
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_VMUserMpiCommEx.F90"
