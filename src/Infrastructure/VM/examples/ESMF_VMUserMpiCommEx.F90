@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.20 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.21 2012/02/15 20:04:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ program ESMF_VMUserMpiCommEx
 !-------------------------------------------------------------------------
 
   write(failMsg, *) "Example failure"
-  write(testname, *) "Example ESMF_FieldRepDimEx"
+  write(testname, *) "Example ESMF_VMUserMpiCommEx"
 
 
 ! ------------------------------------------------------------------------------
