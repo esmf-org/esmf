@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.22 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMUserMpiEx.F90,v 1.23 2012/02/16 22:05:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@ program ESMF_VMUserMpiEx
   integer :: finalrc, result
 
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -71,14 +71,14 @@ program ESMF_VMUserMpiEx
   call MPI_Init(ierr)
   ! User code initializes MPI.
 !EOC
-  if (ierr/=0) finalrc = ESMF_FAILURE
+  if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 !BOC
   call ESMF_Initialize(defaultlogfilename="VMUserMpiEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
