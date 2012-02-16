@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.52 2012/02/15 23:17:56 svasquez Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.53 2012/02/16 19:55:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -75,23 +75,24 @@
 
 !EOC
 
-    if (rc1.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc1 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! LogWrite 
     call ESMF_LogWrite("Log Write 2", ESMF_LOGMSG_INFO, rc=rc2)
 !EOC
 
-    if (rc2.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc2 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! LogMsgSetError
     call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg="Convergence failure", &
                              rcToReturn=rc2)
+!EOC
+
+    if (rc2 /= ESMF_RC_OBJ_BAD) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
     ! LogMsgFoundError
     call ESMF_TimeSet(time, calkindflag=ESMF_CALKIND_NOCALENDAR)
     call ESMF_TimeSyncToRealTime(time, rc=rcToTest)
@@ -123,9 +124,11 @@
     call ESMF_LogOpen(alog, "TestLog.txt", rc=rc1)
 !EOC
 
-    if (rc1.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+!EOC
+
+    if (rc1 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
 
 !BOC
     ! LogWrite
@@ -134,9 +137,7 @@
                        method=ESMF_METHOD, log=alog, rc=rc2)
 !EOC
 
-    if (rc2.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc2 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! LogMsgSetError
@@ -145,9 +146,7 @@
                            method=ESMF_METHOD, rcToReturn=rc2, log=alog)
 !EOC
 
-    if (rc2.NE.ESMF_RC_OBJ_BAD) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc2 /= ESMF_RC_OBJ_BAD) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Get and Set}
@@ -161,9 +160,7 @@
     call ESMF_LogGet(logkindflag=logkindflag, rc=rc3)
 !EOC
 
-    if (rc3.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc3 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! This is an example setting a property of a Log that is not the default.
@@ -172,18 +169,14 @@
     call ESMF_LogSet(log=alog, logmsgAbort=(/ESMF_LOGMSG_ERROR/), rc=rc2)
 !EOC
 
-    if (rc2.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc2 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
     ! Close the user log.
     call ESMF_LogClose(alog, rc=rc3)
 !EOC
 
-    if (rc3.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_RC_OBJ_BAD
-    end if
+    if (rc3 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
