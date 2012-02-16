@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.39 2012/02/15 23:51:43 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.40 2012/02/16 23:48:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -91,8 +91,10 @@ implicit none
       call ESMF_Initialize(vm=vm, &
                     defaultlogfilename="AttributeUpdateEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
       if (localPet==0) then
         print *, "--------------------------------------- "
@@ -111,24 +113,39 @@ implicit none
       if (petCount<4) then
         gridcomp1 = ESMF_GridCompCreate(name="gridcomp1", &
           petList=(/0/), rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
         gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
           petList=(/0/), rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
         cplcomp = ESMF_CplCompCreate(name="cplcomp", &
           petList=(/0/), rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       else
 !BOC
         gridcomp1 = ESMF_GridCompCreate(name="gridcomp1", &
           petList=(/0,1/), rc=rc)
+!EOC
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
         gridcomp2 = ESMF_GridCompCreate(name="gridcomp2", &
           petList=(/2,3/), rc=rc)
+!EOC
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
         cplcomp = ESMF_CplCompCreate(name="cplcomp", &
           petList=(/0,1,2,3/), rc=rc)
+!EOC
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
-      c1exp = ESMF_StateCreate(name="Comp1 exportState", &
+        c1exp = ESMF_StateCreate(name="Comp1 exportState", &
                                stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
-      c2imp = ESMF_StateCreate(name="Comp2 importState", &
+!EOC
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        c2imp = ESMF_StateCreate(name="Comp2 importState", &
                                stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
 !EOC      
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       endif
  
@@ -137,12 +154,18 @@ implicit none
 ! this example, which will not run UNI in the end anyway
                 
       call ESMF_GridCompSetVM(gridcomp1, userm1_setvm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_GridCompSetVM(gridcomp2, userm2_setvm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Before the individual components are initialized, run, and finalized Attributes should be set at the
@@ -158,29 +181,71 @@ implicit none
       purpGen = 'General'
     call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
       rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'Agency', 'NASA', &
       convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'Author', 'Max Suarez', &
       convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'CodingLanguage', &
       'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'Discipline', &
       'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'ComponentLongName', &
    'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'ModelComponentFramework', &
       'ESMF', &
       convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'ComponentShortName', &
       'GEOS-5 FV dynamical core', convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'PhysicalDomain', &
       'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
     call ESMF_AttributeSet(gridcomp1, 'Version', &
       'GEOSagcm-EROS-beta7p12', convention=convESMF, purpose=purpGen, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       
       call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc) 
+
 !EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! Now the individual Components will be run.  First we will initialize the two
@@ -206,25 +271,56 @@ implicit none
       call ESMF_GridCompInitialize(gridcomp2, importState=c2imp, rc=rc)
       call ESMF_CplCompInitialize(cplcomp, importState=c1exp, &
         exportState=c2imp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
       call ESMF_GridCompRun(gridcomp1, exportState=c1exp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       call ESMF_CplCompRun(cplcomp, importState=c1exp, &
         exportState=c2imp, userRc=urc, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
         
       call ESMF_GridCompRun(gridcomp2, importState=c2imp, rc=rc)
+!EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       
       call ESMF_GridCompFinalize(gridcomp1, exportState=c1exp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       call ESMF_GridCompFinalize(gridcomp2, importState=c2imp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
       call ESMF_CplCompFinalize(cplcomp, importState=c1exp, &
         exportState=c2imp, rc=rc)
+
 !EOC
+     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
       call ESMF_GridCompDestroy(gridcomp1, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_GridCompDestroy(gridcomp2, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_CplCompDestroy(cplcomp, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
       call ESMF_StateDestroy(c1exp, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_StateDestroy(c2imp, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
       ! file that the scripts grep for.
