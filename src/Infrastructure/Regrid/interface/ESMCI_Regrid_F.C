@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.72 2012/01/06 20:17:58 svasquez Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.73 2012/02/16 23:00:34 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -636,10 +636,12 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (left_turn) { 
             *concave=true;
             return;
-          } else {
-            *clockwise=true;
-            return;
           }
+          // Get rid of clockwise check, because we handle clockwise elements now
+          // else {
+          // *clockwise=true;
+          // return;
+          // }
         }
       }
     } else if (sdim==3) {
@@ -683,13 +685,15 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (left_turn) { 
             *concave=true;
             return;
-          } else {
-            *clockwise=true;
-            // printf(" clockwise element=%d\n",elem.get_id());
-            // printf(" num nodes=%d\n",num_poly_nodes);
-            // write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
-           return;
-          }
+          } 
+          // Get rid of clockwise check, because we handle clockwise elements now
+          //else {
+          //*clockwise=true;
+          //printf(" clockwise element=%d\n",elem.get_id());
+          //printf(" num nodes=%d\n",num_poly_nodes);
+          //write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
+          // return;
+          //}
         }
       }
     }
@@ -700,7 +704,6 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
 }
 
 #if 0
-// Right now I think the only thing that'll mess up the non-conservative is concave elements
 void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
   
   // Declare polygon information
@@ -820,9 +823,9 @@ void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *co
             return;
           } else {
             *clockwise=true;
-            // printf(" clockwise element=%d\n",elem.get_id());
-            // printf(" num nodes=%d\n",num_poly_nodes);
-            // write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
+            printf(" clockwise element=%d\n",elem.get_id());
+            printf(" num nodes=%d\n",num_poly_nodes);
+            write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
            return;
           }
         }
