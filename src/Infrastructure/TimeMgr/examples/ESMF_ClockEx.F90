@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.60 2012/02/15 23:22:18 svasquez Exp $
+! $Id: ESMF_ClockEx.F90,v 1.61 2012/02/16 20:23:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -71,7 +71,7 @@
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Clock creation}
@@ -84,21 +84,21 @@
       call ESMF_TimeIntervalSet(timeStep, d=2, h=4, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
       call ESMF_TimeSet(startTime, yy=2003, mm=4, dd=1, h=2, m=24, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
       call ESMF_TimeSet(stopTime, yy=2003, mm=4, dd=14, h=2, m=24, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! initialize the clock with the above values
@@ -106,7 +106,7 @@
                                name="Clock 1", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Clock advance}
@@ -119,19 +119,19 @@
       do while (.not.ESMF_ClockIsStopTime(clock, rc=rc))
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
         call ESMF_ClockPrint(clock, options="currTime string", rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
         call ESMF_ClockAdvance(clock, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       end do
@@ -148,7 +148,7 @@
       call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOC
       call ESMF_TimeGet(currTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc) 
@@ -156,7 +156,7 @@
                " ", H, ":", M, ":", S
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOC
       ! get the number of times the clock was advanced
@@ -164,7 +164,7 @@
       print *, "The clock was advanced ", advanceCount, " times."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
 !BOE
 !\subsubsection{Clock reversal}
@@ -176,7 +176,7 @@
       call ESMF_ClockSet(clock, direction=ESMF_DIRECTION_REVERSE, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! time step clock in reverse from stop time back to start time;
@@ -184,19 +184,19 @@
       do while (.not.ESMF_ClockIsDone(clock, rc=rc))
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
         call ESMF_ClockPrint(clock, options="currTime string", rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
         call ESMF_ClockAdvance(clock, rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       end do
@@ -213,11 +213,11 @@
       call ESMF_ClockDestroy(clock, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
       ! file that the scripts grep for.
-      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
 !BOC
