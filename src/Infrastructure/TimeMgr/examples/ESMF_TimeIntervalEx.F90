@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.46 2012/02/15 23:22:18 svasquez Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.47 2012/02/16 20:34:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -66,7 +66,7 @@
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{TimeInterval initialization}
@@ -79,26 +79,26 @@
       call ESMF_TimeIntervalSet(timeinterval1, d=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_TimeIntervalPrint(timeinterval1, options="string", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! initialize time interval2 to 4 days, 1 hour, 30 minutes, 10 seconds
       call ESMF_TimeIntervalSet(timeinterval2, d=4, h=1, m=30, s=10, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_TimeIntervalPrint(timeinterval2, options="string", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{TimeInterval conversion}
@@ -112,7 +112,7 @@
       print *, "Time Interval1 = ", s, " seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_TimeIntervalGet(timeinterval2, h=h, m=m, s=s, rc=rc)
@@ -120,7 +120,7 @@
                                     s, " seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{TimeInterval difference}
@@ -137,7 +137,7 @@
            d, " days, ", h, " hours, ", m, " minutes, ", s, " seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{TimeInterval multiplication}
@@ -153,7 +153,7 @@
                " hours, ", m, " minutes, ", s, " seconds."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{TimeInterval comparison}
