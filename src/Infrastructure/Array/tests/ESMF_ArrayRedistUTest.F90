@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.31 2012/02/09 23:49:04 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.32 2012/02/16 19:36:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.31 2012/02/09 23:49:04 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.32 2012/02/16 19:36:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -51,9 +51,9 @@ program ESMF_ArrayRedistUTest
   type(ESMF_RouteHandle):: routehandle
   integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching Fortran array pointer
 #ifdef ESMF_TESTEXHAUSTIVE
-  type(ESMF_DistGrid)   :: srcDistgrid2
+  type(ESMF_DistGrid)   :: srcDistgrid2, dstDistgridWrong
   type(ESMF_Array)      :: srcArray2, srcArray3
-  type(ESMF_Array)      :: dstArray2, dstArray3
+  type(ESMF_Array)      :: dstArray2, dstArray3, dstArrayWrong
   type(ESMF_ArraySpec)  :: arrayspec3
   type(ESMF_ArraySpec)  :: arrayspec4, arrayspec5
   type(ESMF_Array)      :: srcArray4, dstArray5
@@ -1272,7 +1272,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayRedistStore with mismatching input Test"
+  write(name, *) "ArrayRedistStore with mismatching tensor count input Test"
   write(failMsg, *) "Did return ESMF_SUCCESS" 
   call ESMF_ArrayRedistStore(srcArray=srcArray3, dstArray=dstArray2, &
     routehandle=routehandle3, rc=rc)
@@ -1285,6 +1285,29 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   call ESMF_ArrayRedistRelease(routehandle=routehandle3, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstDistgridWrong Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstDistgridWrong = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/43/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArrayWrong Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dstArrayWrong = ESMF_ArrayCreate(arrayspec=arrayspec, &
+    distgrid=dstDistgridWrong, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedistStore with mismatching exclusive elements input Test"
+  write(failMsg, *) "Did return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistStore(srcArray=srcArray2, dstArray=dstArrayWrong, &
+    routehandle=routehandle3, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ArrayRedistStore with tensor dims reorder Test"
@@ -2087,6 +2110,21 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_DistGridDestroy(srcDistGrid2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArrayWrong Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(dstArrayWrong, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstDistgridWrong Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(dstDistgridWrong, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 #endif
 
 !------------------------------------------------------------------------
