@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.38 2012/02/15 23:22:18 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.39 2012/02/16 20:07:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@
         logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Clock initialization}
@@ -87,21 +87,21 @@
       call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! initialize start time to 9/1/2003
       call ESMF_TimeSet(startTime, yy=2003, mm=9, dd=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! initialize stop time to 9/30/2003
       call ESMF_TimeSet(stopTime, yy=2003, mm=9, dd=30, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! create & initialize the clock with the above values
@@ -109,7 +109,7 @@
                                name="The Clock", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Alarm initialization}
@@ -124,14 +124,14 @@
       call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=15, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       alarm(1) = ESMF_AlarmCreate(clock, &
          ringTime=alarmTime, name="Example alarm 1", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Initialize second alarm to ring on a 1 week interval starting 9/1/2003
@@ -139,13 +139,13 @@
       call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_TimeIntervalSet(alarmInterval, d=7, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Alarm gets default name "Alarm002"
@@ -153,7 +153,7 @@
                                   ringInterval=alarmInterval, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Clock advance and Alarm processing}
@@ -167,7 +167,7 @@
       do while (.not.ESMF_ClockIsStopTime(clock, rc=rc))
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
         ! perform time step and get the number of any ringing alarms
@@ -175,13 +175,13 @@
                                rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
         call ESMF_ClockPrint(clock, options="currTime string", rc=rc)
 !EOC
 
-        if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
         ! check if alarms are ringing
@@ -192,21 +192,21 @@
             if (ESMF_AlarmIsRinging(alarm(i), rc=rc)) then
 !EOC
 
-              if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+              if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
               call ESMF_AlarmGet(alarm(i), name=name, rc=rc)
               print *, trim(name), " is ringing!"
 !EOC
 
-              if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+              if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
               ! after processing alarm, turn it off
               call ESMF_AlarmRingerOff(alarm(i), rc=rc)
 !EOC
 
-              if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+              if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
             end if ! this alarm is ringing
@@ -225,19 +225,19 @@
       call ESMF_AlarmDestroy(alarm(1), rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
       call ESMF_AlarmDestroy(alarm(2), rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC 
       call ESMF_ClockDestroy(clock, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
      ! file that the scripts grep for.
