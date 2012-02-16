@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.39 2012/02/16 20:07:50 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.40 2012/02/16 20:09:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -241,7 +241,7 @@
 
      ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
      ! file that the scripts grep for.
-     call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+     call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
 
