@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiCommEx.F90,v 1.22 2012/02/15 22:00:56 theurich Exp $
+! $Id: ESMF_VMUserMpiCommEx.F90,v 1.23 2012/02/16 21:56:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -69,12 +69,12 @@ program ESMF_VMUserMpiCommEx
   call MPI_Init(ierr)
   ! User code initializes MPI.
 !EOC
-  if (ierr/=0) finalrc = ESMF_FAILURE
+  if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
   ! User code determines the local rank.
 !EOC
-  if (ierr/=0) finalrc = ESMF_FAILURE
+  if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   ! User code prepares MPI communicator "esmfComm" that only contains
   ! rank 0 and 1.
@@ -95,7 +95,7 @@ program ESMF_VMUserMpiCommEx
     ! Only call ESMF_Initialize() on rank 0 and 1, passing the prepared MPI
     ! communicator that spans these ranks.
 !EOC
-    if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     ! user code only to execute on the local MPI communicator
     print *, "ESMF application on MPI rank:", rank
 
