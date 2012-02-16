@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.7 2012/02/15 23:48:10 svasquez Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.8 2012/02/16 22:12:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -167,72 +167,37 @@ program ESMF_AttachMethodsEx
 
   call ESMF_Initialize(defaultlogfilename="AttachMethodsEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   producer = ESMF_GridCompCreate(name="producer", rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   consumer = ESMF_GridCompCreate(name="consumer", rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompSetServices(producer, producerReg, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompSetServices(consumer, consumerReg, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   state = ESMF_StateCreate(rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompInitialize(producer, exportState=state, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompInitialize(consumer, importState=state, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompDestroy(producer, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_GridCompDestroy(consumer, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_StateDestroy(state, rc=rc)
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
-
-10 continue
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
