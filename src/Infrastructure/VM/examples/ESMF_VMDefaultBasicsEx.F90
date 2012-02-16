@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.19 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.20 2012/02/16 21:10:53 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ program ESMF_VMDefaultBasicsEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -69,24 +69,24 @@ program ESMF_VMDefaultBasicsEx
   ! Providing the optional vm argument to ESMF_Initialize() is one way of
   ! obtaining the global VM.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_VMPrint(vm, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_VMGetGlobal(vm=vm, rc=rc)
   ! Calling ESMF_VMGetGlobal() anywhere in the user application is the other
   ! way to obtain the global VM object.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, peCount=peCount, &
     rc=rc)
   ! The VM object contains information about the associated resources. If the
   ! user code requires this information it must query the VM object.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   print *, "This PET is localPet: ", localPet
   print *, "of a total of ",petCount," PETs in this VM."
@@ -94,7 +94,7 @@ program ESMF_VMDefaultBasicsEx
 
   call ESMF_VMGet(vm, localPet, peCount=peCount, ssiId=ssiId, vas=vas, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   print *, "This PET is executing in virtual address space (VAS) ", vas
   print *, "located on single system image (SSI) ", ssiId

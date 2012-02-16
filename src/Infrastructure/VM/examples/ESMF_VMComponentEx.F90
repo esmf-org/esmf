@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.29 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.30 2012/02/16 21:06:47 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -145,7 +145,7 @@ program ESMF_VMComponentEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -162,35 +162,35 @@ program ESMF_VMComponentEx
 
   call ESMF_Initialize(defaultlogfilename="VMComponentEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC  
   gcomp = ESMF_GridCompCreate(petList=(/0/), rc=rc)
 !EOC  
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC  
   call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc=rc)
 !EOC  
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC  
   call ESMF_GridCompInitialize(gcomp, rc=rc)
 !EOC  
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   call ESMF_GridCompRun(gcomp, rc=rc)
 !EOC  
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC  
   call ESMF_GridCompFinalize(gcomp, rc=rc)
 !EOC  
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC  
   call ESMF_GridCompDestroy(gcomp, rc=rc)
 !EOC  
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
