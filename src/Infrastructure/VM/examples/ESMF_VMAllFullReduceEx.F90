@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.20 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.21 2012/02/16 20:57:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_VMAllFullReduceEx
   ! result code
   integer :: finalrc
     character(ESMF_MAXSTR) :: testname
-    character(ESMF_MAXSTR) :: failMsg, finalMsg
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -62,10 +62,10 @@ program ESMF_VMAllFullReduceEx
 
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMAllFullReduceEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_VMGet(vm, localPet=localPet, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! allocate data arrays
   nsize = 2
@@ -89,7 +89,7 @@ program ESMF_VMAllFullReduceEx
   ! Both sendData and recvData must be 1-d arrays. Reduce distributed 
   ! sendData element by element into recvData and return in on all PETs.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! global sum
 !BOC
@@ -98,7 +98,7 @@ program ESMF_VMAllFullReduceEx
   ! sendData must be 1-d array. Fully reduce the distributed sendData 
   ! into a single scalar and return it in recvData on all PETs.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! print the scatter result
   print *, 'Global sum:'
