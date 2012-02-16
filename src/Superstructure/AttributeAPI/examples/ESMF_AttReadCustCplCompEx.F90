@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.14 2012/02/15 23:51:43 svasquez Exp $
+! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.15 2012/02/16 22:20:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ program ESMF_AttReadCustCplCompEx
       if (rc.ne.ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       if (localPet==0) then
-        print *, "--------------------- ------------------"
+        print *, "----------------------------------------"
         print *, "Start of ESMF_AttReadCustCplComp Example"
         print *, "----------------------------------------"
       endif
@@ -120,7 +120,7 @@ program ESMF_AttReadCustCplCompEx
         xercesPresent = .false.
       endif
 
-      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
+      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !print *, 'rc = ', rc
 
@@ -131,7 +131,7 @@ program ESMF_AttReadCustCplCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='My Coupler') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -142,7 +142,7 @@ program ESMF_AttReadCustCplCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='My Earth System Model') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -153,7 +153,7 @@ program ESMF_AttReadCustCplCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Atmosphere') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -164,7 +164,7 @@ program ESMF_AttReadCustCplCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Land') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -175,7 +175,7 @@ program ESMF_AttReadCustCplCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Version 1') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
