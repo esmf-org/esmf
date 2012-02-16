@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadFieldEx.F90,v 1.23 2012/02/15 23:51:43 svasquez Exp $
+! $Id: ESMF_AttReadFieldEx.F90,v 1.24 2012/02/16 22:26:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@ program ESMF_AttReadFieldEx
         xercesPresent = .false.
       endif
 
-      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
+      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !print *, 'rc = ', rc
 
@@ -111,7 +111,7 @@ program ESMF_AttReadFieldEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='DPEDT') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -124,7 +124,7 @@ program ESMF_AttReadFieldEx
 
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='tendency_of_air_pressure') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -135,7 +135,7 @@ program ESMF_AttReadFieldEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Edge pressure tendency') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -146,7 +146,7 @@ program ESMF_AttReadFieldEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Pa s-1') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
