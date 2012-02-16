@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCustPackEx.F90,v 1.5 2012/02/15 23:51:43 svasquez Exp $
+! $Id: ESMF_AttributeCustPackEx.F90,v 1.6 2012/02/16 22:59:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -64,9 +64,11 @@ program ESMF_AttributeCustPackEx
       call ESMF_Initialize(vm=vm, &
                     defaultlogfilename="AttributeCustPackEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
       if (localPet==0) then
         print *, "-------------------------------------- "
@@ -87,6 +89,7 @@ program ESMF_AttributeCustPackEx
           petList=(/0,1,2,3/), rc=rc)
       endif
 !EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !    Now we can add a custom Attribute package to the gridded Component object.
@@ -103,6 +106,10 @@ program ESMF_AttributeCustPackEx
       call ESMF_AttributeAdd(gridcomp, convention=customConv, &
         purpose=customPurp, attrList=customAttrList, rc=rc)
 
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 !BOE
 !     We must set the Attribute values of our custom Attribute package.
 !EOE
@@ -110,11 +117,19 @@ program ESMF_AttributeCustPackEx
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName1', 'CustomAttrValue1', &
       convention=customConv, purpose=customPurp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName2', 'CustomAttrValue2', &
       convention=customConv, purpose=customPurp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName3', 'CustomAttrValue3', &
       convention=customConv, purpose=customPurp, rc=rc)
+
 !EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !     Write out the contents of our custom Attribute package to an XML file,
@@ -126,11 +141,14 @@ program ESMF_AttributeCustPackEx
 !BOC
       call ESMF_AttributeWrite(gridcomp,customConv,customPurp, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
+
 !EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
 
     ! Destroy
     call ESMF_GridCompDestroy(gridcomp, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   if (localPet==0) then
       print *, "------------------------------------ "
