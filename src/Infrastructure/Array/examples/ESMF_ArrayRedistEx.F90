@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.23 2012/02/15 22:55:11 svasquez Exp $
+! $Id: ESMF_ArrayRedistEx.F90,v 1.24 2012/02/16 01:34:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -29,8 +29,8 @@ program ESMF_ArrayRedistEx
   type(ESMF_DistGrid):: srcDistGrid, dstDistGrid
   type(ESMF_Array):: srcArray, dstArray
   type(ESMF_Array):: srcArray1, dstArray1
-  type(ESMF_Array):: srcArray2, dstArray2
-  type(ESMF_ArraySpec):: arrayspec, arrayspec3d
+  type(ESMF_Array):: srcArray2
+  type(ESMF_ArraySpec):: arrayspec, arrayspec3d, arrayspec4d
   type(ESMF_RouteHandle):: redistHandle
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
@@ -106,7 +106,8 @@ program ESMF_ArrayRedistEx
 ! kind. Further the number of exclusive elements matches between both Arrays.
 ! These are the prerequisites for the application of an Array redistribution
 ! in default mode. In order to increase performance of the actual 
-! redistribution the communication patter must be precomputed and stored.
+! redistribution the communication pattern is precomputed and stored in an
+! {\tt ESMF\_RouteHandle} object.
 !EOE
 !BOC
   call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
@@ -124,27 +125,41 @@ program ESMF_ArrayRedistEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
+! \begin{sloppypar}
 ! The use of the precomputed {\tt redistHandle} is {\em not} restricted to
-! {\tt srcArray} and {\tt dstArray}. The {\tt redistHandle} can be used to
-! redistribute data between any Array pairs that are weakly congruent to the
-! Array pair used during precomputation. Arrays are congruent if they are
-! defined on matching DistGrids and the shape of local array allocations match
-! for all DEs. For weakly congruent Arrays the sizes of the undistributed
-! dimensions, that vary faster with memory than the first distributed
-! dimension, are permitted to be different. This means that the same
-! {\tt redistHandle} can be applied to a large class of similar Arrays that
-! differ in the number of elements in the left most undistributed dimensions.
-!EOE
-
-  call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-! Neither {\tt srcArray} nor {\tt dstArray} from above hold an undistributed
-! dimension. However, the following {\tt srcArray1} and {\tt dstArray1} objects
-! are constructed to have an undistributed dimension each, that varies fastest
-! with memory. There is only one element in the undistributed dimension in each
-! Array.
+! the ({\tt srcArray}, {\tt dstArray}) pair. Instead the {\tt redistHandle}
+! can be used to redistribute data between any two Arrays that are weakly 
+! congruent to the Array pair used during precomputation. Arrays are 
+! {\em congruent} if they are defined on DistGrids that match with 
+! {\tt ESMF\_DISTGRIDMATCH\_EXACT} or higher, and have matching DE-local
+! array allocations (i.e. the same amount of padding around the exclusive 
+! region as well as the same shape in the undistributed dimensions). For Arrays
+! to be {\em weakly} congruent the shape and size of the undistributed
+! dimensions that have a smaller stride than the first distributed dimension
+! need not be the same. This definition covers even the case where an Array 
+! does not have any undistributed dimensions.
+! \end{sloppypar}
+!
+! For instance, an Array where the first two dimensions are undistributed, 
+! and are of size 5 and 6 (i.e. undistributed shape (5,6)), is weakly congruent
+! to an Array that only has a single undistributed first dimension. Furthermore,
+! the size of this single undistribute dimension is not restricted by the
+! number of undistributed elements in the first Array (i.e. here it does not
+! have to be 5x6=30). The Array is also weakly congruent to an Array that does
+! not have a first undistributed dimension at all. In either case the only 
+! restriction is that the distributed dimensions must be congruent.
+!
+! The transferablity of RouteHandles between Array pairs that are weakly
+! congruent can greatly reduce the number of communication store calls needed.
+! In a typical application Arrays are often defined on the same decomposition,
+! typically leading to congruent distributed dimensions. However, these Arrays
+! do not always have the same shape or size in the undistributed dimensions.
+!
+! For the current case, the {\tt redistHandle} was precomputed for simple 2D
+! Arrays without undistributed dimensions. The RouteHandle transferability
+! rule allows us to use this same RouteHandle to redistribute between two 
+! 3D Array that are built on the same 2D DistGrid, but have an undistributed
+! dimension that has a smaller stride than the distributed dimensions.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec3d, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
@@ -152,63 +167,65 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   srcArray1 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=srcDistgrid, &
-    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/1/), rc=rc)
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   dstArray1 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=dstDistgrid, &
-    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/1/), rc=rc)
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
+
 !BOC
-  call ESMF_ArrayRedistStore(srcArray=srcArray1, dstArray=dstArray1, &
+  call ESMF_ArrayRedist(srcArray=srcArray1, dstArray=dstArray1, &
     routehandle=redistHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! The weak congruency feature permits the {\tt redistHandle} to be used on Array
-! pairs that have the same arrangement of distributed and undistributed
-! dimensions, but where the first dimension is of different size, e.g. 10
-! elements instead of 1.
+! The following variation of the code shows that the same RouteHandle can be
+! applied to an Array pair where the number of undistributed dimensions does
+! not match between source and destination Array. The two requirements are 
+! simply that each side is weakly congruent to the Array used during store, and
+! that the {\em total} number of undistributed elements on source and 
+! destination side is the same. Here we prepare a source Array with two leading
+! undistributed dimensions that multiply out to 2x5=10 undistributed elements.
+! The destination array is the same as before with only a single leading 
+! undistributed dimension of size 10.
 !EOE
-
-!BOC
-  srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=srcDistgrid, &
-    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
-!EOC
+  !BOC
+  call ESMF_ArraySpecSet(arrayspec4d, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
+!EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  dstArray2 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=dstDistgrid, &
-    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
+  srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec4d, distgrid=srcDistgrid, &
+    distgridToArrayMap=(/3,4/), undistLBound=(/1,1/), undistUBound=(/2,5/), &
+    rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOE
 
 !BOC
-  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray2, &
+  call ESMF_ArrayRedist(srcArray=srcArray2, dstArray=dstArray1, &
     routehandle=redistHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 ! When done, the resources held by {\tt redistHandle} need to be deallocated
-! by the user code before the handle becomes inaccessible.
+! by the user code before the RouteHandle becomes inaccessible.
 !EOE
 !BOC
   call ESMF_ArrayRedistRelease(routehandle=redistHandle, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
+  call ESMF_ArrayDestroy(srcArray2, rc=rc) ! destroy the Array object
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   call ESMF_ArrayDestroy(srcArray1, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ArrayDestroy(dstArray1, rc=rc) ! destroy the Array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-  call ESMF_ArrayDestroy(srcArray2, rc=rc) ! destroy the Array object
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_ArrayDestroy(dstArray2, rc=rc) ! destroy the Array object
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArrayDestroy(dstArray, rc=rc) ! destroy the Array object
@@ -222,12 +239,11 @@ program ESMF_ArrayRedistEx
 ! {\tt srcToDstTransposeMap} argument, {\tt ESMF\_ArrayRedistStore()} does not
 ! require equal number of dimensions in source and destination Array. Only the
 ! total number of elements must match.
-! \end{sloppypar}
-!
 ! Specifying {\tt srcToDstTransposeMap} switches {\tt ESMF\_ArrayRedistStore()}
 ! into {\em transpose} mode. In this mode each dimension of {\tt srcArray}
-! is uniquely associated with a dimension in {\tt dstArray}. The sizes of 
+! is uniquely associated with a dimension in {\tt dstArray}, and the sizes of 
 ! associated dimensions must match for each pair.
+! \end{sloppypar}
 ! 
 !EOE
 !BOC
