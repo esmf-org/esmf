@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.25 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.26 2012/02/16 21:16:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ program ESMF_VMGetMPICommunicatorEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -73,13 +73,13 @@ program ESMF_VMGetMPICommunicatorEx
   finalrc = ESMF_SUCCESS
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMGetMPICommunicatorEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_VMGet(vm, mpiCommunicator=mpic, rc=rc)
   ! The returned MPI communicator spans the same MPI processes that the VM
   ! is defined on.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #ifndef ESMF_MPIUNI     
 !BOC
   call MPI_Comm_dup(mpic, mpic2, ierr)

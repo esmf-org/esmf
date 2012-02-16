@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.24 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.25 2012/02/16 21:25:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@ program ESMF_VMSendVMRecvEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -62,10 +62,10 @@ program ESMF_VMSendVMRecvEx
   
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMSendVMRecvEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   count = 10
   allocate(localData(count))
@@ -79,12 +79,12 @@ program ESMF_VMSendVMRecvEx
   if (localPet==src) &
     call ESMF_VMSend(vm, sendData=localData, count=count, dstPet=dst, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   if (localPet==dst) &
     call ESMF_VMRecv(vm, recvData=localData, count=count, srcPet=src, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   do i=1, count
     print *, 'localData for PET ',localPet,': ', localData(i)

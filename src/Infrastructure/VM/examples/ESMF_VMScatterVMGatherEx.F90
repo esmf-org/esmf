@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.21 2012/02/09 23:15:41 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.22 2012/02/16 21:20:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@ program ESMF_VMScatterVMGatherEx
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
-  character(ESMF_MAXSTR) :: failMsg, finalMsg
+  character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -61,10 +61,10 @@ program ESMF_VMScatterVMGatherEx
 
   call ESMF_Initialize(vm=vm, defaultlogfilename="VMScatterVMGatherEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   scatterRoot = 0
   gatherRoot = petCount-1
@@ -92,13 +92,13 @@ program ESMF_VMScatterVMGatherEx
     rootPet=scatterRoot, rc=rc)
   ! Both sendData and recvData must be 1-d arrays.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=nsize, &
     rootPet=gatherRoot, rc=rc)
   ! Both sendData and recvData must be 1-d arrays.
 !EOC
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
   ! print the scatter result
   print *, 'scatter result:'
