@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.13 2012/02/03 05:22:31 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.14 2012/02/16 23:01:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.13 2012/02/03 05:22:31 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.14 2012/02/16 23:01:00 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -242,121 +242,6 @@ namespace ESMCI {
   }
   
   
-#if 0  
-  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
-  // this call. 
-  void calc_1st_order_weights_2D_2D_cart(const MeshObj *dst_elem, MEField<> *dst_cfield, 
-                             std::vector<const MeshObj *> src_elems, MEField<> *src_cfield, 
-			      std::vector<int> *valid, std::vector<double> *wgts) {
-
-
-// Maximum size for a supported polygon
-// Since the elements are of a small 
-// limited size. Fixed sized buffers seem 
-// the best way to handle them
-
-#define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_2D (2*MAX_NUM_POLY_NODES) 
-
-
-    // Declaration for src polygon
-    int num_dst_nodes;
-    double dst_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Get dst coords
-    get_elem_coords(dst_elem, dst_cfield, 2, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
-
-    // if no nodes then exit
-    if (num_dst_nodes<1) return;
-
-    // calculate dst area
-    double dst_area=area_of_flat_2D_polygon(num_dst_nodes, dst_coords); 
-
-    // if the dst_area is 0 freak out
-    if (dst_area == 0.0) {
-      Throw() << "Destination Element has 0 area";
-    }
-    
-#if 0
-    printf("coords  "); 
-    for (int i=0; i<dst_coords.size(); i++) {
-      if (i%2==0) printf("[");
-      printf("  %f ",dst_coords[i]);
-      if (i%2==1) printf("]");
-    }
-    printf("\n");
-#endif
-
-
-    // Declaration for dst polygon
-    int num_src_nodes;
-    double src_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Declaration for intersection polygon
-    int num_sintd_nodes;
-    double sintd_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Declaration for tmp polygon used in intersection routine
-    double tmp_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Loop intersecting and calculating weights
-    for (int i=0; i<src_elems.size(); i++) {
-      const MeshObj *src_elem = src_elems[i];
-      
-      // Get src coords
-      get_elem_coords(src_elem, src_cfield, 2, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
-
-      // if no nodes then go to next
-      if (num_src_nodes<1) {
-	(*valid)[i]=0;
-	(*wgts)[i]=0.0;
-	continue;
-      }
-
-
-      // Make sure that we aren't going to go over size of tmp buffers
-      if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
-	Throw() << " src and dst poly size too big for temp buffer";
-      }
-
-      // Intersect src with dst element
-      intersect_convex_poly2D(num_dst_nodes, dst_coords,
-			      num_src_nodes, src_coords,
-			      tmp_coords,
-			      &num_sintd_nodes, sintd_coords); 
-#if 0
-      printf("sintd: "); 
-      for (int i=0; i<num_sintd_nodes; i++) {
-	printf(" [%f,%f] ",dst_coords[2*i],dst_coords[2*i+1]);
-      }
-      printf("\n");
-#endif
-
-      // if no sintd_nodes then go to next
-      if (num_sintd_nodes < 1) {
-	(*valid)[i]=0;
-	(*wgts)[i]=0.0;
-	continue;
-      }
-
-      // calculate intersection area
-      double sintd_area=area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords); 
-
-      // calc weight
-      (*valid)[i]=1;
-      (*wgts)[i]=sintd_area/dst_area;
-    }
-    
-
-#undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_2D
-
-  }
-
-#endif
-
-
-
 
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
@@ -380,9 +265,12 @@ namespace ESMCI {
     // Declaration for src polygon
     int num_src_nodes;
     double src_coords[MAX_NUM_POLY_COORDS_2D];
+    double tmp_coords[MAX_NUM_POLY_COORDS_2D];
+
 
     // Get src coords
-    get_elem_coords(src_elem, src_cfield, 2, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
+    get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+
 
     // if no nodes then exit
     if (num_src_nodes<1) return;
@@ -414,10 +302,7 @@ namespace ESMCI {
     int num_sintd_nodes;
     double sintd_coords[MAX_NUM_POLY_COORDS_2D];
 
-    // Declaration for tmp polygon used in intersection routine
-    double tmp_coords[MAX_NUM_POLY_COORDS_2D];
 
- 
     // Allocate something to hold areas
     std::vector<double> sintd_areas;
     sintd_areas.resize(dst_elems.size(),0.0);
@@ -429,9 +314,11 @@ namespace ESMCI {
     for (int i=0; i<dst_elems.size(); i++) {
       const MeshObj *dst_elem = dst_elems[i];
       
+
       // Get dst coords
-      get_elem_coords(dst_elem, dst_cfield, 2, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
-      
+      get_elem_coords_2D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
+
+
       // if no nodes then go to next
       if (num_dst_nodes<1) {
 	(*valid)[i]=0;
@@ -875,9 +762,11 @@ void norm_poly3D(int num_p, double *p) {
     // Declaration for src polygon
     int num_src_nodes;
     double src_coords[MAX_NUM_POLY_COORDS_3D];
+    double tmp_coords[MAX_NUM_POLY_COORDS_3D];
+
 
     // Get src coords
-    get_elem_coords(src_elem, src_cfield, 3, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
+    get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
 
     // if no nodes then exit
     if (num_src_nodes<1) return;
@@ -909,10 +798,6 @@ void norm_poly3D(int num_p, double *p) {
     int num_sintd_nodes;
     double sintd_coords[MAX_NUM_POLY_COORDS_3D];
 
-    // Declaration for tmp polygon used in intersection routine
-    double tmp_coords[MAX_NUM_POLY_COORDS_3D];
-
- 
     // Allocate something to hold areas
     std::vector<double> sintd_areas;
     sintd_areas.resize(dst_elems.size(),0.0);
@@ -925,8 +810,9 @@ void norm_poly3D(int num_p, double *p) {
       const MeshObj *dst_elem = dst_elems[i];
       
       // Get dst coords
-      get_elem_coords(dst_elem, dst_cfield, 3, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
-      
+      get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
+   
+  
       // if no nodes then go to next
       if (num_dst_nodes<1) {
 	(*valid)[i]=0;
