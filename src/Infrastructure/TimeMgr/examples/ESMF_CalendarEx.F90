@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.52 2012/02/15 23:22:18 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.53 2012/02/16 20:17:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -67,7 +67,7 @@
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Calendar creation}
@@ -81,7 +81,7 @@
                                               name="Gregorian", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! create a Julian Day calendar
@@ -89,7 +89,7 @@
                                               name="JulianDay", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! create a Custom calendar for the planet Mars
@@ -104,7 +104,7 @@
                                          name="MarsCalendar", rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Calendar comparison}
@@ -134,14 +134,14 @@
                         calendar=gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! switch time's calendar to perform conversion
       call ESMF_TimeSet(time, calendar=julianDayCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_TimeGet(time, d_i8=dl, rc=rc)
@@ -149,7 +149,7 @@
                " days in the Julian Day calendar."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Add a time interval to a time on a Calendar}
@@ -163,21 +163,21 @@
                         calendar=marsCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Set a 1 solar year time step
       call ESMF_TimeIntervalSet(marsTimeStep, yy=1, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Perform the increment
       marsTime = marsTime + marsTimeStep
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       ! Get the result in sols (2774 = (3+1)*668.5921 + 100)
@@ -185,7 +185,7 @@
       print *, "For Mars, 3 solar years, 100 sols + 1 solar year = ", sols, "sols."
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Calendar destruction}
@@ -197,23 +197,23 @@
       call ESMF_CalendarDestroy(julianDayCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_CalendarDestroy(gregorianCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
       call ESMF_CalendarDestroy(marsCalendar, rc=rc)
 !EOC
 
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
       ! file that the scripts grep for.
-      call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
+      call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
 !BOC
