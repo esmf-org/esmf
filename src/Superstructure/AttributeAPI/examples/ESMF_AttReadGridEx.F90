@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridEx.F90,v 1.24 2012/02/15 23:51:43 svasquez Exp $
+! $Id: ESMF_AttReadGridEx.F90,v 1.25 2012/02/16 22:39:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@ program ESMF_AttReadGridEx
         xercesPresent = .false.
       endif
 
-      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
+      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !print *, 'rc = ', rc
 
@@ -115,7 +115,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='cubed sphere') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -126,7 +126,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='true') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -138,7 +138,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='1') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -149,7 +149,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='YX') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -161,7 +161,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='logically_rectangular') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -172,7 +172,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='sphere') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -183,7 +183,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -194,7 +194,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -205,7 +205,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='false') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -217,7 +217,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='long: 0.0 lat: 90.0') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -228,7 +228,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='53457') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -239,7 +239,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -250,7 +250,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='96') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -262,7 +262,7 @@ program ESMF_AttReadGridEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='C48') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
