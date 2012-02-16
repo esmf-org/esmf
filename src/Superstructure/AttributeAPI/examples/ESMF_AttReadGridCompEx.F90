@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadGridCompEx.F90,v 1.21 2012/02/15 23:51:43 svasquez Exp $
+! $Id: ESMF_AttReadGridCompEx.F90,v 1.22 2012/02/16 22:33:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@ program ESMF_AttReadGridCompEx
         xercesPresent = .false.
       endif
 
-      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) finalrc = ESMF_FAILURE
+      if (rc .ne. ESMF_SUCCESS .and. xercesPresent) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !print *, 'rc = ', rc
 
@@ -135,7 +135,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='GEOS') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -148,7 +148,7 @@ program ESMF_AttReadGridCompEx
 
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='Goddard Earth Observing System Model') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -159,7 +159,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='NASA') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -171,7 +171,7 @@ program ESMF_AttReadGridCompEx
 
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='Global Modeling and Assimilation Office (GMAO)') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -182,7 +182,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='5') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -193,7 +193,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Max Suarez') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -204,7 +204,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Atmosphere') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -216,7 +216,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Earth System') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -228,7 +228,7 @@ program ESMF_AttReadGridCompEx
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Fortran 90') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
@@ -241,7 +241,7 @@ program ESMF_AttReadGridCompEx
 
       if (.not.((rc==ESMF_SUCCESS .and. &
                  attrvalue=='ESMF (Earth System Modeling Framework)') &
-                      .or. .not. xercesPresent)) finalrc = ESMF_FAILURE
+                      .or. .not. xercesPresent)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !print *, 'rc = ', rc
 !print *, 'attrvalue = ', attrvalue
 
