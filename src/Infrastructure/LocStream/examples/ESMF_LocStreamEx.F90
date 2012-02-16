@@ -109,6 +109,9 @@ program ESMF_LocStreamEx
    locstream=ESMF_LocStreamCreate(name="Equatorial Measurements",   &
                                   localCount=numLocationsOnThisPet, &
                                   rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Add key data, referencing a user data pointer. By changing the 
@@ -121,6 +124,9 @@ program ESMF_LocStreamEx
                              datacopyflag=ESMF_DATACOPY_REFERENCE, &
                              keyUnits="Degrees",     &
                              keyLongName="Latitude", rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    call ESMF_LocStreamAddKey(locstream,              &
                              keyName="Lon",          &
@@ -128,6 +134,10 @@ program ESMF_LocStreamEx
                              datacopyflag=ESMF_DATACOPY_REFERENCE, &
                              keyUnits="Degrees",     &
                              keyLongName="Longitude", rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Create a Field on the Location Stream. In this case the 
@@ -141,6 +151,8 @@ program ESMF_LocStreamEx
 
 
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
@@ -184,6 +196,10 @@ program ESMF_LocStreamEx
    locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
                                   localCount=numLocationsOnThisPet, &
                                   rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    !-------------------------------------------------------------------
    ! Add key data (internally allocating memory).
@@ -193,6 +209,9 @@ program ESMF_LocStreamEx
                              KeyTypeKind=ESMF_TYPEKIND_R8, &
                              keyUnits="Degrees",           &
                              keyLongName="Latitude", rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    call ESMF_LocStreamAddKey(locstream,                    &
                              keyName="Lon",                &
@@ -200,6 +219,9 @@ program ESMF_LocStreamEx
                              keyUnits="Degrees",           &
                              keyLongName="Longitude", rc=rc)
 
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Get key data. 
@@ -209,12 +231,18 @@ program ESMF_LocStreamEx
                              keyName="Lat",                &
                              farray=lat,                   &
                              rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    call ESMF_LocStreamGetKey(locstream,                    &
                              localDE=0,                    &
                              keyName="Lon",                &
                              farray=lon,                   &
                              rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Set key data. 
@@ -237,6 +265,8 @@ program ESMF_LocStreamEx
 
 
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
@@ -270,6 +300,10 @@ program ESMF_LocStreamEx
    locstream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
                                   localCount=numLocationsOnThisPet, &
                                   rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
    !-------------------------------------------------------------------
    ! Add key data (internally allocating memory).
    !-------------------------------------------------------------------
@@ -279,11 +313,19 @@ program ESMF_LocStreamEx
                              keyUnits="Degrees",           &
                              keyLongName="Longitude", rc=rc)
 
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
    call ESMF_LocStreamAddKey(locstream,                    &
                              keyName="Lat",                &
                              KeyTypeKind=ESMF_TYPEKIND_R8, &
                              keyUnits="Degrees",           &
                              keyLongName="Latitude", rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
 
    !-------------------------------------------------------------------
@@ -295,12 +337,20 @@ program ESMF_LocStreamEx
                              keyName="Lon",                &
                              farray=lon,                   &
                              rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    call ESMF_LocStreamGetKey(locstream,                    &
                              localDE=0,                    &
                              keyName="Lat",                &
                              farray=lat,                   &
                              rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Set the longitude and latitude coordinates of the points in the 
@@ -324,6 +374,9 @@ program ESMF_LocStreamEx
                                  coordSys=ESMF_COORDSYS_CART, &
                                  indexflag=ESMF_INDEX_GLOBAL, &
                                  rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Allocate the corner stagger location in which to put the coordinates. 
@@ -332,6 +385,9 @@ program ESMF_LocStreamEx
    !-------------------------------------------------------------------
    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=rc)
 
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    !-------------------------------------------------------------------
    ! Get access to the Fortran array pointers that hold the Grid 
@@ -343,10 +399,18 @@ program ESMF_LocStreamEx
                           coordDim=1, computationalLBound=clbnd, &
                           computationalUBound=cubnd,             & 
                           farrayPtr=farrayPtrLonC, rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
 
    call ESMF_GridGetCoord(grid, localDE=0,                       &
                          staggerLoc=ESMF_STAGGERLOC_CORNER,      &
                           coordDim=2, farrayPtr=farrayPtrLatC, rc=rc)
+
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
    do i1=clbnd(1),cubnd(1)
    do i2=clbnd(2),cubnd(2)
@@ -369,6 +433,7 @@ program ESMF_LocStreamEx
    newLocstream=ESMF_LocStreamCreate(locstream, coordKeyNames="Lon:Lat", &
                   background=grid, rc=rc)
 
+
    !-------------------------------------------------------------------
    ! A Field can now be created on newLocstream and 
    ! ESMF_FieldRedist() can be used to move data between Fields built 
@@ -377,6 +442,7 @@ program ESMF_LocStreamEx
 
 
 !EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
    !-------------------------------------------------------------------
    ! Clean up to prepare for the next example.
    !-------------------------------------------------------------------
