@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.59 2012/02/15 23:53:56 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.60 2012/02/17 22:33:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -295,7 +295,7 @@
     if (rc .ne. ESMF_SUCCESS) then
         print *, "Unable to initialize ESMF Framework"
         print *, "FAIL: ESMF_CplEx.F90"
-        stop
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 !-------------------------------------------------------------------------
 !   !

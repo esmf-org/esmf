@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.65 2012/02/15 23:53:56 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.66 2012/02/17 22:38:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -299,7 +299,7 @@
     if (rc .ne. ESMF_SUCCESS) then
         print *, "Unable to initialize ESMF Framework"
         print *, "FAIL: ESMF_GCompEx.F90"
-        stop
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
     endif
 !-------------------------------------------------------------------------
 !   !
