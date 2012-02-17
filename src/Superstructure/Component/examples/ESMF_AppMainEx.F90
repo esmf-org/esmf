@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.56 2012/02/15 23:53:56 svasquez Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.57 2012/02/17 22:11:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -270,14 +270,7 @@
 !   ! Initialize the Framework, and get the default VM
     call ESMF_Initialize(vm=vm, defaultlogfilename="AppMainEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) then
-        print *, "failed to initialize ESMF Framework"
-!EOC
-	print *, "FAIL: ESMF_FieldCreateEx.F90"
-
-!BOC
-        stop
-    endif
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !   !
@@ -317,6 +310,9 @@
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
