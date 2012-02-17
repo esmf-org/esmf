@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesEx.F90,v 1.13 2012/02/15 23:57:36 svasquez Exp $
+! $Id: ESMF_WebServicesEx.F90,v 1.14 2012/02/17 23:06:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -175,29 +175,18 @@ program WebServicesEx
   call ESMF_Initialize(defaultlogfilename="WebServicesEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
-
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   ! create the grid component 
   comp1 = ESMF_GridCompCreate(name="My Component", rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
-
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   ! Set up the register routine 
   call ESMF_GridCompSetServices(comp1, &
           userRoutine=ESMF_WebServUserModelRegister, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !!!!!!!
   !! KDS: I've commented out the call to ESMF_WebServicesLoop so that it won't
   !! enter the infinite loop and hold up the examples run.  I'll keep it
@@ -210,10 +199,7 @@ program WebServicesEx
   ! Call the Web Services Loop and wait for requests to come in
   !call ESMF_WebServicesLoop(comp1, portNum, rc=rc)
 !EOC
-  if (rc/=ESMF_SUCCESS) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !  The call to ESMF\_WebServicesLoop will setup the listening socket for your
 !  service and will wait for requests from a client.  As requests are received,
