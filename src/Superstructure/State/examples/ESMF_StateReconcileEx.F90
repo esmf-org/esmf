@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.46 2012/02/15 23:56:16 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.47 2012/02/17 22:59:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -156,10 +156,16 @@ end module ESMF_StateReconcileEx_Mod
     comp1name = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=comp1name, petList=(/ 0, 1 /), rc=rc)
     print *, "GridComp Create returned, name = ", trim(comp1name)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     comp2name = "Ocean"
     comp2 = ESMF_GridCompCreate(name=comp2name, petList=(/ 2, 3 /), rc=rc)
     print *, "GridComp Create returned, name = ", trim(comp2name)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     statename = "Ocn2Atm"
     state1 = ESMF_StateCreate(name=statename, rc=rc)  
@@ -189,21 +195,49 @@ end module ESMF_StateReconcileEx_Mod
     ! This is o.k. because the SetServices routine must execute from within
     ! the parent component VM.
     call ESMF_GridCompSetVM(comp1, comp_dummy, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
     call ESMF_GridCompSetVM(comp2, comp_dummy, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
     call ESMF_GridCompSetServices(comp1, comp_dummy, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
     call ESMF_GridCompSetServices(comp2, comp_dummy, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
 
     print *, "ready to set entry point 1"
     call ESMF_GridCompSetEntryPoint(comp1, ESMF_METHOD_INITIALIZE, &
          comp1_init, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
 
     print *, "ready to set entry point 2"
     call ESMF_GridCompSetEntryPoint(comp2, ESMF_METHOD_INITIALIZE, &
          comp2_init, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
 
 
     print *, "ready to call init for comp 1"
     call ESMF_GridCompInitialize(comp1, exportState=state1, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
     print *, "ready to call init for comp 2"
     call ESMF_GridCompInitialize(comp2, exportState=state1, rc=rc)
 !EOC
@@ -228,9 +262,17 @@ end module ESMF_StateReconcileEx_Mod
 !BOC
     print *, "State before calling StateReconcile()"
     call ESMF_StatePrint(state1, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
 
     call ESMF_StateReconcile(state1, vm=vm,  &
                              attreconflag=ESMF_ATTRECONCILE_OFF, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+
 
     print *, "State after calling StateReconcile()"
     call ESMF_StatePrint(state1, rc=rc)
