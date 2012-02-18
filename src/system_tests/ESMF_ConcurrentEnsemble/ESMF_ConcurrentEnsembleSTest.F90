@@ -1,4 +1,4 @@
-! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.36 2011/06/30 06:00:44 theurich Exp $
+! $Id: ESMF_ConcurrentEnsembleSTest.F90,v 1.37 2012/02/18 01:35:08 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -111,15 +111,6 @@ program ESMF_ConcurrentEnsembleSTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
-  if (localPet == 0) then
-    print *, "--------------------------------------- "
-    print *, "Start of ", trim(testname)
-    print *, "--------------------------------------- "
-  endif
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
 ! Create section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -144,6 +135,15 @@ program ESMF_ConcurrentEnsembleSTest
          ESMF_CONTEXT, rcToReturn=rc)
      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
    endif
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  if (localPet == 0) then
+    print *, "--------------------------------------- "
+    print *, "Start of ", trim(testname)
+    print *, "--------------------------------------- "
+  endif
 
   ! Create the 4 ensemble model components, the composite component and the coupler on disjoint PETs
   ! In concurrent mode, each of the four ensemble components run 2 disjoint PETs and the coupler and the composite

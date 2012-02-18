@@ -1,4 +1,4 @@
-! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.27 2011/06/30 06:01:30 theurich Exp $
+! $Id: ESMF_SequentialEnsembleSTest.F90,v 1.28 2012/02/18 01:36:55 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -118,15 +118,6 @@ program ESMF_SequentialEnsembleSTest
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
-  if (localPet == 0) then
-    print *, "--------------------------------------- "
-    print *, "Start of ", trim(testname)
-    print *, "--------------------------------------- "
-  endif
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
 ! Create section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -151,6 +142,15 @@ program ESMF_SequentialEnsembleSTest
          ESMF_CONTEXT, rcToReturn=rc)
      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
    endif
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  if (localPet == 0) then
+    print *, "--------------------------------------- "
+    print *, "Start of ", trim(testname)
+    print *, "--------------------------------------- "
+  endif
 
   ! Create the 4 ensemble model components, the composite component and the coupler on disjoint PETs
   ! components on all the 8 PETs.
