@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.142 2012/02/15 16:13:53 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.143 2012/02/18 01:19:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -806,6 +806,7 @@
  
 
 interface operator (==)
+  module procedure ESMF_atreceq
   module procedure ESMF_sfeq
   module procedure ESMF_dkeq
   module procedure ESMF_pteq
@@ -964,6 +965,16 @@ end interface
     end subroutine ESMF_ObjectIDValidate
 
 #endif
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_AttReconcileFlag types
+
+function ESMF_atreceq(atrec1, atrec2)
+  logical ESMF_atreceq
+  type(ESMF_AttReconcileFlag), intent(in) :: atrec1, atrec2
+
+  ESMF_atreceq = (atrec1%value == atrec2%value)
+end function ESMF_atreceq
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
