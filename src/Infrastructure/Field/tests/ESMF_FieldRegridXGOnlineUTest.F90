@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.22 2012/02/22 00:18:49 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.23 2012/02/22 21:59:42 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -164,8 +164,9 @@
     write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 0
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_OFF_UTest
     call test_regrid2xgSph(40,40,80,80,1.,1.,0.6,0.6,-165.,30.,-168.,25., &
       tag='large regional sphere overlap B2', rc=rc)
     write(failMsg, *) ""
@@ -173,14 +174,14 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_UTest
+    !EX_OFF_UTest
     call test_regrid2xgSph(80,80,40,40,0.6,0.6,1.,1.,-168.,25.,-165.,30., &
       tag='reverse large regional sphere overlap', rc=rc)
     write(failMsg, *) ""
     write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
+
     !------------------------------------------------------------------------
     !EX_OFF_UTest
     call test_regrid2xgSph(45,45,90,90,8.,4.,4.,2.,-180.,-90.,0.,-90., &
