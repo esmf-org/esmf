@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.108 2012/01/06 20:19:21 svasquez Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.109 2012/02/22 17:52:38 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -68,14 +68,14 @@
 #endif
         private
         type(ESMF_StateItemWrap), pointer :: siwrap(:)
-        type(ESMF_StateItemInfo), dimension(:), pointer :: childList
-        type(ESMF_StateItemInfo), dimension(:), pointer :: attrList
+        type(ESMF_StateItemInfo), pointer :: childList(:)
+        type(ESMF_StateItemInfo), pointer :: attrList(:)
         ! TODO: these need to be integrated in a better fashion.
         integer(ESMF_KIND_I4) :: mycount, theircount
-        integer(ESMF_KIND_I4), pointer, dimension(:) :: idsend, idrecv
-        type(ESMF_VMId), pointer, dimension(:) :: vmidsend, vmidrecv
-        integer(ESMF_KIND_I4), pointer, dimension(:) :: objsend, objrecv
-        character, pointer, dimension(:,:) :: blindsend, blindrecv
+        integer(ESMF_KIND_I4),    pointer :: idsend(:),   idrecv(:)
+        type(ESMF_VMId),          pointer :: vmidsend(:), vmidrecv(:)
+        integer(ESMF_KIND_I4),    pointer :: objsend(:),  objrecv(:)
+        character,                pointer :: blindsend(:,:), blindrecv(:,:)
         ! TODO: longer term, build a linked list or tree of objects.
         !type(ESMF_StateItemInfo), pointer :: originalObject
         !integer :: blockType   ! new obj, dup, or end marker
@@ -116,7 +116,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.108 2012/01/06 20:19:21 svasquez Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.109 2012/02/22 17:52:38 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -368,7 +368,7 @@
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! (+1) to allow top level State space to reconcile Attributes
-    if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+    if (attreconflag == ESMF_ATTRECONCILE_ON) then
       si%mycount = itemcount + 1
     else
       si%mycount = itemcount
@@ -416,7 +416,7 @@
       end select
 
     ! (+1) to allow top level State space to reconcile Attributes
-    if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+    if (attreconflag == ESMF_ATTRECONCILE_ON) then
       si%mycount = itemcount + 1
       offset = 0
       call c_ESMC_GetID(state%statep%base, si%idsend(1), localrc)
@@ -447,7 +447,7 @@
     !  start from 2, top level State is number 1
     do i=attreconstart, si%mycount
         ! i-1 because we are starting from 2, all else should be i
-        if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+        if (attreconflag == ESMF_ATTRECONCILE_ON) then
           stateitem => si%siwrap(i-1)%si
         else
           stateitem => si%siwrap(i)%si
@@ -936,7 +936,7 @@ petloop:  &
 #endif
 
         ! unpack the top level State Attributes first
-        if (attreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+        if (attreconflag == ESMF_ATTRECONCILE_ON) then
           if (si%objrecv(1) == ESMF_ID_BASE%objectID) then
             bptr => si%blindrecv(:,1)
             offset = 0
@@ -1013,11 +1013,11 @@ itemloop:  do k=attreconstart, si%theircount
              
 !!DEBUG " need to create local proxy object"
                 offset = 0  
+                bptr => si%blindrecv(:,k)
                 select case (si%objrecv(k))
                    case (ESMF_ID_FIELDBUNDLE%objectID)
 
 !!DEBUG "need to create proxy fieldbundle, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
                     fieldbundle = ESMF_FieldBundleDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
@@ -1040,7 +1040,6 @@ itemloop:  do k=attreconstart, si%theircount
 
                    case (ESMF_ID_FIELD%objectID)
 !!DEBUG "need to create proxy field, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
                     field = ESMF_FieldDeserialize(bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
@@ -1063,7 +1062,6 @@ itemloop:  do k=attreconstart, si%theircount
 
                    case (ESMF_ID_ARRAY%objectID)
 !!DEBUG "need to create proxy array, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayDeserialize(array, bptr, offset, &
                       attreconflag, localrc)
                     if (ESMF_LogFoundError(localrc, &
@@ -1092,7 +1090,6 @@ itemloop:  do k=attreconstart, si%theircount
 
                    case (ESMF_ID_ARRAYBUNDLE%objectID)
 !!DEBUG "need to create proxy arraybundle, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayBundleDeserialize(arraybundle, bptr, &
                       offset, attreconflag, localrc)
                     if (ESMF_LogFoundError(localrc, &
@@ -1121,7 +1118,6 @@ itemloop:  do k=attreconstart, si%theircount
 
                    case (ESMF_ID_STATE%objectID)
 !!DEBUG "need to create proxy substate, remote id=", si%idrecv(k)
-                    bptr => si%blindrecv(:,k)
                     substate = ESMF_StateDeserialize(vm, bptr, offset, &
                       attreconflag=attreconflag, rc=localrc)
                     if (ESMF_LogFoundError(localrc, &
@@ -1160,7 +1156,7 @@ itemloop:  do k=attreconstart, si%theircount
 
 !!DEBUG "end of proxy create section"
 
-           if (si%theircount .gt. 0) then
+           if (si%theircount > 0) then
 !!DEBUG "the remote pet had sent us objects; remove temp space now"
                deallocate(si%idrecv, stat=memstat)
                if (ESMF_LogFoundDeAllocError(memstat, &
