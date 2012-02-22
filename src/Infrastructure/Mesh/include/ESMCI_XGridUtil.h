@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.h,v 1.6 2012/01/26 16:25:22 feiliu Exp $
+// $Id: ESMCI_XGridUtil.h,v 1.7 2012/02/22 15:51:22 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -113,9 +113,9 @@ struct xpoint{
   // metric epsilon is 1.e-20
   bool operator == (const xpoint & that) const{
     double epsilon = 1.e-10;
-    return ((std::fabs(this->c[0] - that.c[0]) < epsilon) && 
-            (std::fabs(this->c[1] - that.c[1]) < epsilon) && 
-            (std::fabs(this->c[2] - that.c[2]) < epsilon));
+    return (std::sqrt( (this->c[0]-that.c[0])*((this->c[0]-that.c[0])) +
+                       (this->c[1]-that.c[1])*((this->c[1]-that.c[1])) +
+                       (this->c[2]-that.c[2])*((this->c[2]-that.c[2])) ) < epsilon);
   }
 
 };
@@ -129,6 +129,11 @@ struct xvector{
 
   xvector(double x, double y, double z){
     c[0] = x; c[1] = y; c[2] = z;
+  }
+
+  xvector(const double * const c_, int sdim){
+    c[2] = 0.;
+    std::memcpy(c, c_, sdim*sizeof(double));
   }
 
   xvector(const xpoint & p){
@@ -155,6 +160,17 @@ struct xvector{
     return p.normalize(); 
   }
 
+  xvector normal3D(xvector p2) const{
+    // normal3D = (p1 x p2) x p1 = n x p1, p1 = this
+    xvector n = xvector(c[1]*p2.c[2]-c[2]*p2.c[1], 
+                        c[2]*p2.c[0]-c[0]*p2.c[2],
+                        c[0]*p2.c[1]-c[1]*p2.c[0]);
+    xvector p = xvector(n.c[1]*c[2]-n.c[2]*c[1], 
+                        n.c[2]*c[0]-n.c[0]*c[2],
+                        n.c[0]*c[1]-n.c[1]*c[0]);
+    return p.normalize(); 
+  }
+
 };
 
 xvector operator -(const xvector & v1, const xvector & v2);
@@ -165,7 +181,9 @@ double dot(const xvector & v1, const xvector & v2);
 struct xpoint_equal{
 
   bool operator () (const xpoint & rhs, const xpoint & lhs){
-    return (rhs.c[0] == lhs.c[0] && rhs.c[1] == lhs.c[1]);
+    return (std::sqrt( (rhs.c[0]-lhs.c[0])*((rhs.c[0]-lhs.c[0])) +
+                       (rhs.c[1]-lhs.c[1])*((rhs.c[1]-lhs.c[1])) +
+                       (rhs.c[2]-lhs.c[2])*((rhs.c[2]-lhs.c[2])) ) < 1.e-10);
   }
 };
 
@@ -217,56 +235,9 @@ struct polygon{
 
   unsigned int size() const { return points.size(); }
 
-  double area(int sdim) const {
-    double split_area = 0.;
-    if(sdim == 2){
-      double * coords = new double[sdim * points.size()];
-      polygon_to_coords(*this, sdim, coords);
-      split_area = area_of_flat_2D_polygon(points.size(), coords);
-      delete[] coords;
-      return split_area;
-    }else if(sdim == 3){
-      double * coords = new double[sdim * points.size()];
-      polygon_to_coords(*this, sdim, coords);
-      split_area = great_circle_area(points.size(), coords);
-      delete[] coords;
-      return split_area;
-    }
-    return split_area;
-  }
+  double area(int sdim) const;
 
-  xpoint centroid(int sdim) const {
-    double area = this->area(sdim);
-    if(area <= 0.) Throw() << "Invalid polygon area found when computing centroid\n";
-    int n = this->size();
-    double sum[3]; for(int i = 0; i < 3; i ++) sum[i] = 0.;
-
-    if(sdim == 2){
-      double tmp;
-      for(int i = 0; i < n; i ++){
-        tmp = points[i].c[0]*points[(i+1)%n].c[1] - points[(i+1)%n].c[0]*points[i].c[1];
-        sum[0] += (points[i].c[0]+points[(i+1)%n].c[0])*tmp;
-        sum[1] += (points[i].c[1]+points[(i+1)%n].c[1])*tmp;
-      }
-      for(int i = 0; i < 3; i ++) sum[i] /= 6.*area;
-      return xpoint(sum, sdim);
-    }else if(sdim == 3){
-      //translate the center of the coordinate system to points[0]
-      double tmp;
-      for(int i = 0; i < n-1; i ++){
-        tmp = tri_area(points[i].c, points[(i+1)%n].c, points[(i+2)%n].c);
-        sum[0] += (points[(i+1)%n].c[0]+points[(i+2)%n].c[0])*tmp;
-        sum[1] += (points[(i+1)%n].c[1]+points[(i+2)%n].c[1])*tmp;
-        sum[2] += (points[(i+1)%n].c[2]+points[(i+2)%n].c[2])*tmp;
-      }
-      for(int i = 0; i < 3; i ++) {
-        sum[i] /= 6.*area;
-        sum[i] += points[0].c[i];
-      } 
-      return xpoint(sum, sdim);
-    }else
-      Throw() << "Cannot handle sdim > 3\n";
-  }
+  xpoint centroid(int sdim) const;
 };
 
 // Compute the difference polygons: p-q
@@ -281,6 +252,14 @@ struct polygon{
  * @param[out] difference the difference polygons stored in a vector
  */
 int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, std::vector<polygon> & difference);
+
+// Debugging apis
+void cart2sph(int num_p, double *p, double *lonlat);
+void cart2sph(const polygon & cart, polygon & sph);
+void cart2sph(const std::vector<polygon> & cart, std::vector<polygon> & sph);
+void sph2cart(int num_p, double *p, double *lonlat);
+void sph2cart(const polygon & sph, polygon & cart);
+void sph2cart(const std::vector<polygon> & sph, std::vector<polygon> & cart);
 
 } // namespace
 

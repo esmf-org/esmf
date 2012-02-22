@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.18 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_Interp.h,v 1.19 2012/02/22 15:51:22 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -161,7 +161,7 @@ public:
   void interpL2csrvM(const IWeights &, IWeights *, 
                      MEField<> const * const, MEField<> const * const);
   
-  void release_zz() { if(zz) Zoltan_Destroy(&zz); }
+  void release_zz() { if(zz) Zoltan_Destroy(&zz); zz = 0; }
   Zoltan_Struct * get_zz()  { return zz; }
   SearchResult & get_sres() { return sres; }
   GeomRend & get_grend()    { return grend; }

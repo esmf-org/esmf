@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.8 2012/01/26 16:25:24 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.9 2012/02/22 15:51:29 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -39,28 +39,88 @@ namespace ESMCI{
 // These algorithms are slightly treaked for XGrid implementation.
 //
 
-double dot(const xvector & v1, const xvector & v2){
+inline double dot(const xvector & v1, const xvector & v2){
   return v1.c[0]*v2.c[0]+v1.c[1]*v2.c[1]+v1.c[2]*v2.c[2];
 }
-xvector cross(const xvector & v1, const xvector & v2){
+inline xvector cross(const xvector & v1, const xvector & v2){
   // cross(i) = epsilon(i,j,k)*v1,j*v2,k     i,j,k=1..3
   return xvector(v1.c[1]*v2.c[2]-v1.c[2]*v2.c[1], 
                  v1.c[2]*v2.c[0]-v1.c[0]*v2.c[2],
                  v1.c[0]*v2.c[1]-v1.c[1]*v2.c[0]);
 }
 
-double metric(const xvector & v){
+inline double metric(const xvector & v){
   return v.metric();
 }
 
-xvector operator -(const xvector & v1, const xvector & v2){
+inline xvector operator -(const xvector & v1, const xvector & v2){
   return xvector(v1.c[0]-v2.c[0], v1.c[1]-v2.c[1], v1.c[2]-v2.c[2]);
 }
-xvector operator +(const xvector & v1, const xvector & v2){
+inline xvector operator +(const xvector & v1, const xvector & v2){
   return xvector(v1.c[0]+v2.c[0], v1.c[1]+v2.c[1], v1.c[2]+v2.c[2]);
 }
-xvector operator *(const double ratio, const xvector & v){
+inline xvector operator *(const double ratio, const xvector & v){
   return xvector(v.c[0]*ratio, v.c[1]*ratio, v.c[2]*ratio);
+}
+
+inline xvector operator /(const xvector & v, const double ratio){
+  return xvector(v.c[0]/ratio, v.c[1]/ratio, v.c[2]/ratio);
+}
+
+double polygon::area(int sdim) const {
+  double split_area = 0.;
+  if(sdim == 2){
+    double * coords = new double[sdim * points.size()];
+    polygon_to_coords(*this, sdim, coords);
+    split_area = area_of_flat_2D_polygon(points.size(), coords);
+    delete[] coords;
+    return split_area;
+  }else if(sdim == 3){
+    double * coords = new double[sdim * points.size()];
+    polygon_to_coords(*this, sdim, coords);
+    split_area = great_circle_area(points.size(), coords);
+    delete[] coords;
+
+    // great_circle_area does not take CCW sense into account
+    // dot of the radial normal with polygon normal gives a sense if the points are CCW arranged
+    int np = points.size(); double ccw_sense = 0.;
+    for(int i = 0; i < np-2; i++)
+      ccw_sense += dot(cross(points[(i+1)%np]-points[i], points[(i+2)%np]-points[(i+1)%np]), points[i]);
+    return (ccw_sense > 0)? split_area: (-split_area);
+  }
+  return split_area;
+}
+
+xpoint polygon::centroid(int sdim) const {
+  double area = this->area(sdim);
+  if(area <= 0.) Throw() << "Invalid polygon area found when computing centroid\n";
+  int n = this->size();
+  double sum[3]; for(int i = 0; i < 3; i ++) sum[i] = 0.;
+
+  if(sdim == 2){
+    double tmp;
+    for(int i = 0; i < n; i ++){
+      tmp = points[i].c[0]*points[(i+1)%n].c[1] - points[(i+1)%n].c[0]*points[i].c[1];
+      sum[0] += (points[i].c[0]+points[(i+1)%n].c[0])*tmp;
+      sum[1] += (points[i].c[1]+points[(i+1)%n].c[1])*tmp;
+    }
+    for(int i = 0; i < 3; i ++) sum[i] /= 6.*area;
+    return xpoint(sum, sdim);
+  }else if(sdim == 3){
+    //translate the center of the coordinate system to points[0]
+    double tmp;
+    for(int i = 0; i < n-2; i ++){
+      tmp = tri_area(points[i].c, points[(i+1)%n].c, points[(i+2)%n].c);
+      sum[0] += (points[i].c[0]+points[(i+1)%n].c[0]+points[(i+2)%n].c[0])*tmp;
+      sum[1] += (points[i].c[1]+points[(i+1)%n].c[1]+points[(i+2)%n].c[1])*tmp;
+      sum[2] += (points[i].c[2]+points[(i+1)%n].c[2]+points[(i+2)%n].c[2])*tmp;
+    }
+    for(int i = 0; i < 3; i ++) {
+      sum[i] /= 3.*area;
+    } 
+    return xpoint(sum, sdim);
+  }else
+    Throw() << "Cannot handle sdim > 3\n";
 }
 
 /**
@@ -131,6 +191,91 @@ bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double
   return true;
 }
 
+
+// Intersects between the line a and the seqment s
+// where both line and segment are great circle lines on the sphere represented by
+// 3D cartesian points.
+//  [sin sout] are the ends of a line segment
+// returns true if the lines could be intersected, false otherwise.
+//
+// Note: this test does not work well for line segments on sphere because the underlying
+// theory computes the shortest distance between 2 3D line segments, the minima of this
+// shortest distance for intersection is inaccurate for line segments with end points on sphere.
+bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double *q3,
+                     double *intersect, 
+  int & inbound, bool & on_p_seg, bool & on_q_seg){
+
+  // Do this intersection by reprsenting the line a1 to a2 as a plane through the
+  // two line points and the origin of the sphere (0,0,0). This is the
+  // definition of a great circle arc.
+  double plane[9];
+  double plane_p[2];
+  double t,u;
+  double epsilon = 1.e-15;
+
+  // Load points defining plane into variable (these are supposed to be in counterclockwise order)
+  plane[0]=q1[0];
+  plane[1]=q1[1];
+  plane[2]=q1[2];
+  plane[3]=q2[0];
+  plane[4]=q2[1];
+  plane[5]=q2[2];
+  plane[6]=0.0;
+  plane[7]=0.0;
+  plane[8]=0.0;
+
+  // Intersect the segment with the plane
+  if(!intersect_tri_with_line(plane, a1, a2, plane_p, &t))
+     return false;
+
+  //if( (t < 0) || (t > 1) )
+  if( (t < -epsilon) || (t > (1+epsilon)) )
+    return false;
+
+  // Load points defining plane into variable (these are supposed to be in counterclockwise order)
+  plane[0]=a1[0];
+  plane[1]=a1[1];
+  plane[2]=a1[2];
+  plane[3]=a2[0];
+  plane[4]=a2[1];
+  plane[5]=a2[2];
+  plane[6]=0.0;
+  plane[7]=0.0;
+  plane[8]=0.0;
+
+  // Intersect the segment with the plane
+  if(!intersect_tri_with_line(plane, q1, q2, plane_p, &u))
+     return false;
+
+  if( (u < -epsilon) || (u > (1+epsilon)) )
+    return false;
+
+  xvector p1 = xvector(a2[0]-a1[0], a2[1]-a1[1], a2[2]-a1[2]);
+  xvector v1 = xvector(q2[0]-q1[0], q2[1]-q1[1], q2[2]-q1[2]);
+  xvector v2 = xvector(q3[0]-q2[0], q3[1]-q2[1], q3[2]-q2[2]);
+
+  // The two planes are coincidental
+  double coincident = metric(cross(cross(xvector(a1,3), xvector(a2,3)), cross(xvector(q1,3), xvector(q2,3))));
+  if(coincident < 1.e-15) return false;
+
+  double sense = dot(cross(v1,v2), cross(v1,p1));
+  //if(std::fabs(sense) < epsilon) return false;
+
+  // Calculate point of intersection
+  intersect[0]=q1[0] + u*(q2[0]-q1[0]);
+  intersect[1]=q1[1] + u*(q2[1]-q1[1]);
+  intersect[2]=q1[2] + u*(q2[2]-q1[2]);
+  double norm = xvector(intersect[0], intersect[1], intersect[2]).metric();
+  for(int i = 0; i < 3; i ++) intersect[i] /= norm;
+
+  inbound = 1;
+  // sense of inbound: (v1 x v2).(v1 x p1) > 0
+  //if(sense > 0. && (t>0 && t<1)) inbound = 2; // v1 going into v2 in CCW sense
+  if(sense > 0) inbound = 2; // v1 going into v2 in CCW sense
+
+  return true;
+}
+
 /**
  *\brief check if two line segments intersect
  * @param[in] p1            start point of first line segment
@@ -143,50 +288,61 @@ bool line_intersect_2D_2D(double *p1, double *p2, double *q1, double *q2, double
  * @param[out] on_q_seg     whether the intersection is on q line segment
  * @return                  if the p and q intersects
  */
-bool line_intersect_2D_3D(double *p1, double *p2, double *q1, double *q2, double *intersect, 
+bool line_intersect_2D_3Da(double *p1, double *p2, double *q1, double *q2, double *q3, double *intersect, 
   int & inbound, bool & on_p_seg, bool & on_q_seg){
 
   double mua,mub;
-  double denom,numera,numerb;
+  double denom,numer;
   double epsilon = 1.e-20;
   inbound = -1;
   on_p_seg = true;
   on_q_seg = true;
+  double d1343,d4321,d1321,d4343,d2121;
 
-  xvector a1 = xvector(xpoint(p1[0],p1[1],p1[2]));
-  xvector a2 = xvector(xpoint(p2[0],p2[1],p2[2]));
-  xvector b1 = xvector(xpoint(q1[0],q1[1],q1[2]));
-  xvector b2 = xvector(xpoint(q2[0],q2[1],q2[2]));
+  xvector a1 = xvector(p1[0],p1[1],p1[2]);
+  xvector a2 = xvector(p2[0],p2[1],p2[2]);
+  xvector b1 = xvector(q1[0],q1[1],q1[2]);
+  xvector b2 = xvector(q2[0],q2[1],q2[2]);
   xvector v1 = xvector(p2[0]-p1[0], p2[1]-p1[1], p2[2]-p1[2]);
   xvector v2 = xvector(q2[0]-q1[0], q2[1]-q1[1], q2[2]-q1[2]);
+  xvector v3 = xvector(q3[0]-q2[0], q3[1]-q2[1], q3[2]-q2[2]);
 
-  /*
-   nA = dot(cross(B2-B1,A1-B1),cross(A2-A1,B2-B1));
-   nB = dot(cross(A2-A1,A1-B1),cross(A2-A1,B2-B1));
-   d = dot(cross(A2-A1,B2-B1),cross(A2-A1,B2-B1));
-   A0 = A1 + (nA/d)*(A2-A1);
-   B0 = B1 + (nB/d)*(B2-B1);
-  */
-  denom  = dot(cross(a2-a1,b2-b1), cross(a2-a1,b2-b1));
-  numera = dot(cross(b2-b1,a1-b1), cross(a2-a1,b2-b1));
-  numerb = dot(cross(a2-a1,a1-b1), cross(a2-a1,b2-b1));
+  // /*
+  //  nA = dot(cross(B2-B1,A1-B1),cross(A2-A1,B2-B1));
+  //  nB = dot(cross(A2-A1,A1-B1),cross(A2-A1,B2-B1));
+  //  d = dot(cross(A2-A1,B2-B1),cross(A2-A1,B2-B1));
+  //  A0 = A1 + (nA/d)*(A2-A1);
+  //  B0 = B1 + (nB/d)*(B2-B1);
+  // */
+  // denom  = dot(cross(a2-a1,b2-b1), cross(a2-a1,b2-b1));
+  // numera = dot(cross(b2-b1,a1-b1), cross(a2-a1,b2-b1));
+  // numerb = dot(cross(a2-a1,a1-b1), cross(a2-a1,b2-b1));
 
-  /* Are the lines coincident? Do not consider the lines intersecting in this case. */
-  if (std::fabs(numera) < epsilon && std::fabs(numerb) < epsilon && std::fabs(denom) < epsilon) {
+  if(v1.metric() < epsilon)
     return false;
-  }
+  
+  if(v2.metric() < epsilon)
+    return false;
 
+  d1343 = dot(a1-b1, b2-b1);
+  d4321 = dot(b2-b1, a2-a1);
+  d1321 = dot(a1-b1, a2-a1);
+  d4343 = dot(v2,v2);
+  d2121 = dot(v1,v1);
+
+  denom = d2121 * d4343 - d4321 * d4321;
   /* Are the line parallel */
-  if (std::fabs(denom) < epsilon) {
+  if (std::fabs(denom) < epsilon)
     return false;
-  }
+
+  numer = d1343 * d4321 - d1321 * d4343;
+
+  mua = numer / denom;
+  mub = (d1343 + d4321 * mua) / d4343;
 
   /* Is the intersection outside of the the segments */
-  mua = numera / denom;
-  mub = numerb / denom;
-  if (mua < 0 || mua > 1 || mub < 0 || mub > 1) {
+  if (mua < 0 || mua > 1 || mub < 0 || mub > 1)
     return false;
-  }
 
   // if intersection is one of the end points
   if(std::fabs(mua) < epsilon || std::fabs(mua-1.) < epsilon)
@@ -195,14 +351,20 @@ bool line_intersect_2D_3D(double *p1, double *p2, double *q1, double *q2, double
   if(std::fabs(mub) < epsilon || std::fabs(mub-1.) < epsilon) 
     on_q_seg = false; 
 
-  xvector a0 = a1 + mua*(a2-a1);
-  xvector b0 = b1 + mub*(b2-b1);
+  xvector a0 = a1 + mua*v1;
+  xvector b0 = b1 + mub*v2;
+  xvector an = a0.normalize();
+  xvector bn = b0.normalize();
 
-  // if a0 and b0 does not coincide, then a and b does not intersect.
-  if(std::fabs(metric(b0-a0)) > epsilon) return false;
+  // if an and bn does not coincide, then a and b does not intersect.
+  double diff = std::fabs(metric(bn-an));
+  if(diff > 1.e-5) return false;
+  std::memcpy(intersect, bn.c, 3*sizeof(double));
 
   inbound = 1;
-  if(dot(v1, v2.normal2D()) < 0.) inbound = 2; // v1 going into v2 in CCW sense
+  double sense = dot(cross(v2,v3), cross(v2,v1));
+  // sense of inbound: (v1 x v2).(v1 x p1) > 0
+  if(sense > 0.) inbound = 2; // v1 going into v2,v3 in CCW sense
 
   return true;
 }
@@ -289,6 +451,8 @@ int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const 
  * @param[in] p             polygon coordinates
  * @param[in] point         point coordinate
  * @return                  point inside or outside of polygon
+ * This method does not work well for points on a sphere when the total angel will always be slightly less than 2Pi
+ * Use the walk_polygon method instead which is less sensitive to FPN
  */
 bool check_angle_sum(int sdim, int n, const double * const p, const double * const point)
 {
@@ -319,6 +483,19 @@ bool check_angle_sum(int sdim, int n, const double * const p, const double * con
   else return false;
 }
 
+bool walk_polygon(int sdim, int n, const double * const p, const double * const point)
+{
+  // if point is always on left hand side (sense > 0) of polygon during CCW walk, then it's inside
+  for(int i = 0; i < n; i ++){
+    //xvector midpoint = (xvector(p+i*sdim, sdim)+xvector(p+((i+1)%n)*sdim, sdim))/2.;
+    //double sense = dot(cross(xvector(p+i*sdim, sdim), xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)), xvector(point, sdim)-midpoint.normalize());
+    xvector midpoint = xvector(p+i*sdim, sdim);
+    double sense = dot(cross(xvector(p+i*sdim, sdim), xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)), xvector(point, sdim)-midpoint);
+    if(sense <= 0) return false;
+  }
+  return true;
+}
+
 /**
  *\brief                    test if a point is inside of a polygon, *on edge point* is considered not inside.
  * @param[in] nvert         number of vertices of polygon
@@ -346,7 +523,8 @@ bool point_in_poly(int pdim, int sdim, int nvert, const double * const poly_cd, 
     }
     return c;
   }else if(sdim == 3){
-    return check_angle_sum(sdim, nvert, poly_cd, point);
+    //return check_angle_sum(sdim, nvert, poly_cd, point);
+    return walk_polygon(sdim, nvert, poly_cd, point);
   }else
     Throw() << "cannot handle spatial dimension over 3\n";
 }
@@ -435,8 +613,8 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
 int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, 
   std::vector<polygon> & difference){
 
-  // return if either of the polygons are empty
-  if(num_p == 0 || num_q == 0) return 0;
+  // return if the subject polygon is empty
+  if(num_p < 3) return 0;
 
   // prepare subject and clip vertex lists
   std::vector<xpoint> pnodes, qnodes;
@@ -449,9 +627,24 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     for(int i = 0; i < num_p; i ++)
       pnodes.push_back(xpoint(*(p+sdim*i), *(p+sdim*i+1), *(p+sdim*i+2), 'A'+i)); 
     for(int i = 0; i < num_q; i ++)
-      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), *(p+sdim*i+2), 'a'+i)); 
+      qnodes.push_back(xpoint(*(q+sdim*i), *(q+sdim*i+1), *(q+sdim*i+2), 'a'+i)); 
   }
 
+  // return the subject polygon if the clip polygon is empty
+  if(num_p >= 3 && num_q < 3) {
+    difference.push_back(polygon(pnodes));
+    return 0;
+  }
+  
+  double * sintd_coords = new double[120]; int num_sintd_nodes; 
+  double * tmp_coords=new double[120];
+  if(sdim == 3)
+    intersect_convex_2D_3D_sph_gc_poly(num_p, p,
+                                     num_q, q,
+                                     tmp_coords,
+                                     &num_sintd_nodes, sintd_coords); 
+  delete[] tmp_coords;
+  
   // phase 1, find all intersection points, note degenerated points too
   std::list<xpoint> final_pnodes, final_qnodes, degenerated;
 
@@ -460,7 +653,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   std::copy(pnodes.begin(), pnodes.end(), final_pnodes.begin());
   std::copy(qnodes.begin(), qnodes.end(), final_qnodes.begin());
 
-  double intersect[sdim];
+  double * intersect = new double[sdim];
   int inbound = -1; bool on_p_seg, on_q_seg;
 
   unsigned int n_inter = 0;
@@ -473,12 +666,15 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
       double *q1 = (qnodes[j].c);
       double *q2 = (qnodes[(j+1)%num_q].c); 
+      double *q3 = (qnodes[(j+2)%num_q].c);
 
       bool result = false;
       if(sdim == 2)
         result = line_intersect_2D_2D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
-      else
-        result = line_intersect_2D_3D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
+      else{
+        //result = line_intersect_2D_3Da(p1, p2, q1, q2, q3, intersect, inbound, on_p_seg, on_q_seg);
+        result = line_intersect_2D_3D(p1, p2, q1, q2, q3, intersect, inbound, on_p_seg, on_q_seg);
+      }
 
       if(result){
 
@@ -490,6 +686,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       }
     }
   }
+  delete [] intersect;
 
   // reTally the number of num_inbinter, because intersection points can be coincidental
   n_inter = 0;
@@ -509,7 +706,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   // No intersection points => a) p and q are disjoint, return p 
   //                           b) q contains p, return nothing
   //                           c) p contains q, return concave polygon
-  if(n_inter == 0 || n_inter%2 || num_inbinter == 0 || (n_inter == num_inbinter && num_inbinter%2)) {
+  if(n_inter == 0 || num_inbinter == 0 || (n_inter == num_inbinter && num_inbinter%2)) {
     xpoint p_centroid = polygon(pnodes).centroid(sdim);
     xpoint q_centroid = polygon(qnodes).centroid(sdim);
     bool s_contains_c = false, c_contains_s = false;
@@ -546,6 +743,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     // Start with the subject polygon
     std::list<xpoint>::iterator it = final_pnodes.begin();
     std::list<xpoint> nodes;
+    std::vector<xpoint> visited_inbnodes;
     bool on_subject = true;
     bool start = false;
     while(! done){
@@ -583,6 +781,15 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //   move to the next subject polygon node;
       if(on_subject){
         if(it->intersection && it->inbound==2){
+          if(!start){ // if this inbound node has been visited in previous loop, continue on subject polygon
+            std::vector<xpoint>::iterator it_tmp = std::find(visited_inbnodes.begin(), visited_inbnodes.end(), *it);
+            if(it_tmp != visited_inbnodes.end()) {
+              if(it == --final_pnodes.end()) it = final_pnodes.begin();
+              else ++it;
+              continue;
+            }
+          }
+          visited_inbnodes.push_back(*it);
           start = true;
           it->visited = true;
           nodes.push_back(*it);
@@ -771,9 +978,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     //*area = sintd_cells[i]->get_area();
   }
 
-  char str[64]; memset(str, 0, 64);
-  sprintf(str, "midMesh.vtk.%d", me);
-  WriteVTKMesh(meshmid, str);
+  //char str[64]; memset(str, 0, 64);
+  //sprintf(str, "midMesh.vtk.%d", me);
+  //WriteVTKMesh(meshmid, str);
   //WriteVTKMesh(srcmesh, "srcMesh.vtk");
   //WriteVTKMesh(dstmesh, "dstMesh.vtk");
 
@@ -850,7 +1057,6 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
   // Ready to create nodes etc..
   // Break up the cell into triangles if it's got more than 4 nodes
-  // For some reason quad_3d can't coexist with tri3_3d
   int break_threshold = 4;
   if(num_sintd_nodes > break_threshold){
 
@@ -895,6 +1101,14 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
     delete[] coords;
       
   }else{
+    // Make sure cell area is non-zero
+    double split_area;
+    if(sdim == 2)
+      split_area = area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords);
+    if(sdim == 3)
+      split_area = great_circle_area(num_sintd_nodes, sintd_coords);
+    if(split_area == 0.) return;
+
     // Ready to create nodes etc in one shot
     std::vector<sintd_node *> cell_nodes;
     for(int in = 0; in < num_sintd_nodes; in ++){
@@ -956,8 +1170,8 @@ int coords_to_polygon(const int num_p, const double * const p, const int sdim, s
     }else if(sdim == 3){
       poly.points.push_back(xpoint(p[i*sdim], p[i*sdim+1], p[i*sdim+2], 'p'));
     }
-    if(poly.area(sdim) < 0.) // if the result polygon is in CW sense, reverse it.
-      std::reverse(poly.points.begin(), poly.points.end());
+    //if(poly.area(sdim) < 0.) // if the result polygon is in CW sense, reverse it.
+    //  std::reverse(poly.points.begin(), poly.points.end());
   }
   return 0;
 }
@@ -971,6 +1185,58 @@ void reverse_coord(int sdim, int num_point, double * cd){
     std::memcpy(cd+(num_point-1-i)*sdim, tmp, sdim*sizeof(double));
   }
   delete [] tmp;
+}
+
+void cart2sph(int num_p, double *coord, double *lonlat){
+  const double DEG2RAD = M_PI/180.0;
+  const double RAD2DEG = 180.0/M_PI;
+  const double ninety = 90.0;
+
+  for(int i = 0; i < num_p; i ++){
+    lonlat[i*2]   = asin(coord[i*3+1]/sin(acos(coord[i*3+2])) ) * RAD2DEG;
+    lonlat[i*2+1] = ninety - acos(coord[i*3+2]) * RAD2DEG;
+  }
+}
+
+void cart2sph(const polygon & cart, polygon & sph){
+  double * pts =  new double[3*cart.size()];
+  polygon_to_coords(cart, 3, pts);
+  double * sph_cd = new double[2*cart.size()];
+  cart2sph(cart.size(), pts, sph_cd);
+  coords_to_polygon(cart.size(), sph_cd, 2, sph);
+}
+
+void cart2sph(const std::vector<polygon> & cart, std::vector<polygon> & sph){
+  sph.clear(); sph.resize(cart.size());
+  for(int i = 0; i < cart.size(); i ++)
+    cart2sph(cart[i], sph[i]);
+}
+
+void sph2cart(int num_p, double *lonlat, double *coord){
+  const double DEG2RAD = M_PI/180.0;
+  const double RAD2DEG = 180.0/M_PI;
+  const double ninety = 90.0;
+
+  for(int i = 0; i < num_p; i ++){
+    double theta = DEG2RAD*lonlat[i*2], phi = DEG2RAD*(ninety-lonlat[i*2+1]);
+    coord[i*3]   = std::cos(theta)*std::sin(phi);
+    coord[i*3+1] = std::sin(theta)*std::sin(phi);
+    coord[i*3+2] = std::cos(phi);
+  }
+}
+
+void sph2cart(const polygon & sph, polygon & cart){
+  double * pts =  new double[2*sph.size()];
+  polygon_to_coords(sph, 2, pts);
+  double * cart_cd = new double[3*sph.size()];
+  sph2cart(sph.size(), pts, cart_cd);
+  coords_to_polygon(sph.size(), cart_cd, 3, cart);
+}
+
+void sph2cart(const std::vector<polygon> & sph, std::vector<polygon> & cart){
+  cart.clear(); cart.resize(sph.size());
+  for(int i = 0; i < sph.size(); i ++)
+    sph2cart(sph[i], cart[i]);
 }
 
 } //namespace

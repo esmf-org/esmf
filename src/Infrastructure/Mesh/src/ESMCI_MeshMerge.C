@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.7 2012/01/26 17:54:23 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.8 2012/02/22 15:51:29 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.7 2012/01/26 17:54:23 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.8 2012/02/22 15:51:29 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -258,7 +258,7 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, Zo
   // go through all src mesh elements
   unsigned int ncells = 0;
   {
-    std::cout << "Traversing the source Mesh\n";
+    //std::cout << "Traversing the source Mesh\n";
     const Mesh & mesh = srcmesh;
     MEField<> &coord = *mesh.GetCoordField();
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
@@ -301,7 +301,7 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, Zo
 
   // go through all dst mesh elements
   {
-    std::cout << "Traversing the destination Mesh\n";
+    //std::cout << "Traversing the destination Mesh\n";
     const Mesh & mesh = dstmesh;
     MEField<> &coord = *mesh.GetCoordField();
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
@@ -340,9 +340,9 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, Zo
 
   // We now have all the genesis cells, compute the merged mesh
   compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
-  char str[64]; memset(str, 0, 64);
-  sprintf(str, "sewmesh.vtk.%d", me);
-  WriteVTKMesh(mergemesh, str);
+  //char str[64]; memset(str, 0, 64);
+  //sprintf(str, "sewmesh.vtk.%d", me);
+  //WriteVTKMesh(mergemesh, str);
 
 }
 
@@ -366,6 +366,13 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   int npet = VM::getCurrent(&rc)->getPetCount();
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
+
+  //{
+  //  std::vector<polygon> diff;
+  //  double p[6] = {3.,3.5, 3.5,3.5, 3.5,4.5};
+  //  double q[8] = {3.,3., 4.,3., 4.,4., 3.,4.};
+  //  weiler_clip_difference(2,2,3,p,4,q,diff);
+  //}
 
   // go through all src mesh elements, clip (higher priority) mesh, save all clip cells
   {
@@ -415,7 +422,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
     }
 
-    if(npet == 1){ // serial mode
+    if(npet >= 1){ // serial mode
       // iterate through dst mesh element, construct its coordinates in 'cd'
       // used in both intersected or non-intersected cases
       Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
@@ -434,13 +441,13 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         }
 
         // make sure the polygons are in CCW sense before going into Weiler algorithm
-        if(sdim == 2 && area_of_flat_2D_polygon(subject_num_nodes, cd) < 0)
-          reverse_coord(sdim, subject_num_nodes, cd);
-        if(sdim == 3 && great_circle_area(subject_num_nodes, cd) < 0)
-          reverse_coord(sdim, subject_num_nodes, cd);
+        //if(sdim == 2 && area_of_flat_2D_polygon(subject_num_nodes, cd) < 0)
+        //  reverse_coord(sdim, subject_num_nodes, cd);
+        //if(sdim == 3 && great_circle_area(subject_num_nodes, cd) < 0)
+        //  reverse_coord(sdim, subject_num_nodes, cd);
 
         // Check if this element is in sres_map
-        dump_elem(elem, sdim, coord);
+        // dump_elem(elem, sdim, coord);
         interp_map_iter it = sres_map->find(&elem);
         if(it == sres_map->end()){ // Not intersected, just add it to the list
 
@@ -502,7 +509,23 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               cd = new double[sdim*dstpoly_it->points.size()];
               polygon_to_coords(*dstpoly_it, sdim, cd);
               diff.clear();
-              weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
+              
+              if(sdim == 2) weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
+              if(sdim == 3){
+                double * clip_cd_sph = new double[clip_num_nodes*2]; cart2sph(clip_num_nodes, clip_cd, clip_cd_sph);
+                double * cd_sph = new double[subject_num_nodes*2];   cart2sph(subject_num_nodes, cd, cd_sph);
+  
+                //weiler_clip_difference(pdim, 2, subject_num_nodes, cd_sph, clip_num_nodes, clip_cd_sph, diff);
+                //std::vector<polygon> diff_cart;
+                //sph2cart(diff, diff_cart);
+                //diff.clear(); diff.resize(diff_cart.size()); std::copy(diff_cart.begin(), diff_cart.end(), diff.begin());
+
+                weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
+                std::vector<polygon> diff_sph;
+                cart2sph(diff, diff_sph);
+                delete[] clip_cd_sph, cd_sph;
+              }
+              
               delete[] cd;
 
               // for each non-triangular polygon in diff, use van leer's algorithm to triangulate it
@@ -515,7 +538,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                   td = new double[num_p*sdim];
                   ti = new int[num_p];
                   tri_ind = new int[3*(num_p-2)];
-                  triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
+                  if(sdim == 2)
+                    triangulate_poly<GEOM_CART2D>(num_p, pts, td, ti, tri_ind);
+                  if(sdim == 3)
+                    triangulate_poly<GEOM_SPH2D3D>(num_p, pts, td, ti, tri_ind);
 
                   // Add each of the triangles into the merged mesh
                   unsigned num_tri_edges = 3;
@@ -604,7 +630,9 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
   // We now have all the genesis cells, compute the merged mesh
   compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
-  WriteVTKMesh(mergemesh, "mergemesh.vtk");
+  //char str[64]; memset(str, 0, 64);
+  //sprintf(str, "mergemesh.vtk.%d", me);
+  //WriteVTKMesh(mergemesh, str);
 
 }
 
@@ -924,7 +952,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
             Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
         }
       }
-      res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, 2, src_coords, dst_coords, 
+      res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, 3, src_coords, dst_coords, 
         src_area, dst_area, ((src_area == 0.)? 1.:sintd_areas/src_area) ) ) ); 
 
       // Add element to output list
