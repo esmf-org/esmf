@@ -1,4 +1,4 @@
-! $Id: ESMF_StateInternals.cppF90,v 1.14 2012/01/06 20:19:21 svasquez Exp $
+! $Id: ESMF_StateInternals.cppF90,v 1.15 2012/02/22 17:47:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_StateInternalsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateInternals.cppF90,v 1.14 2012/01/06 20:19:21 svasquez Exp $'
+      '$Id: ESMF_StateInternals.cppF90,v 1.15 2012/02/22 17:47:11 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1302,7 +1302,7 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
                   attreconflag=lattreconflag, rc=localrc)
               !  here we relink the State Attribute hierarchy to the FieldBundle
               !  Attribute hierarchy, as they were linked before
-              if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+              if (lattreconflag == ESMF_ATTRECONCILE_ON) then
                 call c_ESMC_AttributeLink(sp%base, sip%datap%fbp%this%base, &
                     linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
@@ -1318,7 +1318,7 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
                 attreconflag=lattreconflag, rc=localrc)
               !  here we relink the State Attribute hierarchy to the Field
               !  Attribute hierarchy, as they were linked before
-              if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+              if (lattreconflag == ESMF_ATTRECONCILE_ON) then
                 call c_ESMC_AttributeLink(sp%base, sip%datap%fp%ftypep%base, &
                     linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
@@ -1343,7 +1343,7 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
               sip%datap%spp => subsubstate%statep
               !  here we relink the State Attribute hierarchy to the subState
               !  Attribute hierarchy, as they were linked before
-              if (lattreconflag%value == ESMF_ATTRECONCILE_ON%value) then
+              if (lattreconflag == ESMF_ATTRECONCILE_ON) then
                 call c_ESMC_AttributeLink(sp%base, sip%datap%spp%base, &
                     linkChange, localrc)
                 if (ESMF_LogFoundError(localrc, &
