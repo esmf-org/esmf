@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.143 2012/02/18 01:19:35 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.144 2012/02/22 21:55:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -211,6 +211,13 @@
       integer, parameter :: &
                    ESMF_KIND_I = kind(defaultIntegerDummy), &
                    ESMF_KIND_R = kind(defaultRealDummy)
+
+!------------------------------------------------------------------------------
+!    ! Size of default integer, in character storage units.
+!    ! (TODO: In F2003 this could be calculated using the named constants
+!    ! in the iso_fortran_env intrinsic module, by simply dividing
+!    ! NUMERIC_STORAGE_SIZE by CHARACTER_STORAGE_SIZE.)
+      integer, parameter :: ESMF_SIZEOF_DEFINT = 4 
 
 !------------------------------------------------------------------------------
 !
@@ -693,6 +700,7 @@
 #endif
       public ESMF_KIND_I4, ESMF_KIND_I8, & 
              ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
+      public ESMF_SIZEOF_DEFINT
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
