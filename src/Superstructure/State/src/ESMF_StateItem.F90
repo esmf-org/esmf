@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.12 2012/01/06 20:19:21 svasquez Exp $
+! $Id: ESMF_StateItem.F90,v 1.13 2012/02/23 19:21:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -452,13 +452,15 @@ contains
 ! !IROUTINE: ESMF_StateItemPrint - Print a StateItem
 
 ! !INTERFACE:
-  subroutine ESMF_StateItemPrint (stateItem, header, prefixstr, longflag, unit, rc)
+  subroutine ESMF_StateItemPrint (stateItem, header, prefixstr,  &
+      longflag, debugflag, unit, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_StateItem), intent(in)            :: stateItem
+    type(ESMF_StateItem), intent(in), target    :: stateItem
     character(*),         intent(in)            :: header
     character(*),         intent(in)            :: prefixstr
     logical,              intent(in)            :: longflag
+    logical,              intent(in)            :: debugflag
     integer,              intent(in),  optional :: unit
     integer,              intent(out), optional :: rc
 !         
@@ -475,6 +477,8 @@ contains
 !     Leading characters for output string (for indentation levels)
 !   \item[longflag]
 !     Print additional information such as proxyflag
+!   \item[longflag]
+!     Print additional information such as VMId
 !   \item[unit]
 !     Fortran unit number
 !   \item[{[rc]}]
@@ -483,6 +487,14 @@ contains
 !
 !EOPI
 !------------------------------------------------------------------------------
+    type(ESMF_VMId) :: vmid
+    type(ESMF_Array),           pointer :: arrayp
+    type(ESMF_ArrayBundle),     pointer :: abundlep
+    type(ESMF_FieldType),       pointer :: fieldp
+    type(ESMF_FieldBundleType), pointer :: fbundlep
+    type(ESMF_RouteHandle),     pointer :: rhandlep
+    type(ESMF_StateClass),      pointer :: statep
+
     integer                     :: localrc      ! local return code
     integer                     :: localunit
     character(2*ESMF_MAXSTR)    :: outbuf
@@ -535,6 +547,49 @@ contains
 
     write (localunit,*) trim(outbuf)
 
+    if (debugflag) then
+
+      select case (stateItem%otype%ot)
+      case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+        fbundlep => stateItem%datap%fbp%this
+        call c_ESMC_GetVMId (fbundlep, vmid, localrc)
+
+      case (ESMF_STATEITEM_FIELD%ot)
+        fieldp => stateItem%datap%fp%ftypep
+        call c_ESMC_GetVMId (fieldp, vmid, localrc)
+
+      case (ESMF_STATEITEM_ARRAY%ot)
+        arrayp => stateItem%datap%ap
+        call c_ESMC_GetVMId (arrayp, vmid, localrc)
+
+      case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+        abundlep => stateItem%datap%abp
+        call c_ESMC_GetVMId (abundlep, vmid, localrc)
+
+      case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+        rhandlep => stateItem%datap%rp
+        call c_ESMC_GetVMId (rhandlep, vmid, localrc)
+
+      case (ESMF_STATEITEM_STATE%ot)
+        statep => stateItem%datap%spp
+        call c_ESMC_GetVMId (statep, vmid, localrc)
+
+      end select
+      if (ESMF_LogFoundError(localrc, &
+	 ESMF_ERR_PASSTHRU, &
+	 ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_UtilIOUnitFlush (localunit, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+	 ESMF_ERR_PASSTHRU, &
+	 ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call c_esmc_vmidprint (vmid, localrc)
+      if (ESMF_LogFoundError(localrc, &
+	 ESMF_ERR_PASSTHRU, &
+	 ESMF_CONTEXT, rcToReturn=rc)) return
+
+    end if
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
