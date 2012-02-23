@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.16 2012/02/16 23:01:00 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.17 2012/02/23 23:39:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.16 2012/02/16 23:01:00 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.17 2012/02/23 23:39:15 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -42,6 +42,8 @@ static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.16 2012/02/16 23:0
 
           
 namespace ESMCI {
+
+  bool mathutil_debug=false;
 
   ///////// File for random math routines that I didn't know where to put ///////////
 
@@ -310,6 +312,10 @@ double great_circle_area(int n, double *pnts) {
 
   double t = tan ( s / 2.0 ) * tan ( ( s - a ) / 2.0 ) * 
              tan ( ( s - b ) / 2.0 ) * tan ( ( s - c ) / 2.0 );
+
+  //  if (mathutil_debug) {
+  //  printf("a=%30.27f b=%30.27f c=%30.27f a+b+c=%30.27f s=%30.27f t=%40.37f \n",a,b,c,a+b+c,s,t);
+  //}
 
   double area= std::abs ( 4.0 * atan ( sqrt (std::abs ( t ) ) ) );
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.14 2012/02/16 23:01:00 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.15 2012/02/23 23:39:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.14 2012/02/16 23:01:00 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.15 2012/02/23 23:39:15 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -764,9 +764,10 @@ void norm_poly3D(int num_p, double *p) {
     double src_coords[MAX_NUM_POLY_COORDS_3D];
     double tmp_coords[MAX_NUM_POLY_COORDS_3D];
 
-
     // Get src coords
     get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
+    //  get_elem_coords(src_elem, src_cfield, 3, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
+
 
     // if no nodes then exit
     if (num_src_nodes<1) return;
@@ -779,12 +780,26 @@ void norm_poly3D(int num_p, double *p) {
       Throw() << " Source element is degenerate (has less than 3 distinct nodes)";
     }
 
+    //    if (src_elem->get_id()==8969) mathutil_debug=true;
     // calculate dst area
     double src_area=great_circle_area(num_src_nodes, src_coords); 
+    // mathutil_debug=false;
+
+    //    if (src_elem->get_id()==8969) {
+    //  printf("%d area=%20.17f\n",src_elem->get_id(),src_area);
+    //  write_3D_poly_to_vtk("bad_src_elem", src_elem->get_id(), num_src_nodes, src_coords);
+    //}
 
     // if the src_area is 0 freak out
     if (src_area == 0.0) {
-      Throw() << "Source Element has 0 area";
+ /* XMRKX */
+      printf(" src_elem=%d \n",src_elem->get_id());
+	for (int j=0; j<num_src_nodes; j++) {
+	  printf(" [%20.17f,%20.17f,%20.17f] ",src_coords[3*j],src_coords[3*j+1],src_coords[3*j+2]);
+	}      
+        printf("\n");
+
+        Throw() << "Source Element has 0 area";
     }
 
     // Output src_elem_area
@@ -879,6 +894,21 @@ void norm_poly3D(int num_p, double *p) {
 
       // calculate intersection area
       sintd_areas[i]=great_circle_area(num_sintd_nodes, sintd_coords); 
+
+#if 0
+      // Get elem rotation
+      bool left_turn;
+      bool right_turn;
+      rot_2D_3D_sph(num_sintd_nodes, sintd_coords, &left_turn, &right_turn);
+      
+      if (right_turn) {
+            printf("SINTD RIGHT TURN! src:%d dst:%d left=%d right=%d area=%20.17f \n",src_elem->get_id(),dst_elem->get_id(),left_turn,right_turn,sintd_areas[i]);
+
+            if ((src_elem->get_id()==421) && (dst_elem->get_id()==25)) {
+              write_3D_poly_woid_to_vtk("concave_elem_421_25", num_sintd_nodes, sintd_coords);
+            }
+      }
+#endif
 
 	(*valid)[i]=1;
 

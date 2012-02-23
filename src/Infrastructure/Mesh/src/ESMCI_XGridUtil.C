@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.9 2012/02/22 15:51:29 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.10 2012/02/23 23:39:15 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -1060,45 +1060,78 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
   int break_threshold = 4;
   if(num_sintd_nodes > break_threshold){
 
-    double * coords = new double[3*sdim];
-    for(int i = 0; i < sdim; i ++)
-      coords[i] = sintd_coords[i];
+    // Init variables for polygon triangulation
+    int num_tri=num_sintd_nodes-2;
+    int *tri_ind=new int[3*num_tri];
+    double *td=new double[sdim*num_sintd_nodes];
+    int *ti=new int[num_sintd_nodes];
 
-    for(int start_node = 1; start_node < num_sintd_nodes-1; start_node ++){
+    // Triangulate polygon       
+    int rc;
+    if(sdim == 2) {
+      rc=triangulate_poly<GEOM_CART2D>(num_sintd_nodes, sintd_coords, td, ti, tri_ind);
+    } else if(sdim == 3) {
+      rc=triangulate_poly<GEOM_SPH2D3D>(num_sintd_nodes, sintd_coords, td, ti, tri_ind);
+    }
+
+    // handle return code
+    if (rc != ESMCI_TP_SUCCESS) {
+      if (rc==ESMCI_TP_DEGENERATE_POLY) return;
+      if (rc==ESMCI_TP_CLOCKWISE_POLY) Throw()<<"Clockwise Polygon in XGrid create\n";
+    }
+
+    //  space for triangle coords
+    double tri_coords[9];
+
+    // Make triangles. If too small, ignore
+    for(int i=0; i<num_tri; i++) {
+      int *tri=tri_ind+3*i;
+
+      // fill triangle coords
+      int t=0;
+      for(int j = 0; j < 3; j ++){
+        double *pnt=sintd_coords+sdim*tri[j];
+
+        for (int k=0; k<sdim; k++) {
+          tri_coords[t]=pnt[k];
+          t++;
+        }
+      }
+
+      // Calc area
+      double split_area;
+      if(sdim == 2) {
+        split_area = area_of_flat_2D_polygon(3, tri_coords);
+      } else if(sdim == 3) {
+        split_area = great_circle_area(3, tri_coords);
+      }
+
+      // If 0.0 then don't make triangle
+      if(split_area==0.0) continue;
+
+      // List of cell nodes
       std::vector<sintd_node *> cell_nodes;
-      sintd_node * root_node = new sintd_node(sdim, sintd_coords);
-      cell_nodes.push_back(root_node);
-
-      for(int i = 0; i < 2; i ++){
-        sintd_node * node = new sintd_node(sdim, sintd_coords+sdim*(i+start_node));
+      
+      // Add nodes to list
+      for (int j=0; j<3; j++) {
+        sintd_node * node = new sintd_node(sdim, tri_coords+sdim*j);
+        sintd_nodes->push_back(node);
         cell_nodes.push_back(node);
       }
-      for(int i = 0; i < 2; i ++)
-        for(int j = 0; j < sdim; j ++)
-          coords[(i+1)*sdim+j] = cell_nodes[i+1]->operator[](j);
-
-      double split_area;
-      if(sdim == 2)
-        split_area = area_of_flat_2D_polygon(3, coords);
-      if(sdim == 3)
-        split_area = great_circle_area(3, coords);
-      if(split_area == 0.){
-        // release the nodes of this cell and continue split process
-        for(int i = 0; i < 3; i ++) delete cell_nodes[i];
-        continue;
-      }
-
-      // Ready to add the split cell
-      for(int i = 0; i < 3; i ++) sintd_nodes->push_back(cell_nodes[i]);
 
       // every cell keeps track of the nodes enclosing it
       sintd_cell * cell = new sintd_cell(split_area, cell_nodes);
       sintd_cells->push_back(cell);
-
-      for(int in = 0; in < 3; in ++)
+      
+      // nodes refer to their cell    
+      for(int in = 0; in < 3; in ++) {
         (*(cell_nodes[in])).set_cell(cell);
+      }
     }
-    delete[] coords;
+
+    delete[] tri_ind;
+    delete[] td;
+    delete[] ti;
       
   }else{
     // Make sure cell area is non-zero
