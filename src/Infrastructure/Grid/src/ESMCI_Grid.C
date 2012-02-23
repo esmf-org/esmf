@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.129 2012/01/06 20:17:01 svasquez Exp $
+// $Id: ESMCI_Grid.C,v 1.130 2012/02/23 17:53:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.129 2012/01/06 20:17:01 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.130 2012/02/23 17:53:00 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -4487,33 +4487,9 @@ int Grid::getStaggerDistgrid(
       delete [] staggerEdgeUWidthIntIntArray;
 
       if (connListWPoles!=NULL) {
-        if (connListWPoles->array !=NULL) delete connListWPoles->array;
+        if (connListWPoles->array !=NULL) delete[] connListWPoles->array;
         delete connListWPoles;
       }
-#if 0
-      // Get connection List with pole added back in
-      InterfaceInt *connListWPoles=NULL;
-      _add_poles_to_conn(distgrid_wo_poles,
-                         connL,connU, &connListWPoles, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-	return rc;
-
-     
-      // Create stagger distgrid w poles
-      staggerDistgridList[staggerloc]=DistGrid::create(staggerdistgrid_wo_poles,
-                                                       NULL,
-                                                       NULL,
-                                                        NULL,
-                                                       connListWPoles, 
-                                                       &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-	return rc;
-
-      //      DistGrid::destroy(&staggerdistgrid_wo_poles);
-
-      if (connListWPoles!=NULL) delete connListWPoles;
-
-#endif
    }
     
   
