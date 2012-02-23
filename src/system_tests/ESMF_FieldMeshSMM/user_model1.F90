@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.12 2011/06/30 06:01:02 theurich Exp $
+! $Id: user_model1.F90,v 1.13 2012/02/23 19:12:21 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -247,6 +247,8 @@
      !   call ESMF_StatePrint(exportState, rc=rc)
 
         print *, localPet, "User Comp 1 Init returning"
+        deallocate(nodeCoords, nodeIds, nodeOwners)
+        deallocate(elemIds, elemTypes, elemConn)
 
     end subroutine user_init
 
