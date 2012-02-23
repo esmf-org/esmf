@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.23 2012/02/22 21:59:42 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.24 2012/02/23 23:48:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -164,7 +164,7 @@
     write(name, *) "Regrid then create xgrid and regrid through xgrid, spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
+#if 1
     !------------------------------------------------------------------------
     !EX_OFF_UTest
     call test_regrid2xgSph(40,40,80,80,1.,1.,0.6,0.6,-165.,30.,-168.,25., &
