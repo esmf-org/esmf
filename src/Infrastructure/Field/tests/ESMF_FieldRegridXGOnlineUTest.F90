@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.24 2012/02/23 23:48:04 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.25 2012/02/24 16:37:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -166,7 +166,7 @@
 
 #if 1
     !------------------------------------------------------------------------
-    !EX_OFF_UTest
+    !EX_UTest
     call test_regrid2xgSph(40,40,80,80,1.,1.,0.6,0.6,-165.,30.,-168.,25., &
       tag='large regional sphere overlap B2', rc=rc)
     write(failMsg, *) ""
@@ -174,7 +174,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_OFF_UTest
+    !EX_UTest
     call test_regrid2xgSph(80,80,40,40,0.6,0.6,1.,1.,-168.,25.,-165.,30., &
       tag='reverse large regional sphere overlap', rc=rc)
     write(failMsg, *) ""
@@ -183,7 +183,7 @@
 
 
     !------------------------------------------------------------------------
-    !EX_OFF_UTest
+    !EX_UTest
     call test_regrid2xgSph(45,45,90,90,8.,4.,4.,2.,-180.,-90.,0.,-90., &
       scheme=ESMF_REGRID_SCHEME_FULL3D, tag='large full sphere cut C1', rc=rc)
     write(failMsg, *) ""
@@ -191,7 +191,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_OFF_UTest
+    !EX_UTest
     call test_regrid2xgSph(90,90,45,45,4.,2.,8.,4.,0.,-90.,-180.,-90., &
       scheme=ESMF_REGRID_SCHEME_FULL3D, &
       tag='reverse large full sphere cut', rc=rc)
@@ -200,7 +200,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_OFF_UTest
+    !EX_UTest
     call test_regrid2xgSph(60,60,90,90,6.,3.,4.,2.,-180.,-90.,0.,-90., &
       scheme=ESMF_REGRID_SCHEME_FULL3D, tag='large full sphere latlonclip C2', rc=rc)
     write(failMsg, *) ""
@@ -208,7 +208,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !EX_OFF_UTest
+    !EX_UTest
     call test_regrid2xgSph(90,90,60,60,4.,2.,6.,3.,0.,-90.,-180.,-90., &
       scheme=ESMF_REGRID_SCHEME_FULL3D, &
       tag='reverse large full sphere latlonclip', rc=rc)
