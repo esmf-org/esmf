@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.130 2012/02/23 17:53:00 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.131 2012/02/25 04:48:11 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.130 2012/02/23 17:53:00 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.131 2012/02/25 04:48:11 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -9276,7 +9276,8 @@ void _add_poles_to_conn(DistGrid *distgrid,
 
  // Allocate list with poles back in
  int newConnCount=connCount+num_poles;
- int *newConnList=new int[newConnCount*connSize];
+ int *newConnList=NULL;
+ if ((newConnCount*connSize)>0) newConnList=new int[newConnCount*connSize];
 
   // Copy old connections into list
  int newPos=0;
