@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.34 2012/02/22 15:56:17 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.35 2012/02/27 18:24:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !N-EX_UTest
+    !N-EX__disable_UTest
     ! Create an XGrid in 3D
     !print *, 'Starting test5'
     !call test5(rc)
