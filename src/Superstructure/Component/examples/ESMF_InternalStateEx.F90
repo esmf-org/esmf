@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.30 2012/02/17 22:46:05 svasquez Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.31 2012/02/28 18:20:37 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -62,6 +62,7 @@ program ESMF_InternalStateEx
   type(dataWrapper) :: wrap1, wrap2
   type(testData), target :: data
   type(testData), pointer :: datap  ! extra level of indirection
+!EOC
   integer :: result
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg
@@ -73,12 +74,13 @@ program ESMF_InternalStateEx
   write(testname, *) "Example ESMF_InternalStateEx"
 
 
-! ------------------------------------------------------------------------------
-! ------------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 
 
 
   finalrc = ESMF_SUCCESS
+!BOC
 !-------------------------------------------------------------------------
         
   call ESMF_Initialize(defaultlogfilename="InternalStateEx.Log", &
