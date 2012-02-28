@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.15 2012/02/15 23:53:56 svasquez Exp $
+! $Id: ESMF_InternalStateModEx.F90,v 1.16 2012/02/28 18:27:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@ module user_mod
   public mygcomp_register
 
 !BOC
-  contains !--------------------------------------------------------------------
+  contains !--------------------------------------------------------------
 !EOC
 
   subroutine mygcomp_register(gcomp, rc)
@@ -80,7 +80,7 @@ module user_mod
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, mygcomp_run, rc=rc)
     ! register FINAL method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_FINALIZE, mygcomp_final, rc=rc)
-  end subroutine !--------------------------------------------------------------
+  end subroutine !---------------------------------------------------------
   
 
 !BOC
@@ -121,7 +121,7 @@ module user_mod
     wrap%p => data
     call ESMF_GridCompSetInternalState(gcomp, wrap, rc)
 
-  end subroutine !--------------------------------------------------------------
+  end subroutine !-------------------------------------------------------
   
   subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
     type(ESMF_GridComp):: gcomp
@@ -156,7 +156,7 @@ module user_mod
       rc = ESMF_FAILURE
     endif
     
-  end subroutine !--------------------------------------------------------------
+  end subroutine !-------------------------------------------------------
 
   subroutine mygcomp_final(gcomp, istate, estate, clock, rc)
     type(ESMF_GridComp):: gcomp
