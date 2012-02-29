@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.96 2012/02/06 21:22:44 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.97 2012/02/29 23:21:04 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.96 2012/02/06 21:22:44 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.97 2012/02/29 23:21:04 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -674,12 +674,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Mesh needs to be built on elements for conservative, and nodes for the others
           if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
-              if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
-                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
-                 msg="- can currently only do conservative regridding on a mesh built on elements", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-                 return	  
-              endif
+             if (srcMeshloc .ne. ESMF_MESHLOC_ELEMENT) then
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                     msg="- can currently only do conservative regridding on a mesh built on elements", & 
+                     ESMF_CONTEXT, rcToReturn=rc) 
+                return	  
+             endif
           else
               if (srcMeshloc .ne. ESMF_MESHLOC_NODE) then
                  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
@@ -688,7 +688,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  return	  
               endif
           endif	  
-        endif
+
+          ! Turn on masking
+          if (present(srcMaskValues)) then
+             if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
+                call ESMF_MeshTurnOnCellMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             endif
+          endif
+       endif
 
         if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(dstField, grid=dstGrid, &
@@ -760,7 +769,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
                 return	  
               endif
-          endif	  
+          endif
+
+          ! Turn on masking
+          if (present(dstMaskValues)) then
+             if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
+                call ESMF_MeshTurnOnCellMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             endif
+          endif
+	
         endif
 
         ! At this point, we have the meshes, so we are ready to call
@@ -896,19 +915,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
         endif
      
-        ! destroy Meshes, if they were created here
-        if (srcgeomtype .ne. ESMF_GEOMTYPE_MESH) then
-        call ESMF_MeshDestroy(srcMesh,rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Clean up Meshes
+        if (srcgeomtype .eq. ESMF_GEOMTYPE_GRID) then
+           call ESMF_MeshDestroy(srcMesh,rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+        else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
+           ! Otherwise reset masking
+           if (present(srcMaskValues)) then
+              if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
+                 call ESMF_MeshTurnOffCellMask(srcMesh, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
+           endif
         endif
 
-        if (dstgeomtype .ne. ESMF_GEOMTYPE_MESH) then
-        call ESMF_MeshDestroy(dstMesh,rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                     ESMF_ERR_PASSTHRU, &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        if (dstgeomtype .eq. ESMF_GEOMTYPE_GRID) then
+           call ESMF_MeshDestroy(dstMesh,rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+        else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
+           ! Otherwise reset masking
+           if (present(dstMaskValues)) then
+              if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
+                 call ESMF_MeshTurnOffCellMask(dstMesh, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
+           endif
         endif
 
         if(present(rc)) rc = ESMF_SUCCESS

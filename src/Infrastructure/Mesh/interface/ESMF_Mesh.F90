@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.84 2012/01/06 20:17:49 svasquez Exp $
+! $Id: ESMF_Mesh.F90,v 1.85 2012/02/29 23:21:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.84 2012/01/06 20:17:49 svasquez Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.85 2012/02/29 23:21:07 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -163,6 +163,8 @@ module ESMF_MeshMod
   public ESMF_MeshGetElemSplit
   public ESMF_MeshMergeSplitSrcInd
   public ESMF_MeshMergeSplitDstInd
+  public ESMF_MeshTurnOnCellMask
+  public ESMF_MeshTurnOffCellMask
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -170,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.84 2012/01/06 20:17:49 svasquez Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.85 2012/02/29 23:21:07 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -453,7 +455,7 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, &
-                 elementConn, rc)
+                 elementConn, elementMask, rc)
 
 !
 ! !ARGUMENTS:
@@ -461,6 +463,7 @@ contains
     integer,         intent(in) 	   :: elementIds(:)
     integer,         intent(in) 	   :: elementTypes(:)
     integer,         intent(in) 	   :: elementConn(:)
+    integer,         intent(in),  optional :: elementMask(:)
     integer,         intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -508,6 +511,11 @@ contains
 !         {\tt elementTypes}. The nodes for each element 
 !         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
 !         elementConn(2), etc.). 
+!   \item [{[elementMask]}]
+!          An array containing values which can be used for element masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of elements on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -517,6 +525,7 @@ contains
     integer                 :: localrc      ! local return code
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
+    type(ESMF_InterfaceInt) :: elementMaskII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -557,11 +566,16 @@ contains
        return 
     endif    
 
+   ! Create interface int to wrap optional element mask
+   elementMaskII = ESMF_InterfaceIntCreate(elementMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     num_elems = size(elementIds)
     num_elementConn = size(elementConn)
     call C_ESMC_MeshAddElements(mesh%this, num_elems, &
-                             elementIds, elementTypes, &
+                             elementIds, elementTypes, elementMaskII, &
                              num_elementConn, elementConn, &
                              lregridConserve%regridconserve, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -576,6 +590,12 @@ contains
 
     !call ESMF_DistGridPrint(mesh%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
+
+    ! Get rid of interface Int wrapper
+    call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Go to next stage 
     mesh%createStage=3
@@ -774,7 +794,7 @@ contains
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
                          nodeIds, nodeCoords, nodeOwners, &
                          elementIds, elementTypes, elementConn, &
-                         rc)
+                         elementMask, rc)
 !
 !
 ! !RETURN VALUE:
@@ -788,6 +808,7 @@ contains
     integer,            intent(in) 	      :: elementIds(:)
     integer,            intent(in) 	      :: elementTypes(:)
     integer,            intent(in) 	      :: elementConn(:)
+    integer,            intent(in),  optional :: elementMask(:)
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -866,6 +887,11 @@ contains
 !         {\tt elementTypes}. The nodes for each element 
 !         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
 !         elementConn(2), etc.). 
+!   \item [{[elementMask]}]
+!          An array containing values which can be used for element masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of elements on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -876,6 +902,7 @@ contains
     integer                 :: num_nodes
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
+    type(ESMF_InterfaceInt) :: elementMaskII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -913,10 +940,17 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+
+   ! Create interface int to wrap optional element mask
+   elementMaskII = ESMF_InterfaceIntCreate(elementMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     num_elems = size(elementTypes)
     num_elementConn = size(elementConn)
     call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
-                             elementIds, elementTypes, &
+                             elementIds, elementTypes, elementMaskII, &
                              num_elementConn, elementConn, &
                              lregridConserve%regridconserve, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -928,6 +962,12 @@ contains
                       ESMF_MeshCreate1Part%numOwnedNodes, ESMF_MeshCreate1Part%numOwnedElements, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Get rid of interface Int wrapper
+    call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! The C side has been created
@@ -1433,7 +1473,7 @@ end function ESMF_MeshCreateFromFile
     end if
 
     ! Add elements
-    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, localrc)
+    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3053,6 +3093,106 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if  (present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_MeshMergeSplitDstInd
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshTurnOnCellMask()"
+!BOPI
+! !IROUTINE: ESMF_MeshTurnOnCellMask -- Turn on masking to correspond to maskValues
+!
+! !INTERFACE:
+   subroutine ESMF_MeshTurnOnCellMask(mesh, maskValues, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    integer(ESMF_KIND_I4), optional            :: maskValues(:)
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on mesh masking
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to turn on masking for
+!   \item [maskValues]
+!         Values to set as masked
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    type(ESMF_InterfaceInt) :: maskValuesArg
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! If not present, then don't need to turn anything on
+    if (.not. present(maskValues)) then
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif
+
+    ! convert mask values 
+    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	  ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call c_esmc_meshturnoncellmask(mesh, maskValuesArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_MeshTurnOnCellMask
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshTurnOffCellMask()"
+!BOPI
+! !IROUTINE: ESMF_MeshTurnOffCellMask -- Turn off masking
+!
+! !INTERFACE:
+   subroutine ESMF_MeshTurnOffCellMask(mesh, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on mesh masking
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to turn on masking for
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+    call c_esmc_meshturnoffcellmask(mesh, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshTurnOffCellMask
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

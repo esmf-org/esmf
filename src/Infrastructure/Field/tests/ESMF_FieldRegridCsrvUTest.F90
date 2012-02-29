@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.30 2012/02/08 20:48:33 oehmke Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.31 2012/02/29 23:21:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -3412,7 +3412,7 @@ contains
   
   integer, pointer :: nodeIds(:),nodeOwners(:)
   real(ESMF_KIND_R8), pointer :: nodeCoords(:)
-  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:),elemMask(:)
   integer :: numNodes, numElems
   integer :: iconn,inode
 
@@ -3488,8 +3488,11 @@ contains
      ! Allocate and fill the element topology type array.
      allocate(elemTypes(numElems))
      elemTypes=ESMF_MESHELEMTYPE_HEX
-                 
 
+     ! Allocate and fill the element mask array
+     allocate(elemMask(numElems))
+     elemMask=(/0,0,0,1/)
+                 
      ! Allocate and fill the element connection type array.
      ! Note that entries in this array refer to the 
      ! positions in the nodeIds, etc. arrays and that
@@ -3549,6 +3552,10 @@ contains
        allocate(elemTypes(numElems))
        elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
 
+       ! Allocate and fill the element mask array
+       allocate(elemMask(numElems))
+       elemMask=(/0/)
+
        ! Allocate and fill the element connection type array.
        ! Note that entry are local indices
        allocate(elemConn(8*numElems))
@@ -3596,6 +3603,10 @@ contains
        ! Allocate and fill the element topology type array.
        allocate(elemTypes(numElems))
        elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
+
+       ! Allocate and fill the element mask array
+       allocate(elemMask(numElems))
+       elemMask=(/0/)
 
        ! Allocate and fill the element connection type array.
        ! Note that entry are local indices
@@ -3646,6 +3657,10 @@ contains
        allocate(elemTypes(numElems))
        elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
 
+       ! Allocate and fill the element mask array
+       allocate(elemMask(numElems))
+       elemMask=(/0/)
+
        ! Allocate and fill the element connection type array.
        ! Note that entry are local indices
        allocate(elemConn(8*numElems))
@@ -3695,6 +3710,10 @@ contains
        allocate(elemTypes(numElems))
        elemTypes=(/ESMF_MESHELEMTYPE_HEX/) ! elem id 1
 
+       ! Allocate and fill the element mask array
+       allocate(elemMask(numElems))
+       elemMask=(/1/)
+
        ! Allocate and fill the element connection type array.
        ! Note that entry are local indices
        allocate(elemConn(8*numElems))
@@ -3708,7 +3727,8 @@ contains
    srcMesh=ESMF_MeshCreate(parametricDim=3,spatialDim=3, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, elementIds=elemIds,&
-         elementTypes=elemTypes, elementConn=elemConn, rc=localrc)
+         elementTypes=elemTypes, elementConn=elemConn, &
+         elementMask=elemMask, rc=localrc)
    if (localrc /=ESMF_SUCCESS) then
        rc=ESMF_FAILURE
        return
@@ -3774,7 +3794,12 @@ contains
      z=0.125*z
 
      ! Set source function
-     srcFarrayPtr(i1) = 20.0+x+y+z
+     ! (Set huge value for masked values, so it can be detected)
+     if (elemMask(i1) .eq. 0) then
+        srcFarrayPtr(i1) = 20.0+x+y+z
+     else 
+        srcFarrayPtr(i1) = 100000000.0
+     endif
   enddo
  
    ! For now, Easy set interpolated function
@@ -3790,6 +3815,7 @@ contains
    deallocate(elemIds)
    deallocate(elemTypes)
    deallocate(elemConn)
+   deallocate(elemMask)
 
 
   
@@ -4136,6 +4162,7 @@ contains
   ! Regrid store
   call ESMF_FieldRegridStore( &
 	  srcField, &
+          srcMaskValues=(/1/), &
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
@@ -4252,9 +4279,6 @@ contains
              minerror(1) = error
            endif
         endif
-
-
-
      enddo
 
 

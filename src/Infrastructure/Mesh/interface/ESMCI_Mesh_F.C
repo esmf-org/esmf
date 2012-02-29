@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.56 2012/02/03 05:22:29 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.57 2012/02/29 23:21:07 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.56 2012/02/03 05:22:29 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.57 2012/02/29 23:21:07 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -281,8 +281,9 @@ extern "C" void FTN_X(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
 
 }
 
-extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int *elemId, 
-               int *elemType, int *num_elemConn, int *elemConn, int *regridConserve, int *rc) 
+extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, 
+                                              int *_num_elems, int *elemId, int *elemType, InterfaceInt **elemMaskII ,
+                                              int *_num_elemConn, int *elemConn, int *regridConserve, int *rc) 
 {
    try {
 
@@ -296,11 +297,15 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int
     }
 
 
+    // Set some convient variables
     Mesh *meshp = *meshpp;
-
     ThrowRequire(meshp);
 
     Mesh &mesh = *meshp;
+
+    int num_elems=*_num_elems;
+
+    int num_elemConn=*_num_elemConn;
 
 
     // Get parametric dimension
@@ -308,7 +313,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int
 
     // Error check input
     //// Check element type
-    for (int i=0; i< *num_elems; i++) {
+    for (int i=0; i< num_elems; i++) {
       if (parametric_dim==2) {
         if ((elemType[i] != 5) && (elemType[i] != 9)) {
 	  int localrc;
@@ -327,13 +332,13 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int
 
     //// Check size of connectivity list
     int expected_conn_size=0;
-    for (int i=0; i< *num_elems; i++) {
+    for (int i=0; i< num_elems; i++) {
       if (elemType[i]==5) expected_conn_size += 3;   
       else if (elemType[i]==9) expected_conn_size += 4;   
       else if (elemType[i]==10) expected_conn_size += 4;   
       else if (elemType[i]==12) expected_conn_size += 8;   
     }
-    if (expected_conn_size != *num_elemConn) {
+    if (expected_conn_size != num_elemConn) {
       int localrc;
       if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
        "- element connectivity list doesn't contain the right number of entries ", &localrc)) throw localrc;
@@ -372,7 +377,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
 
-    for (int e = 0; e < *num_elems; ++e) {
+    for (int e = 0; e < num_elems; ++e) {
 
     // Get/deduce the element topology
     const MeshObjTopo *topo = Vtk2Topo(mesh.spatial_dim(), elemType[e]);
@@ -435,11 +440,72 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, int *num_elems, int
                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   }
 
-    // Perhaps commit will be a separate call, but for now commit the mesh here.
 
-    mesh.build_sym_comm_rel(MeshObj::NODE);
+  // Handle element masking
+  bool has_elem_mask=false;
+  if (*elemMaskII != NULL) { // if masks exist
+    // Error checking
+    if ((*elemMaskII)->dimCount !=1) {
+      int localrc;
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+                "- elementMask array must be 1D ", &localrc)) throw localrc;
+    }
 
-    mesh.Commit();
+    if ((*elemMaskII)->extent[0] != num_elems) {
+      int localrc;
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+                "- elementMask array must be the same size as elementIds array ", &localrc)) throw localrc;
+    }
+
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask values field
+    MEField<> *elem_mask_val = mesh.RegisterField("elem_mask_val",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Add element mask field
+    MEField<> *elem_mask = mesh.RegisterField("elem_mask",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_mask=true;   
+  } 
+
+
+  // Perhaps commit will be a separate call, but for now commit the mesh here.
+  mesh.build_sym_comm_rel(MeshObj::NODE);
+  mesh.Commit();
+  
+  
+  // Set Mask values
+  if (has_elem_mask) {
+    // Get Fields
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
+    MEField<> *elem_mask=mesh.GetField("elem_mask"); 
+    
+    // Get mask value array
+    int *elemMask=(*elemMaskII)->array;
+
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *mv=elem_mask_val->data(elem);
+      int data_index = elem.get_data_index();
+      *mv=(double)elemMask[data_index];
+
+        // Init mask to 0.0
+      double *m=elem_mask->data(elem);
+      *m=0.0;      
+    }
+  }
+
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -1623,6 +1689,195 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
 
   // Set return code 
   if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+
+
+extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+
+    // If no mask values then leave
+    if (maskValuesArg == NULL) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      
+      // Leave
+      return;
+    }
+
+    // If no mask values then leave
+    if (*maskValuesArg == NULL) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      
+      // Leave
+      return;
+    }
+
+    // Get mask values
+    int numMaskValues=(*maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+
+
+    // Set Mask values
+    // Get Fields
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
+    MEField<> *elem_mask=mesh.GetField("elem_mask"); 
+      
+
+    if ((elem_mask_val!=NULL) && 
+        (elem_mask    !=NULL)) {
+         
+      // Loop through elements setting values
+      // Here we depend on the fact that data index for elements
+      // is set as the position in the local array above
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        // Set mask value to input array
+        double *mv=elem_mask_val->data(elem);
+        
+        // Round value to nearest integer
+        int mi=(int)((*mv)+0.5);
+
+        // See if gm matches any mask values
+        bool mask=false;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (mi==mvi) {
+            mask=true;
+            break;
+          }
+        }
+        
+        // Set mask
+        double *m=elem_mask->data(elem);
+        
+        // Set Mask based on grid mask value
+        if (mask) {
+          *m=1.0;
+        } else {
+          *m=0.0;
+        }
+        
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
+
+// Turn OFF masking
+extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+
+    // Set Mask values
+    // Get Fields
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
+    MEField<> *elem_mask=mesh.GetField("elem_mask"); 
+    
+    
+    if ((elem_mask_val!=NULL) && 
+        (elem_mask    !=NULL)) {
+      
+      // Loop through elements setting values
+      // Here we depend on the fact that data index for elements
+      // is set as the position in the local array above
+      Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+      for (; ei != ee; ++ei) {
+        MeshObj &elem = *ei;
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get mask
+        double *m=elem_mask->data(elem);
+        
+        // Init mask to 0
+        *m=0.0;
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
 }
 
 

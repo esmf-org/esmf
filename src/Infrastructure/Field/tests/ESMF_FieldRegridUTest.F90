@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.44 2012/02/14 16:59:06 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.45 2012/02/29 23:21:06 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -238,7 +238,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#if 0
+#if 1
       !------------------------------------------------------------------------
 
       !EX_OFF_UTest
@@ -10319,8 +10319,10 @@ write(*,*) "LOCALRC=",localrc
 
   ! setup dest. grid
   dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1,1/),maxIndex=(/dst_nx,dst_ny,dst_nz/), &
-              coordSys=ESMF_COORDSYS_CART, regDecomp=(/petCount,1,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+!              coordSys=ESMF_COORDSYS_CART, regDecomp=(/petCount,1,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+       coordSys=ESMF_COORDSYS_CART, regDecomp=(/2,2,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
 ! DOESN'T WORK WITH 4 PETS? coordSys=ESMF_COORDSYS_CART, regDecomp=(/2,2,1/), indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+
   if (localrc /=ESMF_SUCCESS) then
     rc=ESMF_FAILURE
     return
