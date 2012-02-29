@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.157 2012/01/06 20:18:29 svasquez Exp $
+! $Id: ESMF_VM.F90,v 1.158 2012/02/29 17:19:42 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -189,7 +189,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.157 2012/01/06 20:18:29 svasquez Exp $"
+      "$Id: ESMF_VM.F90,v 1.158 2012/02/29 17:19:42 w6ws Exp $"
 
 !==============================================================================
 
@@ -289,6 +289,7 @@ module ESMF_VMMod
       module procedure ESMF_VMAllToAllVI4
       module procedure ESMF_VMAllToAllVR4
       module procedure ESMF_VMAllToAllVR8
+      module procedure ESMF_VMAllToAllVFLogical
       module procedure ESMF_VMAllToAllVVMId
 
 ! !DESCRIPTION: 
@@ -1971,7 +1972,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt recvData} from all other PETs.\newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
-!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
+!   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, and logical
+!   data types. 
 !   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
@@ -2202,6 +2204,73 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllVR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVFLogical()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV Fortran logicals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVFLogical(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),              intent(in)            :: vm
+    logical,            target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCounts(:)
+    integer,                    intent(in)            :: sendOffsets(:)
+    logical,            target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer :: local_sendData(size (sendData))
+    integer :: local_recvData(size (recvData))
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    local_sendData = merge (1, 0, sendData)
+    call c_ESMC_VMAllToAllV(vm,  &
+        local_sendData, sendCounts(1), sendOffsets(1), &
+        local_recvData, recvCounts(1), recvOffsets(1), &
+        ESMF_TYPEKIND_I4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    recvData = local_recvData == 1
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllToAllVFLogical
 !------------------------------------------------------------------------------
 
 

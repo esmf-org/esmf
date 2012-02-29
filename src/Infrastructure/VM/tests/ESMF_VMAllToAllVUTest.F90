@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllVUTest.F90,v 1.18 2012/01/06 20:18:32 svasquez Exp $
+! $Id: ESMF_VMAllToAllVUTest.F90,v 1.19 2012/02/29 17:19:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_VMAllToAllVUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.18 2012/01/06 20:18:32 svasquez Exp $'
+    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.19 2012/02/29 17:19:44 w6ws Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -55,6 +55,7 @@ program ESMF_VMAllToAllVUTest
   integer, allocatable:: iarray1(:), iarray2(:), iarray3(:)
   real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:), f4array3(:)
   real(ESMF_KIND_R8), allocatable:: f8array1(:), f8array2(:), f8array3(:)
+  logical, allocatable:: larray1(:), larray2(:), larray3(:)
      
   type(ESMF_VMId), allocatable :: vmids_array1(:)
   type(ESMF_VMId), allocatable :: vmids_array2(:)
@@ -105,6 +106,9 @@ program ESMF_VMAllToAllVUTest
   allocate(f8array2(nlen2))
   allocate(f8array3(nlen1))
   
+  allocate(larray1(nlen1))
+  allocate(larray2(nlen2))
+  allocate(larray3(nlen1))
 
   ! prepare data array1
   k=1
@@ -113,6 +117,7 @@ program ESMF_VMAllToAllVUTest
       iarray1(k) = i + 100 * k + 10000 * j
       f4array1(k) = real(iarray1(k), ESMF_KIND_R4)
       f8array1(k) = real(iarray1(k), ESMF_KIND_R8)
+      larray1(k) = mod (i, 3) == 0
       k = k+1
     enddo
   enddo
@@ -217,6 +222,45 @@ program ESMF_VMAllToAllVUTest
     if (f8array3(i)/=f8array1(i)) then
       rc = ESMF_FAILURE
       print *, i, f8array1(i), f8array3(i)
+    endif
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+  !Testing with logical arguments
+  !==============================
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "AllToAllV Test larray1 -> larray2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS."
+  larray2 = .false.
+  call ESMF_VMAllToAllV(vm,  &
+      sendData=larray1, sendCounts=sendCounts, sendOffsets=sendOffsets,  &
+      recvData=larray2, recvCounts=recvCounts, recvOffsets=recvOffsets,  &
+      rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "AllToAllV Test larray2 -> larray3"
+  write(failMsg, *) "Did not return ESMF_SUCCESS."
+  larray3 = .false.
+  call ESMF_VMAllToAllV(vm,  &
+      sendData=larray2, sendCounts=recvCounts, sendOffsets=recvOffsets,  &
+      recvData=larray3, recvCounts=sendCounts, recvOffsets=sendOffsets,  &
+      rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Verify larray3 data against larray1 after alltoallv
+  write(failMsg, *) "Wrong data."
+  write(name, *) "Verify larray3 data against larray1 after alltoallv"
+  rc = ESMF_SUCCESS
+  do i=1, nlen1
+    if (larray3(i) .neqv. larray1(i)) then
+      rc = ESMF_FAILURE
+      print *, i, larray1(i), larray3(i)
     endif
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
