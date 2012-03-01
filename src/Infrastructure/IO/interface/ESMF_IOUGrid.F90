@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.4 2012/01/06 20:17:12 svasquez Exp $
+! $Id: ESMF_IOUGrid.F90,v 1.5 2012/03/01 00:41:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -276,32 +276,19 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
         ESMF_SRCLINE, errmsg, &
         rc)) return
 
-      if (.not. present(nodeXcoords) .and. .not. present(nodeYcoords)) then
-        ! find out the node dimension and allocate local nodeCoord arrays
-        ncStatus = nf90_inquire_variable(ncid, VarId, dimids=dimIds)
-        if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-        ncStatus = nf90_inquire_dimension (ncid, DimIds(1), len=nodeDim)
-        errmsg = "Dimension in "//trim(filename)
-        if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-	allocate(nodeXcoordsLocal(nodeDim), nodeYcoordsLocal(nodeDim))
-      else if (present(nodeXcoords)) then
-	nodeDim = size(nodeXcoords,1)
-	allocate(nodeYcoordsLocal(nodeDim))
-	nodeXcoordsLocal = nodeXcoords
-      else if (present(nodeYcoords)) then
-	nodeDim = size(nodeYcoords,1)
-	allocate(nodeXcoordsLocal(nodeDim))
-	nodeYcoordsLocal = nodeYcoords
-      else
-	nodeXcoordsLocal = nodeXcoords
-	nodeYcoordsLocal = nodeYcoords
-      endif
+      ! find out the node dimension and allocate local nodeCoord arrays
+      ncStatus = nf90_inquire_variable(ncid, VarId, dimids=dimIds)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      ncStatus = nf90_inquire_dimension (ncid, DimIds(1), len=nodeDim)
+      errmsg = "Dimension in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      allocate(nodeXcoordsLocal(nodeDim), nodeYcoordsLocal(nodeDim))
       ncStatus = nf90_get_var (ncid, VarId, nodeXcoordsLocal)  
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
@@ -318,6 +305,63 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
+      if (present(nodeXcoords)) nodeXcoords = nodeXcoordsLocal
+      if (present(nodeYcoords)) nodeYcoords = nodeYcoordsLocal
+
+      ! faceNodeConnX and faceNodeConnY are the node coordinates for a given cell (element).
+      ! In the UGRID standard, face_node_connectivity variable contains the indices
+      ! to the nodes, rather than the actually coodinates.  This is used to write the weight
+      ! file in the SCRIP format.
+      if (present(faceNodeConnX)) then 
+        errmsg = "Attribute face_node_connectivity in "//trim(filename)
+        ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
+        if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+        ! Get element connectivity
+        errmsg = "Variable "//trim(elmtConnName)//" in "//trim(filename)
+        ncStatus = nf90_inq_varid (ncid, trim(elmtConnName), VarId)
+        if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+        ! Get elmt conn fill value
+        errmsg = "Attribute "//trim(elmtConnName)//"_FillValue in "//trim(filename)
+        ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
+	if (ncStatus /= nf90_noerror) localFillValue = 0
+        ! Get start_index attribute to find out the index base (0 or 1)
+        ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
+        ! if not defined, default to 0-based
+        if (ncStatus /= nf90_noerror) indexBase = 0
+
+        dim1 = size(faceNodeConnX,1)
+        dim2 = size(faceNodeConnX,2)
+        allocate(elemConn(dim1,dim2) )
+        ncStatus = nf90_get_var (ncid, VarId, elemConn)
+        if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+	faceNodeConnX(:,:)=localFillValue
+	faceNodeConnY(:,:)=localFillValue
+        !adjust index to 1-based of the start_index is 0
+        if (indexBase == 1) then
+	   offset = 0
+        else
+           offset = 1
+        endif
+        do i=1,dim1
+	  do j=1,dim2
+		if (elemConn(i,j) /= localFillValue) then
+		   faceNodeConnX(i,j) = nodeXcoordsLocal(elemConn(i,j)+offset)
+		   faceNodeConnY(i,j) = nodeYcoordsLocal(elemConn(i,j)+offset)
+	        endif
+          enddo
+        enddo
+        deallocate(elemConn)
+      endif
+      deallocate(nodeXcoordsLocal, nodeYcoordsLocal)
     endif
 
     ! get number of face
@@ -359,66 +403,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
           rc)) return
       endif
     endif
-    
-    ! faceNodeConnX and faceNodeConnY are the node coordinates for a given cell (element).
-    ! In the UGRID standard, face_node_connectivity variable contains the indices
-    ! to the nodes, rather than the actually coodinates.  This is used to write the weight
-    ! file in the SCRIP format.
-    if (present(faceNodeConnX)) then 
-        errmsg = "Attribute face_node_connectivity in "//trim(filename)
-        ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
-        if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-        ! Get element connectivity
-        errmsg = "Variable "//trim(elmtConnName)//" in "//trim(filename)
-        ncStatus = nf90_inq_varid (ncid, trim(elmtConnName), VarId)
-        if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-        ! Get elmt conn fill value
-        errmsg = "Attribute "//trim(elmtConnName)//"_FillValue in "//trim(filename)
-        ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
-        if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-        ! Get start_index attribute to find out the index base (0 or 1)
-        ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
-        ! if not defined, default to 0-based
-        if (ncStatus /= nf90_noerror) indexBase = 0
 
-        dim1 = size(faceNodeConnX,1)
-        dim2 = size(faceNodeConnX,2)
-        allocate(elemConn(dim1,dim2) )
-        ncStatus = nf90_get_var (ncid, VarId, elemConn)
-        if (CDFCheckError (ncStatus, &
-          ESMF_METHOD,  &
-          ESMF_SRCLINE, errmsg, &
-          rc)) return
-	faceNodeConnX(:,:)=localFillValue
-	faceNodeConnY(:,:)=localFillValue
-        !adjust index to 1-based of the start_index is 0
-        if (indexBase == 1) then
-	   offset = 0
-        else
-           offset = 1
-        endif
-        do i=1,dim1
-	  do j=1,dim2
-		if (elemConn(i,j) /= localFillValue) then
-		   faceNodeConnX(i,j) = nodeXcoordsLocal(elemConn(i,j)+offset)
-		   faceNodeConnY(i,j) = nodeYcoordsLocal(elemConn(i,j)+offset)
-	        endif
-          enddo
-        enddo
-        deallocate(elemConn)
-	if (.not. present(nodeXcoords)) then
-	  deallocate(nodeXcoordsLocal, nodeYcoordsLocal)
-	endif
-    endif
     ncStatus = nf90_close(ncid)
     
 #else
@@ -503,54 +488,6 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
         return
     endif
 
-    ! Not sure if I need this attribute if "node_coordinates" is a required attribute
-    ! Get location names
-    ncStatus = nf90_inquire_attribute(ncid, meshId, "locations", len=len)
-    errmsg = "Attribute locations in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-          ESMF_METHOD, &
-          ESMF_SRCLINE,&
-	  errmsg,&
-          rc)) return
-    ncStatus = nf90_get_att (ncid, meshId, "locations", values=locations)
-    errmsg = "Attribute locations in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-    ! Break up space-separated string "locations" into individual locNames
-    pos1 = 1
-    yesNode = 0
-    n = 1
-    do 
-	pos2 = index(locations(pos1:len), " ")
-	if (pos2 == 0) then
-	   locNames(n) = locations(pos1:len)
-  	   if (locNames(n) .eq. "node") yesNode = 1
-	   exit
-        endif
-        locNames(n) = locations(pos1:pos1+pos2-2)
-	if (locNames(n) .eq. "node") yesNode = 1
-        ! Check supported location names convention? (node/edge/face)
-        ! (Later, can general to some support of other forms?)
-        if ((locNames(n) .ne. "node") .and. (locNames(n) .ne. "face") .and. &
-            (locNames(n) .ne. "edge")) then
-            print *, "Error - Must use UGRID location names convention (node/edge/face) ", locNames(n)
-	    call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- location attribute is wrong", & 
-               	 ESMF_CONTEXT, rcToReturn=rc) 
-            return
-        endif
-	pos1 = pos2+pos1
-	n = n + 1
-    enddo
-    ! Check if node exists in the location attribute
-    if (yesNode == 0) then
-        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
-                 msg="- node coordinates not defined", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-        return
-    endif
     ! Get node coordinates
     allocate( nodeCoordNames(2) )
     ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", nodeCoordString)
@@ -649,12 +586,11 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
       ESMF_SRCLINE, errmsg, &
       rc)) return
     ! Get elmt conn fill value (if there are triangles mixed with squares, eg)
+    ! _FillValue is optional.  It is not needed if all the elements have the same
+    ! number of corner nodes
     errmsg = "Attribute "//trim(elmtConnName)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
+    if (ncStatus /= nf90_noerror) localFillValue = 0
     ! Get start_index attribute to find out the index base (0 or 1)
     ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
     ! if not defined, default to 0-based
