@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.45 2012/02/29 23:21:06 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.46 2012/03/01 17:10:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -238,7 +238,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#if 1
+#if 0
       !------------------------------------------------------------------------
 
       !EX_OFF_UTest
