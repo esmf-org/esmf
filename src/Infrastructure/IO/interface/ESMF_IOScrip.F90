@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.39 2012/01/06 20:17:12 svasquez Exp $
+! $Id: ESMF_IOScrip.F90,v 1.40 2012/03/02 23:41:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -56,6 +56,7 @@
   public ESMF_ScripGetVar
   public ESMF_OutputScripWeightFile
   public ESMF_GetMeshFromFile
+  public ESMF_EsmfInq
 
 !==============================================================================
 
@@ -1308,7 +1309,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     varStr = "centerCoords"
            endif
 	   if (ncStatus /= nf90_noerror) then
-	     print *, varStr, " does not exit"
+	     write(*,*) "Warning: "//trim(varStr)// &
+                " not present in src grid file, so not outputting xc_a and yc_a to weight file."
+             write(*,*)
            else 
 	     allocate(latBuffer2(srcCoordDim, srcDim))
              allocate(latBuffer(srcDim), lonBuffer(srcDim))
@@ -1375,7 +1378,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
 	     if (ncStatus /= nf90_noerror) then
-	       print *, "elementMask does not exit"
+               write(*,*) "Warning: elementMask"// &
+                " not present in src grid file, so setting mask_a=1 in weight file."
+               write(*,*)
                mask = 1
              else 
                ncStatus=nf90_get_var(ncid1,VarId, mask)
@@ -1541,7 +1546,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	     varStr = "centerCoords"
            endif
 	   if (ncStatus /= nf90_noerror) then
-	     print *, varStr, " does not exit"
+	     write(*,*) "Warning: "//trim(varStr)// &
+                " not present in dst grid file, so not outputting xc_b and yc_b to weight file."
+             write(*,*)
            else 
 	     allocate(latBuffer2(dstCoordDim, dstDim))
              allocate(latBuffer(dstDim), lonBuffer(dstDim))
@@ -1605,7 +1612,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
   	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
 	     if (ncStatus /= nf90_noerror) then
-	       print *, "elementMask does not exit"
+               write(*,*) "Warning: elementMask"// &
+                " not present in dst grid file, so setting mask_b=1 in weight file."
+               write(*,*)
                mask = 1
              else 
                ncStatus=nf90_get_var(ncid1,VarId, mask)
@@ -2023,6 +2032,8 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
     integer :: ncid, VarId, len
     character(len=80) :: buffer
     character(len=256) :: errmsg
+    integer, parameter :: nf90_noerror = 0
+    integer :: coordDim,DimID
 
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
@@ -2031,6 +2042,21 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
       ESMF_METHOD, &
       ESMF_SRCLINE, trim(filename),rc)) return
 
+    ! Get vertex dimension
+    ncStatus = nf90_inq_dimid (ncid, "coordDim", DimId)
+    errmsg = "Dimension coordDim in "//trim(filename)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+
+    ncStatus = nf90_inquire_dimension (ncid, DimId, len=coordDim)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+
+    ! Get units
     ncStatus = nf90_inq_varid (ncid, "nodeCoords", VarId)
     errmsg = "Variable nodeCoords in "//trim(filename)
     if (CDFCheckError (ncStatus, &
@@ -2039,10 +2065,20 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
         rc)) return
 
     ncStatus = nf90_inquire_attribute(ncid, VarId, "units", len=len)
-    if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,errmsg,&
-        rc)) return
+    ! only require units for 2D
+    if (coordDim==2) then
+       if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,errmsg,&
+            rc)) return
+    else    
+       ! if no units are present set to default and leave
+       if (ncStatus /= nf90_noerror) then
+          units="UNKNOWN"
+          if (present(rc)) rc=ESMF_SUCCESS
+          return
+       endif
+    endif
 
     ncStatus = nf90_get_att(ncid, VarId, "units", buffer)
     if (CDFCheckError (ncStatus, &
@@ -2163,34 +2199,37 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
-    if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,errmsg,&
-        rc)) return
+    ! Check units, but only if 2D
+    if (nodeDim==2) then 
+       ncStatus = nf90_inquire_attribute(ncid, VarNo, "units", len=len)
+       if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,errmsg,&
+            rc)) return
 
-    ncStatus = nf90_get_att(ncid, VarNo, "units", units)
-    if (CDFCheckError (ncStatus, &
-        ESMF_METHOD, &
-        ESMF_SRCLINE,errmsg,&
-        rc)) return
-    ! if len != 7, something is wrong, check the value.  If it starts 
-    ! with Degrees/degrees/Radians/radians, ignore the garbage after the
-    ! word.  Otherwise, return the whole thing
-    call ESMF_StringLowerCase(units(1:len), rc=rc)
-    if ((len > 7) .and. (units(1:7) .ne. 'degrees' .and. &
-      units(1:7) .ne. 'radians')) then
-       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+       ncStatus = nf90_get_att(ncid, VarNo, "units", units)
+       if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,errmsg,&
+            rc)) return
+       ! if len != 7, something is wrong, check the value.  If it starts 
+       ! with Degrees/degrees/Radians/radians, ignore the garbage after the
+       ! word.  Otherwise, return the whole thing
+       call ESMF_StringLowerCase(units(1:len), rc=rc)
+       if ((len > 7) .and. (units(1:7) .ne. 'degrees' .and. &
+            units(1:7) .ne. 'radians')) then
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- units attribute is not degrees or radians", & 
                  ESMF_CONTEXT, rcToReturn=rc) 
-       return
-    endif
+          return
+       endif
 
-    ! if units is "radians", convert it to degree
-    if (convertToDegLocal) then
-       if (units(1:7) .eq. "radians") then
-          rad2deg = 180.0/3.141592653589793238
-          nodeCoords(:,:) = nodeCoords(:,:)*rad2deg
+       ! if units is "radians", convert it to degree
+       if (convertToDegLocal) then
+          if (units(1:7) .eq. "radians") then
+             rad2deg = 180.0/3.141592653589793238
+             nodeCoords(:,:) = nodeCoords(:,:)*rad2deg
+          endif
        endif
     endif
 

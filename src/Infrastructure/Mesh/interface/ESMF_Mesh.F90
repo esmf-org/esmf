@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.85 2012/02/29 23:21:07 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.86 2012/03/02 23:41:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.85 2012/02/29 23:21:07 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.86 2012/03/02 23:41:11 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.85 2012/02/29 23:21:07 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.86 2012/03/02 23:41:11 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -1149,7 +1149,6 @@ end function ESMF_MeshCreateFromFile
     integer, allocatable                :: NodeId(:)
     integer, allocatable                :: NodeUsed(:)
     real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
-    real(ESMF_KIND_R8), allocatable     :: NodeCoordsTMP(:)
     real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
@@ -1178,6 +1177,8 @@ end function ESMF_MeshCreateFromFile
     integer                             :: parametricDim
     integer                             :: lni,ti
     type(ESMF_FileFormat_Flag)          :: filetypelocal
+    integer                             :: coordDim
+    logical                             :: convertToDeg
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1210,11 +1211,28 @@ end function ESMF_MeshCreateFromFile
             ESMF_CONTEXT, rcToReturn=rc)) return
  
     if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
+       ! Get coordDim
+       call ESMF_EsmfInq(filename,coordDim=coordDim, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Don't convert if not 2D because that'll be cartesian right now
+       if (coordDim .eq. 2) then
+          convertToDeg = .true.
+       else 
+          convertToDeg = .false.
+       endif
+
+       ! Get information from file
        call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
-                                 startElmt, convertToDeg=.TRUE., rc=localrc)
+                                 startElmt, convertToDeg=convertToDeg, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
+       ! For now assume that we're 2D
+       coordDim=2
+       
+       ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
                                    elmtNum, startElmt, convertToDeg=.TRUE., rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1232,14 +1250,24 @@ end function ESMF_MeshCreateFromFile
     deg2rad = 3.141592653589793238/180;
 
    ! Figure out dimensions 
-    if (convert3D) then
-       parametricDim=2
+    if (coordDim .eq. 2) then
+       if (convert3D) then
+          parametricDim=2
+          spatialDim=3
+       else
+          parametricDim=2
+          spatialDim=NodeDim
+       end if
+    else if (coordDim .eq. 3) then
+       parametricDim=3
        spatialDim=3
     else
-       parametricDim=2
-       spatialDim=NodeDim
-    end if
-    
+       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
+            msg="- only coordDim 2 or 3 is supported right now", & 
+            ESMF_CONTEXT, rcToReturn=rc) 
+       return
+    endif
+
     ! create the mesh
     Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1266,17 +1294,26 @@ end function ESMF_MeshCreateFromFile
     ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
     totalElements = ElemCnt
     totalConnects = 0
-    do ElemNo =1, ElemCnt
-        do i=1,elmtNum(ElemNo)	
-            NodeUsed(elementConn(i,ElemNo))=PetNo
-        enddo
-	if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
-	if (elmtNum(ElemNo) <= 4) then
-           TotalConnects = TotalConnects+elmtNum(ElemNo)
-        else
-	   TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
-        end if
-    end do
+    if (parametricDim .eq. 2) then
+       do ElemNo =1, ElemCnt
+          do i=1,elmtNum(ElemNo)	
+             NodeUsed(elementConn(i,ElemNo))=PetNo
+          enddo
+          if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
+          if (elmtNum(ElemNo) <= 4) then
+             TotalConnects = TotalConnects+elmtNum(ElemNo)
+          else
+             TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
+          end if
+       end do
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       do ElemNo =1, ElemCnt
+          do i=1,elmtNum(ElemNo)	
+             NodeUsed(elementConn(i,ElemNo))=PetNo
+          enddo
+          TotalConnects = TotalConnects+elmtNum(ElemNo)
+       end do       
+    endif
 
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
     ! NodeOwners1(:) 
@@ -1298,41 +1335,58 @@ end function ESMF_MeshCreateFromFile
 
     ! allocate nodes arrays for ESMF_MeshAddNodes()
     allocate (NodeId(localNodes))
-    if (convert3D) then
-       allocate(NodeCoords1D(localNodes*3))
-       allocate(NodeCoordsTMP(localNodes*2))
-    else
-       allocate (NodeCoords1D(localNodes*NodeDim))
-    endif
     allocate (NodeOwners(localNodes))
+    
+    if (parametricDim .eq. 2) then
+       if (convert3D) then
+          allocate(NodeCoords1D(localNodes*3))
+       else
+          allocate (NodeCoords1D(localNodes*NodeDim))
+       endif
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       allocate(NodeCoords1D(localNodes*3))
+    endif
 
+    
     ! copy vertex information into nodes, NodeUsed(:) now contains either 0 (not for me) or
     ! the local node index.  The owner of the node is stored in NodeOwners1(:)
     ! Also calculate how many nodes are "owned" by me -- total
     i = 1
     total = 0
-    do NodeNo = 1, NodeCnt
-        if (NodeUsed(NodeNo) > 0) then
-	   NodeId     (i) = NodeNo     
-	   if (convert3D) then
-              coorX = nodeCoords(1,NodeNo)*deg2rad
-              coorY = (90.0-nodeCoords(2,NodeNo))*deg2rad
-              NodeCoords1D((i-1)*3+1) = COS(coorX)*SIN(coorY)             
-              NodeCoords1D((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
-              NodeCoords1D((i-1)*3+3) = COS(coorY)
-              NodeCoordsTMP((i-1)*2+1) = nodeCoords(1,NodeNo)
-              NodeCoordsTMP((i-1)*2+2) = nodeCoords(2,NodeNo)
-           !   write (*,'(6F8.4)')nodeCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
-           else 
-             do dim = 1, NodeDim
-               NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)
+    if (parametricDim .eq. 2) then
+       do NodeNo = 1, NodeCnt
+          if (NodeUsed(NodeNo) > 0) then
+             NodeId(i) = NodeNo     
+             if (convert3D) then
+                coorX = nodeCoords(1,NodeNo)*deg2rad
+                coorY = (90.0-nodeCoords(2,NodeNo))*deg2rad
+                NodeCoords1D((i-1)*3+1) = COS(coorX)*SIN(coorY)             
+                NodeCoords1D((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
+                NodeCoords1D((i-1)*3+3) = COS(coorY)
+                !   write (*,'(6F8.4)')nodeCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
+             else 
+                do dim = 1, NodeDim
+                   NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)
+                end do
+             endif
+             NodeOwners (i) = NodeOwners1(NodeNo)
+             if (NodeOwners1(NodeNo) == PetNo) total = total+1
+             i = i+1
+          endif
+       end do
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       do NodeNo = 1, NodeCnt
+          if (NodeUsed(NodeNo) > 0) then
+             NodeId(i) = NodeNo     
+             do dim = 1, 3
+                NodeCoords1D ((i-1)*3+dim) = nodeCoords(dim, NodeNo)
 	     end do
-           endif
-           NodeOwners (i) = NodeOwners1(NodeNo)
-	   if (NodeOwners1(NodeNo) == PetNo) total = total+1
-           i = i+1
-        endif
-    end do
+             NodeOwners (i) = NodeOwners1(NodeNo)
+             if (NodeOwners1(NodeNo) == PetNo) total = total+1
+             i = i+1
+          endif
+       end do
+    endif
 
     ! Add nodes
     call ESMF_MeshAddNodes (Mesh, NodeId, NodeCoords1D, NodeOwners, localrc)
@@ -1388,84 +1442,108 @@ end function ESMF_MeshCreateFromFile
        Mesh%origElemCount=ElemCnt
     endif
     
+    
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
     ! as a 1D array.  The node IDs are "local", which are stored in NodeUsed(:)
     ElemNo = 1
     ConnNo = 0
-    do j = 1, ElemCnt
-       if (elmtNum(j)==3) then        
-          ElemId(ElemNo) = myStartElmt+ElemNo
-          ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-          do i=1,3
-             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-          end do
-          if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-          ElemNo=ElemNo+1
-          ConnNo=ConnNo+3
-       elseif (elmtNum(j)==4) then
-          ElemId(ElemNo) = myStartElmt+ElemNo
-          ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
-          do i=1,4
-             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
-          end do
-          if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-          ElemNo=ElemNo+1
-          ConnNo=ConnNo+4
-       else
-          ! number of points in poly to triangulate
-          numPoly=elmtNum(j)
-          if (numPoly > maxNumPoly) then
-             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                  msg="- File contains polygons with more sides than triangulation is supported for", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-
-          ! Copy points into input list
-          if (spatialDim==2) then
-             ti=0
-             do k=1,numPoly
-                lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                polyCoords(ti+1)=NodeCoords1D(lni+1)
-                polyCoords(ti+2)=NodeCoords1D(lni+2)
-                ti=ti+2
-             enddo
-          else if (spatialDim==3) then
-             ti=0
-             do k=1,numPoly
-                lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                polyCoords(ti+1)=NodeCoords1D(lni+1)
-                polyCoords(ti+2)=NodeCoords1D(lni+2)
-                polyCoords(ti+3)=NodeCoords1D(lni+3)
-                ti=ti+3
-             enddo
-          endif
-          ! Checking for other spatialDims above, not here in a loop
-
-          ! call triangulation routine
-          call c_ESMC_triangulate(parametricDim, spatialDim, &
-               numPoly, polyCoords, polyDblBuf, polyIntBuf, &
-               triInd, localrc)   
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-
-          ! translate triangulation out of output list
-          ti=0
-          do k=1,numPoly-2
-             ElemId(ElemNo)=myStartElmt+ElemNo
+    if (parametricDim .eq. 2) then
+       do j = 1, ElemCnt
+          if (elmtNum(j)==3) then        
+             ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-             ElemConn (ConnNo+1) = NodeUsed(elementConn(triInd(ti+1)+1,j))
-             ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
-             ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
+             do i=1,3
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
              ElemNo=ElemNo+1
              ConnNo=ConnNo+3
-             ti=ti+3
-          enddo
-       end if
-    end do
+          elseif (elmtNum(j)==4) then
+             ElemId(ElemNo) = myStartElmt+ElemNo
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_QUAD
+             do i=1,4
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             end do
+             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+             ElemNo=ElemNo+1
+             ConnNo=ConnNo+4
+          else
+             ! number of points in poly to triangulate
+             numPoly=elmtNum(j)
+             if (numPoly > maxNumPoly) then
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                     msg="- File contains polygons with more sides than triangulation is supported for", &
+                     ESMF_CONTEXT, rcToReturn=rc)
+                return
+             endif
+
+             ! Copy points into input list
+             if (spatialDim==2) then
+                ti=0
+                do k=1,numPoly
+                   lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
+                   polyCoords(ti+1)=NodeCoords1D(lni+1)
+                   polyCoords(ti+2)=NodeCoords1D(lni+2)
+                   ti=ti+2
+                enddo
+             else if (spatialDim==3) then
+                ti=0
+                do k=1,numPoly
+                   lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
+                   polyCoords(ti+1)=NodeCoords1D(lni+1)
+                   polyCoords(ti+2)=NodeCoords1D(lni+2)
+                   polyCoords(ti+3)=NodeCoords1D(lni+3)
+                   ti=ti+3
+                enddo
+             endif
+             ! Checking for other spatialDims above, not here in a loop
+
+             ! call triangulation routine
+             call c_ESMC_triangulate(parametricDim, spatialDim, &
+                  numPoly, polyCoords, polyDblBuf, polyIntBuf, &
+                  triInd, localrc)   
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! translate triangulation out of output list
+             ti=0
+             do k=1,numPoly-2
+                ElemId(ElemNo)=myStartElmt+ElemNo
+                ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
+                ElemConn (ConnNo+1) = NodeUsed(elementConn(triInd(ti+1)+1,j))
+                ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
+                ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
+                if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+                ElemNo=ElemNo+1
+                ConnNo=ConnNo+3
+                ti=ti+3
+             enddo
+          end if
+       end do
+    else ! If not parametricDim==2, assuming parmetricDim==3
+       do j = 1, ElemCnt
+          if (elmtNum(j)==4) then        
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
+          elseif (elmtNum(j)==8) then
+             ElemType (ElemNo) = ESMF_MESHELEMTYPE_HEX
+          else
+             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
+                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+             return
+          endif
+
+          do i=1,elmtNum(j)
+             ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+          end do
+          ElemId(ElemNo) = myStartElmt+ElemNo
+          ElemNo=ElemNo+1
+          ConnNo=ConnNo+elmtNum(j)
+       end do
+    endif
+
 
     if (ElemNo /= TotalElements+1) then
 	write (ESMF_UtilIOStdout,*)  &
