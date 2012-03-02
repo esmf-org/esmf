@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.h,v 1.11 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_GeomRendezvous.h,v 1.12 2012/03/02 01:56:47 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -44,7 +44,7 @@ public:
          double geom_tol;
   };
 
-  GeomRend(Mesh &srcmesh, Mesh &dstmesh, const DstConfig &config);
+  GeomRend(Mesh &srcmesh, Mesh &dstmesh, const DstConfig &config, bool freeze_src_=false);
   ~GeomRend();
 
   /*
@@ -57,6 +57,7 @@ public:
    * be registered else only the interp _field will be registered.
    */
   void Build(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, Zoltan_Struct **zzp, bool free_zz);
+  void Build_Merge(UInt nsrcF, MEField<> **srcF, UInt ndstF, MEField<> **dstF, Zoltan_Struct **zzp);
 
   struct ZoltanUD {
   ZoltanUD(UInt _sdim, MEField<> *_coord_src, MEField<> *_coord_dst,bool _iter_is_obj) :
@@ -124,6 +125,7 @@ private:
   bool built;
   UInt sdim;
   bool iter_is_obj;
+  bool freeze_src;  // true if src mesh will not be migrated to create src rendezvous mesh
   
   /* 
    * Store the fields on the rendezvous meshes that line up with those

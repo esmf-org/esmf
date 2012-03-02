@@ -1,4 +1,4 @@
-// $Id: ESMCI_BBox.h,v 1.10 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_BBox.h,v 1.11 2012/03/02 01:56:47 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -33,6 +33,7 @@ class _field;
  */
 class BBox {
 public:
+BBox() {}
 BBox(UInt _dim) : isempty(true), dim(_dim) {}
 BBox(UInt dim, const double min[], const double max[]); 
 // Construct a box around an element.  If the object is a shell, the box

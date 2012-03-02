@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.35 2012/02/27 18:24:43 svasquez Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.36 2012/03/02 01:56:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -68,13 +68,13 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
-    !N-EX__disable_UTest
+    !NEX_UTest
     ! Create an XGrid in 3D
-    !print *, 'Starting test5'
-    !call test5(rc)
-    !write(failMsg, *) ""
-    !write(name, *) "Creating an XGrid in 3D with Grid merging"
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *, 'Starting test5'
+    call test5(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 3D with Grid merging"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_Finalize(rc=rc)
   
@@ -465,7 +465,6 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(npet == 1) then
     ! partially overlap
     xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,field=srcField(1),rc=localrc), &
                                make_grid(4,4,0.5,1.,3.5,3.5,field=srcField(2),rc=localrc)/), &
@@ -552,7 +551,8 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! complicated merging
+    if(npet == 1) then
+    ! complicated merging, these triggers a condition in rend mesh that currently does not support two distant Grids
     xgrid = ESMF_XGridCreate((/make_grid(4,2,1.,1.,0.,0.,rc=localrc), make_grid(4,2,0.5,1.,4.,0.,rc=localrc), &
                                make_grid(4,2,1.,1.,6.,0.,rc=localrc)/), &
       (/make_grid(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid(8,8,0.7,0.7,0.,5.6,rc=localrc)/), &
@@ -585,7 +585,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+  endif
 
   end subroutine test4
 
@@ -633,7 +633,6 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(npet == 1) then
     ! partially overlap
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.6,1.,3.5,3.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
@@ -684,6 +683,7 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    if(npet == 1) then
     ! complicated merging
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,4.,0.,rc=localrc), &
                                make_grid_sph(4,2,1.,1.,6.,0.,rc=localrc)/), &
@@ -785,7 +785,7 @@ contains
     do i = lbound(coordX,1), ubound(coordX,1)
       coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
     enddo
-    print *, 'coordX: ', coordX
+    !print *, 'coordX: ', coordX
     ! X corner
     call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
         coordDim=1, farrayPtr=coordX, rc=localrc)
@@ -899,7 +899,7 @@ contains
         coordY(i,j) = starty + atm_dy/2. + (j-1)*atm_dy
       enddo
     enddo
-    print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
+    !print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
     ! X corner
     call ESMF_GridGetCoord(make_grid_sph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
         coordDim=1, farrayPtr=coordX, rc=localrc)

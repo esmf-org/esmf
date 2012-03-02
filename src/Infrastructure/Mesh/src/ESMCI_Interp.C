@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.37 2012/02/03 05:22:31 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.38 2012/03/02 01:56:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.37 2012/02/03 05:22:31 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.38 2012/03/02 01:56:48 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1280,9 +1280,9 @@ static GeomRend::DstConfig get_dst_config(Mesh &dest, const std::vector<Interp::
   }
 }
   
-Interp::Interp(Mesh &src, Mesh &dest, Mesh *midmesh, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
+Interp::Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_src_, const std::vector<FieldPair> &_fpairs, int unmappedaction) :
 sres(),
-grend(src, dest, get_dst_config(dest, _fpairs)),
+grend(src, dest, get_dst_config(dest, _fpairs), freeze_src_),
 fpairs(_fpairs),
 is_parallel(Par::Size() > 1),
 srcF(),
@@ -1322,7 +1322,10 @@ zz(0)
       OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
     } else if (search_obj_type == MeshObj::ELEMENT) {
       //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-      OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+      if(freeze_src_)
+        OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+      else
+        OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
     }
 
     /*

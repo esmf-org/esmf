@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.27 2011/10/04 19:35:30 rokuingh Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.28 2012/03/02 01:56:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.27 2011/10/04 19:35:30 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.28 2012/03/02 01:56:48 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -343,7 +343,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
 
 
      // Build the rendezvous grids
-     Interp interp(srcmesh, dstmesh, midmesh, fpairs, *unmappedaction);
+     Interp interp(srcmesh, dstmesh, midmesh, false, fpairs, *unmappedaction);
     
      // Create the weight matrix
      interp(0, wts);
@@ -482,7 +482,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
       fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
 
     // Build the rendezvous grids
-    Interp interp(dstmesh, srcmesh, 0, fpairs, *unmappedaction);
+    Interp interp(dstmesh, srcmesh, 0, false, fpairs, *unmappedaction);
 
     // Generate the backwards interpolation matrix
     interp(0, stw);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.10 2012/02/23 23:39:15 oehmke Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.11 2012/03/02 01:56:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -483,17 +483,31 @@ bool check_angle_sum(int sdim, int n, const double * const p, const double * con
   else return false;
 }
 
-bool walk_polygon(int sdim, int n, const double * const p, const double * const point)
+// return value: 0 -> outside, 1 -> inside, 2 -> on edge
+unsigned int walk_polygon(int sdim, int n, const double * const p, const double * const point)
 {
   // if point is always on left hand side (sense > 0) of polygon during CCW walk, then it's inside
+  unsigned int r = 2;
   for(int i = 0; i < n; i ++){
     //xvector midpoint = (xvector(p+i*sdim, sdim)+xvector(p+((i+1)%n)*sdim, sdim))/2.;
     //double sense = dot(cross(xvector(p+i*sdim, sdim), xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)), xvector(point, sdim)-midpoint.normalize());
     xvector midpoint = xvector(p+i*sdim, sdim);
     double sense = dot(cross(xvector(p+i*sdim, sdim), xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)), xvector(point, sdim)-midpoint);
-    if(sense <= 0) return false;
+    // [(p(i+1)-p(i))x(p(i+2)-p(i+1))].[(p(i+1)-p(i))x(pp-p(i))]
+    //double sense = dot( cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
+    //                          (xvector(p+((i+2)%n)*sdim, sdim)-xvector(p+((i+1)%n)*sdim, sdim))), 
+    //                    cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
+    //                          (xvector(point, sdim)-xvector(p+i*sdim, sdim)))); 
+    //double sense = dot(xvector(p+i*sdim, sdim), 
+    //                  cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
+    //                        (xvector(point, sdim)-xvector(p+i*sdim, sdim)))); 
+                       
+    if(std::fabs(sense) < 1.e-15)      // consider the point on edge if sense is really small, use the other point to determine if it's truely inside or not.
+      return 2;
+    if(sense < 0.) 
+      return 0;
   }
-  return true;
+  return 1;
 }
 
 /**
@@ -503,9 +517,9 @@ bool walk_polygon(int sdim, int n, const double * const p, const double * const 
  * @param[in] point         point coordinate
  * @return                  point inside or outside of polygon
  */
-bool point_in_poly(int pdim, int sdim, int nvert, const double * const poly_cd, const double * const point){
+unsigned int point_in_poly(int pdim, int sdim, int nvert, const double * const poly_cd, const double * const point){
   if(sdim == 2){
-    int i, j; bool c = false; 
+    int i, j; unsigned int c = 0;
     double testx = point[0], testy = point[1];
     xpoint xp(point[0], point[1], 'p');
     for (i = 0, j = nvert-1; i < nvert; j = i++) {
@@ -536,10 +550,10 @@ bool point_in_poly(int pdim, int sdim, int nvert, const double * const poly_cd, 
  * @param[in] xpoint        point
  * @return                  point inside or outside of polygon
  */
-bool point_in_poly(int pdim, int sdim, const polygon & poly, const xpoint & point){
+unsigned int point_in_poly(int pdim, int sdim, const polygon & poly, const xpoint & point){
   double * coords = new double[sdim*poly.size()];
   polygon_to_coords(poly, sdim, coords);
-  bool res = point_in_poly(pdim, sdim, poly.size(), coords, point.c);
+  unsigned int res = point_in_poly(pdim, sdim, poly.size(), coords, point.c);
   delete [] coords;
   return res;
 }
@@ -584,26 +598,42 @@ bool disjoint(int pdim, int sdim, const std::vector<xpoint> & subject, const std
   polygon_to_coords(polygon(clip), sdim, clip_cd);
 
   // check if any p point is in q
-  for(int i = 0; i < subject.size(); i ++)
-    if(point_in_poly(pdim, sdim, num_clip_p, clip_cd, subject_cd+i*sdim)){
+  // if any s point is in c, disjoint is false
+  // if any s point is outside c, c contains s is false
+  // if all s point are on c, disjoint is false, also implies c contains s
+  int np = 0;
+  for(int i = 0; i < subject.size(); i ++){
+    unsigned int r = point_in_poly(pdim, sdim, num_clip_p, clip_cd, subject_cd+i*sdim);
+    if(r == 1)
       // if a point is found contained
       disjoint = false;
-    }else
+    else if(r == 0)
       c_contains_s = false;
+    else if(r == 2)
+      np ++;
+  }
+  if(np == subject.size()) disjoint = false;
 
   // check if any q point is in p
-  for(int i = 0; i < clip.size(); i ++)
-    if(point_in_poly(pdim, sdim, num_subject_p, subject_cd, clip_cd+i*sdim)){
+  np = 0;
+  for(int i = 0; i < clip.size(); i ++){
+    unsigned int r = point_in_poly(pdim, sdim, num_subject_p, subject_cd, clip_cd+i*sdim);
+    if(r == 1)
       // if a point is found contained
       disjoint = false;
-    }else
+    else if(r == 0)
       s_contains_c = false;
+    else if(r == 2)
+      np ++;
+  }
+  if(np == clip.size()) disjoint = false;
 
+  // tally the results, only one scenario can happen unless c and s are identical
   int n_cond = 0;
   if(disjoint) n_cond ++;
   if(s_contains_c) n_cond ++;
   if(c_contains_s) n_cond ++;
-  if(n_cond > 1) Throw() << "Invalid spatial relation between subject and clip\n";
+  if(n_cond > 1 && !(c_contains_s && s_contains_c)) Throw() << "Invalid spatial relation between subject and clip\n";
 
   delete [] subject_cd, clip_cd;
   return disjoint;
@@ -714,11 +744,11 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       difference.push_back(polygon(pnodes));
       return 0;
     }
+    if(c_contains_s || point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
     if(s_contains_c || point_in_poly(pdim, sdim, pnodes, q_centroid) ){
       difference.push_back(make_concave_polygon(pdim, sdim, pnodes, qnodes));
       return 0;
     }
-    if(c_contains_s || point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
   }
 
 
@@ -978,9 +1008,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     //*area = sintd_cells[i]->get_area();
   }
 
-  //char str[64]; memset(str, 0, 64);
-  //sprintf(str, "midMesh.vtk.%d", me);
-  //WriteVTKMesh(meshmid, str);
+  char str[64]; memset(str, 0, 64);
+  sprintf(str, "midMesh.vtk.%d", me);
+  WriteVTKMesh(meshmid, str);
   //WriteVTKMesh(srcmesh, "srcMesh.vtk");
   //WriteVTKMesh(dstmesh, "dstMesh.vtk");
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.45 2012/01/26 16:24:37 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.46 2012/03/02 01:57:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,6 +59,10 @@ module ESMF_XGridCreateMod
   sequence
     type(ESMF_Pointer) :: this
   end type
+  type ESMF_FracPtr
+  sequence
+    real(ESMF_KIND_R8), pointer :: fraclist(:)
+  end type
 
 !------------------------------------------------------------------------------
 !
@@ -74,7 +78,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.45 2012/01/26 16:24:37 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.46 2012/03/02 01:57:27 feiliu Exp $'
 
 !==============================================================================
 !
@@ -408,7 +412,6 @@ integer, intent(out), optional              :: rc
     type(ESMF_VM)                 :: vm
     integer(ESMF_KIND_I4), pointer:: indicies(:,:)
     real(ESMF_KIND_R8), pointer   :: weights(:), sidemesharea(:), mesharea(:)
-    real(ESMF_KIND_R8), pointer   :: sidemeshfrac(:)
     integer                       :: nentries
     type(ESMF_TempWeights)        :: tweights
     integer                       :: AisSphere, BisSphere, XisSphere, BXisSphere
@@ -419,6 +422,8 @@ integer, intent(out), optional              :: rc
     integer                       :: l_SideAToSideBScheme
     integer                       :: compute_midmesh
     real(ESMF_KIND_R8)            :: fraction = 1.0
+    type(ESMF_FracPtr), allocatable :: sideAfrac(:), sideBfrac(:)
+    type(ESMF_INDEX_FLAG)         :: indexflag
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -548,10 +553,14 @@ integer, intent(out), optional              :: rc
       enddo
     endif
 
-    ! allocate the temporary meshes
+    ! allocate the temporary meshes and frac ptr
     allocate(meshAt(ngrid_a), meshBt(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
       msg="- Allocating temporary meshes for Xgrid creation", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(sideAfrac(ngrid_a), sideBfrac(ngrid_b), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+      msg="- Allocating temporary frac ptr type for Xgrid creation", &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !TODO: Create the src/dst Mesh, take care of maskValues
@@ -566,6 +575,12 @@ integer, intent(out), optional              :: rc
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     meshA = meshAt(1)
+    ! retrieve frac list, for the highest priority mesh, fraction is always 1.
+    allocate(sideAfrac(1)%fraclist(meshAt(1)%numownedelements), stat=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    sideAfrac(1)%fraclist=1.0
 
     do i = 2, ngrid_a
       meshAt(i) = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
@@ -586,11 +601,24 @@ integer, intent(out), optional              :: rc
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(i .gt. 2) then
-        call ESMF_MeshDestroy(meshA, rc=localrc)
+        !call ESMF_MeshDestroy(meshA, rc=localrc)
+        ! meshA is only a pointer type of mesh at this point, call the C api to destroy it
+        call C_ESMC_MeshDestroy(meshA%this, localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+
+      ! retrieve frac list
+      allocate(sideAfrac(i)%fraclist(meshAt(i)%numownedelements), stat=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_MeshGetElemFrac(meshAt(i), sideAfrac(i)%fraclist, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
       meshA = tmpmesh
     enddo
 
@@ -605,6 +633,12 @@ integer, intent(out), optional              :: rc
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     meshB = meshBt(1)
+    ! retrieve frac list, for the highest priority mesh, fraction is always 1.
+    allocate(sideBfrac(1)%fraclist(meshBt(1)%numownedelements), stat=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    sideBfrac(1)%fraclist=1.0
 
     do i = 2, ngrid_b
       meshBt(i) = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
@@ -625,11 +659,23 @@ integer, intent(out), optional              :: rc
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(i .gt. 2) then
-        call ESMF_MeshDestroy(meshB, rc=localrc)
+        !call ESMF_MeshDestroy(meshB, rc=localrc)
+        call C_ESMC_MeshDestroy(meshB%this, localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+
+      ! retrieve frac list
+      allocate(sideBfrac(i)%fraclist(meshBt(i)%numownedelements), stat=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_MeshGetElemFrac(meshBt(i), sideBfrac(i)%fraclist, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
       meshB = tmpmesh
     enddo
 
@@ -701,60 +747,52 @@ integer, intent(out), optional              :: rc
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatA2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatA2X(i)%factorList(nentries))
+      !allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
+      !allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       if(nentries .ge. 1) then
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatA2X(i)%factorList(1))
-      endif
-      ! We can do a bit of checking here because 
-      ! we know the weights must be all 1. in this case
-      !print *, 'A2X'
-      !do j = 1, size(xgtype%sparseMatA2X(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatA2X(i)%factorIndexList(1,j), &
-      !      '->', xgtype%sparseMatA2X(i)%factorIndexList(2,j), &
-      !      xgtype%sparseMatA2X(i)%factorList(j)
-      !enddo
-    
+      
+        ! apply src fraction due to creeping, this quantity is typically 1.
+        !do j = 1, nentries
+        !  xgtype%sparseMatA2X(i)%factorList(j) = xgtype%sparseMatA2X(i)%factorList(j) * &
+        !    sideAfrac(i)%fraclist(xgtype%sparseMatA2X(i)%factorIndexList(1,j))
+        !enddo
+
       ! Now the reverse direction
-      ! an immediate optimization is to use the A side area to simply invert the weight
-      !allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
-      !allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
-      !call compute_mesharea(meshAt, sidemesharea, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
-      !!call compute_meshfrac(meshAt, sidemeshfrac, rc=localrc)
-      !!TODO: take care of split element
-      !call ESMF_MeshGet(meshAt, numOwnedElements=sideCount, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
-      !if(sideCount /= size(sidemesharea)) then
-      !  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-      !     msg="- number of area elements not equal to frac elements", &
-      !     ESMF_CONTEXT, rcToReturn=rc) 
-      !  return
-      !endif
-      !allocate(sidemeshfrac(sideCount))
-      !call ESMF_MeshGetElemFrac(meshAt, sidemeshfrac, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
-      !do j = 1, nentries
-      !  xgtype%sparseMatX2A(i)%factorIndexList(1,j) = xgtype%sparseMatA2X(i)%factorIndexList(2,j)
-      !  xgtype%sparseMatX2A(i)%factorIndexList(2,j) = xgtype%sparseMatA2X(i)%factorIndexList(1,j)
-      !  ! frac cann't be zero if this mapping entry existed, can also take care of masking here
-      !  xgtype%sparseMatX2A(i)%factorList(j) = &
-      !    mesharea(xgtype%sparseMatX2A(i)%factorIndexList(1,j))&
-      !    /(sidemesharea(xgtype%sparseMatX2A(i)%factorIndexList(2,j)) &
-      !    * sidemeshfrac(xgtype%sparseMatX2A(i)%factorIndexList(2,j)))
-      !enddo
-      !print *, 'X2A -'
-      !do j = 1, size(xgtype%sparseMatX2A(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatX2A(i)%factorIndexList(1,j), '->', &
-      !     xgtype%sparseMatX2A(i)%factorIndexList(2,j), &
-      !     xgtype%sparseMatX2A(i)%factorList(j)
-      !enddo
+
+      !  ! an immediate optimization is to use the A side area to simply invert the weight
+      !  call compute_mesharea(meshAt(i), sidemesharea, rc=localrc)
+      !  if (ESMF_LogFoundError(localrc, &
+      !      ESMF_ERR_PASSTHRU, &
+      !      ESMF_CONTEXT, rcToReturn=rc)) return
+      !  if(size(sideAfrac(i)%fraclist) /= size(sidemesharea)) then
+      !    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+      !       msg="- number of area elements not equal to frac elements", &
+      !       ESMF_CONTEXT, rcToReturn=rc) 
+      !    return
+      !  endif
+      !  do j = 1, nentries
+      !    xgtype%sparseMatX2A(i)%factorIndexList(1,j) = xgtype%sparseMatA2X(i)%factorIndexList(2,j)
+      !    xgtype%sparseMatX2A(i)%factorIndexList(2,j) = xgtype%sparseMatA2X(i)%factorIndexList(1,j)
+      !    ! If src area is not completely creeped out, invert the destination area weighted weights.
+      !    ! TODO: take care of masking here
+      !    if(sideAfrac(i)%fraclist(xgtype%sparseMatX2A(i)%factorIndexList(2,j)) .gt. 0.) then
+      !      xgtype%sparseMatX2A(i)%factorList(j) = &
+      !        mesharea(xgtype%sparseMatX2A(i)%factorIndexList(1,j))&
+      !        /(sidemesharea(xgtype%sparseMatX2A(i)%factorIndexList(2,j)) &
+      !        * sideAfrac(i)%fraclist(xgtype%sparseMatX2A(i)%factorIndexList(2,j)))
+      !    else
+      !      xgtype%sparseMatX2A(i)%factorList(j) = 0.0
+      !    endif
+      !    ! weight cannot exceed 1., renormalize due to fractional clipping
+      !    if( xgtype%sparseMatX2A(i)%factorList(j) .gt. 1.0) xgtype%sparseMatX2A(i)%factorList(j) = 1.0
+      !  enddo
+      !  deallocate(sidemesharea)
+      endif
+      
+      ! Now the reverse direction
       call c_esmc_xgridregrid_create(vm, mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -772,23 +810,13 @@ integer, intent(out), optional              :: rc
         xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
         xgtype%sparseMatX2A(i)%factorList(1))
       endif
-      !print *, 'X2A +'
-      !do j = 1, size(xgtype%sparseMatX2A(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatX2A(i)%factorIndexList(1,j), '->', &
-      !     xgtype%sparseMatX2A(i)%factorIndexList(2,j), &
-      !     xgtype%sparseMatX2A(i)%factorList(j)
-      !enddo
-      !deallocate(sidemesharea, sidemeshfrac)
+
+      deallocate(sideAfrac(i)%fraclist)
     enddo
+
     ! now do the B side
     do i = 1, ngrid_b
-      meshBt = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
-        ESMF_STAGGERLOC_CORNER, BisSphere, BisLatLonDeg, &
-        regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_esmc_xgridregrid_create(vm, meshBt, mesh, &
+      call c_esmc_xgridregrid_create(vm, meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
         l_sideBToXGridScheme, &
@@ -804,15 +832,13 @@ integer, intent(out), optional              :: rc
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatB2X(i)%factorList(1))
+      
+        ! apply src fraction due to creeping, this quantity is typically 1.
+        !do j = 1, nentries
+        !  xgtype%sparseMatB2X(i)%factorList(j) = xgtype%sparseMatB2X(i)%factorList(j) * &
+        !    sideBfrac(i)%fraclist(xgtype%sparseMatB2X(i)%factorIndexList(1,j))
+        !enddo
       endif
-      !print *, 'B2X'
-      !do j = 1, size(xgtype%sparseMatB2X(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatB2X(i)%factorIndexList(1,j), '->', &
-      !     xgtype%sparseMatB2X(i)%factorIndexList(2,j), &
-      !     xgtype%sparseMatB2X(i)%factorList(j)
-      !enddo
-      ! TODO:We can do a bit of checking here because we know the 
-      ! weights must be all 1. in this case
     
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(vm, mesh, meshBt(i), &
@@ -832,13 +858,11 @@ integer, intent(out), optional              :: rc
         xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
         xgtype%sparseMatX2B(i)%factorList(1))
       endif
-      !print *, 'X2B'
-      !do j = 1, size(xgtype%sparseMatX2B(i)%factorIndexList,2)
-      !   print *, xgtype%sparseMatX2B(i)%factorIndexList(1,j), &
-      !     '->', xgtype%sparseMatX2B(i)%factorIndexList(2,j), &
-      !     xgtype%sparseMatX2B(i)%factorList(j)
-      !enddo
+
+      deallocate(sideBfrac(i)%fraclist)
     enddo
+
+    deallocate(sideAfrac, sideBfrac)
 
     xgtype%storeOverlay = .false.
     if(present(storeOverlay)) then
@@ -886,6 +910,9 @@ integer, intent(out), optional              :: rc
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
+
+    deallocate(meshAt, meshBt)
+    deallocate(mesharea)
 
     ! Finalize XGrid Creation
     xgtype%status = ESMF_STATUS_READY
