@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.36 2012/03/02 01:56:37 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.37 2012/03/06 15:18:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1063,7 +1063,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      src = 1.0 + (i-1)*4.
+      src = 2.0
     enddo
 
     ! Perform flux exchange
@@ -1075,12 +1075,28 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
+    ! make sure flux is conserved on XGrid
+    !do i = 1, size(exf)
+    !  if(exf(i) /= 2.0) then
+    !    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+    !       msg="- Incorrect flux in XGrid", &
+    !       ESMF_CONTEXT, rcToReturn=rc)
+    !    return
+    !  endif
+    !enddo
     do i = 1, size(dstField)
       call ESMF_FieldRegrid(srcField=f_xgrid, dstField=dstField(i), &
         routehandle=x2d_rh(i), rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(dstField(i), farrayPtr=dst, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    !make sure flux is conserved on dst Fields
+    do i = 1, size(dstField)
       call ESMF_FieldGet(dstField(i), farrayPtr=dst, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
