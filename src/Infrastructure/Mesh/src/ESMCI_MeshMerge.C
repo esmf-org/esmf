@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.9 2012/03/02 01:56:48 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.10 2012/03/06 15:12:15 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.9 2012/03/02 01:56:48 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.10 2012/03/06 15:12:15 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -448,8 +448,8 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     unsigned int ncells = 0;
     MEField<> &coord = *mesh.GetCoordField();
     MEField<> &clip_coord = *srcmesh.GetCoordField();
-    MEField<> *elem_frac=mesh.GetField("elem_frac");
-    if (!elem_frac) Throw() << "Meshes involved in XGrid construction should have frac field";
+    MEField<> *elem_frac=mesh.GetField("elem_frac2");
+    if (!elem_frac) Throw() << "Meshes involved in XGrid construction should have frac2 field";
 
     // iterate through dst mesh element, construct its coordinates in 'cd'
     // used in both intersected or non-intersected cases
@@ -631,8 +631,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
   void MeshSetFraction(Mesh & mesh, double fraction){
 
-    MEField<> *elem_frac=mesh.GetField("elem_frac");
-    if (!elem_frac) Throw() << "Meshes involved in Conservative interp should have frac field";
+    MEField<> *elem_frac=mesh.GetField("elem_frac2");
+    if (!elem_frac) {
+      Throw() << "Meshes used during mesh merge must support elem_frac2\n";
+    }
 
     // iterate and set
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.38 2012/03/02 01:56:48 feiliu Exp $
+// $Id: ESMCI_Interp.C,v 1.39 2012/03/06 15:12:15 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.38 2012/03/02 01:56:48 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.39 2012/03/06 15:12:15 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -717,6 +717,10 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
   // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
+  // src and dst frac2 fields
+  MEField<> * src_frac2 = srcmesh.GetField("elem_frac2");
+  MEField<> * dst_frac2 = dstmesh.GetField("elem_frac2");
+
   // store all the intersections
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
@@ -741,6 +745,16 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
         }
     }
 
+    // If this source element is creeped out during merging then skip it
+    double frac2=1.0;
+    if(src_frac2){
+      const MeshObj &src_elem = *sr.elem;
+      frac2=*(double *)(src_frac2->data(src_elem));
+      if (frac2 == 0.0) {
+        continue; 
+      }
+    }
+
     // Declare src_elem_area
     double src_elem_area;
 
@@ -756,9 +770,11 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     areas.resize(sr.elems.size(),0.0);
 
     // Calculate weights
+    std::vector<sintd_node *> tmp_nodes;  
+    std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield,
                                      &src_elem_area, &valid, &wgts, &areas, 
-                                     midmesh, &sintd_nodes, &sintd_cells, zz);
+                                     midmesh, &tmp_nodes, &tmp_cells, zz);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -781,6 +797,9 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     // If none valid, then don't add weights
     if (num_valid < 1) continue;
 
+    // Append only valid nodes/cells
+    std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(sintd_nodes));
+    std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(sintd_cells));
     
 
     // Temporary empty col with negatives so unset values
@@ -798,7 +817,7 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
       for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
           col[j].id=sr.elems[i]->get_id();
-          col[j].value=areas[i]/src_elem_area;
+          col[j].value=(frac2*areas[i])/src_elem_area;
           j++;
         }
       }
@@ -851,6 +870,10 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
+  // src and dst frac2 fields
+  MEField<> * src_frac2 = srcmesh.GetField("elem_frac2");
+  MEField<> * dst_frac2 = dstmesh.GetField("elem_frac2");
+
   // store all the intersections
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
@@ -875,6 +898,16 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
         }
     }
 
+    // If this source element is creeped out during merging then skip it
+    double frac2=1.0;
+    if(src_frac2){
+      const MeshObj &src_elem = *sr.elem;
+      frac2=*(double *)(src_frac2->data(src_elem));
+      if (frac2 == 0.0) {
+        continue; 
+      }
+    }
+
     // Declare src_elem_area
     double src_elem_area;
 
@@ -890,9 +923,11 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     areas.resize(sr.elems.size(),0.0);
 
     // Calculate weights
+    std::vector<sintd_node *> tmp_nodes;  
+    std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield,
                                      &src_elem_area, &valid, &wgts, &areas,
-                                     midmesh, &sintd_nodes, &sintd_cells, zz);
+                                     midmesh, &tmp_nodes, &tmp_cells, zz);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -914,6 +949,10 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     // If none valid, then don't add weights
     if (num_valid < 1) continue;
 
+    // Append only valid nodes/cells
+    std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(sintd_nodes));
+    std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(sintd_cells));
+
     // Temporary empty col with negatives so unset values
     // can be detected if they sneak through
     IWeights::Entry col_empty(-1, 0, -1.0, 0);
@@ -929,7 +968,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
           col[j].id=sr.elems[i]->get_id();
-          col[j].value=areas[i]/src_elem_area;
+          col[j].value=(frac2*areas[i])/src_elem_area;
           j++;
         }
       }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.11 2012/03/02 01:56:48 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.12 2012/03/06 15:12:15 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -666,14 +666,14 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     return 0;
   }
   
-  double * sintd_coords = new double[120]; int num_sintd_nodes; 
-  double * tmp_coords=new double[120];
-  if(sdim == 3)
-    intersect_convex_2D_3D_sph_gc_poly(num_p, p,
-                                     num_q, q,
-                                     tmp_coords,
-                                     &num_sintd_nodes, sintd_coords); 
-  delete[] tmp_coords;
+  //double * sintd_coords = new double[120]; int num_sintd_nodes; 
+  //double * tmp_coords=new double[120];
+  //if(sdim == 3)
+  //  intersect_convex_2D_3D_sph_gc_poly(num_p, p,
+  //                                   num_q, q,
+  //                                   tmp_coords,
+  //                                   &num_sintd_nodes, sintd_coords); 
+  //delete[] tmp_coords;
   
   // phase 1, find all intersection points, note degenerated points too
   std::list<xpoint> final_pnodes, final_qnodes, degenerated;
@@ -988,7 +988,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   // Intersection cells should not be masked, fraction should all be 1.0
   Context ctxt; ctxt.flip();
   MEField<> *elem_frac = meshmid.RegisterField("elem_frac",
-                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+  MEField<> *elem_frac2 = meshmid.RegisterField("elem_frac2",
+                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
   // Can also attach elem_area here, an optimization
   //MEField<> *elem_area = meshmid.RegisterField("elem_area",
   //                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
@@ -1000,17 +1002,20 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   meshmid.Commit();
 
   elem_frac = meshmid.GetField("elem_frac");
+  elem_frac2 = meshmid.GetField("elem_frac2");
   //elem_area = meshmid.GetField("elem_area");
   for (int i=0; i<num_cells; i++) {
     double *frac = elem_frac->data(*(elem_list[i]));
     *frac = 1.0;
+    double *frac2 = elem_frac2->data(*(elem_list[i]));
+    *frac2 = 1.0;
     //double *area = elem_area->data(*(elem_list[i]));
     //*area = sintd_cells[i]->get_area();
   }
 
-  char str[64]; memset(str, 0, 64);
-  sprintf(str, "midMesh.vtk.%d", me);
-  WriteVTKMesh(meshmid, str);
+  //char str[64]; memset(str, 0, 64);
+  //sprintf(str, "midMesh.vtk.%d", me);
+  //WriteVTKMesh(meshmid, str);
   //WriteVTKMesh(srcmesh, "srcMesh.vtk");
   //WriteVTKMesh(dstmesh, "dstMesh.vtk");
 
