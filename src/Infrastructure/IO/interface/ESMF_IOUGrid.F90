@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.5 2012/03/01 00:41:31 peggyli Exp $
+! $Id: ESMF_IOUGrid.F90,v 1.6 2012/03/06 17:29:47 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -54,6 +54,7 @@
   public ESMF_UGridInq
   public ESMF_UGridGetVar
   public ESMF_GetMeshFromUGridFile
+  public ESMF_UGridGetVarByName
  
 !==============================================================================
 
@@ -414,6 +415,55 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
 
     return
     end subroutine ESMF_UGridGetVar
+!---------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UGridGetVarByName"
+subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, rc)
+
+    character(len=*), intent(in)   :: filename
+    character(len=*), intent(in)   :: varname
+    real(ESMF_KIND_R8), pointer    :: varbuffer (:)
+    integer                       :: rc
+
+    integer   :: ncid, VarId
+    integer   :: ncStatus
+    character(len=256) :: errmsg
+#ifdef ESMF_NETCDF
+
+    ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+
+    errmsg = "Variable "//varname//" in "//trim(filename)
+    ncStatus = nf90_inq_varid (ncid, varname, VarId)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+    ncStatus = nf90_get_var (ncid, VarId, varbuffer)  
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+
+    ncStatus = nf90_close (ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+    rc = ESMF_SUCCESS
+    return
+#else
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end subroutine ESMF_UGridGetVarByName
+
 !---------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GetMeshFromUGridFile"
