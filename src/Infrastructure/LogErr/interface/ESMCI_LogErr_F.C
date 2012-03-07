@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr_F.C,v 1.5 2012/01/06 20:17:38 svasquez Exp $
+// $Id: ESMCI_LogErr_F.C,v 1.6 2012/03/07 01:46:07 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr_F.C,v 1.5 2012/01/06 20:17:38 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr_F.C,v 1.6 2012/03/07 01:46:07 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -102,8 +102,21 @@ extern "C" {
 // !REQUIREMENTS: 
 
   // copy and convert F90 strings to null terminated ones
-  strcpy(msg,ESMC_LogGetErrMsg(*rc));
-  *msglen=strlen(msg);
+  const char *msg_local = ESMC_LogGetErrMsg(*rc);
+  int msg_local_len = strlen (msg_local);
+
+  strncpy(msg, msg_local, msg_l);
+  if (msg_l > msg_local_len)
+    memset (msg+msg_local_len, ' ', msg_l-msg_local_len);
+
+  // Ignore trailing blanks when setting msglen
+
+  int i;
+  for (i=msg_l; i>0; i--) {
+    if (msg[i-1] != ' ') break;
+  }
+  *msglen = i;
+
   return;
 
 }  // end c_ESMC_LogGetErrMessage
