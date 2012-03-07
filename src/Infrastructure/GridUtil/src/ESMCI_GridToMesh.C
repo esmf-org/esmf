@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.17 2012/02/03 05:22:26 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.18 2012/03/07 18:59:56 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -470,6 +470,8 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
      Context ctxt; ctxt.flip();
      MEField<> *elem_frac = mesh.RegisterField("elem_frac",
                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+     MEField<> *elem_frac2 = mesh.RegisterField("elem_frac2",
+                        MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
    }
 
 
@@ -697,6 +699,15 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
        }
      } 
    }
+
+  if(isConserve) { // set up frac2 field
+    MEField<> *frac2=mesh.GetField("elem_frac2");
+    MeshDB::iterator ei=mesh.elem_begin(), ee=mesh.elem_end();
+    for (; ei!=ee; ei++) {
+      double *e=frac2->data(*ei);
+      *e = 1.0;
+    }
+  }
 
 
 #if 0
