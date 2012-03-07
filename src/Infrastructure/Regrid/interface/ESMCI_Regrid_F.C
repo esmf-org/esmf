@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.73 2012/02/16 23:00:34 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.74 2012/03/07 23:06:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -683,6 +683,24 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         // Look for errors
         if (right_turn) {
           if (left_turn) { 
+#if 0
+            printf("--- Error: Concave Element!! ---\n");
+            printf(" concave element id=%d\n",elem.get_id());
+            printf("\n");
+            printf("Concave polygon coords (lon, lat) in degrees\n");
+            printf("--------------------------------------------\n");
+            for(int i=0; i< num_poly_nodes; i++) {
+              double *pnt=poly_coords+3*i;
+              
+              double lon, lat, r;
+              convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                                      &lon, &lat, &r);
+
+              printf("%d  (%f,  %f) \n",i,lon,lat);
+
+            }
+#endif
+            //  write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 
             *concave=true;
             return;
           } 
