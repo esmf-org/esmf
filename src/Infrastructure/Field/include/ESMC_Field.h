@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.44 2012/03/07 16:44:07 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.45 2012/03/07 22:35:28 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ESMC_Field ESMC_FieldCreateGridArraySpec(
 //    A {\tt ESMC\_ArraySpec} object describing data type and kind specification.
 //  \item[staggerloc]
 //    Stagger location of data in grid cells. The default value is 
-//    ESMF_STAGGERLOC_CENTER.
+//    ESMF\_STAGGERLOC\_CENTER.
 //  \item[gridToFieldMap]
 //    List with number of elements equal to the grid's dimCount. The list
 //    elements map each dimension of the grid to a dimension in the field by
@@ -154,7 +154,7 @@ ESMC_Field ESMC_FieldCreateGridTypeKind(
 //    The ESMC\_TypeKind that describes this Field data.
 //  \item[staggerloc]
 //    Stagger location of data in grid cells. The default value is 
-//    ESMF_STAGGERLOC_CENTER.
+//    ESMF\_STAGGERLOC\_CENTER.
 //  \item[gridToFieldMap]
 //    List with number of elements equal to the grid's dimCount. The list
 //    elements map each dimension of the grid to a dimension in the field by
