@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2010/04/13 05:58:58 eschwab Exp $ 
+# $Id: makefile,v 1.30 2012/03/07 16:44:43 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -6,18 +6,21 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/Array/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_GridCreateUTest \
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_GridUTest \
+                $(ESMF_TESTDIR)/ESMF_GridCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_GridCoordUTest \
 		$(ESMF_TESTDIR)/ESMF_GridItemUTest \
 		$(ESMF_TESTDIR)/ESMF_GridArbitraryUTest
 
 
-TESTS_RUN     = RUN_ESMF_GridCreateUTest \
+TESTS_RUN     = RUN_ESMC_GridUTest \
+                RUN_ESMF_GridCreateUTest \
 	        RUN_ESMF_GridCoordUTest \
 	        RUN_ESMF_GridItemUTest \
 		RUN_ESMF_GridArbitraryUTest
 
-TESTS_RUN_UNI = RUN_ESMF_GridCreateUTestUNI \
+TESTS_RUN_UNI = RUN_ESMC_GridUTestUNI \
+                RUN_ESMF_GridCreateUTestUNI \
 	        RUN_ESMF_GridCoordUTestUNI \
 	        RUN_ESMF_GridItemUTestUNI \
 		RUN_ESMF_GridArbitraryUTestUNI
@@ -72,3 +75,10 @@ RUN_ESMF_GridArbitraryUTest:
 
 RUN_ESMF_GridArbitraryUTestUNI:
 	$(MAKE) TNAME=GridArbitrary NP=1 ftest 
+
+# --- ESMC_Grid Tests
+RUN_ESMC_GridUTest:
+	$(MAKE) TNAME=Grid NP=4 ctest
+RUN_ESMC_GridUTestUNI:
+	$(MAKE) TNAME=Grid NP=1 ctest
+

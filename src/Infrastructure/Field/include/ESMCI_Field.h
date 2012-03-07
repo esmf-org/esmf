@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.12 2012/01/20 17:02:04 rokuingh Exp $
+// $Id: ESMCI_Field.h,v 1.13 2012/03/07 16:44:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,6 +45,8 @@
 #include "ESMC_Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_Util.h"
+#include "ESMC_Grid.h"
 
 
 //-----------------------------------------------------------------------------
@@ -63,6 +65,14 @@ namespace ESMCI{
     Field(F90ClassHolder fc){
       fortranclass = fc;
     }
+    static Field* create(ESMC_Grid *grid, ESMC_ArraySpec arrayspec,
+      ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
+      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      const char *name, int *rc); 
+    static Field* create(ESMC_Grid *grid, ESMC_TypeKind typekind,
+      ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
+      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
+      const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
       ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
       ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc); 

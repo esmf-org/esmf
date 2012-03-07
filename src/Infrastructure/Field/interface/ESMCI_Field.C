@@ -29,6 +29,7 @@
 // associated header file
 #include "ESMCI_Field.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_Grid.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
@@ -49,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.18 2012/01/20 17:02:09 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.19 2012/03/07 16:44:12 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -62,13 +63,38 @@ static const char *const version = "$Id: ESMCI_Field.C,v 1.18 2012/01/20 17:02:0
 //-----------------------------------------------------------------------------
 extern "C" {
 // Prototypes of the Fortran interface functions.
+void FTN_X(f_esmf_fieldcreategridas_opt)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
+    ESMC_ArraySpec *arrayspec, ESMC_StaggerLoc *staggerloc,
+    char *name, int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
+void FTN_X(f_esmf_fieldcreategridas)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
+    ESMC_ArraySpec *arrayspec, ESMC_StaggerLoc *staggerloc,
+    int *gridToFieldMap, int *len1, 
+    int *ungriddedLBound, int *len2,
+    int *ungriddedUBound, int *len3,
+    char *name, int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
+void FTN_X(f_esmf_fieldcreategridtk_opt)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
+    ESMC_TypeKind *typekind, ESMC_StaggerLoc *staggerloc,
+    char *name, int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
+void FTN_X(f_esmf_fieldcreategridtk)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
+    ESMC_TypeKind *typekind, ESMC_StaggerLoc *staggerloc,
+    int *gridToFieldMap, int *len1, 
+    int *ungriddedLBound, int *len2,
+    int *ungriddedUBound, int *len3,
+    char *name, int *rc,
+    ESMCI_FortranStrLenArg nlen);
+
 void FTN_X(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer, 
     ESMC_ArraySpec *arrayspec, 
     int *gridToFieldMap, int *len1, 
     int *ungriddedLBound, int *len2,
     int *ungriddedUBound, int *len3,
-    char *name, 
-    int *rc,
+    char *name, int *rc,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
@@ -76,8 +102,7 @@ void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer,
     int *gridToFieldMap, int *len1, 
     int *ungriddedLBound, int *len2,
     int *ungriddedUBound, int *len3,
-    char *name, 
-    int *rc,
+    char *name, int *rc,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
@@ -97,7 +122,7 @@ void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
 
 void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
-  void *routehandlep, ESMC_RegridMethod *regridmethod, 
+  ESMCI::RouteHandle **routehandlep, ESMC_RegridMethod *regridmethod, 
   ESMC_UnmappedAction *unmappedaction, int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
@@ -116,6 +141,224 @@ void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 //
 
 namespace ESMCI {
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::create()"
+//BOP
+// !IROUTINE:  ESMCI::Field::create - Create a new Field from Grid and ArraySpec
+//
+// !INTERFACE:
+      Field *Field::create(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Field object
+//
+// !ARGUMENTS:
+    ESMC_Grid *grid, 
+    ESMC_ArraySpec arrayspec,
+    ESMC_StaggerLoc staggerloc,
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, 
+    ESMC_InterfaceInt *ungriddedUBound, 
+    const char *name,  
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Field.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Field.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+    bool opt;
+    opt = true;
+    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+
+    if(gridToFieldMap != NULL && 
+       ungriddedLBound != NULL &&
+       ungriddedUBound != NULL) opt = false;  
+
+    if (!opt) {
+      gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
+      uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
+      ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
+    
+      if(gtfm->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- gridToFieldMap array must be of rank 1", rc);
+         return ESMC_NULL_POINTER;
+      }
+      if(uglb->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedLBound array must be of rank 1", rc);
+         return ESMC_NULL_POINTER;
+      }
+      if(ugub->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedUBound array must be of rank 1", rc);
+         return ESMC_NULL_POINTER;
+      }
+    }  
+
+    int slen = strlen(name);
+    char * fName = new char[slen];
+    localrc = ESMC_CtoF90string(name, fName, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+    }
+
+    // prepare the field pointer
+    ESMCI::Field * field = NULL;
+    try{
+      field = new Field;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      return ESMC_NULL_POINTER;
+    }
+
+    // prepare the grid pointer
+    ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid->ptr); 
+ 
+    if(opt) {  
+      FTN_X(f_esmf_fieldcreategridas_opt)(field, &gridp, 
+          &arrayspec, &staggerloc,
+          fName, &localrc, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+    } else {
+      FTN_X(f_esmf_fieldcreategridas)(field, &gridp,
+          &arrayspec, &staggerloc,
+          gtfm->array, &gtfm->extent[0], 
+          uglb->array, &uglb->extent[0], 
+          ugub->array, &ugub->extent[0], 
+          fName, &localrc, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+    }
+  
+    delete[] fName;
+  
+    if (rc) *rc = localrc;
+  
+    return field;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::create()"
+//BOP
+// !IROUTINE:  ESMCI::Field::create - Create a new Field from Grid and typekind
+//
+// !INTERFACE:
+      Field *Field::create(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Field object
+//
+// !ARGUMENTS:
+    ESMC_Grid *grid, 
+    ESMC_TypeKind typekind, 
+    ESMC_StaggerLoc staggerloc,
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, 
+    ESMC_InterfaceInt *ungriddedUBound, 
+    const char *name,  
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Field.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Field.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+    bool opt;
+    opt = true;
+    ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
+
+    if(gridToFieldMap != NULL && 
+       ungriddedLBound != NULL &&
+       ungriddedUBound != NULL) opt = false;  
+
+      if (!opt) {
+        gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
+        uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
+        ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
+   
+      if(gtfm->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- gridToFieldMap array must be of rank 1", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if(uglb->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedLBound array must be of rank 1", rc);
+        return ESMC_NULL_POINTER;
+      }
+      if(ugub->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- ungriddedUBound array must be of rank 1", rc);
+        return ESMC_NULL_POINTER;
+      }
+    } 
+  
+    int slen = strlen(name);
+    char * fName = new char[slen];
+    localrc = ESMC_CtoF90string(name, fName, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        delete[] fName;
+      return ESMC_NULL_POINTER;
+    }
+
+    // prepare the Field pointer
+    ESMCI::Field * field = NULL;
+    try{
+      field = new Field;
+    }catch(...){
+      // allocation error
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      return ESMC_NULL_POINTER;
+    }
+  
+    // prepare the Grid pointer
+    ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid->ptr); 
+
+    if(opt) {  
+      FTN_X(f_esmf_fieldcreategridtk_opt)(field, &gridp, 
+          &typekind, &staggerloc,
+          fName, &localrc, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+    } else {
+      FTN_X(f_esmf_fieldcreategridtk)(field, &gridp, 
+          &typekind, &staggerloc,
+          gtfm->array, &gtfm->extent[0], 
+          uglb->array, &uglb->extent[0], 
+          ugub->array, &ugub->extent[0], 
+          fName, &localrc, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+          return ESMC_NULL_POINTER;
+    }
+  
+    delete[] fName;
+  
+    if (rc) *rc = localrc;
+  
+    return field;
+
+ }
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Field::create()"

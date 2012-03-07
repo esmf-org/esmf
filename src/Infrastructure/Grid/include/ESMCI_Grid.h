@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.81 2012/01/06 20:16:57 svasquez Exp $
+// $Id: ESMCI_Grid.h,v 1.82 2012/03/07 16:44:24 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,9 +35,12 @@
 #include "ESMCI_Base.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMCI_Array.h"
+#include "ESMC_Array.h"
+#include "ESMC_Interface.h"
+#include "ESMCI_Util.h"
 
 
-
+#if 0
 // Eventually move this to ESMCI_Util.h
 enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_UNINIT,
@@ -55,6 +58,15 @@ enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
 };
 
 // Eventually move this to ESMCI_Util.h
+enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
+                      ESMC_STAGGERLOC_UNINIT,
+                      ESMC_STAGGERLOC_CENTER,
+                      ESMC_STAGGERLOC_EDGE1,
+                      ESMC_STAGGERLOC_EDGE2,
+                      ESMC_STAGGERLOC_CORNER,
+};
+
+// Eventually move this to ESMCI_Util.h
 #define ESMC_GRIDITEM_INVALID -2
 #define ESMC_GRIDITEM_UNINIT  -1
 #define ESMC_GRIDITEM_MASK     0
@@ -62,6 +74,7 @@ enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
 #define ESMC_GRIDITEM_AREAM    2
 #define ESMC_GRIDITEM_FRAC     3
 #define ESMC_GRIDITEM_COUNT    4
+#endif
 
 // Define prototype coordGeom flag
 #define ESMC_GRIDCOORDGEOM_CART 0
@@ -92,7 +105,6 @@ enum  ESMC_GridConn {ESMC_GRIDCONN_NONE=0,
 
 // Start name space
 namespace ESMCI {  
-
 
 class Grid;
 class ProtoGrid;
@@ -193,6 +205,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   DistGrid **staggerDistgridList; // [staggerloc]
 
   // Private methods:
+
   // Set internal array
   int setCoordArrayInternal(
 		    int _staggerloc, // (in)
@@ -275,6 +288,16 @@ template <class TYPE>
 
 
  public:
+
+  // ESMC interface:
+  static Grid* createnoperidim(ESMC_InterfaceInt maxIndex, 
+                               ESMC_CoordSys coordSys,
+                               ESMC_TypeKind coordTypeKind, 
+                               int *rc);
+  static Grid* create1peridim(ESMC_InterfaceInt maxIndex, 
+                              ESMC_CoordSys coordSys,
+                              ESMC_TypeKind coordTypeKind, 
+                              int *rc);
 
   // accessor methods
   // NOTE: For efficiencies sake the following functions don't error check
@@ -865,6 +888,22 @@ class ProtoGrid {
 
  
 } // END ESMCI namespace
+
+// fortran interface functions to attribute objects
+extern "C" {
+  void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
+                                        int *_coord, int *_staggerloc,
+                                        ESMCI::InterfaceInt **_exclusiveLBound,
+                                        ESMCI::InterfaceInt **_exclusiveUBound,
+                                        ESMCI::InterfaceInt **_exclusiveCount,
+                                        ESMCI::InterfaceInt **_computationalLBound,
+                                        ESMCI::InterfaceInt **_computationalUBound,
+                                        ESMCI::InterfaceInt **_computationalCount,
+                                        ESMCI::InterfaceInt **_totalLBound,
+                                        ESMCI::InterfaceInt **_totalUBound,
+                                        ESMCI::InterfaceInt **_totalCount,
+                                        int *_rc);
+}
 
 #endif  // ESMC_GridI_H
 

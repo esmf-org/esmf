@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.46 2012/01/06 20:18:17 svasquez Exp $
+// $Id: ESMCI_Util.h,v 1.47 2012/03/07 16:44:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -129,6 +129,41 @@ enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
                          ESMC_ATTWRITE_XML};
+
+// Eventually move this to ESMCI_Util.h
+enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
+                      ESMC_GRIDSTATUS_UNINIT,
+                      ESMC_GRIDSTATUS_NOT_READY,
+                      ESMC_GRIDSTATUS_SHAPE_READY
+};
+
+
+// Eventually move this to ESMCI_Util.h
+enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
+                    ESMC_COORDSYS_UNINIT,
+                    ESMC_COORDSYS_CART,
+                    ESMC_COORDSYS_SPH_DEG,
+                    ESMC_COORDSYS_SPH_RAD
+};
+
+// Eventually move this to ESMCI_Util.h
+enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
+                      ESMC_STAGGERLOC_UNINIT,
+                      ESMC_STAGGERLOC_CENTER,
+                      ESMC_STAGGERLOC_EDGE1,
+                      ESMC_STAGGERLOC_EDGE2,
+                      ESMC_STAGGERLOC_CORNER,
+};
+
+// Eventually move this to ESMCI_Util.h
+#define ESMC_GRIDITEM_INVALID -2
+#define ESMC_GRIDITEM_UNINIT  -1
+#define ESMC_GRIDITEM_MASK     0
+#define ESMC_GRIDITEM_AREA     1
+#define ESMC_GRIDITEM_AREAM    2
+#define ESMC_GRIDITEM_FRAC     3
+#define ESMC_GRIDITEM_COUNT    4
+
 
 // max/min macros if they don't already exist
 #ifndef MAX

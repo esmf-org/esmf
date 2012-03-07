@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.131 2012/02/25 04:48:11 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.132 2012/03/07 16:44:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,13 +48,36 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.131 2012/02/25 04:48:11 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.132 2012/03/07 16:44:37 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max
 
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//
+// Prototypes of the C->Fortran interface functions.
+//
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+extern "C" {
+void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
+    int *maxIndex, int *len1, 
+    ESMC_CoordSys *coordSys,
+    ESMC_TypeKind *coordTypeKind,
+    int *rc);
+
+void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
+    int *maxIndex, int *len1, 
+    ESMC_CoordSys *coordSys,
+    ESMC_TypeKind *coordTypeKind,
+    int *rc);
+}
+
+//
 
 
 //-----------------------------------------------------------------------------
@@ -128,7 +151,142 @@ int setDefaultsLUA(int dimCount,
 //
 //-----------------------------------------------------------------------------
 
+// the following two routine are for the ESMC->Fortran interface
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::createnoperidim()"
+//BOP
+// !IROUTINE:  ESMCI::Grid::create - Create a new Grid
+//
+// !INTERFACE:
+       Grid* Grid::createnoperidim(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Grid object
+//
+// !ARGUMENTS:
+    ESMC_InterfaceInt maxIndex, 
+    ESMC_CoordSys coordSys,
+    ESMC_TypeKind coordTypeKind,
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Grid.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Grid.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
+  
+    if(mi->dimCount != 1){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+         "- maxIndex array must be of rank 1", rc);
+       return ESMC_NULL_POINTER;
+    }
+
+/*
+    if (coordSys == NULL) *coordSys = ESMC_COORSYS_SPH_DEG;
+    if (coordTypeKind == NULL) *coordTypeKind = ESMC_TYPEKIND_R8;    
+*/
+/* 
+    int slen = strlen(name);
+    char * gName = new char[slen];
+    localrc = ESMC_CtoF90string(name, gName, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        delete[] gName;
+        return ESMC_NULL_POINTER;
+    }
+*/
+
+    // allocate the grid object
+    Grid *grid;
+
+    FTN_X(f_esmf_gridcreatenoperidim)(&grid, 
+                                      mi->array, &mi->extent[0],
+                                      &coordSys, &coordTypeKind,
+                                      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        return ESMC_NULL_POINTER;
+    }
+  
+    //delete[] gName;
+
+    if (rc) *rc = localrc;
+  
+    return grid;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::create1peridim()"
+//BOP
+// !IROUTINE:  ESMCI::Grid::create - Create a new Grid
+//
+// !INTERFACE:
+      Grid* Grid::create1peridim(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Grid object
+//
+// !ARGUMENTS:
+    ESMC_InterfaceInt maxIndex, 
+    ESMC_CoordSys coordSys,
+    ESMC_TypeKind coordTypeKind,
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Grid.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Grid.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+    ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
+  
+    if(mi->dimCount != 1){
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+         "- maxIndex array must be of rank 1", rc);
+       return ESMC_NULL_POINTER;
+    }
+/* 
+    int slen = strlen(name);
+    char * gName = new char[slen];
+    localrc = ESMC_CtoF90string(name, gName, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        delete[] gName;
+        return ESMC_NULL_POINTER;
+    }
+*/
+
+    // allocate the grid object
+    Grid *grid;
+  
+    FTN_X(f_esmf_gridcreate1peridim)(&grid, 
+                                     mi->array, &mi->extent[0], 
+                                     &coordSys, &coordTypeKind,
+                                     &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+        return grid;
+    }
+  
+    //delete[] gName;
+  
+    if (rc) *rc = localrc;
+  
+    return grid;
+
+ }
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
