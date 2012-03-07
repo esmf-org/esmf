@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.17 2012/02/23 23:39:15 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.18 2012/03/07 23:05:37 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.17 2012/02/23 23:39:15 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.18 2012/03/07 23:05:37 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -973,9 +973,34 @@ template int triangulate_poly<GEOM_CART2D>(int num_p, double *p, double *td, int
 template int triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, int *ti, int *tri_ind);
 
 
+// calculates spherical coords in radians
+void convert_cart_to_sph(double x, double y, double z,
+                         double *lon, double *lat, double *r) {
+
+  // calc radius of sphere 
+  *r=sqrt(x*x+y*y+z*z);
+
+  // calc lon
+  *lon=atan2(y,x);
+
+  // calc lat
+  *lat=acos(z/(*r));
+}
 
 
-  
+// calculates spherical coords in degs
+void convert_cart_to_sph_deg(double x, double y, double z,
+                             double *lon, double *lat, double *r) {
+
+  const double RAD2DEG=57.295779513082325;
+  double lon_r,lat_r;
+
+  convert_cart_to_sph(x, y, z,
+                      &lon_r, &lat_r, r);
+
+  *lon=lon_r*RAD2DEG;
+  *lat=90.0-(lat_r*RAD2DEG);
+}
 
 
 

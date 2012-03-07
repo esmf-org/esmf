@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.11 2012/02/16 23:01:26 oehmke Exp $
+// $Id: ESMCI_MathUtil.h,v 1.12 2012/03/07 23:05:35 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -60,6 +60,12 @@ namespace ESMCI {
 
   void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn);
 
+  void convert_cart_to_sph(double x, double y, double z,
+                         double *lon, double *lat, double *r);
+
+  void convert_cart_to_sph_deg(double x, double y, double z,
+                               double *lon, double *lat, double *r);
+  
 
   // STUFF FOR TRIANGULATION
 
