@@ -227,8 +227,6 @@ extern "C" {
     localrc = ESMC_RC_NOT_IMPL;
     if (_rc!=NULL) *_rc = ESMC_RC_NOT_IMPL;
 
-    printf("\n\nc_esmc_gridget - status = %d\n", grid->getStatus());
-
     // make sure status is correct
     if (grid->getStatus() < ESMC_GRIDSTATUS_SHAPE_READY) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG,
