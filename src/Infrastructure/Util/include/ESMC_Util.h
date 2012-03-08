@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.41 2012/01/20 17:02:21 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.42 2012/03/08 18:25:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -57,6 +57,21 @@ enum ESMC_RegridMethod { ESMC_REGRIDMETHOD_BILINEAR=0,
 
 enum ESMC_UnmappedAction { ESMC_UNMAPPEDACTION_ERROR=0,
                            ESMC_UNMAPPEDACTION_IGNORE };
+
+enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
+                    ESMC_COORDSYS_UNINIT,
+                    ESMC_COORDSYS_CART,
+                    ESMC_COORDSYS_SPH_DEG,
+                    ESMC_COORDSYS_SPH_RAD
+};
+
+enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
+                      ESMC_STAGGERLOC_UNINIT,
+                      ESMC_STAGGERLOC_CENTER,
+                      ESMC_STAGGERLOC_EDGE1,
+                      ESMC_STAGGERLOC_EDGE2,
+                      ESMC_STAGGERLOC_CORNER,
+};
 
 // ESMF platform-dependent data types
 #if (ESMC_POINTER_SIZE == 4)

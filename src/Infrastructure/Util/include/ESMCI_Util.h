@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.47 2012/03/07 16:44:50 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.48 2012/03/08 18:25:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -138,7 +138,7 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
 };
 
 
-// Eventually move this to ESMCI_Util.h
+#if 0
 enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_UNINIT,
                     ESMC_COORDSYS_CART,
@@ -154,6 +154,7 @@ enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_EDGE2,
                       ESMC_STAGGERLOC_CORNER,
 };
+#endif
 
 // Eventually move this to ESMCI_Util.h
 #define ESMC_GRIDITEM_INVALID -2

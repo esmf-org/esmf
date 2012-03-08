@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.45 2012/03/07 22:35:28 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.46 2012/03/08 18:25:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 #include "ESMC_RHandle.h"
 #include "ESMC_Interface.h"
 #include "ESMC_Grid.h"
-#include "ESMCI_Util.h"
+#include "ESMC_Util.h"
 
 #if defined (__cplusplus)
 extern "C" {
