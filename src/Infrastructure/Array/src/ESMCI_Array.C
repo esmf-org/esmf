@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.141 2012/03/08 23:32:01 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.142 2012/03/08 23:52:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.141 2012/03/08 23:32:01 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.142 2012/03/08 23:52:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -7291,7 +7291,7 @@ int Array::sparseMatMulStore(
   for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp,
-      "befr duplicate elimination srcSeqIndexFactorLookup[i].factorCount=%d\n",
+      "befr duplicate elimination srcSeqIndexFactorLookup[%d].factorCount=%d\n",
       i, srcSeqIndexFactorLookup[i].factorCount);
 #endif
     sort(srcSeqIndexFactorLookup[i].factorList.begin(),
@@ -7320,7 +7320,7 @@ int Array::sparseMatMulStore(
       srcSeqIndexFactorLookup[i].factorList.size();
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp,
-      "aftr duplicate elimination srcSeqIndexFactorLookup[i].factorCount=%d\n",
+      "aftr duplicate elimination srcSeqIndexFactorLookup[%d].factorCount=%d\n",
       i, srcSeqIndexFactorLookup[i].factorCount);
 #endif
   }
@@ -7462,7 +7462,7 @@ int Array::sparseMatMulStore(
   for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp,
-      "befr duplicate elimination dstSeqIndexFactorLookup[i].factorCount=%d\n",
+      "befr duplicate elimination dstSeqIndexFactorLookup[%d].factorCount=%d\n",
       i, dstSeqIndexFactorLookup[i].factorCount);
 #endif
     sort(dstSeqIndexFactorLookup[i].factorList.begin(),
@@ -7491,7 +7491,7 @@ int Array::sparseMatMulStore(
       dstSeqIndexFactorLookup[i].factorList.size();
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp,
-      "aftr duplicate elimination dstSeqIndexFactorLookup[i].factorCount=%d\n",
+      "aftr duplicate elimination dstSeqIndexFactorLookup[%d].factorCount=%d\n",
       i, dstSeqIndexFactorLookup[i].factorCount);
 #endif
   }
