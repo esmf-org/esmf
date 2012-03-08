@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.4 2012/03/07 18:34:19 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.5 2012/03/08 18:53:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -21,16 +21,17 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
+#include "ESMC_Grid.h"
 
+#include "ESMCI_Grid.h"
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_VM.h"
-#include "ESMC_Grid.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.4 2012/03/07 18:34:19 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Grid.C,v 1.5 2012/03/08 18:53:44 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -205,4 +206,4 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 //-----------------------------------------------------------------------------
 
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.4 2012/03/07 18:34:19 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.5 2012/03/08 18:53:44 rokuingh Exp $
