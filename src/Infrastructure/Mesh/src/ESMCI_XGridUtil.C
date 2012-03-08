@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.12 2012/03/06 15:12:15 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.13 2012/03/08 19:41:15 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -1272,6 +1272,8 @@ void cart2sph(const polygon & cart, polygon & sph){
   double * sph_cd = new double[2*cart.size()];
   cart2sph(cart.size(), pts, sph_cd);
   coords_to_polygon(cart.size(), sph_cd, 2, sph);
+  delete[] pts;
+  delete[] sph_cd;
 }
 
 void cart2sph(const std::vector<polygon> & cart, std::vector<polygon> & sph){
@@ -1299,6 +1301,8 @@ void sph2cart(const polygon & sph, polygon & cart){
   double * cart_cd = new double[3*sph.size()];
   sph2cart(sph.size(), pts, cart_cd);
   coords_to_polygon(sph.size(), cart_cd, 3, cart);
+  delete[] pts;
+  delete[] cart_cd;
 }
 
 void sph2cart(const std::vector<polygon> & sph, std::vector<polygon> & cart){

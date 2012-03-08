@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.10 2012/03/06 15:12:15 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.11 2012/03/08 19:41:14 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.10 2012/03/06 15:12:15 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.11 2012/03/08 19:41:14 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -247,7 +247,11 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   else
     concat_meshes(srcmesh, dstmesh, meshmrg, *mesh_src, *mesh_dst, sres, &res_map);
 
+  // clean up memory
   if(interp) delete interp;
+  interp_map_iter it = res_map.begin(), ie = res_map.end();
+  for(; it != ie; ++it)
+    delete it->second;
 
 }
 
