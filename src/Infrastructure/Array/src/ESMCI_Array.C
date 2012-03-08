@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.140 2012/02/09 19:22:47 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.141 2012/03/08 23:32:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.140 2012/02/09 19:22:47 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.141 2012/03/08 23:32:01 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6522,6 +6522,18 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
 } // namespace DD
 
 
+void sum(char *a, char *b, ESMC_TypeKind tk){
+  if (tk == ESMC_TYPEKIND_R4)
+    *((ESMC_R4 *)a) += *((ESMC_R4 *)b);
+  else if (tk == ESMC_TYPEKIND_R8)
+    *((ESMC_R8 *)a) += *((ESMC_R8 *)b);
+  else if (tk == ESMC_TYPEKIND_I4)
+    *((ESMC_I4 *)a) += *((ESMC_I4 *)b);
+  else if (tk == ESMC_TYPEKIND_I8)
+    *((ESMC_I8 *)a) += *((ESMC_I8 *)b);
+}
+
+
 #define ASMMSTORETIMING___disable
 
 int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
@@ -7275,18 +7287,42 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5b);   //gjt - profile
 #endif
 
-  if (haloFlag){
-    // eliminate duplicate sparse matrix entries in srcSeqIndexFactorLookup
-    for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
-      sort(srcSeqIndexFactorLookup[i].factorList.begin(),
-        srcSeqIndexFactorLookup[i].factorList.end());
-      srcSeqIndexFactorLookup[i].factorList.erase(
-        unique(srcSeqIndexFactorLookup[i].factorList.begin(),
-        srcSeqIndexFactorLookup[i].factorList.end()),
-        srcSeqIndexFactorLookup[i].factorList.end());
-      srcSeqIndexFactorLookup[i].factorCount =
-        srcSeqIndexFactorLookup[i].factorList.size();
+  // deal with duplicate sparse matrix entries in srcSeqIndexFactorLookup
+  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
+#ifdef ASMMSTOREPRINT
+    fprintf(asmmstoreprintfp,
+      "befr duplicate elimination srcSeqIndexFactorLookup[i].factorCount=%d\n",
+      i, srcSeqIndexFactorLookup[i].factorCount);
+#endif
+    sort(srcSeqIndexFactorLookup[i].factorList.begin(),
+      srcSeqIndexFactorLookup[i].factorList.end());
+    if (!haloFlag){
+      // not halo: sum duplicate sparse matrix entries into the first occurrence
+      for (int j=0; j<srcSeqIndexFactorLookup[i].factorCount; j++){
+        int k;
+        for (k=j+1; k<srcSeqIndexFactorLookup[i].factorCount; k++){
+          if (srcSeqIndexFactorLookup[i].factorList[j] ==
+            srcSeqIndexFactorLookup[i].factorList[k]){
+            sum(srcSeqIndexFactorLookup[i].factorList[j].factor,
+              srcSeqIndexFactorLookup[i].factorList[k].factor, typekindFactors);
+          }else
+            break;
+        }
+        j=k-1;  // skip over the duplicates
+      }
     }
+    // eliminate duplicates in factorList, only leaving first occurrences
+    srcSeqIndexFactorLookup[i].factorList.erase(
+      unique(srcSeqIndexFactorLookup[i].factorList.begin(),
+      srcSeqIndexFactorLookup[i].factorList.end()),
+      srcSeqIndexFactorLookup[i].factorList.end());
+    srcSeqIndexFactorLookup[i].factorCount =
+      srcSeqIndexFactorLookup[i].factorList.size();
+#ifdef ASMMSTOREPRINT
+    fprintf(asmmstoreprintfp,
+      "aftr duplicate elimination srcSeqIndexFactorLookup[i].factorCount=%d\n",
+      i, srcSeqIndexFactorLookup[i].factorCount);
+#endif
   }
     
   // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
@@ -7422,18 +7458,42 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5e);   //gjt - profile
 #endif
   
-  if (haloFlag){
-    // eliminate duplicate sparse matrix entries in dstSeqIndexFactorLookup
-    for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
-      sort(dstSeqIndexFactorLookup[i].factorList.begin(),
-        dstSeqIndexFactorLookup[i].factorList.end());
-      dstSeqIndexFactorLookup[i].factorList.erase(
-        unique(dstSeqIndexFactorLookup[i].factorList.begin(),
-        dstSeqIndexFactorLookup[i].factorList.end()),
-        dstSeqIndexFactorLookup[i].factorList.end());
-      dstSeqIndexFactorLookup[i].factorCount =
-        dstSeqIndexFactorLookup[i].factorList.size();
+  // deal with duplicate sparse matrix entries in dstSeqIndexFactorLookup
+  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
+#ifdef ASMMSTOREPRINT
+    fprintf(asmmstoreprintfp,
+      "befr duplicate elimination dstSeqIndexFactorLookup[i].factorCount=%d\n",
+      i, dstSeqIndexFactorLookup[i].factorCount);
+#endif
+    sort(dstSeqIndexFactorLookup[i].factorList.begin(),
+      dstSeqIndexFactorLookup[i].factorList.end());
+    if (!haloFlag){
+      // not halo: sum duplicate sparse matrix entries into the first occurrence
+      for (int j=0; j<dstSeqIndexFactorLookup[i].factorCount; j++){
+        int k;
+        for (k=j+1; k<dstSeqIndexFactorLookup[i].factorCount; k++){
+          if (dstSeqIndexFactorLookup[i].factorList[j] ==
+            dstSeqIndexFactorLookup[i].factorList[k]){
+            sum(dstSeqIndexFactorLookup[i].factorList[j].factor,
+              dstSeqIndexFactorLookup[i].factorList[k].factor, typekindFactors);
+          }else
+            break;
+        }
+        j=k-1;  // skip over the duplicates
+      }
     }
+    // eliminate duplicates in factorList, only leaving first occurrences
+    dstSeqIndexFactorLookup[i].factorList.erase(
+      unique(dstSeqIndexFactorLookup[i].factorList.begin(),
+      dstSeqIndexFactorLookup[i].factorList.end()),
+      dstSeqIndexFactorLookup[i].factorList.end());
+    dstSeqIndexFactorLookup[i].factorCount =
+      dstSeqIndexFactorLookup[i].factorList.size();
+#ifdef ASMMSTOREPRINT
+    fprintf(asmmstoreprintfp,
+      "aftr duplicate elimination dstSeqIndexFactorLookup[i].factorCount=%d\n",
+      i, dstSeqIndexFactorLookup[i].factorCount);
+#endif
   }
   
   // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
@@ -8290,6 +8350,16 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::vectorOrderDstInfo);
+#ifdef ASMMSTOREPRINT
+        for (int k=0; k<dstInfoTable[i].size(); k++)
+          fprintf(asmmstoreprintfp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+            ".partnerSeqIndex = %d/%d, .factor = %p\n", i, k,
+            dstInfoTable[i][k].seqIndex.decompSeqIndex, 
+            dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
+            dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex, 
+            dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex,
+            dstInfoTable[i][k].factor);
+#endif
         // vectorize -> deflate dstInfoTable 
         vector<ArrayHelper::DstInfo>::iterator rangeStart =
           dstInfoTable[i].begin();
@@ -8307,6 +8377,11 @@ fprintf(asmmstoreprintfp, "iCount: %d, localDeFactorCount: %d\n", iCount,
             ++vectorLength;
             rangeStop++;
           }
+#ifdef ASMMSTOREPRINT
+fprintf(asmmstoreprintfp, "dstTensorContigLength: %d, vectorLength: %d, decompSeqIndex: %d\n",
+  dstTensorContigLength, vectorLength, decompSeqIndex);
+fflush(asmmstoreprintfp);
+#endif
           if ((rangeWrite != dstInfoTable[i].begin())
             && ((rangeWrite-1)->vectorLength != vectorLength)){
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
