@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.28 2012/01/06 20:19:35 svasquez Exp $
+% CVS $Id: code_conv_gen.tex,v 1.29 2012/03/09 22:03:14 w6ws Exp $
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -211,6 +211,12 @@ begin with a capital and have no period at the end.
 
 \item All methods shall conform to method naming conventions.
 
+\item Functions shall have their data type and return variable name declared
+on a separate line after the {\tt function} statement, and prior to the
+argument list declarations.  The data type shall not appear in the
+{\tt function} statement.  The optional {\tt result} clause should also
+not be used.
+
 \item All arguments shall conform to variable naming conventions
 for capitalization and standard use of terms such as count, dim, etc.
 The conventions shall be used even if names become fairly long.
@@ -288,7 +294,8 @@ for instance when one element of an array of internal attributes must be retriev
 \subsubsection{Use of Is* and Has*} Methods names that indicate the 
 presence of some attribute or quality shall use the Has* form.  Methods 
 that indicate a condition shall use the Is* form; for example, 
-{\tt ESMF\_DELayoutIsLocal}.  The goals are consistency and clarity.
+{\tt ESMF\_DELayoutIsLocal}.  In Fortran, these should return {\tt logical}
+data type results.  The goals are consistency and clarity.
 
 \subsubsection{Functions vs. Subroutines}
 Most Fortran calls in the ESMF are subroutines, with 
@@ -332,7 +339,8 @@ dimension, of the number of local grid cells.
 \subsubsection{Use of Is* and Has*} Variable names that indicate the 
 presence of some attribute or quality shall use the Has* form; e.g., a 
 variable such as {\tt hasGrid}.  Variables that indicate a condition shall 
-use the Is* form.  The goals are consistency and clarity.
+use the Is* form.  In Fortran, these should return {\tt logical}
+data type results.  The goals are consistency and clarity.
 
 \subsubsection{Variable Capitalization} 
 For method arguments that are multi-word, the first word is lower
@@ -380,14 +388,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX\ 
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.28 2012/01/06 20:19:35 svasquez Exp $ 
+% $Id: code_conv_gen.tex,v 1.29 2012/03/09 22:03:14 w6ws Exp $ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.28 2012/01/06 20:19:35 svasquez Exp $'
+character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.29 2012/03/09 22:03:14 w6ws Exp $'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}
