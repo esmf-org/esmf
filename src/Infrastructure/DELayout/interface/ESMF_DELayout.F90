@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.113 2012/01/06 20:16:20 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.114 2012/03/09 21:39:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.113 2012/01/06 20:16:20 svasquez Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.114 2012/03/09 21:39:54 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -421,6 +421,9 @@ contains
   ! Private name; call using ESMF_DELayoutCreate()
   function ESMF_DELayoutCreateDefault(keywordEnforcer, deCount, deGrouping, &
     pinflag, petList, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -430,9 +433,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,              intent(in),  optional :: petList(:)
     type(ESMF_VM),                intent(in),  optional :: vm
     integer,                      intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutCreateDefault
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -544,6 +544,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DELayoutCreate()
   function ESMF_DELayoutCreateFromPetMap(petMap, keywordEnforcer, pinflag, &
     vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
 !
 ! !ARGUMENTS:
     integer,                      intent(in)            :: petMap(:)
@@ -551,9 +554,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Pin_Flag),          intent(in),  optional :: pinflag
     type(ESMF_VM),                intent(in),  optional :: vm
     integer,                      intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutCreateFromPetMap
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -638,6 +638,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DELayoutCreate()
   function ESMF_DELayoutCreateHintWeights(keywordEnforcer, deCount, &
     compWeights, commWeights, deGrouping, pinflag, petList, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DELayout) :: ESMF_DELayoutCreateHintWeights
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -649,9 +652,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,              intent(in),  optional :: petList(:)
     type(ESMF_VM),                intent(in),  optional :: vm
     integer,                      intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutCreateHintWeights
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -781,6 +781,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DELayoutCreate()
   function ESMF_DELayoutCreateDeprecated(vmObject, deCountList, petList, &
     connectionWeightDimList, cyclicFlagDimList, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DELayout) :: ESMF_DELayoutCreateDeprecated
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vmObject
@@ -789,9 +792,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(in),  optional :: connectionWeightDimList(:)
     type(ESMF_Logical), intent(in),  optional :: cyclicFlagDimList(:)
     integer,            intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutCreateDeprecated
 !
 ! !DESCRIPTION:
 !     Create an N-dimensional, logically rectangular {\tt ESMF\_DELayout}.
@@ -1711,15 +1711,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   recursive function ESMF_DELayoutServiceOffer(delayout, keywordEnforcer, de, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_ServiceReply_Flag) :: ESMF_DELayoutServiceOffer
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)            :: delayout
     integer,              intent(in)            :: de
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_ServiceReply_Flag) :: ESMF_DELayoutServiceOffer
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -2001,13 +2001,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_DELayoutDeserialize(buffer, offset, rc) 
 !
+! !RETURN VALUE:
+    type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
+!
 ! !ARGUMENTS:
     character, pointer               :: buffer(:)
     integer,   intent(inout)         :: offset
     integer,   intent(out), optional :: rc 
-!
-! !RETURN VALUE:
-    type(ESMF_DELayout) :: ESMF_DELayoutDeserialize   
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
@@ -2061,11 +2061,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_DELayoutGetInit(delayout) 
 !
-! !ARGUMENTS:
-    type(ESMF_DELayout), intent(in), optional :: delayout
-!
 ! !RETURN VALUE:
     ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout), intent(in), optional :: delayout
 !
 ! !DESCRIPTION:
 !      Access deep object init code.
