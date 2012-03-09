@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.82 2012/01/06 20:15:30 svasquez Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.83 2012/03/09 21:08:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.82 2012/01/06 20:15:30 svasquez Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.83 2012/03/09 21:08:26 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -599,6 +599,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   function ESMF_ArrayBundleCreate(keywordEnforcer, arrayList, multiflag, &
     relaxedflag, name, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_ArrayBundle) :: ESMF_ArrayBundleCreate
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -607,9 +610,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,          intent(in),  optional :: relaxedflag
     character(len=*), intent(in),  optional :: name
     integer,          intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_ArrayBundle) :: ESMF_ArrayBundleCreate
 !
 ! !STATUS:
 ! \begin{itemize}
