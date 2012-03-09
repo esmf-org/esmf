@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.104 2012/01/06 20:16:30 svasquez Exp $
+! $Id: ESMF_DistGrid.F90,v 1.105 2012/03/09 21:34:06 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.104 2012/01/06 20:16:30 svasquez Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.105 2012/03/09 21:34:06 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -635,6 +635,9 @@ contains
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDG(distgrid, keywordEnforcer, &
     firstExtra, lastExtra, indexflag, connectionList, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),           intent(in)            :: distgrid
@@ -644,9 +647,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
     integer,                       intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -759,6 +759,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDGT(distgrid, firstExtraPTile, &
     lastExtraPTile, keywordEnforcer, indexflag, connectionList, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDGT
 !
 ! !ARGUMENTS:
     type(ESMF_DistGrid),        intent(in)            :: distgrid
@@ -768,9 +771,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag),      intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
     integer,                    intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDGT
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -882,6 +882,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_DistGridCreateRD(minIndex, maxIndex, keywordEnforcer, regDecomp, &
     decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
     indexflag, connectionList, delayout, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
 !
 ! !ARGUMENTS:
     integer,                   intent(in)            :: minIndex(:)
@@ -897,9 +900,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),       intent(in),  optional :: delayout
     type(ESMF_VM),             intent(in),  optional :: vm
     integer,                   intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1075,6 +1075,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDB(minIndex, maxIndex, deBlockList, &
     keywordEnforcer, deLabelList, indexflag, connectionList, delayout, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:)
@@ -1087,9 +1090,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1239,6 +1239,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_DistGridCreateRDFA(minIndex, maxIndex, regDecomp, &
     decompflag, regDecompFirstExtra, regDecompLastExtra, deLabelList, &
     indexflag, connectionList, fastAxis, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDFA
 !
 ! !ARGUMENTS:
     integer,                        intent(in)            :: minIndex(:)
@@ -1253,9 +1256,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in)            :: fastAxis
     type(ESMF_VM),                  intent(in),  optional :: vm
     integer,                        intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -1423,6 +1423,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   function ESMF_DistGridCreateDBFA(minIndex, maxIndex, &
     deBlockList, deLabelList, indexflag, connectionList, &
     fastAxis, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBFA
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:)
@@ -1434,9 +1437,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: fastAxis
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a single logically rectangular (LR) 
@@ -1565,6 +1565,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, regDecompPTile, decompflagPTile, regDecompFirstExtraPTile,&
     regDecompLastExtraPTile, deLabelList, indexflag, connectionList, &
     delayout, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDT
 !
 ! !ARGUMENTS:
     integer,             intent(in)            :: minIndexPTile(:,:)
@@ -1580,9 +1583,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout), intent(in),  optional :: delayout
     type(ESMF_VM),       intent(in),  optional :: vm
     integer,             intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDT
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1770,6 +1770,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBP(minIndex, maxIndex, deBlockList, deLabelList,&
     indexflag, connectionList, delayout, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBP
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:,:)
@@ -1781,9 +1784,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBP
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
@@ -1917,6 +1917,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateRDTFA(minIndex, maxIndex, regDecomp, decompflag, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTFA
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:,:)
@@ -1929,9 +1932,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: fastAxis
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
@@ -2065,6 +2065,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBPFA(minIndex, maxIndex, deBlockList, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBPFA
 !
 ! !ARGUMENTS:
     integer,                       intent(in)            :: minIndex(:,:)
@@ -2076,9 +2079,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: fastAxis
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBPFA
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
@@ -2206,14 +2206,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBAI1D(arbSeqIndexList, keywordEnforcer, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
 !
 ! !ARGUMENTS:
     integer, intent(in)            :: arbSeqIndexList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI1D
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -2329,6 +2329,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBAI(arbSeqIndexList, arbDim, &
     minIndexPTile, maxIndexPTile, keywordEnforcer, rc)
+!         
+! !RETURN VALUE:
+    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
 !
 ! !ARGUMENTS:
     integer, intent(in)            :: arbSeqIndexList(:)
@@ -2337,9 +2340,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(in)            :: maxIndexPTile(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
-!         
-! !RETURN VALUE:
-    type(ESMF_DistGrid) :: ESMF_DistGridCreateDBAI
 !
 ! !STATUS:
 ! \begin{itemize}

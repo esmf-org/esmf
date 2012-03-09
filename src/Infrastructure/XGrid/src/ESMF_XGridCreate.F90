@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.46 2012/03/02 01:57:27 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.47 2012/03/09 21:29:27 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.46 2012/03/02 01:57:27 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.47 2012/03/09 21:29:27 w6ws Exp $'
 
 !==============================================================================
 !
@@ -215,41 +215,38 @@ contains
 
 ! !INTERFACE:
 
-function ESMF_XGridCreate(sideA, sideB, &
-keywordEnforcer, &
-sideAToXGridScheme, sideBToXGridScheme, &
-sideAPriority, sideBPriority, &
-sideAMaskValues, sideBMaskValues, &
-storeOverlay, &
-offline, &
-sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
-area, centroid, &
-name, rc)
-
-!
-! !ARGUMENTS:
-type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-integer, intent(in), optional               :: sideAToXGridScheme
-integer, intent(in), optional               :: sideBToXGridScheme
-integer, intent(in), optional               :: sideAPriority(:)
-integer, intent(in), optional               :: sideBPriority(:)
-integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:)
-integer(ESMF_KIND_I4), intent(in), optional :: sideBMaskValues(:)
-logical, intent(in), optional               :: storeOverlay
-logical, intent(in), optional               :: offline
-type(ESMF_XGridSpec), intent(in), optional  :: sparseMatA2X(:)
-type(ESMF_XGridSpec), intent(in), optional  :: sparseMatX2A(:)
-type(ESMF_XGridSpec), intent(in), optional  :: sparseMatB2X(:)
-type(ESMF_XGridSpec), intent(in), optional  :: sparseMatX2B(:)
-real(ESMF_KIND_R8), intent(in), optional    :: area(:)
-real(ESMF_KIND_R8), intent(in), optional    :: centroid(:,:)
-character(len=*), intent(in), optional      :: name
-integer, intent(out), optional              :: rc
-
+function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
+    sideAToXGridScheme, sideBToXGridScheme, &
+    sideAPriority,      sideBPriority, &
+    sideAMaskValues,    sideBMaskValues, &
+    storeOverlay, &
+    offline, &
+    sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
+    area, centroid, &
+    name, rc)
 !
 ! !RETURN VALUE:
   type(ESMF_XGrid)              :: ESMF_XGridCreate
+!
+! !ARGUMENTS:
+  type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
+  type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer,              intent(in), optional :: sideAToXGridScheme
+  integer,              intent(in), optional :: sideBToXGridScheme
+  integer,              intent(in), optional :: sideAPriority(:)
+  integer,              intent(in), optional :: sideBPriority(:)
+  integer(ESMF_KIND_I4),intent(in), optional :: sideAMaskValues(:)
+  integer(ESMF_KIND_I4),intent(in), optional :: sideBMaskValues(:)
+  logical,              intent(in), optional :: storeOverlay
+  logical,              intent(in), optional :: offline
+  type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
+  type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
+  type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
+  type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
+  real(ESMF_KIND_R8),   intent(in), optional :: area(:)
+  real(ESMF_KIND_R8),   intent(in), optional :: centroid(:,:)
+  character(len=*),     intent(in), optional :: name
+  integer,              intent(out),optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -348,24 +345,23 @@ end function ESMF_XGridCreate
 ! ! Private name; call using ESMF_XGridCreate()
 
 function ESMF_XGridCreateDefault(sideA, sideB, &
-sideAToXGridScheme, sideBToXGridScheme, &
-sideAPriority, sideBPriority, &
-sideAMaskValues, sideBMaskValues, &
-storeOverlay, name, rc)
-
-!
-! !ARGUMENTS:
-type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
-integer, intent(in), optional               :: sideAToXGridScheme, sideBToXGridScheme
-integer, intent(in), optional               :: sideAPriority(:), sideBPriority(:)
-integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:), sideBMaskValues(:)
-logical, intent(in), optional               :: storeOverlay
-character(len=*), intent(in), optional      :: name
-integer, intent(out), optional              :: rc
-
+    sideAToXGridScheme, sideBToXGridScheme, &
+    sideAPriority, sideBPriority, &
+    sideAMaskValues, sideBMaskValues, &
+    storeOverlay, name, rc)
 !
 ! !RETURN VALUE:
   type(ESMF_XGrid)              :: ESMF_XGridCreateDefault
+!
+! !ARGUMENTS:
+  type(ESMF_Grid),       intent(in)           :: sideA(:), sideB(:)
+  integer,               intent(in), optional :: sideAToXGridScheme, sideBToXGridScheme
+  integer,               intent(in), optional :: sideAPriority(:), sideBPriority(:)
+  integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:), sideBMaskValues(:)
+  logical,               intent(in), optional :: storeOverlay
+  character(len=*),      intent(in), optional :: name
+  integer,               intent(out),optional :: rc
+
 
 !
 ! !DESCRIPTION:
@@ -944,6 +940,9 @@ function ESMF_XGridCreateOffline(sideA, sideB, &
     rc) 
 
 !
+! !RETURN VALUE:
+    type(ESMF_XGrid) :: ESMF_XGridCreateOffline
+!
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
@@ -954,10 +953,6 @@ real(ESMF_KIND_R8), intent(in), optional   :: area(:)
 real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
 character (len=*), intent(in), optional    :: name
 integer, intent(out), optional             :: rc 
-
-!
-! !RETURN VALUE:
-    type(ESMF_XGrid) :: ESMF_XGridCreateOffline
 
 !
 ! !DESCRIPTION:
@@ -1475,13 +1470,13 @@ end subroutine ESMF_XGridDistGrids
 ! !INTERFACE:
 function ESMF_XGridDGOverlay(sparseMat, dim, rc)
 !
+! !RETURN VALUE:
+    type(ESMF_DistGrid)                         :: ESMF_XGridDGOverlay
+!
 ! !ARGUMENTS:
     type(ESMF_XGridSpec), pointer               :: sparseMat(:)
     integer, intent(in)                         :: dim
     integer, intent(out), optional              :: rc
-!
-! !RETURN VALUE:
-    type(ESMF_DistGrid)                         :: ESMF_XGridDGOverlay
 
 !
 ! !DESCRIPTION:
@@ -1836,13 +1831,13 @@ end subroutine schemeToGridType
 ! !INTERFACE:
 function SideAToSideB(AtoX, XtoB, rc)
 !
+! !RETURN VALUE:
+  integer                       :: SideAToSideB
+!
 ! !ARGUMENTS:
   integer, intent(in)           :: AtoX
   integer, intent(in)           :: XtoB
   integer, intent(out), optional:: rc
-!
-! !RETURN VALUE:
-  integer                       :: SideAToSideB
 !
 ! !DESCRIPTION:
 !      Compute regrid scheme from sideA to sideB.
