@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.23 2012/03/12 05:32:12 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.24 2012/03/12 05:35:32 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@ extern "C" {
     void *recvData, int recvCount, 
     ESMC_TypeKind *dtk, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmalltoallv()"
+#define ESMC_METHOD "c_esmc_vmalltoall()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // start assuming local success
