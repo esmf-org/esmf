@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.8 2012/01/06 20:19:21 svasquez Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.9 2012/03/12 22:25:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.8 2012/01/06 20:19:21 svasquez Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.9 2012/03/12 22:25:19 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -174,6 +174,7 @@ contains
     character(len=ESMF_MAXSTR) :: errmsg
     integer :: ipos, iposnext
     integer :: memstat
+    type(ESMF_Logical) :: linkChange
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -201,13 +202,39 @@ contains
       ipos = ipos + iposnext
     end do
 
+    call ESMF_ContainerRemove (localstatep%stateContainer,  &
+        itemNameList=(/ itemname(ipos:len (itemname)) /), rc=localrc)
+
+    ! Handle the attribute heirarchy
+    linkChange = ESMF_TRUE
     select case (dataitem%otype%ot)
+    case (ESMF_STATEITEM_FIELD%ot)
+      call c_ESMC_AttributeLinkRemove(localstatep%base, &
+          dataitem%datap%fp%ftypep%base, linkChange, localrc)
+
+    case (ESMF_STATEITEM_FIELDBUNDLE%ot)
+      call c_ESMC_AttributeLinkRemove(localstatep%base, &
+          dataitem%datap%fbp%this%base, linkChange, localrc)
+
+    case (ESMF_STATEITEM_ARRAY%ot)
+      call c_ESMC_AttributeLinkRemove(localstatep%base, &
+          dataitem%datap%ap, linkChange, localrc)
+
+    case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
+      call c_ESMC_AttributeLinkRemove(localstatep%base, &
+          dataitem%datap%abp, linkChange, localrc)
+
+    case (ESMF_STATEITEM_ROUTEHANDLE%ot)
+      localrc = ESMF_SUCCESS
+
     case (ESMF_STATEITEM_STATE%ot)
-      localrc = ESMF_RC_NOT_IMPL
-    case default
-      call ESMF_ContainerRemove (localstatep%stateContainer,  &
-          itemNameList=(/ itemname(ipos:len (itemname)) /), rc=localrc)
+      call c_ESMC_AttributeLinkRemove(localstatep%base, &
+          dataitem%datap%spp%base, linkChange, localrc)
+
     end select
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = localrc
 
