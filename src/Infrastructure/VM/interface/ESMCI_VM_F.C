@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.22 2012/01/06 20:18:29 svasquez Exp $
+// $Id: ESMCI_VM_F.C,v 1.23 2012/03/12 05:32:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -196,8 +196,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmalltoallv)(ESMCI::VM **vm, void *sendData, int *sendCounts,
-    int *sendOffsets, void *recvData, int *recvCounts, int *recvOffsets, 
+  void FTN_X(c_esmc_vmalltoall)(ESMCI::VM **vm,
+    void *sendData, int sendCount,
+    void *recvData, int recvCount, 
     ESMC_TypeKind *dtk, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmalltoallv()"
@@ -216,6 +217,50 @@ extern "C" {
       break;
     case ESMC_TYPEKIND_R8:
       vmt = vmR8;
+      break;
+    default:
+      localrc = ESMC_RC_ARG_BAD;
+    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
+      rc)) return;
+    localrc = (*vm)->alltoall(sendData, sendCount,
+      recvData, recvCount, vmt);
+    if (localrc){
+      char *message = new char[160];
+      sprintf(message, "VMKernel/MPI error #%d\n", localrc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, message, rc);
+      delete [] message;
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_vmalltoallv)(ESMCI::VM **vm,
+    void *sendData, int *sendCounts, int *sendOffsets,
+    void *recvData, int *recvCounts, int *recvOffsets, 
+    ESMC_TypeKind *dtk, int *rc,
+    ESMCI_FortranStrLenArg sendData_len, ESMCI_FortranStrLenArg recvData_len){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmalltoallv()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // need to type cast or transform dtk and op into ESMCI::VMK types
+    vmType vmt;
+    switch (*dtk){
+    case ESMC_TYPEKIND_I4:
+      vmt = vmI4;
+      break;
+    case ESMC_TYPEKIND_R4:
+      vmt = vmR4;
+      break;
+    case ESMC_TYPEKIND_R8:
+      vmt = vmR8;
+      break;
+    case ESMC_TYPEKIND_CHARACTER:
+      vmt = vmBYTE;
       break;
     default:
       localrc = ESMC_RC_ARG_BAD;

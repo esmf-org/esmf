@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.158 2012/02/29 17:19:42 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.159 2012/03/12 05:32:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -127,6 +127,7 @@ module ESMF_VMMod
   public ESMF_VMAllGather
   public ESMF_VMAllGatherV
   public ESMF_VMAllReduce
+  public ESMF_VMAllToAll
   public ESMF_VMAllToAllV
   public ESMF_VMBarrier
   public ESMF_VMBroadcast
@@ -189,7 +190,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.158 2012/02/29 17:19:42 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.159 2012/03/12 05:32:12 w6ws Exp $"
 
 !==============================================================================
 
@@ -279,6 +280,23 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
+! !IROUTINE: ESMF_VMAllToAll -- Generic interface
+
+! !INTERFACE:
+    interface ESMF_VMAllToAll
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMAllToAllI4
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMAllToAllV} functions.   
+!EOPI 
+    end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
 ! !IROUTINE: ESMF_VMAllToAllV -- Generic interface
 
 ! !INTERFACE:
@@ -289,6 +307,7 @@ module ESMF_VMMod
       module procedure ESMF_VMAllToAllVI4
       module procedure ESMF_VMAllToAllVR4
       module procedure ESMF_VMAllToAllVR8
+      module procedure ESMF_VMAllToAllVCharArray
       module procedure ESMF_VMAllToAllVFLogical
       module procedure ESMF_VMAllToAllVVMId
 
@@ -1940,6 +1959,142 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOP
+! !IROUTINE: ESMF_VMAllToAllV - AllToAll communications across VM
+!
+! !INTERFACE:
+!  subroutine ESMF_VMAllToAll(vm, sendData, sendCount, &
+!    recvData, recvCount, syncflag, &
+!    commhandle, rc)
+!
+! !ARGUMENTS:
+!    type(ESMF_VM),                    intent(in)            :: vm
+!    <type>(ESMF_KIND_<kind>), target, intent(in)            :: sendData(:)
+!    integer,                          intent(in)            :: sendCount
+!    <type>(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)
+!    integer,                          intent(in)            :: recvCount
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    type(ESMF_Sync_Flag),             intent(in),  optional :: syncflag
+!    type(ESMF_CommHandle),            intent(out), optional :: commhandle
+!    integer,                          intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs a total exchange
+!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
+!   all other PETs while receiving data into the contiguous data buffer
+!   {\tt recvData} from all other PETs.\newline
+!
+!   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4}
+!   data type. 
+!   \newline
+!
+!   {\sc Todo:} The current version of this method does not provide an 
+!   implementation of the {\em non-blocking} feature. When calling this 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
+!   logged.\newline
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contiguous data array holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[sendCount] 
+!        Number of {\tt sendData} elements to send from local PET to
+!        each destination PET.
+!   \item[recvData] 
+!        Single data variable to be received. All PETs must specify a
+!        valid result variable.
+!   \item[recvCount] 
+!        Number of {\tt recvData} elements to be received by local PET from
+!        each source PET.
+!   \item[{[syncflag]}]
+!        Flag indicating whether this call behaves blocking or non-blocking.
+!        The default is {\tt ESMF\_SYNC\_BLOCKING}. See section
+!        \ref{const:sync} for a complete list of options.
+!   \item[{[commhandle]}]
+!        If present, a communication handle will be returned in case of a 
+!        non-blocking request (see argument {\tt syncflag}). The
+!        {\tt commhandle} can be used in {\tt ESMF\_VMCommWait()} to block the
+!        calling PET until the communication call has finished PET-locally. If
+!        no {\tt commhandle} was supplied to a non-blocking call the VM method
+!        {\tt ESMF\_VMCommWaitAll()} may be used to block on all currently queued
+!        communication calls of the VM context.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllI4()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAll 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAll()
+  subroutine ESMF_VMAllToAllI4(vm, sendData, sendCount, &
+    recvData, recvCount, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),                 intent(in)            :: vm
+    integer(ESMF_KIND_I4), target, intent(in)            :: sendData(:)
+    integer,                       intent(in)            :: sendCount
+    integer(ESMF_KIND_I4), target, intent(out)           :: recvData(:)
+    integer,                       intent(in)            :: recvCount
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),          intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),         intent(out), optional :: commhandle
+    integer,                       intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllToAll(vm, sendData, sendCount, &
+      recvData, recvCount, ESMF_TYPEKIND_I4, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllToAllI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
 ! !IROUTINE: ESMF_VMAllToAllV - AllToAllV communications across VM
 !
 ! !INTERFACE:
@@ -2204,6 +2359,72 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllToAllVR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllToAllVCharArray()"
+!BOPI
+! !IROUTINE: ESMF_VMAllToAllV - AllToAllV Character array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllToAllV()
+  subroutine ESMF_VMAllToAllVCharArray(vm, sendData, sendCounts, sendOffsets, &
+    recvData, recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),              intent(in)            :: vm
+    character(*),       target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCounts(:)
+    integer,                    intent(in)            :: sendOffsets(:)
+    character(*),       target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
+!
+!   Note that since this is for character data type, the values in the offsets
+!   arrays must already have taken into account the length of the strings.
+!   That is, this method does not multiply sendOffsets by len(sendData) or
+!   recvOffsets by len(recvData).
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllToAllV(vm, sendData, sendCounts(1), sendOffsets(1), &
+      recvData, recvCounts(1), recvOffsets(1), ESMF_TYPEKIND_CHARACTER, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllToAllVCharArray
 !------------------------------------------------------------------------------
 
 
