@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.1 2012/02/24 19:27:28 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.2 2012/03/12 16:57:48 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -67,30 +67,37 @@
       ! These are only public for unit testing.  They are not intended
       ! to be called by ESMF users.
       public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
+      public :: ESMF_ReconcileSendItems
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile2.F90,v 1.1 2012/02/24 19:27:28 w6ws Exp $'
+      '$Id: ESMF_StateReconcile2.F90,v 1.2 2012/03/12 16:57:48 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
 !------------------------------------------------------------------------------
+!     ! ESMF_ItemBuffer
+      type ESMF_ItemBuffer
+        character, pointer :: item_buffer(:) => null ()
+      end type
+
+!     ! ESMF_NeedsBuffer
+      type ESMF_NeedsBuffer
+        logical, pointer :: needs(:) => null ()
+      end type
+
 !     ! ESMF_StateIDInfo
 !
-!     ! ID/VMId pair
+!     ! ID/VMId pair, plus other global PET info
 
       type ESMF_StateIDInfo
         integer,         pointer :: id(:) => null ()
         type(ESMF_VMId), pointer :: vmid(:) => null ()
         logical,         pointer :: needed(:) => null ()
         character,       pointer :: item_buffer(:) => null ()
-      end type
-
-      type ESMF_Itembuffer
-        character, pointer :: item_buffer(:) => null ()
       end type
 
 !==============================================================================
@@ -251,7 +258,8 @@
 
     type(ESMF_StateIDInfo), pointer :: id_info(:)
 
-    logical, allocatable :: needs_send(:,:), needs_recv(:)
+    logical, pointer :: recvd_needs_matrix(:,:)
+
     type(ESMF_Itembuffer), pointer :: items_recv(:)
 
     integer :: i, j
@@ -265,19 +273,21 @@
 
     ! 0.) Interchange item counts between PETs.  Set up counts/displacements
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 0: Initialize item counts and siwrappers')
+    ': *** Step 0: Initialize item counts and siwrappers', ask=.true.)
     call ESMF_ReconcileInitialize (state, vm,  &
         siwrap=siwrap, nitems_all=nitems_buf, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+print *, ESMF_METHOD, ': siwrap(', lbound (siwrap,1), ',', ubound (siwrap,1), ')'
+print *, ESMF_METHOD, ': nitems_buf(', lbound (nitems_buf,1), ',', ubound (nitems_buf,1), ')'
 
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State
     ! Note that element zero is reserved for the State itself.
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 1 - Build send arrays')
+    ': *** Step 1 - Build send arrays', ask=.true.)
 
     itemtypes_send => null ()
     ids_send   => null ()
@@ -294,8 +304,9 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 2 - AllToAllVing Ids on PET ' // iTos (mypet))
+    ': *** Step 2 - AllToAllVing Ids on PET ' // iTos (mypet), ask=.true.)
 
+    id_info => null ()
     call ESMF_ReconcileDistributeIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
 	  id=  ids_send,  &
@@ -308,7 +319,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
 
 ! At this point, each PET knows what items can be found on all of
-! the other PETs.  The id_info array 
+! the other PETs.  The id_info array has global PET info in it.
 
     ! 3.) Construct needs list.  Receiving PETs compare IDs and VMIds
     ! in their send ID/VMId array with what was received from the
@@ -321,7 +332,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     call ESMF_ReconcileCompareNeeds (vm,  &
 	  id=  ids_send,  &
 	vmid=vmids_send,  &
-        id_info=id_info, &
+        id_info=id_info,  &
 	rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -338,34 +349,14 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ! and corresponds to, the ID and VMId arrays that were previously
     ! offered.
 
-    call ESMF_ReconcileSendNeeds (vm, id_info=id_info, rc=localrc)
+    recvd_needs_matrix => null ()
+    call ESMF_ReconcileExchangeNeeds (vm,  &
+        id_info=id_info,  &
+        recv_needs=recvd_needs_matrix,  &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
-!     if (i_send) then
-!       print *, 'PET', mypet, ': allocating needs_send(0:', iTos (nitems),  &
-!           ',0:', iTos (npets-1), ')'
-!       allocate (needs_send(0:nitems, 0:npets-1))
-!     end if
-! 
-!     call ESMF_VMGather (vm,  &
-!         sendData=needs_recv, recvData=needs_send,  &
-!         count=size(needs_recv), rootPet=send_Pet,  &
-!         rc=localrc)
-!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!         ESMF_CONTEXT,  &
-!         rcToReturn=rc)) return
-! 
-! call ESMF_VMBarrier (vm)
-! if (i_send) then
-!   print *, 'Sending PET ', iTos (send_pet), ': received the following needs:'
-!   do, j=0, ubound (needs_send, 2)
-!     print *, 'from PET ', iTos (j), ':', needs_send(:,j)
-!   end do
-!   flush (6)
-! end if
-! call ESMF_VMBarrier (vm)
 
 
     ! 5.) Serialized needed objects
@@ -375,7 +366,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': *** Step 5 - Serialize needs, send PET = ' // iTos (send_pet))
     do, i=0, npets-1
       call ESMF_ReconcileSerialize (state, siwrap, &
-	  needs_list=id_info(i)%needed, attreconflag=attreconflag,  &
+	  needs_list=recvd_needs_matrix(i,:), attreconflag=attreconflag,  &
 	  obj_buffer=id_info(i)%item_buffer, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 	  ESMF_CONTEXT,  &
@@ -403,32 +394,33 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': *** Step 7 - Deserialize needs, send PET = ' // iTos (send_pet))
 
-    ! !!! DO NOT REMOVE THIS BARRIER !!!
-    ! All serialization and communications must be complete before
-    ! deserialization can begin.
+! !!! DO NOT REMOVE THIS BARRIER !!!
+! All serialization and communications must be complete before
+! deserialization can begin.
+
     call ESMF_VMBarrier (vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 	ESMF_CONTEXT,  &
 	rcToReturn=rc)) return
 
     do, i=0, npets-1
-      call ESMF_ReconcileDeserialize (state, vm,  &
-          obj_buffer=items_recv(i)%item_buffer,  &
-          vm_ids=id_info(i)%vmid,  &
-          attreconflag=attreconflag, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
+      if (size (items_recv(i)%item_buffer) > 0) then
+	call ESMF_ReconcileDeserialize (state, vm,  &
+            obj_buffer=items_recv(i)%item_buffer,  &
+            vm_ids=id_info(i)%vmid,  &
+            attreconflag=attreconflag, rc=localrc)
+	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) return
+      end if
     end do
 
-    if (i_send) then
 print *, ESMF_METHOD //  &
-    ': Deallocating needs_send, PET = ' // iTos (mypet)
-      deallocate (needs_send)
-    end if
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': Deallocating needs_recv, send PET = ' // iTos (send_pet))
-    deallocate (needs_recv)
+    ': Deallocating recvd_needs_matrix, PET = ' // iTos (mypet)
+      deallocate (recvd_needs_matrix, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
 
 #if !defined (ALIAS_VMID)
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -447,7 +439,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     if (associated (siwrap)) then
       deallocate (siwrap, stat=memstat)
-      if (ESMF_LogFoundDeallocError(localrc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
@@ -505,6 +497,16 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
     integer :: i, j, k
     logical :: needed
 
+    type NeedsList_t
+      integer          :: id
+      type(ESMF_VMId)  :: vmid
+      logical, pointer :: offerers(:) => null ()
+      integer, pointer :: position(:) => null ()
+      type(NeedsList_t), pointer :: next => null ()
+    end type
+
+    type(NeedsList_t), pointer :: needs_list
+
 ! Check other PETs contents to see if there are objects this PET needs
 
     npets = size (id_info)
@@ -519,11 +521,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
           rcToReturn=rc)) return
     end if
 
-! TODO: When a 'needed' ID/VMId is found, search other PETs to find out who else
-! can offer it.  To get things going, just find all the neededs and use AddReplace
-! during deserialization.  This code really needs to find a single PET and use a
-! heuristic to make sure PETs needing the same item can spread their requests to
-! different PETs to avoid hot spots.
+! When 'needed' ID/VMId pairs are found, create a list of 'offering' PETs who can
+! provide it.
+
+    needs_list => null ()
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': computing id_info%needed')
@@ -534,11 +535,18 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         do, k = 1, ubound (id_info(i)%id, 1)
           needed = id(j) /= id_info(i)%id(k)
           needed = needed .or. ESMF_VMIdCompare (vmid(j), id_info(i)%vmid(k))
-          id_info(i)%needed(k) = needed
+          if (needed) then
+            call needs_list_insert (needs_list, pet_1=i,  &
+                id_1=id_info(i)%id(k), vmid_1=id_info(i)%vmid(k),  &
+                position=k)
+          end if
+!          id_info(i)%needed(k) = needed
         end do
       end do
     end do
-      
+
+    ! Go through the list of needed IDs/VMIds and select an offerer for each.
+
 do, j=0, npets-1
   if (j == myPet) then
     do, i=0, ubound (id_info, 1)
@@ -550,6 +558,82 @@ do, j=0, npets-1
 end do
 
     rc = localrc
+
+  contains
+
+    subroutine needs_list_insert (needs_list_1, pet_1,  &
+        id_1, vmid_1, position)
+      type(NeedsList_t),  pointer :: needs_list_1  ! intent(inout)
+      integer,         intent(in) :: pet_1
+      integer,         intent(in) :: id_1
+      type(ESMF_VMId), intent(in) :: vmid_1
+      integer,         intent(in) :: position
+
+      type(NeedsList_t), pointer :: needslist_p
+      logical :: needs
+      integer :: memstat
+
+    ! Called when a Id/VMId is offered by some remote PET, and is needed
+    ! by the local PET.
+    !
+    ! If the Id/VMId is not in the needs list, create a new needs_list
+    ! entry.   If it is present, add that this PET is also offering it.
+
+      needslist_p => needs_list_1
+      do
+        if (.not. associated (needslist_p)) then
+          ! At end of list, so create a new entry
+          allocate (needslist_p, stat=memstat)
+          allocate (  &
+              needslist_p%offerers(0:npets-1),  &
+              needslist_p%position(0:npets-1),  &
+              stat=memstat)
+          needslist_p%offerers = .false.
+          needslist_p%position = 0
+          needslist_p%offerers(pet_1) = .true.
+          needslist_p%position(pet_1) = position
+          needslist_p%id = id_1
+          needslist_p%vmid = vmid_1
+          return
+        else
+          if (id_1 == needslist_p%id) then
+            if (ESMF_VMIdCompare (vmid_1, needslist_p%vmid)) then
+              needslist_p%offerers(pet_1) = .true.
+              needslist_p%position(pet_1) = k
+            end if
+          end if
+        end if
+        needslist_p => needslist_p%next
+      end do
+
+    end subroutine needs_list_insert
+
+    subroutine needs_list_select (needs_list_1, id_info_1)
+      type(needsList_t),      pointer       :: needs_list_1  ! intent(in)
+      type(ESMF_StateIDInfo), intent(inout) :: id_info_1(:)
+
+      ! For each needed Id/VMId pair, select an offering PET and set it in
+      ! the id_info_array.
+
+      ! TODO: Initially, simply select the first offering PET.  Eventually
+      ! try to load balance by looking for nearest offering neighbor, etc.
+
+      type(needsList_t), pointer :: needslist_p
+      integer :: i
+
+      needslist_p => needs_list_1
+      do
+        if (.not. associated (needslist_p)) exit
+        do, i=0, npets-1
+          if (needslist_p%offerers(i)) then
+            id_info_1(i)%needed(needslist_p%position(i)) = .true.
+            exit
+          end if
+        end do
+        needslist_p => needslist_p%next
+      end do
+      
+    end subroutine needs_list_select
 
   end subroutine ESMF_ReconcileCompareNeeds
   
@@ -994,7 +1078,140 @@ end do
     rc = localrc
 
   end subroutine ESMF_ReconcileDistributeIDInfo
-  
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileExchangeNeeds"
+!BOPI
+! !IROUTINE: ESMF_ReconcileExchangeNeeds
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileExchangeNeeds (vm, id_info, recv_needs, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),          intent(in)  :: vm
+    type(ESMF_StateIDInfo), intent(in)  :: id_info(:)
+    logical,                pointer     :: recv_needs(:,:) ! intent(out)
+    integer,                intent(out) :: rc
+!
+! !DESCRIPTION:
+!
+!  Performs alltoallv communications from needy PETs to PETs which offer
+!  items they need.
+!
+!   The arguments are:  						   
+!   \begin{description} 						   
+!   \item[vm]
+!     The current {\tt ESMF\_VM} (virtual machine).
+!   \item[id_info]
+!     Array of arrays of global VMId info.  The 'needed' flags indicate
+!     which items are needed from which offering PETs.
+!   \item[recv_needs]
+!     Array of needy PETs and their needs.  If a flag is set, the PET
+!     needs the item.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+    integer :: memstat
+    integer :: mypet, npets
+    integer :: i
+    integer :: itemcount, itemcount_global, itemcount_local
+    integer :: offset_pos
+
+    integer, allocatable :: counts_recv(:),  counts_send(:)
+    integer, allocatable :: offsets_recv(:), offsets_send(:)
+    logical, allocatable :: buffer_recv(:),  buffer_send(:)
+
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    if (size (id_info) /= npets) then
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
+          msg="size (id_info) /= npets", &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+!   Set up send counts, offsets, and buffer.  Note that each remote PET
+!   can have differing numbers of items to offer.
+
+    allocate (  &
+        counts_send (0:npets-1),  &
+        offsets_send(0:npets-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    do, i=0, npets-1
+      counts_send(i) = size (id_info(i)%needed)
+    end do
+
+    itemcount_local = counts_send(mypet)
+    itemcount_global = sum (counts_send)
+
+    allocate (  &
+        buffer_send(0:itemcount_global-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    offset_pos = 0
+    do, i=0, npets-1
+      itemcount = counts_send(i)
+      offsets_send(i) = offset_pos
+      buffer_send(offset_pos:offset_pos+itemcount-1) = id_info(i)%needed
+      offset_pos = offset_pos + itemcount
+    end do
+
+!   Each remote PET should return a buffer that is the same
+!   size as the number of items on the local PET.  So the recv_needs
+!   buffer can be a simple rectangular matrix of which PETs need
+!   which of my items.
+
+    counts_recv = itemcount_local
+    allocate (  &
+        counts_recv (0:npets-1),  &
+        offsets_recv(0:npets-1),  &
+        buffer_recv(0:itemcount_local*npets-1),  &
+        recv_needs(itemcount_local,0:npets-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    offsets_recv = offsets_send
+    buffer_recv = .false.
+
+    ! AlltoAllV
+
+    call ESMF_VMAllToAllV (vm,  &
+        sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send, &
+        recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Copy recv buffers into recv_needs
+
+    do, i=0, npets-1
+      itemcount = counts_recv(i)
+      offset_pos = offsets_recv(i)
+      recv_needs(:,i) = buffer_recv(offset_pos:offset_pos+itemcount-1)
+    end do
+
+    rc = localrc
+
+  end subroutine ESMF_ReconcileExchangeNeeds
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileGetStateIDInfo"
@@ -1065,7 +1282,7 @@ end do
               id(0:nitems),  &
             vmid(0:nitems),  &
         stat=memstat)
-    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
@@ -1282,10 +1499,10 @@ call ESMF_VMBarrier (vm)
   subroutine ESMF_ReconcileSendItems (vm, id_info, recv_items, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),     intent(in)   :: vm
-    type(ESMF_StateIDInfo), intent(in) :: id_info(:)
-    type(ESMF_ItemBuffer), pointer  :: recv_items(:) ! intent(out)
-    integer,           intent(out)  :: rc
+    type(ESMF_VM),          intent(in)  :: vm
+    type(ESMF_StateIDInfo), intent(in)  :: id_info(:)
+    type(ESMF_ItemBuffer),  pointer     :: recv_items(:) ! intent(out)
+    integer,                intent(out) :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1308,6 +1525,15 @@ call ESMF_VMBarrier (vm)
     integer :: localrc
     integer :: memstat
     integer :: mypet, npets
+    integer :: i
+    integer :: itemcount, itemcount_global, itemcount_local
+    integer :: offset_pos
+
+    integer,   allocatable :: counts_recv(:),  counts_send(:)
+    integer,   allocatable :: offsets_recv(:), offsets_send(:)
+    character, allocatable :: buffer_recv(:),  buffer_send(:)
+
+    integer, allocatable :: bufsize_recv(:)
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -1316,79 +1542,112 @@ call ESMF_VMBarrier (vm)
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    allocate (recv_items(0:npets-1), stat=memstat)
+    if (size (id_info) /= npets) then
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
+          msg="size (id_info) /= npets", &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
 
-    ! TODO:
-    ! 1.) exchange sizes
-    ! 2.) Allocate send/recv comm buffers
-    ! 3.) Copy into send buffers
-    ! 4.) AlltoAllV
-    ! 5.) Copy recv buffers into recv_items
+!   Set up send counts, offsets, and buffer.
 
-    rc = localrc
 
-  end subroutine ESMF_ReconcileSendItems
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileSendNeeds"
-!BOPI
-! !IROUTINE: ESMF_ReconcileSendNeeds
-!
-! !INTERFACE:
-  subroutine ESMF_ReconcileSendNeeds (vm, id_info, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),     intent(in)   :: vm
-    type(ESMF_StateIDInfo), intent(in) :: id_info(:)
-    integer,           intent(out)  :: rc
-!
-! !DESCRIPTION:
-!
-!  Performs alltoallv communications from needy PETs to PETs which offer
-!  items they need.
-!
-!   The arguments are:  						   
-!   \begin{description} 						   
-!   \item[vm]
-!     The current {\tt ESMF\_VM} (virtual machine).
-!   \item[id_info]
-!     Array of arrays of global VMId info.  The 'needed' flags indicate
-!     which items are needed from which offering PETs.
-!   \item[rc]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!EOPI
-
-    integer :: localrc
-    integer :: memstat
-    integer :: mypet, npets
-
-    integer, allocatable :: offsets_recv(:), offsets_send(:)
-    logical, allocatable :: needs_recv(:), needs_send(:)
-
-    localrc = ESMF_RC_NOT_IMPL
-
-    call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    allocate (offsets_recv(0:npets-1), offsets_send(0:npets-1), stat=memstat)
+    allocate (  &
+        counts_send (0:npets-1),  &
+        offsets_send(0:npets-1),  &
+        stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    ! TODO:
-    ! 1.) exchange sizes
-    ! 2.) Allocate send/recv comm buffers
-    ! 3.) Copy into send buffers
-    ! 4.) AlltoAllV
-    ! 5.) Copy recv buffers into recv_items
+    do, i=0, npets-1
+      counts_send(i) = size (id_info(i)%item_buffer)
+    end do
+
+    itemcount_local = counts_send(mypet)
+    itemcount_global = sum (counts_send)
+
+    allocate (  &
+        buffer_send(0:itemcount_global-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    offset_pos = 0
+    do, i=0, npets-1
+      itemcount = counts_send(i)
+      offsets_send(i) = offset_pos
+      buffer_send(offset_pos:offset_pos+itemcount-1) = id_info(i)%item_buffer
+      offset_pos = offset_pos + itemcount
+    end do
+
+!   Set up recv counts, offsets, and buffer.  Since there will be a different
+!   buffer size from each remote PET, a communication is necessary to inform
+!   the PETs of the buffer sizes.
+
+    allocate (  &
+        counts_recv(0:npets-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    call ESMF_VMAllToAll (vm,  &
+        sendData=counts_send, sendCount=1,  &
+        recvData=counts_recv, recvCount=1,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    allocate (  &
+        offsets_recv(0:npets-1),  &
+        buffer_recv(0:sum (bufsize_recv)-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    offset_pos = 0
+    do, i=0, npets-1
+      itemcount = counts_recv(i)
+      offsets_recv(i) = offset_pos
+      offset_pos = offset_pos + itemcount
+    end do
+
+    ! AlltoAllV
+
+    call ESMF_VMAllToAllV (vm,  &
+        sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
+        recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Copy recv buffers into recv_items
+
+    allocate (recv_items(0:npets-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    do, i=0, npets-1
+      itemcount = counts_recv(i)
+      allocate (  &
+          recv_items(i)%item_buffer(0:itemcount-1),  &
+          stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      offset_pos = offsets_recv(i)
+      recv_items(i)%item_buffer = buffer_recv(offset_pos:offset_pos+itemcount-1)
+    end do
 
     rc = localrc
 
-  end subroutine ESMF_ReconcileSendNeeds
+  end subroutine ESMF_ReconcileSendItems
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1402,12 +1661,12 @@ call ESMF_VMBarrier (vm)
       obj_buffer, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_State), intent(in)  :: state
-    type (ESMF_StateItemWrap),  intent(in) :: siwrap(:)
-    logical,           intent(in)  :: needs_list(:)
-    type(ESMF_AttReconcileFlag),intent(in) :: attreconflag
-    character,         pointer     :: obj_buffer(:) ! intent(out)
-    integer,           intent(out) :: rc
+    type (ESMF_State),          intent(in)  :: state
+    type (ESMF_StateItemWrap),  intent(in)  :: siwrap(:)
+    logical,                    intent(in)  :: needs_list(:)
+    type(ESMF_AttReconcileFlag),intent(in)  :: attreconflag
+    character,                  pointer     :: obj_buffer(:) ! intent(out)
+    integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1652,18 +1911,18 @@ print *, "serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS"
     end if
 
     if (present (text)) then
-      flush (6)
+      flush (OUTPUT_UNIT)
       call ESMF_VMBarrier (vm)
       if (mypet == 0) then
-	print *, text
-	flush (6)
+	write (OUTPUT_UNIT,*) text
+	flush (OUTPUT_UNIT)
       end if
       call ESMF_VMBarrier (vm)
     end if
 
     if (present (multitext)) then
-      print *, multitext
-      flush (6)
+      write (OUTPUT_UNIT,*) multitext
+      flush (OUTPUT_UNIT)
       call ESMF_VMBarrier (vm)
     end if
 
