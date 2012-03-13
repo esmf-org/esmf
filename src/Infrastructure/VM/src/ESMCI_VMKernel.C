@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.40 2012/01/06 20:18:30 svasquez Exp $
+// $Id: ESMCI_VMKernel.C,v 1.41 2012/03/13 02:44:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -5168,25 +5168,7 @@ namespace ESMCI{
 //==============================================================================
 //==============================================================================
 
-#ifdef ESMF_NO_SOCKETS
-//==============================================================================
-// dummy interfaces to satisfy upper ESMF layers:
-
-namespace ESMCI {
-  int socketServer(void){
-    // return successfully
-    return 0;
-  }
-  int socketClient(void){
-    // return successfully
-    return 0;
-  }
-} // namespace ESMCI
-
-//==============================================================================
-#else
-//==============================================================================
-// real socket based implementation:
+#ifndef ESMF_NO_SOCKETS
 
 #ifdef ESMF_OS_MinGW
 
@@ -5216,6 +5198,8 @@ typedef void* value_ptr_t;
 #define SERVERFILE "server.txt"   // file containing server name
 #define PORT 54320                // a random port for prototype testing
 
+#endif
+
 // LogErr
 #include "ESMCI_LogErr.h"
 #include "ESMF_LogMacros.inc"
@@ -5223,14 +5207,9 @@ typedef void* value_ptr_t;
 
 namespace ESMCI {
 
-  int const SOCKERR_UNSPEC        = -1;
-  int const SOCKERR_TIMEOUT       = -2;
-  int const SOCKERR_DISCONNECT    = -3;
-
   int socketServerInit(
     int port,               // port number
     double timeout          // timeout in seconds
-  ){
     //--------------------------------------------------------------------------
     // Attempt to open an INET socket as server and wait for a client to connect
     // The return value are:
@@ -5238,8 +5217,14 @@ namespace ESMCI {
     // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
     // SOCKERR_TIMEOUT  -- timeout condition was reached
     //--------------------------------------------------------------------------
+  ){
 
     fprintf(stderr, "Hi there from socketServerInit()\n");
+    
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
     
     // create an inet/stream socket
     int sock = socket(PF_INET, SOCK_STREAM, 0);
@@ -5311,6 +5296,7 @@ namespace ESMCI {
     // return successfully
     fprintf(stderr, "socketServerInit: CONNECTED!\n");
     return newSock; // return the connected socket
+#endif
   }
 
   // ------------------------------------------------------------------------
@@ -5319,7 +5305,6 @@ namespace ESMCI {
     char const *serverName, // server by name
     int port,               // port number
     double timeout          // timeout in seconds
-  ){
     //--------------------------------------------------------------------------
     // Attempt to open an INET socket and connect to the specified server.
     // The return value are:
@@ -5327,8 +5312,14 @@ namespace ESMCI {
     // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
     // SOCKERR_TIMEOUT  -- timeout condition was reached
     //--------------------------------------------------------------------------
+  ){
     
     fprintf(stderr, "Hi there from socketClientInit()\n");
+
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
 
     // construct the server address
     struct hostent *server = gethostbyname(serverName);
@@ -5449,6 +5440,7 @@ namespace ESMCI {
     // return successfully
     fprintf(stderr, "socketClientInit: CONNECTED!\n");
     return sock;  // return the connected socket
+#endif
   }
 
   // ------------------------------------------------------------------------
@@ -5456,7 +5448,6 @@ namespace ESMCI {
   int socketFinal(
     int sock,         // connected socket to be finalized
     double timeout    // timeout in seconds
-  ){
     //--------------------------------------------------------------------------
     // Attempt to cleanly take down a socket connection.
     // The return value are:
@@ -5464,8 +5455,14 @@ namespace ESMCI {
     // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
     // SOCKERR_TIMEOUT  -- timeout condition was reached
     //--------------------------------------------------------------------------
+  ){
 
     fprintf(stderr, "Hi there from socketFinal()\n");
+
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
 
     int const bufferSize = 1024;
     char buffer[bufferSize];
@@ -5528,6 +5525,7 @@ namespace ESMCI {
 
     // return successfully
     return 0;
+#endif
   }
     
   // ------------------------------------------------------------------------
@@ -5537,7 +5535,6 @@ namespace ESMCI {
     void const *buffer,   // data buffer
     size_t size,          // number of bytes to send out of buffer
     double timeout        // timeout in seconds
-  ){
     //--------------------------------------------------------------------------
     // Attempt to send data through a socket connection.
     // The return value are:
@@ -5545,9 +5542,15 @@ namespace ESMCI {
     // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
     // SOCKERR_TIMEOUT  -- timeout condition was reached
     //--------------------------------------------------------------------------
+  ){
 
     fprintf(stderr, "Hi there from socketSend()\n");
     
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
+
     int waitSeconds = timeout;
     int waitMicro   = (timeout - waitSeconds)*1000000;
     
@@ -5576,8 +5579,11 @@ namespace ESMCI {
       return SOCKERR_TIMEOUT;
     }
     
+    fprintf(stderr, "socketSend: buffer size=%d, bytes sent=%d\n", size, len);
+    
     // return successfully
     return len;
+#endif
   }
     
   // ------------------------------------------------------------------------
@@ -5587,7 +5593,6 @@ namespace ESMCI {
     void *buffer,         // data buffer
     size_t size,          // size of buffer in bytes
     double timeout        // timeout in seconds
-  ){
     //--------------------------------------------------------------------------
     // Attempt to receive data through a socket connection.
     // The return value are:
@@ -5596,9 +5601,15 @@ namespace ESMCI {
     // SOCKERR_TIMEOUT    -- timeout condition was reached
     // SOCKERR_DISCONNECT -- the other side has disconnected
     //--------------------------------------------------------------------------
+  ){
 
     fprintf(stderr, "Hi there from socketRecv()\n");
     
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
+
     int waitSeconds = timeout;
     int waitMicro   = (timeout - waitSeconds)*1000000;
     
@@ -5628,8 +5639,11 @@ namespace ESMCI {
       return SOCKERR_TIMEOUT;
     }
     
+    fprintf(stderr, "socketRecv: buffer size=%d, bytes recvd=%d\n", size, len);
+
     // return successfully
     return len;
+#endif
   }
     
   // ------------------------------------------------------------------------
@@ -5639,10 +5653,17 @@ namespace ESMCI {
   // ------------------------------------------------------------------------
   // ------------------------------------------------------------------------
 
+#define MORE_EXHAUSTIVE_SOCK_TESTING___disable
+  
   int socketServer(void){
     
     fprintf(stderr, "Hi there from socketServer()\n");
     
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
+
     // attempt to open and connect a server socket
     int sock = socketServerInit(PORT, 60.);
     if (sock <= SOCKERR_UNSPEC){
@@ -5673,7 +5694,9 @@ namespace ESMCI {
       fprintf(stderr, "socketServer: socketFinal() handshake failed\n");
       return 0;   // bail out, but don't indicate abort
     }
+    fprintf(stderr, "server back from clean disconnect\n");
     
+#ifdef MORE_EXHAUSTIVE_SOCK_TESTING
     VMK::wtimedelay(20.);
     
     // attempt to re-open and connect a server socket (while client is gone)
@@ -5706,7 +5729,7 @@ namespace ESMCI {
         " - expected\n");
     }else{
       fprintf(stderr, "socketServer: socketFinal() unexpected handshake\n");
-//      return 0;  // bail out, but don't indicate abort
+      return 0;  // bail out, but don't indicate abort
     }
     
     // attempt to re-open and connect a server socket
@@ -5771,9 +5794,11 @@ namespace ESMCI {
         int b = 53/0; // trigger failure
       }
     }
+#endif
     
     // return successfully
     return 0;
+#endif
   }
   
   // ------------------------------------------------------------------------
@@ -5782,10 +5807,15 @@ namespace ESMCI {
     
     fprintf(stderr, "Hi there from socketClient()\n");
     
+#ifdef ESMF_NO_SOCKETS
+    fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
+    return SOCKERR_UNSPEC;
+#else
+
     FILE *fp = fopen(SERVERFILE, "r");
     if (fp == NULL){
       fprintf(stderr, "socketClient: failed opening SERVERFILE\n");
-      return -1;  // bail out
+      return 0;   // bail out, but don't indicate abort
     }
     
     char serverName[80];
@@ -5809,13 +5839,13 @@ namespace ESMCI {
     // simple ping-pong test using blocking send/recv
     if ((len=recv(sock, buffer, bufferSize, 0)) < 0){
       perror("client: recv()");
-      return -1;  // bail out
+      return 0;   // bail out, but don't indicate abort
     }
     fprintf(stderr, "client received: len=%d :: %s\n", len, buffer);
     sprintf(buffer, "Hi, this is the PONG message!");
     if (send(sock, buffer, strlen(buffer)+1, 0) < 0){
       perror("client: send()");
-      return -1;  // bail out
+      return 0;   // bail out, but don't indicate abort
     }
 
     // attempt a clean disconnect
@@ -5823,7 +5853,9 @@ namespace ESMCI {
       fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
       return 0;  // bail out, but don't indicate abort
     }
-    
+    fprintf(stderr, "client back from clean disconnect\n");
+
+#ifdef MORE_EXHAUSTIVE_SOCK_TESTING
     // attempt to reconnect with server (while it isn't up)
     sock = socketClientInit(serverName, PORT, 10.);
     if (sock <= SOCKERR_UNSPEC){
@@ -5914,11 +5946,12 @@ namespace ESMCI {
         fprintf(stderr, "socketClient: socketFinal() handshake failed\n");
       }
     }
-
+#endif
+    
     // return successfully
     return 0;
+#endif
   }
   
 } // namespace ESMCI
 //==============================================================================
-#endif

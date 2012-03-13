@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.15 2012/01/06 20:18:27 svasquez Exp $
+// $Id: ESMCI_VMKernel.h,v 1.16 2012/03/13 02:44:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -506,6 +506,79 @@ class ComPat{
 //==============================================================================
 //==============================================================================
 
+int const SOCKERR_UNSPEC        = -1;
+int const SOCKERR_TIMEOUT       = -2;
+int const SOCKERR_DISCONNECT    = -3;
+
+int socketServerInit(
+  int port,               // port number
+  double timeout          // timeout in seconds
+  //--------------------------------------------------------------------------
+  // Attempt to open an INET socket as server and wait for a client to connect
+  // The return value are:
+  // >SOCKERR_UNSPEC  -- successfully connected socket
+  // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+  // SOCKERR_TIMEOUT  -- timeout condition was reached
+  //--------------------------------------------------------------------------
+);
+
+int socketClientInit(
+  char const *serverName, // server by name
+  int port,               // port number
+  double timeout          // timeout in seconds
+  //--------------------------------------------------------------------------
+  // Attempt to open an INET socket and connect to the specified server.
+  // The return value are:
+  // >SOCKERR_UNSPEC  -- successfully connected socket
+  // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+  // SOCKERR_TIMEOUT  -- timeout condition was reached
+  //--------------------------------------------------------------------------
+);
+    
+int socketFinal(
+  int sock,         // connected socket to be finalized
+  double timeout    // timeout in seconds
+  //--------------------------------------------------------------------------
+  // Attempt to cleanly take down a socket connection.
+  // The return value are:
+  // 0                -- successfully disconnect hand-shake
+  // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+  // SOCKERR_TIMEOUT  -- timeout condition was reached
+  //--------------------------------------------------------------------------
+);
+
+int socketSend(
+  int sock,             // socket holding the connection
+  void const *buffer,   // data buffer
+  size_t size,          // number of bytes to send out of buffer
+  double timeout        // timeout in seconds
+  //--------------------------------------------------------------------------
+  // Attempt to send data through a socket connection.
+  // The return value are:
+  // >SOCKERR_UNSPEC  -- number of bytes sent
+  // SOCKERR_UNSPEC   -- unspecified error, may be fatal, prints perror()
+  // SOCKERR_TIMEOUT  -- timeout condition was reached
+  //--------------------------------------------------------------------------
+);
+
+int socketRecv(
+  int sock,             // socket holding the connection
+  void *buffer,         // data buffer
+  size_t size,          // size of buffer in bytes
+  double timeout        // timeout in seconds
+  //--------------------------------------------------------------------------
+  // Attempt to receive data through a socket connection.
+  // The return value are:
+  // >0                 -- number of bytes received
+  // SOCKERR_UNSPEC     -- unspecified error, may be fatal, prints perror()
+  // SOCKERR_TIMEOUT    -- timeout condition was reached
+  // SOCKERR_DISCONNECT -- the other side has disconnected
+  //--------------------------------------------------------------------------
+);
+
+
+
+// testing methods, TODO: will be removed when done
 int socketServer(void);
 int socketClient(void);
 
