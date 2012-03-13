@@ -1,4 +1,4 @@
-!  $Id: ESMF_Grid_C.F90,v 1.1 2012/03/07 16:47:11 rokuingh Exp $
+!  $Id: ESMF_Grid_C.F90,v 1.2 2012/03/13 23:59:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Grid_C.F90,v 1.1 2012/03/07 16:47:11 rokuingh Exp $'
+!      '$Id: ESMF_Grid_C.F90,v 1.2 2012/03/13 23:59:04 theurich Exp $'
 !==============================================================================
 
 
@@ -41,8 +41,8 @@
 
     ! arguments
     type(ESMF_Pointer)             :: gridp
-    integer                        :: maxIndex(1:len1)
     integer, intent(in)            :: len1
+    integer                        :: maxIndex(1:len1)
     type(ESMF_CoordSys_Flag)       :: coordSys
     type(ESMF_TypeKind_Flag)       :: coordTypeKind
     integer, intent(out)           :: rc              
