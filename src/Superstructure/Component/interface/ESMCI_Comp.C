@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.24 2012/01/06 20:18:58 svasquez Exp $
+// $Id: ESMCI_Comp.C,v 1.25 2012/03/13 02:52:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.24 2012/01/06 20:18:58 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.25 2012/03/13 02:52:38 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -54,6 +54,8 @@ extern "C" {
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   
+  void FTN_X(f_esmf_compgetcurrentphase)(const ESMCI::Comp *compp,
+    int *currentPhase, int *rc);
   void FTN_X(f_esmf_compgetvminfo)(const ESMCI::Comp *compp, void **vm_info,
     int *rc);
   void FTN_X(f_esmf_compgetvm)(const ESMCI::Comp *compp, ESMCI::VM **vm,
@@ -367,6 +369,49 @@ int Comp::execute(
   
   if (userRc) *userRc = localUserRc;
 
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getCurrentPhase()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getCurrentPhase
+//
+// !INTERFACE:
+int Comp::getCurrentPhase(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *currentPhase
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN_X(f_esmf_compgetcurrentphase)(this, currentPhase, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

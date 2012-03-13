@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.27 2012/01/06 20:18:57 svasquez Exp $
+// $Id: ESMCI_Comp.h,v 1.28 2012/03/13 02:52:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,6 +70,7 @@ class Comp{
       ESMCI::State *exportState, ESMCI::Clock *clock, 
       ESMC_BlockingFlag blockingFlag, int phase, int *userRc) const;
     
+    int getCurrentPhase(int *currentPhase) const;
     int getVmInfo(void **vm_info) const;
     int getVm(VM **vm) const;
     int getVmParent(VM **vmparent) const;

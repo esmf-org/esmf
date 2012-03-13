@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.230 2012/01/06 20:19:00 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.231 2012/03/13 02:52:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -288,7 +288,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.230 2012/01/06 20:19:00 svasquez Exp $'
+    '$Id: ESMF_Comp.F90,v 1.231 2012/03/13 02:52:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -939,6 +939,7 @@ contains
     type(ESMF_Sync_Flag)    :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     integer                 :: phaseArg
+    integer                 :: phasePortArg
         
     ! dummys that will provide initializer values if args are not present
     type(ESMF_State)        :: dummyis, dummyes
@@ -1008,9 +1009,25 @@ contains
       compp%argclock = dummyclock
     endif
 
-    ! phase
-    phaseArg = 1 !default
-    if (present(phase)) phaseArg = phase
+    ! set phase and port number
+    if ((method==ESMF_METHOD_SERVICELOOP) .or. &
+      (method==ESMF_METHOD_SERVICELOOPIC)) then
+      ! deal with special phase/port argument combination
+      phaseArg = 1 ! always use phase 1 for serviceloop method
+      if (present(phase)) then
+        phasePortArg = phase  ! port
+      else
+        phasePortArg = -1     ! indicate no port was specified
+      endif
+    else
+      ! all other component methods have regular phase arguments
+      if (present(phase)) then
+        phaseArg = phase
+      else
+        phaseArg = 1  ! default phase
+      endif
+      phasePortArg = phaseArg
+    endif
 
     ! Wrap comp so it's passed to C++ correctly.
     compp%compw%compp => compp
@@ -1035,7 +1052,7 @@ contains
       ! callback into user code
       call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
         compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
-        phaseArg, compp%vm_recursionCount, localrc)
+        phasePortArg, compp%vm_recursionCount, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return

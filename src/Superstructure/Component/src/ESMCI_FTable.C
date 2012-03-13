@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.67 2012/01/06 20:19:00 svasquez Exp $
+// $Id: ESMCI_FTable.C,v 1.68 2012/03/13 02:52:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.67 2012/01/06 20:19:00 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.68 2012/03/13 02:52:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -333,6 +333,48 @@ extern "C" {
     // also have a valid compTunnel member.
     *compTunnel = new ESMCI::CompTunnel(localActualComp,
       *localActualCompRootPet);
+    if (*compTunnel == NULL){
+      ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", rc);  
+      return; // bail out
+    }
+    // call into setServices with the internal CompTunnel::SetServices wrapper
+    int userRc;
+    localrc =dualComp->setServices(ESMCI::CompTunnel::setServicesWrap, &userRc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
+      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
+      return; // bail out on userRc b/c setServicesWrap is an internal routine
+    
+    // Now that everything has returned successfully, mark the tunnel as
+    // connected.
+    // This must be done up on this level, so that _all_ PETs that call into
+    // SetServices() have the tunnel set to connected.
+    (*compTunnel)->setConnected(true);
+    
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setservicessock"
+  void FTN_X(c_esmc_setservicessock)(ESMCI::Comp *dualComp, 
+    ESMCI::CompTunnel **compTunnel, int *port, char const *serverArg,
+    int *rc, ESMCI_FortranStrLenArg len){
+    int localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    if (*compTunnel != NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+        "- Component is already associated with an Actual Component", rc);
+      return;
+    }
+    // server name
+    string server(serverArg, len);
+    // The compTunnel object must be created on all the PETs that execute
+    // this routine, which are potentially all parent PETs, not just those
+    // that eventually enter the child VM. This is so that all child component
+    // objects that exist on the parent VM with a valid entry of a child VM
+    // also have a valid compTunnel member.
+    *compTunnel = new ESMCI::CompTunnel(*port, server);
     if (*compTunnel == NULL){
       ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", rc);  
       return; // bail out
@@ -684,7 +726,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   void **vm_cargo,            // p2 to member which holds cargo
   ESMCI::FTable **ptr,        // p2 to the ftable of this component
   enum ESMCI::method *method, // method type
-  int *phase,                 // phase selector
+  int *phase_,                // phase selector
   int *recursionCount,        // keeping track of recursion level of component
   int *rc                     // return code
   ){
@@ -703,6 +745,21 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
+
+  // the following construct ensures that this routine does not modify
+  // the phase variable on the caller side
+  int phaseVar;
+  int *phase = &phaseVar;
+  if (phase_)
+    phaseVar = *phase_;
+  else
+    phase = NULL;
+    
+  int port;
+  if (phase && (*method == ESMCI::METHOD_SERVICELOOP)){
+    port = *phase;  // incoming phase actually indicates port number
+    *phase = 1;     // serviceloop only has phase 1
+  }
 
   char const *methodString = ESMCI::FTable::methodString(*method);
 
@@ -739,10 +796,16 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
     cargo->previousCargo = *vm_cargo; // support recursion
     cargo->previousParentFlag = vmplan->parentVMflag;  // support threaded rec.
     cargo->currentMethod = currentMethod;
-    if (phase)
-      cargo->currentPhase = *phase;
-    else
-      cargo->currentPhase = 1;    // default
+    if (*method == ESMCI::METHOD_SERVICELOOP){
+      // for serviceloop method the currentPhase carries the port argument
+      cargo->currentPhase = port;
+    }else{
+      // for all other methods the currentPhase is the current phase
+      if (phase)
+        cargo->currentPhase = *phase;
+      else
+        cargo->currentPhase = 1;    // default
+    }
     *vm_cargo=(void*)cargo;           // store pointer to the cargo structure
   
     if (cargo->previousCargo != NULL){
@@ -1479,8 +1542,9 @@ int FTable::setFuncArgs(
     return rc; // bail out
   
   if (i == -1){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "unknown function name", 
-      &rc);
+    char msg[80];
+    sprintf(msg, "unknown function name: %s", name);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msg, &rc);
     return rc; // bail out
   }
 

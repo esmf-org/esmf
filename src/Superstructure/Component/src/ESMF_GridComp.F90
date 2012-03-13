@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.192 2012/02/28 18:41:10 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.193 2012/03/13 02:52:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.192 2012/02/28 18:41:10 svasquez Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.193 2012/03/13 02:52:35 theurich Exp $'
 
 !==============================================================================
 !
@@ -108,6 +108,7 @@ module ESMF_GridCompMod
     module procedure ESMF_GridCompSetServices
     module procedure ESMF_GridCompSetServicesShObj
     module procedure ESMF_GridCompSetServicesComp
+    module procedure ESMF_GridCompSetServicesSock
   end interface
 !------------------------------------------------------------------------------
 
@@ -1511,7 +1512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   recursive subroutine ESMF_GridCompServiceLoop(gridcomp, keywordEnforcer, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, port, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),  intent(inout)           :: gridcomp
@@ -1520,18 +1521,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_State),     intent(inout), optional :: exportState
     type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
-    integer,              intent(in),    optional :: phase
+    integer,              intent(in),    optional :: port
     integer,              intent(out),   optional :: userRc
     integer,              intent(out),   optional :: rc
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
 ! !DESCRIPTION:
-! Call the associated user initialization routine for 
-! an {\tt ESMF\_GridComp}.
+! Call the ServiceLoop routine for an {\tt ESMF\_GridComp}.
+! This tries to establish a "component tunnel" between the {\em actual}
+! Component (calling this routine) and a {\tt dual} Component connecting to it
+! through a matching SetServices call.
 !   
 ! The arguments are:
 ! \begin{description}
@@ -1557,19 +1555,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]
-!   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.
-!   Single-phase routines require only one invocation to complete
-!   their work.
-!   Multi-phase routines provide multiple subroutines to accomplish
-!   the work, accomodating components which must complete part of their
-!   work, return to the caller and allow other processing to occur,
-!   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase
-!   number to be invoked.
-!   For single-phase child components this argument is optional. The default is
-!   1.
+! \item[{[port]}]
+!   In case a port number is provided, the "component tunnel" is established 
+!   using sockets. The actual component side, i.e. the side that calls into
+!   {\tt ESMF\_GridCompServiceLoop()}, starts to listen on the specified port
+!   as the server.
+!   In case the {\tt port} argument is {\em not} specified, the "component
+!   tunnel" is established within the same executable using local communication
+!   methods (e.g. MPI).
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1585,10 +1578,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
+    
+    if (present(port)) then
+      if (port < 0) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="The 'port' argument must be >= 0", &
+          ESMF_CONTEXT, rcTOReturn=rc)
+        return
+      endif
+    endif
 
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_SERVICELOOP, &
       importState=importState, exportState=exportState, clock=clock, &
-      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=port, userRc=userRc, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2018,7 +2020,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompSetServicesComp"
 !BOP
-! !IROUTINE: ESMF_GridCompSetServices - Set to serve as Dual Component for another Component
+! !IROUTINE: ESMF_GridCompSetServices - Set to serve as Dual Component for an Actual Component
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCompSetServices()
@@ -2033,7 +2035,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Set the services of a Gridded Component to serve a "dual" Component for an
-! "actual" Component.
+! "actual" Component. The component tunnel is VM based.
 !    
 ! The arguments are:
 ! \begin{description}
@@ -2075,6 +2077,71 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     call c_ESMC_SetServicesComp(gridcomp, gridcomp%compp%compTunnel, &
       actualGridcomp, actualCompRootPet, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! now indicate that this Component has a VM associated
+    gridcomp%compp%compStatus%vmIsPresent = .true.
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCompSetServicesSock"
+!BOP
+! !IROUTINE: ESMF_GridCompSetServices - Set to serve as Dual Component for an Actual Component through sockets
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCompSetServices()
+  recursive subroutine ESMF_GridCompSetServicesSock(gridcomp, port, &
+    keywordEnforcer, server, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(inout)         :: gridcomp
+    integer,             intent(in)            :: port
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),    intent(in),  optional :: server
+    integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Set the services of a Gridded Component to serve a "dual" Component for an
+! "actual" Component. The component tunnel is socket based.
+!    
+! The arguments are:
+! \begin{description}
+! \item[gridcomp]
+!   Dual Gridded Component.
+! \item[port]
+!   Port number under which the actual component is being served.
+! \item[{[server]}]
+!   Server name where the actual component is being served. The default, i.e.
+!   if the {\tt server} argument was not provided, is {\tt localhost}.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local error status
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
+    
+    if (present(server)) then
+      call c_ESMC_SetServicesSock(gridcomp, gridcomp%compp%compTunnel, &
+        port, server, localrc)
+    else
+      call c_ESMC_SetServicesSock(gridcomp, gridcomp%compp%compTunnel, &
+        port, "localhost", localrc)
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

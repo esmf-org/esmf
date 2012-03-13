@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.75 2012/01/06 20:18:58 svasquez Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.76 2012/03/13 02:52:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.75 2012/01/06 20:18:58 svasquez Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.76 2012/03/13 02:52:38 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -60,6 +60,25 @@ recursive subroutine f_esmf_compsetvminfo(comp, vm_info, rc)
 
   call ESMF_CompSet(compp=comp%compp, vm_info=vm_info, rc=rc)
 end subroutine f_esmf_compsetvminfo
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compgetcurrentphase"
+recursive subroutine f_esmf_compgetcurrentphase(comp, currentPhase, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+
+  implicit none
+
+  type(ESMF_CWrap)   :: comp
+  integer            :: currentPhase
+  integer            :: rc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_CompGet(compp=comp%compp, currentPhase=currentPhase, rc=rc)
+end subroutine f_esmf_compgetcurrentphase
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compgetvminfo"

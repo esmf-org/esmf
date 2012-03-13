@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.h,v 1.6 2012/01/06 20:18:57 svasquez Exp $
+// $Id: ESMCI_CompTunnel.h,v 1.7 2012/03/13 02:52:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,6 +45,8 @@ namespace ESMCI {
 class CompTunnel{
   private:
     bool connected;
+    bool vmBased;
+    bool socketBased;
     //--------------
     Comp *dual;         // set if this is the dual side
     Comp *actual;       // set if this is the actual side
@@ -55,9 +57,11 @@ class CompTunnel{
     State *exportState;
     Clock **clock;
     //--------------
+    //--------------
     Comp *localActualComp; // in case the actual component happens to be local
     int localActualCompRootPet;
     cargotype localActualCompCargo;
+    //--------------
     //--------------
     VM *bridgeVM;
     //--------------
@@ -71,20 +75,34 @@ class CompTunnel{
     int localRecvFromPet; // other side's PET that sends in terms of bridgeVM 
     //--------------
     bool outstandingWaitFlag; // indicate whether a local wait call is required
+    //--------------
+    //--------------
+    int sock;
+    int port;
+    std::string server;
+    bool masterFlag;
+    //--------------
   private:
     void zeroOut(void){
       connected = false;
+      vmBased = false;
+      socketBased = false;
       dual = NULL;
       actual = NULL;
       method = METHOD_NONE;
-      int phase = 0;
+      phase = 0;
       importState = NULL;
       exportState = NULL;
       clock = NULL;
       localActualComp = NULL;
+      bridgeVM = NULL;
       localSendToPetList.resize(0);
       outstandingWaitFlag = false;
+      sock = -1;
+      port = -1;
+      masterFlag = false;
     }
+    void chat(char *buffer);
   public:
     // native C++ constructors/destructors
     CompTunnel(void){
@@ -94,10 +112,23 @@ class CompTunnel{
       zeroOut();
       localActualComp = localActualComp_;
       localActualCompRootPet = localActualCompRootPet_;
+      vmBased = true;
     }
     CompTunnel(VM *bridgeVM_){
       zeroOut();
       bridgeVM = bridgeVM_;
+      vmBased = true;
+    }
+    CompTunnel(int port_){
+      zeroOut();
+      port = port_;
+      socketBased = true;
+    }
+    CompTunnel(int port_, std::string server_){
+      zeroOut();
+      port = port_;
+      server = server_;
+      socketBased = true;
     }
     ~CompTunnel(void){
       connected = false;
