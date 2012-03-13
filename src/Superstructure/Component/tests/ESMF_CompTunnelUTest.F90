@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.9 2012/01/06 20:19:02 svasquez Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.10 2012/03/13 02:55:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -134,11 +134,37 @@ module ESMF_CompTunnelUTest_comp_mod
     ! local variables
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
+    type(ESMF_VM)          :: vm 
 
     ! Initialize
     rc = ESMF_SUCCESS
     
     call ESMF_LogWrite("Actual Component Run", ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! In order to test blocking/non-blocking dual component feature put the
+    ! actual component to sleep for a few seconds:
+    call ESMF_VMWtimeDelay(SLEEPTIME._ESMF_KIND_R8) ! sleep a few seconds
+    
+    ! Need a barrier so that time tests on the dual component PETs will be
+    ! as expected. This is only for testing! Generally this kind of
+    ! synchronization is not desirable.
+    call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_VMBarrier(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_LogWrite("Actual Component exit Run2 after sleep", &
+      ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -223,7 +249,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.9 2012/01/06 20:19:02 svasquez Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.10 2012/03/13 02:55:55 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -244,6 +270,7 @@ program ESMF_CompTunnelUTest
   type(ESMF_GridComp)    :: actualCompA, dualCompA
   type(ESMF_GridComp)    :: actualCompB, dualCompB
   type(ESMF_GridComp)    :: actualCompC, dualCompC
+  type(ESMF_GridComp)    :: actualCompD, dualCompD
 #endif  
   
   ! cumulative result: count failures; no failures equals "all pass"
@@ -304,7 +331,8 @@ program ESMF_CompTunnelUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Actual Component"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(actualComp, userRoutine=setservices, userRc=userRc, rc=rc)
+  call ESMF_GridCompSetServices(actualComp, userRoutine=setservices, &
+    userRc=userRc, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !NEX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
@@ -342,9 +370,6 @@ program ESMF_CompTunnelUTest
     rc=ESMF_SUCCESS ! manually set the ESMF_SUCCESS for the following tests
   endif
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !NEX_UTest_Multi_Proc_Only
-  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
-  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -537,16 +562,26 @@ program ESMF_CompTunnelUTest
   if (petCount /= 8) goto 10  ! skip all of the exhaustive tests of not on 8PET
   
   !------------------------------------------------------------------------
-  ! The exhaustive tests break into three dual-actual pairs: A, B, C. The dual,
-  ! i.e. front-end component for all these pairs is always defined on the same
-  ! PETs, but the actual components are on different PETs. Calling into the
-  ! dual components with non-blocking syncflag thus allows concurrent execution
-  ! of the actual components. The layout across the 8 PETs is as follows:
+  ! The exhaustive tests break into three dual-actual pairs: A, B, C. The 
+  ! dual, i.e. front-end component for all these pairs is always defined on
+  ! the same two PETs. The actual components are on different PETs.
+  ! Consequently,  calling into the dual components with non-blocking syncflag
+  ! allows concurrent execution of the actual components. The layout across the
+  ! 8 PETs is as follows:
   !
   !   PET:        0     1     2     3     4     5     6     7
   !   pair-A:           dual  act.  act.  dual        act.
   !   pair-B:     act.  dual              dual
   !   pair-C:           dual              dual  act.        act.
+  !
+  ! A fourth pair "D" is created with pairs A, B, C, however, it tests a
+  ! a different component tunnel implementation path. It must be created 
+  ! up here because of how component C is testing implicit termination via
+  ! Finalize (no explicit Destroy call). Pair D is socket based and looks like
+  ! this:
+  !
+  !   PET:        0     1     2     3     4     5     6     7
+  !   pair-D:           dual  act.  act.  dual        act.
   !------------------------------------------------------------------------
   
   ! --- create A's ---
@@ -585,7 +620,8 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Actual Component A"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(actualCompA, userRoutine=setservices, userRc=userRc, rc=rc)
+  call ESMF_GridCompSetServices(actualCompA, userRoutine=setservices, &
+    userRc=userRc, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !EX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
@@ -647,7 +683,8 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Actual Component B"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(actualCompB, userRoutine=setservices, userRc=userRc, rc=rc)
+  call ESMF_GridCompSetServices(actualCompB, userRoutine=setservices, &
+    userRc=userRc, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !EX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
@@ -709,7 +746,8 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Actual Component C"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(actualCompC, userRoutine=setservices, userRc=userRc, rc=rc)
+  call ESMF_GridCompSetServices(actualCompC, userRoutine=setservices, &
+    userRc=userRc, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !EX_UTest_Multi_Proc_Only
   write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
@@ -735,6 +773,69 @@ program ESMF_CompTunnelUTest
   
   deallocate(petList)
 
+  ! --- create D's ---
+
+  !------------------------------------------------------------------------
+  ! construct petList for the actual Component D
+  allocate(petList(3))
+  petList = (/2,3,6/)
+  
+  write(logString, *) "Actual Component D petList = ", petList
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Create the Actual Component D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  actualCompD = ESMF_GridCompCreate(petList=petList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  deallocate(petList)
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "SetVM for the Actual Component D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompSetVM(actualCompD, userRoutine=setvm, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "SetServices for the Actual Component D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompSetServices(actualCompD, userRoutine=setservices, &
+    userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! construct petList for the dual Component D
+  allocate(petList(2))
+  petList = (/1,4/)
+
+  write(logString, *) "Dual Component D petList = ", petList
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Create the Dual Component D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  dualCompD = ESMF_GridCompCreate(petList=petList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  deallocate(petList)
+  
   ! --- connect A's ---
 
   !------------------------------------------------------------------------
@@ -754,9 +855,6 @@ program ESMF_CompTunnelUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_GridCompSetServices(dualCompA, actualGridcomp=actualCompA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !EX_UTest_Multi_Proc_Only
-  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
-  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   ! --- connect B's ---
@@ -767,9 +865,6 @@ program ESMF_CompTunnelUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_GridCompSetServices(dualCompB, actualGridcomp=actualCompB, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !EX_UTest_Multi_Proc_Only
-  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
-  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -791,9 +886,6 @@ program ESMF_CompTunnelUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_GridCompSetServices(dualCompC, actualGridcomp=actualCompC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !EX_UTest_Multi_Proc_Only
-  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
-  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -934,7 +1026,177 @@ program ESMF_CompTunnelUTest
   !------------------------------------------------------------------------
 
   ! --- don't destroy C's in order to test that automatic garbage collection
-  ! --- during ESMF_Finalize() correctly terminates C's ServiceLoop
+  ! --- during ESMF_Finalize() correctly terminates C's ServiceLoop & cleans up
+  
+  !------------------------------------------------------------------------
+  ! -- socket based component pair "D" with the following petLists:
+  !
+  !   PET:        0     1     2     3     4     5     6     7
+  !   pair-D:           dual  act.  act.  dual        act.
+  !------------------------------------------------------------------------
+  
+  ! --- connect D's ---
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ServiceLoop for the Actual Component D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompServiceLoop(actualCompD,  port=60000, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "SetServices for the Dual Component D on all PETs"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompSetServices(dualCompD, port=60000, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Initialize (blocking) for the Dual Component D -> Initialize Actual D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompInitialize(dualCompD, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Run (blocking) for the Dual Component D-> Run Actual D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompRun(dualCompD, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  if (ESMF_GridCompIsPetLocal(dualCompD)) then
+    write(failMsg, *) "Did not return 13141516 in userRc" 
+    call ESMF_Test((userRc.eq.13141516), name, failMsg, result, ESMF_SRCLINE)
+  else
+    write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
+  !------------------------------------------------------------------------
+
+  call ESMF_VMWtime(startTime, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Run phase=2 (blocking) for the Dual Component D-> Run Actual D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompRun(dualCompD, phase=2, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  if (ESMF_GridCompIsPetLocal(dualCompD)) then
+    write(failMsg, *) "Did not return 27282920 in userRc" 
+    call ESMF_Test((userRc.eq.27282920), name, failMsg, result, ESMF_SRCLINE)
+  else
+    write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Check time delay on blocking Component D Run2"
+  write(failMsg, *) "Incorrect time delay" 
+  call ESMF_VMWtime(endTime, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  delayTime = endTime - startTime
+  if (ESMF_GridCompIsPetLocal(dualCompD)) then
+    ! PETs in Dual Component petList must be blocking
+    call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-precTime, name, failMsg, result, ESMF_SRCLINE)
+  else
+    ! PETs not in Dual Component petList must not be blocking
+    call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+precTime, name, failMsg, result, ESMF_SRCLINE)
+  endif
+  write(logString, *) "delayTime (blocking) = ", delayTime
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Run phase=2 (non-blocking) for the Dual Component D-> Run Actual D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  userRc = -999 ! set to something obvious -> must change to SUCCESS on all PETs
+  call ESMF_GridCompRun(dualCompD, phase=2, syncflag=ESMF_SYNC_NONBLOCKING, &
+    userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Wait for non-blocking Run phase=2 for Component pair D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompWait(dualCompD, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  if (ESMF_GridCompIsPetLocal(dualCompD)) then
+    write(failMsg, *) "Did not return 27282920 in userRc" 
+    call ESMF_Test((userRc.eq.27282920), name, failMsg, result, ESMF_SRCLINE)
+  else
+    write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+    call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  endif
+  !------------------------------------------------------------------------
+
+  call ESMF_VMWtime(startTime, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Finalize (non-blocking) for the Dual Component D-> Run Actual D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompFinalize(dualCompD, syncflag=ESMF_SYNC_NONBLOCKING, &
+    userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Wait for non-blocking Finalize for Component pair D"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_GridCompWait(dualCompD, userRc=userRc, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !EX_UTest_Multi_Proc_Only
+  write(failMsg, *) "Did not return ESMF_SUCCESS in userRc" 
+  call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+  
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Check time delay on non-blocking Component D Finalize/wait"
+  write(failMsg, *) "Incorrect time delay" 
+  call ESMF_VMWtime(endTime, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  delayTime = endTime - startTime
+  if (ESMF_GridCompIsPetLocal(dualCompD)) then
+    ! PETs in Dual Component petList must be blocking
+    call ESMF_Test(delayTime > SLEEPTIME._ESMF_KIND_R8-precTime, name, failMsg, result, ESMF_SRCLINE)
+  else
+    ! PETs not in Dual Component petList must not be blocking
+    call ESMF_Test(delayTime < SLEEPTIME._ESMF_KIND_R8+precTime, name, failMsg, result, ESMF_SRCLINE)
+  endif
+  write(logString, *) "delayTime (wait) = ", delayTime
+  call ESMF_LogWrite(logString, ESMF_LOGMSG_INFO, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  ! --- don't destroy D's in order to test that automatic garbage collection
+  ! --- during ESMF_Finalize() correctly terminates D's ServiceLoop & cleans up
 
 10 continue
 !-------------------------------------------------------------------------------  
