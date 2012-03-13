@@ -1,4 +1,4 @@
-! $Id: ESMF_FaultToleranceSTest.F90,v 1.1 2011/12/01 18:58:25 theurich Exp $
+! $Id: ESMF_FaultToleranceSTest.F90,v 1.2 2012/03/13 03:02:07 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -25,8 +25,9 @@ program ESMF_FaultToleranceSTest
   implicit none
 
   ! Local variables
-  integer :: localPet, petCount, userrc, localrc, rc, i
-  type(ESMF_VM):: vm
+  integer             :: localPet, petCount, userRc, localrc, rc, i
+  type(ESMF_VM)       :: vm
+  type(ESMF_GridComp) :: dualComp
 
   character(ESMF_MAXSTR) :: testname
   character(ESMF_MAXSTR) :: failMsg, finalMsg
@@ -69,22 +70,43 @@ program ESMF_FaultToleranceSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  if (localPet == petCount-1) then
-    call c_ESMCI_vmkSocketClient(localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) &
-      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  endif
+  ! - Sanity test the socket based connection 
+  ! - TODO: remove
+
+!  if (localPet == petCount-1) then
+!    call c_ESMCI_vmkSocketClient(localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!      ESMF_CONTEXT, rcToReturn=rc)) &
+!      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+!  endif
   
-  ! test MPI function after call into socket code
-  do i=1, 10
-    call ESMF_VMBarrier(vm)
-    print *, "returned from user VMBarrier()"
-!    call MPI_Barrier(MPI_COMM_WORLD, localrc)
-!    print *, "returned from MPI_Barrier()"
-    call ESMF_VMWTimeDelay(1.d0)
-  enddo  
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+  ! - This is the top level access layer to an actual component running
+  ! - remotely as an independent executable through a local dual component.
   
+  ! - Create the dual component and connect with the actual component by
+  ! - calling a special SetServices routine.
+  
+  dualComp = ESMF_GridCompCreate(name="dual component A", rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  call ESMF_GridCompSetServices(dualComp, port=60000, server="fudge", &
+    rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  call ESMF_GridCompInitialize(dualComp, userRc=userRc, rc=localrc)
+  if (ESMF_LogFoundError(userRc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
