@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.26 2012/01/19 23:49:02 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.27 2012/03/14 14:44:06 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -22,8 +22,7 @@ module ESMF_WebServMod
 
 !EOP
 !
-! This file contains the Component class definition and all Component
-! class methods.
+! This file contains the Web Services routines.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -32,7 +31,7 @@ module ESMF_WebServMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_GridCompMod - Gridded Component class.
+! !MODULE: ESMF_WebServMod - Web Services routines.
 !
 ! !DESCRIPTION:
 !
@@ -43,6 +42,7 @@ module ESMF_WebServMod
 ! !USES:
   use ESMF_CompMod
   use ESMF_GridCompMod
+  use ESMF_CplCompMod
   use ESMF_StateTypesMod
   use ESMF_StateMod
   use ESMF_ClockMod
@@ -55,7 +55,10 @@ module ESMF_WebServMod
   private
 
   public ESMF_WebServProcessRequest, ESMF_WebServWaitForRequest
+  public ESMF_WebServCplCompProcessRequest, ESMF_WebServCplCompWaitForRequest
   public ESMF_WebServicesLoop
+  public ESMF_WebServicesCplCompLoop
+  public ESMF_WebServAddOutputData
 
 contains
 
@@ -158,22 +161,118 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServCplCompProcessRequest()"
+!BOPI
+! !IROUTINE: ESMF_WebServCplCompProcessRequest 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServCplCompProcessRequest(comp, importState, exportState, &
+                                               clock, phase, procType, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)   :: comp
+    type(ESMF_State)     :: importState
+    type(ESMF_State)     :: exportState
+    type(ESMF_Clock)     :: clock
+    integer              :: phase
+    character            :: procType
+    integer, intent(out) :: rc
+
+!
+!
+! !DESCRIPTION:
+!   If this is the root process, send messages to all of the other processes
+!   to run the specified routine.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
+!   the service is created.
+! \item[{[impstate]}]
+!   {\tt ESMF\_State} containing import data for coupling. 
+! \item[{[expstate]}]
+!   {\tt ESMF\_State} containing export data for coupling. 
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
+! \item[{[phase]}]
+!   Indicates whether routines are {\em single-phase} or {\em multi-phase}.
+! \item[{[procType]}]
+!   Specifies which routine to run: 'I' for initialization, 'R' for run, and
+!   'F' for finalization.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    ! Local variables
+    integer        :: localrc
+    type(ESMF_VM)  :: vm
+    integer        :: localPet, petCount
+    integer        :: thread_cntr
+    character      :: outmsg(2)
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    print *, "Processing request"
+
+    call ESMF_CplCompGet(comp, vm=vm)
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount)
+
+    if (localPet == 0) then
+
+       outmsg(1) = procType
+
+       ! Loop through the other, non-root processes, sending each of them 
+       ! the message to process the request
+       do thread_cntr = 1, petCount - 1, 1
+
+          print *, "In do loop: ", thread_cntr
+          print *, "Before MPI Send: ", procType
+          call ESMF_VMSend(vm, sendData=outmsg, count=1, dstPet=thread_cntr, &
+                           rc=localrc)
+
+          ! Check return code to make sure send went out ok
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogSetError( &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
+                      msg="Error while sending message to non-root pet", &
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
+          endif
+
+       enddo
+
+    endif
+
+    rc = localrc
+
+  end subroutine
+!-------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_WebServWaitForRequest()"
 !BOPI
 ! !IROUTINE: ESMF_WebServWaitForRequest 
 !
 ! !INTERFACE:
-!  subroutine ESMF_WebServWaitForRequest(comp, exportState, rc)
-  subroutine ESMF_WebServWaitForRequest(comp, importState, exportState, clock, syncflag, phase, rc)
+  subroutine ESMF_WebServWaitForRequest(comp, importState, exportState, &
+                                        clock, syncflag, phase, rc)
 
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)  :: comp
-!    type(ESMF_State)     :: exportState
+    type(ESMF_GridComp)                              :: comp
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: rc
 !
@@ -185,7 +284,7 @@ contains
 ! The arguments are:
 ! \begin{description}
 ! \item[{[comp]}]
-!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
 !   routine is run.
 ! \item[{[expstate]}]
 !   {\tt ESMF\_State} containing export data for coupling. 
@@ -318,6 +417,165 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServCplCompWaitForRequest()"
+!BOPI
+! !IROUTINE: ESMF_WebServCplCompWaitForRequest 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServCplCompWaitForRequest(comp, importState, exportState, &
+                                               clock, syncflag, phase, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                               :: comp
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
+    integer,                 intent(in),    optional :: phase
+    integer,                 intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   If this is not the root process, waits for a message from the root 
+!   process and executes the appropriate routine when the message is received.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
+!   routine is run.
+! \item[{[expstate]}]
+!   {\tt ESMF\_State} containing export data for coupling. 
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer       :: localrc
+    type(ESMF_VM) :: vm
+    integer       :: localPet, petCount
+    character     :: inmsg(2)
+    integer       :: count
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    ! Get the current PET info
+    call ESMF_CplCompGet(comp, vm=vm)
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount)
+
+    ! Loop forever... need to provide clean exit 
+    do
+
+       ! Wait for the request to be sent, and once it's received, process
+       ! the request based on the incoming message
+       print *, "Waiting for request: ", localPet
+       inmsg(1) = 'A'
+
+       call ESMF_VMRecv(vm, recvData=inmsg, count=count, srcPet=0, &
+                        syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+       if (localrc /= ESMF_SUCCESS) then
+           call ESMF_LogSetError( &
+                   rcToCheck=ESMF_RC_NOT_VALID, &
+                   msg="Error while receiving message from root pet", &
+                   ESMF_CONTEXT, &
+                   rcToReturn=localrc)
+
+           rc = localrc
+           return
+       endif
+
+       print *, "    Buffer value: ", inmsg(1), " - ", localPet
+       print *, "Leaving MPI_Recv: ", localPet
+
+       ! 'I' = init
+       if (inmsg(1) == 'I') then
+
+          print *, "Execute CplCompInitialize: ", localPet
+          call ESMF_CplCompInitialize(comp, rc=localrc)
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogSetError( &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
+                      msg="Error while calling ESMF Initialize.", &
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
+
+              rc = localrc
+              return
+          endif
+          print *, "Done Execute CplCompInitialize: ", localPet
+
+       ! 'R' = run
+       else if (inmsg(1) == 'R') then
+
+          print *, "Execute CplCompRun: ", localPet
+          call ESMF_CplCompRun(comp, rc=localrc)
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogSetError( &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
+                      msg="Error while calling ESMF Run.", &
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
+
+              rc = localrc
+              return
+          endif
+          print *, "Done Execute CplCompRun: ", localPet
+
+       ! 'F' = final
+       else if (inmsg(1) == 'F') then
+
+          print *, "Execute CplCompFinalize: ", localPet
+          call ESMF_CplCompFinalize(comp, rc=localrc)
+          if (localrc /= ESMF_SUCCESS) then
+              call ESMF_LogSetError( &
+                      rcToCheck=ESMF_RC_NOT_VALID, &
+                      msg="Error while calling ESMF Finalize.", &
+                      ESMF_CONTEXT, &
+                      rcToReturn=localrc)
+
+              rc = localrc
+              return
+          endif
+          print *, "Done Execute CplCompFinalize: ", localPet
+
+       ! 'E' = exit
+       else if (inmsg(1) == 'E') then
+
+          print *, "Exit Component Service: ", localPet
+          rc = ESMF_SUCCESS
+          return
+
+       ! Anything else... it's an error
+       else 
+
+           localrc = ESMF_FAILURE
+
+           call ESMF_LogSetError( &
+                   rcToCheck=ESMF_RC_ARG_BAD, &
+                   msg="Error while processing request.", &
+                   ESMF_CONTEXT, &
+                   rcToReturn=localrc)
+
+           rc = localrc
+           return
+
+       endif
+
+    end do
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_WebServRegisterSvc()"
 !BOPI
 ! !IROUTINE: ESMF_WebServRegisterSvc 
@@ -376,6 +634,64 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServCplCompRegisterSvc()"
+!BOPI
+! !IROUTINE: ESMF_WebServCplCompRegisterSvc 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServCplCompRegisterSvc(comp, portNum, clientId, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)         :: comp
+    integer                    :: portNum
+    character(len=ESMF_MAXSTR) :: clientId
+    integer, intent(out)       :: rc
+!
+!
+! !DESCRIPTION:
+!   Registers this component as a service with the Registrar so that clients
+!   can discover that it is available.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
+!   routine is run.
+! \item[{[portNum]}]
+!   Number of the port on which the component service is listening.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer                     :: localrc
+    character(len=ESMF_MAXSTR)  :: compName
+    character(len=ESMF_MAXSTR)  :: compDesc
+!    character(len=ESMF_MAXSTR)  :: hostName
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call ESMF_CplCompGet(comp, name=compName, rc=localrc)
+
+    compDesc = ""
+!    hostName = "localhost"
+
+    call c_ESMC_RegisterComponent(compName, compDesc, clientId, portNum, &
+                                  localrc)
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_WebServUnregisterSvc()"
 !BOPI
 ! !IROUTINE: ESMF_WebServUnregisterSvc 
@@ -395,11 +711,8 @@ contains
 !
 ! The arguments are:
 ! \begin{description}
-! \item[{[comp]}]
-!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
-!   routine is run.
-! \item[{[portNum]}]
-!   Number of the port on which the component service is listening.
+! \item[{[clientId]}]
+!   The identifier of the client.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -428,17 +741,18 @@ contains
 ! !IROUTINE: ESMF_WebServSvcLoop 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServSvcLoop(comp, portNum, importState, exportState, &
-                                 clock, syncflag, phase, rc)
+  subroutine ESMF_WebServSvcLoop(clientId, comp, portNum, importState, &
+                                 exportState, clock, syncflag, phase, rc)
 
 !
 ! !ARGUMENTS:
+    character(len=ESMF_MAXSTR)                       :: clientId
     type(ESMF_GridComp)                              :: comp
     integer                                          :: portNum
     type(ESMF_State),        intent(inout), optional :: importState
     type(ESMF_State),        intent(inout), optional :: exportState
     type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
+    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
     integer,                 intent(out),   optional :: rc
 !
@@ -450,7 +764,7 @@ contains
 ! The arguments are:
 ! \begin{description}
 ! \item[{[comp]}]
-!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
 !   routine is run.
 ! \item[{[portNum]}]
 !   Number of the port on which the component service is listening.
@@ -467,8 +781,64 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_ComponentSvcLoop(comp, importState, exportState, clock, &
-                                 syncflag, phase, portNum, localrc)
+    call c_ESMC_ComponentSvcLoop(clientId, comp, importState, exportState, &
+                                 clock, syncflag, phase, portNum, localrc)
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServCplCompSvcLoop()"
+!BOPI
+! !IROUTINE: ESMF_WebServCplCompSvcLoop 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServCplCompSvcLoop(clientId, comp, portNum, importState, &
+                                        exportState, clock, syncflag, phase, rc)
+
+!
+! !ARGUMENTS:
+    character(len=ESMF_MAXSTR)                       :: clientId
+    type(ESMF_CplComp)                               :: comp
+    integer                                          :: portNum
+    type(ESMF_State),        intent(inout), optional :: importState
+    type(ESMF_State),        intent(inout), optional :: exportState
+    type(ESMF_Clock),        intent(inout), optional :: clock
+    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
+    integer,                 intent(in),    optional :: phase
+    integer,                 intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Enters the service into a process loop that waits for requests from
+!   clients using a socket service.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
+!   routine is run.
+! \item[{[portNum]}]
+!   Number of the port on which the component service is listening.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer       :: localrc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call c_ESMC_CplComponentSvcLoop(clientId, comp, importState, exportState, &
+                                    clock, syncflag, phase, portNum, localrc)
 
     rc = localrc
 
@@ -549,7 +919,7 @@ contains
 ! The arguments are:
 ! \begin{description}
 ! \item[{[comp]}]
-!   {\tt ESMF\_GridComp} object that represents the Grid Component for which
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
 !   routine is run.
 ! \item[{[portNum]}]
 !   Number of the port on which the component service is listening.
@@ -642,7 +1012,8 @@ contains
 
        print *, "KDS: Starting Service Loop"
 
-       call ESMF_WebServSvcLoop(comp, portNum=portNum, &
+       call ESMF_WebServSvcLoop( &
+             clientId=clientIdVal, comp=comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
              syncflag=syncflag, phase=phase, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
@@ -666,6 +1037,169 @@ contains
     else
 
        call ESMF_WebServWaitForRequest(comp, importState=importState, &
+             exportState=exportState, clock=clock, syncflag=syncflag, &
+             phase=phase, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
+
+    end if
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServicesCplCompLoop()"
+!BOP
+! !IROUTINE: ESMF_WebServicesCplCompLoop 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServicesCplCompLoop(comp, portNum, clientId, rc)
+
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp)                                  :: comp
+    integer,                    intent(inout), optional :: portNum
+    character(len=ESMF_MAXSTR), intent(in),    optional :: clientId
+    integer,                    intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Encapsulates all of the functionality necessary to setup a component as
+!   a component service.  If this is the root PET, it registers the 
+!   component service and then enters into a loop that waits for requests on 
+!   a socket.  The loop continues until an "exit" request is received, at 
+!   which point it exits the loop and unregisters the service.  If this is
+!   any PET other than the root PET, it sets up a process block that waits
+!   for instructions from the root PET.  Instructions will come as requests
+!   are received from the socket.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[comp]}]
+!   {\tt ESMF\_CplComp} object that represents the Grid Component for which
+!   routine is run.
+! \item[{[portNum]}]
+!   Number of the port on which the component service is listening.
+! \item[{[clientId]}]
+!   Identifer of the client responsible for this component service.  If a
+!   Process Controller application manages this component service, then the
+!   clientId is provided to the component service application in the command
+!   line.  Otherwise, the clientId is not necessary.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+    integer                    :: localrc
+    integer                    :: registrarrc
+    integer                    :: localPet, petCount
+    type(ESMF_VM)              :: vm
+    type(ESMF_State)           :: importState
+    type(ESMF_State)           :: exportState
+    type(ESMF_Clock)           :: clock
+    type(ESMF_Sync_Flag)       :: syncflag
+    integer                    :: phase
+    character(len=ESMF_MAXSTR) :: clientIdVal
+
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    if (present(clientId)) then
+      clientIdVal = clientId
+    else
+      clientIdVal = ""
+    end if
+
+    call ESMF_VMGetGlobal(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+
+    if (localPet == 0)  then
+
+       ! create and initialize data members 
+       importState = ESMF_StateCreate(name="Import", &
+                                      stateintent=ESMF_STATEINTENT_IMPORT, &
+                                      rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, &
+         rcToReturn=rc)) &
+          return
+
+       exportState = ESMF_StateCreate(name="Export", &
+                                      stateintent=ESMF_STATEINTENT_EXPORT, &
+                                      rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, &
+         rcToReturn=rc)) &
+         return
+
+       ! Initialize clock in the ComponentInitialize function??  
+       ! Will creating the object be sufficient or do I need to initialize 
+       ! it with some values using ClockCreate?
+       !clock = ESMF_ClockCreate("App Clock", rc=localrc)
+
+       syncflag = ESMF_SYNC_BLOCKING
+       phase = 1
+
+       if (portNum <= 0) then
+          call ESMF_WebServGetPortNum(portNum=portNum, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
+       endif
+
+       call ESMF_WebServCplCompRegisterSvc(comp, portNum=portNum, &
+             clientId=clientIdVal, rc=registrarrc)
+       if (ESMF_LogFoundError(registrarrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) &
+             print *, "Unable to Register Service... continuing"
+
+       print *, "KDS: Starting Service Loop"
+
+       call ESMF_WebServCplCompSvcLoop( &
+             clientId=clientIdVal, comp=comp, portNum=portNum, &
+             importState=importState, exportState=exportState, clock=clock, &
+             syncflag=syncflag, phase=phase, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) return
+
+       print *, "KDS: Exited Service Loop"
+
+       call ESMF_WebServCplCompProcessRequest(comp, &
+             importState=importState, exportState=exportState, &
+             clock=clock, phase=phase, procType="E", rc=localrc)
+
+       call ESMF_WebServUnregisterSvc(clientId=clientIdVal, rc=registrarrc)
+       if (ESMF_LogFoundError(registrarrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, &
+             rcToReturn=rc)) &
+             print *, "Unable to Unregister Service... continuing"
+
+    else
+
+       call ESMF_WebServCplCompWaitForRequest(comp, importState=importState, &
              exportState=exportState, clock=clock, syncflag=syncflag, &
              phase=phase, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
@@ -717,6 +1251,99 @@ contains
     localrc = ESMF_SUCCESS
 
     call c_ESMC_AddOutputFilename(filename, localrc)
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServDescOutputData()"
+!BOPI
+! !IROUTINE: ESMF_WebServDescOutputData 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServDescOutputData(varNames, numLatValues, latValues, numLonValues, lonValues, rc)
+
+!
+! !ARGUMENTS:
+    character(len=ESMF_MAXSTR), intent(in)              :: varNames
+    integer,                    intent(in)              :: numLatValues
+    real(ESMF_KIND_R8),         intent(in)              :: latValues(*)
+    integer,                    intent(in)              :: numLonValues
+    real(ESMF_KIND_R8),         intent(in)              :: lonValues(*)
+    integer,                    intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Adds a grid of data for the specified variables.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[filename]}]
+!   The name of the file to add to the list of output filenames.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer       :: localrc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+!    call c_ESMC_AddOutputFilename(filename, localrc)
+
+    rc = localrc
+
+  end subroutine
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_WebServAddOutputData()"
+!BOPI
+! !IROUTINE: ESMF_WebServAddOutputData 
+!
+! !INTERFACE:
+  subroutine ESMF_WebServAddOutputData(timestamp, varName, data, rc)
+
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),         intent(in)              :: timestamp
+    character(len=ESMF_MAXSTR), intent(in)              :: varName
+    real(ESMF_KIND_R8),         intent(in)              :: data(*)
+    integer,                    intent(out),   optional :: rc
+!
+!
+! !DESCRIPTION:
+!   Adds a grid of data for the specified variables.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[filename]}]
+!   The name of the file to add to the list of output filenames.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+
+    integer       :: localrc
+
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    !call c_ESMC_AddOutputData(timestamp, varName, data, localrc)
+    !call c_ESMC_AddOutputData(localrc)
 
     rc = localrc
 

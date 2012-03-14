@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.C,v 1.9 2012/01/06 20:19:29 svasquez Exp $
+// $Id: ESMCI_WebServCompSvrClient.C,v 1.10 2012/03/14 14:44:06 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.9 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.10 2012/03/14 14:44:06 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -88,6 +88,8 @@ ESMCI_WebServCompSvrClient::ESMCI_WebServCompSvrClient(
 	// Set the data members
 	//***
 	setClientId(clientId);
+
+	theOutputDataDesc = NULL;
 }
 
 
@@ -295,6 +297,113 @@ int  ESMCI_WebServCompSvrClient::run(
       // Retrieve the response... which should be the server status
       //***
 		if (getResponse(NET_ESMF_RUN, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading run response from socket.",
+            &localrc);
+
+         return ESMF_FAILURE;
+      }
+
+		if (bufSize == 4)
+		{
+			status = ntohl(*((unsigned int*)buf));
+			//printf("Status: %d\n", status);
+		}
+	}
+
+   //***
+   // Disconnect from the component service
+   //***
+	disconnect();
+
+	return status;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServCompSvrClient::timestep()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServCompSvrClient::timestep()
+//
+// !INTERFACE:
+int  ESMCI_WebServCompSvrClient::timestep(
+//
+// !RETURN VALUE:
+//   int  the current state of the component service;
+//        ESMF_FAILURE if an error occurs
+//
+// !ARGUMENTS:
+//
+  int  numTimesteps		// The number of timesteps to run
+  )
+//
+// !DESCRIPTION:
+//    Connects to the component server, makes a request to run the
+//    component for the specified number of timesteps, retrieve the server 
+//    status, and then disconnect from the server.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+	int	status = 0;
+	int	bufSize = 0;
+   char  buf[1024];
+
+   //***
+   // Connect to the component service
+   //***
+	if (connect() < 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   //***
+   // Send the "Timestep" request... along with the client identifier
+   //***
+	unsigned int	netClientId = htonl(theClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_TIMESTEP, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending timestep request to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	//***
+	// Send the number of timesteps to run parameter
+	//***
+	unsigned int	netNumTimesteps = htonl(numTimesteps);
+	bytesSent = 0;
+
+	if ((bytesSent = sendData(4, &netNumTimesteps)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending num timesteps to socket.",
+         &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+	if (bytesSent == 4)  
+	{
+      //***
+      // Retrieve the response... which should be the server status
+      //***
+		if (getResponse(NET_ESMF_TIMESTEP, bufSize, buf) <= 0)
       {
          ESMC_LogDefault.ESMC_LogMsgFoundError(
             ESMC_RC_FILE_READ,
@@ -632,6 +741,482 @@ vector<string>  ESMCI_WebServCompSvrClient::files(
 	disconnect();
 
 	return dataFiles;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServCompSvrClient::dataDesc()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServCompSvrClient::dataDesc()
+//
+// !INTERFACE:
+ESMCI_WebServDataDesc*  ESMCI_WebServCompSvrClient::dataDesc(
+//
+// !RETURN VALUE:
+//   ESMCI_WebServDataDesc*  pointer to the data descriptor object
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Connects to the component server, makes a request to get the description
+//    of the output data, retrieves the description and the component status, 
+//    and then disconnects from the server.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+	int	status = 0;
+	int	bufSize = 0;
+   char  buf[1024];
+
+   //***
+   // Connect to the component service
+   //***
+	ESMCI_WebServDataDesc*	dataDesc = NULL;
+
+	if (connect() < 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return dataDesc;
+   }
+
+   //***
+   // Send the "Get Data Desc" request... along with the client identifier
+   //***
+	unsigned int	netClientId = htonl(theClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_DATA_DESC, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending get data description request to socket.",
+         &localrc);
+
+      return dataDesc;
+   }
+
+	int		numVarNames  = 0;
+	string*	varNames     = NULL;
+	int		numLatValues = 0;
+	double*	latValues    = NULL;
+	int		numLonValues = 0;
+	double*	lonValues    = NULL;
+
+	if (bytesSent == 4)
+	{
+      //***
+      // Retrieve the response... which should include the following:
+		//   - number of variable names
+		//   - the variable names (if any)
+		//   - the number of lat values
+		//   - the lat values
+		//   - the number of lon values
+		//   - the lon values
+      //***
+
+		//***
+		// Get Variable Names
+		//***
+		if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get files response - number of vars from socket.",
+            &localrc);
+
+         return dataDesc;
+      }
+
+		if (bufSize == 4)
+		{
+			char	varName[1024];
+			int	numVars = ntohl(*((unsigned int*)buf));
+			printf("Num Variables: %d\n", numVars);
+
+			numVarNames = numVars;
+			varNames = new string[numVars];
+
+			for (int i = 0; i < numVars; ++i)
+			{
+				if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
+      		{
+         		ESMC_LogDefault.ESMC_LogMsgFoundError(
+            		ESMC_RC_FILE_READ,
+            		"Error reading get description - var name from socket.",
+            		&localrc);
+
+         		return dataDesc;
+      		}
+				strcpy(varName, buf);
+				//printf("Variable Name: %s\n", varName);
+
+				varNames[i] = varName;
+			}
+		}
+
+		//***
+		// Get Latitude Values
+		//***
+		if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get files response - number of lats from socket.",
+            &localrc);
+
+         return dataDesc;
+      }
+
+		if (bufSize == 4)
+		{
+			double*	lats;
+			int		numLats = ntohl(*((unsigned int*)buf));
+			printf("Num Latitudes: %d\n", numLats);
+
+			numLatValues = numLats;
+			latValues = new double[numLatValues];
+
+			if (numLats > 0)
+			{
+				bufSize = sizeof(double) * numLats;
+
+				if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) != bufSize)
+     			{
+        			ESMC_LogDefault.ESMC_LogMsgFoundError(
+           			ESMC_RC_FILE_READ,
+           			"Error reading get description - lat values from socket.",
+           			&localrc);
+
+        			return dataDesc;
+     			}
+
+				lats = (double*)buf;
+
+				for (int i = 0; i < numLats; ++i)
+				{
+         		ntohll((u_int64_t)(lats[i]));
+					//printf("Lat Value: %g\n", lats[i]);
+
+					latValues[i] = lats[i];
+				}
+			}
+		}
+
+		//***
+		// Get Longitude Values
+		//***
+		if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get files response - number of lons from socket.",
+            &localrc);
+
+         return dataDesc;
+      }
+
+		if (bufSize == 4)
+		{
+			double*	lons;
+			int		numLons = ntohl(*((unsigned int*)buf));
+			printf("Num Longitudes: %d\n", numLons);
+
+			numLonValues = numLons;
+			lonValues = new double[numLonValues];
+
+			if (numLons > 0)
+			{
+				bufSize = sizeof(double) * numLons;
+
+				if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) != bufSize)
+     			{
+        			ESMC_LogDefault.ESMC_LogMsgFoundError(
+           			ESMC_RC_FILE_READ,
+           			"Error reading get description - lon values from socket.",
+           			&localrc);
+
+        			return dataDesc;
+     			}
+
+				lons = (double*)buf;
+
+				for (int i = 0; i < numLons; ++i)
+				{
+         		ntohll((u_int64_t)(lons[i]));
+					//printf("Lon Value: %g\n", lons[i]);
+
+					lonValues[i] = lons[i];
+				}
+			}
+		}
+
+		theOutputDataDesc = new ESMCI_WebServDataDesc(numVarNames,
+	                                                 varNames,
+	                                                 numLatValues,
+	                                                 latValues,
+	                                                 numLonValues,
+	                                                 lonValues);
+
+		if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_READ,
+            "Error reading get data response - status from socket.",
+            &localrc);
+
+         return dataDesc;
+      }
+		status = ntohl(*((unsigned int*)buf));
+		printf("Status: %d\n", status);
+	}
+
+   //***
+   // Disconnect from the component service
+   //***
+	disconnect();
+
+	dataDesc = theOutputDataDesc;
+	return dataDesc;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServCompSvrClient::outputData()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServCompSvrClient::outputData()
+//
+// !INTERFACE:
+ESMCI_WebServDataContent*  ESMCI_WebServCompSvrClient::outputData(
+//
+// !RETURN VALUE:
+//   ESMCI_WebServDataContent*  pointer to the data content object
+//
+// !ARGUMENTS:
+//
+  double      timestamp, // (in) timestamp for which the output data is returned
+  int*        retNumVars,
+  string**    retVarNames,
+  int*        retNumLats,
+  int*        retNumLons
+  )
+//
+// !DESCRIPTION:
+//    Connects to the component server, makes a request to get the output data 
+//    for a specified timestamp, retrieves the output data and the component 
+//    status, and then disconnects from the server.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+	int	status = 0;
+	int	bufSize = 0;
+   char  buf[10240];
+
+   //***
+   // Connect to the component service
+   //***
+	ESMCI_WebServDataContent*	outputData = NULL;
+
+	if (connect() < 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Unable to connect to server socket.",
+         &localrc);
+
+      return outputData;
+   }
+
+   //***
+   // Send the "Get Data" request... along with the client identifier
+   //***
+	unsigned int	netClientId = htonl(theClientId);
+	int				bytesSent = 0;
+
+	if ((bytesSent = sendRequest(NET_ESMF_DATA, 4, &netClientId)) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending get data description request to socket.",
+         &localrc);
+
+      return outputData;
+   }
+
+	//***
+	// Send the timestamp value
+	//***
+	double	netTimestamp = timestamp;
+	htonll((u_int64_t)netTimestamp);
+	bytesSent = 0;
+
+	if ((bytesSent = sendData(8, (unsigned char*)(&netTimestamp))) != 8)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Error sending timestamp to socket.",
+         &localrc);
+
+      return outputData;
+   }
+printf("timestamp sent\n");
+
+   //***
+   // Retrieve the response... which should include an array of double values
+	// for each variable name.  Now, in order to know the order of the variable
+	// name values as well as the size of the data, the server first sends
+	// the number of variables, the variable names, and the number of latitudes
+	// and longitudes.
+   //***
+
+	//***
+	// Read Number of variables in the output data
+	//***
+	if (getResponse(NET_ESMF_DATA, bufSize, buf) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Error reading get data - number of vars from socket.",
+         &localrc);
+
+      return outputData;
+   }
+
+	int	numVars = ntohl(*((unsigned int*)buf));
+	printf("Num Variables: %d\n", numVars);
+
+	*retNumVars = numVars;
+
+	//***
+	// Read the variable names from the socket
+	//***
+	string*	varNames = new string[numVars];
+	char		varName[1024];
+
+	*retVarNames = new string[numVars];
+
+	for (int i = 0; i < numVars; ++i)
+	{
+		if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
+    	{
+      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+        		ESMC_RC_FILE_READ,
+        		"Error reading get data - var name from socket.",
+        		&localrc);
+
+         return outputData;
+     	}
+		strcpy(varName, buf);
+		printf("Variable Name: %s\n", varName);
+
+		varNames[i] = varName;
+		(*retVarNames)[i] = varName;
+	}
+
+	//***
+	// Read Number of lat values in the output data
+	//***
+	if (getResponse(NET_ESMF_DATA, bufSize, buf) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Error reading get data - number of lats from socket.",
+         &localrc);
+
+      return outputData;
+   }
+
+	int	numLats = ntohl(*((unsigned int*)buf));
+	printf("Num Lats: %d\n", numLats);
+
+	*retNumLats = numLats;
+
+	//***
+	// Read Number of lon values in the output data
+	//***
+	if (getResponse(NET_ESMF_DATA, bufSize, buf) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Error reading get data - number of lons from socket.",
+         &localrc);
+
+      return outputData;
+   }
+
+	int	numLons = ntohl(*((unsigned int*)buf));
+	printf("Num Lons: %d\n", numLons);
+
+	*retNumLons = numLons;
+
+	int		dataSize = numLats * numLons;
+printf("Data Size: %d\n", dataSize);
+
+	outputData = new ESMCI_WebServDataContent(numLats, numLons);
+
+	for (int i = 0; i < numVars; ++i)
+	{
+		double*	dataValues = NULL;
+	
+		if (dataSize > 0)
+		{
+			bufSize = sizeof(double) * dataSize;
+			int	bytesRead = 0;
+
+			if ((bytesRead = getResponse(NET_ESMF_DATA, bufSize, buf)) != bufSize)
+  			{
+     			ESMC_LogDefault.ESMC_LogMsgFoundError(
+       				ESMC_RC_FILE_READ,
+       				"Error reading get output data - data values from socket.",
+       				&localrc);
+
+     			return outputData;
+  			}
+
+			dataValues = (double*)buf;
+
+			for (int j = 0; j < dataSize; ++j)
+			{
+        		ntohll((u_int64_t)(dataValues[j]));
+				//printf("Data Value: %g\n", dataValues[j]);
+			}
+
+			outputData->addDataValues(varNames[i], dataValues);
+		}
+	}
+
+	//***
+	// Get the Status
+	//***
+	if (getResponse(NET_ESMF_DATA, bufSize, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Error reading get data response - status from socket.",
+         &localrc);
+
+      return outputData;
+   }
+	status = ntohl(*((unsigned int*)buf));
+	printf("Status: %d\n", status);
+
+   //***
+   // Disconnect from the component service
+   //***
+	disconnect();
+
+	return outputData;
 }
 
 

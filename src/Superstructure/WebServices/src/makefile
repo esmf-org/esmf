@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2011/09/02 21:21:23 theurich Exp $
+# $Id: makefile,v 1.8 2012/03/14 14:44:06 ksaint Exp $
 
 ALL: build_here 
 
@@ -6,6 +6,9 @@ AUTOGEN   =
 
 SOURCEC	  = ESMCI_WebServNetEsmfClient.C \
              ESMCI_WebServCAMOutputFile.C \
+             ESMCI_WebServDataDesc.C \
+             ESMCI_WebServDataContent.C \
+             ESMCI_WebServDataMgr.C \
              ESMCI_WebServNetEsmfServer.C \
              ESMCI_WebServClientInfo.C \
              ESMCI_WebServCompSvrInfo.C \
@@ -29,6 +32,7 @@ STOREH    = ESMCI_WebServLowLevelSocket.h \
             ESMCI_WebServServerSocket.h \
             ESMCI_WebServClientSocket.h \
             ESMCI_WebServNetEsmf.h \
+            ESMCI_WebServNetEsmfClient.h \
             ESMCI_WebServClientInfo.h \
             ESMCI_WebServCAMOutputFile.h \
             ESMCI_WebServCompSvrClient.h \

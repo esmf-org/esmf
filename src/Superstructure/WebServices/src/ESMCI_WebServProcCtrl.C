@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServProcCtrl.C,v 1.3 2012/01/06 20:19:29 svasquez Exp $
+// $Id: ESMCI_WebServProcCtrl.C,v 1.4 2012/03/14 14:44:06 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServProcCtrl.C,v 1.3 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServProcCtrl.C,v 1.4 2012/03/14 14:44:06 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -331,12 +331,16 @@ int  ESMCI_WebServProcCtrl::serviceRequest(
 		processRun();
 		break;
 
+	case NET_ESMF_TIMESTEP: 
+		processTimestep();
+		break;
+
 	case NET_ESMF_FINAL: 
 		processFinal();
 		break;
 
-	case NET_ESMF_FILES: 
-		processFiles();
+	case NET_ESMF_DATA_DESC: 
+		processGetDataDesc();
 		break;
 
 	case NET_ESMF_DATA: 
@@ -959,6 +963,154 @@ int  ESMCI_WebServProcCtrl::processRun(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_WebServProcCtrl::processTimestep()"
+//BOPI
+// !ROUTINE:  ESMCI_WebServProcCtrl::processTimestep()
+//
+// !INTERFACE:
+int  ESMCI_WebServProcCtrl::processTimestep(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+//
+  )
+//
+// !DESCRIPTION:
+//    Processes the request to timestep the component.  This method reads the
+//    client id from the socket and uses it to lookup the client information.
+//    It then reads the number of timesteps parameter from the socket.
+//    The request and its parameters are then passed on to the component 
+//    server, and finally, the component status is written to the socket 
+//    to complete the transaction.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	printf("\n\nSERVER: processing Timestep\n");
+
+	int	localrc = 0;
+	int	status = NET_ESMF_STAT_IDLE;
+
+	//***
+	// Get the client id 
+	//***
+	int	bytesRead = 0;
+	char	buf[1024];
+
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read client id from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+   int	clientId = ntohl(*((unsigned int*)buf));
+	printf("Client ID: %d\n", clientId);
+
+	//***
+	// Get the number of timesteps
+	//***
+	bytesRead = 0;
+
+	if (theSocket.read(bytesRead, buf) <= 0)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_READ,
+         "Unable to read num timesteps from socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+   int	numTimesteps = ntohl(*((unsigned int*)buf));
+	printf("Num Timesteps: %d\n", numTimesteps);
+
+	//***
+	// Now that everything's been read off the socket, lookup the client info
+	// based on the client id.  If the client can't be found, then send back
+	// an error
+	//***
+	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
+	ESMCI_WebServClientInfo*								clientInfo = NULL;
+
+	if ((iter = theClients.find(clientId)) == theClients.end())
+	{
+		status = NET_ESMF_STAT_ERROR;
+		unsigned int	netStatus = htonl(status);
+
+		if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_ARG_VALUE,
+         "Invalid client id read from socket.",
+         &localrc);
+
+      return localrc;
+	}
+
+	clientInfo = iter->second;
+	//clientInfo->print();
+	status = clientInfo->status();
+
+	//***
+	// Call the component run (must have completed the initialize phase before
+	// the run could be called)
+	//***
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
+
+	status = client.state();
+	clientInfo->setStatus(status);
+
+	if ((status == NET_ESMF_STAT_INIT_DONE)  ||
+	    (status == NET_ESMF_STAT_TIMESTEP_DONE))
+	{
+		status = client.timestep(numTimesteps);
+		//clientInfo->setStatus(NET_ESMF_STAT_RUNNING);
+		clientInfo->setStatus(status);
+	}
+	else
+	{
+		// Should return an error message
+	}
+
+	//***
+	// Send the current state back to the client (use the return code from
+	// the component run call to determine the state)
+	//***
+	status = clientInfo->status();
+	unsigned int	netStatus = htonl(status);
+
+	if (theSocket.write(4, &netStatus) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write status to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+	return ESMF_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_WebServProcCtrl::processFinal()"
 //BOPI
 // !ROUTINE:  ESMCI_WebServProcCtrl::processFinal()
@@ -983,7 +1135,7 @@ int  ESMCI_WebServProcCtrl::processFinal(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Final\n");
+	printf("\n\nSERVER: processing Final\n");
 
 	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
@@ -1005,7 +1157,7 @@ int  ESMCI_WebServProcCtrl::processFinal(
    }
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
@@ -1056,6 +1208,7 @@ int  ESMCI_WebServProcCtrl::processFinal(
 	clientInfo->setStatus(status);
 
 	if ((status == NET_ESMF_STAT_RUN_DONE)  ||
+	    (status == NET_ESMF_STAT_TIMESTEP_DONE)  ||
 	    (status == NET_ESMF_STAT_INIT_DONE))
 	{
 		status = client.final();
@@ -1090,12 +1243,12 @@ int  ESMCI_WebServProcCtrl::processFinal(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_WebServProcCtrl::processFiles()"
+#define ESMC_METHOD "ESMCI_WebServProcCtrl::processGetDataDesc()"
 //BOPI
-// !ROUTINE:  ESMCI_WebServProcCtrl::processFiles()
+// !ROUTINE:  ESMCI_WebServProcCtrl::processGetDataDesc()
 //
 // !INTERFACE:
-int  ESMCI_WebServProcCtrl::processFiles(
+int  ESMCI_WebServProcCtrl::processGetDataDesc(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1105,16 +1258,17 @@ int  ESMCI_WebServProcCtrl::processFiles(
   )
 //
 // !DESCRIPTION:
-//    Processes the request to retrieve the export filenames.  
-//    (KDS: This method is here to support the existing NetEsmfClient call,
-//          but we want to use the Get Data call instead, so I'm not 
-//          supporting this call anymore.  Until we remove it completely,
-//          I just return zero filenames.
+//    Processes the request to retrieve the description of the output data.  
+//    This method reads the client id from the socket and uses it to lookup 
+//    the client information.  It then gets the data description from the
+//    component server and writes that information back to the client.  
+//    Finally, the component status is written back to the socket to complete 
+//    the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Files\n");
+	printf("\n\nPROCCTRL: processing GetDataDesc\n");
 
 	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
@@ -1137,7 +1291,7 @@ int  ESMCI_WebServProcCtrl::processFiles(
    }
 
    int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+	printf("Client ID: %d\n", clientId);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
@@ -1149,21 +1303,8 @@ int  ESMCI_WebServProcCtrl::processFiles(
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
-		numFiles = 0;
-		unsigned int  netNumFiles = htonl(numFiles);
-		if (theSocket.write(4, &netNumFiles) != 4)
-      {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
-            ESMC_RC_FILE_WRITE,
-            "Unable to write number of files to socket.",
-            &localrc);
-
-         return localrc;
-      }
-
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
-
 		if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.ESMC_LogMsgFoundError(
@@ -1185,27 +1326,141 @@ int  ESMCI_WebServProcCtrl::processFiles(
 	clientInfo = iter->second;
 	//clientInfo->print();
 
-	status = clientInfo->status();
+	//***
+	// Get the data description from the server
+	//***
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
+
+	ESMCI_WebServDataDesc*	dataDesc = client.dataDesc();
 
 	//***
-	// Write the file information back to the client
+   // Return the description of the variables and the grid information
+   // (i.e., the variable names and the lat/lon values)
+   //***
+	if (dataDesc != NULL)
+	{
+		//dataDesc->print();
+
+		//***
+		// Write out the number of variables
+		//***
+      int   numVars = dataDesc->getNumVars();
+      unsigned int  netNumVars = htonl(numVars);
+      if (theSocket.write(4, &netNumVars) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write num vars to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+		//***
+		// Write out the variable names
+		//***
+      string*  varNames = dataDesc->getVarNames();
+
+      for (int i = 0; i < numVars; ++i)
+      {
+         int      valueLen = varNames[i].length() + 1;
+  
+         if (theSocket.write(valueLen,
+                             (void*)(varNames[i].c_str())) != valueLen)
+         {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(
+               ESMC_RC_FILE_WRITE,
+               "Unable to write variable name to socket.",
+               &localrc);
+
+            return localrc;
+         }
+      }
+
+		//***
+		// Write out the number of latitude values
+		//***
+      int   numLats = dataDesc->getNumLatValues();
+      unsigned int  netNumLats = htonl(numLats);
+      if (theSocket.write(4, &netNumLats) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write num lats to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+		//***
+		// Write out the latitude values
+		//***
+      double*  latValues = dataDesc->getLatValues();
+      double*  netLatValues = new double[numLats];
+      int      latDataSize = sizeof(double) * numLats;
+  
+      for (int i = 0; i < numLats; ++i)
+      {
+         netLatValues[i] = latValues[i];
+         htonll((u_int64_t)(netLatValues[i]));
+      }
+
+      if (theSocket.write(latDataSize, (void*)netLatValues) != latDataSize)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write latitude values to socket.",
+            &localrc);
+
+            return localrc;
+      }
+
+		//***
+		// Write out the number of longitude values
+		//***
+      int   numLons = dataDesc->getNumLonValues();
+      unsigned int  netNumLons = htonl(numLons);
+
+      if (theSocket.write(4, &netNumLons) != 4)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write num lons to socket.",
+            &localrc);
+
+         return localrc;
+      }
+
+		//***
+		// Write out the longitude values
+		//***
+      double*  lonValues = dataDesc->getLonValues();
+      double*  netLonValues = new double[numLons];
+      int      lonDataSize = sizeof(double) * numLons;
+
+      for (int i = 0; i < numLons; ++i)
+      {
+         netLonValues[i] = lonValues[i];
+         htonll((u_int64_t)(netLonValues[i]));
+         htonll((u_int64_t)(netLonValues[i]));
+      }
+
+      if (theSocket.write(lonDataSize, (void*)netLonValues) != lonDataSize)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write longitude values to socket.",
+            &localrc);
+
+            return localrc;
+      }
+	}
+
 	//***
-	numFiles = 0;
-	char	fileInfoBuf[1024];
-
-	unsigned int  netNumFiles = htonl(numFiles);
-	if (theSocket.write(4, &netNumFiles) != 4)
-   {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_WRITE,
-         "Unable to write number of files to socket.",
-         &localrc);
-
-      return localrc;
-   }
-
-	//***
-	// Send the current state back to the client 
+	// Send the current state back to the client (use the return code from
+	// the component initialize call to determine the state)
 	//***
 	status = clientInfo->status();
 	unsigned int	netStatus = htonl(status);
@@ -1257,7 +1512,7 @@ int  ESMCI_WebServProcCtrl::processGetData(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing GetData\n");
+	printf("\n\nSERVER: processing GetData\n");
 
 	int	localrc = 0;
 	int	status = NET_ESMF_STAT_IDLE;
@@ -1282,27 +1537,10 @@ int  ESMCI_WebServProcCtrl::processGetData(
    int	clientId = ntohl(*((unsigned int*)buf));
 	//printf("Client ID: %d\n", clientId);
 
-	char	varName[256];
-	if (theSocket.read(bytesRead, buf) <= 0)
-   {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_READ,
-         "Unable to read variable name from socket.",
-         &localrc);
-
-      return localrc;
-   }
-
-	strncpy(varName, (char*)buf, 255);
-	//printf("Var Name: %s\n", varName);
-
-	//***
-	// These next values are read as strings and then converted to double values
-	//***
-	char	tempValue[256];
-
-	// Read time
-	if (theSocket.read(bytesRead, buf) <= 0)
+   //***
+   // Read the timestamp for the requested data
+   //***
+   if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1311,37 +1549,12 @@ int  ESMCI_WebServProcCtrl::processGetData(
 
       return localrc;
    }
-	strncpy(tempValue, (char*)buf, 255);
-	//printf("Time: %s\n", tempValue);
-	double	timeValue = atof(tempValue);
 
-	// Read lat
-	if (theSocket.read(bytesRead, buf) <= 0)
-   {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_READ,
-         "Unable to read lat value from socket.",
-         &localrc);
+   printf("Bytes read: %d\n", bytesRead);
 
-      return localrc;
-   }
-	strncpy(tempValue, (char*)buf, 255);
-	//printf("Lat: %s\n", tempValue);
-	double	latValue = atof(tempValue);
-
-	// Read lon
-	if (theSocket.read(bytesRead, buf) <= 0)
-   {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
-         ESMC_RC_FILE_READ,
-         "Unable to read lon value from socket.",
-         &localrc);
-
-      return localrc;
-   }
-	strncpy(tempValue, (char*)buf, 255);
-	//printf("Lon: %s\n", tempValue);
-	double	lonValue = atof(tempValue);
+   double*  timeValue = (double*)buf;
+   ntohll((u_int64_t)(*timeValue));
+printf("After: %g\n", *timeValue);
 
 	//***
 	// Now that everything's been read off the socket, lookup the client info
@@ -1353,18 +1566,6 @@ int  ESMCI_WebServProcCtrl::processGetData(
 
 	if ((iter = theClients.find(clientId)) == theClients.end())
 	{
-		numFiles = 0;
-		unsigned int  netNumFiles = htonl(numFiles);
-		if (theSocket.write(4, &netNumFiles) != 4)
-      {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
-            ESMC_RC_FILE_WRITE,
-            "Unable to write number of files to socket.",
-            &localrc);
-
-         return localrc;
-      }
-
 		status = NET_ESMF_STAT_ERROR;
 		unsigned int	netStatus = htonl(status);
 		if (theSocket.write(4, &netStatus) != 4)
@@ -1389,26 +1590,127 @@ int  ESMCI_WebServProcCtrl::processGetData(
 	//clientInfo->print();
 
 	//***
-	// For now, we're returning a zero.... I used to read the data from a file,
-	// but this needs to be changed to get the data from the component server.
+	// Get the data from the server
 	//***
-	double	dataValue = (double)0.0;
-	//printf("Data Value: %e\n", dataValue);
+	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
+                                     clientInfo->serverPort(), 
+                                     clientInfo->clientId());
+
+   int      numVars = 0;
+   int      numLats = 0;
+   int      numLons = 0;
+   string*  varNames = NULL;
+
+	ESMCI_WebServDataContent*	outputData = client.outputData(*timeValue,
+                                                             &numVars,
+                                                             &varNames,
+                                                             &numLats,
+                                                             &numLons);
+
+	if (outputData != NULL)
+	{
+		//outputData->print();
+	}
+
+   printf("Num Vars: %d\n", numVars);
+   for (int i = 0; i < numVars; ++i)
+   {
+      printf("Var Name[%d]: %s\n", i, varNames[i].c_str());
+   }
+   printf("Num Lats: %d\n", numLats);
+   printf("Num Lons: %d\n", numLons);
 
 	//***
-	// Write the data back to the client
-	//***
-	sprintf(tempValue, "%e", dataValue);
-	int	valueLen = strlen(tempValue) + 1;
-
-	if (theSocket.write(valueLen, tempValue) != valueLen)
+   // Return the description of the variables and the grid information
+   // (i.e., the variable names and the number of lat/lon values)
+   //***
+   unsigned int  netNumVars = htonl(numVars);
+   if (theSocket.write(4, &netNumVars) != 4)
    {
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
-         "Unable to write data value to socket.",
+         "Unable to write num vars to socket.",
          &localrc);
 
       return localrc;
+   }
+
+   //***
+   // Now, write out the variable names
+   //***
+   for (int i = 0; i < numVars; ++i)
+   {
+      int      valueLen = varNames[i].length() + 1;
+
+      if (theSocket.write(valueLen, (void*)(varNames[i].c_str())) != valueLen)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write variable name to socket.",
+            &localrc);
+
+         return localrc;
+      }
+   }
+
+   //***
+   // Write out the number of latitude values in the output data
+   //***
+   unsigned int  netNumLats = htonl(numLats);
+   if (theSocket.write(4, &netNumLats) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write num lats to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+   //***
+   // Write out the number of longitude values in the output data
+   //***
+   unsigned int  netNumLons = htonl(numLons);
+   if (theSocket.write(4, &netNumLons) != 4)
+   {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_WRITE,
+         "Unable to write num lons to socket.",
+         &localrc);
+
+      return localrc;
+   }
+
+   //***
+   // For each variable, write out the data
+   //***
+   for (int i = 0; i < numVars; ++i)
+   {
+      double*  dataValues = outputData->getDataValues(varNames[i]);
+      int      numValues = numLats * numLons;
+      double*  netDataValues = new double[numValues];
+
+printf("Num Values: %d\n", numValues);
+      for (int j = 0; j < numValues; ++j)
+      {
+//printf("Data Value[%d][%d]: %g\n", i, j, dataValues[j]);
+         netDataValues[j] = dataValues[j];
+         ntohll((u_int64_t)(netDataValues[j]));
+      }
+
+      int   dataSize = sizeof(double) * numValues;
+      int   bytesSent = 0;
+
+      if ((bytesSent = theSocket.write(dataSize, (void*)netDataValues)) !=
+         dataSize)
+      {
+         ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write data values to socket.",
+            &localrc);
+
+         return localrc;
+      }
    }
 
 	//***

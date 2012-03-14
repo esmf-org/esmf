@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.C,v 1.7 2012/01/06 20:19:29 svasquez Exp $
+// $Id: ESMCI_WebServSocketUtils.C,v 1.8 2012/03/14 14:44:06 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.7 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.8 2012/03/14 14:44:06 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -87,16 +87,19 @@ char*  ESMCI_WebServGetRequestFromId(
 
    switch (id)
    {
-   case NET_ESMF_EXIT:  return (char*)"EXIT";
-   case NET_ESMF_NEW:   return (char*)"NEW";
-   case NET_ESMF_INIT:  return (char*)"INIT";
-   case NET_ESMF_RUN:   return (char*)"RUN";
-   case NET_ESMF_FINAL: return (char*)"FINAL";
-   case NET_ESMF_STATE: return (char*)"STATE";
-   case NET_ESMF_FILES: return (char*)"FILES";
-   case NET_ESMF_END:   return (char*)"END";
-   case NET_ESMF_PING:  return (char*)"PING";
-   default:             return (char*)"UNKN";
+   case NET_ESMF_EXIT:       return (char*)"EXIT";
+   case NET_ESMF_NEW:        return (char*)"NEW";
+   case NET_ESMF_INIT:       return (char*)"INIT";
+   case NET_ESMF_RUN:        return (char*)"RUN";
+   case NET_ESMF_TIMESTEP:   return (char*)"TIMESTEP";
+   case NET_ESMF_FINAL:      return (char*)"FINAL";
+   case NET_ESMF_STATE:      return (char*)"STATE";
+   case NET_ESMF_DATA_DESC:  return (char*)"DATADESC";
+   case NET_ESMF_DATA:       return (char*)"DATA";
+   case NET_ESMF_FILES:      return (char*)"FILES";
+   case NET_ESMF_END:        return (char*)"END";
+   case NET_ESMF_PING:       return (char*)"PING";
+   default:                  return (char*)"UNKN";
    }
 
    return (char*)"UNKN";
@@ -129,15 +132,18 @@ int  ESMCI_WebServGetRequestId(
 {
    //printf("ESMCI_WebServGetRequestId()\n");
 
-   if (strcmp(request, "EXIT")  == 0)  return NET_ESMF_EXIT;
-   if (strcmp(request, "NEW")   == 0)  return NET_ESMF_NEW;
-   if (strcmp(request, "INIT")  == 0)  return NET_ESMF_INIT;
-   if (strcmp(request, "RUN")   == 0)  return NET_ESMF_RUN;
-   if (strcmp(request, "FINAL") == 0)  return NET_ESMF_FINAL;
-   if (strcmp(request, "STATE") == 0)  return NET_ESMF_STATE;
-   if (strcmp(request, "FILES") == 0)  return NET_ESMF_FILES;
-   if (strcmp(request, "END")   == 0)  return NET_ESMF_END;
-   if (strcmp(request, "PING")  == 0)  return NET_ESMF_PING;
+   if (strcmp(request, "EXIT")     == 0)  return NET_ESMF_EXIT;
+   if (strcmp(request, "NEW")      == 0)  return NET_ESMF_NEW;
+   if (strcmp(request, "INIT")     == 0)  return NET_ESMF_INIT;
+   if (strcmp(request, "RUN")      == 0)  return NET_ESMF_RUN;
+   if (strcmp(request, "TIMESTEP") == 0)  return NET_ESMF_TIMESTEP;
+   if (strcmp(request, "FINAL")    == 0)  return NET_ESMF_FINAL;
+   if (strcmp(request, "STATE")    == 0)  return NET_ESMF_STATE;
+   if (strcmp(request, "DATADESC") == 0)  return NET_ESMF_DATA_DESC;
+   if (strcmp(request, "DATA")     == 0)  return NET_ESMF_DATA;
+   if (strcmp(request, "FILES")    == 0)  return NET_ESMF_FILES;
+   if (strcmp(request, "END")      == 0)  return NET_ESMF_END;
+   if (strcmp(request, "PING")     == 0)  return NET_ESMF_PING;
 
    return ESMF_FAILURE;
 }

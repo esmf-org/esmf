@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.11 2012/01/06 20:19:29 svasquez Exp $
+// $Id: ESMCI_WebServ_F.C,v 1.12 2012/03/14 14:44:06 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.11 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.12 2012/03/14 14:44:06 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -55,6 +55,7 @@ static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.11 2012/01/06 20:
 
 ESMCI::ESMCI_WebServComponentSvr*	theComponentServer = NULL;
 string		theClientId = "";
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -69,14 +70,16 @@ void FTN_X(c_esmc_componentsvcloop)(
 //
 // !ARGUMENTS:
 //
-  ESMCI::GridComp*   comp,				// (in) the grid component
-  ESMCI::State*      importState,	// (in) the component import state
-  ESMCI::State*      exportState,	// (in) the component export state
-  ESMCI::Clock*      clock,			// (in) the component clock
-  ESMC_BlockingFlag* blockingFlag,  // (in) the blocking flag
-  int*               phase,         // (in) the phase
-  int*               portNum,			// (in) the service port number
-  int*               rc			      // (in) the return code
+  char*                   clientId, 		// (in) the client identifier
+  ESMCI::GridComp*        comp,				// (in) the grid component
+  ESMCI::State*           importState,		// (in) the component import state
+  ESMCI::State*           exportState,		// (in) the component export state
+  ESMCI::Clock*           clock,				// (in) the component clock
+  ESMC_BlockingFlag*      blockingFlag,  	// (in) the blocking flag
+  int*                    phase,         	// (in) the phase
+  int*                    portNum,			// (in) the service port number
+  int*                    rc,			      // (in) the return code
+  ESMCI_FortranStrLenArg  clientIdLen		// (in) the length of the client id
   )
 //
 // !DESCRIPTION:
@@ -87,6 +90,70 @@ void FTN_X(c_esmc_componentsvcloop)(
 //-----------------------------------------------------------------------------
 {
 	printf("Port Number: %d\n", *portNum);
+	printf("Client ID: %d\n", atoi(clientId));
+	int	localrc = 0;
+
+   //***
+   // This loop should not return until either an "exit" message has been
+   // received or an error has occurred.
+   //***
+	theComponentServer = 
+		new ESMCI::ESMCI_WebServComponentSvr(*portNum, atoi(clientId));
+
+	if (theComponentServer->requestLoop(comp, 
+                                       importState, 
+                                       exportState, 
+                                       clock, 
+                                       *phase, 
+                                       *blockingFlag) != ESMF_SUCCESS)
+	{
+      ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_RC_FILE_OPEN,
+         "Error during request loop setup.",
+         &localrc);
+
+		*rc = localrc;
+		return;
+	}
+
+   *rc = ESMF_SUCCESS;
+}
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_cplcomponentsvcloop()"
+//BOPI
+// !ROUTINE:  c_esmc_cplcomponentsvcloop()
+//
+// !INTERFACE:
+void FTN_X(c_esmc_cplcomponentsvcloop)(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  char*                   clientId, 		// (in) the client identifier
+  ESMCI::CplComp*         comp,				// (in) the grid component
+  ESMCI::State*           importState,		// (in) the component import state
+  ESMCI::State*           exportState,		// (in) the component export state
+  ESMCI::Clock*           clock,				// (in) the component clock
+  ESMC_BlockingFlag*      blockingFlag,  	// (in) the blocking flag
+  int*                    phase,         	// (in) the phase
+  int*                    portNum,			// (in) the service port number
+  int*                    rc,			      // (in) the return code
+  ESMCI_FortranStrLenArg  clientIdLen		// (in) the length of the client id
+  )
+//
+// !DESCRIPTION:
+//    Creates a component service on the specified port and calls the
+//    loop method to listen for client requests.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	printf("Port Number: %d\n", *portNum);
+	printf("Client ID: %d\n", atoi(clientId));
 	int	localrc = 0;
 
    //***
@@ -94,16 +161,15 @@ void FTN_X(c_esmc_componentsvcloop)(
    // received or an error has occurred.
    //***
 //	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
-	theComponentServer = new ESMCI::ESMCI_WebServComponentSvr(*portNum);
+	theComponentServer = new ESMCI::ESMCI_WebServComponentSvr(*portNum, atoi(clientId));
 
-//	if (server.requestLoop(comp, 
 printf("Component Server Request Loop\n");
-	if (theComponentServer->requestLoop(comp, 
-                                       importState, 
-                                       exportState, 
-                                       clock, 
-                                       *phase, 
-                                       *blockingFlag) != ESMF_SUCCESS)
+	if (theComponentServer->cplCompRequestLoop(comp, 
+                                              importState, 
+                                              exportState, 
+                                              clock, 
+                                              *phase, 
+                                              *blockingFlag) != ESMF_SUCCESS)
 	{
       ESMC_LogDefault.ESMC_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
@@ -342,3 +408,52 @@ void FTN_X(c_esmc_addoutputfilename)(
 
    *rc = ESMF_SUCCESS;
 }
+
+/*
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_addoutputdata()"
+//BOPI
+// !ROUTINE:  c_esmc_addoutputdata()
+//
+// !INTERFACE:
+void FTN_X(c_esmc_addoutputdata)(
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+//
+  double*                 timestamp,	// (in) 
+  char*                   varName,		// (in) 
+  double**                dataValues,	// (in) 
+  int*                    rc,			   // (out) the return code
+  ESMCI_FortranStrLenArg  varNameLen	// (in) the length of the var name
+  )
+//
+// !DESCRIPTION:
+//    Adds output data to the current output data structure.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+{
+	int	localrc = 0;
+	char	varNameStr[ESMF_MAXSTR];
+
+	strncpy(varNameStr, varName, varNameLen);
+	printf("Var Name: %s\n", varName);
+	for (int i = 0; i < 5; ++i)
+	{
+		printf("Values[%d]: %g\n", i, dataValues[i]);
+	}
+
+   // TODO: everything
+   if (theComponentServer != NULL)
+	{
+		//strncpy(filenameStr, filename, filenameLen);
+		//theComponentServer->addOutputFilename(filenameStr);
+	}
+
+   *rc = ESMF_SUCCESS;
+}
+*/

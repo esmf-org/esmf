@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmfClient.C,v 1.6 2012/01/06 20:19:29 svasquez Exp $
+// $Id: ESMCI_WebServNetEsmfClient.C,v 1.7 2012/03/14 14:44:06 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServNetEsmfClient.C,v 1.6 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServNetEsmfClient.C,v 1.7 2012/03/14 14:44:06 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -474,6 +474,7 @@ char*  ESMCI_WebServNetEsmfClient::getStateStr(
 	case NET_ESMF_STAT_FINAL_DONE:    return (char*)"FINAL_DONE";
 	case NET_ESMF_STAT_DONE:          return (char*)"DONE";
 	case NET_ESMF_STAT_SUBMITTED:     return (char*)"SUBMITTED";
+	case NET_ESMF_STAT_TIMESTEP_DONE: return (char*)"TIMESTEP_DONE";
 	case NET_ESMF_STAT_ERROR:         return (char*)"ERROR";
    default:                          return (char*)"UNKN";
    }
@@ -519,6 +520,8 @@ int  ESMCI_WebServNetEsmfClient::getStateValue(
 	if (strcmp(stateStr, "FINAL_DONE") == 0)   return NET_ESMF_STAT_FINAL_DONE;
 	if (strcmp(stateStr, "DONE") == 0)         return NET_ESMF_STAT_DONE;
 	if (strcmp(stateStr, "SUBMITTED") == 0)    return NET_ESMF_STAT_SUBMITTED;
+	if (strcmp(stateStr, "TIMESTEP_DONE") == 0) 
+														 return NET_ESMF_STAT_TIMESTEP_DONE;
 	if (strcmp(stateStr, "ERROR") == 0)        return NET_ESMF_STAT_ERROR;
 
    return ESMF_FAILURE;
