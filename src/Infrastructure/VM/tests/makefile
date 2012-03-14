@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2011/10/17 22:53:41 w6ws Exp $ 
+# $Id: makefile,v 1.42 2012/03/14 17:08:41 w6ws Exp $ 
 
 ifeq ($(ESMF_TESTFORCEOPENMP),ON)
 ifeq ($(ESMF_OPENMP),OFF)
@@ -27,6 +27,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_VMUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllGatherUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllGatherVUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBroadcastUTest \
+		$(ESMF_TESTDIR)/ESMF_VMAllToAllUTest \
 		$(ESMF_TESTDIR)/ESMF_VMAllToAllVUTest \
 		$(ESMF_TESTDIR)/ESMF_VMBarrierUTest \
 		$(ESMF_TESTDIR)/ESMF_VMComponentUTest
@@ -44,6 +45,7 @@ TESTS_RUN     = RUN_ESMC_VMUTest \
                 RUN_ESMF_VMAllGatherUTest \
                 RUN_ESMF_VMAllGatherVUTest \
 		RUN_ESMF_VMBroadcastUTest \
+                RUN_ESMF_VMAllToAllUTest \
                 RUN_ESMF_VMAllToAllVUTest \
 		RUN_ESMF_VMBarrierUTest \
 		RUN_ESMF_VMComponentUTest 
@@ -60,6 +62,7 @@ TESTS_RUN_UNI = RUN_ESMC_VMUTestUNI \
                 RUN_ESMF_VMAllGatherUTestUNI \
                 RUN_ESMF_VMAllGatherVUTestUNI \
                 RUN_ESMF_VMBroadcastUTestUNI \
+                RUN_ESMF_VMAllToAllUTestUNI \
                 RUN_ESMF_VMAllToAllVUTestUNI \
                 RUN_ESMF_VMBarrierUTestUNI \
                 RUN_ESMF_VMComponentUTestUNI
@@ -188,6 +191,15 @@ RUN_ESMF_VMBroadcastUTest:
 
 RUN_ESMF_VMBroadcastUTestUNI:
 	$(MAKE) TNAME=VMBroadcast NP=1 ftest
+
+#
+# VM AllToAll
+#
+RUN_ESMF_VMAllToAllUTest:
+	$(MAKE) TNAME=VMAllToAll NP=4 ftest
+
+RUN_ESMF_VMAllToAllUTestUNI:
+	$(MAKE) TNAME=VMAllToAll NP=1 ftest
 
 #
 # VM AllToAllV
