@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmf.h,v 1.5 2012/01/06 20:19:27 svasquez Exp $
+// $Id: ESMCI_WebServNetEsmf.h,v 1.6 2012/03/14 14:44:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -26,20 +26,23 @@ namespace ESMCI
 #define NET_ESMF_PORT	27001
 
 // Request identifiers
-#define NET_ESMF_EXIT			10
-#define NET_ESMF_NEW	   		15
-#define NET_ESMF_INIT			20
-#define NET_ESMF_RUN				21
-#define NET_ESMF_FINAL			22
-#define NET_ESMF_STATE			23
-#define NET_ESMF_FILES			24
-#define NET_ESMF_INIT_DONE		25
-#define NET_ESMF_RUN_DONE		26
-#define NET_ESMF_FINAL_DONE	27
-#define NET_ESMF_DATA			28
-#define NET_ESMF_PING			30
-#define NET_ESMF_END				40
-#define NET_ESMF_UNKN			50
+#define NET_ESMF_EXIT				10
+#define NET_ESMF_NEW	   			15
+#define NET_ESMF_INIT				20
+#define NET_ESMF_RUN					21
+#define NET_ESMF_FINAL				22
+#define NET_ESMF_STATE				23
+#define NET_ESMF_FILES				24
+#define NET_ESMF_INIT_DONE			25
+#define NET_ESMF_RUN_DONE			26
+#define NET_ESMF_FINAL_DONE		27
+#define NET_ESMF_DATA_DESC			28
+#define NET_ESMF_DATA				29
+#define NET_ESMF_TIMESTEP			30
+#define NET_ESMF_TIMESTEP_DONE	31
+#define NET_ESMF_END					40
+#define NET_ESMF_UNKN				50
+#define NET_ESMF_PING				99
 
 // State values
 #define NET_ESMF_STAT_IDLE				0
@@ -53,6 +56,7 @@ namespace ESMCI
 #define NET_ESMF_STAT_FINAL_DONE		8
 #define NET_ESMF_STAT_DONE				9
 #define NET_ESMF_STAT_SUBMITTED		10
+#define NET_ESMF_STAT_TIMESTEP_DONE	11
 #define NET_ESMF_STAT_ERROR			99
 
 

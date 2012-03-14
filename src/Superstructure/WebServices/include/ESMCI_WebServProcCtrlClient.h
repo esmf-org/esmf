@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServProcCtrlClient.h,v 1.2 2012/01/06 20:19:27 svasquez Exp $
+// $Id: ESMCI_WebServProcCtrlClient.h,v 1.3 2012/03/14 14:44:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -26,6 +26,8 @@
 //#include "ESMCI_WebServClientSocket.h"
 #include "ESMCI_WebServNetEsmf.h"
 #include "ESMCI_WebServNetEsmfClient.h"
+#include "ESMCI_WebServDataDesc.h"
+#include "ESMCI_WebServDataContent.h"
 
 using namespace std;
 
@@ -66,12 +68,15 @@ namespace ESMCI
      int  getClientId() { return theClientId; }
 
      // methods to send client requests to the server
-     int  state();
-     int  init();
-     int  run();
-     int  final();
-     int  end();
-     int  killServer();
+     int  								state();
+     int  								init();
+     int  								run();
+     int  								timestep(int  numTimesteps);
+     int  								final();
+     ESMCI_WebServDataDesc*      dataDesc();
+     ESMCI_WebServDataContent*   outputData(double  timestamp);
+     int  								end();
+     int  								killServer();
    
 
   private:

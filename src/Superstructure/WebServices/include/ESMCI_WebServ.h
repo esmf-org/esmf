@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ.h,v 1.7 2012/01/06 20:19:27 svasquez Exp $
+// $Id: ESMCI_WebServ.h,v 1.8 2012/03/14 14:44:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,14 +44,28 @@
 extern "C"
 {
 	// service loop from ESMCI_WebServComponentSvr class
-	void FTN_X(c_esmc_componentsvcloop)(ESMCI::GridComp*    comp,
-                                     ESMCI::State*       importState,
-                                     ESMCI::State*       exportState,
-                                     ESMCI::Clock*       clock,
-                                     ESMC_BlockingFlag*  blockingFlag,
-                                     int*        		   phase,
-                                     int*        		   portNum,
-                                     int*        		   rc);
+	void FTN_X(c_esmc_componentsvcloop)(char*                   clientId,
+	                                    ESMCI::GridComp*        comp,
+                                       ESMCI::State*           importState,
+                                       ESMCI::State*           exportState,
+                                       ESMCI::Clock*           clock,
+                                       ESMC_BlockingFlag*      blockingFlag,
+                                       int*        		       phase,
+                                       int*        		       portNum,
+                                       int*        		       rc,
+                                       ESMCI_FortranStrLenArg  clientIdLen);
+
+	// service loop from ESMCI_WebServComponentSvr class
+	void FTN_X(c_esmc_cplcomponentsvcloop)(char*                   clientId,
+	                                       ESMCI::CplComp*         comp,
+                                          ESMCI::State*           importState,
+                                          ESMCI::State*           exportState,
+                                          ESMCI::Clock*           clock,
+                                          ESMC_BlockingFlag*      blockingFlag,
+                                          int*        		      phase,
+                                          int*        		      portNum,
+                                          int*        		      rc,
+                                          ESMCI_FortranStrLenArg  clientIdLen);
 
 	// registration methods from ESMCI_WebServRegistrarClient class
 	void  FTN_X(c_esmc_registercomponent)(char*                   compName,
@@ -73,6 +87,15 @@ extern "C"
 	void  FTN_X(c_esmc_addoutputfilename)(char*                   filename,
                                        int*                    rc,
                                        ESMCI_FortranStrLenArg  filenameLen);
+
+/*
+	void  FTN(c_esmc_addoutputdata)(double*                 timestamp,
+                                   char*                   varName,
+                                   double**                dataValues,
+                                   int*                    rc,
+                                   ESMCI_FortranStrLenArg  filenameLen);
+*/
+	void  FTN_X(c_esmc_addoutputdata)(int*  rc);
 };
 
 

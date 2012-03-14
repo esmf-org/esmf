@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.h,v 1.6 2012/01/06 20:19:27 svasquez Exp $
+// $Id: ESMCI_WebServCompSvrClient.h,v 1.7 2012/03/14 14:44:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -26,6 +26,8 @@
 #include "ESMCI_WebServClientSocket.h"
 #include "ESMCI_WebServNetEsmf.h"
 #include "ESMCI_WebServNetEsmfClient.h"
+#include "ESMCI_WebServDataDesc.h"
+#include "ESMCI_WebServDataContent.h"
 
 using namespace std;
 
@@ -65,18 +67,26 @@ namespace ESMCI
 	  void setClientId(int  clientId);
 
      // methods to send client requests to the server
-     int  init();
-     int  run();
-     int  final();
-     int  state();
-     vector<string>  files();
-     int  end();
-     int  killServer();
+     int                     		init();
+     int                     		run();
+     int                     		timestep(int  numTimesteps);
+     int                     		final();
+     int                     		state();
+     ESMCI_WebServDataDesc*  		dataDesc();
+     ESMCI_WebServDataContent*	outputData(double      timestamp,
+                                            int*        retNumVars,
+                                            string**    retVarNames,
+                                            int*        retNumLats,
+                                            int*        retNumLons);
+     vector<string>          		files();
+     int                     		end();
+     int                     		killServer();
    
 
   private:
 
-	  int				theClientId;	// the id of the client on the PassThruSvr
+	  int								theClientId;			// id of the client 
+     ESMCI_WebServDataDesc*	theOutputDataDesc;	// description of the data
   };
 
 } // end namespace

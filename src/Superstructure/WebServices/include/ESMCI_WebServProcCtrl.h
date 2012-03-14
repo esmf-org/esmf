@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServProcCtrl.h,v 1.2 2012/01/06 20:19:27 svasquez Exp $
+// $Id: ESMCI_WebServProcCtrl.h,v 1.3 2012/03/14 14:44:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -22,7 +22,6 @@
 #include "ESMCI_WebServClientSocket.h"
 #include "ESMCI_WebServNetEsmf.h"
 #include "ESMCI_WebServClientInfo.h"
-#include "ESMCI_WebServCAMOutputFile.h"
 #include "ESMCI_WebServCompSvrMgr.h"
 #include <map>
 
@@ -99,8 +98,9 @@ namespace ESMCI
 	  int   processState();
 	  int   processInit();
 	  int   processRun();
+	  int   processTimestep();
 	  int   processFinal();
-	  int   processFiles();
+	  int   processGetDataDesc();
 	  int   processGetData();
 	  int   processEnd();
 	  int   processExit();

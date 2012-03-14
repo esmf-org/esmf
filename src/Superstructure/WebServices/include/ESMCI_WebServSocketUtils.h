@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.h,v 1.6 2012/01/06 20:19:27 svasquez Exp $
+// $Id: ESMCI_WebServSocketUtils.h,v 1.7 2012/03/14 14:44:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,9 +34,14 @@
 //EOPI
 //-------------------------------------------------------------------------
 
-
 namespace ESMCI
 {
+  //***
+  // Functions to convert endianness of 64-bit values
+  //***
+  #define ntohll(x) (((u_int64_t)(ntohl((int)((x << 32) >> 32))) << 32) | (unsigned int)ntohl(((int)(x >> 32))))
+
+  #define htonll(x) ntohll(x)
 
   //***
   // Default wait time before timing out
@@ -76,7 +81,6 @@ namespace ESMCI
 
   int  ESMCI_WebServRecv(int          fd,
                          const char*  s);
-
 
 } // end namespace
 
