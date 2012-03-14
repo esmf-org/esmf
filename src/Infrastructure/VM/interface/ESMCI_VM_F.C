@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.24 2012/03/12 05:35:32 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.25 2012/03/14 17:07:33 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -197,8 +197,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmalltoall)(ESMCI::VM **vm,
-    void *sendData, int sendCount,
-    void *recvData, int recvCount, 
+    void *sendData, int *sendCount,
+    void *recvData, int *recvCount, 
     ESMC_TypeKind *dtk, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmalltoall()"
@@ -223,8 +223,8 @@ extern "C" {
     }
     if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported data type.",
       rc)) return;
-    localrc = (*vm)->alltoall(sendData, sendCount,
-      recvData, recvCount, vmt);
+    localrc = (*vm)->alltoall(sendData, *sendCount,
+      recvData, *recvCount, vmt);
     if (localrc){
       char *message = new char[160];
       sprintf(message, "VMKernel/MPI error #%d\n", localrc);
